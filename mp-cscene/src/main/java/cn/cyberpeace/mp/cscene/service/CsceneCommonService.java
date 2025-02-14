@@ -96,7 +96,13 @@ public class CsceneCommonService {
             agentNames = elementBOs.stream().filter(e -> elementIds.contains(e.getId())).map(SceneElementBO::getEid).collect(Collectors.toList());
         }
 
-        return agentNames;
+        var batchSceneHandler = new BatchSceneHandler(Collections.singletonList(translatedSceneId), null);
+        List<String> res = new ArrayList<>();
+        for (var a : agentNames) {
+            res.add(batchSceneHandler.eid2AgentName.get(a));
+        }
+
+        return res;
     }
 
     @Cacheable(value = "query_scene_create_time")

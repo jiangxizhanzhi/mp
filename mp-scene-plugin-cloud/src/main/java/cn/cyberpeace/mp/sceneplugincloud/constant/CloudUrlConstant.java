@@ -18,6 +18,7 @@ public class CloudUrlConstant {
     public static final String VIRTUAL_FIREWALL_UPDATE_URL = "/v1/scenarios/update_virtual_firewall_rule";
     public static final String VIRTUAL_FIREWALL_DELETE_URL = "/v1/scenarios/virtual_firewall";
 
+    public static final String VIRTUAL_ROUTER_GET_URL = "/v1/routers/{router_id}";
     public static final String VIRTUAL_ROUTER_CREATE_URL = "/v1/scenarios/virtual_router";
     public static final String VIRTUAL_ROUTER_UPDATE_URL = "/v1/routers/{router_id}";
     public static final String VIRTUAL_ROUTER_DELETE_URL = "/v1/scenarios/virtual_router";

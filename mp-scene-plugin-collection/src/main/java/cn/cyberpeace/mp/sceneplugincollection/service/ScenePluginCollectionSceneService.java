@@ -17,6 +17,7 @@ import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
+import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudSceneConfigPluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
@@ -279,11 +280,17 @@ public class ScenePluginCollectionSceneService {
         if (pluginHandler == null) {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
+        CloudScenePluginHandler cloudPlugin = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
         // 构建探针名和节点的映射
         List<SceneElementBO> srcElements = getSrcElements(sceneHandler, queryParams.getNodeIds());
         Map<String, SceneElementBO> agentName2Element = new HashMap<>();
         srcElements.forEach(srcElement -> {
             var collectionElement = pluginHandler.getElement(srcElement.getId());
+            var cloudElement = cloudPlugin.getElement(srcElement.getId());
+            if (BaseCloudPluginSceneElementModel.ImageType.ENTITY.equals(cloudElement.getImageType())) {
+                agentName2Element.put(cloudElement.getImageUuid(), srcElement);
+                return;
+            }
             if (collectionElement == null || CollectionUtils.isEmpty(collectionElement.getProbes())) {
                 return;
             }
@@ -1365,7 +1372,11 @@ public class ScenePluginCollectionSceneService {
         Map<String, String> nodeId2Eidmap = batchSceneHandler.getProbeEnabledNodeId2EidMap();
         CollectorBaseRequest collectorBaseRequest = new CollectorBaseRequest();
         PageInfo<Port> pageInfo = new PageInfo();
-        collectorBaseRequest.setAgentName(nodeId2Eidmap.get(listPageInfoQueryParams.getNodeIds().get(0)));
+
+        String agentName = nodeId2Eidmap.get(listPageInfoQueryParams.getNodeIds().get(0));
+        agentName = batchSceneHandler.eid2AgentName.get(agentName);
+        collectorBaseRequest.setAgentName(agentName);
+
         collectorBaseRequest.setPage(listPageInfoQueryParams.getPage() == null ? 1 : listPageInfoQueryParams.getPage());
         collectorBaseRequest.setPageSize(listPageInfoQueryParams.getPageSize() == null ? 10 : listPageInfoQueryParams.getPageSize());
         collectorBaseRequest.setPerPage(listPageInfoQueryParams.getPerPage());
@@ -1384,7 +1395,11 @@ public class ScenePluginCollectionSceneService {
         int page = listPageInfoQueryParams.getPage() == null ? 1 : listPageInfoQueryParams.getPage();
 
         WazuhMonitorEventsRequest wazuhRequest = new WazuhMonitorEventsRequest();
-        wazuhRequest.setAgentNames(Lists.newArrayList(nodeId2Eidmap.get(listPageInfoQueryParams.getNodeIds().get(0))));
+
+        String agentName = nodeId2Eidmap.get(listPageInfoQueryParams.getNodeIds().get(0));
+        agentName = batchSceneHandler.eid2AgentName.get(agentName);
+        wazuhRequest.setAgentNames(Lists.newArrayList(agentName));
+
         wazuhRequest.setPageSize(1);
         // 默认24小时
         LocalDateTime endTime = LocalDateTime.now();
@@ -1473,7 +1488,9 @@ public class ScenePluginCollectionSceneService {
         Map<String, String> nodeId2Eidmap = batchSceneHandler.getProbeEnabledNodeId2EidMap();
         CollectorBaseRequest collectorBaseRequest = new CollectorBaseRequest();
         PageInfo<Netiface> pageInfo = new PageInfo<>();
-        collectorBaseRequest.setAgentName(nodeId2Eidmap.get(listPageInfoQueryParams.getNodeIds().get(0)));
+        String agentName = nodeId2Eidmap.get(listPageInfoQueryParams.getNodeIds().get(0));
+        agentName = batchSceneHandler.eid2AgentName.get(agentName);
+        collectorBaseRequest.setAgentName(agentName);
         collectorBaseRequest.setPage(listPageInfoQueryParams.getPage() == null ? 1 : listPageInfoQueryParams.getPage());
         collectorBaseRequest.setPageSize(listPageInfoQueryParams.getPageSize() == null ? 10 : listPageInfoQueryParams.getPageSize());
         collectorBaseRequest.setPerPage(listPageInfoQueryParams.getPerPage());

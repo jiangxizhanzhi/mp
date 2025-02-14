@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.sceneplugincollection.plugin;
 
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CategoryGroupBO;
 import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
@@ -15,6 +16,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @Description
@@ -58,10 +60,17 @@ public class BatchSceneHandler {
 
     private Map<Integer, CategoryGroupBO> category2CountInfo = new HashMap<>();
 
+    private Map<String, SceneHandler> id2SceneHandler = new HashMap<>();
+
     public BatchSceneHandler(List<String> sceneIds, List<String> nodeIds) {
         this.sceneIds = sceneIds;
         this.nodeIds = nodeIds;
         this.init();
+    }
+
+    public CloudScenePluginHandler getCloudScenePluginHandler(String sceneId) {
+        return this.id2SceneHandler.get(sceneId)
+                .getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
     }
 
     public LocalDateTime getEarliestStartTime() {
@@ -69,7 +78,20 @@ public class BatchSceneHandler {
     }
 
     public List<String> getFlowCollectors() {
-        return flowCollectors;
+        if (flowCollectors == null || flowCollectors.isEmpty()) {
+            return flowCollectors;
+        }else{
+            List<String> res = new ArrayList<>();
+            flowCollectors.forEach(f -> res.add(f));
+            // 如果场景里有实体设备 则需要再从实体设备的arkime中查询数据
+            for (var e : this.getCloudScenePluginHandler(sceneIds.get(0)).getElementMap().values()) {
+                if (BaseCloudPluginSceneElementModel.ImageType.ENTITY.equals(e.getImageType())) {
+                    res.add("mp_arkime_entity");
+                    break;
+                }
+            }
+            return res;
+        }
     }
 
     public List<String> getProbeCollectors() {
@@ -176,9 +198,12 @@ public class BatchSceneHandler {
         return this.category2CountInfo;
     }
 
+    public Map<String, String> eid2AgentName = new ConcurrentHashMap<>();
+
     private void init() {
         for (String sceneId : sceneIds) {
             SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
+            this.id2SceneHandler.put(sceneId,sceneHandler);
             if (earliestStartTime == null || sceneHandler.getScene().getCreateTime().isBefore(earliestStartTime)) {
                 earliestStartTime = sceneHandler.getScene().getCreateTime();
             }
@@ -226,6 +251,11 @@ public class BatchSceneHandler {
                     && pluginHandler.getElementMap().get(srcElement.getId()).getEnableProbeCollect() != null &&
                     pluginHandler.getElementMap().get(srcElement.getId()).getEnableProbeCollect()) {
                 this.probeEnabledNodeId2EidMap.put(srcElement.getId(), srcElement.getEid());
+                this.eid2AgentName.put(srcElement.getEid(), srcElement.getEid());
+            }
+            if (BaseCloudPluginSceneElementModel.ImageType.ENTITY.equals(cloudPlugin.getElement(srcElement.getId()).getImageType())) {
+                this.probeEnabledNodeId2EidMap.put(srcElement.getId(), srcElement.getEid());
+                this.eid2AgentName.put(srcElement.getEid(), cloudPlugin.getElement(srcElement.getId()).getImageUuid());
             }
             this.nodeId2NodenameMap.put(srcElement.getId(), srcElement.getName());
             srcPorts.forEach(srcPort -> {

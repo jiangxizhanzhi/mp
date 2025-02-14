@@ -9,14 +9,29 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterDele
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterGetData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterUpdateData;
 import cn.cyberpeace.mp.sceneplugincloud.util.ForceReleaseResourceUtils;
+import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudListData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class VirtualRouter extends CloudClient {
+
+    @Getter
+    @Setter
+    public static class RouterGetInfo implements CloudHttpData {
+        private List<VirtualNic> interfaces ;
+    }
+
+    public List<VirtualNic> get(String routerId) {
+        CloudResponse<RouterGetInfo> result = cloudGet(CloudUrlConstant.VIRTUAL_ROUTER_GET_URL.replace("{router_id}", routerId), null, new TypeReference<CloudResponse<RouterGetInfo>>() {
+        }, true);
+        return result.getData().getInterfaces();
+    }
 
     public VirtualRouterCreateData create(VirtualRouterCreateData createData) {
         heavyConcurrentWait();
