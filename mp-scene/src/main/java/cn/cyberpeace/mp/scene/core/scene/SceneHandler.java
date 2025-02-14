@@ -208,6 +208,10 @@ public class SceneHandler extends BaseSceneHandler<
         this.setSceneStageRecorder(new SceneStageRecorder(this.getScene()));
     }
 
+    public SceneHandler(String sceneId, String areaId, SceneContextBO context, boolean partSceneFlag) {
+        init(sceneId, areaId, false, context, partSceneFlag);
+    }
+
     @Override
     public void beforeInitPlugin(ScenePluginHandler<?, ?, ?, ?> plugin) {
         plugin.setSceneHandler(this);
@@ -1076,5 +1080,16 @@ public class SceneHandler extends BaseSceneHandler<
             }
         }
         overSceneEvent(sceneEvent);
+    }
+
+
+    public boolean existOtherRangeNode() {
+        for (SceneElementBO sceneElementBO : this.getElementMap().values()) {
+            if (!sceneElementBO.getCurrentScenePartFlag()) {
+                return true;
+            }
+
+        }
+        return false;
     }
 }

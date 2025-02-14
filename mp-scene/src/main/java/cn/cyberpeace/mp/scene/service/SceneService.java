@@ -77,10 +77,15 @@ public class SceneService {
             return new ServiceResult<>(null, SceneErrorCode.SCENE_NOT_EXIST);
         }
 
-        SceneHandler sceneHandlerProxy = SceneHandlerProxyBuilder.build(sceneHandler);
+        SceneHandler sceneHandlerProxy;
+        if (sceneHandler.existOtherRangeNode()) {
+            sceneHandlerProxy = SceneHandlerProxyBuilder.build(new SceneHandler(sceneHandler.getSceneId(), "", null, true));
+        } else {
+            sceneHandlerProxy = SceneHandlerProxyBuilder.build(sceneHandler);
+        }
         SceneTaskPool.getInstance().executeTask(() -> {
             var starTime = LocalDateTime.now();
-            sceneHandler.prepare(partialStart);
+            sceneHandlerProxy.prepare(partialStart);
             if (!sceneHandlerProxy.initiate(false)) {
                 return;
             }
@@ -88,8 +93,8 @@ public class SceneService {
 
             var endTime = LocalDateTime.now();
             var consumeSeconds = Duration.between(starTime, endTime).toSeconds();
-            sceneHandler.getScene().setCreateConsumeSeconds(consumeSeconds);
-            sceneHandler.updateScene();
+            sceneHandlerProxy.getScene().setCreateConsumeSeconds(consumeSeconds);
+            sceneHandlerProxy.updateScene();
             if (callback != null) {
                 callback.run();
             }

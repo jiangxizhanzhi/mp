@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.scene.core.bo.base;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultBool;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.define.SerializableFunction;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
@@ -13,6 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Data
@@ -45,21 +47,41 @@ public abstract class BaseSceneElementBO<M extends BaseSceneElementModel, P exte
     private String nodeCommand;
     @ApiModelProperty(value = "是否辅助节点")
     private Boolean isAuxiliary;
+    /**
+     * 一个大场景会跨靶场，从想定下发的场景，如果节点属于当前pg所在的靶场
+     * 那么就是true，默认为true
+     */
+    @DefaultBool(value = true)
+    private Boolean currentScenePartFlag;
 
     @Override
     public void fromModel(M obj, String... ignoreFields) {
         super.fromModel(obj, ArrayUtils.addAll(ignoreFields,
-                BeanUtils.getBeanGetterFieldName(BaseSceneElementModel::getInitCommands)));
+                BeanUtils.getBeanGetterFieldName(BaseSceneElementModel::getInitCommands),
+                BeanUtils.getBeanGetterFieldName(BaseSceneElementModel::getCurrentScenePartFlag)));
         initCommands = StringUtils.isEmpty(obj.getInitCommands()) ? new ArrayList<>()
                 : JsonCommon.parse(obj.getInitCommands(), new TypeReference<List<String>>(){});
+        currentScenePartFlag = Objects.isNull(obj.getCurrentScenePartFlag()) || (obj.getCurrentScenePartFlag() > 0);
+
     }
 
     @Override
     public M toModel(String... ignoreFields) {
         var obj = super.toModel(ArrayUtils.addAll(ignoreFields,
-                BeanUtils.getBeanGetterFieldName(BaseSceneElementModel::getInitCommands)));
+                BeanUtils.getBeanGetterFieldName(BaseSceneElementModel::getInitCommands),
+                BeanUtils.getBeanGetterFieldName(BaseSceneElementModel::getCurrentScenePartFlag)));
         if (initCommands != null) {
             obj.setInitCommands(JsonCommon.stringify(initCommands));
+        }
+
+        if (Objects.isNull(currentScenePartFlag)) {
+            obj.setCurrentScenePartFlag(1);
+        } else {
+            if (currentScenePartFlag) {
+                obj.setCurrentScenePartFlag(1);
+            } else {
+                obj.setCurrentScenePartFlag(0);
+            }
         }
         return obj;
     }

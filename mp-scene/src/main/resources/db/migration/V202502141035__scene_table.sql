@@ -1,0 +1,2 @@
+alter table mp_scene_scene_config_element add column current_scene_part_flag int(1) not null default 1 comment '是否是启动在当前靶场的节点，0：不是，1：是';
+alter table mp_scene_scene_element add column current_scene_part_flag int(1) not null default 1 comment '是否是启动在当前靶场的节点，0：不是，1：是';
