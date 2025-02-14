@@ -58,7 +58,7 @@
             <if test="param.version != null and param.version != ''">
                 version = #{param.version},
             </if>
-            <if test="param.expireTime != null and param.expireTime != ''">
+            <if test="param.expireTime != null ">
                 expire_time = #{param.expireTime},
             </if>
         </set>
