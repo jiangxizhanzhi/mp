@@ -14,7 +14,8 @@
             area,
             create_time,
             creator,
-            version
+            version,
+            expire_time
         )
         VALUES
         (
@@ -27,7 +28,8 @@
             #{param.area},
             now(),
             #{param.creator},
-            #{param.version}
+            #{param.version},
+            #{param.expireTime}
         )
     </insert>
 
@@ -55,6 +57,9 @@
             </if>
             <if test="param.version != null and param.version != ''">
                 version = #{param.version},
+            </if>
+            <if test="param.expireTime != null and param.expireTime != ''">
+                expire_time = #{param.expireTime},
             </if>
         </set>
         WHERE

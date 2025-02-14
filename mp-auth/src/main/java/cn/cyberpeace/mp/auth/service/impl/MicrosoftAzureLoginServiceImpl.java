@@ -84,6 +84,7 @@ public class MicrosoftAzureLoginServiceImpl implements MicrosoftAzureLoginServic
                 !StringUtils.isEmpty(requestData.getAzureTenantId()) ||
                 !StringUtils.isEmpty(requestData.getAzureSubscriptionId()) ||
                 !StringUtils.isEmpty(requestData.getAzureClientId()) ||
-                !StringUtils.isEmpty(requestData.getAzureClientSecret());
+                !StringUtils.isEmpty(requestData.getAzureClientSecret()) ||
+                null != requestData.getExpireTime();
     }
 }
