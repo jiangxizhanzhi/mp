@@ -1,19 +1,28 @@
 package cn.cyberpeace.mp.scene.service;
 
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigContextBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
+import cn.cyberpeace.mp.scene.core.bo.ThirdPartyElementBO;
+import cn.cyberpeace.mp.scene.core.bo.ThirdPartyElementConnectBO;
 import cn.cyberpeace.mp.scene.core.exception.SceneNotExistException;
 import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
+import cn.cyberpeace.mp.scene.core.sceneconfig.ThirdPartyTopoSceneConfigHandler;
 import cn.cyberpeace.mp.scene.model.SceneElementSnapshotModel;
 import cn.cyberpeace.mp.scene.repository.SceneElementSnapshotMapper;
+import com.alibaba.excel.EasyExcel;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import javax.swing.plaf.multi.MultiPanelUI;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -79,6 +88,28 @@ public class SceneConfigService {
             return new ServiceResult<>(result, BaseErrorCode.DATA_PARTIAL_SUCCESS);
         } else {
             return new ServiceResult<>(result);
+        }
+    }
+
+    public SceneConfigDataBO importThirdPartyScene(MultipartFile file) {
+        try {
+            String fileName = StringUtils.substringBefore(file.getOriginalFilename(), ".");
+            ThirdPartyElementReader thirdPartyElementReader = new ThirdPartyElementReader();
+            EasyExcel.read(file.getInputStream(), ThirdPartyElementBO.class, thirdPartyElementReader)
+                    .autoCloseStream(true).sheet(0).headRowNumber(2);
+            List<ThirdPartyElementBO> thirdPartyElementBOS = thirdPartyElementReader.getCachedElements();
+
+            ThirdPartyElementConnectReader thirdPartyElementConnectReader = new ThirdPartyElementConnectReader();
+            EasyExcel.read(file.getInputStream(), ThirdPartyElementConnectBO.class, thirdPartyElementConnectReader)
+                    .autoCloseStream(true).sheet(1).headRowNumber(1);
+            List<ThirdPartyElementConnectBO> thirdPartyElementConnectBOS = thirdPartyElementConnectReader.getCachedConnects();
+
+            ThirdPartyTopoSceneConfigHandler thirdPartyTopoSceneConfigHandler = new ThirdPartyTopoSceneConfigHandler(
+                    fileName, thirdPartyElementBOS, thirdPartyElementConnectBOS);
+            return thirdPartyTopoSceneConfigHandler.save();
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+            throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("读取导入文件过程异常，请确认文件格式无误再尝试导入"));
         }
     }
 

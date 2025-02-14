@@ -2,9 +2,12 @@ package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.basic.MapUtils;
 import cn.cyberpeace.mp.cscene.bo.*;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneActionRequest;
@@ -17,6 +20,8 @@ import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
+import com.alibaba.excel.EasyExcel;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -32,10 +37,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Api(value = "场景模板", tags = "CSCENE-场景模板")
 @Slf4j
@@ -270,4 +278,22 @@ public class CsceneController implements BaseModelListControllerBase {
             @RequestParam String[] images) {
         return csceneSpecialService.statDeviceReferCscenes(images).asResult();
     }
+
+    @ApiOperation("导入第三方靶场的模板文件")
+    @PostMapping("/import_third_party_cscene")
+    public ServiceResult<CsceneBO> importThirdPartyCscene(@RequestParam("file") MultipartFile file) {
+        // 校验文件类型
+        if (Objects.isNull(file.getOriginalFilename()) || !file.getOriginalFilename().endsWith(".xlsx")) {
+            throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("导入拓扑只支持标准.xlsx文件"));
+        }
+
+        SceneConfigDataBO sceneConfigDataBO = modelService.importThirdPartyScene(file);
+        CsceneBO csceneBO = new CsceneBO();
+        csceneBO.setSceneConfig(sceneConfigDataBO);
+        return ServiceResult.success(csceneBO);
+    }
+
+
+
+
 }

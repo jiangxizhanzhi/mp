@@ -41,6 +41,7 @@ import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
+import cn.cyberpeace.mp.scene.service.SceneConfigService;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudSceneConfigPluginHandler;
@@ -53,6 +54,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -80,6 +82,8 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     private CsceneSnapshotService csceneSnapshotService;
 
     private TenantUserServiceImpl tenantUserService;
+    private SceneConfigService sceneConfigService;
+
 
     private List<CsceneRoleModel> readCsceneRoles(String[] csceneIds) {
         if (csceneIds == null || csceneIds.length == 0) {
@@ -210,7 +214,8 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                          CsceneSnapshotService csceneSnapshotService,
                          CsceneModelFields csceneModelFields,
                          CsceneAuthMapper csceneAuthMapper,
-                         TenantUserServiceImpl tenantUserService) {
+                         TenantUserServiceImpl tenantUserService,
+                         SceneConfigService sceneConfigService) {
         setModelFields(csceneModelFields);
         setModelMapper(modelMapper);
         setCsceneRoleMapper(csceneRoleMapper);
@@ -222,6 +227,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         setCsceneSnapshotService(csceneSnapshotService);
         setCsceneAuthMapper(csceneAuthMapper);
         setTenantUserService(tenantUserService);
+        setSceneConfigService(sceneConfigService);
     }
 
     @Override
@@ -703,5 +709,9 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
             ids = sceneElementModels.stream().map(SceneElementModel::getNodeId).collect(Collectors.toList());
         }
         return ids;
+    }
+
+    public SceneConfigDataBO importThirdPartyScene(MultipartFile file) {
+        return sceneConfigService.importThirdPartyScene(file);
     }
 }
