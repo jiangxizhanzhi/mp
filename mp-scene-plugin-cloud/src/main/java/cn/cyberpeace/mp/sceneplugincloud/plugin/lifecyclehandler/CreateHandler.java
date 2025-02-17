@@ -1873,8 +1873,22 @@ public class CreateHandler extends HandlerCommon {
         // 再创建终端
         List<CloudPluginSceneElementBO> npcNodes = getPluginHandler().getNpcElements();
         List<Runnable> createTerminalTasks = new ArrayList<>();
-        for (CloudPluginSceneElementBO cloudPluginSceneElementBO : getPluginHandler().getTerminalExcludeNpcElements()) {
-            Runnable runnable = () -> createElementProcess(cloudPluginSceneElementBO);
+        var terminalExcludeNpcElements = getPluginHandler().getTerminalExcludeNpcElements();
+        terminalExcludeNpcElements.sort((o1, o2) -> {
+            int o1StartPriority = o1.getStartPriority() == null ? 1 : o1.getStartPriority();
+            int o2StartPriority = o2.getStartPriority() == null ? 1 : o2.getStartPriority();
+            return o1StartPriority - o2StartPriority;
+        });
+        for (CloudPluginSceneElementBO cloudPluginSceneElementBO : terminalExcludeNpcElements) {
+            Runnable runnable = () -> {
+                try {
+                    createElementProcess(cloudPluginSceneElementBO);
+                } catch (Exception e) {
+                    if (Boolean.TRUE.equals(cloudPluginSceneElementBO.getKeyElement())) {
+                        throw e;
+                    }
+                }
+            };
             createTerminalTasks.add(runnable);
         }
         if (!createTerminalTasks.isEmpty()) {
