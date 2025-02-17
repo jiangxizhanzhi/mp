@@ -256,6 +256,12 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     @ApiModelProperty("扩展字段")
     private Object ext;
 
+    @ApiModelProperty("是否是关键节点")
+    private Boolean keyElement;
+
+     @ApiModelProperty("启动优先级：1：高，2：中，3：低")
+    private Integer startPriority;
+
     @Override
     public void fromModel(M obj, String... ignoreFields) {
         //忽略直接赋值处理的字段，需要定制处理

@@ -319,5 +319,8 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     private String mgmtIp;
     @DefaultStr
     private String mgmtMacAddr;
-
+    @DefaultBool(value = true)
+    private Boolean keyElement;
+    @DefaultInt(value = 1)
+    private Integer startPriority;
 }
