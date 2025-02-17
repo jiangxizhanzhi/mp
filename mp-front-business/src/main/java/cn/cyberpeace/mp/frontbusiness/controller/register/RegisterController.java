@@ -35,8 +35,8 @@ import org.springframework.web.client.RestTemplate;
 import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
+import java.io.InputStream;
+import java.util.*;
 
 /**
  * @Description: 注册接口
@@ -82,8 +82,8 @@ public class RegisterController {
 
 
     @ApiOperation(value = "测试接口")
-    @PostMapping("/test/remote_access/api/session/tunnels/{token}/streams/{type}/{file}")
-    public ServiceResult<String> test(@PathVariable("token") String token, @PathVariable("type") String type, @PathVariable("file") String file, HttpServletRequest httpServletRequest) throws IOException {
+    @PostMapping("/test/remote_access/api/session/tunnels/{tunnels}/streams/{type}/{file}")
+    public ServiceResult<String> test(@PathVariable("tunnels") String tunnels, @PathVariable("type") String type, @PathVariable("file") String file, @RequestParam("token") String token, HttpServletRequest httpServletRequest) throws IOException {
         // 获取请求头
         HttpHeaders headers = new HttpHeaders();
         httpServletRequest.getHeaderNames().asIterator().forEachRemaining(headerName -> {
@@ -91,16 +91,16 @@ public class RegisterController {
         });
 
         // 获取请求体
-        StringBuilder body = new StringBuilder();
-        BufferedReader reader = httpServletRequest.getReader();
-        String line;
-        while ((line = reader.readLine()) != null) {
-            body.append(line);
+        InputStream reader = httpServletRequest.getInputStream();
+        byte[] body = {};
+        if (reader.available() > 0) {
+            body = reader.readAllBytes();
         }
 
         // 创建新的请求体 (可以选择是否与原请求体相同)
-        HttpEntity<String> entity = new HttpEntity<>(body.toString(), headers);
-        var resp = restTemplate.postForEntity(String.format("http://10.100.12.1:9200/guacamole/api/session/tunnels/%s/streams/%s/%s", token, type, file),
+        HttpEntity<byte[]> entity = new HttpEntity<>(body, headers);
+        String url = String.format("http://10.100.12.1:9200/guacamole/api/session/tunnels/%s/streams/%s/%s?token=%s", tunnels, type, file, token);
+        var resp = restTemplate.postForEntity(url,
                 entity, HashMap.class, Collections.emptyMap());
         log.info("[guacamole] response: {}", JsonCommon.stringify(resp));
         return new ServiceResult<>("").asResult();
