@@ -37,7 +37,9 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @Component
@@ -108,9 +110,20 @@ public class CleanExpiredEsIndexScheduleJob {
      */
     private void cleanWazuhMonitorData(){
         // 清理非当天的数据, 项目中监控数据只使用了一条；
+        Set<String> excludeIndexs = new HashSet<>();
+
         LocalDateTime nDaysAgo = LocalDateTime.now();
         String excludeDeleteDataIndex = TimeUtils.localDateTimeToString(nDaysAgo, DateTimeFormatter.ofPattern("yyyy.MM.dd"));
-        String excludeIndex = PREFIX + excludeDeleteDataIndex;
+        excludeIndexs.add(PREFIX + excludeDeleteDataIndex);
+
+        LocalDateTime oneDaysAgo = LocalDateTime.now().minusDays(1);
+        excludeDeleteDataIndex = TimeUtils.localDateTimeToString(oneDaysAgo, DateTimeFormatter.ofPattern("yyyy.MM.dd"));
+        excludeIndexs.add(PREFIX + excludeDeleteDataIndex);
+
+        LocalDateTime twoDaysAgo = LocalDateTime.now().minusDays(2);
+        excludeDeleteDataIndex = TimeUtils.localDateTimeToString(twoDaysAgo, DateTimeFormatter.ofPattern("yyyy.MM.dd"));
+        excludeIndexs.add(PREFIX + excludeDeleteDataIndex);
+
         GetIndexRequest getIndexRequest = new GetIndexRequest(PREFIX + "*");
         try {
 
@@ -118,7 +131,13 @@ public class CleanExpiredEsIndexScheduleJob {
             if (result.getIndices() != null && result.getIndices().length > 0) {
                 final String[] indices = result.getIndices();
                 for (String indexName : indices) {
-                    if (indexName.contains(excludeIndex)) {
+                    boolean isExclude = false;
+                    for (String excludeIndex : excludeIndexs) {
+                        if (indexName.contains(excludeIndex)) {
+                            isExclude = true;
+                        }
+                    }
+                    if (isExclude) {
                         continue;
                     }
                     FuzzyQueryBuilder controllerQuery = QueryBuilders.fuzzyQuery("agent.name", "controller");
