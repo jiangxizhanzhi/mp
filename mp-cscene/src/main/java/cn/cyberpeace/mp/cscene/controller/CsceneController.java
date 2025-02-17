@@ -21,7 +21,12 @@ import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
+import cn.cyberpeace.mp.scene.core.bo.ThirdPartyElementBO;
+import cn.cyberpeace.mp.scene.core.bo.ThirdPartyElementConnectBO;
+import cn.cyberpeace.mp.scene.core.sceneconfig.ThirdPartyTopoSceneConfigHandler;
 import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.ExcelWriter;
+import com.alibaba.excel.write.metadata.WriteSheet;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -30,6 +35,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -39,7 +45,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -291,6 +299,46 @@ public class CsceneController implements BaseModelListControllerBase {
         CsceneBO csceneBO = new CsceneBO();
         csceneBO.setSceneConfig(sceneConfigDataBO);
         return ServiceResult.success(csceneBO);
+    }
+
+    @ApiOperation("导出第三方靶场模板文件")
+    @GetMapping("/export_third_party_cscene")
+    public void exportThirdPartyCscene(@RequestParam("scene_config_id") String sceneConfigId, HttpServletResponse response) {
+        InputStream templateStream = null;
+        try {
+            // 设置响应头
+            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            response.setHeader("Content-Disposition", "attachment; filename=multi_sheet.xlsx");
+
+            // 加载模板文件（需放在resources/templates目录）
+            ClassPathResource templateResource = new ClassPathResource("excel_template/third_party_topo_export_template.xlsx");
+            templateStream = templateResource.getInputStream();
+
+
+            ThirdPartyTopoSceneConfigHandler thirdPartyTopoSceneConfigHandler = new ThirdPartyTopoSceneConfigHandler(sceneConfigId);
+
+            try (ExcelWriter excelWriter = EasyExcel.write(response.getOutputStream()).withTemplate(templateStream).build()) {
+                WriteSheet nodeSheet = EasyExcel.writerSheet(0).build();
+                WriteSheet connectSheet = EasyExcel.writerSheet(1).build();
+                for (ThirdPartyElementBO thirdPartyElementBO : thirdPartyTopoSceneConfigHandler.getThirdPartyElementBOs()) {
+                    excelWriter.fill(thirdPartyElementBO, nodeSheet);
+                }
+                for (ThirdPartyElementConnectBO thirdPartyElementConnectBO : thirdPartyTopoSceneConfigHandler.getThirdPartyElementConnectBOs()) {
+                    excelWriter.fill(thirdPartyElementConnectBO, connectSheet);
+                }
+            }
+        } catch (Exception e) {
+            log.error("导出简易拓扑数据异常" + e.getMessage(), e);
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        } finally {
+            if (Objects.nonNull(templateStream)) {
+                try {
+                    templateStream.close();
+                } catch (Exception e) {
+                    log.error("关闭inputStream失败" + e.getMessage(), e);
+                }
+            }
+        }
     }
 
 

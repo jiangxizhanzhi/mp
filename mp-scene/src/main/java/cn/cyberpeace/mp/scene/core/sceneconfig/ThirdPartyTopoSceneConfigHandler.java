@@ -8,18 +8,64 @@ import cn.cyberpeace.mp.scene.core.bo.*;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.plugin.stereotype.PluginKey;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ThirdPartyTopoSceneConfigHandler {
 
-    private final List<ThirdPartyElementBO> thirdPartyElementBOs;
-    private final List<ThirdPartyElementConnectBO> thirdPartyElementConnectBOs;
+    @Getter
+    private List<ThirdPartyElementBO> thirdPartyElementBOs;
+    @Getter
+    private List<ThirdPartyElementConnectBO> thirdPartyElementConnectBOs;
     private List<ThirdPartyElementPortBO> thirdPartyElementPortBOS;
-    private final String sceneName;
+    private String sceneName;
+
+    public ThirdPartyTopoSceneConfigHandler(String sceneConfigId) {
+        SceneConfigHandler sceneConfigHandler = new SceneConfigHandler(sceneConfigId, "", null);
+        this.sceneName = sceneConfigHandler.getScene().getName();
+        this.thirdPartyElementBOs = sceneConfigHandler.getElementMap().values()
+                .stream().map(element -> {
+                    ThirdPartyElementBO thirdPartyElementBO = new ThirdPartyElementBO();
+                    thirdPartyElementBO.setNodeName(element.getName());
+                    if (BaseSceneElementModel.Type.TERMINAL == element.getType()) {
+                        thirdPartyElementBO.setNodeType(ThirdPartyElementBO.NodeType.END_DEVICE);
+                    } else if (BaseSceneElementModel.Type.SWITCH == element.getType()) {
+                        thirdPartyElementBO.setNodeType(ThirdPartyElementBO.NodeType.SWITCH);
+                    } else if (BaseSceneElementModel.Type.ROUTER == element.getType()) {
+                        thirdPartyElementBO.setNodeType(ThirdPartyElementBO.NodeType.ROUTER);
+                    } else if (BaseSceneElementModel.Type.FIREWALL == element.getType()) {
+                        thirdPartyElementBO.setNodeType(ThirdPartyElementBO.NodeType.FIREWALL);
+                    } else {
+                        thirdPartyElementBO.setNodeType(ThirdPartyElementBO.NodeType.OTHER);
+                    }
+                    thirdPartyElementBO.setNodeId(element.getEid());
+                    return thirdPartyElementBO;
+                }).collect(Collectors.toList());
+
+        this.thirdPartyElementConnectBOs = sceneConfigHandler.getElementPortConnectionMap().values()
+                .stream().map(connection -> {
+                    ThirdPartyElementConnectBO thirdPartyElementConnectBO = new ThirdPartyElementConnectBO();
+                    var sourcePort = sceneConfigHandler.getPort(connection.getSource());
+                    var targetPort = sceneConfigHandler.getPort(connection.getTarget());
+                    thirdPartyElementConnectBO.setFromNodeName(sourcePort.getElement().getName());
+                    thirdPartyElementConnectBO.setToNodeName(sourcePort.getElement().getName());
+                    thirdPartyElementConnectBO.setFromNodeIp(sourcePort.getIp());
+                    thirdPartyElementConnectBO.setToNodeIp(targetPort.getIp());
+                    thirdPartyElementConnectBO.setFromPortId(sourcePort.getId());
+                    thirdPartyElementConnectBO.setToPortId(targetPort.getId());
+                    return thirdPartyElementConnectBO;
+                }).collect(Collectors.toList());
+        genPortRelation();
+    }
+
+
+
+
     public ThirdPartyTopoSceneConfigHandler(String sceneName, List<ThirdPartyElementBO> thirdPartyElementBOs, List<ThirdPartyElementConnectBO> thirdPartyElementConnectBOs) {
         this.sceneName = sceneName;
         this.thirdPartyElementBOs = thirdPartyElementBOs;
@@ -190,6 +236,7 @@ public class ThirdPartyTopoSceneConfigHandler {
         sceneConfigHandler.save();
         return sceneConfigHandler.toData();
     }
+
 
 
 
