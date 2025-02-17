@@ -936,6 +936,11 @@ public class DataCollectionService extends CollectionBaseService {
 
         try {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+            if (response.getFailedShards() != 0) {
+                for (var f : response.getShardFailures()) {
+                    log.error("shard {} failed , reason : {} ", f.shard().toString(), f.reason());
+                }
+            }
             return response;
         } catch (IOException e) {
             throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
