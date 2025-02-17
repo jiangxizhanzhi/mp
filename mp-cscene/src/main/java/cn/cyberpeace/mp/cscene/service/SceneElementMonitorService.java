@@ -663,8 +663,6 @@ public class SceneElementMonitorService {
         request.setAgentNames(agentNames);
         request.setRuleGroups(CsceneBizConstant.VULNERABILITY_GROUP);
 
-        EsHttpUtil.updateWazuhDataMaxQueryNum(DataCollectionService.WAZUH_ALERT_INDEX_PREFIX, BaseAppConfig.getWazuhMaxWindow());
-
         ListObjResult<WazuhVulnerabilityInfoModel> result = dataCollectionService.queryVulnerabilityInfo(request, true);
         List<ElementVulnerabilityInfo> vulnerabilityInfos = new ArrayList<>();
         for (WazuhVulnerabilityInfoModel r : result.getObjs()) {
