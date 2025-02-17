@@ -1,0 +1,1 @@
+update mp_menu_template_info set en_name = 'AWDP' where menu_id = 'ct-awdp-contest-list' ;
