@@ -6,6 +6,7 @@ import java.util.Objects;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import cn.cyberpeace.mp.base.service.code.ErrorCode;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -73,22 +74,29 @@ public class AuthenticateController {
 	@ApiImplicitParam(name = "sso", value = "sso", dataTypeClass = String.class)
 	@GetMapping("/sso")
 	public ServiceResult<String> authenticateSso(@RequestParam String sso,
-			HttpServletRequest request, HttpServletResponse response) {
+			HttpServletResponse response) {
+		String username = "";
 		try {
 			String jwtStr = SsoUtils.decryptK316(sso);
-			String username = SsoUtils.validateJwt(jwtStr);
-			UserModel userModel = userService.getByUserName(username);
-			String newJwt = JwtUtils.generateToken(new JwtUtils.UserInfo(userModel.getId(),
-					userModel.getUsername(), userModel.getTokenSecret()));
-			SsoUtils.addJWTCookieToResponse(response, newJwt);
-			response.setStatus(301);
-			response.setHeader("Location", "/page/mg/home");
-			response.setHeader("Set-Cookie", "cr_jwttoken=" + newJwt + "; Path=/");
-			return ResultCommon.success(username);
+			username = SsoUtils.validateJwt(jwtStr);
 		} catch (Exception e) {
 			log.error("failed to authenticate sso token", e);
 			throw new MpRuntimeException(AuthErrorCode.AUTHENTICATION_FAILED);
 		}
+
+		UserModel userModel = userService.getByUserName(username);
+		if (null == userModel) {
+			log.error("user not found, username:{}", username);
+			throw new MpRuntimeException(AuthErrorCode.ACCOUNT_NOT_EXISTED);
+		}
+		String newJwt = JwtUtils.generateToken(new JwtUtils.UserInfo(userModel.getId(),
+				userModel.getUsername(), userModel.getTokenSecret()));
+		SsoUtils.addJWTCookieToResponse(response, newJwt);
+		response.setStatus(301);
+		response.setHeader("Location", "/page/mg/home");
+		// response.setHeader("Set-Cookie", "cr_jwttoken=" + newJwt + "; Path=/");
+		return ResultCommon.success(username);
+
 	}
 
 }
