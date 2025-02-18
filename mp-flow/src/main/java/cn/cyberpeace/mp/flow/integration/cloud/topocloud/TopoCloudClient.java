@@ -34,11 +34,11 @@ import java.util.Map;
 @Slf4j
 public class TopoCloudClient implements ICloudClient {
 
-    private static final String CREATE_TOPO_URL = "/api/mp/cscene/cscenes/app_instance";
+    private static final String CREATE_TOPO_URL = "/api/cscene/cscenes/app_instance";
 
-    private static final String DELETE_TOPO_URL = "/api/mp/cscene/cscene_instances";
+    private static final String DELETE_TOPO_URL = "/api/cscene/cscene_instances";
 
-    private static final String GET_TOPO_URL = "/api/mp/cscene/cscene_instances?id={id}";
+    private static final String GET_TOPO_URL = "/api/cscene/cscene_instances?id={id}";
 
     private static final String TOPO_NAME = "trex_topo";
 

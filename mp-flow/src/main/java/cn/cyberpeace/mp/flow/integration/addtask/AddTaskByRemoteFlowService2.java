@@ -191,7 +191,7 @@ public class AddTaskByRemoteFlowService2 implements IAddTaskService {
             int resourceType = StringUtils.isNotEmpty(flow.getPcapFile()) ? 0 : 1;
             String fileKey = resourceType == 0 ? flow.getPcapFile() : flow.getFile();
             fileKey = fileKey.replace("\\", "/");
-            String downloadUrl = flowConfig.getCsceneUrl() + "/api/mp/file/" + fileKey;
+            String downloadUrl = flowConfig.getCsceneUrl() + "/api/file/" + fileKey;
             byte[] bytes = this.downloadFileToByteArray(downloadUrl, 2);
             List<FlowActuator.ProtocolRate> protocolRates = new ArrayList<>();
             if (flow.getProtocolList() != null) {
