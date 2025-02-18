@@ -25,7 +25,7 @@ import java.util.Map;
 public class FlowClient {
     private static String BACKGROUND_FLOW_INFO_URL = "/api/flow/info/background";
 
-    private static String ATTACK_FLOW_INFO_URL = "/api/flow/info/background";
+    private static String ATTACK_FLOW_INFO_URL = "/api/flow/info/attack";
 
     private static Map<String, String> HEADER = new HashMap<>();
 
