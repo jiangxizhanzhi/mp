@@ -109,6 +109,7 @@ public class LoadServiceImpl {
     private String LOAD_TRANSFORM_URL;
 
     private static final String LOAD_RESULT_LOG = "![载荷执行记录](%s) ";
+
     /*
      * 载荷页面
      * */
@@ -530,7 +531,29 @@ public class LoadServiceImpl {
 
     public ListObjServiceResult getLoadExecutionResultList(String sceneId) {
         HumanCondition humanCondition = new HumanCondition();
-        humanCondition.filterEqual(MpDevopsLoadSceneLog::getSceneId, sceneId)
+        humanCondition.link(MpDevopsLoadSceneLog.class, MpDevopsLoad.class)
+                .filterLink(MpDevopsLoadSceneLog.class, MpDevopsLoadSceneLog::getId, MpDevopsLoad.class, MpDevopsLoad::getId)
+                .currentLink(MpDevopsLoadSceneLog.class)
+                .selectAs(MpDevopsLoadSceneLog::getId, MpDevopsLoadSceneLog::getId)
+                .selectAs(MpDevopsLoadSceneLog::getInstanceId, MpDevopsLoadSceneLog::getInstanceId)
+                .selectAs(MpDevopsLoadSceneLog::getSceneId, MpDevopsLoadSceneLog::getSceneId)
+                .selectAs(MpDevopsLoadSceneLog::getTaskId, MpDevopsLoadSceneLog::getTaskId)
+                .selectAs(MpDevopsLoadSceneLog::getResultStatus, MpDevopsLoadSceneLog::getResultStatus)
+                .selectAs(MpDevopsLoadSceneLog::getResultType, MpDevopsLoadSceneLog::getResultType)
+                .selectAs(MpDevopsLoadSceneLog::getJudgmentStatus, MpDevopsLoadSceneLog::getJudgmentStatus)
+                .selectAs(MpDevopsLoadSceneLog::getStageId, MpDevopsLoadSceneLog::getStageId)
+                .selectAs(MpDevopsLoadSceneLog::getCommand, MpDevopsLoadSceneLog::getCommand)
+                .selectAs(MpDevopsLoadSceneLog::getRemark, MpDevopsLoadSceneLog::getRemark)
+                .selectAs(MpDevopsLoadSceneLog::getCreateTime, MpDevopsLoadSceneLog::getCreateTime)
+                .currentLink(MpDevopsLoad.class)
+                .selectAs(MpDevopsLoad::getActionType, MpDevopsLoadSceneLog::getActionType)
+                .selectAs(MpDevopsLoad::getControlPort, MpDevopsLoadSceneLog::getControlPort)
+                .selectAs(MpDevopsLoad::getToolName, MpDevopsLoadSceneLog::getToolName)
+                .selectAs(MpDevopsLoad::getToolDescription, MpDevopsLoadSceneLog::getToolDescription)
+                .selectAs(MpDevopsLoad::getRunTable, MpDevopsLoadSceneLog::getRunTable)
+                .selectAs(MpDevopsLoad::getControlType, MpDevopsLoadSceneLog::getControlType)
+                .currentLink(MpDevopsLoadSceneLog.class)
+                .filterEqual(MpDevopsLoadSceneLog::getSceneId, sceneId)
                 .orderBy(MpDevopsLoadSceneLog::getCreateTime, true);
         List<MpDevopsLoadSceneLog> list = devopsLoadSceneLogMapper.list(humanCondition);
         String[] codes = {CommonStatusCodeEnum.RESULT_STATUS.getCode(), CommonStatusCodeEnum.ACTION_TYPE.getCode(),
@@ -604,7 +627,7 @@ public class LoadServiceImpl {
      * */
     public Boolean addLoadExecutionResult(MpDevopsLoadSceneLog requestData) {
         LocalDateTime createTime = requestData.getCreateTime();
-        if( createTime == null){
+        if (createTime == null) {
             requestData.setCreateTime(LocalDateTime.now());
         }
         Boolean addLoadExecutionResult = loadMapper.addLoadExecutionResult(requestData);
@@ -659,10 +682,10 @@ public class LoadServiceImpl {
         String instanceId = loadRequest.getInstanceId();
         String taskId = loadRequest.getTaskId();
         HumanCondition humanCondition = new HumanCondition();
-        humanCondition.filterEqual(CloudPluginSceneElementModel::getResourceId,taskId);
-        humanCondition.filterEqual(CloudPluginSceneElementModel::getLoadResourceInstanceId,instanceId);
+        humanCondition.filterEqual(CloudPluginSceneElementModel::getResourceId, taskId);
+        humanCondition.filterEqual(CloudPluginSceneElementModel::getLoadResourceInstanceId, instanceId);
         List<CloudPluginSceneElementModel> cloudPluginSceneElementModels = cloudPluginSceneElementMapper.list(humanCondition);
-        if(cloudPluginSceneElementModels.size()>0 && BaseCloudPluginSceneElementModel.LoadSourceType.LOCAL==cloudPluginSceneElementModels.get(0).getLoadSource()){
+        if (cloudPluginSceneElementModels.size() > 0 && BaseCloudPluginSceneElementModel.LoadSourceType.LOCAL == cloudPluginSceneElementModels.get(0).getLoadSource()) {
             String resultLog = loadRequest.getResultLog();
             loadRequest.setResultLog(String.format(LOAD_RESULT_LOG, resultLog));
         }
@@ -1163,7 +1186,7 @@ public class LoadServiceImpl {
         List<JSONObject> loadResultBySceneId = null;
         if (loadIds != null && loadIds.size() > 0) {
             //查询该场景绑定的载荷及记录
-            loadResultBySceneId = loadMapper.getLoadResultByLoads(sceneId,loadIds);
+            loadResultBySceneId = loadMapper.getLoadResultByLoads(sceneId, loadIds);
             return loadResultBySceneId;
         } else {
             return loadResultBySceneId;
@@ -1337,8 +1360,8 @@ public class LoadServiceImpl {
             BufferedReader br = new BufferedReader(new FileReader(FILEPATH + name));
             String s = null;
             // 使用readLine方法，一次读一行
-            while((s = br.readLine())!=null){
-                result.append(System.lineSeparator()+s);
+            while ((s = br.readLine()) != null) {
+                result.append(System.lineSeparator() + s);
             }
 
             LoadFileInfo loadFileInfo = new LoadFileInfo();
