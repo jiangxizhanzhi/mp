@@ -1,12 +1,25 @@
 package cn.cyberpeace.mp.auth.controller;
 
 
+import java.util.Objects;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
-import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.JwtUtils;
+import cn.cyberpeace.mp.auth.util.SsoUtils;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
@@ -17,14 +30,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Objects;
 
 /**
  * @Description: 认证接口
@@ -63,5 +68,27 @@ public class AuthenticateController {
         }
         return user;
     }
+
+	@ApiOperation(value = "校验sso token", notes = "")
+	@ApiImplicitParam(name = "sso", value = "sso", dataTypeClass = String.class)
+	@GetMapping("/sso")
+	public ServiceResult<String> authenticateSso(@RequestParam String sso,
+			HttpServletRequest request, HttpServletResponse response) {
+		try {
+			String jwtStr = SsoUtils.decryptK316(sso);
+			String username = SsoUtils.validateJwt(jwtStr);
+			UserModel userModel = userService.getByUserName(username);
+			String newJwt = JwtUtils.generateToken(new JwtUtils.UserInfo(userModel.getId(),
+					userModel.getUsername(), userModel.getTokenSecret()));
+			SsoUtils.addJWTCookieToResponse(response, newJwt);
+			response.setStatus(301);
+			response.setHeader("Location", "/page/mg/home");
+			response.setHeader("Set-Cookie", "cr_jwttoken=" + newJwt + "; Path=/");
+			return ResultCommon.success(username);
+		} catch (Exception e) {
+			log.error("failed to authenticate sso token", e);
+			throw new MpRuntimeException(AuthErrorCode.AUTHENTICATION_FAILED);
+		}
+	}
 
 }
