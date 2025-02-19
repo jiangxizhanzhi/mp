@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
@@ -14,11 +15,13 @@ import cn.cyberpeace.mp.sceneplugincollection.service.param.TimeListPageInfoQuer
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Netiface;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
+import cn.hutool.core.exceptions.ExceptionUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -126,19 +129,34 @@ public class HostStateController {
     @ApiOperation(value = "节点端口信息")
     @GetMapping("/element_port")
     public ListObjServiceResult<Port> pagePorts(TimeListPageInfoQueryParams listPageInfoQueryParams) {
-        return hostStateService.pagePorts(listPageInfoQueryParams).asResult();
+        try {
+            return hostStateService.pagePorts(listPageInfoQueryParams).asResult();
+        } catch (Exception e) {
+            log.error(ExceptionUtil.stacktraceToString(e));
+            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(),0));
+        }
     }
 
     @ApiOperation(value = "节点进程信息")
     @GetMapping("/element_process")
     public ListObjServiceResult<Process> pageProcesses(TimeListPageInfoQueryParams listPageInfoQueryParams) {
-        return hostStateService.pageProcesses(listPageInfoQueryParams).asResult();
+        try {
+            return hostStateService.pageProcesses(listPageInfoQueryParams).asResult();
+        }catch (Exception e){
+            log.error(ExceptionUtil.stacktraceToString(e));
+            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(),0));
+        }
     }
 
     @ApiOperation(value = "节点网卡信息")
     @GetMapping("/element_netifaces")
     public ListObjServiceResult<Netiface> pageNetifaces(TimeListPageInfoQueryParams listPageInfoQueryParams) {
-        return hostStateService.pageNetifaces(listPageInfoQueryParams).asResult();
+        try {
+            return hostStateService.pageNetifaces(listPageInfoQueryParams).asResult();
+        }catch (Exception e){
+            log.error(ExceptionUtil.stacktraceToString(e));
+            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(),0));
+        }
     }
 
 }
