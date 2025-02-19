@@ -11,5 +11,7 @@ public class CloudPluginSceneConfigBO extends BaseCloudPluginSceneBO<CloudPlugin
     @Override
     public CloudPluginSceneConfigModel createModel() {
         return new CloudPluginSceneConfigModel();
+        CloudPluginSceneConfigElementBO cloudPluginSceneConfigElementBO = new CloudPluginSceneConfigElementBO();
+        cloudPluginSceneConfigElementBO.setCategory();
     }
 }

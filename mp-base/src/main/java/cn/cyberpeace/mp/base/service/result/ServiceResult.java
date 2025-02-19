@@ -38,6 +38,13 @@ public class ServiceResult<T> extends BaseServiceResult<T, T> {
         return this;
     }
 
+    public static <T> ServiceResult<T> success(T source) {
+        ServiceResult<T> serviceResult = new ServiceResult<>();
+        serviceResult.setSource(source);
+        serviceResult.setServiceCode(BaseErrorCode.SUCCESS);
+        return serviceResult;
+    }
+
     public static class ServiceResultBuilder<T> {
         private T source;
         private ServiceCode serviceCode = BaseErrorCode.SUCCESS;
@@ -57,7 +64,6 @@ public class ServiceResult<T> extends BaseServiceResult<T, T> {
             this.detail = detail;
             return this;
         }
-
         public ServiceResult<T> build() {
             return new ServiceResult<>(source, serviceCode, detail);
         }

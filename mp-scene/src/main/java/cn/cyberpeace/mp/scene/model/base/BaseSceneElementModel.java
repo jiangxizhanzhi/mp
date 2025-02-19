@@ -30,6 +30,13 @@ public class BaseSceneElementModel extends BaseSceneNodeModel {
     @DefaultBool
     private Boolean isAuxiliary;
 
+    /**
+     * 一个大场景会跨靶场，从想定下发的场景，如果节点属于当前pg所在的靶场
+     * 那么就是true，默认为true
+     */
+    @DefaultInt(value = 1)
+    private Integer currentScenePartFlag;
+
     public static class Type {
         public static final int OTHER = 0;
         public static final int SWITCH = 1;

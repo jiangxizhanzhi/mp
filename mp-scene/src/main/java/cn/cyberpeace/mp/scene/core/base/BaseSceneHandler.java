@@ -156,6 +156,8 @@ public abstract class BaseSceneHandler<
     /** 端口连接端口映射 */
     private final Map<String, String> portIdConnectedPortIdMap = new ConcurrentHashMap<>();
 
+    private boolean partSceneFlag = false;
+
     // 通过ClassFieldNames注解和实现类ClassFieldClasses注解，初始化调用ClassUtils.loadClassFields(this)设置
     private Class<D> sceneDataBOClass;
     private Class<T> sceneTopologyBOClass;
@@ -737,6 +739,10 @@ public abstract class BaseSceneHandler<
             condition.filterIn(BaseSceneElementModel::getArea, filterAreaIds);
         }
 
+        if (partSceneFlag) {
+            condition.filterEqual(BaseSceneElementModel::getCurrentScenePartFlag, 1);
+        }
+
         elements = sceneElementMapper.list(condition);
         return elements;
     }
@@ -762,7 +768,22 @@ public abstract class BaseSceneHandler<
                     .filterEqual(BaseSceneElementPortModel::getScene, sceneId)
                     .currentLink(sceneElementModelClass)
                     .filterIn(BaseSceneElementModel::getArea, filterAreaIds);
+
+            if (partSceneFlag) {
+                condition.filterEqual(BaseSceneElementModel::getCurrentScenePartFlag, 1);
+            }
         } else {
+            if (partSceneFlag) {
+                condition.link(sceneElementPortModelClass, sceneElementModelClass)
+                        .filterLink(sceneElementPortModelClass, BaseSceneElementPortModel::getSceneElement,
+                                sceneElementModelClass, BaseSceneElementModel::getId)
+                        .currentLink(sceneElementPortModelClass)
+                        .filterEqual(BaseSceneElementPortModel::getScene, sceneId)
+                        .currentLink(sceneElementModelClass)
+                        .filterEqual(BaseSceneElementModel::getCurrentScenePartFlag, 1);
+            } else {
+                condition.filterEqual(BaseSceneElementPortModel::getScene, sceneId);
+            }
             condition.filterEqual(BaseSceneElementPortModel::getScene, sceneId);
         }
         return sceneElementPortMapper.list(condition);
@@ -782,20 +803,41 @@ public abstract class BaseSceneHandler<
             filterAreaIds = new String[]{currentAreaId};
         }
         if (filterAreaIds.length > 0) {
-            condition.link(sceneElementPortConnectionModelClass, sceneElementModelClass)
+            HumanCondition elementFilterCondition = new HumanCondition()
+                    .select(BaseSceneElementModel::getId)
+                    .filterEqual(BaseSceneElementModel::getScene, sceneId)
+                    .filterIn(BaseSceneElementModel::getArea, filterAreaIds);
+            if (partSceneFlag) {
+                elementFilterCondition.filterEqual(BaseSceneElementModel::getCurrentScenePartFlag, 1);
+            }
+            List<String> currentNodes = sceneElementMapper.list(elementFilterCondition)
+                    .stream().map(e0 -> e0.getId()).collect(Collectors.toList());
+
+            if (CollectionUtils.isEmpty(currentNodes)) {
+                return new ArrayList<>();
+            }
+
+            condition.filterEqual(BaseSceneElementPortConnectionModel::getScene, sceneId)
                     .filterOrStart()
-                    .orLink(sceneElementPortConnectionModelClass, BaseSceneElementPortConnectionModel::getSourceElement,
-                            sceneElementModelClass, BaseSceneElementModel::getId)
-                    .orLink(sceneElementPortConnectionModelClass, BaseSceneElementPortConnectionModel::getTargetElement,
-                            sceneElementModelClass, BaseSceneElementModel::getId)
-                    .filterOrEnd()
-                    .currentLink(sceneElementPortConnectionModelClass)
-                    .filterEqual(BaseSceneElementPortConnectionModel::getScene, sceneId)
-                    .currentLink(sceneElementModelClass)
-                    .filterIn(BaseSceneElementModel::getArea, filterAreaIds)
-                    .distinct();
+                    .orIn(BaseSceneElementPortConnectionModel::getSourceElement, currentNodes.toArray())
+                    .orIn(BaseSceneElementPortConnectionModel::getTargetElement, currentNodes.toArray())
+                    .filterOrEnd();
         } else {
             condition.filterEqual(BaseSceneElementPortConnectionModel::getScene, sceneId);
+
+            if (partSceneFlag) {
+                HumanCondition elementFilterCondition = new HumanCondition().select(BaseSceneElementModel::getId)
+                        .filterEqual(BaseSceneElementModel::getScene, sceneId).filterEqual(BaseSceneElementModel::getCurrentScenePartFlag, 1);
+                List<String> currentNodes = sceneElementMapper.list(elementFilterCondition)
+                        .stream().map(e0 -> e0.getId()).collect(Collectors.toList());
+
+                condition.filterEqual(BaseSceneElementPortConnectionModel::getScene, sceneId)
+                        .filterOrStart()
+                        .orIn(BaseSceneElementPortConnectionModel::getSourceElement, currentNodes.toArray())
+                        .orIn(BaseSceneElementPortConnectionModel::getTargetElement, currentNodes.toArray())
+                        .filterOrEnd();            }
+
+
         }
         return sceneElementPortConnectionMapper.list(condition);
     }
@@ -821,8 +863,22 @@ public abstract class BaseSceneHandler<
                     .filterEqual(BaseSceneElementPluginModel::getScene, sceneId)
                     .currentLink(sceneElementModelClass)
                     .filterIn(BaseSceneElementModel::getArea, filterAreaIds);
+            if (partSceneFlag) {
+                condition.filterEqual(BaseSceneElementModel::getCurrentScenePartFlag, 1);
+            }
         } else {
-            condition.filterEqual(BaseSceneElementPluginModel::getScene, sceneId);
+            if (partSceneFlag) {
+                condition.link(sceneElementPluginModelClass, sceneElementModelClass)
+                        .filterLink(sceneElementPluginModelClass, BaseSceneElementPluginModel::getSceneElement,
+                                sceneElementModelClass, BaseSceneElementModel::getId)
+                        .currentLink(sceneElementPluginModelClass)
+                        .filterEqual(BaseSceneElementPluginModel::getScene, sceneId)
+                        .currentLink(sceneElementModelClass)
+                        .filterEqual(BaseSceneElementModel::getCurrentScenePartFlag, 1);
+            } else {
+                condition.filterEqual(BaseSceneElementPluginModel::getScene, sceneId);
+
+            }
         }
 
         return sceneElementPluginMapper.list(condition);
@@ -1201,6 +1257,28 @@ public abstract class BaseSceneHandler<
         this.sceneId = sceneId;
         this.areaId = areaId;
         this.isAreaMode = isAreaMode;
+        reload();
+        if (scene == null) {
+            throw new SceneNotExistException("Scene " + sceneId + " not exist");
+        }
+    }
+
+    /**
+     * 场景包含多个靶场的节点。只启动本靶场的节点
+     * @param sceneId
+     * @param areaId
+     * @param isAreaMode
+     * @param context
+     * @param partSceneFlag
+     */
+    public void init(String sceneId, String areaId, boolean isAreaMode, C2 context, boolean partSceneFlag) {
+        ClassUtils.loadClassFields(this);
+        BeanCommon.loadBeanFields(this);
+        this.context = context;
+        this.sceneId = sceneId;
+        this.areaId = areaId;
+        this.isAreaMode = isAreaMode;
+        this.partSceneFlag = partSceneFlag;
         reload();
         if (scene == null) {
             throw new SceneNotExistException("Scene " + sceneId + " not exist");
