@@ -37,6 +37,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ObjResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.IdUtils;
 import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
@@ -50,7 +51,10 @@ import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
@@ -120,6 +124,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Autowired
     private UserRoleMapper userRoleMapper;
+
+    @Autowired
+    private TransactionTemplate transactionTemplate;
 
 
     @Autowired
@@ -1284,6 +1291,41 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             return result;
         }
         return new ArrayList<>();
+    }
+
+    @Override
+	public void insertK316User(String username) {
+
+		UserModel userModel = new UserModel();
+		userModel.setId(IdUtils.globalId());
+		userModel.setName(username);
+		userModel.setUsername(username);
+		userModel.setInitCheck(0);
+		userModel.setPassword("d8165e80c4abed2dcc1dd06df1a8be31");
+		userModel.encodePassword();
+
+		transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus status) {
+				boolean successFlag = getModelMapper().create(userModel);
+				if (successFlag) {
+					log.error("insertK316User error: {}", username);
+				} else {
+					throw new MpRuntimeException(AuthErrorCode.USER_ADD_ERROR);
+				}
+                // 默认一级组织
+				TenantUserModel tenantUserModel = TenantUserModel.builder().user(userModel.getId())
+						.org("a13262d600fe40c799d63dce5c1485af").build();
+				var re1 = tenantUserService.create(tenantUserModel);
+				ResultUtils.throwExceptionIfError(re1, AuthErrorCode.USER_ORG_ADD_ERROR);
+                // 默认管理员角色
+				UserRoleModel userRoleModel = UserRoleModel.builder().user(userModel.getId())
+						.role("5827ff7847504ffd806e0a85c417228d").build();
+				var re2 = userRoleService.create(userRoleModel);
+				ResultUtils.throwExceptionIfError(re2, AuthErrorCode.USER_ROLE_ADD_ERROR);
+			}
+		});
     }
 }
 

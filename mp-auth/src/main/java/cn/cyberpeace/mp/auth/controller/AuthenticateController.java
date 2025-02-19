@@ -86,15 +86,15 @@ public class AuthenticateController {
 
 		UserModel userModel = userService.getByUserName(username);
 		if (null == userModel) {
-			log.error("user not found, username:{}", username);
-			throw new MpRuntimeException(AuthErrorCode.ACCOUNT_NOT_EXISTED);
+			log.info("user not found, username:{}, will be registered", username);
+			userService.insertK316User(username);
+			userModel = userService.getByUserName(username);
 		}
 		String newJwt = JwtUtils.generateToken(new JwtUtils.UserInfo(userModel.getId(),
 				userModel.getUsername(), userModel.getTokenSecret()));
 		SsoUtils.addJWTCookieToResponse(response, newJwt);
 		response.setStatus(301);
 		response.setHeader("Location", "/page/mg/home");
-		// response.setHeader("Set-Cookie", "cr_jwttoken=" + newJwt + "; Path=/");
 		return ResultCommon.success(username);
 
 	}

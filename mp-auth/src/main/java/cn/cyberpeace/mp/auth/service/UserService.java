@@ -112,4 +112,5 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
 
    List<String> listExistedUserNames(List<String> userNames, Integer limit);
 
+    void insertK316User(String username);
 }
