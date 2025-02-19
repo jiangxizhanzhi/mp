@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.model.BlacklistModel;
+import cn.cyberpeace.mp.auth.util.JwtUtils;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
@@ -27,8 +28,11 @@ import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.dto.scene.ElementCommandExecResult;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneLinkStatusInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
+import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.model.SceneSwitchInfoModel;
+import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.SceneSwitchInfoMapper;
+import cn.cyberpeace.mp.cscene.response.GuacamoleRep;
 import cn.cyberpeace.mp.cscene.service.CsceneFileService;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
@@ -41,6 +45,7 @@ import cn.cyberpeace.mp.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.log.utils.SnUtils;
 import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
 import cn.cyberpeace.mp.scene.core.event.SceneElementEventTransition;
+import cn.cyberpeace.mp.scene.model.SceneConfigElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConnectionModel;
@@ -56,6 +61,7 @@ import cn.cyberpeace.mp.sceneplugincollection.service.param.QueryCollectionDataC
 import cn.cyberpeace.mp.scenepluginflow.service.response.SceneFlowRecordsResponse;
 import cn.cyberpeace.mp.situationaware.model.enums.FileEventType;
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -65,6 +71,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.client.HttpClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -95,8 +102,14 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
 
     private CsceneFileService csceneFileService;
 
+    private HttpClient httpClient;
+
     @Resource(name = "sysOptionServiceImpl")
     private OptionService optionService;
+
+    public static final String GUACAMOLE_IP_PORT = "http://10.110.3.1:8200/remote_access/api/session/tunnels/";
+    @Autowired
+    private CsceneInstanceMapper csceneInstanceMapper;
 
     private CsceneInstanceActionRequest formatActionRequest(CsceneInstanceActionRequest request, String paramId) {
         if (request == null) {
@@ -941,6 +954,29 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         List<SceneSwitchInfoModel> list = switchInfoMapper.list(humanCondition);
         String jsonString = JSONArray.toJSONString(list);
         return new ServiceResult(jsonString).asResult();
+    }
+    @ApiOperation("鉴权场景虚拟机是否能上传下载")
+    @GetMapping("/auth/vm")
+    public ServiceResult getVm(String primaryConnectionIdentifier){
+        CloudPluginSceneConnectionModel vmLoginAuthUpOrDown = csceneInstanceMapper.getVmLoginAuthUpOrDown(primaryConnectionIdentifier);
+        //获取虚拟机名称信息
+        String sceneElement = vmLoginAuthUpOrDown.getSceneElement();
+        List<SceneConfigElementModel> sceneConfigElementModels = csceneInstanceMapper.getVmInfo(sceneElement);
+        String vmName = sceneConfigElementModels.get(0).getName();
+
+
+        String scene = vmLoginAuthUpOrDown.getScene();
+        HumanCondition humanCondition = new HumanCondition();
+        humanCondition.filterEqual(CsceneInstanceModel::getScene,scene);
+        CsceneInstanceModel csceneInstanceModel = csceneInstanceMapper.list(humanCondition).get(0);
+
+        String id = csceneInstanceModel.getId();
+        String accessUser = vmLoginAuthUpOrDown.getAccessUser();
+        String accessIp = vmLoginAuthUpOrDown.getAccessIp();
+
+        GuacamoleRep guacamoleRep = GuacamoleRep.builder().accessUser(accessUser).accessIp(accessIp).id(id).vmName(vmName).nodeId(sceneElement).build();
+        String jsonString = JSONObject.toJSONString(guacamoleRep);
+        return new ServiceResult<>(jsonString).asResult();
     }
 
 }

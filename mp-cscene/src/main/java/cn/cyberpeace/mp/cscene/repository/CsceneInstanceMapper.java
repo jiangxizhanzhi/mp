@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.cscene.model.CsceneInstanceCountActivitySceneModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceCountByReferenceTypeModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.repository.base.BaseCsceneMapper;
+import cn.cyberpeace.mp.scene.model.SceneConfigElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConnectionModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneModel;
@@ -47,4 +48,8 @@ public interface CsceneInstanceMapper extends BaseCsceneMapper<CsceneInstanceMod
     List<CloudPluginSceneElementModel> getVlanUsedInstance(List<Integer> vlanId);
 
     String selectCsceneByMpSceneId(@Param("mpSceneId") String mpSceneId);
+
+    CloudPluginSceneConnectionModel getVmLoginAuthUpOrDown(@Param("primaryConnectionIdentifier") String primaryConnectionIdentifier);
+
+    List<SceneConfigElementModel> getVmInfo(@Param("sceneElement") String sceneElement);
 }

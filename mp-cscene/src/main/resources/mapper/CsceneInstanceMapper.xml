@@ -103,5 +103,12 @@
     <select id="selectCsceneByMpSceneId" resultType="java.lang.String" parameterType="java.lang.String">
         select mcci.cscene from mp_cscene_cscene_instance as mcci where id = #{mpSceneId}
     </select>
+    <select id="getVmLoginAuthUpOrDown"
+            resultType="cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConnectionModel">
+        select *from mp_sceneplugincloud_scene_connection where connection_id = #{primaryConnectionIdentifier};
+    </select>
+    <select id="getVmInfo" resultType="cn.cyberpeace.mp.scene.model.SceneConfigElementModel">
+        select * from mp_scene_scene_config_element where node_id = #{sceneElement}
+    </select>
 
 </mapper>
