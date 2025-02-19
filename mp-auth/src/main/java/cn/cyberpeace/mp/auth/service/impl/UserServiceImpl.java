@@ -43,6 +43,7 @@ import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.base.util.define.SerializableFunction;
+import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -1296,36 +1297,29 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
 	public void insertK316User(String username) {
 
-		UserModel userModel = new UserModel();
-		userModel.setId(IdUtils.globalId());
-		userModel.setName(username);
-		userModel.setUsername(username);
-		userModel.setInitCheck(0);
-		userModel.setPassword("d8165e80c4abed2dcc1dd06df1a8be31");
-		userModel.encodePassword();
+        UserRequest request = new UserRequest();
+        request.setUsername(username);
+        request.setName(username);
+        request.setPassword("d8165e80c4abed2dcc1dd06df1a8be31");
+        request.setOrgIds(Lists.newArrayList("a13262d600fe40c799d63dce5c1485af"));
+        request.setRoleIds(Lists.newArrayList("5827ff7847504ffd806e0a85c417228d"));
+        request.setTenant("K316");
 
-		transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+        transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+            @Override
+            protected void doInTransactionWithoutResult(TransactionStatus status) {
+                UserModel userCreated = upsertUserModel(request);
+                String userId = userCreated.getId();
+                log.info("user create success id:{}", userId);
 
-			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus status) {
-				boolean successFlag = getModelMapper().create(userModel);
-				if (successFlag) {
-					log.error("insertK316User error: {}", username);
-				} else {
-					throw new MpRuntimeException(AuthErrorCode.USER_ADD_ERROR);
-				}
-                // 默认一级组织
-				TenantUserModel tenantUserModel = TenantUserModel.builder().user(userModel.getId())
-						.org("a13262d600fe40c799d63dce5c1485af").build();
-				var re1 = tenantUserService.create(tenantUserModel);
-				ResultUtils.throwExceptionIfError(re1, AuthErrorCode.USER_ORG_ADD_ERROR);
-                // 默认管理员角色
-				UserRoleModel userRoleModel = UserRoleModel.builder().user(userModel.getId())
-						.role("5827ff7847504ffd806e0a85c417228d").build();
-				var re2 = userRoleService.create(userRoleModel);
-				ResultUtils.throwExceptionIfError(re2, AuthErrorCode.USER_ROLE_ADD_ERROR);
-			}
-		});
+                // 保存组织-用户关系
+                saveUserOrgRelation(request.getOrgIds(), userId);
+                // 保存角色-用户关系
+                saveUserRoleRelation(request.getRoleIds(), userId);
+
+                userCacheService.evictAllUserCache();
+            }
+        });
     }
 }
 
