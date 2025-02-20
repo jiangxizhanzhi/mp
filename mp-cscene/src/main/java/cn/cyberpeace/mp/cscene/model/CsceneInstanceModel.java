@@ -29,11 +29,7 @@ public class CsceneInstanceModel extends BaseCsceneModel {
     private Integer sceneAttr;
     @DefaultStr
     private String passThrough;
-    //控制guacamole上传下载
-    @DefaultInt
-    private Boolean up = true;
 
-    private Boolean down = false;
 
     public static class Type {
         public static final int TEST = 1;
