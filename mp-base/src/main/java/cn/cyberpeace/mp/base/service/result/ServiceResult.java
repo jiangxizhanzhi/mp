@@ -42,7 +42,7 @@ public class ServiceResult<T> extends BaseServiceResult<T, T> {
         ServiceResult<T> serviceResult = new ServiceResult<>();
         serviceResult.setSource(source);
         serviceResult.setServiceCode(BaseErrorCode.SUCCESS);
-        return serviceResult;
+        return serviceResult.asResult();
     }
 
     public static class ServiceResultBuilder<T> {

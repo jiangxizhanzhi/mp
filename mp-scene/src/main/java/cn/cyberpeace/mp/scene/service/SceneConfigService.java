@@ -22,7 +22,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.swing.plaf.multi.MultiPanelUI;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 
@@ -92,25 +95,36 @@ public class SceneConfigService {
     }
 
     public SceneConfigDataBO importThirdPartyScene(MultipartFile file) {
-        try {
+        try (InputStream originalInputStream = file.getInputStream()) {
+
+            // 最终得到的字节数组
+            byte[] bytes = originalInputStream.readAllBytes();
+
+            // 2. 转换为 InputStream（可重复生成）
+            InputStream inputStreamForSheet0 = new ByteArrayInputStream(bytes);
+            InputStream inputStreamForSheet1 = new ByteArrayInputStream(bytes); // 复用同一份数据
+
+            // 后续用 EasyExcel 读取
             String fileName = StringUtils.substringBefore(file.getOriginalFilename(), ".");
             ThirdPartyElementReader thirdPartyElementReader = new ThirdPartyElementReader();
-            EasyExcel.read(file.getInputStream(), ThirdPartyElementBO.class, thirdPartyElementReader)
-                    .autoCloseStream(true).sheet(0).headRowNumber(2);
+            EasyExcel.read(inputStreamForSheet0, ThirdPartyElementBO.class, thirdPartyElementReader)
+                    .autoCloseStream(true).sheet(0).headRowNumber(2).doRead();
             List<ThirdPartyElementBO> thirdPartyElementBOS = thirdPartyElementReader.getCachedElements();
 
             ThirdPartyElementConnectReader thirdPartyElementConnectReader = new ThirdPartyElementConnectReader();
-            EasyExcel.read(file.getInputStream(), ThirdPartyElementConnectBO.class, thirdPartyElementConnectReader)
-                    .autoCloseStream(true).sheet(1).headRowNumber(1);
+            EasyExcel.read(inputStreamForSheet1, ThirdPartyElementConnectBO.class, thirdPartyElementConnectReader)
+                    .autoCloseStream(true).sheet(1).headRowNumber(1).doRead();
             List<ThirdPartyElementConnectBO> thirdPartyElementConnectBOS = thirdPartyElementConnectReader.getCachedConnects();
 
             ThirdPartyTopoSceneConfigHandler thirdPartyTopoSceneConfigHandler = new ThirdPartyTopoSceneConfigHandler(
                     fileName, thirdPartyElementBOS, thirdPartyElementConnectBOS);
             return thirdPartyTopoSceneConfigHandler.save();
+
         } catch (IOException e) {
             log.error(e.getMessage(), e);
             throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("读取导入文件过程异常，请确认文件格式无误再尝试导入"));
         }
+
     }
 
 }

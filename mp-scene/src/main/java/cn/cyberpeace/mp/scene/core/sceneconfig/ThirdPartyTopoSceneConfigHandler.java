@@ -19,10 +19,11 @@ import java.util.stream.Collectors;
 public class ThirdPartyTopoSceneConfigHandler {
 
     @Getter
-    private List<ThirdPartyElementBO> thirdPartyElementBOs;
+    private List<ThirdPartyElementBO> thirdPartyElementBOs = new ArrayList<>();
     @Getter
-    private List<ThirdPartyElementConnectBO> thirdPartyElementConnectBOs;
-    private List<ThirdPartyElementPortBO> thirdPartyElementPortBOS;
+    private List<ThirdPartyElementConnectBO> thirdPartyElementConnectBOs = new ArrayList<>();
+    private List<ThirdPartyElementPortBO> thirdPartyElementPortBOS = new ArrayList<>();
+    @Getter
     private String sceneName;
 
     public ThirdPartyTopoSceneConfigHandler(String sceneConfigId) {
@@ -53,7 +54,7 @@ public class ThirdPartyTopoSceneConfigHandler {
                     var sourcePort = sceneConfigHandler.getPort(connection.getSource());
                     var targetPort = sceneConfigHandler.getPort(connection.getTarget());
                     thirdPartyElementConnectBO.setFromNodeName(sourcePort.getElement().getName());
-                    thirdPartyElementConnectBO.setToNodeName(sourcePort.getElement().getName());
+                    thirdPartyElementConnectBO.setToNodeName(targetPort.getElement().getName());
                     thirdPartyElementConnectBO.setFromNodeIp(sourcePort.getIp());
                     thirdPartyElementConnectBO.setToNodeIp(targetPort.getIp());
                     thirdPartyElementConnectBO.setFromPortId(sourcePort.getId());
@@ -111,7 +112,6 @@ public class ThirdPartyTopoSceneConfigHandler {
 
         SceneConfigBO sceneConfigBO = new SceneConfigBO();
         sceneConfigBO.setName(this.sceneName);
-        sceneConfigBO.setEid(TextUtils.uuid());
 
         sceneConfigTopologyBO.setScene(sceneConfigBO);
         List<SceneConfigElementBO> elements = new ArrayList<>();
@@ -128,16 +128,8 @@ public class ThirdPartyTopoSceneConfigHandler {
             sceneConfigElementBO.setId(thirdPartyElementBO.getNodeId());
             List<SceneConfigElementPortBO> ports = new ArrayList<>();
 
-            for (int i = 0; i < thirdPartyElementPortBOS.size(); i++) {
-                ThirdPartyElementPortBO thirdPartyPort = thirdPartyElementPortBOS.get(i);
-                SceneConfigElementPortBO sceneConfigElementPortBO = new SceneConfigElementPortBO();
-                sceneConfigElementPortBO.setId(thirdPartyPort.getPortId());
-                sceneConfigElementPortBO.setElement(sceneConfigElementBO);
-                sceneConfigElementPortBO.setIp(thirdPartyPort.getIp());
-                sceneConfigElementPortBO.setName(thirdPartyPort.getPortName());
-                sceneConfigElementPortBO.setOrder(i);
-                sceneConfigElementPortBO.setType(1);
-                sceneConfigElementPortBO.setIsAuxiliary(false);
+            for (int i = 0; i < thirdPartyElementBO.getPorts().size(); i++) {
+                SceneConfigElementPortBO sceneConfigElementPortBO = getSceneConfigElementPortBO(thirdPartyElementBO, i, sceneConfigElementBO);
                 ports.add(sceneConfigElementPortBO);
             }
             sceneConfigElementBO.setPorts(ports);
@@ -221,9 +213,23 @@ public class ThirdPartyTopoSceneConfigHandler {
         }
         cpcloudDataBo.setElements(cloudElementMap);
         cpcloudDataBo.setElementPorts(cloudElementPortMap);
+        sceneConfigDataBO.setPlugins(new HashMap<>());
 
         sceneConfigDataBO.getPlugins().put("cpcloud", cpcloudDataBo);
         return sceneConfigDataBO;
+    }
+
+    private static SceneConfigElementPortBO getSceneConfigElementPortBO(ThirdPartyElementBO thirdPartyElementBO, int i, SceneConfigElementBO sceneConfigElementBO) {
+        ThirdPartyElementPortBO thirdPartyPort = thirdPartyElementBO.getPorts().get(i);
+        SceneConfigElementPortBO sceneConfigElementPortBO = new SceneConfigElementPortBO();
+        sceneConfigElementPortBO.setId(thirdPartyPort.getPortId());
+        sceneConfigElementPortBO.setElement(sceneConfigElementBO);
+        sceneConfigElementPortBO.setIp(thirdPartyPort.getIp());
+        sceneConfigElementPortBO.setName(thirdPartyPort.getPortName());
+        sceneConfigElementPortBO.setOrder(i);
+        sceneConfigElementPortBO.setType(1);
+        sceneConfigElementPortBO.setIsAuxiliary(false);
+        return sceneConfigElementPortBO;
     }
 
     private SceneConfigHandler toSceneConfigHandler() {

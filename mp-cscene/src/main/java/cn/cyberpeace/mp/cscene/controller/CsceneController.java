@@ -308,7 +308,6 @@ public class CsceneController implements BaseModelListControllerBase {
         try {
             // 设置响应头
             response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-            response.setHeader("Content-Disposition", "attachment; filename=multi_sheet.xlsx");
 
             // 加载模板文件（需放在resources/templates目录）
             ClassPathResource templateResource = new ClassPathResource("excel_template/third_party_topo_export_template.xlsx");
@@ -316,16 +315,19 @@ public class CsceneController implements BaseModelListControllerBase {
 
 
             ThirdPartyTopoSceneConfigHandler thirdPartyTopoSceneConfigHandler = new ThirdPartyTopoSceneConfigHandler(sceneConfigId);
+            String sceneName = thirdPartyTopoSceneConfigHandler.getSceneName();
+            if (StringUtils.isEmpty(sceneName)) {
+                sceneName = "导出拓扑";
+            }
+            response.setHeader("Content-Disposition", "attachment; filename=" + sceneName + ".xlsx");
+
 
             try (ExcelWriter excelWriter = EasyExcel.write(response.getOutputStream()).withTemplate(templateStream).build()) {
                 WriteSheet nodeSheet = EasyExcel.writerSheet(0).build();
                 WriteSheet connectSheet = EasyExcel.writerSheet(1).build();
-                for (ThirdPartyElementBO thirdPartyElementBO : thirdPartyTopoSceneConfigHandler.getThirdPartyElementBOs()) {
-                    excelWriter.fill(thirdPartyElementBO, nodeSheet);
-                }
-                for (ThirdPartyElementConnectBO thirdPartyElementConnectBO : thirdPartyTopoSceneConfigHandler.getThirdPartyElementConnectBOs()) {
-                    excelWriter.fill(thirdPartyElementConnectBO, connectSheet);
-                }
+
+                excelWriter.fill(thirdPartyTopoSceneConfigHandler.getThirdPartyElementBOs(), nodeSheet);
+                excelWriter.fill(thirdPartyTopoSceneConfigHandler.getThirdPartyElementConnectBOs(), connectSheet);
             }
         } catch (Exception e) {
             log.error("导出简易拓扑数据异常" + e.getMessage(), e);

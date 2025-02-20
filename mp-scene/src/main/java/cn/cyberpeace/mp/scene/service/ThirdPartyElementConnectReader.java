@@ -59,7 +59,7 @@ public class ThirdPartyElementConnectReader implements ReadListener<ThirdPartyEl
 
     private boolean ipIsInvalid(String ipv4) {
         if (StringUtils.isBlank(ipv4)) {
-            return true;
+            return false;
         } else {
             return !IPV4_PATTERN.matcher(ipv4).matches();
         }
