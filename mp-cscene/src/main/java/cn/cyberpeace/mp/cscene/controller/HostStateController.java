@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.cscene.controller;
 import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
@@ -130,19 +131,34 @@ public class HostStateController {
     @ApiOperation(value = "节点端口信息")
     @GetMapping("/element_port")
     public ListObjServiceResult<Port> pagePorts(TimeListPageInfoQueryParams listPageInfoQueryParams) {
-        return hostStateService.pagePorts(listPageInfoQueryParams).asResult();
+        try {
+            return hostStateService.pagePorts(listPageInfoQueryParams).asResult();
+        } catch (Exception e) {
+            log.error("failed to exec element_port", e);
+            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
+        }
     }
 
     @ApiOperation(value = "节点进程信息")
     @GetMapping("/element_process")
     public ListObjServiceResult<Process> pageProcesses(TimeListPageInfoQueryParams listPageInfoQueryParams) {
-        return hostStateService.pageProcesses(listPageInfoQueryParams).asResult();
+        try {
+            return hostStateService.pageProcesses(listPageInfoQueryParams).asResult();
+        } catch (Exception e) {
+            log.error("failed to exec element_port", e);
+            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
+        }
     }
 
     @ApiOperation(value = "节点网卡信息")
     @GetMapping("/element_netifaces")
     public ListObjServiceResult<Netiface> pageNetifaces(TimeListPageInfoQueryParams listPageInfoQueryParams) {
-        return hostStateService.pageNetifaces(listPageInfoQueryParams).asResult();
+        try {
+            return hostStateService.pageNetifaces(listPageInfoQueryParams).asResult();
+        } catch (Exception e) {
+            log.error("failed to exec element_port", e);
+            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
+        }
     }
 
 }
