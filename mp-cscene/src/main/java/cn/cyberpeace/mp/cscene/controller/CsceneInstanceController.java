@@ -918,9 +918,12 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @GetMapping("/vmmanagement")
     public ServiceResult<String> getVmManagement(String mpSceneId) {
         if (Objects.isNull(mpSceneId)) {
-            return null;
+            return new ServiceResult<String>().asResult();
         }
         List<CloudPluginSceneConnectionModel> models = modelService.selectVmHistoryByMpSceneId(mpSceneId);
+        if (CollectionUtils.isEmpty(models)) {
+            return new ServiceResult<String>().asResult();
+        }
         String jsonString = JSONArray.toJSONString(models);
         return new ServiceResult<>(jsonString).asResult();
     }

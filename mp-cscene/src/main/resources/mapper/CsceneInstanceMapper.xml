@@ -98,7 +98,7 @@
     <select id="selectVmHistoryByMpSceneId"
             resultType="cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConnectionModel"
             parameterType="java.lang.String">
-        select mssc.* from mp_cscene_cscene_instance as mcci left join mp_sceneplugincloud_scene_connection as mssc on mcci.scene = mssc.scene where mcci.id = #{mpSceneId}
+        select mssc.* from mp_cscene_cscene_instance as mcci inner join mp_sceneplugincloud_scene_connection as mssc on mcci.scene = mssc.scene where mcci.id = #{mpSceneId}
     </select>
     <select id="selectCsceneByMpSceneId" resultType="java.lang.String" parameterType="java.lang.String">
         select mcci.cscene from mp_cscene_cscene_instance as mcci where id = #{mpSceneId}
