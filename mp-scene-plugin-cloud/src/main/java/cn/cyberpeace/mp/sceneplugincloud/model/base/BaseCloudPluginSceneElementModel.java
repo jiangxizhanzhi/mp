@@ -323,4 +323,10 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     private Boolean keyElement;
     @DefaultInt(value = 1)
     private Integer startPriority;
+    @DefaultStr
+    private String configNetworkIp;
+    @DefaultStr
+    private String configNetworkId;
+    @DefaultStr
+    private String configNetworkNextHopIp;
 }

@@ -32,7 +32,6 @@ import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.core.event.base.SceneEventProcess;
 import cn.cyberpeace.mp.scene.model.SceneBusinessElementCommandModel;
-import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.repository.SceneBusinessElementCommandMapper;
 import cn.cyberpeace.mp.scene.util.*;
@@ -40,6 +39,7 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.*;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.*;
 import cn.cyberpeace.mp.sceneplugincloud.config.CloudAppConfig;
 import cn.cyberpeace.mp.sceneplugincloud.constant.*;
+import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConfigNetworkModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementLogicalSwitchModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CsceneElementSoftVersionModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
@@ -50,6 +50,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.device.DeviceClient;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.CreateTaskPool;
+import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConfigNetworkMapper;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementLogicalSwitchMapper;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CsceneElementSoftVersionMapper;
 import cn.cyberpeace.mp.sceneplugincloud.util.ConfigNetworkUtils;
@@ -1569,6 +1570,16 @@ public class CreateHandler extends HandlerCommon {
 
 
         createData.setNetwork(CollectionUtils.emptyNull(genVirutalNics(cloudElement)));
+        if (cloudElement.getConfigNetwork() != null) {
+            var network = cloudElement.getConfigNetwork();
+            VirtualNic virtualNic = new VirtualNic();
+            virtualNic.setNetworkId(network.getResourceId());
+            virtualNic.setCidr(network.getCidr());
+            virtualNic.setGateway(network.getGatewayIp());
+            virtualNic.setFixedIp(cloudElement.getConfigNetworkIp());
+            createData.getNetwork().add(virtualNic);
+        }
+
         // todo cloud-init不用userdata字段, 用custome_script字段
         if (Boolean.TRUE.equals(cloudElement.getInitSupport())) {
             createData.setCustomScript(TextUtils.emptyNull(combineInitCommand(cloudElement)));
@@ -1795,6 +1806,8 @@ public class CreateHandler extends HandlerCommon {
      */
     public void create() {
         this.prepareEventProcess();
+        // 创建配置网络
+        this.createConfigNetworks();
 
         // 先创建辅助网络(包含虚拟交换机)
         getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CloudSceneStage.CREATE_NETWORK);
@@ -1920,6 +1933,44 @@ public class CreateHandler extends HandlerCommon {
         // 批量创建实体设备
         createEntityElementProcess();
     }
+
+     private void createConfigNetworks() {
+         if (getHandlerUtils().getConfigNetworks() != null) {
+             for (var connectedNetwork : getHandlerUtils().getConfigNetworks()) {
+                 var createData = new VirtualSwitchCreateData();
+                 createData.setName(HandlerUtils.genResourceName("MP_SCENE_" + TextUtils.uuid()));
+                 createData.setCidr(connectedNetwork.getCidr());
+                 createData.setGateway(TextUtils.emptyNull(connectedNetwork.getGatewayIp()));
+                 createData.setMtu("1500");
+                 createData.setSubnetName(TextUtils.uuid());
+                 createData.setSubnetDns(new ArrayList<>());
+                 var virtualSwitch = vsClient.create(createData);
+                 connectedNetwork.setResourceId(virtualSwitch.getId());
+
+                 // 接入SN router
+                 var d = new VirtualRouterBindNetworkData();
+                 d.setNetworkId(virtualSwitch.getId());
+                 d.setFixedIp(connectedNetwork.getNextHopIp());
+                 vrClient.bindNetwork(connectedNetwork.getSnRouterId(), d);
+
+                 // 更新下数据库
+                 var configNetworkMapper = BeanCommon.getBean(CloudPluginSceneConfigNetworkMapper.class);
+                 CloudPluginSceneConfigNetworkModel networkModel = new CloudPluginSceneConfigNetworkModel();
+                 networkModel.setResourceId(virtualSwitch.getId());
+                 networkModel.setNextHopIp(d.getFixedIp());
+                 String sceneId = getPluginHandler().getSceneHandler().getScene().getEid();
+                 var condition = new HumanCondition().filterEqual(CloudPluginSceneConfigNetworkModel::getScene, sceneId)
+                         .filterEqual(CloudPluginSceneConfigNetworkModel::getCidr, connectedNetwork.getCidr());
+                 configNetworkMapper.filterUpdate(networkModel, condition);
+             }
+             for (var e : getPluginHandler().getTerminalElementMap().values()) {
+                 if (e.getConfigNetwork() != null) {
+                     e.setConfigNetworkId(e.getConfigNetwork().getResourceId());
+                     e.setConfigNetworkNextHopIp(e.getConfigNetwork().getNextHopIp());
+                 }
+             }
+         }
+     }
 
     /**
      * createNodeToExternalRouter

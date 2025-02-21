@@ -6,11 +6,11 @@ spring:
       max: ${MP_TOMCAT_MAX_POOL_SIZE:200}
   datasource:
     ext-var:
-      db-ip: ${MP_DB_IP:10.4.1.58}
+      db-ip: ${MP_DB_IP:10.4.1.37}
       db-port: ${MP_DB_PORT:9306}
-      db-database: ${MP_DB_DATABASE:mp}
+      db-database: ${MP_DB_DATABASE:mp2}
       username: ${MP_DB_USERNAME:root}
-      password: ${MP_DB_PASSWORD:123456}
+      password: ${MP_DB_PASSWORD:cyberpeace@NzM1M}
       maximum-pool-size: ${MP_DB_MAX_POOL_SIZE:60}
       minimum-idle: ${MP_DB_MIN_POOL_SIZE:25}
 
@@ -108,11 +108,11 @@ mp:
       monitor-business-restart-restrict: ${MP_MONITOR_BIZ_SRV_RESTART_RESTRICT_LIST:}
   common: #公用配置
     ext-var:
-      mp-ip: ${MP_API_IP:10.4.1.58}          # MP中台地址
+      mp-ip: ${MP_API_IP:10.100.27.1}          # MP中台地址
       mp-port: ${MP_API_PORT:8001}
       cp-ip: ${CP_IP:10.4.1.57}                # 云平台适配层接口地址
       cp-port: ${CP_PORT:9999}
-      bas-ip: ${BAS_IP:10.4.1.58}
+      bas-ip: ${BAS_IP:10.100.27.1}
       bas-port: ${BAS_PORT:9876}
       public-net-proxy: ${MP_PUBLIC_NET_PROXY:false}
       public-net-proxy-ip: ${MP_PUBLIC_NET_PROXY_IP:}
@@ -123,7 +123,7 @@ mp:
       trex-image: ${TREX_IMAGE:trex2}
   base:
     ext-var:
-      fdfs-ip: ${FDFS_IP:10.4.1.58}
+      fdfs-ip: ${FDFS_IP:10.100.27.1}
       fdfs-tracker-port: ${FDFS_TRACKER_SERVERS_PORT:22122}
       fdfs-inner-file-port: ${FDFS_INNER_FILE_SERVER_PORT:8888}
       fdfs-outer-http-server: ${FDFS_FILE_SERVER_ADDR:/fdfs}
@@ -188,7 +188,7 @@ mp:
       authenticate-encoder-hash-width: ${MP_AUTH_ENCODER_HASHWIDTH:256}
   sceneplugingns3:
     ext-var:
-      gns3-ip: ${GNS3_IP:10.4.1.58}
+      gns3-ip: ${GNS3_IP:10.100.27.1}
       gns3-port: ${GNS3_PORT:8088}
   scene:
     ext-var:
@@ -200,7 +200,7 @@ mp:
       scene-process-save-realtime: ${MP_SCENE_PROCESS_SAVE_REALTIME:true}
       element-process-save-realtime: ${MP_ELEMENT_PROCESS_SAVE_REALTIME:true}
       dhcp-control: ${MP_SCENE_DHCP_CONTROL:false}
-      version-report-url: ${MP_VERSION_REPORT_URL:http://10.4.1.58:8001/api/mp/cscene/file/upload_versions}
+      version-report-url: ${MP_VERSION_REPORT_URL:http://10.100.27.1:8001/api/mp/cscene/file/upload_versions}
       version-soft: ${MP_VERSION_SOFT:wget_and_libpcre3}
       version-image: ${MP_VERSION_IMAGE:ubuntu_test_cloudint_not_delete}
       metadata-file-server: http://${MP_API_IP:10.100.25.1}:${MP_API_PORT:8002}/api/mp/file

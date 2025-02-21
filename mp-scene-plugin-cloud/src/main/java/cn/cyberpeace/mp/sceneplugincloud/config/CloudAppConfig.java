@@ -239,6 +239,27 @@ public class CloudAppConfig {
     @Value("${mp.sceneplugincloud.port_map_disk:40}")
     private Integer portMapDisk;
 
+    @Value("${mp.sceneplugincloud.config_net_start_cidr:95.100.0.0}")
+    private String configNetStartCidr;
+
+    @Value("${mp.sceneplugincloud.config_net_end_cidr:95.200.0.0}")
+    private String configNetEndCidr;
+
+    @Value("${mp.sceneplugincloud.config_net_group_num:1}")
+    private Integer configNetGroupNum;
+
+    @Value("${mp.sceneplugincloud.sn_router_start_ip:170.10.10.2}")
+    private String snRouterStartIp;
+
+    @Value("${mp.sceneplugincloud.sn_route_end_ip:170.10.10.250}")
+    private String snRouterEndIp;
+
+    @Value("${mp.sceneplugincloud.snRouterNetId:aaaaa-bbbbb-cccc}")
+    private String snRouterNetId;
+
+    @Value("${mp.sceneplugincloud.sn_route_end_ip:170.10.10.250}")
+    private String snRouterNetCidr;
+
     @Autowired
     private BaseAppConfig baseAppConfig;
 

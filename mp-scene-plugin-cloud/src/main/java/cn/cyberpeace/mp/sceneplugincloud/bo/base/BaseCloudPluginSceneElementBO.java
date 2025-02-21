@@ -259,8 +259,17 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     @ApiModelProperty("是否是关键节点")
     private Boolean keyElement;
 
-     @ApiModelProperty("启动优先级：1：高，2：中，3：低")
+    @ApiModelProperty("启动优先级：1：高，2：中，3：低")
     private Integer startPriority;
+
+    @ApiModelProperty("配采网分配的ip")
+    private String configNetworkIp;
+
+    @ApiModelProperty("配采网的id")
+    private String configNetworkId;
+
+     @ApiModelProperty("配采网接入的SN router的下一跳地址")
+     private String configNetworkNextHopIp;
 
     @Override
     public void fromModel(M obj, String... ignoreFields) {
