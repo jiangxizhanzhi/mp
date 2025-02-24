@@ -397,7 +397,12 @@
             <if test="instanceCreateUser != null">
                 instance_create_user = #{instanceCreateUser}
             </if>
-
+            <if test="vlanId != null">
+                vlan_id = #{vlanId}
+            </if>
+            <if test="cidr != null">
+                cidr = #{cidr}
+            </if>
         </set>
         where uuid = #{uuid}
     </update>
