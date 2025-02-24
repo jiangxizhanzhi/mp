@@ -146,4 +146,13 @@ public class ImageConvertModel extends BasePageConvertModel{
      */
     private String createUserName;
 
+    /**
+     * VLAN ID
+     */
+    private Integer vlanId;
+
+    /**
+     * cidr地址
+     */
+    private String cidr;
 }

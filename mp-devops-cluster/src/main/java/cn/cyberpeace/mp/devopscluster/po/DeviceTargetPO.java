@@ -165,4 +165,14 @@ public class DeviceTargetPO extends BaseModel {
      */
     @DefaultStr
     private String createUserName;
+
+    /**
+     * VLAN ID
+     */
+    private Integer vlanId;
+
+    /**
+     * cidr地址
+     */
+    private String cidr;
 }

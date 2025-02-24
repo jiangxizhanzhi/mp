@@ -725,6 +725,8 @@ public class ImagesController {
                 }
             }
             vo.setCreateUserName(v.getCreateUserName());
+            vo.setVlanId(v.getVlanId());
+            vo.setCidr(v.getCidr());
             return vo;
         }).collect(Collectors.toList());
     }

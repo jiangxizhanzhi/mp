@@ -140,6 +140,8 @@ public class ImagesConverter implements BaseConverter{
                 }
                 if (MapUtils.isNotEmpty(deviceTargetPOMap) && deviceTargetPOMap.containsKey(imageConvertModel.getUuid())) {
                     imageConvertModel.setCreateUserName(deviceTargetPOMap.get(imageConvertModel.getUuid()).getCreateUserName());
+                    imageConvertModel.setVlanId(deviceTargetPOMap.get(imageConvertModel.getUuid()).getVlanId());
+                    imageConvertModel.setCidr(deviceTargetPOMap.get(imageConvertModel.getUuid()).getCidr());
                 }
                 imageConvertModel.setAuthTotal(imageAuthTotalCountsMap.get(imageConvertModel.getUuid()));
                 if (supportExports.containsKey(imageConvertModel.getUuid())) {
@@ -364,6 +366,8 @@ public class ImagesConverter implements BaseConverter{
         var updateTargetModel = new DeviceTargetPO();
         updateTargetModel.setUuid(uuid);
         updateTargetModel.setInstanceCreateUser(insctanceCreateUser);
+        updateTargetModel.setVlanId(im.getVlanId());
+        updateTargetModel.setCidr(im.getCidr());
         deviceTargetMapper.updateById(updateTargetModel);
     }
 
