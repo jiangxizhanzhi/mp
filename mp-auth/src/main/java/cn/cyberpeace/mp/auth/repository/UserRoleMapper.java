@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.auth.repository;
 
 import cn.cyberpeace.mp.auth.bo.user.RoleCount;
 import cn.cyberpeace.mp.auth.bo.user.UserOrgRoleBo;
+import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.RoleModelCount;
 import cn.cyberpeace.mp.auth.model.UserRoleModel;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
@@ -24,4 +25,6 @@ public interface UserRoleMapper extends BaseModelMapper<UserRoleModel> {
 
 
     List<RoleModelCount> selectCount(@Param("ids") List<String> ids);
+
+    RoleModel getRoleInfoByUserId(@Param("userId") String userId);
 }

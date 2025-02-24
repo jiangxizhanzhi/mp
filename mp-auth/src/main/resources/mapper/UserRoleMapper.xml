@@ -19,4 +19,7 @@
             #{id}
         </foreach>
     </select>
+    <select id="getRoleInfoByUserId" resultType="cn.cyberpeace.mp.auth.model.RoleModel">
+        SELECT mar.* FROM mp_auth_user_role as maur LEFT JOIN mp_auth_role as mar ON maur.role = mar.id WHERE maur.`user` = #{userId}
+    </select>
 </mapper>

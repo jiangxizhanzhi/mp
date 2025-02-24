@@ -26,6 +26,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import nl.altindag.ssl.util.StringUtils;
 import org.apache.commons.compress.utils.Lists;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -161,5 +162,13 @@ public class RoleController {
             return  new ServiceResult<>(roleModels).asResult();
         }
         return  new ServiceResult<>(roleService.getRoleModelByids(ids)).asResult();
+    }
+    @GetMapping("/get/role")
+    public ServiceResult<RoleModel> getRoleInfoByUserId(String userId) {
+        if (StringUtils.isBlank(userId)) {
+            RoleModel roleModel = new RoleModel();
+            return new ServiceResult<>(roleModel).asResult();
+        }
+        return new ServiceResult<>(roleService.getRoleInfoByUserId(userId)).asResult();
     }
 }

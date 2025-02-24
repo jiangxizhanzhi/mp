@@ -389,6 +389,11 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         return roleMapper.list(humanCondition);
     }
 
+    @Override
+    public RoleModel getRoleInfoByUserId(String userId) {
+        return userRoleMapper.getRoleInfoByUserId(userId);
+    }
+
 
     private RoleBo roleModel2RoleDto(RoleModel roleModel) {
         if (Objects.isNull(roleModel)) {
