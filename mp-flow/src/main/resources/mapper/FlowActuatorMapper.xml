@@ -14,4 +14,12 @@
         select `actuator_type` as name , count(1) as `count` from mp_flow_task_task group by actuator_type;
     </select>
 
+    <select id="totalRate" resultType="cn.cyberpeace.mp.flow.response.RateCount" parameterType="java.util.Map">
+        select ifnull(sum(tx_bps),0) as totalRate
+        from mp_flow_task_record
+        where (task_id,pk) in
+        (select task_id,max(pk)
+        from mp_flow_task_record where create_time &gt;= #{startTime} and create_time &lt;= #{endTime} group by task_id );
+    </select>
+
 </mapper>

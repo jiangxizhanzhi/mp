@@ -16,9 +16,11 @@ import cn.cyberpeace.mp.flow.model.FlowActuatorModel;
 import cn.cyberpeace.mp.flow.response.ActuatorSceneName;
 import cn.cyberpeace.mp.flow.response.ActuatorStatistic;
 import cn.cyberpeace.mp.flow.response.ActuatorTaskCount;
+import cn.cyberpeace.mp.flow.response.RateCount;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -38,4 +40,6 @@ public interface FlowActuatorMapper extends BaseModelMapper<FlowActuatorModel> {
     List<ActuatorStatistic> countByType();
 
     List<ActuatorTaskCount> countTask();
+
+    RateCount totalRate(LocalDateTime startTime, LocalDateTime endTime);
 }

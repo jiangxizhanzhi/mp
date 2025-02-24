@@ -42,6 +42,13 @@ public class FlowActuatorController {
     @Resource
     private FlowActuatorService flowActuatorService;
 
+    @ApiOperation("实时总带宽")
+    @GetMapping("/total_rate")
+    public ServiceResult<Integer> rateCount() {
+        var result = flowActuatorService.totalRate();
+        return new ServiceResult<>(result).asResult();
+    }
+
     @ApiOperation("统计流量发生器已配置的任务数量")
     @GetMapping("/task_count")
     public ServiceResult<Integer> taskCount() {

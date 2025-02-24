@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,6 +59,12 @@ public class FlowActuatorService extends BaseModelServiceImpl<FlowActuatorModel,
 
     public List<ActuatorTaskCount> taskCount() {
         return flowActuatorMapper.countTask();
+    }
+
+    public Integer totalRate() {
+        LocalDateTime endTime = LocalDateTime.now();
+        var startTime = endTime.minusSeconds(60);
+        return flowActuatorMapper.totalRate(startTime, endTime).getTotalRate();
     }
 
     public List<ActuatorStatistic> getFlowActuatorStatistics() {
