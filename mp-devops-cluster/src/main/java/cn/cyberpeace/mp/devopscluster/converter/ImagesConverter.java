@@ -140,6 +140,7 @@ public class ImagesConverter implements BaseConverter{
                 }
                 if (MapUtils.isNotEmpty(deviceTargetPOMap) && deviceTargetPOMap.containsKey(imageConvertModel.getUuid())) {
                     imageConvertModel.setCreateUserName(deviceTargetPOMap.get(imageConvertModel.getUuid()).getCreateUserName());
+                    imageConvertModel.setComputeNode(deviceTargetPOMap.get(imageConvertModel.getUuid()).getComputeNode());
                     imageConvertModel.setVlanId(deviceTargetPOMap.get(imageConvertModel.getUuid()).getVlanId());
                     imageConvertModel.setCidr(deviceTargetPOMap.get(imageConvertModel.getUuid()).getCidr());
                 }
@@ -366,6 +367,7 @@ public class ImagesConverter implements BaseConverter{
         var updateTargetModel = new DeviceTargetPO();
         updateTargetModel.setUuid(uuid);
         updateTargetModel.setInstanceCreateUser(insctanceCreateUser);
+        updateTargetModel.setComputeNode(host);
         updateTargetModel.setVlanId(im.getVlanId());
         updateTargetModel.setCidr(im.getCidr());
         deviceTargetMapper.updateById(updateTargetModel);

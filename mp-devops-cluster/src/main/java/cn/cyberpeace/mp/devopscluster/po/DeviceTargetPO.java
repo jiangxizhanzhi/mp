@@ -167,6 +167,11 @@ public class DeviceTargetPO extends BaseModel {
     private String createUserName;
 
     /**
+     * 计算节点
+     */
+    private String computeNode;
+
+    /**
      * VLAN ID
      */
     private Integer vlanId;

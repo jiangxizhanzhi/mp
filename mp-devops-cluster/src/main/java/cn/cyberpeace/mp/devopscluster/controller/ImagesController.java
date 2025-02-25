@@ -725,6 +725,7 @@ public class ImagesController {
                 }
             }
             vo.setCreateUserName(v.getCreateUserName());
+            vo.setComputeNode(v.getComputeNode());
             vo.setVlanId(v.getVlanId());
             vo.setCidr(v.getCidr());
             return vo;
