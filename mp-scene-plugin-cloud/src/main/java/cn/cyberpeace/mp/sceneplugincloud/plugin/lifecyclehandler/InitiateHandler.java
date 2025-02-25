@@ -250,7 +250,7 @@ public class InitiateHandler extends HandlerCommon {
             configNetworks.add(configNetwork);
 
             var sameNetCloudElements = groupCloudElements.get(groupIndex);
-            List<String> ips = ConfigNetUtils.getIpPool(configNetInfo.getCidrIp(), 2, sameNetCloudElements.size());
+            List<String> ips = configNetInfo.getIpPool();
             for (int elementIndex = 0; elementIndex < sameNetCloudElements.size(); elementIndex++) {
                 var e = sameNetCloudElements.get(elementIndex);
                 e.setConfigNetworkIp(ips.get(elementIndex));
