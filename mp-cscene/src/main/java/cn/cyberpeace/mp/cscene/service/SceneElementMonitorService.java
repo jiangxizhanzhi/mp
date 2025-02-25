@@ -688,7 +688,7 @@ public class SceneElementMonitorService {
         request.setRuleSort(Boolean.TRUE);
         //查询主机漏洞信息
         ListObjResult<WazuhVulnerabilityInfoModel> result = dataCollectionService.queryVulnerabilityInfo(request, true);
-        if(Objects.isNull(result) || CollectionUtils.isEmpty(result.getList())){
+        if(Objects.isNull(result) || CollectionUtils.isEmpty(result.getObjs())){
             return resultBuilder.build();
         }
         List<ElementVulnerabilityInfo> vulnerabilityInfos = new ArrayList<>();
