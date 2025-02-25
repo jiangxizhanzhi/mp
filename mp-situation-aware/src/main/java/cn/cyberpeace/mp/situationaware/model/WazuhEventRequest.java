@@ -98,4 +98,10 @@ public class WazuhEventRequest {
     @ApiModelProperty("事件类型 0:所有 1:进程 2:端口 3:网络连接 4:文件 5:用户")
     private Integer type;
 
+    /**
+     * 是否优先按照规则等级排序
+     */
+    @ApiModelProperty(value = "是否优先按照规则等级排序")
+    private boolean ruleSort = false;
+
 }

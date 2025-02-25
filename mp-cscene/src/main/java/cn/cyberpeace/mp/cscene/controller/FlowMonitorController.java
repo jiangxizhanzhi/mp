@@ -178,6 +178,14 @@ public class FlowMonitorController {
     }
 
 
+    @ApiOperation(value = "场景主机节点风险状态")
+    @GetMapping("/scene_target_severity")
+    public ServiceResult<Map<String, Integer>> getSceneTargetSeverity(FlowCommonRequest request) {
+        return ResultCommon.success(flowMonitorService.getElementRiskByIpAndSeverity(request));
+    }
+
+
+
     /**
      * elementIds若为多值，则只取第一个值
      *

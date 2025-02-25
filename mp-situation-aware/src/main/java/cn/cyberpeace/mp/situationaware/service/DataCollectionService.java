@@ -416,6 +416,10 @@ public class DataCollectionService extends CollectionBaseService {
 
         // 构造查询条件
         buildFileEventBoolQueryBuilder(wazuhEventRequest, boolQueryBuilder, null);
+        //是否优先以规则等级降序排序
+        if(wazuhEventRequest.isRuleSort()){
+            sourceBuilder.sort(SituationalAwareConstant.ES_RULE_LEVEL_FIELD, SortOrder.DESC);
+        }
         if (desc) {
             // 按时间降序
             sourceBuilder.sort(SituationalAwareConstant.ES_TIMESTAMP_FIELD, SortOrder.DESC);

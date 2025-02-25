@@ -8,20 +8,11 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
-import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
-import cn.cyberpeace.mp.cscene.dto.element.ConnectionState;
-import cn.cyberpeace.mp.cscene.dto.element.ElementHistogramInfo;
-import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
-import cn.cyberpeace.mp.cscene.dto.element.ElementRTInfo;
-import cn.cyberpeace.mp.cscene.dto.element.ElementVulnerabilityCountInfo;
-import cn.cyberpeace.mp.cscene.dto.element.ElementVulnerabilityInfo;
-import cn.cyberpeace.mp.cscene.dto.element.ElementVulnerabilityPieChartInfo;
+import cn.cyberpeace.mp.cscene.dto.element.*;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.request.element.ElementMonitorRequest;
 import cn.cyberpeace.mp.cscene.service.CsceneHostCollectQueryService;
-import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
-import cn.cyberpeace.mp.cscene.service.HostStateService;
 import cn.cyberpeace.mp.cscene.service.SceneElementMonitorService;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.OS;
@@ -242,6 +233,15 @@ public class ElementMonitorController {
 
         ListObjResult<ElementVulnerabilityInfo> result = sceneElementMonitorService.getVulnerabilityInfo(pageRequest);
         return new ListObjServiceResult<>(result).asResult();
+    }
+
+    @ApiOperation(value = "查询节点包含漏洞信息")
+    @GetMapping("/get_target_info")
+    public ServiceResult<ElementTargetInfo> getTargetInfoList(ElementMonitorRequest request) {
+        request.ensure();
+
+        ElementTargetInfo result = sceneElementMonitorService.getTargetMainInfo(request);
+        return ResultCommon.success(result);
     }
 
 }

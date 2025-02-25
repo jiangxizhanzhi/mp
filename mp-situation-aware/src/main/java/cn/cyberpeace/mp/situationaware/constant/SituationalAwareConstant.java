@@ -41,4 +41,9 @@ public class SituationalAwareConstant {
     public static final String MP_COMMON_OPTION_TYPE_SITUATION_PROBE_TYPE = "probe_type";
 
     public static final String ES_TIMESTAMP_FIELD = "timestamp";
+
+    /**
+     * 规则等级（规则等级与漏洞等级相关）
+     */
+    public static final String ES_RULE_LEVEL_FIELD = "rule.level";
 }

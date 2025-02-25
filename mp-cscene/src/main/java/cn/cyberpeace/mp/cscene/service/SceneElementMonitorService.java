@@ -17,19 +17,12 @@ import cn.cyberpeace.mp.base.util.mptool.NumberUtil;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
 import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
-import cn.cyberpeace.mp.cscene.dto.element.ConnectionState;
-import cn.cyberpeace.mp.cscene.dto.element.ElementHistogramInfo;
-import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
-import cn.cyberpeace.mp.cscene.dto.element.ElementPort;
-import cn.cyberpeace.mp.cscene.dto.element.ElementRTInfo;
-import cn.cyberpeace.mp.cscene.dto.element.ElementVulnerabilityCountInfo;
-import cn.cyberpeace.mp.cscene.dto.element.ElementVulnerabilityInfo;
-import cn.cyberpeace.mp.cscene.dto.element.ElementVulnerabilityPieChartInfo;
-import cn.cyberpeace.mp.cscene.dto.element.HostState;
+import cn.cyberpeace.mp.cscene.dto.element.*;
 import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.request.element.ElementMonitorRequest;
+import cn.cyberpeace.mp.cscene.request.flow.FlowCommonRequest;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.cscene.util.SegmentCount2IntervalSecondsUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
@@ -116,6 +109,9 @@ public class SceneElementMonitorService {
 
     @Autowired
     private DataCollectionService dataCollectionService;
+
+    @Autowired
+    private FlowMonitorService flowMonitorService;
 
     @Autowired
     private SceneMapper sceneMapper;
@@ -628,6 +624,90 @@ public class SceneElementMonitorService {
             }
         }
         return histogramInfos;
+    }
+
+    public ElementTargetInfo getTargetMainInfo(ElementMonitorRequest pageRequest) {
+        BaseRequestUtil.checkBaseRequestWithSceneId(pageRequest);
+        if (CollectionUtils.isEmpty(pageRequest.getElementIds())) {
+            return new ElementTargetInfo();
+        }
+        String sceneId = csceneInstanceService.getSceneId(pageRequest.getSceneId());
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
+        HumanCondition humanCondition = new HumanCondition().currentLink(SceneModel.class)
+            .filterEqual(SceneModel::getId, sceneId);
+        List<SceneModel> sceneModel = sceneMapper.list(humanCondition);
+        boolean isRunning = csceneCommonService.isCsceneInstanceRunning(pageRequest.getSceneId());
+        processVulnerabilityRequest(pageRequest, sceneModel.get(0), isRunning);
+        LocalDateTime startTime = TimeUtils.stringToLocalDateTime(pageRequest.getStartTime());
+        LocalDateTime endTime = TimeUtils.stringToLocalDateTime(pageRequest.getEndTime());
+        Map<String, String> elementEid2Name = new HashMap<>();
+        for (SceneElementBO e : sceneHandler.getElementMap().values()) {
+            if (elementEid2Name.put(e.getEid(), e.getName()) != null) {
+                throw new IllegalStateException("Duplicate key");
+            }
+        }
+
+        //目前只查一个节点的信息
+        String elementId = pageRequest.getElementIds().get(0);
+        Map<String, SceneElementBO> elementMap = sceneHandler.getElementMap();
+        SceneElementBO sceneElementBO = elementMap.get(elementId);
+        //名称，区域
+        ElementTargetInfo.ElementTargetInfoBuilder resultBuilder =
+            ElementTargetInfo.builder().name(sceneElementBO.getName()).area(sceneElementBO.getArea());
+        //操作系统
+        SystemTypeUtils.SystemTypeItem item = SystemTypeUtils.getSystemTypeItem(sceneElementBO.getSystemType());
+        resultBuilder.systemTypeName(item.getName());
+        //ip 取第一个端口ip
+        SceneElementPortBO sceneElementPortBO = CollectionUtils.isNotEmpty(sceneElementBO.getPorts())?sceneElementBO.getPorts().get(0):null;
+        resultBuilder.ip(Objects.nonNull(sceneElementPortBO)?sceneElementPortBO.getIp():StringUtils.EMPTY);
+
+
+        //主机流量攻击状态信息
+        FlowCommonRequest flowCommonRequest = new FlowCommonRequest();
+        flowCommonRequest.setSceneId(pageRequest.getSceneId());
+
+        flowCommonRequest.setElementIds(pageRequest.getElementIds());
+        Map<String, Integer> elementRiskByIpAndSeverity =
+            flowMonitorService.getElementRiskByIpAndSeverity(flowCommonRequest);
+        //获取主机状态，默认0标识正常
+        resultBuilder.hostStatus(elementRiskByIpAndSeverity.getOrDefault(elementId,0));
+        //获取漏洞信息
+        List<String> agentNames = getAgentNames(pageRequest, sceneHandler);
+        if (startTime.plusHours(getWazuhVulnerabilityScanInterval()).isEqual(endTime)) {
+            processTimeRangeForVulnerabilityInfo(pageRequest, agentNames);
+            startTime = TimeUtils.stringToLocalDateTime(pageRequest.getStartTime());
+        }
+        WazuhEventRequest request = new WazuhEventRequest();
+        request.setStartTime(startTime);
+        request.setEndTime(endTime);
+        request.setPageNum(pageRequest.getPage());
+        request.setPageSize(pageRequest.getPageSize());
+        request.setAgentNames(agentNames);
+        request.setRuleGroups(CsceneBizConstant.VULNERABILITY_GROUP);
+        //默认先按照规则等级降序排序
+        request.setRuleSort(Boolean.TRUE);
+        //查询主机漏洞信息
+        ListObjResult<WazuhVulnerabilityInfoModel> result = dataCollectionService.queryVulnerabilityInfo(request, true);
+        if(Objects.isNull(result) || CollectionUtils.isEmpty(result.getList())){
+            return resultBuilder.build();
+        }
+        List<ElementVulnerabilityInfo> vulnerabilityInfos = new ArrayList<>();
+        for (WazuhVulnerabilityInfoModel r : result.getObjs()) {
+            ElementVulnerabilityInfo vulnerabilityInfo = new ElementVulnerabilityInfo();
+            vulnerabilityInfo.setNodeName(elementEid2Name.get(r.getAgentName()));
+            vulnerabilityInfo.setCve(r.getVulnerability().getCve());
+            // 等级转化为小写，便于前端转化
+            vulnerabilityInfo.setSeverity(r.getVulnerability().getSeverity().toLowerCase());
+            vulnerabilityInfo.setTitle(r.getVulnerability().getTitle());
+            vulnerabilityInfo.setTime(r.getTime());
+            vulnerabilityInfo.setPublished(convertDate(r.getVulnerability().getPublished()));
+            vulnerabilityInfo.setUpdate(r.getVulnerability().getUpdated());
+            vulnerabilityInfo.setTime(r.getTime());
+            vulnerabilityInfo.setReferences(r.getVulnerability().getReferences());
+            vulnerabilityInfo.setRationale(r.getVulnerability().getRationale());
+            vulnerabilityInfos.add(vulnerabilityInfo);
+        }
+        return resultBuilder.vulnerabilityInfos(vulnerabilityInfos).build();
     }
 
     public ListObjResult<ElementVulnerabilityInfo> getVulnerabilityInfo(ElementMonitorRequest pageRequest) {

@@ -190,6 +190,84 @@ public class FlowMonitorService {
         return vo;
     }
 
+    /**
+     * @description: 获取主机状态
+     * @param request 
+     * @throws
+     * @return Map<String,Integer>
+     */
+    public Map<String, Integer> getElementRiskByIpAndSeverity(FlowCommonRequest request){
+        BaseRequestUtil.checkBaseRequestWithSceneId(request);
+        // 逗号分割
+        List<String> sceneIds = CollectionUtil.toList(StringUtils.split(request.getSceneId(), ","));
+        //结束时间
+        LocalDateTime endTime = request.getEndTime();
+        //开始时间
+        LocalDateTime startTime = request.getStartTime();
+        //获取场景id
+        List<String> sceneIdList = csceneCommonService.translateSceneIds(sceneIds);
+
+        FlowGroupByDestinationPortParams params = new FlowGroupByDestinationPortParams();
+        params.setStartTime(startTime);
+        params.setEndTime(endTime);
+        params.setSourceIps(request.getSourceIps());
+        params.setSceneIds(sceneIdList);
+        params.setTopSize(request.getTopSize());
+        //获取ip风险统计
+        ServiceResult<List<FlowGroupByDestinationIpAndSeverityBO>> serviceResult = scenePluginCollectionSceneService.groupByDestinationIpAndSeverity(params);
+
+        List<FlowGroupByDestinationIpAndSeverityBO> boList = serviceResult.getSource();
+
+        if (CollectionUtils.isEmpty(boList)) {
+            boList = Lists.newArrayList();
+        }
+
+        BatchSceneHandler batchSceneHandler = new BatchSceneHandler(sceneIdList, request.getElementIds());
+        // 合并同一节点的多IP数据,且获取节点风险等级map
+        Map<String, Integer> severityMap = this.convertAndGetSeverityMap(boList, batchSceneHandler);
+        return severityMap;
+    }
+
+
+    /**
+     * @description: 获取节点风险等级信息
+     * @param boList 
+     * @param batchSceneHandler 
+     * @throws 
+     * @return Map<String,Integer>
+     */
+    private Map<String, Integer> convertAndGetSeverityMap(List<FlowGroupByDestinationIpAndSeverityBO> boList, BatchSceneHandler batchSceneHandler) {
+        // 各节点风险等级map
+        Map<String, Integer> severityMap = new HashMap<>();
+        // 将ip转换成节点，整合风险等级，合并一个节点有多ip的数据
+        for (FlowGroupByDestinationIpAndSeverityBO flowGroupByDestinationIpAndSeverityBO : boList) {
+            List<String> destinationIpList = flowGroupByDestinationIpAndSeverityBO.getDestinationIpList();
+            for (String ip : destinationIpList) {
+                SceneElementBO nodeByIpAddr = batchSceneHandler.getNodeByIpAddr(ip);
+                // map中是否包含当前节点的风险等级
+                if (severityMap.containsKey(nodeByIpAddr.getId())) {
+                    // 已包含，只记录较高的风险等级
+                    if (severityMap.get(nodeByIpAddr.getId()) < flowGroupByDestinationIpAndSeverityBO.getSeverity()) {
+                        severityMap.put(nodeByIpAddr.getId(), flowGroupByDestinationIpAndSeverityBO.getSeverity());
+                    }
+                } else {
+                    severityMap.put(nodeByIpAddr.getId(), flowGroupByDestinationIpAndSeverityBO.getSeverity());
+                }
+            }
+        }
+        Map<String, String> nodeId2NodenameMap = batchSceneHandler.getNodeId2NodenameMap();
+        if(nodeId2NodenameMap.size() == severityMap.size()){
+            return severityMap;
+        }
+        //处理没有查询到风险的情况，则认为主机状态正常
+        for (String elementId :nodeId2NodenameMap.keySet()) {
+            if(!severityMap.keySet().contains(elementId)){
+                severityMap.put(elementId,0);
+            }
+        }
+        return severityMap;
+    }
+
 
     /**
      * 统计主机状态
