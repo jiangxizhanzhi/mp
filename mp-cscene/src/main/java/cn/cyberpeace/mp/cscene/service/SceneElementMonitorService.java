@@ -25,6 +25,7 @@ import cn.cyberpeace.mp.cscene.request.element.ElementMonitorRequest;
 import cn.cyberpeace.mp.cscene.request.flow.FlowCommonRequest;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.cscene.util.SegmentCount2IntervalSecondsUtil;
+import cn.cyberpeace.mp.scene.core.bo.SceneAreaBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneTopologyBO;
@@ -652,8 +653,10 @@ public class SceneElementMonitorService {
         Map<String, SceneElementBO> elementMap = sceneHandler.getElementMap();
         SceneElementBO sceneElementBO = elementMap.get(elementId);
         //名称，区域
+        Map<String, SceneAreaBO> areaMap = sceneHandler.getAreaMap();
+        SceneAreaBO sceneAreaBO = areaMap.get(sceneElementBO.getArea());
         ElementTargetInfo.ElementTargetInfoBuilder resultBuilder =
-            ElementTargetInfo.builder().name(sceneElementBO.getName()).area(sceneElementBO.getArea());
+            ElementTargetInfo.builder().name(sceneElementBO.getName()).area(Objects.nonNull(sceneAreaBO)?sceneAreaBO.getName():StringUtils.EMPTY);
         //操作系统
         SystemTypeUtils.SystemTypeItem item = SystemTypeUtils.getSystemTypeItem(sceneElementBO.getSystemType());
         resultBuilder.systemTypeName(item.getName());
