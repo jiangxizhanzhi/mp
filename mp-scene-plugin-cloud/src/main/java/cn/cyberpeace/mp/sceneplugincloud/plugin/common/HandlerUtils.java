@@ -19,6 +19,7 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.DnsPool;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
+import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConfigNetworkModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginContext;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
@@ -66,6 +67,16 @@ public class HandlerUtils {
     private Set<String> toDeleteNodes = new HashSet<>();
 
     private List<String> dnsIpAndDomain = null;
+
+    private List<CloudPluginSceneConfigNetworkModel> configNetworks = null ;
+
+    public List<CloudPluginSceneConfigNetworkModel> getConfigNetworks() {
+        return configNetworks;
+    }
+
+    public void setConfigNetworks(List<CloudPluginSceneConfigNetworkModel> configNetworks) {
+        this.configNetworks = configNetworks;
+    }
 
     /**
      * getDnsIpAndDomains

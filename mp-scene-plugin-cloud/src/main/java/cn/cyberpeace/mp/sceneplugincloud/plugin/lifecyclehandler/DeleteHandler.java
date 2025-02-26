@@ -20,6 +20,7 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.EntityUsb;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.VirtualUsb;
+import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConfigNetworkModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConnectionModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
@@ -28,6 +29,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.DeleteTaskPool;
+import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConfigNetworkMapper;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConnectionMapper;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementLogicalSwitchMapper;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementMapper;
@@ -510,7 +512,24 @@ public class DeleteHandler extends HandlerCommon {
             new Mirror().delete(getPluginHandler().getScene().getFlowMirrorId());
         }
 
+        // 删除配采网
+        this.deleteConfigNetworks();
+
 //        SceneInstanceLinkCacheUtil.clear(getPluginHandler().getSourceSceneId());
+    }
+
+    private void deleteConfigNetworks() {
+        String sceneId = getPluginHandler().getSrcScene().getEid();
+        CloudPluginSceneConfigNetworkMapper networkMapper = BeanCommon.getBean(CloudPluginSceneConfigNetworkMapper.class);
+        var networks = networkMapper.list(new HumanCondition().filterEqual(CloudPluginSceneConfigNetworkModel::getScene, sceneId));
+        for (var net : networks) {
+            var unbindData = new VirtualRouterUnbindNetworkData();
+            unbindData.setNetworkId(net.getResourceId());
+            unbindData.setFixedIp(net.getNextHopIp());
+            vrClient.unbindNetwork(net.getSnRouterId(), unbindData);
+            vsClient.deleteById(net.getResourceId());
+        }
+        networkMapper.filterDelete(new HumanCondition().filterEqual(CloudPluginSceneConfigNetworkModel::getScene, sceneId));
     }
 
     /**

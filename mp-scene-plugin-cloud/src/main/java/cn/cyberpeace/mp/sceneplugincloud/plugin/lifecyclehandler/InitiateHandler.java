@@ -10,6 +10,7 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.BoolUtils;
@@ -27,12 +28,15 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.AllocationPool;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
+import cn.cyberpeace.mp.sceneplugincloud.config.CloudAppConfig;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
+import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConfigNetworkModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.CoreType;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.InitiateTaskPool;
+import cn.cyberpeace.mp.sceneplugincloud.util.ConfigNetUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -211,7 +215,49 @@ public class InitiateHandler extends HandlerCommon {
 
         // 分配 fwdnsInterfaceIp
         setFwdnsInterfaceIps(cloudElements);
+        this.addConfigNetworks();
 //        this.initiateForSingleNode(noEventElements);
+    }
+
+    private void addConfigNetworks(){
+        // 获取隐藏交换机可用的cidr列表
+        String sceneId = getPluginHandler().getSrcScene().getEid();
+        int terminalSize = getPluginHandler().getTerminalElementMap().values().size();
+        var cidrs = ConfigNetUtils.getAvailableConfigNetInfo(sceneId, terminalSize);
+        List<List<CloudPluginSceneElementBO>> groupCloudElements = new ArrayList<>();
+        List<CloudPluginSceneElementBO> tmp = new ArrayList<>();
+        for (var e : getPluginHandler().getTerminalElementMap().values()) {
+            tmp.add(e);
+            if (tmp.size() == BeanCommon.getBean(CloudAppConfig.class).getConfigNetGroupNum()) {
+                groupCloudElements.add(tmp);
+                tmp = new ArrayList<>();
+            }
+        }
+        if (tmp.size() != 0) {
+            groupCloudElements.add(tmp);
+        }
+
+        List<CloudPluginSceneConfigNetworkModel> configNetworks = new ArrayList<>();
+        getHandlerUtils().setConfigNetworks(configNetworks);
+        for (int groupIndex = 0; groupIndex < groupCloudElements.size(); groupIndex++) {
+            CloudPluginSceneConfigNetworkModel configNetwork = new CloudPluginSceneConfigNetworkModel();
+            ConfigNetUtils.ConfigNetInfo configNetInfo = cidrs.get(groupIndex);
+            configNetwork.setScene(sceneId);
+            configNetwork.setCidr(configNetInfo.getCidr());
+            configNetwork.setCidrIp(configNetInfo.getCidrIp());
+            configNetwork.setCidrIpLong(configNetInfo.getCidrIpLong());
+            configNetwork.setGatewayIp(configNetInfo.getGatewayIp());
+            configNetwork.setNextHopIp(configNetInfo.getNextHop());
+            configNetworks.add(configNetwork);
+
+            var sameNetCloudElements = groupCloudElements.get(groupIndex);
+            List<String> ips = configNetInfo.getIpPool();
+            for (int elementIndex = 0; elementIndex < sameNetCloudElements.size(); elementIndex++) {
+                var e = sameNetCloudElements.get(elementIndex);
+                e.setConfigNetworkIp(ips.get(elementIndex));
+                e.setConfigNetwork(configNetwork);
+            }
+        }
     }
 
     /**

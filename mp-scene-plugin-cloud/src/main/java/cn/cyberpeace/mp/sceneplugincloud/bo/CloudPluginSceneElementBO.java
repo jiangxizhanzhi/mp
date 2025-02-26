@@ -14,6 +14,7 @@ import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.BaseCloudPluginSceneElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConfigNetworkModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.CoreType;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ConnectedNetworkBO;
@@ -63,6 +64,10 @@ public class CloudPluginSceneElementBO extends BaseCloudPluginSceneElementBO<Clo
     // 构建的网络
     @JsonIgnore
     private List<ConnectedNetworkBO> deriveNetworks = new ArrayList<>();
+
+    // 配采网
+    @JsonIgnore
+    private CloudPluginSceneConfigNetworkModel configNetwork = null;
 
     /**
      * createModel

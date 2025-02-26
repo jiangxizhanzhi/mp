@@ -6,11 +6,11 @@ spring:
       max: ${MP_TOMCAT_MAX_POOL_SIZE:200}
   datasource:
     ext-var:
-      db-ip: ${MP_DB_IP:10.4.1.58}
+      db-ip: ${MP_DB_IP:10.4.1.37}
       db-port: ${MP_DB_PORT:9306}
-      db-database: ${MP_DB_DATABASE:mp}
+      db-database: ${MP_DB_DATABASE:mp2}
       username: ${MP_DB_USERNAME:root}
-      password: ${MP_DB_PASSWORD:123456}
+      password: ${MP_DB_PASSWORD:cyberpeace@NzM1M}
       maximum-pool-size: ${MP_DB_MAX_POOL_SIZE:60}
       minimum-idle: ${MP_DB_MIN_POOL_SIZE:25}
 
@@ -98,6 +98,11 @@ mp:
       port-map-cpu: ${MP_PORT_MAP_CPU:2}
       port-map-ram: ${MP_PORT_MAP_RAM:2048}
       port-map-disk: ${MP_PORT_MAP_DISK:40}
+      config-net-start-cidr: ${MP_CONFIG_NET_START_CIDR:90.100.0.0}
+      config-net-end-cidr: ${MP_CONFIG_NET_END_CIDR:90.102.0.0}
+      config-net-group-num: ${MP_CONFIG_NET_GROUP_NUM:1}
+      sn-router-id: ${MP_SN_ROUTER_ID:aaaa-bbbb-cccc}
+      sn-router-manager-net-cidr: ${MP_SN_ROUTER_MANAGER_NET_CIDR:173.10.10.0/24}
   monitor:
     ext-var:
       monitor-cp-cloud-interval: ${MP_MONITOR_CP_SRV_INTERVAL:}

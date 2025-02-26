@@ -299,6 +299,11 @@ mp:
     port-map-cpu: ${mp.sceneplugincloud.ext-var.port-map-cpu}
     port-map-ram: ${mp.sceneplugincloud.ext-var.port-map-ram}
     port-map-disk: ${mp.sceneplugincloud.ext-var.port-map-disk}
+    config-net-start-cidr: ${mp.sceneplugincloud.ext-var.config-net-start-cidr}
+    config-net-end-cidr: ${mp.sceneplugincloud.ext-var.config-net-end-cidr}
+    config-net-group-num: ${mp.sceneplugincloud.ext-var.config-net-group-num}
+    sn-router-id: ${mp.sceneplugincloud.ext-var.sn-router-id}
+    sn-router-manager-net-cidr: ${mp.sceneplugincloud.ext-var.sn-router-manager-net-cidr}
 
   sceneplugincollection:
     wazuh-server-host: ${mp.situationaware.ext-var.wazuh-ip}
