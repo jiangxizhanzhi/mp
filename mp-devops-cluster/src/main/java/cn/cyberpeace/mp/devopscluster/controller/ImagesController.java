@@ -12,12 +12,7 @@ import cn.cyberpeace.mp.common.deprecated.FileResponseData;
 import cn.cyberpeace.mp.common.service.FileService;
 import cn.cyberpeace.mp.cscene.service.CsceneSnapshotService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.DynamicImageInfo;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtDocker;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtImageInfo;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtSystemInfo;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtVm;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Flavor;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.DynamipsService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.FlavorService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.ISOService;
@@ -74,6 +69,7 @@ import cn.cyberpeace.mp.log.annotation.OperateLog;
 import cn.cyberpeace.mp.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
+import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel.Role;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudmessageconvert.CloudMessageConvertUtil;
 import cn.hutool.core.util.URLUtil;
 import io.swagger.annotations.Api;
@@ -101,12 +97,8 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -232,10 +224,34 @@ public class ImagesController {
         if (model.getImageType().equals("container")) {
             imagesByIdVO.setAccessProtocolList(Objects.nonNull(extDocker) ? extDocker.getAccessProtocols() : null);
         }
+
+        Set<Integer> gwRole = new HashSet<>(Set.of(
+                Role.VIRTUAL_LAYER_3_SIMPLE_ROUTER,
+                Role.VIRTUAL_LAYER_3_SIMPLE_SWITCH,
+                Role.VIRTUAL_LAYER_3_SIMPLE_FIREWALL
+        ));
+        if(model.getRole() != null && gwRole.contains(model.getRole())) {
+            // 终端类型的网络设备，接入协议使用gatway
+            imagesByIdVO.setAccessProtocolList(Collections.emptyList());
+            if (extVm != null){
+                extVm.setAccessProtocols(Collections.emptyList());
+            }
+            if (extDocker != null) {
+                extDocker.setAccessProtocols(Collections.emptyList());
+            }
+            imagesByIdVO.setExtGateway(model.getExtGateway());
+            if(model.getExtGateway() == null){
+                final ExtGateway extGateway = new ExtGateway();
+                extGateway.setPortConfigs(Collections.emptyList());
+                extGateway.setConsoleConfig(null);
+                imagesByIdVO.setExtGateway(extGateway);
+            }
+        } else {
+            imagesByIdVO.setExtGateway(model.getExtGateway());
+        }
         imagesByIdVO.setImageType(model.getImageType());
         imagesByIdVO.setDescription(model.getDescription());
         imagesByIdVO.setExtImageInfo(model.getExtImageInfo());
-        imagesByIdVO.setExtGateway(model.getExtGateway());
         imagesByIdVO.setExtVm(extVm);
         imagesByIdVO.setExtSystemInfo(model.getExtSystemInfo());
         imagesByIdVO.setExtDocker(extDocker);
