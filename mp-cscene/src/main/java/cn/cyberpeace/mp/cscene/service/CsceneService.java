@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.auth.request.org.OrgUserPageRequest;
 import cn.cyberpeace.mp.auth.service.impl.TenantUserServiceImpl;
 import cn.cyberpeace.mp.authbase.model.BasePermissionModel;
 import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.model.BaseModel;
@@ -35,6 +36,8 @@ import cn.cyberpeace.mp.cscene.service.taskpool.CsceneSnapshotDeleteTaskPool;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
@@ -44,6 +47,12 @@ import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementM
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudSceneConfigPluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneConfigService;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneConfigElementBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
+import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneConfigModel;
+import cn.cyberpeace.mp.sceneplugincollection.util.CollectionCommonConfigUtil;
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -597,7 +606,45 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
             csceneInstance.setReferenceMetaData(createContext.getReferenceMetaData());
             CsceneDataModifier.correctName(csceneId, createContext.getReferenceMetaData(), csceneInstance, cscene, csceneHandler.getCscene(), createContext.getName());
         }
+
+        addCollectionPlugin(csceneInstance);
+
         return new ServiceResult<>(csceneHandler.createAppInstance(unique, csceneInstance));
+    }
+
+    public static void addCollectionPlugin(CsceneInstanceBO csceneBO) {
+        if (csceneBO.getScene().getPlugins()
+                .containsKey(cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant.PLUGIN_KEY)) {
+            return;
+        }
+        CollectionPluginSceneConfigModel scene = new CollectionPluginSceneConfigModel();
+        scene.setEnableProbeCollect(true);
+        scene.setEnableFlowCollect(false);
+        scene.setEnableFlowMirror(false);
+
+        String defaultBizProbesContent = getDEFAULT_BIZ_PROBES();
+        List<Probe> defaultBizProbes = JsonCommon.snakeParse(defaultBizProbesContent, new TypeReference<List<Probe>>() {
+        });
+        Map<String, Map<String, Object>> pluginElements = new HashMap<>();
+        for (SceneElementBO e : csceneBO.getScene().getTopology().getElements()) {
+            CollectionPluginSceneElementBO elementModel = new CollectionPluginSceneElementBO();
+            elementModel.setEnableProbeCollect(true);
+            elementModel.setProbes(defaultBizProbes);
+            pluginElements.put(e.getId(), JsonCommon.beanToSnakeMap(elementModel));
+        }
+
+        ScenePluginDataBO pluginData = new ScenePluginDataBO();
+        pluginData.setScene(JsonCommon.beanToSnakeMap(scene));
+        pluginData.setElements(pluginElements);
+        pluginData.setElementPorts(new HashMap<>());
+
+
+        csceneBO.getScene().getPlugins()
+                .put(cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant.PLUGIN_KEY, pluginData);
+    }
+
+    public static String getDEFAULT_BIZ_PROBES(){
+        return "[" + "  {" + "    \"common\": true," + "    \"desc\": \"主板序列号、CPU名称、CPU核数、CPU主频、内存总大小、内存剩余、内存使用率、硬盘总大小、硬盘使用率\"," + "    \"id\": \"001\"," + "    \"disabled\": false," + "    \"interval\": 180," + "    \"name\": \"硬件信息\"," + "    \"os_type\": \"0,1,2,3\"," + "    \"output_format\": \"none\"," + "    \"exec_type\": 0," + "    \"type\": 0," + "    \"open\": true" + "  }," + "  {" + "    \"common\": true," + "    \"desc\": \"主机名、架构、系统名称、系统版本、平台、发布版本\"," + "    \"id\": \"002\"," + "    \"disabled\": false," + "    \"interval\": 180," + "    \"name\": \"操作系统信息\"," + "    \"os_type\": \"0,1,2,3\"," + "    \"output_format\": \"none\"," + "    \"type\": 0," + "    \"exec_type\": 0," + "    \"open\": true" + "  }," + "  {" + "    \"common\": true," + "    \"desc\": \"名称、适配器、类型、状态、MTU、MAC地址、IP地址、发包数、收包数、发送字节数、接收字节数\"," + "    \"id\": \"003\"," + "    \"disabled\": false," + "    \"interval\": 180," + "    \"name\": \"网络接口信息\"," + "    \"exec_type\": 0," + "    \"os_type\": \"0,1,2,3\"," + "    \"output_format\": \"none\"," + "    \"type\": 0," + "    \"open\": true" + "  }," + "  {" + "    \"common\": true," + "    \"desc\": \"协议类型、本地IP、本地端口、对端ip、对端端口、inode、状态、PID、进程\"," + "    \"id\": \"004\"," + "    \"disabled\": false," + "    \"interval\": 180," + "    \"name\": \"端口信息\"," + "    \"exec_type\": 0," + "    \"os_type\": \"0,1,2,3\"," + "    \"output_format\": \"none\"," + "    \"type\": 0," + "    \"open\": true" + "  }," + "  {" + "    \"common\": true," + "    \"desc\": \"PID、进程名、状态、PPID、utime、stime\"," + "    \"id\": \"005\"," + "    \"disabled\": false," + "    \"interval\": 180," + "    \"name\": \"进程信息\"," + "    \"exec_type\": 0," + "    \"os_type\": \"0,1,2,3\"," + "    \"output_format\": \"none\"," + "    \"type\": 0," + "    \"open\": true" + "  }," + "  {" + "    \"common\": true," + "    \"desc\": \"包含大小、权限、所有者、最后修改日期、校验和目录文件的变更（当监控目录时监控到3级子目录）\"," + "    \"id\": \"006\"," + "    \"disabled\": false," + "    \"interval\": 180," + "    \"name\": \"文件变更事件\"," + "    \"exec_type\": 2," + "    \"os_type\": \"0,1,2,3\"," + "    \"output_format\": \"none\"," + "    \"type\": 1," + "    \"collect_path\": [" + "      \"\"" + "    ]," + "    \"open\": true" + "  }," + "  {" + "    \"common\": true," + "    \"desc\": \"包含size、mtime、inode、md5、sha1、sha256的变更（当监控目录时监控到5级子目录，不支持 HKEY_CURRENT_USER目录）\"," + "    \"id\": \"007\"," + "    \"disabled\": false," + "    \"interval\": 180," + "    \"name\": \"注册表变更事件\"," + "    \"exec_type\": 3," + "    \"os_type\": \"0,1,2,3\"," + "    \"output_format\": \"none\"," + "    \"type\": 1," + "    \"collect_path\": [" + "      \"\"" + "    ]," + "    \"open\": true" + "  }," + "  {" + "    \"common\": true," + "    \"desc\": \"日志文件\"," + "    \"exec_type\": 1," + "    \"id\": \"011\"," + "    \"disabled\": false," + "    \"interval\": 180," + "    \"name\": \"日志文件\"," + "    \"os_type\": \"0,1,2,3\"," + "    \"output_format\": \"none\"," + "    \"type\": 2," + "    \"collect_path\": [" + "      \"\"" + "    ]," + "    \"open\": true" + "  }," + "  {" + "    \"common\": true," + "    \"desc\": \"安全软件\"," + "    \"exec_type\": 1," + "    \"id\": \"010\"," + "    \"disabled\": false," + "    \"interval\": 180," + "    \"name\": \"安全软件\"," + "    \"os_type\": \"0,1,2,3\"," + "    \"output_format\": \"none\"," + "    \"type\": 2," + "    \"open\": true" + "  }," + "  {" + "    \"common\": true," + "    \"desc\": \"操作系统\"," + "    \"exec_type\": 1," + "    \"id\": \"008\"," + "    \"disabled\": false," + "    \"interval\": 180," + "    \"name\": \"操作系统\"," + "    \"os_type\": \"0,1,2,3\"," + "    \"output_format\": \"none\"," + "    \"type\": 2," + "    \"open\": true" + "  }," + "  {" + "    \"common\": true," + "    \"desc\": \"应用系统日志\"," + "    \"exec_type\": 1," + "    \"id\": \"009\"," + "    \"disabled\": false," + "    \"interval\": 180," + "    \"name\": \"应用系统日志\"," + "    \"os_type\": \"0,1,2,3\"," + "    \"output_format\": \"none\"," + "    \"type\": 2," + "    \"open\": true" + "  }" + "]";
     }
 
     public ServiceResult<Boolean> updateElementImage(String id, String nodeId, String image) {
