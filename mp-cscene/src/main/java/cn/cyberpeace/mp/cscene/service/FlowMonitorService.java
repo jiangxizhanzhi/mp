@@ -244,6 +244,9 @@ public class FlowMonitorService {
             List<String> destinationIpList = flowGroupByDestinationIpAndSeverityBO.getDestinationIpList();
             for (String ip : destinationIpList) {
                 SceneElementBO nodeByIpAddr = batchSceneHandler.getNodeByIpAddr(ip);
+                if(Objects.isNull(nodeByIpAddr)){
+                    continue;
+                }
                 // map中是否包含当前节点的风险等级
                 if (severityMap.containsKey(nodeByIpAddr.getId())) {
                     // 已包含，只记录较高的风险等级
