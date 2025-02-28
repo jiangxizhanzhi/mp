@@ -6,7 +6,9 @@ import cn.cyberpeace.mp.auth.config.ThirdSsoConfig;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.extensions.security.filter.JwtAuthenticationFilter;
+import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.repository.RoleMapper;
 import cn.cyberpeace.mp.auth.repository.UserMapper;
 import cn.cyberpeace.mp.auth.request.user.UserRequest;
 import cn.cyberpeace.mp.auth.service.impl.UserServiceImpl;
@@ -103,8 +105,24 @@ public class ThirdSsoController {
         newUserReq.setAvatar("");
         newUserReq.setEmail(thirdUserParams.getEmail());
         newUserReq.setDescription("");
-        newUserReq.setRoleIds(Arrays.asList("12312312"));
-        newUserReq.setOrgIds(Arrays.asList("asdfasdf"));
+
+        RoleMapper roleMapper = BeanCommon.getBean(RoleMapper.class);
+        /**
+         * 无锡移动的 超级管理员 管理员 -> 管理员 ， 全部前后台菜单
+         * 无锡移动的 省管理 专家 -> 教员 ， 全部前后台菜单（不包含后台系统管理、系统运维菜单）
+         * 无锡移动的 学员 -> 学员，全部前台菜单
+         */
+        if ("soc_supper_admin".equals(thirdUserParams.getRoleCode()) || "sys_admin".equals(thirdUserParams.getRoleCode())) {
+            var role = roleMapper.first(new HumanCondition().filterEqual(RoleModel::getName, "管理员"));
+            newUserReq.setRoleIds(Arrays.asList(role.getId()));
+        } else if ("soc_admin".equals(thirdUserParams.getRoleCode()) || "soc_expert".equals(thirdUserParams.getRoleCode())) {
+            var role = roleMapper.first(new HumanCondition().filterEqual(RoleModel::getName, "教员"));
+            newUserReq.setRoleIds(Arrays.asList(role.getId()));
+        } else {
+            var role = roleMapper.first(new HumanCondition().filterEqual(RoleModel::getName, "学员"));
+            newUserReq.setRoleIds(Arrays.asList(role.getId()));
+        }
+
         newUserReq.setTicket(ticket);
         userService.addV2(newUserReq);
 
