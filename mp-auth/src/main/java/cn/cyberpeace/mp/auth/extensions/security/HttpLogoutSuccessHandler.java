@@ -1,14 +1,18 @@
 package cn.cyberpeace.mp.auth.extensions.security;
 
 import cn.cyberpeace.mp.auth.config.AuthConfig;
+import cn.cyberpeace.mp.auth.config.ThirdSsoConfig;
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.extensions.security.common.JwtCommon;
 import cn.cyberpeace.mp.auth.extensions.security.event.UserEventPublisher;
 import cn.cyberpeace.mp.auth.extensions.security.event.UserLogoutEvent;
 import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.repository.UserMapper;
 import cn.cyberpeace.mp.auth.service.UserService;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.log.constant.LogConstant;
 import cn.cyberpeace.mp.log.enums.OpModuleEnums;
@@ -25,7 +29,9 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -52,6 +58,9 @@ public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
 
     @Autowired
     private UserEventPublisher userEventPublisher ;
+
+    @Resource(name = "restTemplate")
+    private RestTemplate restTemplate;
 
     @Autowired
     public HttpLogoutSuccessHandler(MappingJackson2HttpMessageConverter messageConverter, UserService userService) {
@@ -82,6 +91,16 @@ public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
             userName = user.getName();
             recordLogoutLog(user, request);
             userEventPublisher.publishEvent(new UserLogoutEvent(JsonCommon.beanToMap(user)));
+
+            // 判断是否需要从第三方退出登录
+            var cond = new HumanCondition().filterEqual(UserModel::getUsername, user.getUsername());
+            var dbUser = BeanCommon.getBean(UserMapper.class).first(cond);
+            if (dbUser != null && StringUtils.isNotEmpty(dbUser.getTicket())) {
+                var config = BeanCommon.getBean(ThirdSsoConfig.class);
+                String logoutUrl = config.getThirdLoginOutUrl();
+                log.info("用户 {} - {} 将从第三方登录退出 , ticket: {} , url: {}", dbUser.getUsername(), dbUser.getNickname(), dbUser.getTicket(), logoutUrl);
+                restTemplate.getForEntity(logoutUrl, Object.class);
+            }
         }
 
         if (StringUtils.isNotBlank(userName)) {

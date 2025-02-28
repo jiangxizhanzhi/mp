@@ -214,6 +214,11 @@ mp:
     #authenticate-exclude-urls: /unauth/**,/sys/activation,/sys/activation/license_status,/sys/activation/machinecode,/sys/config/public,/config/single_ip,/file/**
     authenticate-encoder-iterations: ${mp.auth.ext-var.authenticate-encoder-iterations}
     authenticate-encoder-hash-width: 256
+  thirdsso:
+    login-success-redirect-url: ${mp.thirdsso.ext-var.login-success-redirect-url}
+    third-login-page-url: ${mp.thirdsso.ext-var.third-login-page-url}
+    ticket-check-url: ${mp.thirdsso.ext-var.ticket-check-url}
+    third-login-out-url: ${mp.thirdsso.ext-var.third-login-out-url}
   # mp-front-admin 模块配置
   frontadmin:
     activ-enable: true

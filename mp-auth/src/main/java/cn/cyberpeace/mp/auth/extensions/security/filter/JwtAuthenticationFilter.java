@@ -137,4 +137,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         response.addCookie(cookie);
     }
 
+    public static void addJWTCookieToResponse(HttpServletResponse response, String newJwt) {
+        log.info("新增 jwt token , key is {} , value is {}", "cr_jwttoken", newJwt);
+        Cookie cookie = new Cookie("cr_jwttoken", null);
+        cookie.setPath("/");
+        cookie.setMaxAge(Integer.MAX_VALUE);
+        // httponly = false
+        cookie.setHttpOnly(false);
+        try {
+            cookie.setValue(URLEncoder.encode(newJwt, "utf-8"));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        response.addCookie(cookie);
+    }
 }

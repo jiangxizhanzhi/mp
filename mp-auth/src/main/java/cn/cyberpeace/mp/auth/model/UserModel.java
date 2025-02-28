@@ -134,8 +134,12 @@ public class UserModel extends BaseModel implements Serializable {
     @DefaultGen(DateTimeGenerator.class)
     private LocalDateTime lastLogin;
 
+    @ApiModelProperty(value = "第三方登录时的ticket值")
+    @DefaultStr
+    private String ticket ;
+
     @Builder
-    public UserModel(String id, LocalDateTime createTime, LocalDateTime updateTime, String tenant, String identifier, String username, String password, String tokenSecret, String name, String nickname, String avatar, LocalDate birthday, String email, String mobile, String idCard, String address, Integer initCheck, String description, Integer isEnabled, Integer isAudited, LocalDateTime dateJoined, LocalDateTime expiredTime, LocalDateTime lastLogin) {
+    public UserModel(String id, LocalDateTime createTime, LocalDateTime updateTime, String tenant, String identifier, String username, String password, String tokenSecret, String name, String nickname, String avatar, LocalDate birthday, String email, String mobile, String idCard, String address, Integer initCheck, String description, Integer isEnabled, Integer isAudited, LocalDateTime dateJoined, LocalDateTime expiredTime, LocalDateTime lastLogin,String ticket) {
         super(id, createTime, updateTime);
         this.tenant = tenant;
         this.username = username;
@@ -157,6 +161,7 @@ public class UserModel extends BaseModel implements Serializable {
         this.idCard = idCard;
         this.mobile = mobile;
         this.address = address;
+        this.ticket = ticket ;
     }
 
     public static class Status {
