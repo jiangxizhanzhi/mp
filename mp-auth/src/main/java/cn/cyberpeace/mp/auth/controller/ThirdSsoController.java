@@ -34,7 +34,7 @@ import java.util.Objects;
 @Api(value = "第三方登录管理接口", tags = "UNAUTH-第三方登录接口")
 @Slf4j
 @Controller
-@RequestMapping(ControllerConstant.BASE_UNAUTH_API_PATH + "/third_login")
+@RequestMapping(ControllerConstant.BASE_UNAUTH_API_PATH + "/third-login")
 public class ThirdSsoController {
 
     @Resource
