@@ -124,8 +124,8 @@ public class ThirdSsoController {
     @ApiOperation("第三方登录配置查询")
     @ResponseBody
     public ServiceResult<ThirdLoginConfig> getThirdLoginConfig() {
-        ThirdLoginConfig thirdLoginConfig = BeanCommon.getBean(ThirdLoginConfig.class);
-        thirdLoginConfig.setThirdLoginPageUrl(thirdLoginConfig.getThirdLoginPageUrl());
+        ThirdLoginConfig thirdLoginConfig = new ThirdLoginConfig();
+        thirdLoginConfig.setThirdLoginPageUrl(this.thirdSsoConfig.getThirdLoginPageUrl());
         return new ServiceResult<>(thirdLoginConfig).asResult();
     }
 
