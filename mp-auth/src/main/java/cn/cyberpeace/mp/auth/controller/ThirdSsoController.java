@@ -55,6 +55,7 @@ public class ThirdSsoController {
     @GetMapping
     @ApiOperation("赛宁第三方登录接口")
     public String loginAndRedirectToHomePage(@RequestParam(value = "ticket") String ticket, HttpServletRequest request, HttpServletResponse response) {
+        log.info("第三方登录,ticket: {}");
         if (ticket == null) {
             String url = thirdSsoConfig.getThirdLoginPageUrl();
             log.info("第三方登录, ticket 为空 , 重定向至 {}", thirdSsoConfig.getThirdLoginPageUrl());
@@ -65,7 +66,10 @@ public class ThirdSsoController {
             XmlMapper xmlMapper = new XmlMapper();
             ThirdUser thirdUser = null;
             try {
-                responseBody = restTemplate.getForObject(thirdSsoConfig.getTicketCheckUrl(), String.class);
+                String ticketCheckUrl = thirdSsoConfig.getTicketCheckUrl() + "?ticket=" + ticket;
+                log.info("校验ticket , url:{}", thirdSsoConfig.getTicketCheckUrl());
+                responseBody = restTemplate.getForObject(ticketCheckUrl, String.class);
+                log.info("返回内容: {}", responseBody);
                 thirdUser = xmlMapper.readValue(responseBody, new TypeReference<ThirdUser>() {
                 });
             } catch (Exception e) {
