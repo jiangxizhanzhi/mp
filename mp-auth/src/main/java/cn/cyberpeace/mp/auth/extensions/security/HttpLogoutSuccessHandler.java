@@ -99,7 +99,11 @@ public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
                 var config = BeanCommon.getBean(ThirdSsoConfig.class);
                 String logoutUrl = config.getThirdLoginOutUrl();
                 log.info("用户 {} - {} 将从第三方登录退出 , ticket: {} , url: {}", dbUser.getUsername(), dbUser.getNickname(), dbUser.getTicket(), logoutUrl);
-                restTemplate.getForEntity(logoutUrl, Object.class);
+                try {
+                    restTemplate.getForEntity(logoutUrl, Object.class);
+                }catch (Exception e){
+                    log.error("第三方退出报错", e);
+                }
             }
         }
 
