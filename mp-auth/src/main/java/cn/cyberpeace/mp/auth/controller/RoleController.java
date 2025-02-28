@@ -4,12 +4,15 @@ import cn.cyberpeace.mp.auth.bo.role.RoleBo;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.model.RoleModel;
+import cn.cyberpeace.mp.auth.repository.RoleMapper;
 import cn.cyberpeace.mp.auth.request.role.RolePageRequest;
 import cn.cyberpeace.mp.auth.request.role.RoleRequest;
 import cn.cyberpeace.mp.auth.service.OperateRolePermissionService;
 import cn.cyberpeace.mp.auth.service.RoleService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.log.annotation.OperateLog;
@@ -62,6 +65,10 @@ public class RoleController {
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.DELETE, title = "删除角色", target = OpTargetEnums.ROLE)
     public ServiceResult<Boolean> delete(@PathVariable String id) {
+        var role = BeanCommon.getBean(RoleMapper.class).get(id);
+        if (role != null && ("学员".equals(role.getName()) || "管理员".equals(role.getName()) || "教员".equals(role.getName()))) {
+            throw new MpRuntimeException("该角色有第三方用户使用,不允许删除");
+        }
         opRolePermService.checkByTargetRoleIds(Arrays.asList(id));
         return roleService.delete(id);
     }
@@ -76,6 +83,12 @@ public class RoleController {
     @DeleteMapping("/bulk_delete")
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ServiceResult<Integer> bulkDelete(@RequestBody String[] ids) {
+        for (String id : ids) {
+            var role = BeanCommon.getBean(RoleMapper.class).get(id);
+            if (role != null && ("学员".equals(role.getName()) || "管理员".equals(role.getName()) || "教员".equals(role.getName()))) {
+                throw new MpRuntimeException("学员、管理员、教员角色，有第三方用户,不允许删除");
+            }
+        }
         return roleService.bulkDelete(ids).asResult();
     }
 
@@ -113,6 +126,18 @@ public class RoleController {
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "修改角色", target = OpTargetEnums.ROLE)
     public ServiceResult<RoleModel> modify(@RequestBody @Validated RoleRequest modifyRequest) {
+        var role = BeanCommon.getBean(RoleMapper.class).get(modifyRequest.getId());
+        if (role != null) {
+            if ("学员".equals(role.getName()) && !"学员".equals(modifyRequest.getName())) {
+                throw new MpRuntimeException("学员角色有第三方用户,不允许改名");
+            }
+            if ("管理员".equals(role.getName()) && !"管理员".equals(modifyRequest.getName())) {
+                throw new MpRuntimeException("管理员角色有第三方用户,不允许改名");
+            }
+            if ("教员".equals(role.getName()) && !"教员".equals(modifyRequest.getName())) {
+                throw new MpRuntimeException("教员角色有第三方用户,不允许改名");
+            }
+        }
         RoleModel roleModel = roleService.modify(modifyRequest);
         return ResultCommon.success(roleModel);
     }
