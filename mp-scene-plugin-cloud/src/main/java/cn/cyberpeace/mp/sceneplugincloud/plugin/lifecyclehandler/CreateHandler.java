@@ -1402,8 +1402,9 @@ public class CreateHandler extends HandlerCommon {
 
 
         if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH)) {
-            runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.CREATE_VIRTUAL_ROUTER,
-                    () -> createVirtualRouter(cloudElement));
+            runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.CREATE_VIRTUAL_SWITCH,
+                    () -> cloudElement.setResourceId(cloudElement.getAuxiliaryNetworkId()));
+
         } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)) {
             runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.CREATE_VIRTUAL_ROUTER,
                     () -> createVirtualRouter(cloudElement));
