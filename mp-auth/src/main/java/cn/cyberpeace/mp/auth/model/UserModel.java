@@ -136,9 +136,9 @@ public class UserModel extends BaseModel implements Serializable {
     @DefaultGen(DateTimeGenerator.class)
     private LocalDateTime lastLogin;
 
-    private String bcIds = JSONArray.toJSONString(Lists.newArrayList());
+    private String bcIds;
 
-    private String bcName = JSONArray.toJSONString(Lists.newArrayList());
+    private String bcName;
 
     @Builder
     public UserModel(String id, LocalDateTime createTime, LocalDateTime updateTime, String tenant, String identifier, String username, String password, String tokenSecret, String name, String nickname, String avatar, LocalDate birthday, String email, String mobile, String idCard, String address, Integer initCheck, String description, Integer isEnabled, Integer isAudited, LocalDateTime dateJoined, LocalDateTime expiredTime, LocalDateTime lastLogin,String bcIds, String bcName) {
@@ -163,23 +163,10 @@ public class UserModel extends BaseModel implements Serializable {
         this.idCard = idCard;
         this.mobile = mobile;
         this.address = address;
-        this.bcIds = initBcIds(bcIds);
-        this.bcIds = initBcName(bcName);
-
+        this.bcIds = bcIds;
+        this.bcName = bcName;
     }
 
-    private String initBcIds(String bcIds) {
-        if (StringUtils.isBlank(bcIds)) {
-            bcIds = JSONArray.toJSONString(Lists.newArrayList());
-        }
-        return bcIds;
-    }
-    private String initBcName(String bcName) {
-        if (StringUtils.isBlank(bcName)) {
-            bcName = JSONArray.toJSONString(Lists.newArrayList());
-        }
-        return bcName;
-    }
 
     public static class Status {
         // 启用与否
