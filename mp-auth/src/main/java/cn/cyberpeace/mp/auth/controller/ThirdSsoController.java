@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.auth.repository.UserMapper;
 import cn.cyberpeace.mp.auth.request.user.UserRequest;
 import cn.cyberpeace.mp.auth.service.impl.UserServiceImpl;
 import cn.cyberpeace.mp.auth.util.JwtUtils;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -123,7 +124,7 @@ public class ThirdSsoController {
     @ApiOperation("第三方登录配置查询")
     @ResponseBody
     public ServiceResult<ThirdLoginConfig> getThirdLoginConfig() {
-        ThirdLoginConfig thirdLoginConfig = new ThirdLoginConfig();
+        ThirdLoginConfig thirdLoginConfig = BeanCommon.getBean(ThirdLoginConfig.class);
         thirdLoginConfig.setThirdLoginPageUrl(thirdLoginConfig.getThirdLoginPageUrl());
         return new ServiceResult<>(thirdLoginConfig).asResult();
     }
