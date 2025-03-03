@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -50,4 +51,6 @@ public class HostEventQueryParams extends QueryParams {
      */
     @ApiModelProperty(value = "是否是滚动分页请求")
     private Boolean scroll;
+
+    private LocalDateTime sceneDeleteTime;
 }

@@ -134,6 +134,7 @@ mp:
       windows-path: ${WAZUH_AGENT_SCRIPT_WINDOWS_PATH:C:\ossec-agent\shared\scripts\}
       es-date-pattern: ${ES_DATE_PATTERN:yyyy-MM-dd'T'HH:mm:ss.SSSZ}
       self-port: ${MP_SELF_PORT:8001}
+      max-index-num: ${MP_MAX_INDEX_NUM:30}
   # mp-log 模块
   log:
     ext-var:

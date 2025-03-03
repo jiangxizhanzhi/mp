@@ -75,6 +75,7 @@ public class SituationAwareConfig {
     private String probeMgrAgentScriptLinuxPath;
     private String probeMgrAgentScriptWindowsPath;
     private String probeMgrTaskEnable;
+    private Integer maxIndexNum;
 
     public static DateTimeFormatter esDateTimeFormatter = null;
     @PostConstruct

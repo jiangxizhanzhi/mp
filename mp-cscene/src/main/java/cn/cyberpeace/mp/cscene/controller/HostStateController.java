@@ -145,7 +145,7 @@ public class HostStateController {
         try {
             return hostStateService.pageProcesses(listPageInfoQueryParams).asResult();
         } catch (Exception e) {
-            log.error("failed to exec element_port", e);
+            log.error("failed to exec element_process", e);
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
     }
@@ -156,7 +156,7 @@ public class HostStateController {
         try {
             return hostStateService.pageNetifaces(listPageInfoQueryParams).asResult();
         } catch (Exception e) {
-            log.error("failed to exec element_port", e);
+            log.error("failed to exec element_netifaces", e);
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
     }

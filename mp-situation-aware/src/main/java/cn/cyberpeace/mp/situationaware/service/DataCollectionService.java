@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.situationaware.service;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -1850,6 +1851,10 @@ public class DataCollectionService extends CollectionBaseService {
     @VisibleForTesting
     public static List<String> indexListBuilder(LocalDateTime start, LocalDateTime end) {
         List<String> dateStringList = fetchFormatterTime(start, end);
+        int maxIndexNum = BeanCommon.getBean(SituationAwareConfig.class).getMaxIndexNum();
+        if (dateStringList.size() > maxIndexNum) {
+            dateStringList = dateStringList.subList(dateStringList.size() - maxIndexNum, dateStringList.size());
+        }
         List<String> list = new ArrayList<>();
         for (String dateString : dateStringList) {
             String s = WAZUH_ALERT_INDEX_PREFIX + dateString;

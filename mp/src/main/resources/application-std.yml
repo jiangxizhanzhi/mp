@@ -170,6 +170,7 @@ mp:
     arkime-es-nodes: ${mp.situationaware.ext-var.arkime-es-host}:${mp.situationaware.ext-var.arkime-es-port}
     # es 日期格式
     es-date-pattern: ${mp.situationaware.ext-var.es-date-pattern}
+    max-index-num: ${mp.situationaware.ext-var.max-index-num}
   # mp-log 模块
   log:
     ext-var:

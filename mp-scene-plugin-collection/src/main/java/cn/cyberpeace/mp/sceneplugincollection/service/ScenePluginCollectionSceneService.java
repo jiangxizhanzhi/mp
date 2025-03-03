@@ -21,6 +21,7 @@ import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
+import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudSceneConfigPluginHandler;
@@ -512,6 +513,10 @@ public class ScenePluginCollectionSceneService {
         if (pluginHandler == null) {
             return new ListObjServiceResult(new ListObjResult(Collections.emptyList(), 0)).asResult();
         }
+        if (sceneHandler.getScene().getEvent() != null && sceneHandler.getScene()
+                .getEvent() == SceneModel.Event.DELETE) {
+            queryParams.setSceneDeleteTime(sceneHandler.getScene().getUpdateTime());
+        }
         Map<String, SceneElementBO> agentNameElementMap = new HashMap<>();
         srcElements.forEach(srcElement -> {
             CollectionPluginSceneElementBO collectionElement = pluginHandler.getElement(srcElement.getId());
@@ -647,7 +652,11 @@ public class ScenePluginCollectionSceneService {
             request.setStartTime(TimeUtils.stringToLocalDateTime(queryParams.getStartTime()));
         }
         if (StringUtils.isBlank(queryParams.getEndTime())) {
-            request.setEndTime(LocalDateTime.now());
+            if (queryParams.getSceneDeleteTime() != null) {
+                request.setEndTime(queryParams.getSceneDeleteTime());
+            } else {
+                request.setEndTime(LocalDateTime.now());
+            }
         } else {
             request.setEndTime(TimeUtils.stringToLocalDateTime(queryParams.getEndTime()));
             if (request.getStartTime() != null && !request.getEndTime().isAfter(request.getStartTime())) {
