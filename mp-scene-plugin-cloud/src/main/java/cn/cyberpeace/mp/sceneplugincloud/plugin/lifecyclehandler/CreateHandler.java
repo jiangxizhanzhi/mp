@@ -1899,30 +1899,45 @@ public class CreateHandler extends HandlerCommon {
         getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CloudSceneStage.CREATE_INSTANCE);
         // 再创建终端
         List<CloudPluginSceneElementBO> npcNodes = getPluginHandler().getNpcElements();
-        List<Runnable> createTerminalTasks = new ArrayList<>();
-        var terminalExcludeNpcElements = getPluginHandler().getTerminalExcludeNpcElements();
-        terminalExcludeNpcElements.sort((o1, o2) -> {
-            int o1StartPriority = o1.getStartPriority() == null ? 1 : o1.getStartPriority();
-            int o2StartPriority = o2.getStartPriority() == null ? 1 : o2.getStartPriority();
-            return o1StartPriority - o2StartPriority;
-        });
-        for (CloudPluginSceneElementBO cloudPluginSceneElementBO : terminalExcludeNpcElements) {
-            Runnable runnable = () -> {
-                try {
-                    createElementProcess(cloudPluginSceneElementBO);
-                } catch (Exception e) {
-                    if (Boolean.TRUE.equals(cloudPluginSceneElementBO.getKeyElement())) {
-                        throw e;
+
+        Map<String, List<CloudPluginSceneElementBO>> groupByPriority = new HashMap();
+        for (CloudPluginSceneElementBO terminalExcludeNpcElement : getPluginHandler().getTerminalExcludeNpcElements()) {
+            String key = terminalExcludeNpcElement.getStartPriority().toString();
+            if (!groupByPriority.containsKey(key)) {
+                groupByPriority.put(key, new ArrayList<>());
+            }
+            groupByPriority.get(key).add(terminalExcludeNpcElement);
+        }
+
+        List<String> keys = new ArrayList<>(groupByPriority.keySet());
+        keys.sort(Comparator.comparingInt(Integer::parseInt));
+
+        List<List<Runnable>> createTerminalTasks = new ArrayList<>();
+        for (String key : keys) {
+            List<Runnable> tmp = new ArrayList<>();
+            createTerminalTasks.add(tmp);
+            var terminalExcludeNpcElements = groupByPriority.get(key);
+            for (CloudPluginSceneElementBO cloudPluginSceneElementBO : terminalExcludeNpcElements) {
+                Runnable runnable = () -> {
+                    try {
+                        createElementProcess(cloudPluginSceneElementBO);
+                    } catch (Exception e) {
+                        if (Boolean.TRUE.equals(cloudPluginSceneElementBO.getKeyElement())) {
+                            throw e;
+                        }
                     }
-                }
-            };
-            createTerminalTasks.add(runnable);
+                };
+                tmp.add(runnable);
+            }
         }
         if (!createTerminalTasks.isEmpty()) {
             runSceneProgress(SceneProcess.CREATE_TERMINALS, () -> {
-                runTasks(createTerminalTasks);
+                for (var list : createTerminalTasks) {
+                    runTasks(list);
+                }
                 if (npcNodes.isEmpty()) {
-                    getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CloudSceneStage.CREATE_INSTANCE);
+                    getPluginHandler().getSceneHandler().getSceneStageRecorder()
+                            .endStage(CloudSceneStage.CREATE_INSTANCE);
                 }
             });
         }
