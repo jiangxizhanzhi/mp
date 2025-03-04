@@ -390,7 +390,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     }
 
     @Override
-    public RoleModel getRoleInfoByUserId(String userId) {
+    public List<RoleModel> getRoleInfoByUserId(String userId) {
         return userRoleMapper.getRoleInfoByUserId(userId);
     }
 

@@ -26,5 +26,5 @@ public interface UserRoleMapper extends BaseModelMapper<UserRoleModel> {
 
     List<RoleModelCount> selectCount(@Param("ids") List<String> ids);
 
-    RoleModel getRoleInfoByUserId(@Param("userId") String userId);
+    List<RoleModel> getRoleInfoByUserId(@Param("userId") String userId);
 }

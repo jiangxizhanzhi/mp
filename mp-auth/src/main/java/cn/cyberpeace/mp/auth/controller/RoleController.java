@@ -10,15 +10,12 @@ import cn.cyberpeace.mp.auth.service.OperateRolePermissionService;
 import cn.cyberpeace.mp.auth.service.RoleService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
-import cn.cyberpeace.mp.base.service.param.QueryParams;
-import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.log.annotation.OperateLog;
 import cn.cyberpeace.mp.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
-import cn.hutool.core.collection.ListUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import io.swagger.annotations.Api;
@@ -27,7 +24,6 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import nl.altindag.ssl.util.StringUtils;
-import org.apache.commons.compress.utils.Lists;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -164,9 +160,9 @@ public class RoleController {
         return  new ServiceResult<>(roleService.getRoleModelByids(ids)).asResult();
     }
     @GetMapping("/get/role")
-    public ServiceResult<RoleModel> getRoleInfoByUserId(String userId) {
+    public ServiceResult<List<RoleModel>> getRoleInfoByUserId(String userId) {
         if (StringUtils.isBlank(userId)) {
-            RoleModel roleModel = new RoleModel();
+            List<RoleModel> roleModel = new ArrayList<>();
             return new ServiceResult<>(roleModel).asResult();
         }
         return new ServiceResult<>(roleService.getRoleInfoByUserId(userId)).asResult();

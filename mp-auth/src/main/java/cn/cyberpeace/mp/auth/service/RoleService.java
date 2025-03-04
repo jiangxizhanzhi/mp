@@ -49,5 +49,5 @@ public interface RoleService extends BaseModelService<RoleModel, QueryParams> {
 
     List<RoleModel> getRoleModelByids(List<String> ids);
 
-    RoleModel getRoleInfoByUserId(String userId);
+    List<RoleModel> getRoleInfoByUserId(String userId);
 }
