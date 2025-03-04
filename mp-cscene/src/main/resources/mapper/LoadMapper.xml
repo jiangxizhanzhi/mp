@@ -17,7 +17,8 @@
          result_log,
          creator_id,
          create_time,
-         update_time)
+         update_time,
+         command)
         VALUES (#{param.id},
                 #{param.instanceId},
                 #{param.sceneId},
@@ -31,7 +32,8 @@
                 #{param.resultLog},
                 #{param.creatorId},
                 #{param.createTime},
-                #{param.createTime})
+                #{param.createTime},
+                #{param.command})
     </insert>
 
     <insert id="addResult">
