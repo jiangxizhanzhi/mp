@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.scene.core.bo.base;
 
 import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -20,4 +21,6 @@ public abstract class BaseSceneBO<M extends BaseSceneModel, T extends BaseSceneB
     private LocalDateTime createTime;
     @ApiModelProperty(value = "创建时间")
     private LocalDateTime updateTime;
+    @ApiModelProperty(value = "是否是分靶场部分拓扑")
+    private boolean partScene = false;
 }

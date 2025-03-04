@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.ValidationCommon;
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldNames;
+import cn.cyberpeace.mp.base.util.mptool.ConcurrentHashSet;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.plugin.stereotype.PluginKey;
@@ -11,10 +12,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -42,8 +40,8 @@ public abstract class BasePluginHandler<S, E, P, C> {
 
     // 源场景索引数据
     private String sourceSceneId;
-    private final List<String> elementIds = new CopyOnWriteArrayList<>();
-    private final List<String> elementPortIds = new CopyOnWriteArrayList<>();
+    private final Set<String> elementIds = new ConcurrentHashSet<>();
+    private final Set<String> elementPortIds = new ConcurrentHashSet<>();
 
     private S scene;
     private final Map<String, E> elementMap = new ConcurrentHashMap<>();
@@ -87,6 +85,11 @@ public abstract class BasePluginHandler<S, E, P, C> {
         var elementMapSrc = pluginData.getElements();
         if (elementMapSrc != null) {
             elementMapSrc.forEach((nodeId, elementData) -> {
+                if (!this.elementIds.isEmpty()) {
+                    if (!this.elementIds.contains(nodeId)) {
+                        return;
+                    }
+                }
                 elementMap.put(nodeId, JsonCommon.snakeMapToBean(elementData, elementBOClass));
             });
         }
@@ -94,6 +97,11 @@ public abstract class BasePluginHandler<S, E, P, C> {
         var elementPortMapSrc = pluginData.getElementPorts();
         if (elementPortMapSrc != null) {
             elementPortMapSrc.forEach((portId, elementPortData) -> {
+                if (!this.elementPortIds.isEmpty()) {
+                    if (!this.elementPortIds.contains(portId)) {
+                        return;
+                    }
+                }
                 elementPortMap.put(portId, JsonCommon.snakeMapToBean(elementPortData, elementPortBOClass));
             });
         }
@@ -161,6 +169,21 @@ public abstract class BasePluginHandler<S, E, P, C> {
      * @param pluginDataBO 场景插件业务数据
      */
     public void init(String sceneId, ScenePluginDataBO pluginDataBO, Object context) {
+        initBase();
+        loadContext(context);
+        sourceSceneId = sceneId;
+        if (pluginDataBO != null) {
+            fromData(pluginDataBO);
+        }
+    }
+
+    public void init(String sceneId, ScenePluginDataBO pluginDataBO, Object context, List<String> elementIds, List<String> elementPortIds) {
+        if (elementIds != null) {
+            this.elementIds.addAll(elementIds);
+        }
+        if (elementPortIds != null) {
+            this.elementPortIds.addAll(elementPortIds);
+        }
         initBase();
         loadContext(context);
         sourceSceneId = sceneId;

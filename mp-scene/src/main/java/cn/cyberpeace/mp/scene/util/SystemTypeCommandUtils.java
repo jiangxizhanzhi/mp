@@ -91,15 +91,15 @@ public class SystemTypeCommandUtils {
     }
 
     public static String joinCommands(String systemType, String... commands) {
-        return StringUtils.joinWith(getLineBreak(systemType), commands);
+        return StringUtils.joinWith(getLineBreak(systemType), (Object[]) commands);
     }
 
     public static String andJoinCommands(String systemType, String... commands) {
-        return StringUtils.joinWith(COMMAND_AND_SEPARATOR, commands);
+        return StringUtils.joinWith(COMMAND_AND_SEPARATOR, (Object[]) commands);
     }
 
     public static String inlineJoinCommands(String systemType, String... commands) {
-        return StringUtils.joinWith(getCommandInlineSeparator(systemType), commands);
+        return StringUtils.joinWith(getCommandInlineSeparator(systemType), (Object[]) commands);
     }
 
     public static String appendBeforeCommand(String command, String beforeCommand, String systemType) {
@@ -111,7 +111,7 @@ public class SystemTypeCommandUtils {
     }
 
     public static String joinPath(String systemType, String... paths) {
-        return StringUtils.joinWith(getPathDelimiter(systemType), paths);
+        return StringUtils.joinWith(getPathDelimiter(systemType), (Object[]) paths);
     }
 
 }

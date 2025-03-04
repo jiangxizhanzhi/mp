@@ -3,6 +3,8 @@ package cn.cyberpeace.mp.scene.core.base;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.ValidationCommon;
 import cn.cyberpeace.mp.base.common.stereotype.BeanFieldNames;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
@@ -22,6 +24,7 @@ import cn.cyberpeace.mp.scene.model.SceneElementPortModel;
 import cn.cyberpeace.mp.scene.model.base.*;
 import cn.cyberpeace.mp.scene.repository.base.*;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -96,6 +99,7 @@ import java.util.stream.Collectors;
         "scenePieceMapper",
 })
 @Getter
+@Slf4j
 public abstract class BaseSceneHandler<
         S0 extends BaseSceneModel,
         A0 extends BaseSceneAreaModel,
@@ -438,6 +442,11 @@ public abstract class BaseSceneHandler<
             if (!isValidAreaNode(element)) {
                 return;
             }
+            if (this.partSceneFlag) {
+                if (Boolean.FALSE.equals(element.getCurrentScenePartFlag())) {
+                    return;
+                }
+            }
 
             elementMap.put(element.getId(), element);
 
@@ -489,11 +498,17 @@ public abstract class BaseSceneHandler<
             Set<String> currentOuterConnectionPortIds = outerConnectionPortIdConnectionsMap.keySet();
             if (!StringUtils.isEmpty(sceneId)) {
                 Set<String> existOuterConnectionPortIds = new HashSet<>();
-                sceneElementPortMapper.list(new HumanCondition()
-                        .select(BaseSceneElementPortModel::getPortId)
-                        .filterEqual(BaseSceneElementPortModel::getScene, sceneId)
-                        .filterIn(BaseSceneElementPortModel::getPortId,
-                                outerConnectionPortIdConnectionsMap.keySet().toArray(new String[0])))
+                HumanCondition existSceneElementPortCondition = new HumanCondition().select(BaseSceneElementPortModel::getPortId)
+                        .filterEqual(BaseSceneElementPortModel::getScene, sceneId);
+
+                var outConnectionPortIds = outerConnectionPortIdConnectionsMap.keySet();
+                if (this.partSceneFlag) {
+                    var elementPortIds = elementPortMap.keySet();
+                    outConnectionPortIds.retainAll(elementPortIds);
+                }
+                existSceneElementPortCondition.filterIn(BaseSceneElementPortModel::getPortId, outConnectionPortIds.toArray(new String[0]));
+
+                sceneElementPortMapper.list(existSceneElementPortCondition)
                         .forEach(elementPort -> existOuterConnectionPortIds.add(elementPort.getPortId()));
                 currentOuterConnectionPortIds.removeAll(existOuterConnectionPortIds);
             }
@@ -1234,7 +1249,31 @@ public abstract class BaseSceneHandler<
         BeanCommon.loadBeanFields(this);
         this.context = context;
         this.isAreaMode = isAreaMode;
+        if (sceneDataBO.getTopology().getScene().isPartScene()) {
+            this.partSceneFlag = true;
+            log.warn("初始化的场景为部分场景，partSceneFlag为true");
+        }
         fromData(sceneDataBO);
+        if (!StringUtils.isEmpty(sceneId) && readScene() == null) {
+            throw new SceneNotExistException("Scene " + sceneId + " not exist");
+        }
+        initPlugins(scenePluginData);
+
+        // 场景业务数据需要纠正
+        correctData();
+    }
+
+    public void init(D sceneDataBO, boolean isAreaMode, C2 context, boolean partSceneFlag) {
+        ClassUtils.loadClassFields(this);
+        BeanCommon.loadBeanFields(this);
+        this.context = context;
+        this.isAreaMode = isAreaMode;
+        this.partSceneFlag = partSceneFlag;
+        fromData(sceneDataBO);
+        if (this.scene.isPartScene() && !partSceneFlag) {
+            throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("当前场景数据为部分场景数据，partSceneFlag不能为false"));
+        }
+        this.scene.setPartScene(this.partSceneFlag);
         if (!StringUtils.isEmpty(sceneId) && readScene() == null) {
             throw new SceneNotExistException("Scene " + sceneId + " not exist");
         }
@@ -1283,6 +1322,7 @@ public abstract class BaseSceneHandler<
         if (scene == null) {
             throw new SceneNotExistException("Scene " + sceneId + " not exist");
         }
+        scene.setPartScene(this.partSceneFlag);
     }
 
     /**
