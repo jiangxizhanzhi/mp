@@ -21,15 +21,13 @@ import java.util.Map;
 @Data
 public class CloudCommonConfigService {
 
-    private static String CONFIG_PATH_SUFFIX = ".json";
+    private static String CLOUD_MESSAGE_CONVERT = "cloud_message_convert.json";
 
-    private static String CLOUD_MESSAGE_CONVERT = "cloud_message_convert";
-
-    private static String SYSTEM_TYPE_TO_AGENT_SUPPORT = "system_type_to_agent_support";
+    private static String SYSTEM_TYPE_TO_AGENT_SUPPORT = "system_type_to_agent_support.json";
 
     private static String FRAME_INSTALL_CMDS = "install_frame.sh";
 
-    private static String[] CONFIGS = new String[]{ CLOUD_MESSAGE_CONVERT, SYSTEM_TYPE_TO_AGENT_SUPPORT };
+    private static String[] CONFIGS = new String[]{ CLOUD_MESSAGE_CONVERT, SYSTEM_TYPE_TO_AGENT_SUPPORT, FRAME_INSTALL_CMDS};
 
     private static volatile boolean LOADED = false;
 
@@ -59,7 +57,7 @@ public class CloudCommonConfigService {
         } else {
             for (String config : CONFIGS) {
                 try {
-                    Resource resource = new ClassPathResource("config/" + config + CONFIG_PATH_SUFFIX);
+                    Resource resource = new ClassPathResource("config/" + config);
                     String content = CharStreams.toString(new InputStreamReader(resource.getInputStream()));
                     CONFIG_MAP.put(config, content);
                 } catch (Exception e) {
