@@ -1331,7 +1331,8 @@ public class CreateHandler extends HandlerCommon {
                     portIds.add(value.getResourceId());
                 }
             });
-            vpClient.syncFlowPortInfo(portIds, "add");
+            //云平台版本没有此功能
+//            vpClient.syncFlowPortInfo(portIds, "add");
         }
 
         //创建虚拟机
