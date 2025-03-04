@@ -262,7 +262,7 @@ mp:
     internal-vm-ip: ${MP_INTERNAL_VM_IP:10.108.109.10}
     internal-net-cidr: ${MP_INTERNAL_NET_CIDR:10.108.109.0/24}
     internal-net-gateway: ${MP_INTERNAL_NET_GATEWAY:10.108.109.254}
-    internal-vm-image: ${MP_INTERNAL_VM_IMAGE:info_center_adk2}
+    internal-vm-image: ${MP_INTERNAL_VM_IMAGE:info_center_adk}
   sceneplugincollection:
     wazuh-server-host: ${mp.situationaware.ext-var.wazuh-ip}
     wazuh-api-server: http://${mp.situationaware.ext-var.wazuh-ip}:15500
