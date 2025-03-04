@@ -183,16 +183,16 @@ public class CloudAppConfig {
     @Value("${mp.sceneplugincloud.dhcp_ip_allocate:true}")
     private Boolean dhcpIpAllocate;
 
-    @Value("${mp.sceneplugincloud.internal_net_cidr:110.108.109.0/24}")
+    @Value("${mp.sceneplugincloud.internal_net_cidr:10.108.109.0/24}")
     private String internalNetCidr;
 
     @Value("${mp.sceneplugincloud.internal_vm_ip:10.108.109.10}")
     private String internalVmIp;
 
-    @Value("${mp.sceneplugincloud.internal_vm_image:info_center_adk2}")
+    @Value("${mp.sceneplugincloud.internal_vm_image:info_center_adk}")
     private String internalVmImage;
 
-    @Value("${mp.sceneplugincloud.internal_net_cidr:10.108.109.254}")
+    @Value("${mp.sceneplugincloud.internal_net_gateway:10.108.109.254}")
     private String internalNetGateway;
 
     @Autowired
