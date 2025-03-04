@@ -11,6 +11,8 @@ import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.base.service.result.ObjResult;
+import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.bo.OptionBO;
 import cn.cyberpeace.mp.common.service.OptionService;
@@ -980,6 +982,16 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         GuacamoleRep guacamoleRep = GuacamoleRep.builder().accessUser(accessUser).accessIp(accessIp).id(id).vmName(vmName).nodeId(sceneElement).build();
         String jsonString = JSONObject.toJSONString(guacamoleRep);
         return new ServiceResult<>(jsonString).asResult();
+    }
+
+    @ApiOperation("获取场景类型")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class)
+    })
+    @GetMapping("/type")
+    public ObjServiceResult resumeElement(@RequestParam(required = true) String id) {
+        CsceneInstanceModel csceneInstanceModel = csceneInstanceMapper.get(id);
+        return new ObjServiceResult<>(new ObjResult<>(csceneInstanceModel.getReferenceType(), null)).asResult();
     }
 
 }
