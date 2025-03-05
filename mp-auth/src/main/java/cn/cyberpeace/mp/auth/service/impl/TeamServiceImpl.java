@@ -32,6 +32,8 @@ import com.alibaba.excel.EasyExcel;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.ObjectUtils;
@@ -83,20 +85,22 @@ public class TeamServiceImpl implements TeamService {
      */
     @Override
     public ListObjResult getPageTeam(TeamPageRequest teamPageRequest) {
-        if (StringUtils.isEmpty(teamPageRequest.getName())) {
-            HumanCondition humanCondition = new HumanCondition().orderBy(TeamModel::getCreateTime)
-                                                                .pagination(teamPageRequest.getPage(), teamPageRequest.getPageSize());
-            int total = teamMapper.total(humanCondition);
-            List<TeamModel> models = teamMapper.list(humanCondition);
-            return new ListObjResult(models, total).asResult();
 
-        } else {
-            HumanCondition humanCondition = new HumanCondition().filterContains(TeamModel::getName, teamPageRequest.getName()).orderBy(TeamModel::getCreateTime)
-                                                                .pagination(teamPageRequest.getPage(), teamPageRequest.getPageSize());
-            int total = teamMapper.total(humanCondition);
-            List<TeamModel> list = teamMapper.list(humanCondition);
-            return new ListObjResult(list, total).asResult();
+        String url = "http://10.110.3.1:8377/api/ct/admin/nbi/teams/";
+        ServiceResult ctTeamInfo = getCtTeamInfo(url);
+        JSONArray data = (JSONArray) ctTeamInfo.getData();
+        List<TeamModel> teamModel = Lists.newArrayList();
+        for (Object datum : data) {
+            JSONObject jsonObject = (JSONObject) datum;
+            TeamModel model = new TeamModel();
+            model.setLogo(jsonObject.get("team_logo").toString());
+            model.setName(jsonObject.get("team_name").toString());
+            model.setDescription(jsonObject.get("team_desc").toString());
+            model.setId(jsonObject.get("team_id").toString());
+            model.setTag(jsonObject.get("team_tag").toString());
+            teamModel.add(model);
         }
+        return new ListObjResult(teamModel,teamModel.size()).asResult();
     }
 
     /**
