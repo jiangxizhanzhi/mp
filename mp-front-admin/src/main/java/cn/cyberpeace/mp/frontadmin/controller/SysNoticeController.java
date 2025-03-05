@@ -148,8 +148,8 @@ public class SysNoticeController {
             String teamId = noticeReq.getTeamId();
             TeamRequest teamRequest = new TeamRequest();
             teamRequest.setId(teamId);
-            TeamModel team = teamService.getTeam(teamRequest);
-            noticeReq.setTeamName(team.getName());
+            String teamName = teamService.getTeamInfo(teamId);
+            noticeReq.setTeamName(teamName);
             List<TeamIdAndUserInfo> teamList = teamService.getTeamList(Lists.newArrayList(teamId));
             for (TeamIdAndUserInfo teamIdAndUserInfo : teamList) {
                 for (UserBo userBo : teamIdAndUserInfo.getUserBos()) {

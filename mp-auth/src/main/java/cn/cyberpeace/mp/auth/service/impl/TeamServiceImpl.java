@@ -4,6 +4,8 @@ import cn.cyberpeace.mp.auth.bo.Personnel.management.PersonnelManagementBo;
 import cn.cyberpeace.mp.auth.bo.excel.ExportPersonnelManagementBo;
 import cn.cyberpeace.mp.auth.bo.excel.ExportTeamBO;
 import cn.cyberpeace.mp.auth.bo.user.TeamInfoIdAndName;
+import cn.cyberpeace.mp.auth.bo.user.TeamInfoResult;
+import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.model.PersonnelManagementModel;
 import cn.cyberpeace.mp.auth.model.TeamModel;
@@ -22,6 +24,7 @@ import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.service.code.ErrorCode;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.hutool.json.JSONUtil;
@@ -31,18 +34,29 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.Lists;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.IdGenerator;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URLEncoder;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -132,7 +146,17 @@ public class TeamServiceImpl implements TeamService {
         if (StringUtils.isEmpty(teamRequest.getId())) {
             throw new MpRuntimeException( AuthErrorCode.CLAN_QUERY_MISSING_PARAMETERS);
         }
-        TeamModel teamModel = teamMapper.get(teamRequest.getId());
+        String url = "http://10.110.3.1:8377/api/ct/admin/nbi/team/?team_id=" + teamRequest.getId();
+        ServiceResult serviceResult = getCtTeamInfo(url);
+        TeamModel teamModel = new TeamModel();
+        TeamInfoResult teamInfoResult = JSON.parseObject(serviceResult.getData().toString(), TeamInfoResult.class);
+        if (!ObjectUtils.isEmpty(teamInfoResult)) {
+            teamModel.setName(teamInfoResult.getTeamName());
+            teamModel.setId(teamInfoResult.getTeamId());
+            teamModel.setDescription(teamInfoResult.getTeamDesc());
+            teamModel.setLogo(teamInfoResult.getTeamLogo());
+        }
+
         return teamModel;
     }
 
@@ -309,16 +333,28 @@ public class TeamServiceImpl implements TeamService {
      */
     @Override
     public List<TeamIdAndUserInfo>  getTeamList(List<String> list) {
-        //根据队伍id查询该队伍下的人员信息
+        String teamId = list.get(0);
+        String url = "http://10.110.3.1:8377/api/ct/admin/nbi/team_users/?team_id=" + teamId;
         List<TeamIdAndUserInfo> teamIdAndUserInfos = Lists.newArrayList();
-        for (String teamId : list) {
-            TeamIdAndUserInfo teamIdAndUserInfo = new TeamIdAndUserInfo();
-            teamIdAndUserInfo.setTeamId(teamId);
-            HumanCondition humanCondition = new HumanCondition().filterEqual(PersonnelManagementModel::getTeamId, teamId);
-            List<String> userIds = personnelManagementMapper.list(humanCondition).stream().map(PersonnelManagementModel::getUserId).collect(Collectors.toList());
-            teamIdAndUserInfo.getUserBos().addAll(tenantUserService.listByUserIds(userIds));
-            teamIdAndUserInfos.add(teamIdAndUserInfo);
+
+        ServiceResult serviceResult = getCtTeamInfo(url);
+
+        //获取数据
+        String data = serviceResult.getData().toString();
+        //收集用户id
+        List<String>userIds = Lists.newArrayList();
+        JSONArray jsonData = JSONArray.parseArray(data);
+
+        for (Object jsonDatum : jsonData) {
+            JSONObject jsonObject = (JSONObject) jsonDatum;
+            String userId = (String) jsonObject.get("id");
+            userIds.add(userId);
         }
+        List<UserBo> userBos = tenantUserService.listByUserIds(userIds);
+        TeamIdAndUserInfo teamIdAndUserInfo = new TeamIdAndUserInfo();
+        teamIdAndUserInfo.setTeamId(teamId);
+        teamIdAndUserInfo.setUserBos(userBos);
+        teamIdAndUserInfos.add(teamIdAndUserInfo);
 
         return teamIdAndUserInfos;
     }
@@ -345,9 +381,41 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public TeamInfoIdAndName getTeamInfoByUser(String userId) {
-
-        TeamInfoIdAndName teamInfoIdAndName = personnelManagementMapper.selectByUserIdToTeamInfo(userId);
+        String url = "http://10.110.3.1:8377/api/ct/admin/nbi/user_team/?user_id=" + userId;
+        ServiceResult ctTeamInfo = getCtTeamInfo(url);
+        JSONObject data = (JSONObject) ctTeamInfo.getData();
+        TeamInfoIdAndName teamInfoIdAndName = new TeamInfoIdAndName();
+        teamInfoIdAndName.setId((String) data.get("team_id"));
+        teamInfoIdAndName.setName((String) data.get("team_name"));
         return teamInfoIdAndName;
+    }
+
+    @Override
+    public String getTeamInfo(String teamId) {
+        String url = "http://10.110.3.1:8377/api/ct/admin/nbi/team/?team_id=" + teamId;
+        String teamName = null;
+        //获取数据
+        ServiceResult ctTeamInfo = getCtTeamInfo(url);
+        JSONObject data = (JSONObject) ctTeamInfo.getData();
+        teamName = (String) data.get("team_name");
+        return teamName;
+    }
+
+    private static ServiceResult getCtTeamInfo(String url) {
+        try (CloseableHttpClient client = HttpClients.createDefault()) {
+            HttpGet request = new HttpGet(url);
+            // 设置请求头
+            request.addHeader("accept", "application/json");
+            request.addHeader("CLIENTID", "84261d495c414e");
+            request.addHeader("CLIENTSECRET", "2112f4b855264ad7b1a4209737fc7836");
+
+            HttpResponse response = client.execute(request);
+            String responseBody = EntityUtils.toString(response.getEntity(), "UTF-8");
+            ServiceResult serviceResult = JSON.parseObject(responseBody, ServiceResult.class);
+            return serviceResult;
+        } catch (Exception e) {
+            throw new MpRuntimeException(AuthErrorCode.GET_CT_TEAM,e.getMessage());
+        }
     }
 
     private List<String> checkUserNameExist(List<String> userNameList) {

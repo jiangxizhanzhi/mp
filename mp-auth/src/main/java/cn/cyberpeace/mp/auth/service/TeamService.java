@@ -41,4 +41,6 @@ public interface TeamService  {
     String getTeamInfoByUserId(String userId);
 
     TeamInfoIdAndName getTeamInfoByUser(String userId);
+
+    String getTeamInfo(String teamId);
 }

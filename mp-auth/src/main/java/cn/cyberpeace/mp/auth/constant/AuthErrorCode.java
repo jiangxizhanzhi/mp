@@ -153,7 +153,8 @@ public enum AuthErrorCode implements ErrorCode {
     USERS_CANNOT_ADD_TWO_TEAMS("MP-110168","users_cannot_add_two_teams"),
     TEAM_NAME_DOES_NOT_EXIST("MP-110169","team_name_does_not_exist"),
     USER_NOT_EXIST("MP-110170","user_not_exist"),
-    PEOPLE_NOT_JOIN_TEAM("MP-110171","people_not_join_team");
+    PEOPLE_NOT_JOIN_TEAM("MP-110171","people_not_join_team"),
+    GET_CT_TEAM("MP-110172","ct_get_team");
 
 
     AuthErrorCode(String code, String message) {
