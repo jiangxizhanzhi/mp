@@ -162,6 +162,7 @@ public class OutputFlowInfoController {
             response.setTaskId(m.getId());
             response.setCsceneId(m.getCsceneId());
             response.setCsceneNodeId(m.getCsceneNodeId());
+
             result.add(response);
         }
         return new ListObjServiceResult<>(new ListObjResult<>(result, result.size())).asResult();

@@ -231,7 +231,7 @@ public class AddTaskByRemoteFlowService2 implements IAddTaskService {
             // 从远程服务上查询流量的信息
             var remoteFlowInfos = this.getRemoteFlowInfos(flowIds);
             // 创建流量任务
-            var flowTaskTaskModelList = this.createFlowTasks(actuatorId, addFlowTaskParams.getNodeId(), "", addFlowTaskParams.getTargetIp(), addFlowTaskParams.getNetworkId(), remoteFlowInfos);
+            var flowTaskTaskModelList = this.createFlowTasks(actuatorId, addFlowTaskParams.getNodeId(), addFlowTaskParams.getNodeName(), "", addFlowTaskParams.getTargetIp(), addFlowTaskParams.getNetworkId(), remoteFlowInfos);
             // 创建任务配置
             this.createTaskConfigs(flowTaskTaskModelList, addFlowTaskParams.getTasks(), remoteFlowInfos);
         }
@@ -269,6 +269,7 @@ public class AddTaskByRemoteFlowService2 implements IAddTaskService {
             if (!map.containsKey(e.getId())) {
                 continue;
             }
+            map.get(e.getId()).setNodeName(e.getName());
             for (var p : e.getPorts()) {
                 var cloudPort = cloudPorts.get(p.getId());
                 String networkId = cloudPort.getAuxiliaryNetworkId();
@@ -295,6 +296,7 @@ public class AddTaskByRemoteFlowService2 implements IAddTaskService {
                 AddFlowTaskParams params = new AddFlowTaskParams();
                 params.setActuatorId(m.getId());
                 params.setNodeId(e.getCsceneNodeId());
+                params.setNodeName(e.getCsceneNodeId());
                 params.setTasks(new ArrayList<>());
                 map.put(e.getCsceneNodeId(), params);
             }
@@ -367,7 +369,7 @@ public class AddTaskByRemoteFlowService2 implements IAddTaskService {
         return flow;
     }
 
-    private List<FlowTaskTaskModel> createFlowTasks(String actuatorId, String nodeId, String portId, String targetIp, String networkId, List<RemoteFlowInfo> remoteFlowInfos) {
+    private List<FlowTaskTaskModel> createFlowTasks(String actuatorId, String nodeId,String nodeName, String portId, String targetIp, String networkId, List<RemoteFlowInfo> remoteFlowInfos) {
         // 生成流量任务
         List<FlowTaskTaskModel> flowTaskTaskModelList = new ArrayList<FlowTaskTaskModel>();
         for (var flow : remoteFlowInfos) {
@@ -378,7 +380,7 @@ public class AddTaskByRemoteFlowService2 implements IAddTaskService {
             flowTaskTaskModel.setPortId(portId);
             flowTaskTaskModel.setNodeId(nodeId);
             flowTaskTaskModel.setNodeIp(targetIp);
-            flowTaskTaskModel.setNodeName("");
+            flowTaskTaskModel.setNodeName(nodeName);
             flowTaskTaskModel.setNodeNetworkId(networkId);
             flowTaskTaskModel.setInteractiveType(flow.getInteractiveType());
             flowTaskTaskModel.setResourceType(StringUtils.isNotEmpty(flow.getPcapFile()) ? 0 : 1);

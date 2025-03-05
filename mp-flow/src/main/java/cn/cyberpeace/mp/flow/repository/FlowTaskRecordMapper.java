@@ -54,7 +54,7 @@ public interface FlowTaskRecordMapper extends BaseModelMapper<FlowTaskRecordMode
      * @param sceneId
      * @return
      */
-    LocalDateTime getFirstTime(@Param("sceneId") String sceneId);
+    LocalDateTime getFirstTime(@Param("actuatorId") String actuatorId);
 
     /**
      * 根据任务id统计总数据
@@ -62,7 +62,7 @@ public interface FlowTaskRecordMapper extends BaseModelMapper<FlowTaskRecordMode
      * @param conditions
      * @return
      */
-    List<FlowStatisticsTemp> statisticsTaskId(@Param("sceneId") String sceneId, @Param("conditions") List<FlowStatisticalCondition> conditions);
+    List<FlowStatisticsTemp> statisticsTaskId(@Param("actuatorId") String actuatorId, @Param("conditions") List<FlowStatisticalCondition> conditions);
 
     /**
      * 根据任务id统计总数据(某些字段需要统计已经停止的任务)

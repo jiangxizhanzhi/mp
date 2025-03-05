@@ -14,7 +14,6 @@ import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.flow.bo.FlowNodeTxBps;
-import cn.cyberpeace.mp.flow.bo.FlowRealTimeRate;
 import cn.cyberpeace.mp.flow.bo.FlowStatisticalCondition;
 import cn.cyberpeace.mp.flow.bo.FlowStatisticsDetail;
 import cn.cyberpeace.mp.flow.bo.FlowStatisticsInfo;
@@ -44,10 +43,10 @@ import javax.annotation.Resource;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * @ClassName FlowTaskRecordServiceImpl
@@ -82,7 +81,31 @@ public class FlowTaskRecordService extends BaseModelServiceImpl<FlowTaskRecordMo
      * @return
      */
     public FlowSummary queryFlowSummary(String actuatorId) {
-        FlowSummary flowSummary = this.getModelMapper().queryFlowSummary(actuatorId);
+        FlowSummary flowSummary = new FlowSummary();
+        flowSummary.setTaskNum(0);
+        flowSummary.setRunningTask(0);
+        flowSummary.setSuccessCount(0);
+        flowSummary.setErrorCount(0);
+        flowSummary.setTotalNode(0);
+        flowSummary.setRunnedCount(0);
+        flowSummary.setRunningNode(0);
+
+        var list = flowTaskTaskMapper.list(new HumanCondition().filterEqual(FlowTaskTaskModel::getActuatorId, actuatorId));
+        Set<String> runningNode = new HashSet<>();
+        Set<String> totalNode = new HashSet<>();
+        for (var m : list) {
+            flowSummary.setTaskNum(flowSummary.getTaskNum() + 1);
+            flowSummary.setSuccessCount(flowSummary.getSuccessCount() + m.getSuccessCount());
+            flowSummary.setErrorCount(flowSummary.getErrorCount() + m.getErrorCount());
+            flowSummary.setRunnedCount(flowSummary.getSuccessCount() + flowSummary.getErrorCount());
+            totalNode.add(m.getNodeId());
+            if (m.getTaskStatus() == TaskTaskStatusEnum.RUNNING.toValue()) {
+                runningNode.add(m.getNodeId());
+                flowSummary.setRunningTask(flowSummary.getRunningTask() + 1);
+            }
+        }
+        flowSummary.setRunningNode(runningNode.size());
+        flowSummary.setTotalNode(totalNode.size());
         return flowSummary;
     }
 
@@ -105,11 +128,11 @@ public class FlowTaskRecordService extends BaseModelServiceImpl<FlowTaskRecordMo
 
     /**
      * 仿真统计
-     * @param sceneId
+     * @param actuatorId
      * @return
      */
-    public FlowStatisticsInfo flowStatistics(String sceneId) {
-        log.info("FlowTaskRecordServiceImpl.flowStatistics begin. id:{}", sceneId);
+    public FlowStatisticsInfo flowStatistics(String actuatorId) {
+        log.info("FlowTaskRecordServiceImpl.flowStatistics begin. id:{}", actuatorId);
         FlowStatisticsInfo flowStatisticsInfo = new FlowStatisticsInfo();
         flowStatisticsInfo.setTotalTxL2(0L);
         flowStatisticsInfo.setTotalTxL1(0L);
@@ -119,14 +142,14 @@ public class FlowTaskRecordService extends BaseModelServiceImpl<FlowTaskRecordMo
         flowStatisticsInfo.setDropRate(0L);
         flowStatisticsInfo.setObytes(0L);
         flowStatisticsInfo.setOerrors(0L);
-        List<FlowStatisticalCondition> conditionList = this.getCondition(sceneId);
+        List<FlowStatisticalCondition> conditionList = this.getCondition(actuatorId);
         if (CollectionUtils.isEmpty(conditionList)) {
             log.info("没有执行记录");
             return flowStatisticsInfo;
         }
-        List<FlowStatisticsTemp> tempList = this.getModelMapper().statisticsTaskId(sceneId, conditionList);
+        List<FlowStatisticsTemp> tempList = this.getModelMapper().statisticsTaskId(actuatorId, conditionList);
         List<FlowStatisticsTemp> tempContainOldList = this.getModelMapper()
-                .statisticsTaskIdContainOld(sceneId, conditionList);
+                .statisticsTaskIdContainOld(actuatorId, conditionList);
         List<FlowStatisticsDetail> txBpsList = new ArrayList<>();
         List<FlowStatisticsDetail> txPpsList = new ArrayList<>();
         List<FlowStatisticsDetail> latencyList = new ArrayList<>();
@@ -229,6 +252,7 @@ public class FlowTaskRecordService extends BaseModelServiceImpl<FlowTaskRecordMo
         if (Objects.nonNull(jsonMessage.get("flow_record"))) {
             JSONObject data = jsonMessage.getJSONObject("flow_record");
             FlowTaskRecordModel flowTaskRecordModel = new FlowTaskRecordModel();
+            flowTaskRecordModel.setActuatorId(flowTaskTaskModel.getActuatorId());
             flowTaskRecordModel.setTaskId(data.getString("task_uuid"));
             flowTaskRecordModel.setTxBps(data.getLong("tx_bps"));
             flowTaskRecordModel.setTxPps(data.getLong("tx_pps"));
@@ -319,9 +343,9 @@ public class FlowTaskRecordService extends BaseModelServiceImpl<FlowTaskRecordMo
      * 获取统计条件
      * @return
      */
-    private List<FlowStatisticalCondition> getCondition(String sceneId) {
-        log.info("FlowTaskRecordServiceImpl.getCondition begin. sceneId:{}", sceneId);
-        LocalDateTime startTime = this.getModelMapper().getFirstTime(sceneId);
+    private List<FlowStatisticalCondition> getCondition(String actuatorId) {
+        log.info("FlowTaskRecordServiceImpl.getCondition begin. sceneId:{}", actuatorId);
+        LocalDateTime startTime = this.getModelMapper().getFirstTime(actuatorId);
         if (startTime == null) {
             return null;
         }

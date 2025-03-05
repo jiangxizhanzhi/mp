@@ -8,8 +8,6 @@ import cn.cyberpeace.mp.flow.bo.StartFlowActuatorParams;
 import cn.cyberpeace.mp.flow.constant.ControllerConstant;
 import cn.cyberpeace.mp.flow.repository.FlowActuatorMapper;
 import cn.cyberpeace.mp.flow.response.ActuatorSceneName;
-import cn.cyberpeace.mp.flow.response.ActuatorStatistic;
-import cn.cyberpeace.mp.flow.response.ActuatorTaskCount;
 import cn.cyberpeace.mp.flow.response.FlowActuatorResponse;
 import cn.cyberpeace.mp.flow.service.FlowActuatorService;
 import io.swagger.annotations.Api;
@@ -96,6 +94,7 @@ public class FlowActuatorController {
         flowActuatorService.deleteFlowActuator(params.getActuatorId());
         return new ServiceResult<>(true).asResult();
     }
+
 
     @Getter
     @Setter

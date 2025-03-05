@@ -14,4 +14,5 @@ public class AddFlowTaskParams {
     String networkId;
     String targetIp;
     String nodeId;
+    String nodeName;
 }

@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
-//@Service("saiNingCloudClient")
+@Service("saiNingCloudClient")
 public class SaiNingCloudClient implements ICloudClient {
 
     private static final String VIRTUAL_MACHINE_GET_URL = "/v1/instances/{instance_id}";

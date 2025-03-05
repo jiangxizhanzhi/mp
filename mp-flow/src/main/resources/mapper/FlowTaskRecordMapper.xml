@@ -43,7 +43,7 @@
     <select id="getFirstTime" resultType="java.time.LocalDateTime">
         select min(create_time) as firstTime
         from mp_flow_task_record
-        where task_id in (select id from mp_flow_task_task where scene_id=#{sceneId})
+        where task_id in (select id from mp_flow_task_task where actuator_id=#{actuatorId})
     </select>
 
     <select id="statisticsTaskId" parameterType="java.util.Map"
@@ -56,7 +56,7 @@
             where (task_id,create_time) in
             (select task_id,max(create_time)
             from mp_flow_task_record
-            where task_id in (select id from mp_flow_task_task where scene_id=#{sceneId})
+            where task_id in (select id from mp_flow_task_task where actuator_id=#{actuatorId})
             and create_time &lt;= #{item.endTime} and create_time &gt; #{item.startTime} group by task_id)
         </foreach>
         order by statisticalTime
