@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.scene.core.bo.base;
 
 import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -23,4 +24,8 @@ public abstract class BaseSceneBO<M extends BaseSceneModel, T extends BaseSceneB
     private LocalDateTime updateTime;
     @ApiModelProperty(value = "是否是分靶场部分拓扑")
     private boolean partScene = false;
+    @ApiModelProperty(value = "合肥电院定制字段，vpn客户端需要暴露的局域网段，默认是192.168.1.0/24")
+    private String clientLan;
+    @ApiModelProperty(value = "第三方靶场启动的vpnServer端地址")
+    private String serverVpnIp;
 }

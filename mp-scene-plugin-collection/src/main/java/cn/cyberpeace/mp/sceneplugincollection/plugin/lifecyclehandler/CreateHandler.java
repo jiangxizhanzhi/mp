@@ -22,12 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -106,6 +101,21 @@ public class CreateHandler extends HandlerCommon {
 
     public void create() {
         prepareEventProcess(SceneModel.Event.CREATE, SceneProcess.class, ElementProcess.class);
+        if (getPluginHandler().getScene().getEnableFlowCollect()) {
+            // 创建流量采集器
+            runSceneProgress(SceneProcess.CREATE_FLOW_COLLECTOR, () -> {
+                var containerCreateData = getFlowCollector().createCollectorWithFullReturn();
+                var flowCollectorId = containerCreateData.getName();
+                getPluginHandler().getScene().setFlowCollector(flowCollectorId);
+                getPluginHandler().getSceneHandler().setArkimeIp(containerCreateData.getNetworks().get(0).getFixedIp());
+                getPluginHandler().getSceneHandler().setArkimeRunHost(containerCreateData.getHost());
+                //有arkime ip了，就启动vpn 虚机
+                if (Objects.nonNull(getPluginHandler().getSceneHandler().getVpnMachineRunnable())) {
+                    getPluginHandler().getSceneHandler().getVpnMachineRunnable().run();
+                }
+            });
+        }
+        // 创建虚机
 
         // TODO 流量镜像应该是基于网络端口的, 这里是基于节点的
         Set<String> collectorVmInstanceIds = new HashSet<>();
@@ -150,11 +160,6 @@ public class CreateHandler extends HandlerCommon {
         boolean enableMirror = !mirrorVmInstanceIds.isEmpty() || !mirrorContainerInstanceIds.isEmpty();
         if (enableCollector) {
             var sceneId = getPluginHandler().getSrcScene().getEid();
-            // 创建流量采集器
-            runSceneProgress(SceneProcess.CREATE_FLOW_COLLECTOR, () -> {
-                var flowCollectorId = getFlowCollector().createCollector();
-                getPluginHandler().getScene().setFlowCollector(flowCollectorId);
-            });
 
             var flowCollectorId = getPluginHandler().getScene().getFlowCollector();
             runSceneProgress(SceneProcess.BIND_FLOW_COLLECT_PORTS, () -> {
@@ -169,11 +174,7 @@ public class CreateHandler extends HandlerCommon {
             getFlowCollector().bindEntityNetworkPorts(sceneId, new ArrayList<>(mirrorVmInstanceIds),
                     new ArrayList<>(mirrorContainerInstanceIds));
         } else if (creatFlowCollector) {
-            // 只创建流量采集器
-            runSceneProgress(SceneProcess.CREATE_FLOW_COLLECTOR, () -> {
-                var flowCollectorId = getFlowCollector().createCollector();
-                getPluginHandler().getScene().setFlowCollector(flowCollectorId);
-            });
+
         }
 
         // 绑定探针agent到探针采集器

@@ -19,6 +19,10 @@ public class BaseSceneModel extends BaseModel {
     private String displayContext;
     @DefaultBool
     private Boolean deleted;
+    @DefaultStr("192.168.1.0/24")
+    private String clientLan;
+    @DefaultBool
+    private String serverVpnIp;
 
     @Override
     public boolean hasDeleted() {

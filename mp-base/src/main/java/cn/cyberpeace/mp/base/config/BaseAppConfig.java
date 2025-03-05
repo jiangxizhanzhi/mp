@@ -108,6 +108,9 @@ public class BaseAppConfig {
     @Value("${mp.base.swagger-doc-url:}")
     private String swaggerDocUrl;
 
+    @Value("${mp.base.mp-ip}")
+    private String mpIp;
+
     public String getHomeDir() {
         if (!StringUtils.isEmpty(homeDir)) {
             return homeDir;
