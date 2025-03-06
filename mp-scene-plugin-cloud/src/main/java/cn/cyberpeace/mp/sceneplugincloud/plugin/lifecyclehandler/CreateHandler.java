@@ -665,10 +665,12 @@ public class CreateHandler extends HandlerCommon {
             List<String> pushRouteToServerLanCommands = new ArrayList<>();
             getPluginHandler().getElementMap().forEach((nodeId, cloudElement) -> {
                 cloudElement.getDeriveNetworks().forEach(deriveNetwork -> {
-                    String[] cidrArray = deriveNetwork.getNetwork().getCidr().split("/");
-                    String maskIp = Ipv4Util.getMaskByMaskBit(Integer.parseInt(cidrArray[1]));
-                    String cidrIp = Ipv4Util.longToIpv4(Ipv4Util.ipv4ToLong(cidrArray[0]) & Ipv4Util.ipv4ToLong(maskIp));
-                    pushRouteToServerLanCommands.add(String.format(pushRouteToServerLanCommandTemplate, cidrIp, maskIp));
+                    if (StringUtils.isNotEmpty(deriveNetwork.getNetwork().getCidr())) {
+                        String[] cidrArray = deriveNetwork.getNetwork().getCidr().split("/");
+                        String maskIp = Ipv4Util.getMaskByMaskBit(Integer.parseInt(cidrArray[1]));
+                        String cidrIp = Ipv4Util.longToIpv4(Ipv4Util.ipv4ToLong(cidrArray[0]) & Ipv4Util.ipv4ToLong(maskIp));
+                        pushRouteToServerLanCommands.add(String.format(pushRouteToServerLanCommandTemplate, cidrIp, maskIp));
+                    }
                 });
             });
 
