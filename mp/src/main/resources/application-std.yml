@@ -29,6 +29,7 @@ spring:
     #      enabled: ${MP_FLYWAY_ENABLED_VALUE:false}
     clean-disabled: true
     enabled: ${spring.flyway.ext-var.enabled}
+    out-of-order: true
   application:
     name: mp
   servlet:
@@ -98,6 +99,7 @@ mp:
   #      cp-ip: ${CP_IP:10.100.7.1}                # 云平台适配层接口地址
   #      cp-port: ${CP_PORT:11111}
   base:
+    mp-ip: ${mp.common.ext-var.mp-ip}
     #    ext-var:
     #      fdfs-ip: ${FDFS_IP:10.100.7.1}
     #      fdfs-tracker-port: ${FDFS_TRACKER_SERVERS_PORT:22122}

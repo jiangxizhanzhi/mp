@@ -42,6 +42,7 @@ import cn.cyberpeace.mp.scene.repository.SceneElementPortConnectionMapper;
 import cn.cyberpeace.mp.scene.repository.SceneElementPortMapper;
 import cn.cyberpeace.mp.scene.repository.SceneMapper;
 import cn.cyberpeace.mp.scene.repository.ScenePieceMapper;
+import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -135,6 +136,18 @@ public class SceneHandler extends BaseSceneHandler<
     private final List<SceneReporter> reporters = SceneReporter.getReporters();
 
     private SceneStageRecorder sceneStageRecorder;
+
+    @Getter
+    @Setter
+    private String arkimeIp;
+
+    @Getter
+    @Setter
+    private String arkimeRunHost;
+
+    @Getter
+    @Setter
+    private Runnable vpnMachineRunnable;
 
     public void setSceneStageRecorder(SceneStageRecorder sceneStageRecorder) {
         this.sceneStageRecorder = sceneStageRecorder;

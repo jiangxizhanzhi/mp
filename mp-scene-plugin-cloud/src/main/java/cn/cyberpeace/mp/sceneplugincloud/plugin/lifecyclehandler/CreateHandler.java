@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.base.util.basic.IntUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.mptool.CollectionUtil;
 import cn.cyberpeace.mp.base.util.mptool.FileNameUtil;
+import cn.cyberpeace.mp.base.util.mptool.Ipv4Util;
 import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
@@ -54,6 +55,11 @@ public class CreateHandler extends HandlerCommon {
     private VirtualDynamips vdClient = new VirtualDynamips();
 
     private final Map<String, BaseNpcData.NetWorkNpcInfo> network2Info = new ConcurrentHashMap<>();
+
+    private class HfdyVpnImage {
+        public static final String VPN_SERVER = "hfdy-vpn-server";
+        public static final String VPN_CLIENT = "hfdy-vpn-client";
+    }
 
     public static class SceneProcess {
         public static final SceneEventProcess CREATE_AUXILIARY_NETWORKS = new SceneEventProcess("create_auxiliary_networks", "sceneplugincloud.event.create_auxiliary_network", "create_network", 1);
@@ -631,6 +637,10 @@ public class CreateHandler extends HandlerCommon {
             });
             userAndPassword.entrySet().forEach(e -> builder.addUser(e.getKey(), e.getValue()));
         }
+
+        addHFDYVpnInitCommand(commands, cloudElement);
+
+
         builder.addAllInitCommands(commands);
         if (!getHandlerUtils().getDnsIpAndDomains().isEmpty()) {
             builder.addAllDns(getHandlerUtils().getDnsIpAndDomains());
@@ -648,6 +658,60 @@ public class CreateHandler extends HandlerCommon {
         return command;
     }
 
+    void addHFDYVpnInitCommand(List<String> existCommands, CloudPluginSceneElementBO currentCloudElement) {
+        if (HfdyVpnImage.VPN_SERVER.equals(currentCloudElement.getImage())) {
+            String pushRouteToServerLanCommandTemplate = "push \"route %s %s\"";
+
+            List<String> pushRouteToServerLanCommands = new ArrayList<>();
+            getPluginHandler().getElementMap().forEach((nodeId, cloudElement) -> {
+                cloudElement.getDeriveNetworks().forEach(deriveNetwork -> {
+                    String[] cidrArray = deriveNetwork.getNetwork().getCidr().split("/");
+                    String maskIp = Ipv4Util.getMaskByMaskBit(Integer.parseInt(cidrArray[1]));
+                    String cidrIp = Ipv4Util.longToIpv4(Ipv4Util.ipv4ToLong(cidrArray[0]) & Ipv4Util.ipv4ToLong(maskIp));
+                    pushRouteToServerLanCommands.add(String.format(pushRouteToServerLanCommandTemplate, cidrIp, maskIp));
+                });
+            });
+
+            String pushRouteToServerLanParameter = String.join("\n", pushRouteToServerLanCommands);
+
+
+            String routeToClientLanCommandTemplate = "route %s %s";
+            String irouteToClientLanCommandTemplate = "iroute %s %s";
+            String clientLan = getPluginHandler().getSceneHandler().getScene().getClientLan();
+            String[] clientLanArray = clientLan.split("/");
+            String maskIp = Ipv4Util.getMaskByMaskBit(Integer.parseInt(clientLanArray[1]));
+            String cidrIp = Ipv4Util.longToIpv4(Ipv4Util.ipv4ToLong(clientLanArray[0]) & Ipv4Util.ipv4ToLong(maskIp));
+            String routeToClientLanParameter = String.format(routeToClientLanCommandTemplate, cidrIp, maskIp);
+            String irouteToClientLanParameter = String.format(irouteToClientLanCommandTemplate, cidrIp, maskIp);
+
+            String arkimeIp = getPluginHandler().getSceneHandler().getArkimeIp();
+
+            String vpnServerCommand = String.format("bash /etc/openvpn/start_server.sh \"%s\" \"%s\" \"%s\" \"%s\"", pushRouteToServerLanParameter,
+                    routeToClientLanParameter, irouteToClientLanParameter, arkimeIp);
+            log.info("vpn server cloud init command : " + vpnServerCommand);
+            existCommands.add(vpnServerCommand);
+        } else if (HfdyVpnImage.VPN_CLIENT.equals(currentCloudElement.getImage())) {
+            String serverVpnIp = getPluginHandler().getSceneHandler().getScene().getServerVpnIp();
+            String mpIp = CloudSingleton.cloudAppConfig.getMpIp();
+            String arkimeIp = getPluginHandler().getSceneHandler().getArkimeIp();
+            String controllerHostName = getPluginHandler().getSceneHandler().getArkimeRunHost();
+
+            String startVpnClientCommand = String.format("/etc/openvpn/start_client.sh %s", serverVpnIp);
+            String configMpIpCommand = String.format("echo \"%s %s %s\" > /etc/arkime-bridge/mp-ip.txt", mpIp, controllerHostName, arkimeIp);
+            String configServerIpCommand = String.format("echo %s > /etc/arkime-bridge/server-ip.txt", serverVpnIp);
+            String execFileBridgeCommand = String.format("nohup /etc/arkime-bridge/file_bridge > /etc/arkime-bridge/file_bridge.log 2>&1 &");
+
+
+            existCommands.add(startVpnClientCommand);
+            existCommands.add(configMpIpCommand);
+            existCommands.add(configServerIpCommand);
+            existCommands.add(execFileBridgeCommand);
+
+        }
+
+
+
+    }
     /**
      * 容器不保证有 curl/unzip 无法正常通过系统命令方式初始化
      * 容器默认linux
@@ -1009,67 +1073,74 @@ public class CreateHandler extends HandlerCommon {
     }
 
     protected void createVirtualMachine(CloudPluginSceneElementBO cloudElement) {
-        if (ElementTypeUtils.isExternal(cloudElement)) {
-            // 外部虚拟机 需要连接网络
-            var nics = CollectionUtils.emptyNull(genVirutalNics(cloudElement));
-            if (nics != null && nics.size() > 0) {
-                List<VirtualNic> created = new ArrayList<>();
-                nics.forEach(n -> {
-                    VirtualMachineAddPortData port = new VirtualMachineAddPortData();
-                    port.setFixedIp(n.getFixedIp());
-                    port.setNetworkId(n.getNetworkId());
-                    var result = vmClient.addPort(cloudElement.getResourceId(), port);
-                    VirtualNic virtualNic = new VirtualNic();
-                    virtualNic.setPortId(result.getPortId());
-                    virtualNic.setNetworkId(result.getNetworkId());
-                    virtualNic.setFixedIp(result.getFixedIp());
-                    created.add(virtualNic);
-                });
-                this.receiveVirtualPortInfo(cloudElement, created);
+        Runnable virtualMachineRunnable = () -> {
+            if (ElementTypeUtils.isExternal(cloudElement)) {
+                // 外部虚拟机 需要连接网络
+                var nics = CollectionUtils.emptyNull(genVirutalNics(cloudElement));
+                if (nics != null && nics.size() > 0) {
+                    List<VirtualNic> created = new ArrayList<>();
+                    nics.forEach(n -> {
+                        VirtualMachineAddPortData port = new VirtualMachineAddPortData();
+                        port.setFixedIp(n.getFixedIp());
+                        port.setNetworkId(n.getNetworkId());
+                        var result = vmClient.addPort(cloudElement.getResourceId(), port);
+                        VirtualNic virtualNic = new VirtualNic();
+                        virtualNic.setPortId(result.getPortId());
+                        virtualNic.setNetworkId(result.getNetworkId());
+                        virtualNic.setFixedIp(result.getFixedIp());
+                        created.add(virtualNic);
+                    });
+                    this.receiveVirtualPortInfo(cloudElement, created);
+                }
+                return;
             }
-            return;
-        }
-        var srcElement = cloudElement.getSrcElement();
-        var createData = new VirtualMachineCreateData();
-        createData.setRequestUser(TextUtils.emptyNull(getHandlerUtils().getRequestUser()));
+            var srcElement = cloudElement.getSrcElement();
+            var createData = new VirtualMachineCreateData();
+            createData.setRequestUser(TextUtils.emptyNull(getHandlerUtils().getRequestUser()));
 //        createData.setDepartment(Optional.ofNullable(getHandlerUtils().getRequestUserOrg()).orElse(StringUtils.EMPTY));
 //        createData.setScene(Optional.ofNullable(getPluginHandler().getSrcScene().getName()).orElse(StringUtils.EMPTY));
-        createData.setName(HandlerUtils.genResourceName(srcElement.getEid()));
-        createData.setImage(cloudElement.getImage());
-        createData.setCpu(IntUtils.zeroNull(srcElement.getCpu()));
-        createData.setRam(IntUtils.zeroNull(srcElement.getRam()));
-        createData.setDisk(IntUtils.zeroNull(srcElement.getDisk()));
-        if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(cloudElement.getEntityUsbs()) && StringUtils.isNotEmpty(cloudElement.getEntityUsbs().get(0).getHost())) {
-            createData.setHost(cloudElement.getEntityUsbs().get(0).getHost());
-        }
-        if (Boolean.TRUE.equals(cloudElement.getInitSupport())) {
-            createData.setUserData(TextUtils.emptyNull(combineInitCommand(cloudElement)));
-        }
-        createData.setNetworks(CollectionUtils.emptyNull(genVirutalNics(cloudElement)));
-        if (StringUtils.isNotEmpty(cloudElement.getIsoAttachFilename()) && StringUtils.isNotEmpty(cloudElement.getIsoTmpdirUuid())) {
-            createData.setIsoAttach(true);
-        }
-        var virtualMachine = vmClient.create(createData);
-        cloudElement.setResourceId(virtualMachine.getId());
-        cloudElement.setHost(virtualMachine.getHost());
+            createData.setName(HandlerUtils.genResourceName(srcElement.getEid()));
+            createData.setImage(cloudElement.getImage());
+            createData.setCpu(IntUtils.zeroNull(srcElement.getCpu()));
+            createData.setRam(IntUtils.zeroNull(srcElement.getRam()));
+            createData.setDisk(IntUtils.zeroNull(srcElement.getDisk()));
+            if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(cloudElement.getEntityUsbs()) && StringUtils.isNotEmpty(cloudElement.getEntityUsbs().get(0).getHost())) {
+                createData.setHost(cloudElement.getEntityUsbs().get(0).getHost());
+            }
+            if (Boolean.TRUE.equals(cloudElement.getInitSupport())) {
+                createData.setUserData(TextUtils.emptyNull(combineInitCommand(cloudElement)));
+            }
+            createData.setNetworks(CollectionUtils.emptyNull(genVirutalNics(cloudElement)));
+            if (StringUtils.isNotEmpty(cloudElement.getIsoAttachFilename()) && StringUtils.isNotEmpty(cloudElement.getIsoTmpdirUuid())) {
+                createData.setIsoAttach(true);
+            }
+            var virtualMachine = vmClient.create(createData);
+            cloudElement.setResourceId(virtualMachine.getId());
+            cloudElement.setHost(virtualMachine.getHost());
 
-        receiveVirtualPortInfo(cloudElement, virtualMachine.getNetworks());
+            receiveVirtualPortInfo(cloudElement, virtualMachine.getNetworks());
 
-        if (ElementTypeUtils.isCoreRouter(cloudElement)) {
-            this.configVyosNetwork(cloudElement);
-        }
+            if (ElementTypeUtils.isCoreRouter(cloudElement)) {
+                this.configVyosNetwork(cloudElement);
+            }
 
-        if (StringUtils.isNotEmpty(cloudElement.getIsoAttachFilename()) && StringUtils.isNotEmpty(cloudElement.getIsoTmpdirUuid())) {
-            this.attachISO(cloudElement);
-        }
-        if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(cloudElement.getVirtualUsbs())) {
-            this.attachVirtualUsbs(cloudElement);
-        }
-        if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(cloudElement.getEntityUsbs())) {
-            this.attachEntityUsbs(cloudElement);
-        }
+            if (StringUtils.isNotEmpty(cloudElement.getIsoAttachFilename()) && StringUtils.isNotEmpty(cloudElement.getIsoTmpdirUuid())) {
+                this.attachISO(cloudElement);
+            }
+            if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(cloudElement.getVirtualUsbs())) {
+                this.attachVirtualUsbs(cloudElement);
+            }
+            if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(cloudElement.getEntityUsbs())) {
+                this.attachEntityUsbs(cloudElement);
+            }
 
-        checkAccessModes(cloudElement);
+            checkAccessModes(cloudElement);
+        };
+        if (HfdyVpnImage.VPN_CLIENT.equals(cloudElement.getImage()) || HfdyVpnImage.VPN_SERVER.equals(cloudElement.getImage())) {
+            this.getPluginHandler().getSceneHandler().setVpnMachineRunnable(virtualMachineRunnable);
+        } else {
+            virtualMachineRunnable.run();
+        }
     }
 
     protected void createContainer(CloudPluginSceneElementBO cloudElement) {

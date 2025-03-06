@@ -188,6 +188,10 @@ public class CloudAppConfig {
 
     private List<String> cachedCidrs;
 
+    public String getMpIp() {
+        return baseAppConfig.getMpIp();
+    }
+
     public void init() {
         this.getCidrPool();
     }

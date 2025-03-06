@@ -1,18 +1,20 @@
 package cn.cyberpeace.mp.situationaware.service;
 
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
-import cn.cyberpeace.mp.situationaware.model.BaseCloudPlatformResult;
+import cn.cyberpeace.mp.situationaware.model.CloudResponse;
+import cn.cyberpeace.mp.situationaware.model.ContainerCreateData;
 import cn.cyberpeace.mp.situationaware.model.GroupModel;
 import cn.cyberpeace.mp.situationaware.model.NetworkTrafficMirrorRequest;
-import cn.cyberpeace.mp.situationaware.utils.JsonUtils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONPath;
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -107,12 +109,18 @@ public class NetworkTrafficGroupService {
         return arkimePrefixId;
     }
 
+    public ContainerCreateData addArkimeImageInstance() {
+        String arkimePrefixId = indexPrefix + String.valueOf(System.currentTimeMillis());
+        log.info("index prefix generated {}", arkimePrefixId);
+        return createArkimeImageInstance(arkimePrefixId);
+    }
+
     /**
      * 新增arkime 实例
      *
      * @param instanceId instanceId
      */
-    public void createArkimeImageInstance(String instanceId) {
+    public ContainerCreateData createArkimeImageInstance(String instanceId) {
         if (Objects.isNull(SituationalAwareConstant.ArkimeNetworkId)) {
             throw new MpRuntimeException(SituationalAwareErrorCode.ARKIME_ADD_ERROR, "networkId 为空");
         }
@@ -135,11 +143,6 @@ public class NetworkTrafficGroupService {
         paramObject.put("networks", networks);
         //设置环境变量
         JSONObject environment = new JSONObject();
-
-        environment.put("SIC_ARKIME_ELASTICSEARCH", "http://" + situationAwareConfig.getArkimeEsHost() + ":" + situationAwareConfig.getArkimeEsPort());
-        environment.put("SIC_ARKIME_INSTALL_DIR", "/opt/arkime");
-        environment.put("SIC_ARKIME_ELASTICSEARCH_PREFIX", instanceId);
-
         environment.put("ES_HOST", situationAwareConfig.getArkimeEsHost());
         environment.put("ES_PORT", situationAwareConfig.getArkimeEsPort());
         environment.put("ES_PREFIX", instanceId);
@@ -152,16 +155,19 @@ public class NetworkTrafficGroupService {
         try {
             log.info("create arkime Image instance param {}",paramObject.toJSONString());
             var result = HttpUtils.sendPost(url, paramObject.toJSONString());
-            BaseCloudPlatformResult  model = JsonUtils.toSnakeObject(result, BaseCloudPlatformResult.class);
-            if (Objects.isNull(model) || !model.getCode().equals("0")){
-                throw new MpRuntimeException(SituationalAwareErrorCode.ARKIME_ADD_ERROR,model.getMessage());
+            var res = JsonCommon.snakeParse(result, new TypeReference<CloudResponse<ContainerCreateData>>() {
+            });
+            if (Objects.isNull(res) || !res.getCode().equals("0")){
+                throw new MpRuntimeException(SituationalAwareErrorCode.ARKIME_ADD_ERROR,res.getMessage());
             }
             log.info("create arkime Image instance res {}", result);
+            return res.getData();
         } catch (Exception e) {
             log.error("create arkime Image instance error {}", ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException(SituationalAwareErrorCode.ARKIME_ADD_ERROR, ExceptionUtils.getStackTrace(e));
         }
     }
+
 
     /**
      * 场景绑定流量镜像

@@ -20,4 +20,8 @@ public abstract class BaseSceneBO<M extends BaseSceneModel, T extends BaseSceneB
     private LocalDateTime createTime;
     @ApiModelProperty(value = "创建时间")
     private LocalDateTime updateTime;
+    @ApiModelProperty(value = "合肥电院定制字段，vpn客户端需要暴露的局域网段，默认是192.168.1.0/24")
+    private String clientLan;
+    @ApiModelProperty(value = "第三方靶场启动的vpnServer端地址")
+    private String serverVpnIp;
 }
