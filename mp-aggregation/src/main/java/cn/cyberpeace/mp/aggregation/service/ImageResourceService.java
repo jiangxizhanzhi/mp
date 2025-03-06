@@ -9,6 +9,9 @@ import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.AccessProtocol;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtEntityAccess;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.service.DeviceService;
 import cn.cyberpeace.mp.devopscluster.repository.DeviceTargetMapper;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
@@ -46,6 +49,9 @@ public class ImageResourceService {
     @Resource
     private DeviceTargetMapper deviceTargetMapper;
 
+    @Resource
+    private DeviceService deviceService;
+
     private static String EXPORT_DEVICE_YML = "/cpcloud/device/v1/image/export_device_yml";
 
     private static final String PNG = "logo.png";
@@ -58,8 +64,39 @@ public class ImageResourceService {
                 log.error("failed to get image information by uuid:{}", uuid);
                 throw new MpRuntimeException(BaseErrorCode.DATA_NOT_EXIST);
             }
+            var device = deviceService.findByUuid(uuid);
+            List<AccessProtocol> accessProtocols = new ArrayList<>();
+            if (device.getExtVm() != null && !CollectionUtils.isEmpty(device.getExtVm().getAccessProtocols())) {
+                accessProtocols.addAll(device.getExtVm().getAccessProtocols());
+            }
+            if (device.getExtDocker() != null && !CollectionUtils.isEmpty(device.getExtDocker().getAccessProtocols())) {
+                accessProtocols.addAll(device.getExtDocker().getAccessProtocols());
+            }
+            if (device.getExtGateway() != null && device.getExtGateway().getConsoleConfig() != null) {
+                accessProtocols.add(device.getExtGateway().getConsoleConfig());
+            }
+            if (!CollectionUtils.isEmpty(device.getExtEntityAccess())) {
+                device.getExtEntityAccess().forEach(extEntityAccess -> {
+                    accessProtocols.addAll(extEntityAccess.getAccessProtocols());
+                });
+            }
+            List<AccessMode> deviceAccessModes = new ArrayList<>();
+            accessProtocols.forEach(accessProtocol -> {
+                var accessMode = new AccessMode();
+                accessMode.setProtocol(accessProtocol.getProtocol());
+                accessMode.setPort(accessProtocol.getPort());
+                accessMode.setUsername(accessProtocol.getUsername());
+                accessMode.setPassword(accessProtocol.getPassword());
+                accessMode.setPrivateKeyEnable(accessProtocol.getPrivateKeyEnable());
+                accessMode.setPrivateKeyPath(accessProtocol.getPrivateKeyPath());
+                accessMode.setPrivateKeyFileName(accessProtocol.getPrivateKeyFileName());
+                accessMode.setDesc(accessProtocol.getDescription());
+                accessMode.setManageMode(accessProtocol.getManageMode());
+                deviceAccessModes.add(accessMode);
+            });
+
             String currentImageDir = imagePath + "/" + imageInfo.getName();
-            exportImage(imageInfo.getName(), imageInfo.getLogo(), currentImageDir, new ArrayList<AccessMode>());
+            exportImage(imageInfo.getName(), imageInfo.getLogo(), currentImageDir, deviceAccessModes);
             return true;
         } else {
             log.error("failed to get image information，uuid is {}", uuid);

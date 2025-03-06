@@ -28,6 +28,6 @@ public class ExtGateway implements Serializable {
     private AccessProtocol consoleConfig;
 
     public AccessProtocol getConsoleConfig() {
-        return Objects.nonNull(consoleConfig) && StringUtils.isBlank(consoleConfig.getProtocol()) ?  null : consoleConfig;
+        return (Objects.nonNull(consoleConfig) && StringUtils.isBlank(consoleConfig.getProtocol())) ?  null : consoleConfig;
     }
 }
