@@ -660,7 +660,7 @@ public class CreateHandler extends HandlerCommon {
 
     void addHFDYVpnInitCommand(List<String> existCommands, CloudPluginSceneElementBO currentCloudElement) {
         if (HfdyVpnImage.VPN_SERVER.equals(currentCloudElement.getImage())) {
-            String pushRouteToServerLanCommandTemplate = "push \"route %s %s\"";
+            String pushRouteToServerLanCommandTemplate = "push \\\"route %s %s\\\"";
 
             List<String> pushRouteToServerLanCommands = new ArrayList<>();
             getPluginHandler().getElementMap().forEach((nodeId, cloudElement) -> {
