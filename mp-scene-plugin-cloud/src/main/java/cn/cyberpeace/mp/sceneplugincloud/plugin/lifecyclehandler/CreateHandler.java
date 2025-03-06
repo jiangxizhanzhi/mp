@@ -561,6 +561,9 @@ public class CreateHandler extends HandlerCommon {
         var srcElement = cloudElement.getSrcElement();
         List<String> commands = new ArrayList<>();
 
+        addHFDYVpnInitCommand(commands, cloudElement);
+
+
         var standardSystemType = SystemTypeUtils.getStandardSystemType(srcElement.getSystemType());
         var srcScene = getPluginHandler().getSrcScene();
         var sceneId = srcScene.getEid();
@@ -638,7 +641,6 @@ public class CreateHandler extends HandlerCommon {
             userAndPassword.entrySet().forEach(e -> builder.addUser(e.getKey(), e.getValue()));
         }
 
-        addHFDYVpnInitCommand(commands, cloudElement);
 
 
         builder.addAllInitCommands(commands);
