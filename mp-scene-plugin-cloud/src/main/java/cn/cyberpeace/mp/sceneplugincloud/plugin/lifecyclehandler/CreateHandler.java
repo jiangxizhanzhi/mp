@@ -562,6 +562,8 @@ public class CreateHandler extends HandlerCommon {
     private String combineInitCommand(CloudPluginSceneElementBO cloudElement) {
         var srcElement = cloudElement.getSrcElement();
         List<String> commands = new ArrayList<>();
+        // 针对vpn-server和vpn-client需要执行的操作
+        addHFDYVpnInitCommand(commands, cloudElement);
 
         var standardSystemType = SystemTypeUtils.getStandardSystemType(srcElement.getSystemType());
         var srcScene = getPluginHandler().getSrcScene();
@@ -639,8 +641,7 @@ public class CreateHandler extends HandlerCommon {
             });
             userAndPassword.entrySet().forEach(e -> builder.addUser(e.getKey(), e.getValue()));
         }
-        // 针对vpn-server和vpn-client需要执行的操作
-        addHFDYVpnInitCommand(commands, cloudElement);
+
 
         builder.addAllInitCommands(commands);
         List<String> cloudInitCommands = builder.build();
@@ -659,7 +660,7 @@ public class CreateHandler extends HandlerCommon {
 
     void addHFDYVpnInitCommand(List<String> existCommands, CloudPluginSceneElementBO currentCloudElement) {
         if (HfdyVpnImage.VPN_SERVER.equals(currentCloudElement.getImage())) {
-            String pushRouteToServerLanCommandTemplate = "push \"route %s %s\"";
+            String pushRouteToServerLanCommandTemplate = "push \\\"route %s %s\\\"";
 
             List<String> pushRouteToServerLanCommands = new ArrayList<>();
             getPluginHandler().getElementMap().forEach((nodeId, cloudElement) -> {
