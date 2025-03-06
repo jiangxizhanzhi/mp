@@ -40,8 +40,10 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Slf4j
 @Service(value = "addTaskByRemoteFlowService2")
@@ -74,12 +76,23 @@ public class AddTaskByRemoteFlowService2 implements IAddTaskService {
         log.info("开始处理执行器，在数据库中添加流量任务 {} ", flowActuator.getId());
 
         var instance = this.getInstanceWithNoException(flowActuator.getCsceneInstanceId(), 2);
+        Set<String> nodeIds = new HashSet<>();
+        for (var p : instance.getScene().getTopology().getElements()) {
+            nodeIds.add(p.getId());
+        }
         log.info("查询对应的场景实例信息: {} ", JsonCommon.snakeStringify(instance));
         // 更新场景名称到执行器表
         this.updateFlowActuatorDbName(actuatorId, instance.getScene().getTopology().getScene().getName());
 
         // 加载场景中每个节点对应的网络信息
-        var map = this.getCsceneConfigFlowTaskParams(flowActuator);
+        var mapTmp = this.getCsceneConfigFlowTaskParams(flowActuator);
+        Map<String, AddFlowTaskParams> map = new HashMap<>();
+        for (String nodeId : nodeIds) {
+            if (mapTmp.containsKey(nodeId)) {
+                map.put(nodeId, mapTmp.get(nodeId));
+            }
+        }
+
         this.loadNetworkInfo(map, instance);
         log.info("每个节点对应的网络信息：{}", JsonCommon.snakeStringify(map));
 
