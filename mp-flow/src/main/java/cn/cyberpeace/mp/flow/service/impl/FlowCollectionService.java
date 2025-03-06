@@ -254,6 +254,7 @@ public class FlowCollectionService extends BaseModelServiceImpl<FlowCollectionMo
      * @param request
      * @return
      */
+    @Transactional
     public ServiceResult<FlowCollectionModel> addCollection(AddFlowCollectionRequest request) {
         if (!checkNameUnique(request.getTitle(), StringUtils.EMPTY)) {
             return ResultCommon.fail(FlowErrorCode.TITLE_UNIQUE);
@@ -282,6 +283,7 @@ public class FlowCollectionService extends BaseModelServiceImpl<FlowCollectionMo
      * @param request
      * @return
      */
+    @Transactional
     public ServiceResult<FlowCollectionModel> updateCollection(ModifyCollectionRequest request) {
         if (StringUtils.isNotBlank(request.getTitle()) && !checkNameUnique(request.getTitle(), request.getId())) {
             return ResultCommon.fail(FlowErrorCode.TITLE_UNIQUE);

@@ -31,14 +31,14 @@ public class InitApplicationService implements ApplicationRunner {
     }
 
     public static void writeFile(InputStream inputStream, String fileName) {
-        FileOutputStream outputStream = null;
-        try {
+
+        try(FileOutputStream outputStream = new FileOutputStream(fileName)) {
             if (inputStream == null) {
                 System.out.println("文件未找到！");
                 return;
             }
             // 输出文件路径
-            outputStream = new FileOutputStream(fileName);
+            ;
 
             // 创建缓冲区（1KB）
             byte[] buffer = new byte[1024];
@@ -58,9 +58,6 @@ public class InitApplicationService implements ApplicationRunner {
                 // 关闭流
                 if (inputStream != null) {
                     inputStream.close();
-                }
-                if (outputStream != null) {
-                    outputStream.close();
                 }
             } catch (IOException e) {
                 e.printStackTrace();

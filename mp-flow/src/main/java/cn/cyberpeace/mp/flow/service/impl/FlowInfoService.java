@@ -1157,6 +1157,7 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
      * @param request
      * @return
      */
+    @Transactional
     public ServiceResult<Boolean> flowImport(ImportFlowInfoRequest request) {
         String filePath = request.getPath();
         File fileFolder = new File(filePath);
