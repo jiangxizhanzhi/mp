@@ -1,1 +1,0 @@
-alter table mp_flow_task_task add column `node_network_id` varchar(128) NOT NULL default '' COMMENT '目标网络id';

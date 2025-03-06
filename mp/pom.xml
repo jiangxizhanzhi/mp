@@ -23,8 +23,8 @@
             <version>0.0.2-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>cn.cyberpeace.mp.flow</groupId>
-            <artifactId>mp-flow</artifactId>
+            <groupId>cn.cyberpeace.mp.behavior</groupId>
+            <artifactId>mp-behavior</artifactId>
             <version>0.0.2-SNAPSHOT</version>
         </dependency>
     </dependencies>

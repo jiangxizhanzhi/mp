@@ -33,8 +33,8 @@
 
     <modules>
         <module>mp-base</module>
-        <module>mp-flow</module>
         <module>mp</module>
+        <module>mp-behavior</module>
     </modules>
     <dependencies>
         <dependency>
