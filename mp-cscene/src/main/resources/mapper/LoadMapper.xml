@@ -75,8 +75,8 @@
                 </if>
                 update_time = now()
             </set>
-            WHERE id = (
-                SELECT id
+            WHERE pk = (
+                SELECT pk
                 FROM mp_devops_load_scene_result_log
                 <where>
                     <if test="item.taskId != null and item.taskId != ''">
