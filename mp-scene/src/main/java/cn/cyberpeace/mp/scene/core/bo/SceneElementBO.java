@@ -29,4 +29,16 @@ public class SceneElementBO extends BaseSceneElementBO<SceneElementModel, SceneE
     public String genTarget() {
         return getEid();
     }
+
+    @Override
+    public SceneElementModel toModel(String... ignoreFields) {
+        if (Boolean.FALSE.equals(this.getCurrentScenePartFlag())) {
+            this.event = 2;
+            this.eventStatus = 4;
+            this.process = "创建节点";
+            this.processStatus = 4;
+            this.processMessage = "非本靶场节点，直接成功";
+        }
+        return super.toModel(ignoreFields);
+    }
 }
