@@ -91,10 +91,8 @@ public class VyosNetworkCommandUtils {
             }
             List<String> result = new ArrayList<>();
             paramsWrapper.pluginPorts.forEach(p -> {
-                boolean noOspf = StringUtils.isEmpty(p.getOspfIp());
                 boolean noRip = StringUtils.isEmpty(p.getRipIp());
-                boolean noBgp = StringUtils.isEmpty(p.getBgpIp());
-                if (noOspf && noBgp && noRip) {
+                if (noRip) {
                     var net = paramsWrapper.pluginHandler.getHandlerUtils().getNetworkByPort(p.getSrcPort());
                     if (Objects.nonNull(net)) {
                         String interfaceAddr = p.getSrcPort().getIp() + net.getCidr().substring(net.getCidr().indexOf("/"));
@@ -185,7 +183,7 @@ public class VyosNetworkCommandUtils {
      */
     private static class OSPFCmdBuilder implements NetworkingCmdBuilder {
 
-        private static String SET_INTERFACES = "set interfaces ethernet eth%s address %s";
+//        private static String SET_INTERFACES = "set interfaces ethernet eth%s address %s";
         private static String SET_AREA = "set protocols ospf area %s network %s";
 
         @Override
@@ -206,9 +204,9 @@ public class VyosNetworkCommandUtils {
                             ospfIp = ospfIp + "/24";
                         }
                     }
-                    result.add(
-                            String.format(SET_INTERFACES, p.getSrcPort().getOrder(), ospfIp)
-                    );
+//                    result.add(
+//                            String.format(SET_INTERFACES, p.getSrcPort().getOrder(), ospfIp)
+//                    );
                     setAreas.add(
                             String.format(SET_AREA, p.getOspfArea(), IpUtils.getFormatCidrIp(ospfIp))
                     );
@@ -245,6 +243,7 @@ public class VyosNetworkCommandUtils {
             }
             String defaultSelfAs = bgpPorts.get(0).getBgpAs();
             List<String> cmds = new ArrayList<>();
+            List<String> setNets = new ArrayList<>();
             paramsWrapper.pluginPorts.forEach(p -> {
                 if (bgpPorts.contains(p)) {
                     // 端口有bgp配置 根据配置创建命
@@ -256,11 +255,11 @@ public class VyosNetworkCommandUtils {
                         interfaceIp = p.getSrcPort().getIp() + "/24";
                     }
                     cmds.addAll(List.of(new String[]{
-                            String.format(SET_INTERFACE_ADDRESS, p.getSrcPort().getOrder(), interfaceIp),
+//                            String.format(SET_INTERFACE_ADDRESS, p.getSrcPort().getOrder(), interfaceIp),
                             String.format(SET_PEER, p.getBgpPeer()),
-                            String.format(SET_DECLARE_NET, p.getBgpAs(), IpUtils.getFormatCidrIp(interfaceIp)),
                             String.format(SET_NEIGHBOR_BFD, p.getBgpAs(), p.getBgpPeer()),
-                            String.format(SET_NEIGHBOR_AS, p.getBgpAs(), p.getBgpPeer(), p.getBgpPeerAs())
+                            String.format(SET_NEIGHBOR_AS, p.getBgpAs(), p.getBgpPeer(), p.getBgpPeerAs()),
+                            String.format(SET_DECLARE_NET, p.getBgpAs(), IpUtils.getFormatCidrIp(interfaceIp)),
                     }));
                 } else if (!Boolean.TRUE.equals(p.getSrcPort().getIsAuxiliary())) {
                     // 非辅助端口 且 bgp无配置 设置下地址,宣告下网络
@@ -271,12 +270,22 @@ public class VyosNetworkCommandUtils {
                     } else {
                         interfaceIp = p.getSrcPort().getIp() + "/24";
                     }
-                    cmds.addAll(List.of(new String[]{
-                            String.format(SET_INTERFACE_ADDRESS, p.getSrcPort().getOrder(), interfaceIp),
-                            String.format(SET_DECLARE_NET, defaultSelfAs, IpUtils.getFormatCidrIp(interfaceIp))
-                    }));
+
+//                    String setIp = String.format(SET_INTERFACE_ADDRESS, p.getSrcPort().getOrder(), interfaceIp);
+//                    for (String s : cmds) {
+//                        if (StringUtils.equals(s, setIp)) {
+//                            setIp = null;
+//                            break;
+//                        }
+//                    }
+//                    if (StringUtils.isNotEmpty(setIp)) {
+//                        cmds.add(setIp);
+//                    }
+                    String setNet = String.format(SET_DECLARE_NET, defaultSelfAs, IpUtils.getFormatCidrIp(interfaceIp));
+                    setNets.add(setNet);
                 }
             });
+            cmds.addAll(setNets);
             return cmds;
         }
     }
