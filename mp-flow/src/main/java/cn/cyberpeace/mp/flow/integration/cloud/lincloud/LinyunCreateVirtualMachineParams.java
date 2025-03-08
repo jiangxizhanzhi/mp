@@ -10,6 +10,7 @@ import lombok.Setter;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -100,7 +101,7 @@ public class LinyunCreateVirtualMachineParams extends AbstractCreateVirtualMachi
         int networkEnd = networkStart | ~subnetMask;
 
         // 从网络的开始地址和结束地址生成随机地址
-        Random random = new Random();
+        SecureRandom random = new SecureRandom();
         int randomIPInt = networkStart + random.nextInt(networkEnd - networkStart + 1);
 
         // 将随机生成的IP整数转换回字节形式

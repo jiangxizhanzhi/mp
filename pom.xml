@@ -29,6 +29,9 @@
         <okhttp.version>3.14.6</okhttp.version>
         <snmp4j.version>2.8.15</snmp4j.version>
         <validator.version>1.7</validator.version>
+        <sonar.projectKey>knowledge-space-flow</sonar.projectKey>
+        <sonar.host.url>http://10.100.2.52:9000</sonar.host.url>
+        <sonar.login>d74b9b573cd0d127b124a4f82f1117b448e4189b</sonar.login>
     </properties>
 
     <modules>

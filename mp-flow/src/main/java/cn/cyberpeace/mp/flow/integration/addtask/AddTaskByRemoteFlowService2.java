@@ -77,12 +77,16 @@ public class AddTaskByRemoteFlowService2 implements IAddTaskService {
 
         var instance = this.getInstanceWithNoException(flowActuator.getCsceneInstanceId(), 2);
         Set<String> nodeIds = new HashSet<>();
-        for (var p : instance.getScene().getTopology().getElements()) {
-            nodeIds.add(p.getId());
+        if (null != instance && null != instance.getScene() && null != instance.getScene().getTopology()){
+            for (var p : instance.getScene().getTopology().getElements()) {
+                nodeIds.add(p.getId());
+            }
         }
         log.info("查询对应的场景实例信息: {} ", JsonCommon.snakeStringify(instance));
         // 更新场景名称到执行器表
-        this.updateFlowActuatorDbName(actuatorId, instance.getScene().getTopology().getScene().getName());
+        if (null != instance){
+            this.updateFlowActuatorDbName(actuatorId, instance.getScene().getTopology().getScene().getName());
+        }
 
         // 加载场景中每个节点对应的网络信息
         var mapTmp = this.getCsceneConfigFlowTaskParams(flowActuator);
@@ -93,7 +97,9 @@ public class AddTaskByRemoteFlowService2 implements IAddTaskService {
             }
         }
 
-        this.loadNetworkInfo(map, instance);
+        if (null != instance){
+            this.loadNetworkInfo(map, instance);
+        }
         log.info("每个节点对应的网络信息：{}", JsonCommon.snakeStringify(map));
 
         this.createTaskAndConfig(actuatorId, map);
