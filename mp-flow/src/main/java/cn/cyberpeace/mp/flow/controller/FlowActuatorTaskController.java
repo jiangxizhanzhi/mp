@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.flow.bo.EditFlowTaskConfRequest;
 import cn.cyberpeace.mp.flow.bo.FlowTaskBatchStartRequest;
 import cn.cyberpeace.mp.flow.bo.QueryFlowTaskConfResponse;
 import cn.cyberpeace.mp.flow.constant.ControllerConstant;
+import cn.cyberpeace.mp.flow.request.queryparam.FlowCsceneTaskParams;
 import cn.cyberpeace.mp.flow.request.queryparam.FlowTaskPageQueryParams;
 import cn.cyberpeace.mp.flow.response.FlowTaskPageResponse;
 import cn.cyberpeace.mp.flow.service.FlowActuatorTaskService;
@@ -41,6 +42,12 @@ public class FlowActuatorTaskController {
     @GetMapping("/task/list")
     public ListObjServiceResult<FlowTaskPageResponse> taskList(FlowTaskPageQueryParams request) {
         return flowActuatorTaskService.taskList(request).asResult();
+    }
+
+    @ApiOperation("根据场景实例查询流量任务列表")
+    @GetMapping("/task/list_by_cscene")
+    public ListObjServiceResult<FlowTaskPageResponse> taskListByCscene(FlowCsceneTaskParams request) {
+        return flowActuatorTaskService.taskListByCscene(request).asResult();
     }
 
     @ApiOperation("新增流量任务")

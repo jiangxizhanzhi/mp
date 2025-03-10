@@ -14,6 +14,7 @@ import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
 import cn.cyberpeace.mp.flow.bo.FlowTaskNode;
 import cn.cyberpeace.mp.flow.model.FlowTaskTaskModel;
+import cn.cyberpeace.mp.flow.request.queryparam.FlowCsceneTaskParams;
 import cn.cyberpeace.mp.flow.request.queryparam.FlowTaskPageQueryParams;
 import cn.cyberpeace.mp.flow.response.FlowTaskPageResponse;
 import org.apache.ibatis.annotations.Mapper;
@@ -39,7 +40,10 @@ public interface FlowTaskTaskMapper extends BaseModelMapper<FlowTaskTaskModel> {
 
     List<FlowTaskPageResponse> listTasks(FlowTaskPageQueryParams params, @Param("offset") int offset, @Param("limit") int limit);
 
+    List<FlowTaskPageResponse> listTasksByCscene(FlowCsceneTaskParams params, @Param("offset") int offset, @Param("limit") int limit);
+
     int countTasks(FlowTaskPageQueryParams params);
 
+    int countTasksByCscene(FlowCsceneTaskParams params);
 
 }

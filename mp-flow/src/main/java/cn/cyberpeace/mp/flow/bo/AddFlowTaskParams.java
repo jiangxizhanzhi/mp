@@ -10,6 +10,7 @@ import java.util.List;
 @Setter
 public class AddFlowTaskParams {
     List<AddFlowTaskFlowInfo> tasks;
+    String csceneInstanceId;
     String actuatorId;
     String networkId;
     String targetIp;

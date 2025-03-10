@@ -250,7 +250,7 @@ public class AddTaskByRemoteFlowService2 implements IAddTaskService {
             // 从远程服务上查询流量的信息
             var remoteFlowInfos = this.getRemoteFlowInfos(flowIds);
             // 创建流量任务
-            var flowTaskTaskModelList = this.createFlowTasks(actuatorId, addFlowTaskParams.getNodeId(), addFlowTaskParams.getNodeName(), "", addFlowTaskParams.getTargetIp(), addFlowTaskParams.getNetworkId(), remoteFlowInfos);
+            var flowTaskTaskModelList = this.createFlowTasks(actuatorId, addFlowTaskParams.getCsceneInstanceId(), addFlowTaskParams.getNodeId(), addFlowTaskParams.getNodeName(), "", addFlowTaskParams.getTargetIp(), addFlowTaskParams.getNetworkId(), remoteFlowInfos);
             // 创建任务配置
             this.createTaskConfigs(flowTaskTaskModelList, addFlowTaskParams.getTasks(), remoteFlowInfos);
         }
@@ -317,6 +317,7 @@ public class AddTaskByRemoteFlowService2 implements IAddTaskService {
                 params.setNodeId(e.getCsceneNodeId());
                 params.setNodeName(e.getCsceneNodeId());
                 params.setTasks(new ArrayList<>());
+                params.setCsceneInstanceId(m.getCsceneInstanceId());
                 map.put(e.getCsceneNodeId(), params);
             }
             AddFlowTaskFlowInfo flowTaskFlowInfo = new AddFlowTaskFlowInfo();
@@ -388,7 +389,7 @@ public class AddTaskByRemoteFlowService2 implements IAddTaskService {
         return flow;
     }
 
-    private List<FlowTaskTaskModel> createFlowTasks(String actuatorId, String nodeId,String nodeName, String portId, String targetIp, String networkId, List<RemoteFlowInfo> remoteFlowInfos) {
+    private List<FlowTaskTaskModel> createFlowTasks(String actuatorId,String csceneInstanceId , String nodeId,String nodeName,  String portId, String targetIp, String networkId, List<RemoteFlowInfo> remoteFlowInfos) {
         // 生成流量任务
         List<FlowTaskTaskModel> flowTaskTaskModelList = new ArrayList<FlowTaskTaskModel>();
         for (var flow : remoteFlowInfos) {
@@ -399,6 +400,8 @@ public class AddTaskByRemoteFlowService2 implements IAddTaskService {
             flowTaskTaskModel.setPortId(portId);
             flowTaskTaskModel.setNodeId(nodeId);
             flowTaskTaskModel.setNodeIp(targetIp);
+            flowTaskTaskModel.setSceneId(csceneInstanceId);
+            flowTaskTaskModel.setNodeName("");
             flowTaskTaskModel.setNodeName(nodeName);
             flowTaskTaskModel.setNodeNetworkId(networkId);
             flowTaskTaskModel.setInteractiveType(flow.getInteractiveType());

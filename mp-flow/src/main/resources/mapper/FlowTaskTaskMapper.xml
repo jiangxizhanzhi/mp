@@ -26,4 +26,29 @@
             limit #{offset}, #{limit}
         </if>
     </select>
+
+    <select id="countTasksByCscene" parameterType="cn.cyberpeace.mp.flow.request.queryparam.FlowCsceneTaskParams"
+            resultType="java.lang.Integer">
+        select count(1) from mp_flow_task_task t
+        where t.scene_id=#{csceneInstanceId}
+        <if test="csceneNodeId != null">
+            and t.node_id=#{csceneNodeId}
+        </if>
+    </select>
+
+    <select id="listTasksByCscene" parameterType="cn.cyberpeace.mp.flow.request.queryparam.FlowCsceneTaskParams"
+            resultType="cn.cyberpeace.mp.flow.response.FlowTaskPageResponse">
+        select t.id as id,t.actuator_id as actuatorId, t.interactive_type as interactiveType, t.node_name as nodeName,
+        t.node_id as nodeId, t.node_ip as nodeIp
+        ,t.success_count as successCount, t.error_count as errorCount, t.success_count+t.error_count as totalCount
+        ,t.task_status as taskStatus, t.msg as msg, t.resource_type as resourceType
+        from mp_flow_task_task t
+        where t.scene_id=#{params.csceneInstanceId}
+        <if test="params.csceneNodeId != null">
+            and t.node_id=#{params.csceneNodeId}
+        </if>
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
 </mapper>

@@ -34,6 +34,7 @@ import cn.cyberpeace.mp.flow.repository.FlowTaskConfMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskPortMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskRecordMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskTaskMapper;
+import cn.cyberpeace.mp.flow.request.queryparam.FlowCsceneTaskParams;
 import cn.cyberpeace.mp.flow.request.queryparam.FlowTaskPageQueryParams;
 import cn.cyberpeace.mp.flow.response.AttackFlowResponse;
 import cn.cyberpeace.mp.flow.response.BackgroundFlowResponse;
@@ -287,6 +288,18 @@ public class FlowActuatorTaskService extends BaseModelServiceImpl<FlowTaskTaskMo
             int offset = (params.getPage() - 1) * params.getPageSize();
             int limit = params.getPageSize();
             var list = flowTaskTaskMapper.listTasks(params, offset, limit);
+            return new ListObjServiceResult<>(new ListObjResult<>(list, total));
+        }
+    }
+
+    public ListObjServiceResult<FlowTaskPageResponse> taskListByCscene(FlowCsceneTaskParams params) {
+        int total = flowTaskTaskMapper.countTasksByCscene(params);
+        if (total == 0) {
+            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
+        } else {
+            int offset = (params.getPage() - 1) * params.getPageSize();
+            int limit = params.getPageSize();
+            var list = flowTaskTaskMapper.listTasksByCscene(params, offset, limit);
             return new ListObjServiceResult<>(new ListObjResult<>(list, total));
         }
     }
