@@ -134,7 +134,14 @@ public class CsceneSpecialService {
             if (CollectionUtils.isEmpty(sceneModels)) {
                 return "";
             } else {
-                return sceneModels.get(0).getId();
+                String sceneInstanceId = sceneModels.get(0).getId();
+                var csceneInstances = csceneInstanceMapper.list(new HumanCondition().select(CsceneInstanceModel::getId).filterEqual(CsceneInstanceModel::getScene, sceneInstanceId)
+                           .filterEqual(CsceneInstanceModel::getDeleted, false));
+                if (CollectionUtils.isEmpty(csceneInstances)) {
+                    return "";
+                } else {
+                    return csceneInstances.get(0).getId();
+                }
             }
         }
     }
