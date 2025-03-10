@@ -253,6 +253,13 @@ public class CsceneController implements BaseModelListControllerBase {
         return result;
     }
 
+    @ApiOperation("根据vpn服务端ip获取场景实例id")
+    @ApiImplicitParam(name = "vpnServerIp", value = "vpn服务端ip", dataTypeClass = String.class)
+    @GetMapping("/get_scene_id_by_vpn_server_ip")
+    public ServiceResult<String> getSceneIdByVpnServerIp(@RequestParam String vpnServerIp) {
+        return new ServiceResult<>(csceneSpecialService.getSceneInstanceId(vpnServerIp)).asResult();
+    }
+
     @ApiOperation("获取场景模板统计数据")
     @ApiImplicitParam(name = "ids", value = "请求参数", dataTypeClass = String[].class)
     @GetMapping("/stat")

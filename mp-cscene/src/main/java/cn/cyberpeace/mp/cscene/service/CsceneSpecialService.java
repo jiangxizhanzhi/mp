@@ -33,12 +33,10 @@ import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceStatQueryParams;
 import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
 import cn.cyberpeace.mp.cscene.util.SceneStatusUtil;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
-import cn.cyberpeace.mp.scene.model.SceneConfigElementModel;
-import cn.cyberpeace.mp.scene.model.SceneConfigModel;
-import cn.cyberpeace.mp.scene.model.SceneElementModel;
-import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.scene.model.*;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
+import cn.cyberpeace.mp.scene.repository.SceneElementPortMapper;
 import cn.cyberpeace.mp.scene.repository.SceneMapper;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.UserConnectionNumBO;
@@ -84,6 +82,9 @@ public class CsceneSpecialService {
     private SceneElementMapper sceneElementMapper;
 
     @Autowired
+    private SceneElementPortMapper sceneElementPortMapper;
+
+    @Autowired
     private CsceneInstanceMapper csceneInstanceMapper;
 
     @Autowired
@@ -119,6 +120,23 @@ public class CsceneSpecialService {
     public static class CsceneInstanceCountStat {
         private String csceneId;
         private Integer instanceCount;
+    }
+
+    public String getSceneInstanceId(String serverVpnIp) {
+        var scenePortModels = sceneElementPortMapper.list(new HumanCondition().select(SceneElementPortModel::getScene).filterEqual(SceneElementPortModel::getIp, serverVpnIp));
+        if (CollectionUtils.isEmpty(scenePortModels)) {
+            return StringUtils.EMPTY;
+        } else {
+            Set<String> sceneIds = scenePortModels.stream().map(SceneElementPortModel::getScene).collect(Collectors.toSet());
+            var sceneModels = sceneMapper.list(new HumanCondition().filterEqual(SceneModel::getDeleted, false)
+                            .filterIn(SceneModel::getId, sceneIds.toArray(new String[0]))
+                    .select(SceneModel::getId));
+            if (CollectionUtils.isEmpty(sceneModels)) {
+                return "";
+            } else {
+                return sceneModels.get(0).getId();
+            }
+        }
     }
 
     /**
