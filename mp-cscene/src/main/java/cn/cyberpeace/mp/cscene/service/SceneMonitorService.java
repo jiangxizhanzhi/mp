@@ -18,6 +18,7 @@ import cn.cyberpeace.mp.cscene.request.agent.AgentNameBasedRequest;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
+import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
@@ -238,7 +239,7 @@ public class SceneMonitorService {
         CloudScenePluginHandler cloudPlugin = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
 
         // 根据名称模糊筛选
-        var stream = sceneHandler.getElementMap().values().stream();
+        var stream = sceneHandler.getElementMap().values().stream().filter(BaseSceneElementBO::getCurrentScenePartFlag);
         if (Objects.nonNull(request) && StringUtils.isNotEmpty(request.getName())) {
             stream = stream.filter(e -> e.getName().toLowerCase().contains(request.getName().toLowerCase()));
         }
