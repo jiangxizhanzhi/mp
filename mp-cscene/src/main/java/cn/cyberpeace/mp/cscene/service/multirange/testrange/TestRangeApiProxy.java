@@ -71,6 +71,7 @@ public class TestRangeApiProxy implements SubRangeMonitorInterface {
         String mapSceneId = getRangeMapScene(sceneId);
         String result = TestRangeClientUtil.get(String.format(TestRangeApiUrl.BASIC_ELEMENT_MONITOR_INFO, mapSceneId), request, getAuthHeaderMap(), 10000)
                 .getResult();
+        log.info("result : {}", result);
         JSONObject jsonObject = JSONObject.parseObject(result);
         List<ElementMonitorBasicInfo> elementMonitorBasicInfoList = jsonObject.getJSONArray("data").toJavaList(ElementMonitorBasicInfo.class);
         return elementMonitorBasicInfoList;

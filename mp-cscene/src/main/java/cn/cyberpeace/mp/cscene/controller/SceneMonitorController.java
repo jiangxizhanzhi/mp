@@ -96,8 +96,12 @@ public class SceneMonitorController {
             }
         }
 
-        var testRangeResult = testRangeApiProxy.listAllElementBasicInfo(sceneInstanceId, request);
-        result.addAll(testRangeResult);
+        try {
+            var testRangeResult = testRangeApiProxy.listAllElementBasicInfo(sceneInstanceId, request);
+            result.addAll(testRangeResult);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
 
         return ResultCommon.success(result);
     }
