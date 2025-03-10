@@ -88,6 +88,12 @@ public class CsceneAppConfig {
     @Value("${mp.cscene.flow-segment:5}")
     private Integer flowSegment;
 
+    @Value("${mp.cscene.hfdy.test-range-ip:10.100.13.1}")
+    private String hfdyTestRangeIp;
+    @Value("${mp.cscene.hfdy.test-range-port:80}")
+    private String hfdyTestRangePort;
+
+
     @Autowired
     private MessageSource messageSource;
 

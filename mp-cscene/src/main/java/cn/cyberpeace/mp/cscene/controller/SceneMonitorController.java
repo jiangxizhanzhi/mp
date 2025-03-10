@@ -2,15 +2,19 @@ package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
 import cn.cyberpeace.mp.cscene.controller.request.SceneAllElementsQueryRequest;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneMonitorInfo;
+import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
+import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.SceneMonitorService;
+import cn.cyberpeace.mp.cscene.service.multirange.testrange.TestRangeApiProxy;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import io.swagger.annotations.Api;
@@ -43,9 +47,13 @@ public class SceneMonitorController {
 
     @Autowired
     private CsceneInstanceService csceneInstanceService;
+    @Autowired
+    private CsceneInstanceMapper csceneInstanceMapper;
 
     @Autowired
     private SceneMonitorService sceneMonitorService;
+    @Autowired
+    private TestRangeApiProxy testRangeApiProxy;
 
     @ApiOperation(value = "查询场景监控信息")
     @ApiImplicitParams({
@@ -67,6 +75,8 @@ public class SceneMonitorController {
     public ServiceResult<List<ElementMonitorBasicInfo>> getSceneAllElements(@PathVariable String sceneId,
                                                                             @RequestParam(required = false) Boolean realTimeHostState,
                                                                             SceneAllElementsQueryRequest request) {
+        String sceneInstanceId = csceneInstanceMapper.list(new HumanCondition().filterEqual(CsceneInstanceModel::getId, sceneId)
+                .select(CsceneInstanceModel::getScene)).get(0).getScene();
         List<ElementMonitorBasicInfo> basicInfoList = sceneMonitorService.getAllSceneElements(sceneId, realTimeHostState, request);
         if (Boolean.TRUE.equals(request.getIncludeDeleting())) {
             return ResultCommon.success(basicInfoList);
@@ -85,6 +95,10 @@ public class SceneMonitorController {
                 }
             }
         }
+
+        var testRangeResult = testRangeApiProxy.listAllElementBasicInfo(sceneInstanceId, request);
+        result.addAll(testRangeResult);
+
         return ResultCommon.success(result);
     }
 

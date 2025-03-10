@@ -1,12 +1,13 @@
 package cn.cyberpeace.mp.cscene.controller.request;
 
+import cn.cyberpeace.mp.base.util.http.SnakeHttpParam;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.util.List;
 
 @Data
-public class SceneAllElementsQueryRequest {
+public class SceneAllElementsQueryRequest implements SnakeHttpParam {
     @ApiModelProperty(value = "节点名称 模糊查询")
     private String name;
     @ApiModelProperty(value = "设备类型")

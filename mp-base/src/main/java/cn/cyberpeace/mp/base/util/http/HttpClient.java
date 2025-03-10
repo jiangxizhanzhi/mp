@@ -121,7 +121,7 @@ public class HttpClient {
         return request;
     }
 
-    private <T extends HttpRequestBase> HttpResult request(Class<T> requestClass, String url, HttpData data,
+    public <T extends HttpRequestBase> HttpResult request(Class<T> requestClass, String url, HttpData data,
                                                            HttpParam param, Map<String, String> headers,
                                                            Integer timeout, boolean loadResult) {
         var request = genRequest(requestClass, url, param, data, headers, timeout);
