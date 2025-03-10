@@ -30,7 +30,7 @@ public class TestRangeLoginData {
     private String authToken;
 
     private String getEncodePassword() {
-        return PasswordUtils.desDecrypt(originPassword);
+        return PasswordUtils.desEncrypt(originPassword);
     }
 
     public String getAuthToken() {
