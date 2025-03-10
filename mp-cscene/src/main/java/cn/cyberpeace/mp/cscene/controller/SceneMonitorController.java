@@ -75,8 +75,7 @@ public class SceneMonitorController {
     public ServiceResult<List<ElementMonitorBasicInfo>> getSceneAllElements(@PathVariable String sceneId,
                                                                             @RequestParam(required = false) Boolean realTimeHostState,
                                                                             SceneAllElementsQueryRequest request) {
-        String sceneInstanceId = csceneInstanceMapper.list(new HumanCondition().filterEqual(CsceneInstanceModel::getId, sceneId)
-                .select(CsceneInstanceModel::getScene)).get(0).getScene();
+
         List<ElementMonitorBasicInfo> basicInfoList = sceneMonitorService.getAllSceneElements(sceneId, realTimeHostState, request);
         if (Boolean.TRUE.equals(request.getIncludeDeleting())) {
             return ResultCommon.success(basicInfoList);
@@ -97,7 +96,7 @@ public class SceneMonitorController {
         }
 
         try {
-            var testRangeResult = testRangeApiProxy.listAllElementBasicInfo(sceneInstanceId, request);
+            var testRangeResult = testRangeApiProxy.listAllElementBasicInfo(sceneId, request);
             result.addAll(testRangeResult);
         } catch (Exception e) {
             log.error(e.getMessage(), e);

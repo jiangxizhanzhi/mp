@@ -14,7 +14,7 @@ public interface SubRangeMonitorInterface {
 
     String getAuthorizationHeader();
 
-    String getRangeMapScene(String identity);
+    String getRangeMapCscene(String identity);
 
     List<ElementMonitorBasicInfo> listAllElementBasicInfo(String rangeMapScene, SceneAllElementsQueryRequest request);
 
