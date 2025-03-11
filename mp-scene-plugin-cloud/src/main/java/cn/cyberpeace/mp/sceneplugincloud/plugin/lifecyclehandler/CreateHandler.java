@@ -689,6 +689,12 @@ public class CreateHandler extends HandlerCommon {
             String vpnServerCommand = String.format("bash /etc/openvpn/start_server.sh \"%s\" \"%s\" \"%s\" \"%s\"", pushRouteToServerLanParameter,
                     routeToClientLanParameter, irouteToClientLanParameter, arkimeIp);
             log.info("vpn server cloud init command : " + vpnServerCommand);
+
+            Set<String> innerNetworkGatewayIps = getVpnInnerNetworkGatewayIp(currentCloudElement);
+            innerNetworkGatewayIps.forEach(innerNetworkGatewayIp -> {
+                String delInnerGatewayRouteCommand = String.format("ip route del default via %s", innerNetworkGatewayIp);
+                existCommands.add(delInnerGatewayRouteCommand);
+            });
             existCommands.add(vpnServerCommand);
         } else if (HfdyVpnImage.VPN_CLIENT.equals(currentCloudElement.getImage())) {
             String serverVpnIp = getPluginHandler().getSceneHandler().getScene().getServerVpnIp();
@@ -701,6 +707,11 @@ public class CreateHandler extends HandlerCommon {
             String configServerIpCommand = String.format("echo %s > /etc/arkime-bridge/server-ip.txt", serverVpnIp);
             String execFileBridgeCommand = String.format("nohup /etc/arkime-bridge/file_bridge > /etc/arkime-bridge/file_bridge.log 2>&1 &");
 
+            Set<String> innerNetworkGatewayIps = getVpnInnerNetworkGatewayIp(currentCloudElement);
+            innerNetworkGatewayIps.forEach(innerNetworkGatewayIp -> {
+                String delInnerGatewayRouteCommand = String.format("ip route del default via %s", innerNetworkGatewayIp);
+                existCommands.add(delInnerGatewayRouteCommand);
+            });
 
             existCommands.add(startVpnClientCommand);
             existCommands.add(configMpIpCommand);
@@ -711,6 +722,20 @@ public class CreateHandler extends HandlerCommon {
 
 
 
+    }
+
+    private Set<String> getVpnInnerNetworkGatewayIp(CloudPluginSceneElementBO cloudElement) {
+        Set<String> deriveInnerNetworkGatewayIps = cloudElement.getDeriveNetworks().stream().map(ConnectedNetworkBO::getNetwork)
+                .filter(network -> !Boolean.TRUE.equals(network.getExternal()))
+                .map(CloudPluginSceneElementNetworkBO::getGateway).collect(Collectors.toSet());
+
+        Set<String> accessInnerNetworkGatewayIps = cloudElement.getAccessNetworks().stream().map(ConnectedNetworkBO::getNetwork)
+                .filter(network -> !Boolean.TRUE.equals(network.getExternal()))
+                .map(CloudPluginSceneElementNetworkBO::getGateway).collect(Collectors.toSet());
+        Set<String> innerNetworkGatewayIps = new HashSet<>();
+        innerNetworkGatewayIps.addAll(deriveInnerNetworkGatewayIps);
+        innerNetworkGatewayIps.addAll(accessInnerNetworkGatewayIps);
+        return innerNetworkGatewayIps;
     }
 
 
