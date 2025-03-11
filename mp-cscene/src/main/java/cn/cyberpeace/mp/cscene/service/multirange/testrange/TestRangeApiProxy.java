@@ -36,6 +36,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @Slf4j
@@ -49,6 +50,8 @@ public class TestRangeApiProxy implements SubRangeMonitorInterface {
     private CsceneInstanceMapper csceneInstanceMapper;
     @Autowired
     private SceneElementMapper sceneElementMapper;
+
+    private static final Map<String, String> CSCENE_MAP_CACHE = new ConcurrentHashMap<>();
 
     @Override
     public String getIdentity(String currentCsceneId) {
@@ -83,17 +86,22 @@ public class TestRangeApiProxy implements SubRangeMonitorInterface {
 
     @Override
     public String getRangeMapCscene(String currentCsceneId) {
-
-        String identity = getIdentity(currentCsceneId);
-        String result = TestRangeClientUtil.get(String.format("%s?vpnServerIp=%s", TestRangeApiUrl.MAP_SCENE_ID, identity), null, getAuthHeaderMap(), 10000)
-                .getResult();
-        String mapCsceneId = JSONObject.parseObject(result).getString("data");
-        if (StringUtils.isEmpty(mapCsceneId)) {
-            log.warn("当前靶场没有配置mapSceneId，无法获取靶场元素信息");
-            throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("当前靶场没有配置mapSceneId，无法获取靶场元素信息"));
+        if (CSCENE_MAP_CACHE.containsKey(currentCsceneId)) {
+            return CSCENE_MAP_CACHE.get(currentCsceneId);
         } else {
-            return mapCsceneId;
+            String identity = getIdentity(currentCsceneId);
+            String result = TestRangeClientUtil.get(String.format("%s?vpnServerIp=%s", TestRangeApiUrl.MAP_SCENE_ID, identity), null, getAuthHeaderMap(), 10000)
+                    .getResult();
+            String mapCsceneId = JSONObject.parseObject(result).getString("data");
+            if (StringUtils.isEmpty(mapCsceneId)) {
+                log.warn("当前靶场没有配置mapSceneId，无法获取靶场元素信息");
+                throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("当前靶场没有配置mapSceneId，无法获取靶场元素信息"));
+            } else {
+                CSCENE_MAP_CACHE.put(currentCsceneId, mapCsceneId);
+                return mapCsceneId;
+            }
         }
+
     }
 
     @Override
@@ -109,6 +117,8 @@ public class TestRangeApiProxy implements SubRangeMonitorInterface {
 
     @Override
     public OS getElementOs(BaseSceneElementRequest baseRequest) {
+        String mapCsceneId = getRangeMapCscene(baseRequest.getSceneId());
+        baseRequest.setSceneId(mapCsceneId);
         String result = TestRangeClientUtil.get(TestRangeApiUrl.ELEMENT_OS, baseRequest, getAuthHeaderMap(), 10000)
                 .getResult();
         JSONObject jsonObject = JSONObject.parseObject(result);
@@ -117,6 +127,8 @@ public class TestRangeApiProxy implements SubRangeMonitorInterface {
 
     @Override
     public ServiceResult<List<HostState>> getElementHostStateTrend(HostStateTrendRequest hostStateTrendRequest) {
+        String mapCsceneId = getRangeMapCscene(hostStateTrendRequest.getSceneId());
+        hostStateTrendRequest.setSceneId(mapCsceneId);
         String result = TestRangeClientUtil.get(TestRangeApiUrl.ELEMENT_TREND_STATE, hostStateTrendRequest, getAuthHeaderMap(), 10000).getResult();
         return JsonCommon.snakeParse(result, new TypeReference<ServiceResult<List<HostState>>>() {
         });
@@ -124,6 +136,8 @@ public class TestRangeApiProxy implements SubRangeMonitorInterface {
 
     @Override
     public ServiceResult<List<HostState>> getElementHostState(BaseSceneElementPageRequest pageRequest) {
+        String mapCsceneId = getRangeMapCscene(pageRequest.getSceneId());
+        pageRequest.setSceneId(mapCsceneId);
         String result = TestRangeClientUtil.get(TestRangeApiUrl.ELEMENT_STATE, pageRequest, getAuthHeaderMap(), 10000).getResult();
         return JsonCommon.snakeParse(result, new TypeReference<ServiceResult<List<HostState>>>() {
         });
@@ -131,6 +145,8 @@ public class TestRangeApiProxy implements SubRangeMonitorInterface {
 
     @Override
     public ListObjServiceResult<Netiface> pageNetifaces(TimeListPageInfoQueryParams listPageInfoQueryParams) {
+        String mapCsceneId = getRangeMapCscene(listPageInfoQueryParams.getSceneIds().get(0));
+        listPageInfoQueryParams.setSceneIds(List.of(mapCsceneId));
         String result = TestRangeClientUtil.get(TestRangeApiUrl.ELEMENT_NET_INTERFACE, listPageInfoQueryParams, getAuthHeaderMap(), 10000).getResult();
         return JsonCommon.snakeParse(result, new TypeReference<ListObjServiceResult<Netiface>>() {
         });
@@ -138,6 +154,8 @@ public class TestRangeApiProxy implements SubRangeMonitorInterface {
 
     @Override
     public ListObjServiceResult<Port> pagePorts(TimeListPageInfoQueryParams listPageInfoQueryParams) {
+        String mapCsceneId = getRangeMapCscene(listPageInfoQueryParams.getSceneIds().get(0));
+        listPageInfoQueryParams.setSceneIds(List.of(mapCsceneId));
         String result = TestRangeClientUtil.get(TestRangeApiUrl.ELEMENT_PORT, listPageInfoQueryParams, getAuthHeaderMap(), 10000).getResult();
         return JsonCommon.snakeParse(result, new TypeReference<ListObjServiceResult<Port>>() {
         });
@@ -145,6 +163,8 @@ public class TestRangeApiProxy implements SubRangeMonitorInterface {
 
     @Override
     public ListObjServiceResult<Process> pageProcesses(TimeListPageInfoQueryParams listPageInfoQueryParams) {
+        String mapCsceneId = getRangeMapCscene(listPageInfoQueryParams.getSceneIds().get(0));
+        listPageInfoQueryParams.setSceneIds(List.of(mapCsceneId));
         String result = TestRangeClientUtil.get(TestRangeApiUrl.ELEMENT_PROCESS, listPageInfoQueryParams, getAuthHeaderMap(), 10000).getResult();
         return JsonCommon.snakeParse(result, new TypeReference<ListObjServiceResult<Process>>() {
         });
