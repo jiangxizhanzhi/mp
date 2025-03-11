@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.cscene.request.element;
 
+import cn.cyberpeace.mp.base.util.http.HttpParam;
+import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.request.common.PageRequest;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -25,5 +27,12 @@ public class BaseSceneElementPageRequest extends PageRequest {
 
     @ApiModelProperty(value = "场景关闭情况下是否仍然查询数据，默认false，表示不查询")
     private Boolean fetchIfSceneInstanceShutdown = false;
+
+    public BaseSceneElementRequest toBaseSceneElementRequest() {
+        BaseSceneElementRequest baseSceneElementRequest = new BaseSceneElementRequest();
+        baseSceneElementRequest.setSceneId(sceneId);
+        baseSceneElementRequest.setElementIds(elementIds);
+        return baseSceneElementRequest;
+    }
 
 }

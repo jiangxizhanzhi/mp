@@ -9,4 +9,13 @@ public interface TestRangeApiUrl {
     public static final String AUTH_HEALTH_CHECK = "/api/mp/auth/user_permissions/menuidents/byloginuser";
 
     public static final String MAP_SCENE_ID = "/api/mp/cscene/cscenes/get_scene_id_by_vpn_server_ip";
+    public static final String ELEMENT_OS = "/api/mp/cscene/monitor/scene/element/os";
+
+    public static final String ELEMENT_TREND_STATE = "/api/mp/cscene/monitor/hoststate/element_trend";
+    public static final String ELEMENT_STATE = "/api/mp/cscene/monitor/hoststate";
+    public static final String ELEMENT_NET_INTERFACE = "/api/mp/cscene/monitor/hoststate/element_netifaces";
+    public static final String ELEMENT_PORT = "/api/mp/cscene/monitor/hoststate/element_port";
+    public static final String ELEMENT_PROCESS = "/api/mp/cscene/monitor/hoststate/element_process";
+
+
 }

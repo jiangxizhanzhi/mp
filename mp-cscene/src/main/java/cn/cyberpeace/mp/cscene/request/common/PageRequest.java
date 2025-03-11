@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.cscene.request.common;
 
+import cn.cyberpeace.mp.base.util.http.HttpParam;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,7 +16,7 @@ import java.util.Objects;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PageRequest {
+public class PageRequest implements HttpParam {
 
     @ApiModelProperty(value = "当前页")
     private Integer page;

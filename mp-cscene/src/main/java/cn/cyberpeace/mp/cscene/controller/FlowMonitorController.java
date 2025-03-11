@@ -29,6 +29,7 @@ import cn.cyberpeace.mp.cscene.request.flow.FlowTrendRequest;
 import cn.cyberpeace.mp.cscene.response.AssetsStatisticsResponse;
 import cn.cyberpeace.mp.cscene.service.CsceneCommonService;
 import cn.cyberpeace.mp.cscene.service.FlowMonitorService;
+import cn.cyberpeace.mp.cscene.service.multirange.testrange.TestRangeApiProxy;
 import cn.cyberpeace.mp.cscene.vo.FlowGroupByDestinationIpAndSeverityVO;
 import cn.cyberpeace.mp.cscene.vo.FlowGroupPortWithProtocolVO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CategoryGroupBO;
@@ -79,6 +80,8 @@ public class FlowMonitorController {
 
     @Autowired
     private FlowClassificationsService flowClassificationsService;
+    @Autowired
+    private TestRangeApiProxy testRangeApiProxy;
 
     @ApiOperation(value = "模拟流量")
     @GetMapping("/simulation")

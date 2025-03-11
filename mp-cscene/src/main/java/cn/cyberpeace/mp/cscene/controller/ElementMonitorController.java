@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -13,12 +14,16 @@ import cn.cyberpeace.mp.cscene.dto.element.ElementRTInfo;
 import cn.cyberpeace.mp.cscene.dto.element.ElementVulnerabilityCountInfo;
 import cn.cyberpeace.mp.cscene.dto.element.ElementVulnerabilityInfo;
 import cn.cyberpeace.mp.cscene.dto.element.ElementVulnerabilityPieChartInfo;
+import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.request.element.ElementMonitorRequest;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.service.HostStateService;
 import cn.cyberpeace.mp.cscene.service.SceneElementMonitorService;
+import cn.cyberpeace.mp.cscene.service.multirange.testrange.TestRangeApiProxy;
+import cn.cyberpeace.mp.scene.model.SceneElementModel;
+import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.OS;
 import io.swagger.annotations.Api;
@@ -26,6 +31,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -55,6 +61,13 @@ public class ElementMonitorController {
 
     @Autowired
     private HostStateService hostStateService;
+
+    @Autowired
+    private CsceneInstanceMapper csceneInstanceMapper;
+    @Autowired
+    private SceneElementMapper sceneElementMapper;
+    @Autowired
+    private TestRangeApiProxy testRangeApiProxy;
 
     /**
      * elementIds不能为空，如果为多个值，默认只取第一个
@@ -88,7 +101,13 @@ public class ElementMonitorController {
     @ApiOperation(value = "节点操作系统信息")
     @GetMapping("/os")
     public ServiceResult<OS> getOS(BaseSceneElementRequest baseRequest) {
-        OS os = sceneElementMonitorService.getOSInfo(baseRequest);
+        //分靶场节点，需要查分靶场
+        OS os = null;
+        if (testRangeApiProxy.elementExistInCurrentScene(baseRequest)) {
+            os = testRangeApiProxy.getElementOs(baseRequest);
+        } else {
+            os = sceneElementMonitorService.getOSInfo(baseRequest);
+        }
         return ResultCommon.success(os);
     }
 

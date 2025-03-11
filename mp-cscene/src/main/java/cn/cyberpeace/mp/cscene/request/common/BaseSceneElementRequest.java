@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.cscene.request.common;
 
+import cn.cyberpeace.mp.base.util.http.HttpParam;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,7 +19,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class BaseSceneElementRequest {
+public class BaseSceneElementRequest implements HttpParam {
 
     @ApiModelProperty("场景id,多个id用逗号分隔")
     @NotNull

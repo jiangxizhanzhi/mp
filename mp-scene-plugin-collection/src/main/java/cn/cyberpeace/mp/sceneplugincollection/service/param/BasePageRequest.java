@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincollection.service.param;
 
+import cn.cyberpeace.mp.base.util.http.HttpParam;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -11,7 +12,7 @@ import java.util.Objects;
  * @Date：2022/2/24 16:08
  */
 @Data
-public class BasePageRequest {
+public class BasePageRequest implements HttpParam {
 
     @ApiModelProperty(value = "当前页")
     private Integer page;
