@@ -215,7 +215,7 @@ public class TestRangeApiProxy implements SubRangeMonitorInterface {
             var sceneElements = sceneElementMapper.list(new HumanCondition()
                             .select(SceneElementModel::getNodeId)
                     .filterEqual(SceneElementModel::getScene, sceneInstanceId)
-                    .filterEqual(SceneElementModel::getNodeId, allElements));
+                    .filterIn(SceneElementModel::getNodeId, allElements.toArray(new String[]{})));
             if (CollectionUtils.isEmpty(sceneElements)) {
                 return Collections.emptySet();
             } else {
