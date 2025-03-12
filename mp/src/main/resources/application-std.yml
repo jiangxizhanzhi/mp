@@ -207,6 +207,12 @@ mp:
     #authenticate-exclude-urls: /unauth/**,/sys/activation,/sys/activation/license_status,/sys/activation/machinecode,/sys/config/public,/config/single_ip,/file/**
     authenticate-encoder-iterations: ${mp.auth.ext-var.authenticate-encoder-iterations}
     authenticate-encoder-hash-width: ${mp.auth.ext-var.authenticate-encoder-hash-width}
+    sso:
+      appid: ${mp.auth.sso.ext-var.appid}
+      url: ${mp.auth.sso.ext-var.url}
+      login-4a-url: ${mp.auth.sso.ext-var.login-4a-url}
+      conn-timeout: ${mp.auth.sso.ext-var.conn-timeout}
+      read-timeout: ${mp.auth.sso.ext-var.read-timeout}
   # mp-front-admin 模块配置
   frontadmin:
     activ-enable: true

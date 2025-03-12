@@ -1,6 +1,7 @@
 dependencies {
     implementation project(':mp-base')
     implementation project(':mp-log')
+    implementation fileTree(dir: 'lib', includes: ['*.jar'])
 }
 
 tasks.test {

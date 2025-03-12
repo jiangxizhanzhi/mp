@@ -159,6 +159,13 @@ mp:
       authenticate-jwt-expires: ${MP_AUTH_JWT_EXPIRES:604800}
       authenticate-urls: ${MP_AUTH_URLS:/auth/**,/sys/**,/flow/**,/cscene/**,/devops/**,/agg/**,/common/**,/collection/**,/probes/**,/wazuh/**,/sessions/**,/flow_group/**}
       authenticate-encoder-hash-width: ${MP_AUTH_ENCODER_HASHWIDTH:256}
+    sso:
+      ext-var:
+        appid: ${SSO_APPID:sn}
+        url: ${SSO_URL:http://10.214.71.84:9000/ashe/oss-ticket-sso}
+        login-4a-url: ${SSO_LOGIN_4A_URL:http://10.214.71.88:30301}
+        conn-timeout: ${SSO_CONN_TIMEOUT:5000}
+        read-timeout: ${SSO_READ_TIMEOUT:20000}
   sceneplugingns3:
     ext-var:
       gns3-ip: ${GNS3_IP:10.100.27.1}
