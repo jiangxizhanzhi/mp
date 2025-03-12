@@ -270,6 +270,9 @@ public class FlowMonitorController {
                         .sorted((o1, o2) -> (int) (o2.getTimestamp() - o1.getTimestamp())).collect(Collectors.toList());
                 int startIncludeIndex = (originPage - 1) * originPerPage;
                 int endExcludeIndex = originPage * originPerPage;
+                if (endExcludeIndex > sortedFlowAttacks.size()) {
+                    endExcludeIndex = sortedFlowAttacks.size();
+                }
                 var subList = sortedFlowAttacks.subList(startIncludeIndex, endExcludeIndex);
                 try {
                     return new ListObjServiceResult<>(new ListObjResult<>(subList, sortedFlowAttacks.size()).asResult()).asResult();
