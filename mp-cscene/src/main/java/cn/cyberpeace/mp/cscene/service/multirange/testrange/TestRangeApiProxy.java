@@ -185,7 +185,7 @@ public class TestRangeApiProxy implements SubRangeMonitorInterface {
          queryParams.setTargetNodeIds(new ArrayList<>(allTargetNodes));
          queryParams.setId(mapCsceneId);
          queryParams.setPage(1);
-         queryParams.setPerPage(Integer.MAX_VALUE);
+         queryParams.setPerPage(10000);
 
          String result = TestRangeClientUtil.get(TestRangeApiUrl.FLOW_ATTACK_PAGE, queryParams, getAuthHeaderMap(), 10000).getResult();
          var resultList = JsonCommon.snakeParse(result, new TypeReference<ListObjServiceResult<FlowAttackDto>>() {
