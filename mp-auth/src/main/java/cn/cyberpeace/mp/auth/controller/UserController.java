@@ -16,6 +16,8 @@ import cn.cyberpeace.mp.log.annotation.OperateLog;
 import cn.cyberpeace.mp.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
+import cn.cyberpeace.mp.log.utils.JsonUtils;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -159,5 +161,12 @@ public class UserController {
     public ServiceResult<List<String>> getIsOnline(@RequestBody List<String> list) {
         List<String> onlineList = userService.getIsOnline(list);
         return new ServiceResult<>(onlineList).asResult();
+    }
+
+    @GetMapping("/byname")
+    public ServiceResult<String> getUserInfoByUserName(String username) {
+        UserModel userModel = userService.getByUserName(username);
+        String json = JSON.toJSONString(userModel.getId());
+        return new ServiceResult<>(json).asResult();
     }
 }
