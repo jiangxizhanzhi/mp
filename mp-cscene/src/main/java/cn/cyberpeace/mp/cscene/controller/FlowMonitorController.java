@@ -254,9 +254,10 @@ public class FlowMonitorController {
             if (elementsInCurrentScene.size() == allNodes.size()) {
                 return flowMonitorService.pageFlow(id, queryParams);
             } else {
-                var allFlowAttackInTestRange = testRangeApiProxy.pageFlow(id, queryParams);
                 int originPerPage = queryParams.getPerPage();
                 int originPage = queryParams.getPage();
+                var allFlowAttackInTestRange = testRangeApiProxy.pageFlow(id, queryParams);
+
                 queryParams.setPerPage(10000);
                 queryParams.setPage(1);
                 queryParams.setTargetNodeIds(new ArrayList<>(elementsInCurrentScene));
