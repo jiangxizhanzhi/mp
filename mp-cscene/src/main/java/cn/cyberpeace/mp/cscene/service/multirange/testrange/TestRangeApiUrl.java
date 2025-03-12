@@ -17,5 +17,7 @@ public interface TestRangeApiUrl {
     public static final String ELEMENT_PORT = "/api/mp/cscene/monitor/hoststate/element_port";
     public static final String ELEMENT_PROCESS = "/api/mp/cscene/monitor/hoststate/element_process";
 
+    public static final String FLOW_ATTACK_PAGE = "/api/mp/cscene/monitor/flow/page";
+
 
 }

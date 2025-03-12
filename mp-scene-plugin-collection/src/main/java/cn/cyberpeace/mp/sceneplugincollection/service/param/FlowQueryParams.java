@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincollection.service.param;
 
 import cn.cyberpeace.mp.base.service.param.QueryParams;
+import cn.cyberpeace.mp.base.util.http.SnakeHttpParam;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -13,7 +14,9 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @ApiModel
-public class FlowQueryParams extends QueryParams {
+public class FlowQueryParams extends QueryParams implements SnakeHttpParam {
+    private String id;
+
     @ApiModelProperty(value = "协议")
     private String protocol;
 

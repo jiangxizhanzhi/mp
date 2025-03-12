@@ -4,11 +4,13 @@ import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.controller.request.SceneAllElementsQueryRequest;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackDto;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
@@ -19,6 +21,7 @@ import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
 import cn.cyberpeace.mp.scene.repository.SceneMapper;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.TimeListPageInfoQueryParams;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Netiface;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.OS;
@@ -33,10 +36,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -170,11 +172,33 @@ public class TestRangeApiProxy implements SubRangeMonitorInterface {
         });
     }
 
+    @Override
+    public List<FlowAttackDto> pageFlow(String id, FlowQueryParams queryParams) {
+         List<String> targetNodeIds = queryParams.getTargetNodeIds();
+         if (CollectionUtils.isEmpty(targetNodeIds)) {
+             return new ArrayList<>();
+         }
+         Set<String> allTargetNodes = new HashSet<>(queryParams.getTargetNodeIds());
+         Set<String> existElements = elementsExistInCurrentScene(id, allTargetNodes);
+         allTargetNodes.removeAll(existElements);
+         String mapCsceneId = getRangeMapCscene(id);
+         queryParams.setTargetNodeIds(new ArrayList<>(allTargetNodes));
+         queryParams.setId(mapCsceneId);
+         queryParams.setPage(1);
+         queryParams.setPerPage(Integer.MAX_VALUE);
+
+         String result = TestRangeClientUtil.get(TestRangeApiUrl.FLOW_ATTACK_PAGE, queryParams, getAuthHeaderMap(), 10000).getResult();
+         var resultList = JsonCommon.snakeParse(result, new TypeReference<ListObjServiceResult<FlowAttackDto>>() {
+         });
+         return resultList.getData().getList();
+    }
+
 
     public boolean elementExistInCurrentScene(BaseSceneElementRequest baseRequest) {
         String csceneInstanceId = baseRequest.getSceneId();
         String sceneInstanceId = csceneInstanceMapper.get(csceneInstanceId).getScene();
-        var sceneElements = sceneElementMapper.list(new HumanCondition().filterEqual(SceneElementModel::getScene, sceneInstanceId).filterEqual(SceneElementModel::getNodeId, baseRequest.getElementIds().get(0)));
+        var sceneElements = sceneElementMapper.list(new HumanCondition().select(SceneElementModel::getId)
+                .filterEqual(SceneElementModel::getScene, sceneInstanceId).filterEqual(SceneElementModel::getNodeId, baseRequest.getElementIds().get(0)));
         if (CollectionUtils.isEmpty(sceneElements)) {
             log.info("当前节点{}不是当前靶场{}节点", baseRequest.getElementIds().get(0), baseRequest.getSceneId());
             return false;
@@ -182,6 +206,26 @@ public class TestRangeApiProxy implements SubRangeMonitorInterface {
             return true;
         }
     }
+
+    public Set<String> elementsExistInCurrentScene(String csceneInstanceId, Set<String> allElements) {
+        if (CollectionUtils.isEmpty(allElements)) {
+            return Collections.emptySet();
+        } else {
+            String sceneInstanceId = csceneInstanceMapper.get(csceneInstanceId).getScene();
+            var sceneElements = sceneElementMapper.list(new HumanCondition()
+                            .select(SceneElementModel::getNodeId)
+                    .filterEqual(SceneElementModel::getScene, sceneInstanceId)
+                    .filterEqual(SceneElementModel::getNodeId, allElements));
+            if (CollectionUtils.isEmpty(sceneElements)) {
+                return Collections.emptySet();
+            } else {
+                return sceneElements.stream().map(SceneElementModel::getNodeId).collect(Collectors.toSet());
+            }
+        }
+
+    }
+
+
 
 
 }

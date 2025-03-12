@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
@@ -54,11 +55,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -246,11 +243,45 @@ public class FlowMonitorController {
     @ApiOperation(value = "流量分页接口")
     @ApiImplicitParams({@ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),})
     @GetMapping("/page")
-    public ListObjServiceResult<FlowAttackDto> pageFlow(@RequestParam String id, FlowQueryParams queryParams) {
+    public ListObjServiceResult<?> pageFlow(@RequestParam String id, FlowQueryParams queryParams) {
         log.info("pageFlow ====>> id:{}, queryParams:{}", id, queryParams);
+        if (CollectionUtils.isEmpty(queryParams.getTargetNodeIds())) {
+            return flowMonitorService.pageFlow(id, queryParams);
 
-        ListObjServiceResult<FlowAttackDto> result = flowMonitorService.pageFlow(id, queryParams);
-        return result;
+        } else {
+            Set<String> allNodes = new HashSet<>(queryParams.getTargetNodeIds());
+            Set<String> elementsInCurrentScene = testRangeApiProxy.elementsExistInCurrentScene(id, allNodes);
+            if (elementsInCurrentScene.size() == allNodes.size()) {
+                return flowMonitorService.pageFlow(id, queryParams);
+            } else {
+                var allFlowAttackInTestRange = testRangeApiProxy.pageFlow(id, queryParams);
+
+                queryParams.setPerPage(Integer.MAX_VALUE);
+                queryParams.setPage(1);
+                queryParams.setTargetNodeIds(new ArrayList<>(elementsInCurrentScene));
+                var flowAttackInCurrentRange = flowMonitorService.pageFlow(id, queryParams).getData().getList();
+
+                List<FlowAttackDto> allFlowAttack = new ArrayList<>();
+                allFlowAttack.addAll(allFlowAttackInTestRange);
+                allFlowAttack.addAll(flowAttackInCurrentRange);
+                List<FlowAttackDto> sortedFlowAttacks = allFlowAttack.stream()
+                        .sorted((o1, o2) -> (int) (o2.getTimestamp() - o1.getTimestamp())).collect(Collectors.toList());
+                int perPage = queryParams.getPerPage();
+                int page  = queryParams.getPage();
+                int startIncludeIndex = (page - 1) * perPage;
+                int endExcludeIndex = page * perPage;
+                var subList = sortedFlowAttacks.subList(startIncludeIndex, endExcludeIndex);
+                try {
+                    return new ListObjServiceResult<>(new ListObjResult<>(subList, sortedFlowAttacks.size()).asResult()).asResult();
+                } catch (Exception e) {
+                    log.error(e.getMessage(), e);
+                    return new ListObjServiceResult<>(new ListObjResult<>(Collections.emptyList(), sortedFlowAttacks.size()).asResult()).asResult();
+                }
+
+            }
+        }
+
+
     }
 
 
