@@ -435,6 +435,8 @@ public class InitiateHandler extends HandlerCommon {
     }
 
     /**
+     *
+     * 用于生成节点的衍生网络和接入网络，以及设置网络cidr和节点是否需要辅助路由
      * 初始化节点
      * @param cloudElement 网元节点
      */
@@ -542,9 +544,13 @@ public class InitiateHandler extends HandlerCommon {
         }
 
         Map<String, ConnectedNetworkBO> cidr2ConnectedNetwork = new HashMap<>();
+        Set<ConnectedNetworkBO> connectedNetworks = new HashSet<>();
         List<ConnectedNetworkBO> noCidrNetwork = new ArrayList<>();
+
+
         for (SceneElementPortBO port : ports) {
             SceneElementPortBO connectPort = getHandlerUtils().getPortConnectedOpaqueSrcPort(port.getId());
+            // 这里初始化节点的接入网络。
             if (connectPort != null) {
                 // 有连线 且 对端端口已归属某个网络 则本端口接入即可
                 CloudPluginSceneElementNetworkBO connectNetwork = getHandlerUtils().getNetworkByPort(connectPort);
@@ -580,7 +586,21 @@ public class InitiateHandler extends HandlerCommon {
                     ConnectedNetworkBO connectedNetwork = new ConnectedNetworkBO(createNetwork, getHandlerUtils());
                     connectedNetwork.addPort(port, connectPort, true);
                     noCidrNetwork.add(connectedNetwork);
-                } else {
+                } else if (Objects.nonNull(cloudElement.getSrcElement().getType()) && cloudElement.getSrcElement().getType().equals(BaseSceneElementModel.Type.SWITCH)
+                        && BaseCloudPluginSceneElementModel.ImageType.VM.equals(cloudElement.getImageType()) && connectPort != null) {
+                    // 如果是虚拟交换机 连着线的端口分配一个网络
+                    var createNetwork = new CloudPluginSceneElementNetworkBO(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
+                    var connectedNetwork = new ConnectedNetworkBO(createNetwork, getHandlerUtils());
+                    connectedNetwork.addPort(port, connectPort, true);
+                    noCidrNetwork.add(connectedNetwork);
+                } else if (Objects.nonNull(cloudElement.getSrcElement().getType()) && cloudElement.getSrcElement().getType().equals(BaseSceneElementModel.Type.FIREWALL)
+                        && BaseCloudPluginSceneElementModel.ImageType.VM.equals(cloudElement.getImageType()) && connectPort != null) {
+                    // 如果是虚拟镜像防火墙 连着线的端口分配一个网络
+                    var createNetwork = new CloudPluginSceneElementNetworkBO(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
+                    var connectedNetwork = new ConnectedNetworkBO(createNetwork, getHandlerUtils());
+                    connectedNetwork.addPort(port, connectPort, true);
+                    noCidrNetwork.add(connectedNetwork);
+                }else {
                     // 否则加入默认网络即可
                     defaultConnectedNetwork.addPort(port, connectPort, true);
                 }
@@ -600,6 +620,16 @@ public class InitiateHandler extends HandlerCommon {
                         createNetwork.setCidr(cidr);
                         connectedNetwork = new ConnectedNetworkBO(createNetwork, getHandlerUtils());
                         cidr2ConnectedNetwork.put(cidr, connectedNetwork);
+                        connectedNetworks.add(connectedNetwork);
+                    } else if ((BaseCloudPluginSceneElementModel.ImageType.VM.equals(cloudElement.getImageType()) &&
+                            (BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_SWITCH == cloudElement.getRole()
+                                    || BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_FIREWALL == cloudElement.getRole()))
+                            ) {
+                        // 虚拟镜像交换机、虚拟镜像防火墙、实体设备每根线创建一个网络
+                        var createNetwork = new CloudPluginSceneElementNetworkBO(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
+                        createNetwork.setCidr(cidr);
+                        connectedNetwork = new ConnectedNetworkBO(createNetwork, getHandlerUtils());
+                        connectedNetworks.add(connectedNetwork);
                     }
                     connectedNetwork.addPort(port, connectPort, true);
                 }
@@ -622,7 +652,7 @@ public class InitiateHandler extends HandlerCommon {
                     deriveNetworks.add(n);
                 }
             }
-            for (ConnectedNetworkBO n : cidr2ConnectedNetwork.values()) {
+            for (ConnectedNetworkBO n : new ArrayList<>(connectedNetworks)) {
                 if (CollectionUtils.isNotEmpty(n.getToPorts())) {
                     deriveNetworks.add(n);
                 }
@@ -657,6 +687,7 @@ public class InitiateHandler extends HandlerCommon {
             cloudElement.setDeriveNetworks(deriveNetworks);
         }
 
+        //给上面分配好的衍生网络设置cidr，以及设置当前节点是否需要辅助路由
         initiateAuxiliaryNetwork(cloudElement);
     }
 
@@ -711,11 +742,28 @@ public class InitiateHandler extends HandlerCommon {
      * @param cloudElement 网元节点
      */
     private void initiateAuxiliaryNetwork(CloudPluginSceneElementBO cloudElement) {
-        List<CloudPluginSceneElementNetworkBO> networks = new ArrayList<>();
-        for (ConnectedNetworkBO n : cloudElement.getDeriveNetworks()) {
-            CloudPluginSceneElementNetworkBO cloudPluginSceneElementNetworkBO = n.network;
-            networks.add(cloudPluginSceneElementNetworkBO);
+        var networks = cloudElement.getDeriveNetworks().stream().map(n -> n.network).collect(Collectors.toList());
+        //如果三层交换机和防火墙衍生的网络没有配置cidr，则固定分配同样的cidr
+        if (BaseCloudPluginSceneElementModel.ImageType.VM.equals(cloudElement.getImageType()) &&
+                (BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_SWITCH == cloudElement.getRole()
+                        || BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_FIREWALL == cloudElement.getRole())) {
+            prepareExistCidrs();
+            String cidr = allocateCidrs(1).get(0);
+            for (CloudPluginSceneElementNetworkBO network : networks) {
+                if (StringUtils.isNotEmpty(network.getCidr())) {
+                    cidr = network.getCidr();
+                    break;
+                }
+            }
+            for (CloudPluginSceneElementNetworkBO network : networks) {
+                if (StringUtils.isEmpty(network.getCidr())) {
+                    network.setCidr(cidr);
+                }
+            }
         }
+
+
+
         for (CloudPluginSceneElementNetworkBO network : networks) {
             Integer role = cloudElement.getRole();
             if (Boolean.TRUE.equals(network.getExternal())) {
@@ -736,6 +784,9 @@ public class InitiateHandler extends HandlerCommon {
         }
         Integer virtualType = cloudElement.getVirtualType();
         for (ConnectedNetworkBO connectNetwork : cloudElement.getDeriveNetworks()) {
+            if (getHandlerUtils().getCreatedNetworks().contains(connectNetwork.getNetwork().getId())) {
+                continue;
+            }
             if (!Boolean.TRUE.equals(connectNetwork.network.getVlan())) {
                 // 是否vlan模式(是否连接了实体节点)
                 boolean vlan = false;
