@@ -93,4 +93,9 @@ public class OrgController {
         return orgService.delete(id);
     }
 
+    @ApiOperation("同步指定组织")
+    @PostMapping("/sync")
+    public ObjServiceResult<OrgModel> sync(@RequestBody OrgModel obj) {
+        return orgService.sync(obj).asResult();
+    }
 }

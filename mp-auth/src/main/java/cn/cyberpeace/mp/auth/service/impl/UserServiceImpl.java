@@ -17,6 +17,7 @@ import cn.cyberpeace.mp.auth.repository.TenantUserMapper;
 import cn.cyberpeace.mp.auth.repository.UserMapper;
 import cn.cyberpeace.mp.auth.repository.UserRoleMapper;
 import cn.cyberpeace.mp.auth.request.user.UserRequest;
+import cn.cyberpeace.mp.auth.response.login.LoginResp;
 import cn.cyberpeace.mp.auth.service.*;
 import cn.cyberpeace.mp.auth.service.fields.UserFields;
 import cn.cyberpeace.mp.auth.service.param.UserQueryParams;
@@ -32,6 +33,7 @@ import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.repository.condition.aggregation.Aggregation;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.base.service.result.ObjResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.ServletUtils;
@@ -346,6 +348,11 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     @Transactional(rollbackFor = Exception.class)
     public UserModel add(UserRequest createRequest) {
+        return add(createRequest, false);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public UserModel add(UserRequest createRequest, boolean allowEmptyPassword) {
         ParamCheck.notNull(createRequest, AuthBasei18nCode.REQUEST_PARAMS);
         opUserPermCheckService.checkByTargetRoleIds(createRequest.getRoleIds());
 
@@ -353,6 +360,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         UserModel userModel = new UserModel();
         BeanUtils.copyProperties(createRequest, userModel);
 
+        if (StringUtils.isEmpty(createRequest.getPassword()) && allowEmptyPassword) {
+            createRequest.setPassword(PasswordUtils.desEncrypt("Aa0" + TextUtils.uuid()));
+        }
         String decryptedPwd = PasswordUtils.desDecrypt(createRequest.getPassword());
         userModel.setPassword(decryptedPwd);
         userModel.setTokenSecret(null);
@@ -365,7 +375,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             userModel.setAvatar(DefaultImgUtil.fdfsUrlToPath(userModel.getAvatar()));
         }
 
-        createCheckService.check(userModel);
+        createCheckService.check(userModel, allowEmptyPassword);
 
         // create中会对密码加密，外层不需要再次加密
         userModel.setDelayRemindLicenseTime(BeanCommon.getBean(ExpireRemindDateGetter.class).get());
@@ -1176,6 +1186,59 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             return list.stream().map(UserModel::getUsername).collect(Collectors.toList());
         }
         return new ArrayList<>();
+    }
+
+    private void checkOperateRootUser() {
+        var operateUser = UserUtils.getLoginUser();
+        if (Objects.isNull(operateUser)) {
+            throw new MpRuntimeException(AuthErrorCode.ACCOUNT_NOT_LOGIN);
+        }
+        if (!AuthConstant.ROOT_USER_ID.equals(operateUser.getId())) {
+            throw new MpRuntimeException(AuthErrorCode.PERMISSION_DENIED);
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public UserModel sync(UserRequest syncRequest) {
+        checkOperateRootUser();
+        var username = syncRequest.getUsername();
+        var user = getModelMapper().first(new HumanCondition().filterEqual(UserModel::getUsername, username));
+        if (user == null) {
+            syncRequest.setAvatar(FsCommon.getFileKey(syncRequest.getAvatar()));
+            return add(syncRequest, true);
+        } else {
+            syncRequest.setId(user.getId());
+            return modify(syncRequest);
+        }
+    }
+
+    @Override
+    public LoginResp disguiseLogin(String id, String username) {
+        checkOperateRootUser();
+        UserModel user = null;
+        if (!StringUtils.isEmpty(id)) {
+            user = getModelMapper().get(id);
+        } else if (!StringUtils.isEmpty(username)) {
+            user = getModelMapper().first(new HumanCondition().filterEqual(UserModel::getUsername, username));
+        }
+        if (user == null) {
+            throw new MpRuntimeException(AuthErrorCode.ACCOUNT_NOT_EXISTED);
+        }
+        setDefaultIfNoAvatar(user);
+
+        String jwt = JwtUtils.generateToken(new JwtUtils.UserInfo(user.getId(), user.getUsername(), user.getTokenSecret()));
+        UserBo userBo = userModel2UserDto(user);
+        LoginResp loginResp = new LoginResp();
+        loginResp.setUser(userBo);
+        loginResp.setToken(jwt);
+        return loginResp;
+    }
+
+    @Override
+    public UserModel getByUsername(String username) {
+        checkOperateRootUser();
+        return getModelMapper().first(new HumanCondition().filterEqual(UserModel::getUsername, username));
     }
 }
 

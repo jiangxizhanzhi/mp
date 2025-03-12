@@ -42,4 +42,6 @@ public interface RoleService extends BaseModelService<RoleModel, QueryParams> {
     RoleModel modify(RoleRequest modifyRequest);
 
     List<String> getSystemUnVisibleRoleIds();
+
+    RoleModel sync(RoleRequest syncRequest);
 }

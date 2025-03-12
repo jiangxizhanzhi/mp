@@ -19,6 +19,8 @@ import cn.cyberpeace.mp.auth.service.sender.AuthStatusRabbitmqSender;
 import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.auth.util.SQLUtils;
+import cn.cyberpeace.mp.auth.util.UserUtils;
+import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.repository.condition.aggregation.Count;
@@ -514,4 +516,27 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         return result;
     }
 
+    private void checkOperateRootUser() {
+        var operateUser = UserUtils.getLoginUser();
+        if (Objects.isNull(operateUser)) {
+            throw new MpRuntimeException(AuthErrorCode.ACCOUNT_NOT_LOGIN);
+        }
+        if (!AuthConstant.ROOT_USER_ID.equals(operateUser.getId())) {
+            throw new MpRuntimeException(AuthErrorCode.PERMISSION_DENIED);
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public RoleModel sync(RoleRequest syncRequest) {
+        checkOperateRootUser();
+        var name = syncRequest.getName();
+        var role = getModelMapper().first(new HumanCondition().filterEqual(RoleModel::getName, name));
+        if (role == null) {
+            return add(syncRequest);
+        } else {
+            syncRequest.setId(role.getId());
+            return modify(syncRequest);
+        }
+    }
 }

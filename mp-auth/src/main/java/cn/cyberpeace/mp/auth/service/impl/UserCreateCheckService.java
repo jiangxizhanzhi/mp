@@ -25,12 +25,22 @@ public class UserCreateCheckService implements UserCheckService {
     private UserService userService;
 
     public void check(UserModel user) {
+        check(user, false);
+    }
+
+    public void check(UserModel user, boolean allowEmptyPassword) {
 
         ParamCheck.notBlank(user.getUsername(), AuthBasei18nCode.USER_USERNAME);
 
-        // 密码是否合法
-        if (PasswordUtils.isPasswordInvalid(user.getPassword())) {
-            throw new MpRuntimeException(AuthErrorCode.PASSWORD_STRENGTH_INVALID);
+        if (StringUtils.isEmpty(user.getPassword())) {
+            if (!allowEmptyPassword) {
+                throw new MpRuntimeException(AuthErrorCode.PASSWORD_STRENGTH_INVALID);
+            }
+        } else {
+            // 密码是否合法
+            if (PasswordUtils.isPasswordInvalid(user.getPassword())) {
+                throw new MpRuntimeException(AuthErrorCode.PASSWORD_STRENGTH_INVALID);
+            }
         }
 
         // 邮箱是否合法

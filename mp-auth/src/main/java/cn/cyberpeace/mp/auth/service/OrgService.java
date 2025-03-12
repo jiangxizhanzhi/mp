@@ -88,4 +88,5 @@ public interface OrgService extends BaseModelService<OrgModel, QueryParams> {
      */
     List<List<String>> getBathPathToList(List<OrgModel> orgModelList);
 
+    ObjServiceResult<OrgModel> sync(OrgModel obj);
 }

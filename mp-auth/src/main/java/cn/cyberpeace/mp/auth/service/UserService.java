@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.bo.user.UserOrgRoleBo;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.request.user.UserRequest;
+import cn.cyberpeace.mp.auth.response.login.LoginResp;
 import cn.cyberpeace.mp.auth.service.param.UserQueryParams;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.BaseModelService;
@@ -110,6 +111,12 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
 
     ServiceResult<Integer> bulkCreateWithPasswordPreSet(List<UserModel> objs);
 
-   List<String> listExistedUserNames(List<String> userNames, Integer limit);
+    List<String> listExistedUserNames(List<String> userNames, Integer limit);
+
+    UserModel sync(UserRequest syncRequest);
+
+    LoginResp disguiseLogin(String id, String username);
+
+    UserModel getByUsername(String username);
 
 }

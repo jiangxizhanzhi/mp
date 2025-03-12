@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.model.OrgModel;
+import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.repository.OrgMapper;
 import cn.cyberpeace.mp.auth.service.OrgPermissionService;
@@ -15,6 +16,7 @@ import cn.cyberpeace.mp.auth.service.UserCacheService;
 import cn.cyberpeace.mp.auth.service.fields.OrgFields;
 import cn.cyberpeace.mp.auth.service.sender.AuthStatusRabbitmqSender;
 import cn.cyberpeace.mp.auth.util.ParamCheck;
+import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
@@ -470,6 +472,29 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         }
 
         return new ArrayList<>();
+    }
+
+    @Override
+    public ObjServiceResult<OrgModel> sync(OrgModel obj) {
+        checkOperateRootUser();
+        var name = obj.getName();
+        var org = getModelMapper().first(new HumanCondition().filterEqual(OrgModel::getName, name));
+        if (org == null) {
+            return create(obj);
+        } else {
+            obj.setId(org.getId());
+            return update(org);
+        }
+    }
+
+    private void checkOperateRootUser() {
+        var operateUser = UserUtils.getLoginUser();
+        if (Objects.isNull(operateUser)) {
+            throw new MpRuntimeException(AuthErrorCode.ACCOUNT_NOT_LOGIN);
+        }
+        if (!AuthConstant.ROOT_USER_ID.equals(operateUser.getId())) {
+            throw new MpRuntimeException(AuthErrorCode.PERMISSION_DENIED);
+        }
     }
 
     private List<OrgDto> toTree(List<OrgBO> orgs) {

@@ -5,7 +5,9 @@ import cn.cyberpeace.mp.auth.bo.user.UserSimpleBo;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.request.user.DisguiseLoginRequest;
 import cn.cyberpeace.mp.auth.request.user.UserRequest;
+import cn.cyberpeace.mp.auth.response.login.LoginResp;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.common.FsCommon;
@@ -150,6 +152,32 @@ public class UserController {
     public ServiceResult<UserModel> modify(@RequestBody UserRequest modifyRequest) {
 //        modifyRequest.setAvatar(FsCommon.getFileKey(modifyRequest.getAvatar()));
         UserModel userModel = userService.modify(modifyRequest);
+        return ResultCommon.success(userModel);
+    }
+
+    @ApiOperation(value = "同步用户，同时完成组织，角色绑定关系", notes = "")
+    @ApiImplicitParam(name = "syncRequest", value = "同步请求", dataTypeClass = UserRequest.class)
+    @PostMapping("/sync")
+    public ServiceResult<UserModel> sync(@RequestBody UserRequest syncRequest) {
+        UserModel userModel = userService.sync(syncRequest);
+        return ResultCommon.success(userModel);
+    }
+
+    @ApiOperation(value = "获取指定用户token", notes = "")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="username", paramType="body", value="用户名", dataTypeClass = String.class),
+    })
+    @PostMapping("/disguise_login")
+    public ServiceResult<LoginResp> disguiseLogin(@RequestBody DisguiseLoginRequest loginRequest) {
+        LoginResp loginResp = userService.disguiseLogin(loginRequest.getId(), loginRequest.getUsername());
+        return ResultCommon.success(loginResp);
+    }
+
+    @ApiOperation(value = "获取用户", notes = "")
+    @ApiImplicitParam(name = "username", value = "获取用户", dataTypeClass = UserRequest.class)
+    @GetMapping("/get_by_username")
+    public ServiceResult<UserModel> getUser(@RequestParam String username) {
+        UserModel userModel = userService.getByUsername(username);
         return ResultCommon.success(userModel);
     }
 }

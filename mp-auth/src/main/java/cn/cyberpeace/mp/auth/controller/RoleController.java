@@ -125,4 +125,12 @@ public class RoleController {
         return ResultCommon.success(roles);
     }
 
+    @ApiOperation(value = "同步角色，同时完成角色-权限绑定关系", notes = "")
+    @ApiImplicitParam(name = "syncRequest", value = "同步请求", dataTypeClass = RoleRequest.class)
+    @PostMapping("/sync")
+    public ServiceResult<RoleModel> sync(@RequestBody @Validated RoleRequest syncRequest) {
+        RoleModel roleModel = roleService.sync(syncRequest);
+        return ResultCommon.success(roleModel);
+    }
+
 }
