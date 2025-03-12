@@ -422,6 +422,56 @@ public class SceneService {
         }
     }
 
+    public ServiceResult<Boolean> start(String id, SceneContextBO context) {
+        SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
+        sceneHandler.setRealTimeUpdate(true);
+        SceneEventUtils.SceneEventInfo newEventInfo = this.createSceneEventInfo(id, null, null, SceneModel.Event.START);
+        SceneEventUtils.SceneEventInfo originLockInfo = SceneEventUtils.tryLockAndGetInfoIfLockFailed(id, newEventInfo);
+        if (originLockInfo == null) {
+            // 锁获取成功 没有其他线程执行操作
+            SceneTaskPool.getInstance()
+                    .executeTask(() -> {
+                        try {
+                            sceneHandler.start();
+                        } finally {
+                            SceneEventUtils.unLock(id);
+                        }
+                    });
+            return new ServiceResult<>(true);
+        } else if (originLockInfo.getEvent() == SceneModel.Event.START) {
+            // 锁获取失败, 其它线程正在执行相同操作 则直接返回成功
+            return new ServiceResult<>(true);
+        } else {
+            // 其他线程执行场景的其他操作 则返回报错
+            throw this.createOperateException(originLockInfo);
+        }
+    }
+
+    public ServiceResult<Boolean> stop(String id, SceneContextBO context) {
+        SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
+        sceneHandler.setRealTimeUpdate(true);
+        SceneEventUtils.SceneEventInfo newEventInfo = this.createSceneEventInfo(id, null, null, SceneModel.Event.STOP);
+        SceneEventUtils.SceneEventInfo originLockInfo = SceneEventUtils.tryLockAndGetInfoIfLockFailed(id, newEventInfo);
+        if (originLockInfo == null) {
+            // 锁获取成功 没有其他线程执行操作
+            SceneTaskPool.getInstance()
+                    .executeTask(() -> {
+                        try {
+                            sceneHandler.stop();
+                        } finally {
+                            SceneEventUtils.unLock(id);
+                        }
+                    });
+            return new ServiceResult<>(true);
+        } else if (originLockInfo.getEvent() == SceneModel.Event.STOP) {
+            // 锁获取失败, 其它线程正在执行相同操作 则直接返回成功
+            return new ServiceResult<>(true);
+        } else {
+            // 其他线程执行场景的其他操作 则返回报错
+            throw this.createOperateException(originLockInfo);
+        }
+    }
+
     /**
      * @description: 启动节点
      *

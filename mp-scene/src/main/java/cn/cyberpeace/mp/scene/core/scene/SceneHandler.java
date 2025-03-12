@@ -494,12 +494,6 @@ public class SceneHandler extends BaseSceneHandler<
         return true;
     }
 
-    public void start() {
-    }
-
-    public void stop() {
-    }
-
     public void restart() {
     }
 
@@ -600,6 +594,44 @@ public class SceneHandler extends BaseSceneHandler<
             return false;
         }
         overAllEvent(SceneModel.Event.SUSPEND, SceneElementModel.Event.SUSPEND);
+        if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
+            save();
+        }
+        return true;
+    }
+
+    public boolean start() {
+        prepareAllEvent(SceneModel.Event.START, SceneElementModel.Event.START);
+        startAllEvent(SceneModel.Event.START, SceneElementModel.Event.START);
+        try {
+            for (ScenePluginHandler<?, ?, ?, ?> plugin : getPlugins()) {
+                plugin.start();
+            }
+        } catch (Exception e) {
+            log.error("failed to start scene , sceneId is {} , exception is {}", getSceneId(), ExceptionUtils.getStackTrace(e));
+            errorScene(SceneModel.Event.START, e.getMessage());
+            return false;
+        }
+        overAllEvent(SceneModel.Event.START, SceneElementModel.Event.START);
+        if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
+            save();
+        }
+        return true;
+    }
+
+    public boolean stop() {
+        prepareAllEvent(SceneModel.Event.STOP, SceneElementModel.Event.STOP);
+        startAllEvent(SceneModel.Event.STOP, SceneElementModel.Event.STOP);
+        try {
+            for (ScenePluginHandler<?, ?, ?, ?> plugin : getPlugins()) {
+                plugin.stop();
+            }
+        } catch (Exception e) {
+            log.error("failed to stop scene , sceneId is {} , exception is {}", getSceneId(), ExceptionUtils.getStackTrace(e));
+            errorScene(SceneModel.Event.STOP, e.getMessage());
+            return false;
+        }
+        overAllEvent(SceneModel.Event.STOP, SceneElementModel.Event.STOP);
         if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
             save();
         }

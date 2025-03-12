@@ -12,6 +12,7 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
+import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
@@ -21,9 +22,11 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.StopTaskPool;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
-/**
+ /**
  * @ClassName StopHandler
  * @Description
  * @Author maojun
@@ -39,6 +42,9 @@ public class StopHandler extends HandlerCommon{
     private final Container container = new Container();
     private final VirtualDynamips virtualDynamips = new VirtualDynamips();
 
+    public static class SceneProcess {
+        public static final EventProcess STOP_TERMINALS = new EventProcess("stop_terminals", "sceneplugincloud.event.stop_terminals");
+    }
 
     public static class ElementProcess {
         //关闭虚拟机
@@ -59,6 +65,18 @@ public class StopHandler extends HandlerCommon{
     public StopHandler(CloudScenePluginHandler pluginHandler, int event) {
         super(pluginHandler, StopTaskPool.getInstance(), event);
     }
+
+     public void stop() {
+         prepareEventProcess(SceneModel.Event.STOP, SceneProcess.class, ElementProcess.class);
+         List<Runnable> tasks = new ArrayList<>();
+         for (CloudPluginSceneElementBO e : getPluginHandler().getElementMap().values()) {
+             if (this.getPluginHandler().getSceneHandler().isHandleNode(e.getSrcElement().getId())) {
+                 Runnable runnable = () -> this.stopElement(e);
+                 tasks.add(runnable);
+             }
+         }
+         runSceneProgress(SceneProcess.STOP_TERMINALS, () -> runTasks(tasks));
+     }
 
     /**
      * @description: 节点关闭

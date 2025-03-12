@@ -12,6 +12,7 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
+import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.EntityUsb;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.VirtualUsb;
@@ -48,6 +49,9 @@ public class StartHandler extends HandlerCommon{
     private final Container container = new Container();
     private final VirtualDynamips virtualDynamips = new VirtualDynamips();
 
+    public static class SceneProcess {
+        public static final EventProcess START_TERMINALS = new EventProcess("start_terminals", "sceneplugincloud.event.start_terminals");
+    }
 
     //节点处理过程
     public static class ElementProcess {
@@ -68,6 +72,18 @@ public class StartHandler extends HandlerCommon{
      */
     public StartHandler(CloudScenePluginHandler pluginHandler, int event) {
         super(pluginHandler, StartTaskPool.getInstance(), event);
+    }
+
+    public void start() {
+        prepareEventProcess(SceneModel.Event.START, PauseHandler.SceneProcess.class, PauseHandler.ElementProcess.class);
+        List<Runnable> tasks = new ArrayList<>();
+        for (CloudPluginSceneElementBO e : getPluginHandler().getElementMap().values()) {
+            if (this.getPluginHandler().getSceneHandler().isHandleNode(e.getSrcElement().getId())) {
+                Runnable runnable = () -> this.startElement(e);
+                tasks.add(runnable);
+            }
+        }
+        runSceneProgress(SceneProcess.START_TERMINALS, () -> runTasks(tasks));
     }
 
 

@@ -406,6 +406,16 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         new ResumeHandler(this, SceneModel.Event.RESUME).resume();
     }
 
+    @Override
+    public void start() {
+        new StartHandler(this, SceneModel.Event.START).start();
+    }
+
+    @Override
+    public void stop() {
+        new StopHandler(this, SceneModel.Event.STOP).stop();
+    }
+
     /**
      * initiateElement
      *

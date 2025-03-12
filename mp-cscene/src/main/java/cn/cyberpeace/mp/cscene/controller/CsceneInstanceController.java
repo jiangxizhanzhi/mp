@@ -1243,6 +1243,41 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         return result;
     }
 
+    @ApiOperation("场景实例开机")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = CsceneInstanceActionRequest.class),
+    })
+    @PostMapping("/start")
+    public ServiceResult<Boolean> startScene(@RequestParam(required = false) String id,
+                                               @RequestBody(required = false) CsceneInstanceActionRequest request) {
+        request = formatActionRequest(request, id);
+        ServiceResult<Boolean> result = modelService.start(request.getId(), request.getContext()).asResult();
+//        CsceneLogUtils.recordSceneInstanceLog(request.getId(), OpTypeEnums.PAUSE, CsceneLogUtils.SCENE_SUSPEND, request.getContext());
+        return result;
+    }
+
+    /**
+     * resumeScene
+     *
+     * @param id
+     * @param request
+     * @return
+     */
+    @ApiOperation("场景实例关机")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = CsceneInstanceActionRequest.class),
+    })
+    @PostMapping("/stop")
+    public ServiceResult<Boolean> stopScene(@RequestParam(required = false) String id,
+                                              @RequestBody(required = false) CsceneInstanceActionRequest request) {
+        request = formatActionRequest(request, id);
+        ServiceResult<Boolean> result = modelService.stop(request.getId(), request.getContext()).asResult();
+//        CsceneLogUtils.recordSceneInstanceLog(request.getId(), OpTypeEnums.RECOVER, CsceneLogUtils.SCENE_RESUME, request.getContext());
+        return result;
+    }
+
     /**
      * restartElement
      *

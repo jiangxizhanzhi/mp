@@ -1744,6 +1744,30 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return this.sceneService.resume(sceneId, context.toSceneContext());
     }
 
+     public ServiceResult<Boolean> start(String id, CsceneContextBO context) {
+         String sceneId = this.getSceneId(id);
+         if (sceneId == null) {
+             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+         }
+         if (context != null) {
+             context.loadTransparentContext();
+             CsceneContextHolder.setCsceneInstanceId(id);
+         }
+         return this.sceneService.start(sceneId, context.toSceneContext());
+     }
+
+     public ServiceResult<Boolean> stop(String id, CsceneContextBO context) {
+         String sceneId = this.getSceneId(id);
+         if (sceneId == null) {
+             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+         }
+         if (context != null) {
+             context.loadTransparentContext();
+             CsceneContextHolder.setCsceneInstanceId(id);
+         }
+         return this.sceneService.stop(sceneId, context.toSceneContext());
+     }
+
     /**
      * startElement
      * @param id
