@@ -255,7 +255,8 @@ public class FlowMonitorController {
                 return flowMonitorService.pageFlow(id, queryParams);
             } else {
                 var allFlowAttackInTestRange = testRangeApiProxy.pageFlow(id, queryParams);
-
+                int originPerPage = queryParams.getPerPage();
+                int originPage = queryParams.getPage();
                 queryParams.setPerPage(10000);
                 queryParams.setPage(1);
                 queryParams.setTargetNodeIds(new ArrayList<>(elementsInCurrentScene));
@@ -266,10 +267,8 @@ public class FlowMonitorController {
                 allFlowAttack.addAll(flowAttackInCurrentRange);
                 List<FlowAttackDto> sortedFlowAttacks = allFlowAttack.stream()
                         .sorted((o1, o2) -> (int) (o2.getTimestamp() - o1.getTimestamp())).collect(Collectors.toList());
-                int perPage = queryParams.getPerPage();
-                int page  = queryParams.getPage();
-                int startIncludeIndex = (page - 1) * perPage;
-                int endExcludeIndex = page * perPage;
+                int startIncludeIndex = (originPage - 1) * originPerPage;
+                int endExcludeIndex = originPage * originPerPage;
                 var subList = sortedFlowAttacks.subList(startIncludeIndex, endExcludeIndex);
                 try {
                     return new ListObjServiceResult<>(new ListObjResult<>(subList, sortedFlowAttacks.size()).asResult()).asResult();
