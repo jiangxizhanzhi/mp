@@ -413,11 +413,7 @@ public class DeleteHandler extends HandlerCommon {
         }
 
         // 删除配置下发虚拟机
-        if (StringUtils.isNotEmpty(getPluginHandler().getScene().getStrategyInstance())) {
-            VirtualMachineDeleteData deleteData = new VirtualMachineDeleteData();
-            deleteData.setVms(List.of(getPluginHandler().getScene().getStrategyInstance()));
-            vmClient.delete(deleteData);
-        }
+        this.deleteConfigVm();
 
         // 删除终端
         List<CloudPluginSceneElementBO> terminals = new ArrayList<>();
@@ -507,10 +503,8 @@ public class DeleteHandler extends HandlerCommon {
             runSceneProgress(SceneProcess.DELETE_AUXILIARY_NETWORKS, () -> runTasks(deleteAuxiliaryNetworkTasks));
         }
 
-        ConfigNetworkUtils.releaseIps(getPluginHandler().getSrcScene().getEid());
-        if (StringUtils.isNotEmpty(getPluginHandler().getScene().getFlowMirrorId())) {
-            new Mirror().delete(getPluginHandler().getScene().getFlowMirrorId());
-        }
+        this.releaseIps();
+        this.deleteMirror();
 
         // 删除配采网
         this.deleteConfigNetworks();
@@ -518,7 +512,26 @@ public class DeleteHandler extends HandlerCommon {
 //        SceneInstanceLinkCacheUtil.clear(getPluginHandler().getSourceSceneId());
     }
 
-    private void deleteConfigNetworks() {
+    protected void releaseIps() {
+        ConfigNetworkUtils.releaseIps(getPluginHandler().getSrcScene().getEid());
+    }
+
+    protected void deleteMirror() {
+        if (StringUtils.isNotEmpty(getPluginHandler().getScene().getFlowMirrorId())) {
+            new Mirror().delete(getPluginHandler().getScene().getFlowMirrorId());
+        }
+    }
+
+    protected void deleteConfigVm(){
+        // 删除配置下发虚拟机
+        if (StringUtils.isNotEmpty(getPluginHandler().getScene().getStrategyInstance())) {
+            VirtualMachineDeleteData deleteData = new VirtualMachineDeleteData();
+            deleteData.setVms(List.of(getPluginHandler().getScene().getStrategyInstance()));
+            vmClient.delete(deleteData);
+        }
+    }
+
+    protected void deleteConfigNetworks() {
         String sceneId = getPluginHandler().getSrcScene().getEid();
         CloudPluginSceneConfigNetworkMapper networkMapper = BeanCommon.getBean(CloudPluginSceneConfigNetworkMapper.class);
         var networks = networkMapper.list(new HumanCondition().filterEqual(CloudPluginSceneConfigNetworkModel::getScene, sceneId));
@@ -555,7 +568,7 @@ public class DeleteHandler extends HandlerCommon {
      *
      * @param list
      */
-    private void deleteNpcElements(List<BaseNpcData.NetWorkNpcInfo> list) {
+    protected void deleteNpcElements(List<BaseNpcData.NetWorkNpcInfo> list) {
         NpcDeleteData npcDeleteData = new NpcDeleteData();
         npcDeleteData.setNetWorkNpcInfos(list);
         npcClient.delete(npcDeleteData);

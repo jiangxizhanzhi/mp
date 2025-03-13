@@ -21,6 +21,7 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementNetworkModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.BaseNpcData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.CreateTaskPool;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -469,6 +470,8 @@ public class ModifyHandler extends HandlerCommon {
          */
         @Override
         public void delete() {
+            // 父类中，执行删除的动作都会被 ModifyDeleteHandler 覆盖掉
+            // ModifyDeleteHandler 中覆写的方法，在删除时会先判断是否是需要删除的节点，再进行删除
             super.delete();
             // 删除网络信息
             List<CloudPluginSceneElementNetworkModel> networks = getPluginHandler().getPluginModelHandler().readNetworks();
@@ -481,6 +484,32 @@ public class ModifyHandler extends HandlerCommon {
             if (CollectionUtils.isNotEmpty(deleteNets)) {
                 getPluginHandler().getPluginModelHandler().deleteElementNetworks(deleteNets.toArray(new String[]{}));
             }
+        }
+
+        protected void deleteConfigVm(){
+
+        }
+
+        protected void deleteLogicSwitchProcess() {
+
+        }
+
+        protected void deleteNpcElements(List<BaseNpcData.NetWorkNpcInfo> list) {
+
+        }
+
+        protected void deleteVirtualDynamips(List<String> ids) {
+
+        }
+
+        protected void deleteConfigNetworks() {
+
+        }
+
+        protected void releaseIps() {
+        }
+
+        protected void deleteMirror() {
         }
 
         /**

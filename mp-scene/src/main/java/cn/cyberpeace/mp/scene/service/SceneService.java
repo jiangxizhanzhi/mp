@@ -230,20 +230,17 @@ public class SceneService {
             updatedSceneData.getTopology().getScene().setDisplayContext(newDisplayContext);
             SceneHandler updatedSceneHandler = new SceneHandler(updatedSceneData, context);
 
-            Queue<SceneElementBO> allElements = new ArrayDeque<>(updatedSceneHandler.getElementMap().values());
-            while (!allElements.isEmpty()) {
-                SceneElementBO element = allElements.poll();
-                if (element != null) {
-                    List<SceneElementPortBO> connectPorts = updatedSceneHandler.getElementConnectedPorts(element.getId());
-                    if (CollectionUtils.isNotEmpty(connectPorts)) {
-                        Set<String> ips = new HashSet<>();
-                        for (SceneElementPortBO p : connectPorts) {
-                            if (StringUtils.isNotEmpty(p.getIp())) {
-                                if (ips.contains(p.getIp())) {
-                                    throw new MpRuntimeException(SceneErrorCode.IP_DUPLICATE.format(p.getIp()));
-                                } else {
-                                    ips.add(p.getIp());
-                                }
+            // 同一个节点的相连端口中，不能有重复的ip值
+            for (var element : updatedSceneHandler.getElementMap().values()) {
+                List<SceneElementPortBO> connectPorts = updatedSceneHandler.getElementConnectedPorts(element.getId());
+                if (CollectionUtils.isNotEmpty(connectPorts)) {
+                    Set<String> ips = new HashSet<>();
+                    for (SceneElementPortBO p : connectPorts) {
+                        if (StringUtils.isNotEmpty(p.getIp())) {
+                            if (ips.contains(p.getIp())) {
+                                throw new MpRuntimeException(SceneErrorCode.IP_DUPLICATE.format(p.getIp()));
+                            } else {
+                                ips.add(p.getIp());
                             }
                         }
                     }
@@ -255,7 +252,7 @@ public class SceneService {
                 updatedSceneHandler.getScene().setCreateTime(null);
             }
             updatedSceneHandler.save();
-            // 获取配置更新的节点
+            // 标记一下上次更新场景实例时更新失败的节点 ， 即 event = MODIFY, eventStatus = ABNORMAL 的节点
             List<String> updateElementIds = new ArrayList<>();
             originSceneHandler.getElementMap().values().forEach(e -> {
                 if (e.getEvent() == SceneModel.Event.MODIFY && e.getEventStatus() == EventStatus.ABNORMAL) {
@@ -266,9 +263,13 @@ public class SceneService {
                 try {
                     originSceneHandler.getElementMap().values().forEach(e -> {
                         if (e.getEvent() == SceneElementModel.Event.DEFAULT) {
+                            // 设置本次动态更新时不处理的节点
+                            // 动态更新场景时，如果节点状态为DEFAULT，说明该节点被设置为不自动启动，此时节点需要保持现状
+                            // 新数据的处理器和旧数据的处理器都要标记一下
                             updatedSceneHandler.addExcludeHandleNode(e.getId());
                             originSceneHandler.addExcludeHandleNode(e.getId());
                         } else {
+                            // 将需要处理的节点状态变为初始化
                             e.setEvent(SceneElementModel.Event.DEFAULT);
                             e.setEventStatus(EventStatus.INITIAL);
                         }
@@ -276,6 +277,7 @@ public class SceneService {
 
                     for (SceneElementBO e : updatedSceneHandler.getElementMap().values()) {
                         if (updatedSceneHandler.isHandleNode(e.getId())) {
+                            // 将需要处理的节点状态变为初始化
                             e.setEvent(SceneElementModel.Event.DEFAULT);
                             e.setEventStatus(EventStatus.INITIAL);
                         }

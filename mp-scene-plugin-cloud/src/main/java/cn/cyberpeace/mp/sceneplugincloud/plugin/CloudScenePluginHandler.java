@@ -952,7 +952,7 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
      */
     @Override
     public void modify(SceneHandler originSceneHandler, List<String> updateElementIds) {
-        // 更新前合并下数据
+        // 更新前合并下数据 前端给的数据，可能缺resource_id和network_id，通过数据库的数据来补一下
         CloudScenePluginHandler originCloudPlugin = originSceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
         for (Map.Entry<String, CloudPluginSceneElementBO> originEntry : originCloudPlugin.getElementMap().entrySet()) {
             String nodeId = originEntry.getKey();

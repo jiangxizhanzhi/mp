@@ -2335,7 +2335,8 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 .getPassThrough() : new HashMap<>());
         instance.setScene(csceneBO.getUpdateScene());
 
-        BcSceneInstanceHandler originHandler = new BcSceneInstanceHandler(csceneBO.getId(), null);
+        BcSceneInstanceHandler originHandler = new BcSceneInstanceHandler(csceneBO.getId(), csceneBO.getUpdateScene()
+                .getTopology().getAreaId(), null);
         // 保留隐藏节点和隐藏端口
         SceneDataBO originData = originHandler.toDataWithHidden().getScene();
         Set<String> hiddenElementIds = new HashSet<>();
@@ -2411,8 +2412,8 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             }
         }
 
-        SceneHandler originSceneHandler = new SceneHandler(originData, null);
-        SceneHandler newSceneHandler = new SceneHandler(instance.getScene(), null);
+        SceneHandler originSceneHandler = new SceneHandler(originData, true, null);
+        SceneHandler newSceneHandler = new SceneHandler(instance.getScene(), true,null);
         for (String portId : newPorts.keySet()) {
             SceneElementPortBO srcPort = originSceneHandler.getPort(portId);
             if (srcPort != null && srcPort.getElement() != null && srcPort.getElement()
