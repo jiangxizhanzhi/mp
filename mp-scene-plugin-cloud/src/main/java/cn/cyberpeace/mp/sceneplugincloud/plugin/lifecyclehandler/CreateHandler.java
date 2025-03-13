@@ -1332,12 +1332,12 @@ public class CreateHandler extends HandlerCommon {
                 }
             });
             //云平台版本没有此功能
-//            vpClient.syncFlowPortInfo(portIds, "add");
+            vpClient.syncFlowPortInfo(portIds, "add");
         }
 
         //创建虚拟机
         if (Boolean.TRUE.equals(getPluginHandler().getScene().getCreateInternalVm())) {
-//            this.createInternalServerVm();
+            this.createInternalServerVm();
         }
     }
 

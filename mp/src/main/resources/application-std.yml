@@ -5,7 +5,7 @@ server:
       charset: UTF-8
       enabled: true
       force: true
-  port: 8080
+  port: 8001
   tomcat:
     threads:
       min-spare: 10
@@ -259,7 +259,7 @@ mp:
     cloud-heavy-concurrent-delay: ${mp.sceneplugincloud.ext-var.cloud-heavy-concurrent-delay}
     scene-create-install-unzip-apk: ${mp.sceneplugincloud.ext-var.scene-create-install-unzip-apk}
     dhcp-ip-allocate: ${mp.sceneplugincloud.ext-var.dhcp-ip-allocate}
-    internal-vm-ip: ${MP_INTERNAL_VM_IP:10.108.109.10}
+    internal-vm-ip: ${MP_INTERNAL_VM_IP}
     internal-net-cidr: ${MP_INTERNAL_NET_CIDR:10.108.109.0/24}
     internal-net-gateway: ${MP_INTERNAL_NET_GATEWAY:10.108.109.254}
     internal-vm-image: ${MP_INTERNAL_VM_IMAGE:info_center_adk}
