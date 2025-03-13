@@ -246,8 +246,7 @@ public class FlowMonitorController {
     public ListObjServiceResult<?> pageFlow(@RequestParam String id, FlowQueryParams queryParams) {
         log.info("pageFlow ====>> id:{}, queryParams:{}", id, queryParams);
         if (CollectionUtils.isEmpty(queryParams.getTargetNodeIds())) {
-            return flowMonitorService.pageFlow(id, queryParams);
-
+            return new ListObjServiceResult(new ListObjResult(Collections.emptyList(), 0).asResult()).asResult();
         } else {
             Set<String> allNodes = new HashSet<>(queryParams.getTargetNodeIds());
             Set<String> elementsInCurrentScene = testRangeApiProxy.elementsExistInCurrentScene(id, allNodes);
@@ -261,7 +260,10 @@ public class FlowMonitorController {
                 queryParams.setPerPage(10000);
                 queryParams.setPage(1);
                 queryParams.setTargetNodeIds(new ArrayList<>(elementsInCurrentScene));
-                var flowAttackInCurrentRange = flowMonitorService.pageFlow(id, queryParams).getData().getList();
+                List<FlowAttackDto> flowAttackInCurrentRange = new ArrayList<>();
+                if (CollectionUtils.isNotEmpty(elementsInCurrentScene)) {
+                    flowAttackInCurrentRange = flowMonitorService.pageFlow(id, queryParams).getData().getList();
+                }
 
                 List<FlowAttackDto> allFlowAttack = new ArrayList<>();
                 allFlowAttack.addAll(allFlowAttackInTestRange);
