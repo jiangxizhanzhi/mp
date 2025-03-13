@@ -110,8 +110,7 @@ public class UrlACFilter extends OncePerRequestFilter {
 
                 if (!isAuthoritiesMatchFlag) {
                     // 权限不匹配
-                    log.error("###URLACFILTER -> referer:{}, url:{} access denied!", request.getHeaders("referer"), requestUrl);
-                    result = new ServiceResult<>(null, FrontBizErrorCode.URL_AC_AUTHORITY_NOT_MATCH.format(requestUrl));
+
                 }
             }
 
