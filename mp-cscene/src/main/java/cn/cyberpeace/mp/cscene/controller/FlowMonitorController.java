@@ -245,6 +245,13 @@ public class FlowMonitorController {
     @GetMapping("/page")
     public ListObjServiceResult<?> pageFlow(@RequestParam String id, FlowQueryParams queryParams) {
         log.info("pageFlow ====>> id:{}, queryParams:{}", id, queryParams);
+        if (Objects.isNull(queryParams.getPage())) {
+            queryParams.setPage(1);
+        }
+        if (Objects.isNull(queryParams.getPerPage())) {
+            queryParams.setPerPage(100);
+        }
+        queryParams.ensure();
         if (CollectionUtils.isEmpty(queryParams.getTargetNodeIds()) || (queryParams.getTargetNodeIds().size() == 1 && queryParams.getTargetNodeIds().get(0).equals("null"))) {
             List<String> allNodes = new ArrayList<>();
             allNodes.addAll(testRangeApiProxy.getAllNodeIdsInTestRangeByCurrentCsceneIds(id));
