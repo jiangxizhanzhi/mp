@@ -1,0 +1,35 @@
+package cn.cyberpeace.mp.auth.service.impl;
+
+import cn.cyberpeace.mp.auth.bo.sso.SSOLoginBO;
+import cn.cyberpeace.mp.auth.constant.SSOSysEnum;
+import cn.cyberpeace.mp.auth.service.AbstractSSOService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+/**
+ * @BelongsPackage: cn.cyberpeace.mp.auth.service.impl
+ * @Author: hhuang
+ * @CreateTime: 2025/03/13  16:09
+ * @Description: soc单点
+ * @Version: 1.0
+ */
+@Slf4j
+@Service
+public class SSOSocServiceImpl extends AbstractSSOService {
+
+    @Override
+    public boolean isSupport(SSOSysEnum sysEnum) {
+        return SSOSysEnum.SOC == sysEnum;
+    }
+
+    @Override
+    public void doLogin(SSOLoginBO ssoLoginBO) {
+        log.info("cas==================soc");
+        //todo
+    }
+
+    @Override
+    public void doLogout() {
+
+    }
+}
