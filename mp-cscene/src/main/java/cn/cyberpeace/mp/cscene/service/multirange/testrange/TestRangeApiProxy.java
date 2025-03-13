@@ -225,6 +225,19 @@ public class TestRangeApiProxy implements SubRangeMonitorInterface {
 
     }
 
+    public Set<String> getAllNodeIdsInTestRangeByCurrentCsceneIds(String csceneInstanceId) {
+        var allElementInfo = listAllElementBasicInfo(csceneInstanceId, new SceneAllElementsQueryRequest());
+        return allElementInfo.stream().map(element -> element.getId()).collect(Collectors.toSet());
+    }
+
+    public Set<String> getAllNodeIdsInCurrentCscene(String csceneInstanceId) {
+        String sceneInstanceId = csceneInstanceMapper.get(csceneInstanceId).getScene();
+        var sceneElements = sceneElementMapper.list(new HumanCondition().select(SceneElementModel::getNodeId)
+                .filterEqual(SceneElementModel::getScene, sceneInstanceId)
+                .filterEqual(SceneElementModel::getCurrentScenePartFlag, 1));
+        return sceneElements.stream().map(SceneElementModel::getNodeId).collect(Collectors.toSet());
+    }
+
 
 
 

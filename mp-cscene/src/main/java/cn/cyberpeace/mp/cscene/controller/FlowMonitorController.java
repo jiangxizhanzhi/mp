@@ -246,44 +246,47 @@ public class FlowMonitorController {
     public ListObjServiceResult<?> pageFlow(@RequestParam String id, FlowQueryParams queryParams) {
         log.info("pageFlow ====>> id:{}, queryParams:{}", id, queryParams);
         if (CollectionUtils.isEmpty(queryParams.getTargetNodeIds())) {
-            return new ListObjServiceResult(new ListObjResult(Collections.emptyList(), 0).asResult()).asResult();
+            List<String> allNodes = new ArrayList<>();
+            allNodes.addAll(testRangeApiProxy.getAllNodeIdsInTestRangeByCurrentCsceneIds(id));
+            allNodes.addAll(testRangeApiProxy.getAllNodeIdsInCurrentCscene(id));
+            queryParams.setTargetNodeIds(allNodes);
+        }
+
+        Set<String> allNodes = new HashSet<>(queryParams.getTargetNodeIds());
+        Set<String> elementsInCurrentScene = testRangeApiProxy.elementsExistInCurrentScene(id, allNodes);
+        if (elementsInCurrentScene.size() == allNodes.size()) {
+            return flowMonitorService.pageFlow(id, queryParams);
         } else {
-            Set<String> allNodes = new HashSet<>(queryParams.getTargetNodeIds());
-            Set<String> elementsInCurrentScene = testRangeApiProxy.elementsExistInCurrentScene(id, allNodes);
-            if (elementsInCurrentScene.size() == allNodes.size()) {
-                return flowMonitorService.pageFlow(id, queryParams);
-            } else {
-                int originPerPage = queryParams.getPerPage();
-                int originPage = queryParams.getPage();
-                var allFlowAttackInTestRange = testRangeApiProxy.pageFlow(id, queryParams);
+            int originPerPage = queryParams.getPerPage();
+            int originPage = queryParams.getPage();
+            var allFlowAttackInTestRange = testRangeApiProxy.pageFlow(id, queryParams);
 
-                queryParams.setPerPage(10000);
-                queryParams.setPage(1);
-                queryParams.setTargetNodeIds(new ArrayList<>(elementsInCurrentScene));
-                List<FlowAttackDto> flowAttackInCurrentRange = new ArrayList<>();
-                if (CollectionUtils.isNotEmpty(elementsInCurrentScene)) {
-                    flowAttackInCurrentRange = flowMonitorService.pageFlow(id, queryParams).getData().getList();
-                }
-
-                List<FlowAttackDto> allFlowAttack = new ArrayList<>();
-                allFlowAttack.addAll(allFlowAttackInTestRange);
-                allFlowAttack.addAll(flowAttackInCurrentRange);
-                List<FlowAttackDto> sortedFlowAttacks = allFlowAttack.stream()
-                        .sorted((o1, o2) -> (int) (o2.getTimestamp() - o1.getTimestamp())).collect(Collectors.toList());
-                int startIncludeIndex = (originPage - 1) * originPerPage;
-                int endExcludeIndex = originPage * originPerPage;
-                if (endExcludeIndex > sortedFlowAttacks.size()) {
-                    endExcludeIndex = sortedFlowAttacks.size();
-                }
-                var subList = sortedFlowAttacks.subList(startIncludeIndex, endExcludeIndex);
-                try {
-                    return new ListObjServiceResult<>(new ListObjResult<>(subList, sortedFlowAttacks.size()).asResult()).asResult();
-                } catch (Exception e) {
-                    log.error(e.getMessage(), e);
-                    return new ListObjServiceResult<>(new ListObjResult<>(Collections.emptyList(), sortedFlowAttacks.size()).asResult()).asResult();
-                }
-
+            queryParams.setPerPage(10000);
+            queryParams.setPage(1);
+            queryParams.setTargetNodeIds(new ArrayList<>(elementsInCurrentScene));
+            List<FlowAttackDto> flowAttackInCurrentRange = new ArrayList<>();
+            if (CollectionUtils.isNotEmpty(elementsInCurrentScene)) {
+                flowAttackInCurrentRange = flowMonitorService.pageFlow(id, queryParams).getData().getList();
             }
+
+            List<FlowAttackDto> allFlowAttack = new ArrayList<>();
+            allFlowAttack.addAll(allFlowAttackInTestRange);
+            allFlowAttack.addAll(flowAttackInCurrentRange);
+            List<FlowAttackDto> sortedFlowAttacks = allFlowAttack.stream()
+                    .sorted((o1, o2) -> (int) (o2.getTimestamp() - o1.getTimestamp())).collect(Collectors.toList());
+            int startIncludeIndex = (originPage - 1) * originPerPage;
+            int endExcludeIndex = originPage * originPerPage;
+            if (endExcludeIndex > sortedFlowAttacks.size()) {
+                endExcludeIndex = sortedFlowAttacks.size();
+            }
+            var subList = sortedFlowAttacks.subList(startIncludeIndex, endExcludeIndex);
+            try {
+                return new ListObjServiceResult<>(new ListObjResult<>(subList, sortedFlowAttacks.size()).asResult()).asResult();
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+                return new ListObjServiceResult<>(new ListObjResult<>(Collections.emptyList(), sortedFlowAttacks.size()).asResult()).asResult();
+            }
+
         }
 
 
