@@ -1337,7 +1337,7 @@ public class CreateHandler extends HandlerCommon {
 
         //创建虚拟机
         if (Boolean.TRUE.equals(getPluginHandler().getScene().getCreateInternalVm())) {
-            this.createInternalServerVm();
+//            this.createInternalServerVm();
         }
     }
 
