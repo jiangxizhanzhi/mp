@@ -40,12 +40,17 @@ public class AuthConstant {
 
     public static final String ROLE_ADMIN_ID = "5827ff7847504ffd806e0a85c417228d";
 
+    public static final String ROLE_XUEYUAN_ID = "6a38df3740024a7786c523481d9436eb";
+
+    public static final String ROLE_JIAOYUAN_ID = "65a1c0738d324d0d8b9605da3751963b";
 
     public static final String ORG_PATH_SEPARATOR = "/";
 
     public static final String FDFS_PREFIX = "/fdfs";
 
     public static final String DEFAULT_IMAGE_PREFIX = "/api/mp";
+
+    public static final String DEFAULT_INITIALPASSWORD = "d8165e80c4abed2dcc1dd06df1a8be31";
 
     /**
      * 逗号

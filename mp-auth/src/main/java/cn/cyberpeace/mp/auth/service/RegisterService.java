@@ -13,12 +13,24 @@ import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -51,6 +63,10 @@ public class RegisterService {
     @Autowired
     private UserRoleService userRoleService;
 
+    // 外部平台ip配置文件读取
+    @Value("${project.setting.4a-service-url:http://ip:port}")
+    private String YIDONG_IP_CONFIG;
+
     @Transactional(rollbackFor = Exception.class)
     public ObjServiceResult<UserModel> register(RegisterRequest req) {
 
@@ -82,7 +98,7 @@ public class RegisterService {
             String roleId = adminConfigService.getRegisterDefaultRoleId();
             RoleModel roleModel = null;
             if (StringUtils.isNotBlank(roleId)) {
-                ObjServiceResult<RoleModel> result =  roleService.get(roleId);
+                ObjServiceResult<RoleModel> result = roleService.get(roleId);
                 roleModel = result.getSource().getObj();
             }
 
@@ -114,6 +130,40 @@ public class RegisterService {
         return result;
     }
 
+    private String getRequest(String url, String token) {
+        try {
+            HttpClient client = HttpClientBuilder.create().build();
+            HttpGet httpget = new HttpGet(url);
+            httpget.addHeader("Authorization", token);
+            httpget.addHeader("Content-Type", "application/json");
+            HttpResponse resp = client.execute(httpget);
+            // 设置请求和传输超时时间
+            RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
+            httpget.setConfig(requestConfig);
+            // 获得返回值
+            String result = EntityUtils.toString(resp.getEntity(), StandardCharsets.UTF_8);
+            return result;
+        } catch (Exception e) {
+            throw new MpRuntimeException(e.getMessage());
+        }
+    }
 
+    private String postRequest(String url, Map<String, Object> formMap, String token) {
+        try {
+            HttpClient client = HttpClientBuilder.create().build();
+            HttpPost httppost = new HttpPost(url);
+            httppost.addHeader("Authorization", token);
+            httppost.addHeader("Content-Type", "application/json");
+            httppost.setEntity(new StringEntity(JsonUtils.stringify(formMap), StandardCharsets.UTF_8));
+            RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
+            httppost.setConfig(requestConfig);
+            HttpResponse resp = client.execute(httppost);
+            // 获得返回值
+            String result = EntityUtils.toString(resp.getEntity(), StandardCharsets.UTF_8);
+            return result;
+        } catch (Exception e) {
+            throw new MpRuntimeException(e.getMessage());
+        }
+    }
 
 }

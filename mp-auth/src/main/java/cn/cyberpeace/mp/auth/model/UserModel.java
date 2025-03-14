@@ -45,6 +45,12 @@ public class UserModel extends BaseModel implements Serializable {
     @DefaultInt(0)
     private Integer pk;
 
+    @ApiModelProperty(value = "外部平台用户id")
+    private String accountId;
+
+    @ApiModelProperty(value = "外部平台用户类型")
+    private String outUserType;
+
     @ApiModelProperty(value = "用户编号")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @DefaultStr

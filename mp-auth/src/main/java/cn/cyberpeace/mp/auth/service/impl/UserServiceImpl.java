@@ -1285,6 +1285,13 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         }
         return new ArrayList<>();
     }
+
+    @Override
+    public List<UserModel> getUserBy4AAccountId(String userId) {
+        HumanCondition condition = new HumanCondition().filterEqual(UserModel::getAccountId, userId);
+        List<UserModel> list = getModelMapper().list(condition) != null ? getModelMapper().list(condition) : new ArrayList<>();
+        return list;
+    }
 }
 
 class GroupConcat extends Aggregation<GroupConcat> {

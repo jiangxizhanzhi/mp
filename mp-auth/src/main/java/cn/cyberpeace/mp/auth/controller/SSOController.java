@@ -6,12 +6,14 @@ import cn.cyberpeace.mp.auth.constant.SSOSysEnum;
 import cn.cyberpeace.mp.auth.request.sso.SSOLoginRequest;
 import cn.cyberpeace.mp.auth.service.SSOService;
 import cn.cyberpeace.mp.auth.service.SSOServiceFactory;
+import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
 import com.alibaba.fastjson.JSON;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -39,6 +41,9 @@ public class SSOController {
     @Resource
     private SSOServiceFactory ssoServiceFactory;
 
+    @Autowired
+    private UserService userService;
+
 
     /**
      * @description: 4a单点登录
@@ -53,10 +58,10 @@ public class SSOController {
     public void ssoFourALogin(@Validated SSOLoginRequest ssoLoginRequest, HttpServletRequest request, HttpServletResponse response) throws Exception {
         log.info("4a login,ssoLoginRequest: {}", JSON.toJSONString(ssoLoginRequest));
         SSOLoginBO ssoLoginBO = SSOLoginBO.builder()
-            .ticket(ssoLoginRequest.getTicket())
-            .request(request)
-            .response(response)
-            .build();
+                .ticket(ssoLoginRequest.getTicket())
+                .request(request)
+                .response(response)
+                .build();
         SSOService ssoService = ssoServiceFactory.getSSOService(SSOSysEnum.FOUR_A);
         ssoService.login(ssoLoginBO);
     }
@@ -75,13 +80,30 @@ public class SSOController {
     public void ssoSocLogin(@Validated SSOLoginRequest ssoLoginRequest, HttpServletRequest request, HttpServletResponse response) throws Exception {
         log.info("soc login,ssoLoginRequest: {}", JSON.toJSONString(ssoLoginRequest));
         SSOLoginBO ssoLoginBO = SSOLoginBO.builder()
-            .ticket(ssoLoginRequest.getTicket())
-            .service(ssoLoginRequest.getService())
-            .request(request)
-            .response(response)
-            .build();
+                .ticket(ssoLoginRequest.getTicket())
+                .service(ssoLoginRequest.getService())
+                .request(request)
+                .response(response)
+                .build();
         SSOService ssoService = ssoServiceFactory.getSSOService(SSOSysEnum.SOC);
         ssoService.login(ssoLoginBO);
     }
+
+//    @ApiOperation(value = "用户新增测试", notes = "用户新增测试")
+//    @PostMapping("/test")
+//    public void ssoFourALogin() {
+//        UserRequest addRequest = new UserRequest();
+//        // 创建用户
+//        addRequest.setUsername(UUID.randomUUID().toString());
+//        addRequest.setName(UUID.randomUUID().toString());
+//        addRequest.setAccountId(UUID.randomUUID().toString());
+//        addRequest.setOutUserType(SSOSysEnum.FOUR_A.getCode());
+//        addRequest.setPassword(AuthConstant.DEFAULT_INITIALPASSWORD);
+//        // 预设学员角色和默认组织
+//        addRequest.setOrgIds(Collections.singletonList(AuthConstant.ROOT_ORG_ID));
+//        addRequest.setRoleIds(Collections.singletonList(AuthConstant.ROLE_XUEYUAN_ID));
+//        UserModel user = userService.add(addRequest);
+//        System.out.println(user.getAccountId());
+//    }
 
 }

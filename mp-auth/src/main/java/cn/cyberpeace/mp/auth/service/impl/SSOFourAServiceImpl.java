@@ -3,21 +3,28 @@ package cn.cyberpeace.mp.auth.service.impl;
 import cn.cyberpeace.mp.auth.bo.sso.SSOLoginBO;
 import cn.cyberpeace.mp.auth.config.SSOConfig;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
+import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.constant.SSOSysEnum;
 import cn.cyberpeace.mp.auth.extensions.security.filter.JwtAuthenticationFilter;
 import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.request.user.UserRequest;
 import cn.cyberpeace.mp.auth.service.AbstractSSOService;
+import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.JwtUtils;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import com.boco.iam.sso.client.LoginUtil;
 import com.boco.iam.sso.client.ResultCode;
 import com.boco.iam.sso.client.TransferTicket;
 import com.boco.iam.sso.client.UserInfo;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -36,6 +43,9 @@ public class SSOFourAServiceImpl extends AbstractSSOService {
 
     @Resource
     private SSOConfig ssoConfig;
+
+    @Autowired
+    private UserService userService;
 
     @Override
     public boolean isSupport(SSOSysEnum sysEnum) {
@@ -105,8 +115,37 @@ public class SSOFourAServiceImpl extends AbstractSSOService {
      * @return UserModel
      */
     private UserModel createOrUpdateFourAUser(UserInfo userInfo) {
-        //TODO
-        return new UserModel();
+        UserModel user = new UserModel();
+        if(Objects.nonNull(userInfo) && ResultCode.RESULT_OK.equals(userInfo.getRetCode())){
+            //应用资源根据帐号信息做登录后业务处理
+            List<UserModel> users = userService.getUserBy4AAccountId(userInfo.getAccountID());
+            log.info("查找该4A用户在本系统的账户数量: {}", users.size());
+            UserRequest addRequest = new UserRequest();
+            if (users == null || users.size() == 0) {// 目前无该用户
+                // 创建用户
+                addRequest.setUsername(userInfo.getName());
+                addRequest.setName(userInfo.getName());
+                addRequest.setAccountId(userInfo.getAccountID());
+                addRequest.setOutUserType(SSOSysEnum.FOUR_A.getCode());
+                addRequest.setPassword(AuthConstant.DEFAULT_INITIALPASSWORD);
+                // 预设学员角色和默认组织
+                addRequest.setOrgIds(Collections.singletonList(AuthConstant.ROOT_ORG_ID));
+                addRequest.setRoleIds(Collections.singletonList(AuthConstant.ROLE_XUEYUAN_ID));// 以实际环境的学员角色id为准
+                user = userService.add(addRequest);
+            } else if (users.size() == 1) {// 查找到唯一用户
+                // 修改用户,目前无需修改其他信息
+//                UserModel thisUser = users.get(0);
+//                thisUser.setId(user.getId());
+//
+//                user = userService.modify(addRequest);
+            } else {
+                throw new MpRuntimeException(AuthErrorCode.FOUR_A_USER_SELECT_ERROR);//用户查询错误
+            }
+        }else {
+            //用户不存在或者其他非成功的情况
+            throw new MpRuntimeException(AuthErrorCode.PERMISSION_DENIED);//登录失败
+        }
+        return user;
     }
 
 
