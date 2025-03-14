@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.CollectionUtils;
 import cn.cyberpeace.mp.base.util.basic.IntUtils;
@@ -33,6 +35,7 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.io.file.FileNameUtil;
 import cn.hutool.core.net.Ipv4Util;
 import cn.hutool.core.net.MaskBit;
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -64,6 +67,13 @@ public class CreateHandler extends HandlerCommon {
     private class HfdyVpnImage {
         public static final String VPN_SERVER = "hfdy-vpn-server";
         public static final String VPN_CLIENT = "hfdy-vpn-client";
+    }
+
+    @Data
+    private static class HfdyServerVpnConfig {
+        private String rangeName;
+        private String ip;
+        private String attackLan;
     }
 
     public static class SceneProcess {
@@ -707,7 +717,34 @@ public class CreateHandler extends HandlerCommon {
             });
             existCommands.add(vpnServerCommand);
         } else if (HfdyVpnImage.VPN_CLIENT.equals(currentCloudElement.getImage())) {
-            String serverVpnIp = getPluginHandler().getSceneHandler().getScene().getServerVpnIp();
+            String serverVpnConfig = getPluginHandler().getSceneHandler().getScene().getServerVpnIp();
+            if (StringUtils.isEmpty(serverVpnConfig)) {
+                return;
+            }
+
+            List<HfdyServerVpnConfig> hfdyServerVpnConfigs = JsonCommon.snakeParse(serverVpnConfig, new TypeReference<List<HfdyServerVpnConfig>>() {
+            });
+            String serverVpnIp = "";
+            Set<String> innerNetworkGatewayIps = getVpnInnerNetworkGatewayIp(currentCloudElement);
+            innerNetworkGatewayIps.forEach(innerNetworkGatewayIp -> {
+                String delInnerGatewayRouteCommand = String.format("ip route del default via %s", innerNetworkGatewayIp);
+                existCommands.add(delInnerGatewayRouteCommand);
+            });
+
+            Set<String> innerNetworkCidrs = getVpnInnerNetworkCidr(currentCloudElement);
+            for (String innerNetworkCidr : innerNetworkCidrs) {
+                for (HfdyServerVpnConfig hfdyServerVpnConfig : hfdyServerVpnConfigs) {
+                    if (innerNetworkCidr.equals(hfdyServerVpnConfig.getAttackLan())) {
+                        serverVpnIp = hfdyServerVpnConfig.getIp();
+                        break;
+                    }
+                }
+            }
+            if (StringUtils.isEmpty(serverVpnIp)) {
+                throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("client vpn所接入的内部网络网段和配置不一致"));
+            }
+
+
             String mpIp = CloudSingleton.cloudAppConfig.getMpIp();
             String arkimeIp = getPluginHandler().getSceneHandler().getArkimeIp();
             String controllerHostName = getPluginHandler().getSceneHandler().getArkimeRunHost();
@@ -717,11 +754,7 @@ public class CreateHandler extends HandlerCommon {
             String configServerIpCommand = String.format("echo %s > /etc/arkime-bridge/server-ip.txt", serverVpnIp);
             String execFileBridgeCommand = String.format("nohup /etc/arkime-bridge/file_bridge > /etc/arkime-bridge/file_bridge.log 2>&1 &");
 
-            Set<String> innerNetworkGatewayIps = getVpnInnerNetworkGatewayIp(currentCloudElement);
-            innerNetworkGatewayIps.forEach(innerNetworkGatewayIp -> {
-                String delInnerGatewayRouteCommand = String.format("ip route del default via %s", innerNetworkGatewayIp);
-                existCommands.add(delInnerGatewayRouteCommand);
-            });
+
 
             existCommands.add(startVpnClientCommand);
             existCommands.add(configMpIpCommand);
@@ -747,6 +780,21 @@ public class CreateHandler extends HandlerCommon {
         innerNetworkGatewayIps.addAll(accessInnerNetworkGatewayIps);
         return innerNetworkGatewayIps;
     }
+
+    private Set<String> getVpnInnerNetworkCidr(CloudPluginSceneElementBO cloudElement) {
+        Set<String> deriveInnerNetworkCidrs = cloudElement.getDeriveNetworks().stream().map(ConnectedNetworkBO::getNetwork)
+                .filter(network -> !Boolean.TRUE.equals(network.getExternal()))
+                .map(CloudPluginSceneElementNetworkBO::getCidr).collect(Collectors.toSet());
+
+        Set<String> accessInnerNetworkCidrs = cloudElement.getAccessNetworks().stream().map(ConnectedNetworkBO::getNetwork)
+                .filter(network -> !Boolean.TRUE.equals(network.getExternal()))
+                .map(CloudPluginSceneElementNetworkBO::getCidr).collect(Collectors.toSet());
+        Set<String> innerNetworkCidrs = new HashSet<>();
+        innerNetworkCidrs.addAll(deriveInnerNetworkCidrs);
+        innerNetworkCidrs.addAll(accessInnerNetworkCidrs);
+        return innerNetworkCidrs;
+    }
+
 
 
 
