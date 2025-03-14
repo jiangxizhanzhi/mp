@@ -6,6 +6,9 @@ import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import lombok.Data;
 
+import java.util.Arrays;
+import java.util.List;
+
 @Data
 public class BaseCsceneModel extends BaseModel {
     @DefaultInt
@@ -55,6 +58,14 @@ public class BaseCsceneModel extends BaseModel {
         public static final int TACTICAL_TRAINING = 234;
         public static final int COMPREHENSIVE_TRAINING = 235;
         public static final int RANGE_TEST = 236;
+
+        public static final int NETWORK_SECURITY_STRATEGY = 241;
+        public static final int NETWORK_SECURITY_SERVICES = 242;
+        public static final int NETWORK_SECURITY_MONITOR = 243;
+        public static final int NETWORK_SECURITY_RESPONSE = 244;
+        public static final int NETWORK_SECURITY_AUDIT = 245;
+
+        public static final List<Integer> TEAM_TRAIN_LIST = Arrays.asList(NETWORK_SECURITY_STRATEGY, NETWORK_SECURITY_SERVICES, NETWORK_SECURITY_MONITOR, NETWORK_SECURITY_RESPONSE, NETWORK_SECURITY_AUDIT);
 
         private ReferenceType() {}
     }

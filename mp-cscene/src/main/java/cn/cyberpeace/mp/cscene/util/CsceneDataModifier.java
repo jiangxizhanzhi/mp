@@ -515,7 +515,7 @@ public class CsceneDataModifier {
             return;
         }
         boolean enableRate = csceneBO.getReferenceType() == null ? false : (BaseCsceneModel.ReferenceType.READ_VS_BLUE == csceneBO.getReferenceType()
-                || BaseCsceneModel.ReferenceType.TEAM_TRAINING == csceneBO.getReferenceType()
+                || BaseCsceneModel.ReferenceType.TEAM_TRAIN_LIST.contains(csceneBO.getReferenceType())
                 || BaseCsceneModel.ReferenceType.RANGE_TEST == csceneBO.getReferenceType());
         ScenePluginDataBO scenePluginDataBO = csceneBO.getSceneConfig().getPlugins().get("cpcloud");
         var cpcloudPluginScene = Optional.ofNullable(scenePluginDataBO.getScene())
@@ -1076,7 +1076,7 @@ public class CsceneDataModifier {
 
     public static void removeUnUsePlugin(CsceneBO csceneBO) {
         if (csceneBO != null && csceneBO.getSceneConfig() != null && csceneBO.getReferenceType() != null) {
-            if (csceneBO.getReferenceType() != BaseCsceneModel.ReferenceType.TEAM_TRAINING &&
+            if (!BaseCsceneModel.ReferenceType.TEAM_TRAIN_LIST.contains(csceneBO.getReferenceType()) &&
                     csceneBO.getReferenceType() != BaseCsceneModel.ReferenceType.READ_VS_BLUE) {
                 if (csceneBO.getSceneConfig().getPlugins() != null) {
                     csceneBO.getSceneConfig().getPlugins().remove("cpflow");
