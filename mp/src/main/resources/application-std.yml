@@ -278,7 +278,7 @@ mp:
     gns3-server: http://${mp.sceneplugingns3.ext-var.gns3-ip}:${mp.sceneplugingns3.ext-var.gns3-port}
     gns3-image-uuids: 854f7c24-060f-4dbd-b771-68eab207a071
   cscene:
-    has-own-recording-set: 213,214,236
+    has-own-recording-set: 213,214,236,241,242,243,244,245
     scene-error-creating-seconds: 3600
     element-error-creating-seconds: 300
     ignore-scene-creating-seconds: 120
