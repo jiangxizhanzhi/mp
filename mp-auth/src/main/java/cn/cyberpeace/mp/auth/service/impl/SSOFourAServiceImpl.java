@@ -59,48 +59,48 @@ public class SSOFourAServiceImpl extends AbstractSSOService {
         HttpServletRequest request = ssoLoginBO.getRequest();
         HttpServletResponse response = ssoLoginBO.getResponse();
         UserInfo userInfo = new UserInfo();
-//        if(!loginUtil.isEnable()){
-//            //服务不可用，认证失败
-//            log.warn("4a sso service is not available!");
-//            loginUtil.redirectToServer(request, response);
-//            return;
-//        }
-//        if(!loginUtil.checkTicket(request)){
-//            log.warn("4a sso request param ticket is empty!");
-//            loginUtil.redirectToServer(request, response);
-//            return;
-//        }
-//        //获取ticket信息
-//        String strTic = loginUtil.getTicket(request);
-//        TransferTicket ticket = loginUtil.analysTicket(strTic);
-//        if(Objects.isNull(ticket)){
-//            log.warn("4a sso analysis ticket is null!");
-//            loginUtil.redirectToServer(request, response);
-//            return;
-//        }
-//        String errorMessage = null;
-//        if(!ResultCode.RESULT_OK.equals(ticket.getRetCode())){
-//            //根据错误信息
-//            errorMessage = loginUtil.getCodeMess(ticket.getRetCode(),
-//                request.getLocale().getLanguage());
-//            log.warn("4a sso analysis ticket failed!! reason is {}",errorMessage);
-//            loginUtil.redirectToServer(request, response);
-//            return;
-//        }
-//        userInfo = loginUtil.qryUserByTicket(ticket);
-//        if(Objects.isNull(userInfo)){
-//            //用户信息不存在
-//            log.warn("4a sso get userInfo is failed!");
-//            loginUtil.redirectToServer(request, response);
-//            return;
-//        }
-//        if(!ResultCode.RESULT_OK.equals(userInfo.getRetCode())){
-//            errorMessage = loginUtil.getCodeMess(ticket.getRetCode(),
-//                request.getLocale().getLanguage());
-//            log.warn("4a sso login failed! reason is {}",errorMessage);
-//            loginUtil.redirectToServer(request, response);
-//            return;
-//        }
+        if(!loginUtil.isEnable()){
+            //服务不可用，认证失败
+            log.warn("4a sso service is not available!");
+            loginUtil.redirectToServer(request, response);
+            return;
+        }
+        if(!loginUtil.checkTicket(request)){
+            log.warn("4a sso request param ticket is empty!");
+            loginUtil.redirectToServer(request, response);
+            return;
+        }
+        //获取ticket信息
+        String strTic = loginUtil.getTicket(request);
+        TransferTicket ticket = loginUtil.analysTicket(strTic);
+        if(Objects.isNull(ticket)){
+            log.warn("4a sso analysis ticket is null!");
+            loginUtil.redirectToServer(request, response);
+            return;
+        }
+        String errorMessage = null;
+        if(!ResultCode.RESULT_OK.equals(ticket.getRetCode())){
+            //根据错误信息
+            errorMessage = loginUtil.getCodeMess(ticket.getRetCode(),
+                request.getLocale().getLanguage());
+            log.warn("4a sso analysis ticket failed!! reason is {}",errorMessage);
+            loginUtil.redirectToServer(request, response);
+            return;
+        }
+        userInfo = loginUtil.qryUserByTicket(ticket);
+        if(Objects.isNull(userInfo)){
+            //用户信息不存在
+            log.warn("4a sso get userInfo is failed!");
+            loginUtil.redirectToServer(request, response);
+            return;
+        }
+        if(!ResultCode.RESULT_OK.equals(userInfo.getRetCode())){
+            errorMessage = loginUtil.getCodeMess(ticket.getRetCode(),
+                request.getLocale().getLanguage());
+            log.warn("4a sso login failed! reason is {}",errorMessage);
+            loginUtil.redirectToServer(request, response);
+            return;
+        }
         //应用资源根据帐号信息做登录后业务处理
         try {
             // 测试
