@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.flow.integration.actuator;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.util.HttpUtils;
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.flow.bo.FlowTaskStart;
@@ -25,9 +26,12 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
+import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -179,7 +183,31 @@ public class FlowActuator {
         }
     }
 
+    public byte[] changeCap2Pcap(byte[] fileByte) {
+        String fileName = "/tmp/"+ TextUtils.uuid()+".pcap";
+        try {
+            FileUtils.writeByteArrayToFile(new File(fileName), fileByte);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        String pythonCmd = String.format("python3 ./editcaptopcap.py %s", fileName);
+        log.info("============python analyse cmd: {}", pythonCmd);
+        try {
+            Process process = Runtime.getRuntime().exec(pythonCmd);
+            process.waitFor();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        try {
+            return FileUtils.readFileToByteArray(new File(fileName));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public boolean uploadPcapV2(byte[] fileByte, String flowId, String flowTile, String flowFileName, int resourceType, List<ProtocolRate> flowProtocolModelList) {
+        // 确保文件格式是 pcap ，这样就能支持cap、pcapng
+        fileByte = this.changeCap2Pcap(fileByte);
         JSONObject object = new JSONObject();
         object.put("flowId", flowId);
         object.put("flow_id", flowId);

@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.flow.integration.cloud.sncloud;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.flow.config.FlowConfig;
 import cn.cyberpeace.mp.flow.integration.cloud.base.AbstractCreateVirtualMachineParams;
 import cn.cyberpeace.mp.flow.integration.cloud.base.VirtualNic;
 import lombok.Getter;
@@ -23,7 +25,8 @@ public class SnCreateVirtualMachineParams extends AbstractCreateVirtualMachinePa
         int trexCpu = 4;
         int trexRam = 4096;
         int trexDisk = 80;
-        String networkId = "5489d262-8d06-4909-b893-4191ef036f46";
+
+        String networkId = BeanCommon.getBean(FlowConfig.class).getNetworkId();
         String trexImage = "tgn-trex";
         String name = "Trex-" + TextUtils.uuid();
 

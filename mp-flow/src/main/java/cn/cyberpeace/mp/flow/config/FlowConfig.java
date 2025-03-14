@@ -66,4 +66,7 @@ public class FlowConfig {
     @Value("${mp.flow.flow_res_mode:}")
     private String flowResMode;
 
+    @Value("${mp.flow.flow_network_id:5489d262-8d06-4909-b893-4191ef036f46}")
+    private String flowNetworkId;
+
 }

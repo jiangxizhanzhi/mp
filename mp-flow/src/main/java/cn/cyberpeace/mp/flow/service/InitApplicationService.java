@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.flow.service;
 
 import cn.cyberpeace.mp.flow.integration.cloud.lincloud.LinyunCloudClient;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
@@ -10,6 +11,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+@Slf4j
 @Component
 public class InitApplicationService implements ApplicationRunner {
     @Override
@@ -18,6 +20,7 @@ public class InitApplicationService implements ApplicationRunner {
         saveFile("traffic_generators.zip");
         saveFile("protocol_analyse.py");
         saveFile("protocol_filter.py");
+        saveFile("editcaptopcap.py");
     }
 
     public void saveFile(String fileName) {
@@ -49,7 +52,7 @@ public class InitApplicationService implements ApplicationRunner {
                 outputStream.write(buffer, 0, bytesRead);
             }
 
-            System.out.println("文件写入成功！");
+            log.info("文件写入成功！");
 
         } catch (IOException e) {
             e.printStackTrace();
