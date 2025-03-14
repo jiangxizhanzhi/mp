@@ -1,17 +1,9 @@
 package cn.cyberpeace.mp.auth.config;
 
-import cn.cyberpeace.mp.base.util.mptool.FileUtil;
-import com.boco.iam.sso.client.LoginUtil;
-import lombok.Data;
-import org.apache.commons.io.IOUtils;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
+import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 
 /**
  * @BelongsPackage: cn.cyberpeace.mp.auth.config
@@ -49,5 +41,23 @@ public class SSOConfig {
      * 读超时
      */
     private Integer readTimeout;
+
+
+    /**
+     * 首页url
+     */
+    private String homePageUrl;
+
+
+    /**
+     * soc登录页url
+     */
+    private String socLoginUrl;
+
+    /**
+     * soc票据校验url
+     */
+    private String socTicketCheckUrl;
+
 
 }

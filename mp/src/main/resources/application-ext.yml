@@ -166,6 +166,9 @@ mp:
         login-4a-url: ${SSO_LOGIN_4A_URL:http://10.214.71.88:30301}
         conn-timeout: ${SSO_CONN_TIMEOUT:5000}
         read-timeout: ${SSO_READ_TIMEOUT:20000}
+        home-page-url: ${SSO_HOME_PAGE_URL:http://10.100.1.28/page/mg/personal}
+        soc-login-url: ${SSO_SOC_LOGIN_URL:}
+        soc-ticket-check-url: ${SSO_SOC_TICKET_CHECK_URL:https://10.100.1.1:8443/cas/p3/serviceValidate}
   sceneplugingns3:
     ext-var:
       gns3-ip: ${GNS3_IP:10.100.27.1}

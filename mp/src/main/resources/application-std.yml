@@ -213,6 +213,9 @@ mp:
       login-4a-url: ${mp.auth.sso.ext-var.login-4a-url}
       conn-timeout: ${mp.auth.sso.ext-var.conn-timeout}
       read-timeout: ${mp.auth.sso.ext-var.read-timeout}
+      home-page-url: ${mp.auth.sso.ext-var.home-page-url}
+      soc-login-url: ${mp.auth.sso.ext-var.soc-login-url}
+      soc-ticket-check-url: ${mp.auth.sso.ext-var.soc-ticket-check-url}
   # mp-front-admin 模块配置
   frontadmin:
     activ-enable: true

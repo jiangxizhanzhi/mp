@@ -24,7 +24,7 @@ public class SSOSocServiceImpl extends AbstractSSOService {
 
     @Override
     public void doLogin(SSOLoginBO ssoLoginBO) {
-        log.info("cas==================soc");
+        log.info("soc sso login ticket is {}, service is {}",ssoLoginBO.getTicket(),ssoLoginBO.getService());
         //todo
     }
 
