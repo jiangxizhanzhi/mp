@@ -54,6 +54,9 @@ public abstract class BaseSceneElementBO<M extends BaseSceneElementModel, P exte
     @DefaultBool(value = true)
     private Boolean currentScenePartFlag;
 
+    @ApiModelProperty(value = "当前节点归属靶场")
+    private String range;
+
     @Override
     public void fromModel(M obj, String... ignoreFields) {
         super.fromModel(obj, ArrayUtils.addAll(ignoreFields,

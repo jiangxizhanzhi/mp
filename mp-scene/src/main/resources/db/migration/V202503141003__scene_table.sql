@@ -1,0 +1,2 @@
+alter table mp_scene_scene_config_element add column `range` varchar(255) not null default '' comment '当前节点归属的靶场名称';
+alter table mp_scene_scene_element add  column `range` varchar(255) not null default '' comment '当前节点归属的靶场名称';

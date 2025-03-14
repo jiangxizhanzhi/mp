@@ -37,6 +37,9 @@ public class BaseSceneElementModel extends BaseSceneNodeModel {
     @DefaultInt(value = 1)
     private Integer currentScenePartFlag;
 
+    @DefaultStr
+    private String range;
+
     public static class Type {
         public static final int OTHER = 0;
         public static final int SWITCH = 1;
