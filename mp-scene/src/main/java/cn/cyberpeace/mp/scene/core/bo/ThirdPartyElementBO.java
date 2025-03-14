@@ -19,6 +19,9 @@ public class ThirdPartyElementBO {
     @ExcelProperty("节点名称（节点名称需要唯一）")
     private String nodeName;
 
+    @ExcelProperty("所属靶场")
+    private String range;
+
     private String nodeId = TextUtils.uuid();
 
     private List<ThirdPartyElementPortBO> ports = new ArrayList<>();

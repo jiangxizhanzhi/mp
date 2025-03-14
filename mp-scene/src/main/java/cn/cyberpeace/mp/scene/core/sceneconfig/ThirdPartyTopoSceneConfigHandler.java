@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.plugin.stereotype.PluginKey;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import lombok.Getter;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,6 +26,8 @@ public class ThirdPartyTopoSceneConfigHandler {
     private List<ThirdPartyElementPortBO> thirdPartyElementPortBOS = new ArrayList<>();
     @Getter
     private String sceneName;
+
+    private final String DEFAULT_RANGE = "合肥靶场";
 
     public ThirdPartyTopoSceneConfigHandler(String sceneConfigId) {
         SceneConfigHandler sceneConfigHandler = new SceneConfigHandler(sceneConfigId, "", null);
@@ -45,6 +48,11 @@ public class ThirdPartyTopoSceneConfigHandler {
                         thirdPartyElementBO.setNodeType(ThirdPartyElementBO.NodeType.OTHER);
                     }
                     thirdPartyElementBO.setNodeId(element.getEid());
+                    if (StringUtils.isEmpty(element.getRange())) {
+                        thirdPartyElementBO.setRange(DEFAULT_RANGE);
+                    } else {
+                        thirdPartyElementBO.setRange(element.getRange());
+                    }
                     return thirdPartyElementBO;
                 }).collect(Collectors.toList());
 
@@ -117,6 +125,7 @@ public class ThirdPartyTopoSceneConfigHandler {
         List<SceneConfigElementBO> elements = new ArrayList<>();
         for (ThirdPartyElementBO thirdPartyElementBO : this.thirdPartyElementBOs) {
             SceneConfigElementBO sceneConfigElementBO = new SceneConfigElementBO();
+            sceneConfigElementBO.setRange(thirdPartyElementBO.getRange());
             sceneConfigElementBO.setName(thirdPartyElementBO.getNodeName());
             sceneConfigElementBO.setIcon2(thirdPartyElementBO.getDefaultIcon());
             sceneConfigElementBO.setType(thirdPartyElementBO.getDefaultType());
