@@ -56,6 +56,10 @@ public class CreateHandler extends HandlerCommon {
 
     private final Map<String, BaseNpcData.NetWorkNpcInfo> network2Info = new ConcurrentHashMap<>();
 
+    private final String[] CLIENT_LANS = {"192.168.1.0", "192.168.2.0", "192.168.3.0", "192.168.4.0", "192.168.5.0",
+            "192.168.6.0", "192.168.7.0", "192.168.8.0", "192.168.9.0", "192.168.10.0", "192.168.11.0", "192.168.12.0", "192.168.13.0",
+            "192.168.14.0", "192.168.15.0", "192.168.16.0"};
+
     private class HfdyVpnImage {
         public static final String VPN_SERVER = "hfdy-vpn-server";
         public static final String VPN_CLIENT = "hfdy-vpn-client";
@@ -678,20 +682,25 @@ public class CreateHandler extends HandlerCommon {
 
             String pushRouteToServerLanParameter = String.join("\n", pushRouteToServerLanCommands);
 
-
             String routeToClientLanCommandTemplate = "route %s %s";
             String irouteToClientLanCommandTemplate = "iroute %s %s";
-            String clientLan = getPluginHandler().getSceneHandler().getScene().getClientLan();
-            String[] clientLanArray = clientLan.split("/");
-            String maskIp = Ipv4Util.getMaskByMaskBit(Integer.parseInt(clientLanArray[1]));
-            String cidrIp = Ipv4Util.longToIpv4(Ipv4Util.ipv4ToLong(clientLanArray[0]) & Ipv4Util.ipv4ToLong(maskIp));
-            String routeToClientLanParameter = String.format(routeToClientLanCommandTemplate, cidrIp, maskIp);
-            String irouteToClientLanParameter = String.format(irouteToClientLanCommandTemplate, cidrIp, maskIp);
+            List<String> routeToClientLans = new ArrayList<>();
+            List<String> irouteToClientLans = new ArrayList<>();
+            for (String clientLan : CLIENT_LANS) {
+
+                String maskIp = "255.255.255.0";
+                String cidrIp = clientLan;
+                String singleRouteToClientLan = String.format(routeToClientLanCommandTemplate, cidrIp, maskIp);
+                String SingleIrouteToClientLan = String.format(irouteToClientLanCommandTemplate, cidrIp, maskIp);
+                routeToClientLans.add(singleRouteToClientLan);
+                irouteToClientLans.add(SingleIrouteToClientLan);
+            }
+
 
             String arkimeIp = getPluginHandler().getSceneHandler().getArkimeIp();
 
             String vpnServerCommand = String.format("bash /etc/openvpn/start_server.sh \"%s\" \"%s\" \"%s\" \"%s\"", pushRouteToServerLanParameter,
-                    routeToClientLanParameter, irouteToClientLanParameter, arkimeIp);
+                    String.join("\n", routeToClientLans), String.join("\n", irouteToClientLans), arkimeIp);
             log.info("vpn server cloud init command : " + vpnServerCommand);
             //删除连接的非外部网络给的默认路由
             Set<String> innerNetworkGatewayIps = getVpnInnerNetworkGatewayIp(currentCloudElement);
