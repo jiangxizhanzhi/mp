@@ -676,7 +676,7 @@ public class CreateHandler extends HandlerCommon {
                 });
             });
 
-            String pushRouteToServerLanParameter = String.join("\n", pushRouteToServerLanCommands);
+            String pushRouteToServerLanParameter = String.join("\\n", pushRouteToServerLanCommands);
 
 
             String routeToClientLanCommandTemplate = "route %s %s";
