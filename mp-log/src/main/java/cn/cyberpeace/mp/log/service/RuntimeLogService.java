@@ -55,6 +55,7 @@ public class RuntimeLogService {
         if (CollectionUtil.isNotEmpty(runTimeLogDTOS)) {
             runTimeLogDTOS.forEach(dto -> {
                 dto.setId(TextUtils.uuid());
+                dto.setRunTimeLogType(basePageRequest.getRunTimeLogType());
             });
         }
 

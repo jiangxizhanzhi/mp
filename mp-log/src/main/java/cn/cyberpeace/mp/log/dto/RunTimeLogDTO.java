@@ -53,4 +53,7 @@ public class RunTimeLogDTO {
     @ApiModelProperty(value = "日志文件最新时间-yyyy-MM-dd HH:mm:ss", required = true)
     private LocalDateTime lastModifyTime;
 
+    @ApiModelProperty(value = "日志类型 0:全部 1:运行日志 2:安全日志", required = false)
+    private Integer runTimeLogType;
+
 }

@@ -195,7 +195,7 @@ public class OperateLogSqlServiceImpl extends BaseModelServiceImpl<OperateLogSql
                 response.setOpType(opTypeCode);
             }
 
-            if (Objects.nonNull(response) && Objects.nonNull(response.getOpLogType())) {
+            if (Objects.nonNull(response) && Objects.nonNull(response.getOpType())) {
                 if (Arrays.asList(opLoginOutTypeIds).contains(response.getOpTypeID())) {
                     //登录日志
                     response.setOpLogType(1);
