@@ -39,6 +39,7 @@ public abstract class AbstractBaseService {
         if (CollectionUtils.isEmpty(groupList)){
             return new String[]{};
         }
+        startDate = startDate.minusHours(24);
         List<String> indexList = indexListBuilder(groupList,startDate,endDate);
         var indexArray = new String[indexList.size()];
         return indexList.toArray(indexArray);
