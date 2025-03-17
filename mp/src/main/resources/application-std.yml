@@ -211,6 +211,7 @@ mp:
       appid: ${mp.auth.sso.ext-var.appid}
       url: ${mp.auth.sso.ext-var.url}
       login-4a-url: ${mp.auth.sso.ext-var.login-4a-url}
+      config-file-path: ${mp.auth.sso.ext-var.config-file-path}
       conn-timeout: ${mp.auth.sso.ext-var.conn-timeout}
       read-timeout: ${mp.auth.sso.ext-var.read-timeout}
       home-page-url: ${mp.auth.sso.ext-var.home-page-url}

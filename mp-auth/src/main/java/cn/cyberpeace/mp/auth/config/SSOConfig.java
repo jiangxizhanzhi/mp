@@ -33,6 +33,11 @@ public class SSOConfig {
     private String login4aUrl;
 
     /**
+     * 4a单点配置文件绝对路径
+     */
+    private String configFilePath;
+
+    /**
      * 连接超时
      */
     private Integer connTimeout;

@@ -8,7 +8,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.Resource;
+import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
@@ -59,7 +61,16 @@ public class SSOFourALoginConfig {
     @Bean
     public LoginUtil initLoginUtil(){
         log.info("4A loginUtil init start...");
-        String path = getClass().getClassLoader().getResource(SSO_CONFIG_FILE).getPath();
+        String path = ssoConfig.getConfigFilePath() + SSO_CONFIG_FILE;
+        File file = new File(path);
+        if(!file.exists()){
+            try {
+                file.createNewFile();
+            } catch (IOException e) {
+                log.error("4a sso file create failed!",e);
+                throw new RuntimeException(e);
+            }
+        }
         try (InputStream inputStream = FileUtil.getInputStream(path);FileWriter writer = new FileWriter(path)){
             Properties ssoProp = new Properties();
             ssoProp.load(inputStream);
