@@ -110,8 +110,10 @@ public class CreateHandler extends HandlerCommon {
                 getPluginHandler().getSceneHandler().setArkimeIp(containerCreateData.getNetworks().get(0).getFixedIp());
                 getPluginHandler().getSceneHandler().setArkimeRunHost(containerCreateData.getHost());
                 //有arkime ip了，就启动vpn 虚机
-                if (Objects.nonNull(getPluginHandler().getSceneHandler().getVpnMachineRunnable())) {
-                    getPluginHandler().getSceneHandler().getVpnMachineRunnable().run();
+                if (CollectionUtils.isNotEmpty(getPluginHandler().getSceneHandler().getVpnMachineRunnables())) {
+                    for (Runnable vpnMachineRunnable : getPluginHandler().getSceneHandler().getVpnMachineRunnables()) {
+                        vpnMachineRunnable.run();
+                    }
                 }
             });
         }

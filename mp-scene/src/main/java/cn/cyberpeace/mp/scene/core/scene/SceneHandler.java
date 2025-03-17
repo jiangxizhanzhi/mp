@@ -167,7 +167,7 @@ public class SceneHandler extends BaseSceneHandler<
 
     @Getter
     @Setter
-    private Runnable vpnMachineRunnable;
+    private List<Runnable> vpnMachineRunnables = new ArrayList<>();
 
     public int errorScene(int event, String errorMessage) {
         var flag = getSceneEventHandler(event).error(errorMessage);

@@ -707,7 +707,7 @@ public class CreateHandler extends HandlerCommon {
             String arkimeIp = getPluginHandler().getSceneHandler().getArkimeIp();
 
             String vpnServerCommand = String.format("bash /etc/openvpn/start_server.sh \"%s\" \"%s\" \"%s\" \"%s\"", pushRouteToServerLanParameter,
-                    String.join("\n", routeToClientLans), String.join("\n", irouteToClientLans), arkimeIp);
+                    String.join("\\\\n", routeToClientLans), String.join("\\\\n", irouteToClientLans), arkimeIp);
             log.info("vpn server cloud init command : " + vpnServerCommand);
 
             Set<String> innerNetworkGatewayIps = getVpnInnerNetworkGatewayIp(currentCloudElement);
@@ -1217,7 +1217,7 @@ public class CreateHandler extends HandlerCommon {
             checkAccessModes(cloudElement);
         };
         if (HfdyVpnImage.VPN_CLIENT.equals(cloudElement.getImage()) || HfdyVpnImage.VPN_SERVER.equals(cloudElement.getImage())) {
-            this.getPluginHandler().getSceneHandler().setVpnMachineRunnable(virtualMachineRunnable);
+            this.getPluginHandler().getSceneHandler().getVpnMachineRunnables().add(virtualMachineRunnable);
         } else {
             virtualMachineRunnable.run();
         }
