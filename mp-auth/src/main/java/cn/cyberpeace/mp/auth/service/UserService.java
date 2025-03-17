@@ -113,4 +113,6 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
     List<String> listExistedUserNames(List<String> userNames, Integer limit);
 
     List<UserModel> getUserBy4AAccountId(String userId);
+
+    UserModel addFourAUser(UserRequest addRequest);
 }

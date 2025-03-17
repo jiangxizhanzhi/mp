@@ -137,7 +137,7 @@ public class SSOFourAServiceImpl extends AbstractSSOService {
                 // 预设学员角色和默认组织
                 addRequest.setOrgIds(Collections.singletonList(AuthConstant.ROOT_ORG_ID));
                 addRequest.setRoleIds(Collections.singletonList(AuthConstant.ROLE_XUEYUAN_ID));// 以实际环境的学员角色id为准
-                user = userService.add(addRequest);
+                user = userService.addFourAUser(addRequest);
             } else if (users.size() == 1) {// 查找到唯一用户
                 // 修改用户,目前无需修改其他信息
 //                UserModel thisUser = users.get(0);
@@ -167,7 +167,6 @@ public class SSOFourAServiceImpl extends AbstractSSOService {
         JwtAuthenticationFilter.addJWTCookieToResponse(response, newJwt);
         response.setHeader(AuthConstant.JWT_HEADER_KEY, newJwt);
         response.setHeader(AuthConstant.CP_TOKEN_REFRESHED_HEADER_KEY, "true");
-        ssoConfig.setHomePageUrl("www.baidu.com");
         response.sendRedirect(ssoConfig.getHomePageUrl());
     }
 

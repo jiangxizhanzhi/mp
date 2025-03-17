@@ -1,19 +1,14 @@
 package cn.cyberpeace.mp.auth.controller;
 
 import cn.cyberpeace.mp.auth.bo.sso.SSOLoginBO;
-import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.constant.SSOSysEnum;
-import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.request.sso.SSOLoginRequest;
-import cn.cyberpeace.mp.auth.request.user.UserRequest;
 import cn.cyberpeace.mp.auth.service.SSOService;
 import cn.cyberpeace.mp.auth.service.SSOServiceFactory;
 import cn.cyberpeace.mp.auth.service.UserService;
-import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
-import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import com.alibaba.fastjson.JSON;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -22,14 +17,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Collections;
-import java.util.UUID;
 
 /**
  * @BelongsPackage: cn.cyberpeace.mp.auth.controller
@@ -95,31 +87,6 @@ public class SSOController {
                 .build();
         SSOService ssoService = ssoServiceFactory.getSSOService(SSOSysEnum.SOC);
         ssoService.login(ssoLoginBO);
-    }
-
-    @ApiOperation(value = "用户新增测试", notes = "用户新增测试")
-    @PostMapping("/test")
-    public ServiceResult<Boolean> ssoFourALogin() {
-        UserRequest addRequest = new UserRequest();
-        // 创建用户
-        addRequest.setUsername(UUID.randomUUID().toString());
-        addRequest.setName(UUID.randomUUID().toString());
-        addRequest.setAccountId(UUID.randomUUID().toString());
-        addRequest.setOutUserType(SSOSysEnum.FOUR_A.getCode());
-        addRequest.setPassword(AuthConstant.DEFAULT_INITIALPASSWORD);// 该密码为前端加密过后的密码,原始密码为Xctfoj01
-        // 预设学员角色和默认组织
-        addRequest.setOrgIds(Collections.singletonList(AuthConstant.ROOT_ORG_ID));
-        addRequest.setRoleIds(Collections.singletonList(AuthConstant.ROLE_XUEYUAN_ID));
-        UserModel user = userService.add(addRequest);
-        System.out.println(user.getAccountId());
-        return new ServiceResult<>(true).asResult();
-    }
-
-    @ApiOperation(value = "获取用户信息", notes = "获取用户信息")
-    @GetMapping("/getUser")
-    public ServiceResult<UserModel> getUser() {
-        UserModel loginUser = UserUtils.getLoginUser();
-        return new ServiceResult<>(loginUser).asResult();
     }
 
 }

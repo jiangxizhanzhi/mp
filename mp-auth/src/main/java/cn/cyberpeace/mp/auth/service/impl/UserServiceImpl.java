@@ -375,6 +375,25 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    public UserModel addFourAUser(UserRequest createRequest) {
+        ParamCheck.notNull(createRequest, AuthBasei18nCode.REQUEST_PARAMS);
+//        opUserPermCheckService.checkByTargetRoleIds(createRequest.getRoleIds());// 4a用戶新增不走鉴权
+
+        UserModel userCreated = upsertUserModel(createRequest);
+        String userId = userCreated.getId();
+        log.info("user create success id:{}", userId);
+
+        // 保存组织-用户关系
+        saveUserOrgRelation(createRequest.getOrgIds(), userId);
+        // 保存角色-用户关系
+        saveUserRoleRelation(createRequest.getRoleIds(), userId);
+
+        userCacheService.evictAllUserCache();
+        return userCreated;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
     public UserModel modify(UserRequest modifyRequest) {
         if (!opUserPermCheckService.isOperateSelf(Arrays.asList(modifyRequest.getId()))) {
             // 如果操作的对象不是自己，则进行权限校验
