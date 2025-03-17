@@ -700,7 +700,7 @@ public class CreateHandler extends HandlerCommon {
             String arkimeIp = getPluginHandler().getSceneHandler().getArkimeIp();
 
             String vpnServerCommand = String.format("bash /etc/openvpn/start_server.sh \"%s\" \"%s\" \"%s\" \"%s\"", pushRouteToServerLanParameter,
-                    String.join("\n", routeToClientLans), String.join("\n", irouteToClientLans), arkimeIp);
+                    String.join("\\\\n", routeToClientLans), String.join("\\\\n", irouteToClientLans), arkimeIp);
             log.info("vpn server cloud init command : " + vpnServerCommand);
             //删除连接的非外部网络给的默认路由
             Set<String> innerNetworkGatewayIps = getVpnInnerNetworkGatewayIp(currentCloudElement);
