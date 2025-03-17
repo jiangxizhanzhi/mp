@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.log.converter.RunTimeLogDTOConverter;
 import cn.cyberpeace.mp.log.dto.LogReportDTO;
 import cn.cyberpeace.mp.log.dto.RunTimeLogDTO;
+import cn.cyberpeace.mp.log.enums.LogReportTypeEnum;
 import cn.cyberpeace.mp.log.request.RunTimeLogPageRequest;
 import cn.hutool.core.collection.CollectionUtil;
 import com.google.common.collect.Lists;
@@ -55,7 +56,13 @@ public class RuntimeLogService {
         if (CollectionUtil.isNotEmpty(runTimeLogDTOS)) {
             runTimeLogDTOS.forEach(dto -> {
                 dto.setId(TextUtils.uuid());
-                dto.setRunTimeLogType(basePageRequest.getRunTimeLogType());
+                if (dto.getLogReportTypeEnum().equals(LogReportTypeEnum.BC)) {
+                    dto.setRunTimeLogType(RunTimeLogPageRequest.runTimeLogFlag);
+                }
+                if (dto.getLogReportTypeEnum().equals(LogReportTypeEnum.MP) || dto.getLogReportTypeEnum().equals(LogReportTypeEnum.CP)) {
+                    dto.setRunTimeLogType(RunTimeLogPageRequest.securityLogFlag);
+                }
+
             });
         }
 
