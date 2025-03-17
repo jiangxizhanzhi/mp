@@ -1502,10 +1502,27 @@ public class CreateHandler extends HandlerCommon {
             log.error("no network config , element id is {} ", elementBO.getSrcElement().getId());
             return;
         }
-        RouterConfigCmdData buildNetwork = new RouterConfigCmdData();
-        buildNetwork.setSerialIp(defaultPort.getAccessModes().get(0).getAccessIp());
-        buildNetwork.setSerialPort(defaultPort.getAccessModes().get(0).getAccessPort());
-        buildNetwork.setCmds(cmds);
+
+        List<String> cmds1 = new ArrayList<>();
+        List<String> cmds2 = new ArrayList<>();
+        while (true && cmds.size() > 0) {
+            String cmd = cmds.remove(0);
+            cmds1.add(cmd);
+            if (cmd.contains("set system host-name")) {
+                break;
+            }
+        }
+        cmds2.addAll(cmds);
+
+        RouterConfigCmdData buildNetwork1 = new RouterConfigCmdData();
+        buildNetwork1.setSerialIp(defaultPort.getAccessModes().get(0).getAccessIp());
+        buildNetwork1.setSerialPort(defaultPort.getAccessModes().get(0).getAccessPort());
+        buildNetwork1.setCmds(cmds1);
+
+        RouterConfigCmdData buildNetwork2 = new RouterConfigCmdData();
+        buildNetwork2.setSerialIp(defaultPort.getAccessModes().get(0).getAccessIp());
+        buildNetwork2.setSerialPort(defaultPort.getAccessModes().get(0).getAccessPort());
+        buildNetwork2.setCmds(cmds2);
 
         // 开启dhcp
         RouterConfigCmdData openDhcp = new RouterConfigCmdData();
@@ -1531,7 +1548,7 @@ public class CreateHandler extends HandlerCommon {
             }
             // 发送拼接网络的命令
             try {
-                buildNetworkResult = vmRouter.createConfig(buildNetwork);
+                buildNetworkResult = vmRouter.createConfig(buildNetwork1);
             } catch (Exception e) {
                 log.error("failed to build network , try time {}", i);
                 exception = e;
@@ -1541,12 +1558,13 @@ public class CreateHandler extends HandlerCommon {
                 // 设置失败需要重试
                 continue;
             } else {
-                // dhcp设置的ip可用之后 即可执行后续的命令
+                buildNetworkResult = vmRouter.createConfig(buildNetwork2);
                 break;
             }
         }
         if (openDhcpResult == false || buildNetworkResult == false) {
-            log.error("build vyos network failed ,openDhcp {} , buildNetwork {} , resource id is {} , params is {} , ", openDhcp, buildNetwork, elementBO.getResourceId(), JsonCommon.stringify(openDhcp));
+            log.error("build vyos network failed ,openDhcp {} , buildNetwork {} , resource id is {} , params is {} , ", openDhcp, buildNetwork1, elementBO.getResourceId(), JsonCommon.stringify(openDhcp));
+            log.error("build vyos network failed ,openDhcp {} , buildNetwork {} , resource id is {} , params is {} , ", openDhcp, buildNetwork2, elementBO.getResourceId(), JsonCommon.stringify(openDhcp));
             if (exception != null) {
                 log.error("failed to build network ", exception);
             }
