@@ -165,4 +165,10 @@ public class DeviceTargetPO extends BaseModel {
      */
     @DefaultStr
     private String createUserName;
+
+    /**
+     * 靶标创建用户名
+     */
+    @DefaultStr
+    private String imageResourceType;
 }

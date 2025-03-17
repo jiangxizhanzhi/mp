@@ -146,4 +146,9 @@ public class ImageConvertModel extends BasePageConvertModel{
      */
     private String createUserName;
 
+    /**
+     * 镜像资源类型
+     */
+    private String imageResourceType;
+
 }

@@ -19,6 +19,7 @@
         <result column="reference_status" property="referenceStatus" />
         <result column="use_status" property="useStatus" typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler"/>
         <result column="create_user_name" property="createUserName"/>
+        <result column="image_resource_type" property="imageResourceType"/>
     </resultMap>
 
     <sql id="commonTargetWhere">
@@ -122,6 +123,9 @@
             </if>
             <if test="createUserName != null">
                 and i.create_user_name like CONCAT('%',#{createUserName},'%')
+            </if>
+            <if test="imageResourceType != null">
+                and i.image_resource_type = #{imageResourceType})
             </if>
 
         </where>

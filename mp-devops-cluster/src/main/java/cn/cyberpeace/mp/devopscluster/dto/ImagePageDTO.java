@@ -168,6 +168,11 @@ public class ImagePageDTO extends BasePageDTO{
      */
     private String ordersType;
 
+    /**
+     * 镜像资源类型
+     */
+    private String imageResourceType;
+
     public Boolean getLikeName() {
         return Objects.isNull(likeName) ? Boolean.TRUE : likeName;
     }
@@ -209,6 +214,7 @@ public class ImagePageDTO extends BasePageDTO{
             this.setOrders(request.getOrders());
             this.setOrdersType("asc");
         }
+        this.setImageResourceType(request.getImageResourceType());
     }
 
     /**

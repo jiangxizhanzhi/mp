@@ -148,6 +148,8 @@ public class ImagesConverter implements BaseConverter{
                         }
                     }
                 }
+                //设置镜像资源类型
+                imageConvertModel.setImageResourceType(supportExports.get(imageConvertModel.getUuid()).getImageResourceType());
             }
         }
 
