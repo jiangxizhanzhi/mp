@@ -476,6 +476,9 @@ public abstract class BaseSceneHandler<
         connections.forEach(connection -> {
             String sourcePortId = connection.getSource();
             String targetPortId = connection.getTarget();
+            if (StringUtils.isEmpty(sourcePortId) || StringUtils.isEmpty(targetPortId)) {
+                return;
+            }
             if (!elementPortMap.containsKey(sourcePortId)
                     && !elementPortMap.containsKey(targetPortId)) {
                 return;
