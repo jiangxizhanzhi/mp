@@ -136,8 +136,10 @@ public class UserModel extends BaseModel implements Serializable {
     @DefaultGen(DateTimeGenerator.class)
     private LocalDateTime lastLogin;
 
+    @DefaultStr
     private String bcIds;
 
+    @DefaultStr
     private String bcName;
 
     @Builder
