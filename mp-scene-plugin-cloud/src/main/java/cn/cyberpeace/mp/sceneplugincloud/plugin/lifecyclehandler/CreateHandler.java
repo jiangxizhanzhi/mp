@@ -53,6 +53,7 @@ public class CreateHandler extends HandlerCommon {
     private final Npc npcClient = new Npc();
     private final VmRouter vmRouter = new VmRouter();
     private VirtualDynamips vdClient = new VirtualDynamips();
+    private Network network = new Network();
 
     private final Map<String, BaseNpcData.NetWorkNpcInfo> network2Info = new ConcurrentHashMap<>();
 
@@ -749,6 +750,12 @@ public class CreateHandler extends HandlerCommon {
         innerNetworkGatewayIps.addAll(deriveInnerNetworkGatewayIps);
         innerNetworkGatewayIps.addAll(accessInnerNetworkGatewayIps);
         return innerNetworkGatewayIps;
+    }
+
+    private Set<String> getVpnOutNetworkGatewayIp(CloudPluginSceneElementBO cloudElement) {
+        String externalNetworkId = CloudSingleton.cloudAppConfig.getExternalNetId();
+        String externalNetworkGateway = network.get(externalNetworkId).getSubnet().getGatewayIp();
+
     }
 
     /**
