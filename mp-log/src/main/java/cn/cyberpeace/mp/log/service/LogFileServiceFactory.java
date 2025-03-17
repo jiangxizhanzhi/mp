@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.log.dto.LogDownloadDTO;
 import cn.cyberpeace.mp.log.dto.LogReportDTO;
 import cn.cyberpeace.mp.log.enums.LogReportTypeEnum;
 import cn.cyberpeace.mp.log.request.BasePageRequest;
+import cn.cyberpeace.mp.log.request.RunTimeLogPageRequest;
 import cn.hutool.core.collection.CollectionUtil;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
@@ -18,10 +19,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -47,14 +45,27 @@ public class LogFileServiceFactory {
         logFileServiceMap = fileServiceList.stream().collect(Collectors.toMap(LogFileService::logReportType, Function.identity()));
     }
 
+    private final String runTimeLogName = "BC";
+    private final List<String> securityLogList = Arrays.asList("MP", "CP");
+
     /**
      * 查询全部日志上报数据
      * @return
      */
-    public List<LogReportDTO> listAll(BasePageRequest basePageRequest) {
+    public List<LogReportDTO> listAll(RunTimeLogPageRequest basePageRequest) {
         List<LogReportDTO> result = Lists.newArrayList();
         if (Objects.nonNull(basePageRequest.getType())) {
             LogFileService logFileService = logFileServiceMap.get(basePageRequest.getType().name());
+            //判断是否筛选类型
+            if (Objects.nonNull(basePageRequest.getRunTimeLogType()) && basePageRequest.getRunTimeLogType().equals(RunTimeLogPageRequest.runTimeLogFlag)
+                    && !runTimeLogName.equals(basePageRequest.getType().name())) {
+                return result;
+            }
+            if (Objects.nonNull(basePageRequest.getRunTimeLogType()) && basePageRequest.getRunTimeLogType().equals(RunTimeLogPageRequest.securityLogFlag)
+                    && !securityLogList.contains(basePageRequest.getType().name())) {
+                return result;
+            }
+
             if (Objects.isNull(logFileService)) {
                 result.addAll(logFileServiceMap.get(LogReportTypeEnum.REPORT.name()).list(basePageRequest.getType().name()));
             } else {
@@ -65,9 +76,15 @@ public class LogFileServiceFactory {
             List<OptionBO> options = res.getSource();
             List<String> codes = new ArrayList<>();
             if (CollectionUtil.isNotEmpty(options)) {
-                codes = options.stream().map(o -> (String) o.getCode()).collect(Collectors.toList());
+                //日志类型筛选
+                if (Objects.nonNull(basePageRequest.getRunTimeLogType()) && basePageRequest.getRunTimeLogType().equals(RunTimeLogPageRequest.runTimeLogFlag)) {
+                    codes = options.stream().map(o -> (String) o.getCode()).filter(runTimeLogName::equals).collect(Collectors.toList());
+                } else if (Objects.nonNull(basePageRequest.getRunTimeLogType()) && basePageRequest.getRunTimeLogType().equals(RunTimeLogPageRequest.securityLogFlag)) {
+                    codes = options.stream().map(o -> (String) o.getCode()).filter(securityLogList::contains).collect(Collectors.toList());
+                } else {
+                    codes = options.stream().map(o -> (String) o.getCode()).collect(Collectors.toList());
+                }
             }
-
 
             List<LogFileService> logFileServices = new ArrayList<>();
             CollectionUtil.addAll(logFileServices, fileServiceList);

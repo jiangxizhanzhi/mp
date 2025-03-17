@@ -54,6 +54,8 @@ public class OperateLogSqlServiceImpl extends BaseModelServiceImpl<OperateLogSql
     @Autowired
     private MessageSource messageSource;
 
+    private Integer [] opLoginOutTypeIds = new Integer[] {0, 1};
+
     @Override
     public void create(OperationLogRequest request, Locale locale) {
         OperateLogSqlModel model = opRequest2Model(request, locale);
@@ -142,6 +144,16 @@ public class OperateLogSqlServiceImpl extends BaseModelServiceImpl<OperateLogSql
             humanCondition.filterIn(OperateLogSqlModel::getOpTypeId, opTypeOrdinals.toArray(new Integer[0]));
         }
 
+        //日志类型
+        if (Objects.nonNull(request.getOpLogType())) {
+            if (request.getOpLogType().equals(1)) {
+                humanCondition.filterIn(OperateLogSqlModel::getOpTypeId, opLoginOutTypeIds);
+            }
+            if (request.getOpLogType().equals(2)) {
+                humanCondition.filterNotIn(OperateLogSqlModel::getOpTypeId, opLoginOutTypeIds);
+            }
+        }
+
         if (Objects.nonNull(request.getUserNameOrOpTarget())) {
             humanCondition.filterOrStart()
                     .orContains(OperateLogSqlModel::getUserName, request.getUserNameOrOpTarget())
@@ -181,6 +193,16 @@ public class OperateLogSqlServiceImpl extends BaseModelServiceImpl<OperateLogSql
                 OpTypeEnums opTypeEnum = OpTypeEnums.fromValue(response.getOpTypeID());
                 String opTypeCode = this.getlocalizedMessage(locale, opTypeEnum.getCode());
                 response.setOpType(opTypeCode);
+            }
+
+            if (Objects.nonNull(response) && Objects.nonNull(response.getOpLogType())) {
+                if (Arrays.asList(opLoginOutTypeIds).contains(response.getOpTypeID())) {
+                    //登录日志
+                    response.setOpLogType(1);
+                } else {
+                    //操作日志
+                    response.setOpLogType(2);
+                }
             }
             list.add(response);
         }

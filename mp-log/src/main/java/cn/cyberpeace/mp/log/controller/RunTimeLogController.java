@@ -1,5 +1,19 @@
 package cn.cyberpeace.mp.log.controller;
 
+import java.util.List;
+
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -11,26 +25,14 @@ import cn.cyberpeace.mp.log.constant.LogConstant;
 import cn.cyberpeace.mp.log.constant.LogErrorCode;
 import cn.cyberpeace.mp.log.dto.LogDownloadDTO;
 import cn.cyberpeace.mp.log.dto.RunTimeLogDTO;
-import cn.cyberpeace.mp.log.request.BasePageRequest;
 import cn.cyberpeace.mp.log.request.RunTimeLogDownloadRequest;
+import cn.cyberpeace.mp.log.request.RunTimeLogPageRequest;
 import cn.cyberpeace.mp.log.service.LogFileServiceFactory;
 import cn.cyberpeace.mp.log.service.RuntimeLogService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import javax.servlet.http.HttpServletResponse;
-import java.util.List;
 
 /**
  *
@@ -51,7 +53,7 @@ public class RunTimeLogController {
 
     @GetMapping("/logs")
     @ApiOperation(value = "分页查询运行时日志", notes = "")
-    public ListObjServiceResult<RunTimeLogDTO> queryLogs(BasePageRequest basePageRequest) {
+    public ListObjServiceResult<RunTimeLogDTO> queryLogs(RunTimeLogPageRequest basePageRequest) {
         return new ListObjServiceResult(runTimeLogService.page(basePageRequest)).asResult();
     }
 

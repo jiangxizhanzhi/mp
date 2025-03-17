@@ -45,6 +45,12 @@ public class OperationLogPageResponse {
     private Integer opTypeID;
 
     /**
+     * 日志类型 (0:全部 1:登录日志-(包括操作类型的 0、1) 2:操作日志)
+     */
+    @ApiModelProperty(value = "日志类型 (0:全部 1:登录日志 2:操作日志)")
+    private Integer opLogType;
+
+    /**
      * 操作对象
      */
     @ApiModelProperty(value = "操作对象")

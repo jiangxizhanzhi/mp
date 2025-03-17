@@ -5,7 +5,7 @@ import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.log.converter.RunTimeLogDTOConverter;
 import cn.cyberpeace.mp.log.dto.LogReportDTO;
 import cn.cyberpeace.mp.log.dto.RunTimeLogDTO;
-import cn.cyberpeace.mp.log.request.BasePageRequest;
+import cn.cyberpeace.mp.log.request.RunTimeLogPageRequest;
 import cn.hutool.core.collection.CollectionUtil;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +34,7 @@ public class RuntimeLogService {
      * @param basePageRequest
      * @return
      */
-    public ListObjResult<RunTimeLogDTO> page(BasePageRequest basePageRequest) {
+    public ListObjResult<RunTimeLogDTO> page(RunTimeLogPageRequest basePageRequest) {
         List<LogReportDTO> allLogReportDTOList = Lists.newArrayList();
         List<LogReportDTO> mpAndCpLogList = logFileServiceFactory.listAll(basePageRequest);
         allLogReportDTOList.addAll(mpAndCpLogList);
