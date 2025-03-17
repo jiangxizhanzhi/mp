@@ -41,6 +41,8 @@ public class MpRuntimeExceptionHandler {
     @ResponseBody
     public ServiceResult<Object> validationExceptionHandle(BindException ex) {
         log.error(ex.getMessage());
+        log.error(ex.getMessage(), ex);
+
         var objectError = ex.getBindingResult().getAllErrors().get(0);
         var bindingResult = ex.getBindingResult();
         String detail = objectError.getDefaultMessage();
@@ -60,6 +62,8 @@ public class MpRuntimeExceptionHandler {
     @ResponseBody
     public ServiceResult handException(Exception ex) {
         log.error(ex.getMessage());
+        log.error(ex.getMessage(), ex);
+
         return new ServiceResult(null,BaseErrorCode.GATEWAY_TIME_OUT).asResult();
     }
 
@@ -68,6 +72,7 @@ public class MpRuntimeExceptionHandler {
     @ResponseBody
     public ServiceResult<Object> handleException(Exception ex){
         log.error(LOGGER_FORMAT, ex.getMessage(), ExceptionUtils.getStackTrace(ex));
+        log.error(ex.getMessage(), ex);
         return new ServiceResult<>(null, BaseErrorCode.ERROR, ex.getMessage()).asResult();
     }
 }
