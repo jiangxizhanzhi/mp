@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
 import cn.cyberpeace.mp.auth.bo.sso.SSOLoginBO;
+import cn.cyberpeace.mp.auth.bo.sso.SSOLoginOutBO;
 import cn.cyberpeace.mp.auth.config.SSOConfig;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
@@ -17,6 +18,7 @@ import com.boco.iam.sso.client.ResultCode;
 import com.boco.iam.sso.client.TransferTicket;
 import com.boco.iam.sso.client.UserInfo;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -171,7 +173,12 @@ public class SSOFourAServiceImpl extends AbstractSSOService {
 
 
     @Override
-    public void doLogout() {
-//        loginUtil.logout();
+    public void doLogout(SSOLoginOutBO ssoLoginOutBO) {
+        if(StringUtils.isEmpty(ssoLoginOutBO.getTicket())){
+            log.warn("4a logout param ticket is empty!");
+            return;
+        }
+        loginUtil.logout(ssoLoginOutBO.getTicket());
+        //todo 客户文档说不重定向到任何登录页面，这里需要以现场实际情况而定
     }
 }

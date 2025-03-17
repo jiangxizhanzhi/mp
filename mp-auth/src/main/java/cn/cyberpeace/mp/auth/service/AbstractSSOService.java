@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.auth.service;
 
 import cn.cyberpeace.mp.auth.bo.sso.SSOLoginBO;
+import cn.cyberpeace.mp.auth.bo.sso.SSOLoginOutBO;
 import cn.cyberpeace.mp.auth.constant.SSOSysEnum;
 
 /**
@@ -18,13 +19,13 @@ public abstract class AbstractSSOService implements SSOService{
     }
 
     @Override
-    public void logout() {
-        doLogout();
+    public void logout(SSOLoginOutBO ssoLoginOutBO) {
+        doLogout(ssoLoginOutBO);
     }
 
     public abstract boolean isSupport(SSOSysEnum sysEnum);
 
     public abstract void doLogin(SSOLoginBO ssoLoginBO);
 
-    public abstract void doLogout();
+    public abstract void doLogout(SSOLoginOutBO ssoLoginOutBO);
 }

@@ -1,9 +1,11 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
 import cn.cyberpeace.mp.auth.bo.sso.SSOLoginBO;
+import cn.cyberpeace.mp.auth.bo.sso.SSOLoginOutBO;
 import cn.cyberpeace.mp.auth.constant.SSOSysEnum;
 import cn.cyberpeace.mp.auth.service.AbstractSSOService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 /**
@@ -29,7 +31,11 @@ public class SSOSocServiceImpl extends AbstractSSOService {
     }
 
     @Override
-    public void doLogout() {
-
+    public void doLogout(SSOLoginOutBO ssoLoginOutBO) {
+        if(StringUtils.isEmpty(ssoLoginOutBO.getTicket())){
+            log.warn("soc logout param ticket is empty!");
+            return;
+        }
+        //todo 目前soc无单点登出接口
     }
 }

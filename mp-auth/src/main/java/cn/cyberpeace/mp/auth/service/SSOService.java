@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.auth.service;
 
 import cn.cyberpeace.mp.auth.bo.sso.SSOLoginBO;
+import cn.cyberpeace.mp.auth.bo.sso.SSOLoginOutBO;
 
 /*
  * @BelongsPackage: cn.cyberpeace.mp.auth.service
@@ -15,5 +16,5 @@ public interface SSOService {
     void login(SSOLoginBO ssoLoginBO);
 
 
-    void logout();
+    void logout(SSOLoginOutBO ssoLoginOutBO);
 }
