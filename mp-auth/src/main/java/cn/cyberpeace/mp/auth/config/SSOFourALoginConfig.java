@@ -64,7 +64,11 @@ public class SSOFourALoginConfig {
         String path = ssoConfig.getConfigFilePath() + SSO_CONFIG_FILE;
         File file = new File(path);
         if(!file.exists()){
+            File dir = new File(ssoConfig.getConfigFilePath());
             try {
+                if(!dir.exists() || !dir.isDirectory()){
+                    dir.mkdir();
+                }
                 file.createNewFile();
             } catch (IOException e) {
                 log.error("4a sso file create failed!",e);
