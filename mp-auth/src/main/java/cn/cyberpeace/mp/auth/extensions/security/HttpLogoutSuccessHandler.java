@@ -51,7 +51,7 @@ public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
     private AuthConfig authConfig;
 
     @Autowired
-    private UserEventPublisher userEventPublisher ;
+    private UserEventPublisher userEventPublisher;
 
     @Autowired
     public HttpLogoutSuccessHandler(MappingJackson2HttpMessageConverter messageConverter, UserService userService) {
@@ -95,6 +95,29 @@ public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
         PrintWriter writer = response.getWriter();
         mapper.writeValue(writer, result.asResult());
         writer.flush();
+    }
+
+    public void onFourALogoutSuccess(HttpServletRequest request, HttpServletResponse response, UserModel user)
+            throws IOException {
+        String userName = null;
+        if (Objects.nonNull(user)) {
+            if (Objects.nonNull(authConfig.getLogoutResetSecret()) && authConfig.getLogoutResetSecret()) {
+                if (!StringUtils.equals(user.getId(), authConfig.getLogoutKeepSecretUser())) {
+                    // 退出是否重置秘钥
+                    UserModel updateUser = new UserModel();
+                    updateUser.setId(user.getId());
+                    updateUser.initDefault("tokenSecret");
+                    userService.update(updateUser);
+                }
+            }
+            userName = user.getName();
+            recordLogoutLog(user, request);
+            userEventPublisher.publishEvent(new UserLogoutEvent(JsonCommon.beanToMap(user)));
+        }
+
+        if (StringUtils.isNotBlank(userName)) {
+            log.info("user:{} has logout!", userName);
+        }
     }
 
     private void recordLogoutLog(UserModel user, HttpServletRequest request) {

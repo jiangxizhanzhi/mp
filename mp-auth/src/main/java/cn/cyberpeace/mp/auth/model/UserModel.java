@@ -51,6 +51,9 @@ public class UserModel extends BaseModel implements Serializable {
     @ApiModelProperty(value = "外部平台用户类型")
     private String outUserType;
 
+    @ApiModelProperty(value = "外部平台用户ticket")
+    private String fourATicket;
+
     @ApiModelProperty(value = "用户编号")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @DefaultStr
@@ -231,7 +234,7 @@ public class UserModel extends BaseModel implements Serializable {
                 Objects.equals(identifier, userModel.identifier) &&
                 Objects.equals(idCard, userModel.idCard) &&
                 Objects.equals(mobile, userModel.mobile) &&
-                Objects.equals(address, userModel.address) ;
+                Objects.equals(address, userModel.address);
     }
 
     @Override

@@ -2,6 +2,10 @@ package cn.cyberpeace.mp.auth.service;
 
 import cn.cyberpeace.mp.auth.bo.sso.SSOLoginBO;
 import cn.cyberpeace.mp.auth.bo.sso.SSOLoginOutBO;
+import cn.cyberpeace.mp.auth.model.UserModel;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /*
  * @BelongsPackage: cn.cyberpeace.mp.auth.service
@@ -11,10 +15,10 @@ import cn.cyberpeace.mp.auth.bo.sso.SSOLoginOutBO;
  * @Version: 1.0
  */
 public interface SSOService {
-
-
+    
     void login(SSOLoginBO ssoLoginBO);
-
-
+    
     void logout(SSOLoginOutBO ssoLoginOutBO);
+
+    void logoutByUser(HttpServletRequest request, HttpServletResponse response, UserModel loginUser);
 }

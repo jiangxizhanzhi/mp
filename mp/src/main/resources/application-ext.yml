@@ -168,6 +168,7 @@ mp:
         conn-timeout: ${SSO_CONN_TIMEOUT:5000}
         read-timeout: ${SSO_READ_TIMEOUT:20000}
         home-page-url: ${SSO_HOME_PAGE_URL:http://10.100.1.28/page/mg/personal}
+        out-home-page-url: ${SSO_OUT_HOME_PAGE_URL:https://www.baidu.com}
         soc-login-url: ${SSO_SOC_LOGIN_URL:}
         soc-ticket-check-url: ${SSO_SOC_TICKET_CHECK_URL:https://10.100.1.1:8443/cas/p3/serviceValidate}
   sceneplugingns3:

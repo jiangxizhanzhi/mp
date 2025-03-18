@@ -1,19 +1,21 @@
 package cn.cyberpeace.mp.auth.controller;
 
 import cn.cyberpeace.mp.auth.bo.sso.SSOLoginBO;
+import cn.cyberpeace.mp.auth.bo.sso.SSOLoginOutBO;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.constant.SSOSysEnum;
+import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.request.sso.SSOLoginOutRequest;
 import cn.cyberpeace.mp.auth.request.sso.SSOLoginRequest;
 import cn.cyberpeace.mp.auth.service.SSOService;
 import cn.cyberpeace.mp.auth.service.SSOServiceFactory;
-import cn.cyberpeace.mp.auth.service.UserService;
+import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
 import com.alibaba.fastjson.JSON;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,21 +39,16 @@ import javax.servlet.http.HttpServletResponse;
 @AuthTarget(TargetEnum.NO_AUTH)
 public class SSOController {
 
-
     @Resource
     private SSOServiceFactory ssoServiceFactory;
 
-    @Autowired
-    private UserService userService;
-
-
     /**
-     * @description: 4a单点登录
      * @param ssoLoginRequest
      * @param request
      * @param response
-     * @throws Exception
      * @return void
+     * @throws Exception
+     * @description: 4a单点登录
      */
     @ApiOperation(value = "4a单点登录", notes = "4a单点登录")
     @GetMapping("/login/4a")
@@ -66,14 +63,39 @@ public class SSOController {
         ssoService.login(ssoLoginBO);
     }
 
+    @ApiOperation(value = "4a平台登出", notes = "4a平台登出")
+    @GetMapping("/loginout/4a")
+    public void ssoFourALoginout(@Validated SSOLoginOutRequest ssoLoginOutRequest, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        log.info("4a loginOut,ssoLoginOutRequest: {}", JSON.toJSONString(ssoLoginOutRequest));
+        SSOLoginOutBO ssoLoginOutBO = SSOLoginOutBO.builder()
+                .ticket(ssoLoginOutRequest.getTicket())
+                .request(request)
+                .response(response)
+                .build();
+        SSOService ssoService = ssoServiceFactory.getSSOService(SSOSysEnum.FOUR_A);
+        ssoService.logout(ssoLoginOutBO);
+    }
+
+    @ApiOperation(value = "本系统登出额外处理", notes = "本系统登出额外处理")
+    @GetMapping("/loginout")
+    public void loginout(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        // 查询当前人员
+        UserModel loginUser = UserUtils.getLoginUser();
+        if (loginUser.getAccountId() != null && loginUser.getOutUserType() != null) {
+            if (loginUser.getOutUserType().equals(SSOSysEnum.FOUR_A.getCode())) {
+                SSOService ssoService = ssoServiceFactory.getSSOService(SSOSysEnum.FOUR_A);
+                ssoService.logoutByUser(request, response, loginUser);
+            }
+        }
+    }
 
     /**
-     * @description: soc单点
      * @param ssoLoginRequest
      * @param request
      * @param response
-     * @throws Exception
      * @return void
+     * @throws Exception
+     * @description: soc单点
      */
     @ApiOperation(value = "soc单点登录", notes = "soc单点登录")
     @GetMapping("/login/soc")

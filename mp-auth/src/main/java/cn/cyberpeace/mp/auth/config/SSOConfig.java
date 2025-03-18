@@ -53,6 +53,10 @@ public class SSOConfig {
      */
     private String homePageUrl;
 
+    /**
+     * 外部首页url
+     */
+    private String outHomePageUrl;
 
     /**
      * soc登录页url
