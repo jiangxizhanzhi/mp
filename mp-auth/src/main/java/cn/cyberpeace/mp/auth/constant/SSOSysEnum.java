@@ -35,4 +35,14 @@ public enum SSOSysEnum {
     public String getName() {
         return name;
     }
+
+
+    public static SSOSysEnum getSSOSysEnumByCode(String code){
+        for (SSOSysEnum ssoSysEnum:SSOSysEnum.values()) {
+            if(ssoSysEnum.getCode().equals(code)){
+                return ssoSysEnum;
+            }
+        }
+        return null;
+    }
 }
