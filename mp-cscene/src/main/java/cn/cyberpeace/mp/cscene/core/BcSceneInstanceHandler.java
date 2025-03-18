@@ -13,7 +13,6 @@ package cn.cyberpeace.mp.cscene.core;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
-import cn.cyberpeace.mp.behavior.service.CsceneUserBehaviorService;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstaneRoleBO;
@@ -25,13 +24,11 @@ import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceRoleMapper;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceUserCountService;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
-import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
 import cn.cyberpeace.mp.scene.context.SceneContextHolder;
 import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.service.SceneService;
-import cn.cyberpeace.mp.sceneplugincloud.util.SceneInstanceLinkCacheUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -58,8 +55,6 @@ public class BcSceneInstanceHandler extends BaseCsceneHandler<
     private String areaId;
 
     private CsceneInstanceUserCountService csceneInstanceUserCountService;
-
-    private CsceneUserBehaviorService csceneUserBehaviorService;
 
     /**
      * generateSceneContext
@@ -153,7 +148,6 @@ public class BcSceneInstanceHandler extends BaseCsceneHandler<
         super.initBase();
         sceneService = BeanCommon.getBean(SceneService.class);
         csceneInstanceUserCountService = BeanCommon.getBean(CsceneInstanceUserCountService.class);
-        csceneUserBehaviorService = BeanCommon.getBean(CsceneUserBehaviorService.class);
     }
 
     /**
@@ -225,7 +219,6 @@ public class BcSceneInstanceHandler extends BaseCsceneHandler<
                 || sceneData.getTopology().getScene() == null) ? null : sceneData.getTopology().getScene().getEid();
         deleteScene(sceneId, logic);
         csceneBO.setScene(null);
-        csceneUserBehaviorService.delete(csceneBO.getId());
     }
 
     /**

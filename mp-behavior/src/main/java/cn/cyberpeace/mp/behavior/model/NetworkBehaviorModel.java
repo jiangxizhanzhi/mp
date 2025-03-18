@@ -1,31 +1,12 @@
- // Copyright (C) 2024
- // All rights reserved.
- // Project name mp
- // Description:
- // Author:
- // File name NetworkBehaviorModel.java.
- // File size 1225.
- // File create date Fri Jul 12 12:55:29 CST 2024.
- // File update date Fri Jul 12 12:55:29 CST 2024.
- // Version 1.0.0
 package cn.cyberpeace.mp.behavior.model;
 
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-/**
- * @ClassName NetworkBehaviorModel
- * @Description
- * @Author maojun
- * @Date 2024/07/02
- * @Version 1.0.0
- * @see BaseModel
- */
 @Data
+@AllArgsConstructor
 @NoArgsConstructor
 @Table("mp_network_behavior")
 public class NetworkBehaviorModel extends BaseModel {
@@ -36,32 +17,21 @@ public class NetworkBehaviorModel extends BaseModel {
 	@ApiModelProperty("网络行为描述")
 	private String description;
 
-	@ApiModelProperty("网络行为类型")
-	private Integer type;
-
 	@ApiModelProperty("文件名称")
 	private String fileName;
 
 	@ApiModelProperty("文件路径")
-	private String fileUrl;
+	private String filePath;
 
-	public enum BehaviorEnum {
+	@ApiModelProperty("参数配置")
+	private String params;
 
-		NETWORK(0, "浏览网页"),
-		EMAIL(1, "发送邮件"),
-		FILE(2, "下载文件"),
-		FORM(3, "填写和提交表单"),
-		OTHER(4, "其他");
+	@ApiModelProperty("目标服务")
+	private String target;
 
-		@Getter
-		private Integer code;
+	@ApiModelProperty("分类")
+	private Integer type;
 
-		@Getter
-		private String desc;
-
-		BehaviorEnum(Integer code, String desc) {
-			this.code = code;
-			this.desc = desc;
-		}
-	}
+	@ApiModelProperty("步骤")
+	private Integer step;
 }

@@ -10,7 +10,6 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.behavior.config;
 
-import cn.cyberpeace.mp.auth.config.AuthSwagger2Config;
 import cn.cyberpeace.mp.base.config.Swagger2Config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -19,8 +18,6 @@ import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
-
-import java.util.Collections;
 
 /**
  * @ClassName BehaviorSwagger2Config
@@ -49,7 +46,6 @@ public class BehaviorSwagger2Config {
 				.apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.behavior"))
 				.paths(PathSelectors.any())
 				.build()
-				.globalRequestParameters(Collections.singletonList(AuthSwagger2Config.authParameter))
 				.groupName("behavior");
 	}
 

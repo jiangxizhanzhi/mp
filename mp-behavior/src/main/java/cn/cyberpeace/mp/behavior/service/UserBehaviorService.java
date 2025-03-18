@@ -3,41 +3,43 @@
  // Project name mp
  // Description:
  // Author:
- // File name UserBehaviorService.java.
- // File size 6065.
+ // File name NetworkBehaviorService.java.
+ // File size 3136.
  // File create date Fri Jul 12 12:55:29 CST 2024.
  // File update date Fri Jul 12 12:55:29 CST 2024.
  // Version 1.0.0
 package cn.cyberpeace.mp.behavior.service;
 
-import cn.cyberpeace.mp.auth.request.common.PageRequest;
+ import cn.cyberpeace.mp.auth.request.common.PageRequest;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
-import cn.cyberpeace.mp.base.util.basic.TimeUtils;
+import cn.cyberpeace.mp.behavior.bo.NetworkBehaviorBo;
+import cn.cyberpeace.mp.behavior.bo.NodeNetworkBehavior;
+import cn.cyberpeace.mp.behavior.bo.NodeUserBehavior;
+import cn.cyberpeace.mp.behavior.bo.Param;
 import cn.cyberpeace.mp.behavior.model.NetworkBehaviorModel;
 import cn.cyberpeace.mp.behavior.model.UserBehaviorModel;
 import cn.cyberpeace.mp.behavior.repository.NetworkBehaviorMapper;
 import cn.cyberpeace.mp.behavior.repository.UserBehaviorMapper;
 import cn.cyberpeace.mp.behavior.req.AddUserBehaviorReq;
 import cn.cyberpeace.mp.behavior.req.UpdateUserBehaviorReq;
-import cn.cyberpeace.mp.behavior.res.CodeNameRes;
-import cn.cyberpeace.mp.behavior.res.UserBehaviorDetail;
-import com.alibaba.fastjson.JSON;
+import cn.cyberpeace.mp.behavior.res.NetworkBehaviorBoRes;
+import cn.cyberpeace.mp.behavior.res.UserBehaviorDetailRes;
+import cn.cyberpeace.mp.behavior.res.UserBehaviorPageRes;
+import cn.cyberpeace.mp.behavior.util.TimeUtil;
+import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
-/**
+ /**
  * @ClassName UserBehaviorService
  * @Description
  * @Author maojun
@@ -63,9 +65,9 @@ public class UserBehaviorService {
 	public String add(AddUserBehaviorReq addReq) {
 		UserBehaviorModel model = new UserBehaviorModel();
 		BeanUtils.copyProperties(addReq, model);
-		model.setStartTime(TimeUtils.stringToLocalDateTime(addReq.getStartTime()));
-		model.setEndTime(TimeUtils.stringToLocalDateTime(addReq.getEndTime()));
-		model.setNetworkIds(JSON.toJSONString(addReq.getNetworkIdList()));
+		model.setBehaviors(JSONObject.toJSONString(addReq.getBehaviorList()));
+		model.setStartTime(TimeUtil.toLocalTime(addReq.getStartTime()));
+		model.setEndTime(TimeUtil.toLocalTime(addReq.getEndTime()));
 		userBehaviorMapper.create(model);
 		return model.getId();
 	}
@@ -78,14 +80,12 @@ public class UserBehaviorService {
 	public void update(UpdateUserBehaviorReq updateReq) {
 		UserBehaviorModel model = new UserBehaviorModel();
 		BeanUtils.copyProperties(updateReq, model);
+		model.setBehaviors(JSONObject.toJSONString(updateReq.getBehaviorList()));
 		if (StringUtils.isNotEmpty(updateReq.getStartTime())) {
-			model.setStartTime(TimeUtils.stringToLocalDateTime(updateReq.getStartTime()));
+			model.setStartTime(TimeUtil.toLocalTime(updateReq.getStartTime()));
 		}
 		if (StringUtils.isNotEmpty(updateReq.getEndTime())) {
-			model.setEndTime(TimeUtils.stringToLocalDateTime(updateReq.getEndTime()));
-		}
-		if (CollectionUtils.isNotEmpty(updateReq.getNetworkIdList())) {
-			model.setNetworkIds(JSON.toJSONString(updateReq.getNetworkIdList()));
+			model.setEndTime(TimeUtil.toLocalTime(updateReq.getEndTime()));
 		}
 		userBehaviorMapper.update(model);
 	}
@@ -100,12 +100,50 @@ public class UserBehaviorService {
 	}
 
 	/**
+	 * get
+	 *
+	 * @param id
+	 * @return
+	 */
+	public UserBehaviorDetailRes get(String id) {
+		UserBehaviorDetailRes userBehaviorDetailRes = new UserBehaviorDetailRes();
+		UserBehaviorModel userBehaviorModel = userBehaviorMapper.get(id);
+		if (userBehaviorModel == null) {
+			log.error("cannot find userBehavior ,id = [{}]", id);
+			throw new MpRuntimeException("找不到对应的用户行为");
+		}
+		BeanUtils.copyProperties(userBehaviorModel, userBehaviorDetailRes);
+		List<String> networkIds = JSONObject.parseArray(userBehaviorModel.getBehaviors(), NetworkBehaviorBo.class)
+											.stream()
+											.map(NetworkBehaviorBo::getNetworkBehaviorId)
+											.collect(Collectors.toList());
+		List<NetworkBehaviorModel> networkBehaviorModelList = networkBehaviorMapper.list(new HumanCondition()
+				.filterIn(NetworkBehaviorModel::getId, networkIds.toArray()));
+		Map<String, NetworkBehaviorModel> networkBehaviorModelMap = networkBehaviorModelList.stream()
+																							.collect(Collectors.toMap(NetworkBehaviorModel::getId, m -> m));
+		Map<String, String> runTimeMap = JSONObject.parseArray(userBehaviorModel.getBehaviors(), NetworkBehaviorBo.class)
+													  .stream()
+													  .collect(Collectors.toMap(NetworkBehaviorBo::getNetworkBehaviorId, NetworkBehaviorBo::getRunTime));
+		List<NetworkBehaviorBoRes> networkBehaviorBoResList = new ArrayList<>();
+		for (String networkId : networkIds) {
+			NetworkBehaviorBoRes networkBehaviorBoRes = new NetworkBehaviorBoRes();
+			BeanUtils.copyProperties(networkBehaviorModelMap.get(networkId), networkBehaviorBoRes);
+			networkBehaviorBoRes.setRunTime(runTimeMap.get(networkId));
+			networkBehaviorBoResList.add(networkBehaviorBoRes);
+		}
+		userBehaviorDetailRes.setBehaviorList(networkBehaviorBoResList);
+		userBehaviorDetailRes.setStartTime(TimeUtil.format(userBehaviorModel.getStartTime()));
+		userBehaviorDetailRes.setEndTime(TimeUtil.format(userBehaviorModel.getEndTime()));
+		return userBehaviorDetailRes;
+	}
+
+	/**
 	 * page
 	 *
 	 * @param pageReq
 	 * @return
 	 */
-	public ListObjServiceResult<UserBehaviorDetail> page(PageRequest pageReq) {
+	public ListObjServiceResult<UserBehaviorPageRes> page(PageRequest pageReq) {
 		pageReq.ensure();
 		HumanCondition humanCondition = new HumanCondition()
 				.pagination(pageReq.getPage(), pageReq.getPageSize());
@@ -114,71 +152,59 @@ public class UserBehaviorService {
 			humanCondition.filterIContains(UserBehaviorModel::getName, pageReq.getSearch());
 		}
 
-		List<UserBehaviorModel> userModelList = userBehaviorMapper.list(humanCondition);
-		if (CollectionUtils.isEmpty(userModelList)) {
-			return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<UserBehaviorDetail>(), 0).asResult());
-		}
+		List<UserBehaviorModel> modelList = userBehaviorMapper.list(humanCondition);
 		int total = userBehaviorMapper.total(humanCondition);
+		List<UserBehaviorPageRes> networkBehaviorPageResList = modelList.stream().map(this::UserBehaviorModel2Page).collect(Collectors.toList());
+		return new ListObjServiceResult(new ListObjResult(networkBehaviorPageResList, total).asResult());
+	}
 
-		List<String> networkIds = new ArrayList<>();
-		for (UserBehaviorModel userModel : userModelList) {
-			networkIds.addAll(JSON.parseArray(userModel.getNetworkIds(), String.class));
+	public ListObjServiceResult<NodeUserBehavior> scenePage(PageRequest pageReq) {
+		pageReq.ensure();
+		HumanCondition humanCondition = new HumanCondition()
+				.pagination(pageReq.getPage(), pageReq.getPageSize());
+		List<UserBehaviorModel> modelList = userBehaviorMapper.list(humanCondition);
+		int	total = userBehaviorMapper.total(humanCondition);
+		Set<String> networkBehaviorIds = new HashSet<>();
+		for (UserBehaviorModel model : modelList) {
+			List<NetworkBehaviorBo> networkBehaviorBos = JSONObject.parseArray(model.getBehaviors(), NetworkBehaviorBo.class);
+			networkBehaviorIds.addAll(networkBehaviorBos.stream().map(NetworkBehaviorBo::getNetworkBehaviorId).collect(Collectors.toSet()));
 		}
-		List<NetworkBehaviorModel> networkModelList = new ArrayList<>();
-		if (CollectionUtils.isNotEmpty(networkIds)) {
-			humanCondition = new HumanCondition().filterIn(NetworkBehaviorModel::getId, networkIds.toArray(new String[0]));
-			networkModelList = networkBehaviorMapper.list(humanCondition);
-		}
-		Map<String, NetworkBehaviorModel> networkModelMap = networkModelList.stream().collect(Collectors.toMap(NetworkBehaviorModel::getId, n -> n));
-		List<UserBehaviorDetail> details = userModelList.stream().map(userModel -> {
-			UserBehaviorDetail detail = new UserBehaviorDetail();
-			BeanUtils.copyProperties(userModel, detail);
-			List<NetworkBehaviorModel> networkList = new ArrayList<>();
-			for (String networkId : JSON.parseArray(detail.getNetworkIds(), String.class)) {
-				NetworkBehaviorModel networkModel = networkModelMap.get(networkId);
-				if (networkModel!= null) {
-					networkList.add(networkModelMap.get(networkId));
-				}
+		HumanCondition networkHumanCondition = new HumanCondition().filterIn(NetworkBehaviorModel::getId, networkBehaviorIds.toArray());
+		List<NetworkBehaviorModel> networkBehaviorModelList = networkBehaviorMapper.list(networkHumanCondition);
+		Map<String, NetworkBehaviorModel> networkBehaviorModelMap = networkBehaviorModelList.stream()
+																							.collect(Collectors.toMap(NetworkBehaviorModel::getId, m -> m));
+		List<NodeUserBehavior> nodeUserBehaviors = new ArrayList<>();
+		for (UserBehaviorModel model : modelList) {
+			NodeUserBehavior nodeUserBehavior = new NodeUserBehavior();
+			nodeUserBehavior.setUserBehaviorId(model.getId());
+			nodeUserBehavior.setUserBehaviorName(model.getName());
+			nodeUserBehavior.setStartTime(TimeUtil.format(model.getStartTime()));
+			nodeUserBehavior.setEndTime(TimeUtil.format(model.getEndTime()));
+			List<NetworkBehaviorBo> networkBehaviorBoList = JSONObject.parseArray(model.getBehaviors(), NetworkBehaviorBo.class);
+			nodeUserBehavior.setBehaviorCount(networkBehaviorBoList.size());
+			List<NodeNetworkBehavior> nodeNetworkBehaviorList = new ArrayList<>();
+			for (NetworkBehaviorBo networkBehaviorBo : networkBehaviorBoList) {
+				NodeNetworkBehavior nodeNetworkBehavior = new NodeNetworkBehavior();
+				NetworkBehaviorModel networkBehaviorModel = networkBehaviorModelMap.get(networkBehaviorBo.getNetworkBehaviorId());
+				BeanUtils.copyProperties(networkBehaviorModel, nodeNetworkBehavior);
+				nodeNetworkBehavior.setNetworkBehaviorId(networkBehaviorModel.getId());
+				nodeNetworkBehavior.setFileUrl(networkBehaviorModel.getFilePath());
+				nodeNetworkBehavior.setParamList(JSONObject.parseArray(networkBehaviorModel.getParams(), Param.class));
+				nodeNetworkBehavior.setRunTime(networkBehaviorBo.getRunTime());
+				nodeNetworkBehaviorList.add(nodeNetworkBehavior);
 			}
-			detail.setNetworkBehaviorModelList(networkList);
-			detail.setNetworkBehaviorIdList(networkList.stream().map(NetworkBehaviorModel::getId).collect(Collectors.toList()));
-			return detail;
-		}).collect(Collectors.toList());
-		return new ListObjServiceResult(new ListObjResult(details, total).asResult());
-	}
-
-	/**
-	 * getUserType
-	 *
-	 * @return
-	 */
-	public List<CodeNameRes> getUserType() {
-		return Arrays.stream(UserBehaviorModel.UserType.values())
-			  .map(userType -> new CodeNameRes(userType.getCode(), userType.getDesc()))
-			  .collect(Collectors.toList());
-	}
-
-	/**
-	 * 获取用户行为详情
-	 *
-	 * @param id
-	 * @return
-	 */
-	public UserBehaviorDetail getDetail(String id) {
-		UserBehaviorModel userBehaviorModel = userBehaviorMapper.get(id);
-		List<NetworkBehaviorModel> networkBehaviorModelList = new ArrayList<>();
-
-		String networkIds = userBehaviorModel.getNetworkIds();
-		List<String> networkIdList = JSON.parseArray(networkIds, String.class);
-		if (CollectionUtils.isNotEmpty(networkIdList)) {
-			HumanCondition humanCondition = new HumanCondition().filterIn(NetworkBehaviorModel::getId, networkIdList.toArray(new String[0]));
-			networkBehaviorModelList = networkBehaviorMapper.list(humanCondition);
+			nodeUserBehavior.setNetworkBehaviorList(nodeNetworkBehaviorList);
+			nodeUserBehaviors.add(nodeUserBehavior);
 		}
+		return new ListObjServiceResult(new ListObjResult(nodeUserBehaviors, total).asResult());
+	}
 
-		UserBehaviorDetail detail = new UserBehaviorDetail();
-		BeanUtils.copyProperties(userBehaviorModel, detail);
-		detail.setNetworkBehaviorModelList(networkBehaviorModelList);
-		detail.setNetworkBehaviorIdList(networkBehaviorModelList.stream().map(NetworkBehaviorModel::getId).collect(Collectors.toList()));
-		return detail;
+	private UserBehaviorPageRes UserBehaviorModel2Page(UserBehaviorModel userBehaviorModel) {
+		UserBehaviorPageRes userBehaviorPageRes = new UserBehaviorPageRes();
+		BeanUtils.copyProperties(userBehaviorModel, userBehaviorPageRes);
+		userBehaviorPageRes.setCount(JSONObject.parseArray(userBehaviorModel.getBehaviors(), NetworkBehaviorBo.class).size());
+		userBehaviorPageRes.setStartTime(TimeUtil.format(userBehaviorModel.getStartTime()));
+		userBehaviorPageRes.setEndTime(TimeUtil.format(userBehaviorModel.getEndTime()));
+		return userBehaviorPageRes;
 	}
 }

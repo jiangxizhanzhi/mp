@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.cyberpeace.mp.behavior.repository.BehaviorTypeMapper">
+
+    <select id="selectAll" resultType="cn.cyberpeace.mp.behavior.res.CodeNameRes">
+        select `code`, `name`
+        from mp_behavior_type
+    </select>
+</mapper>

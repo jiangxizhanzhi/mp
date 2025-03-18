@@ -10,12 +10,14 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.behavior.req;
 
+import cn.cyberpeace.mp.behavior.bo.Param;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
-/**
+ /**
  * @ClassName AddNetworkBehaviorReq
  * @Description
  * @Author maojun
@@ -30,15 +32,23 @@ public class AddNetworkBehaviorReq {
 	private String name;
 
 	@ApiModelProperty("描述")
-	@NotNull(message = "描述不能为空")
 	private String description;
-
-	@ApiModelProperty("行为类型")
-	private Integer type;
 
 	@ApiModelProperty("文件名称")
 	private String fileName;
 
 	@ApiModelProperty("导入文件地址")
-	private String fileUrl;
+	private String filePath;
+
+	@ApiModelProperty("目标服务")
+	private String target;
+
+	@ApiModelProperty("分类")
+	private Integer type;
+
+	@ApiModelProperty("步骤")
+	private Integer step;
+
+	@ApiModelProperty("参数列表")
+	private List<Param> paramList;
 }

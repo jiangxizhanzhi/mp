@@ -3,8 +3,8 @@
  // Project name mp
  // Description:
  // Author:
- // File name UserBehaviorMapper.java.
- // File size 619.
+ // File name NetworkBehaviorMapper.java.
+ // File size 634.
  // File create date Fri Jul 12 12:55:29 CST 2024.
  // File update date Fri Jul 12 12:55:29 CST 2024.
  // Version 1.0.0
@@ -16,16 +16,16 @@ import cn.cyberpeace.mp.behavior.model.UserBehaviorModel;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 
-/**
- * @ClassName UserBehaviorMapper
- * @Description
- * @Author maojun
- * @Date 2024/07/02
- * @Version 1.0.0
- * @see BaseModelMapper
- */
-@Mapper
-@Repository
-@ModelClass(UserBehaviorModel.class)
-public interface UserBehaviorMapper extends BaseModelMapper<UserBehaviorModel> {
-}
+ /**
+  * @ClassName NetworkBehaviorMapper
+  * @Description
+  * @Author maojun
+  * @Date 2024/07/02
+  * @Version 1.0.0
+  * @see BaseModelMapper
+  */
+ @Mapper
+ @Repository
+ @ModelClass(UserBehaviorModel.class)
+ public interface UserBehaviorMapper extends BaseModelMapper<UserBehaviorModel> {
+ }
