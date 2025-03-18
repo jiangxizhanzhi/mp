@@ -5,8 +5,10 @@ import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.MapUtils;
 import cn.cyberpeace.mp.cscene.bo.*;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
@@ -20,13 +22,17 @@ import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
+import cn.cyberpeace.mp.scene.core.bo.RangeBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
 import cn.cyberpeace.mp.scene.core.bo.ThirdPartyElementBO;
 import cn.cyberpeace.mp.scene.core.bo.ThirdPartyElementConnectBO;
 import cn.cyberpeace.mp.scene.core.sceneconfig.ThirdPartyTopoSceneConfigHandler;
+import cn.cyberpeace.mp.scene.model.RangeModel;
+import cn.cyberpeace.mp.scene.repository.RangeMapper;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.write.metadata.WriteSheet;
+import com.google.common.collect.RangeMap;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -65,6 +71,8 @@ public class CsceneController implements BaseModelListControllerBase {
     private CsceneSpecialService csceneSpecialService;
 
     private BaseAppConfig baseAppConfig;
+
+    private RangeMapper rangeMapper;
 
     private CsceneActionRequest formatActionRequest(CsceneActionRequest request, String paramId) {
         if (request == null) {
@@ -121,6 +129,22 @@ public class CsceneController implements BaseModelListControllerBase {
         setModelService(csceneService);
         setCsceneSpecialService(csceneSpecialService);
         this.baseAppConfig = baseAppConfig;
+    }
+
+    @ApiOperation("新增更新靶场信息")
+    @PostMapping("/range/upsert")
+    public ServiceResult<Boolean> upsert(@RequestBody RangeBO rangeBO) {
+        if (StringUtils.isEmpty(rangeBO.getRangeName())) {
+            throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("靶场名称为空"));
+        }
+        if (StringUtils.isEmpty(rangeBO.getRangeIp())) {
+            throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("靶场ip为空"));
+        }
+        rangeMapper.filterDelete(new HumanCondition().filterEqual(RangeModel::getRangeName, rangeBO.getRangeName()));
+        RangeModel rangeModel = new RangeModel();
+        BeanUtils.copyProperties(rangeBO, rangeModel);
+        rangeMapper.save(rangeModel);
+        return new ServiceResult<>(Boolean.TRUE).asResult();
     }
 
     @ApiOperation("授权场景模板")
