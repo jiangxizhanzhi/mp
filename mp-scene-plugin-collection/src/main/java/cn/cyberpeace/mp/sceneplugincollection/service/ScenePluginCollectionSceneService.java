@@ -154,9 +154,6 @@ public class ScenePluginCollectionSceneService {
                     ips.addAll(nodeIps);
                 }
             }
-            if (CollectionUtils.isEmpty(ips)) {
-                ips.addAll(queryParams.getSourceNodeIds());
-            }
             if (CollectionUtils.isEmpty(queryParams.getSourceIps())) {
                 queryParams.setSourceIps(ips);
             }
@@ -168,9 +165,6 @@ public class ScenePluginCollectionSceneService {
                 if (CollectionUtils.isNotEmpty(nodeIps)) {
                     ips.addAll(nodeIps);
                 }
-            }
-            if (CollectionUtils.isEmpty(ips)) {
-                ips.addAll(queryParams.getTargetNodeIds());
             }
             if (CollectionUtils.isEmpty(queryParams.getTargetIps())) {
                 queryParams.setTargetIps(ips);
