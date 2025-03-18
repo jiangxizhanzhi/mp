@@ -10,7 +10,11 @@ import cn.cyberpeace.mp.base.util.http.StringHttpData;
 import cn.cyberpeace.mp.frontadmin.util.EncryptUtils;
 import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.databind.JsonNode;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.json.JsonObject;
 import org.springframework.stereotype.Component;
@@ -19,6 +23,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Component
@@ -26,32 +31,34 @@ public class TestRangeLoginData {
     private String userName = "admin";
     private String originPassword = "xctfoj01";
 
-    private LocalDateTime authDataTime;
-    private String authToken;
+
+    private Map<String, AuthToken> rangeToAuthTokenMap = new ConcurrentHashMap<>();
 
     private String getEncodePassword() {
         return PasswordUtils.desEncrypt(originPassword);
     }
 
-    public String getAuthToken() {
-        if (Objects.nonNull(authDataTime) && Objects.nonNull(authToken) && authDataTime.isAfter(LocalDateTime.now().minusMinutes(10))) {
-            if (tokenIsValid()) {
-                authDataTime = LocalDateTime.now();
-                return authToken;
+    public String getAuthToken(String rangeName) {
+        AuthToken authToken = rangeToAuthTokenMap.get(rangeName);
+        if (Objects.nonNull(authToken) && Objects.nonNull(authToken.getToken()) && Objects.nonNull(authToken.getAuthDataTime())
+                && authToken.getAuthDataTime().isAfter(LocalDateTime.now().minusMinutes(10))) {
+            if (tokenIsValid(authToken.getToken())) {
+                authToken.setAuthDataTime(LocalDateTime.now());
+                return authToken.getToken();
             } else {
-                authToken = getAuthTokenFromTestRange();
-                authDataTime = LocalDateTime.now();
-                return authToken;
+                String token = getAuthTokenFromTestRange(rangeName);
+                rangeToAuthTokenMap.put(rangeName, new AuthToken(token, LocalDateTime.now()));
+                return token;
             }
         } else {
-            authToken = getAuthTokenFromTestRange();
-            authDataTime = LocalDateTime.now();
-            return authToken;
+            String token = getAuthTokenFromTestRange(rangeName);
+            rangeToAuthTokenMap.put(rangeName, new AuthToken(token, LocalDateTime.now()));
+            return token;
         }
     }
 
-    private String getAuthTokenFromTestRange() {
-        String result = TestRangeClientUtil.post(TestRangeApiUrl.AUTH_TOKEN, new StringHttpData(JsonCommon.snakeStringify(
+    private String getAuthTokenFromTestRange(String rangeName) {
+        String result = TestRangeClientUtil.post(rangeName, TestRangeApiUrl.AUTH_TOKEN, new StringHttpData(JsonCommon.snakeStringify(
                         new LoginData(userName, getEncodePassword()))), null, null, 10000)
                 .getResult();
         JSONObject jsonObject = JSONObject.parseObject(result);
@@ -63,9 +70,9 @@ public class TestRangeLoginData {
         }
     }
 
-    private boolean tokenIsValid() {
+    private boolean tokenIsValid(String token) {
         Map<String, String> headers = new HashMap<>();
-        headers.put("authorization", "JWT " + authToken);
+        headers.put("authorization", "JWT " + token);
         try {
             HttpResult httpResult = TestRangeClientUtil.get(TestRangeApiUrl.AUTH_HEALTH_CHECK, null, headers, 10000);
             if (httpResult.isSuccess()) {
@@ -91,5 +98,13 @@ public class TestRangeLoginData {
             this.password = encodePassword;
             this.verifyCode = "";
         }
+    }
+
+    @Data
+    @Accessors(chain = true)
+    @AllArgsConstructor
+    private static class AuthToken {
+        private String token;
+        private LocalDateTime authDataTime;
     }
 }

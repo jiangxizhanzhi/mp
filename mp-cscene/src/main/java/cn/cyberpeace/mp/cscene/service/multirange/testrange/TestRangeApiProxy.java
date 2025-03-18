@@ -17,8 +17,10 @@ import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.request.hoststate.HostStateTrendRequest;
 import cn.cyberpeace.mp.cscene.service.multirange.SubRangeMonitorInterface;
+import cn.cyberpeace.mp.scene.core.bo.HfdyServerVpnConfig;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.scene.repository.RangeMapper;
 import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
 import cn.cyberpeace.mp.scene.repository.SceneMapper;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
@@ -38,6 +40,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -52,11 +55,14 @@ public class TestRangeApiProxy implements SubRangeMonitorInterface {
     private CsceneInstanceMapper csceneInstanceMapper;
     @Autowired
     private SceneElementMapper sceneElementMapper;
+    @Autowired
+    private RangeMapper rangeMapper;
 
-    private static final Map<String, String> CSCENE_MAP_CACHE = new ConcurrentHashMap<>();
+    private static final Map<String, Map<String, String>> CSCENE_MAP_CACHE = new ConcurrentHashMap<>();
+    private static final Map<String, Set<String>> csceneIdToNodeIds = new ConcurrentHashMap<>();
 
     @Override
-    public String getIdentity(String currentCsceneId) {
+    public Map<String, HfdyServerVpnConfig> getIdentity(String currentCsceneId) {
         var csceneModels = csceneInstanceMapper.list(new HumanCondition().filterEqual(CsceneInstanceModel::getId, currentCsceneId).filterEqual(CsceneInstanceModel::getDeleted, false));
         if (CollectionUtils.isEmpty(csceneModels)) {
             throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("靶场csceneId"+currentCsceneId+"不存在"));
@@ -68,18 +74,24 @@ public class TestRangeApiProxy implements SubRangeMonitorInterface {
             if (CollectionUtils.isEmpty(sceneModels)) {
                 throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("场景" + currentSceneId + "不存在"));
             } else {
-                return sceneModels.get(0).getServerVpnIp();
+                String hfdyServerVpnConfig = sceneModels.get(0).getServerVpnIp();
+                if (StringUtils.isEmpty(hfdyServerVpnConfig)) {
+                    throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("场景" + currentSceneId + "没有配置serverVpnIp"));
+                } else {
+                    List<HfdyServerVpnConfig> hfdyServerVpnConfigs = JsonCommon.snakeParse(hfdyServerVpnConfig, new TypeReference<List<HfdyServerVpnConfig>>(){} );
+                    return hfdyServerVpnConfigs.stream().collect(Collectors.toMap(HfdyServerVpnConfig::getRangeName, Function.identity(), (a, b) -> a));
+                }
             }
         }
     }
 
     @Override
-    public String getAuthorizationHeader() {
-        return "JWT " + testRangeLoginData.getAuthToken();
+    public String getAuthorizationHeader(String rangeName) {
+        return "JWT " + testRangeLoginData.getAuthToken(rangeName);
     }
 
-    public Map<String, String> getAuthHeaderMap() {
-        String token = getAuthorizationHeader();
+    public Map<String, String> getAuthHeaderMap(String rangeName) {
+        String token = getAuthorizationHeader(rangeName);
         Map<String, String> headers = new HashMap<>();
         headers.put("authorization", token);
         return headers;
@@ -87,21 +99,25 @@ public class TestRangeApiProxy implements SubRangeMonitorInterface {
 
 
     @Override
-    public String getRangeMapCscene(String currentCsceneId) {
+    public Map<String, String> getRangeMapCscene(String currentCsceneId) {
         if (CSCENE_MAP_CACHE.containsKey(currentCsceneId)) {
             return CSCENE_MAP_CACHE.get(currentCsceneId);
         } else {
-            String identity = getIdentity(currentCsceneId);
-            String result = TestRangeClientUtil.get(String.format("%s?vpnServerIp=%s", TestRangeApiUrl.MAP_SCENE_ID, identity), null, getAuthHeaderMap(), 10000)
-                    .getResult();
-            String mapCsceneId = JSONObject.parseObject(result).getString("data");
-            if (StringUtils.isEmpty(mapCsceneId)) {
-                log.warn("当前靶场没有配置mapSceneId，无法获取靶场元素信息");
-                throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("当前靶场没有配置mapSceneId，无法获取靶场元素信息"));
-            } else {
-                CSCENE_MAP_CACHE.put(currentCsceneId, mapCsceneId);
-                return mapCsceneId;
-            }
+            Map<String, HfdyServerVpnConfig> identity = getIdentity(currentCsceneId);
+            Map<String, String> mappingCsceneIdToRange = new HashMap<>();
+            identity.forEach((rangeName, hfdyServerVpnConfig) -> {
+                String result = TestRangeClientUtil.get(rangeName, String.format("%s?vpnServerIp=%s", TestRangeApiUrl.MAP_SCENE_ID, hfdyServerVpnConfig.getIp()), null, getAuthHeaderMap(rangeName), 10000)
+                        .getResult();
+                String mapCsceneId = JSONObject.parseObject(result).getString("data");
+                if (StringUtils.isEmpty(mapCsceneId)) {
+                    log.warn("{}靶场无法查询到启动了ip为{}的hfdy vpn server实例", rangeName, hfdyServerVpnConfig.getIp() );
+                    throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format(rangeName + "分靶场无法获取到对应拓扑实例"));
+                } else {
+                    mappingCsceneIdToRange.put(mapCsceneId, rangeName);
+                }
+            });
+            CSCENE_MAP_CACHE.put(currentCsceneId, mappingCsceneIdToRange);
+            return CSCENE_MAP_CACHE.get(currentCsceneId);
         }
 
     }
@@ -109,67 +125,127 @@ public class TestRangeApiProxy implements SubRangeMonitorInterface {
     @Override
     public List<ElementMonitorBasicInfo> listAllElementBasicInfo(String csceneId, SceneAllElementsQueryRequest request) {
 
-        String mapCsceneId = getRangeMapCscene(csceneId);
-        String result = TestRangeClientUtil.get(String.format(TestRangeApiUrl.BASIC_ELEMENT_MONITOR_INFO, mapCsceneId), request, getAuthHeaderMap(), 10000)
-                .getResult();
-        JSONObject jsonObject = JSONObject.parseObject(result);
-        List<ElementMonitorBasicInfo> elementMonitorBasicInfoList = jsonObject.getJSONArray("data").toJavaList(ElementMonitorBasicInfo.class);
-        return elementMonitorBasicInfoList;
+        Map<String,String> rangeToMappingCsceneId = getRangeMapCscene(csceneId);
+        List<ElementMonitorBasicInfo> elementInfos = new ArrayList<>();
+        rangeToMappingCsceneId.forEach((mapCsceneId, range) -> {
+            String result = TestRangeClientUtil.get(range, String.format(TestRangeApiUrl.BASIC_ELEMENT_MONITOR_INFO, mapCsceneId), request, getAuthHeaderMap(range), 10000)
+                    .getResult();
+            JSONObject jsonObject = JSONObject.parseObject(result);
+            List<ElementMonitorBasicInfo> elementMonitorBasicInfoList = jsonObject.getJSONArray("data").toJavaList(ElementMonitorBasicInfo.class);
+            if (CollectionUtils.isNotEmpty(elementMonitorBasicInfoList)) {
+                Set<String> nodes = elementMonitorBasicInfoList.stream().map(ElementMonitorBasicInfo::getId).collect(Collectors.toSet());
+                csceneIdToNodeIds.put(csceneId, nodes);
+
+                elementInfos.addAll(elementMonitorBasicInfoList);
+            }
+        });
+
+        return elementInfos;
     }
 
     @Override
     public OS getElementOs(BaseSceneElementRequest baseRequest) {
-        String mapCsceneId = getRangeMapCscene(baseRequest.getSceneId());
-        baseRequest.setSceneId(mapCsceneId);
-        String result = TestRangeClientUtil.get(TestRangeApiUrl.ELEMENT_OS, baseRequest, getAuthHeaderMap(), 10000)
-                .getResult();
-        JSONObject jsonObject = JSONObject.parseObject(result);
-        return jsonObject.getObject("data", OS.class);
+        Map<String,String> mappingCsceneIdToRange = getRangeMapCscene(baseRequest.getSceneId());
+
+        for (Map.Entry<String, String> entry : mappingCsceneIdToRange.entrySet()) {
+            String range = entry.getValue();
+            String mapCsceneId = entry.getKey();
+            if (csceneIdToNodeIds.containsKey(mapCsceneId)) {
+                baseRequest.setSceneId(mapCsceneId);
+                String result = TestRangeClientUtil.get(range, TestRangeApiUrl.ELEMENT_OS, baseRequest, getAuthHeaderMap(range), 10000)
+                        .getResult();
+                JSONObject jsonObject = JSONObject.parseObject(result);
+                return jsonObject.getObject("data", OS.class);
+            }
+        }
+        return new OS();
     }
 
     @Override
     public ServiceResult<List<HostState>> getElementHostStateTrend(HostStateTrendRequest hostStateTrendRequest) {
-        String mapCsceneId = getRangeMapCscene(hostStateTrendRequest.getSceneId());
-        hostStateTrendRequest.setSceneId(mapCsceneId);
-        String result = TestRangeClientUtil.get(TestRangeApiUrl.ELEMENT_TREND_STATE, hostStateTrendRequest, getAuthHeaderMap(), 10000).getResult();
-        return JsonCommon.snakeParse(result, new TypeReference<ServiceResult<List<HostState>>>() {
-        });
+        Map<String,String> mappingCsceneIdToRange = getRangeMapCscene(hostStateTrendRequest.getSceneId());
+
+        for (Map.Entry<String, String> entry : mappingCsceneIdToRange.entrySet()) {
+            String range = entry.getValue();
+            String mapCsceneId = entry.getKey();
+            if (csceneIdToNodeIds.containsKey(mapCsceneId)) {
+                hostStateTrendRequest.setSceneId(mapCsceneId);
+                String result = TestRangeClientUtil.get(range, TestRangeApiUrl.ELEMENT_TREND_STATE, hostStateTrendRequest, getAuthHeaderMap(range), 10000).getResult();
+                return JsonCommon.snakeParse(result, new TypeReference<ServiceResult<List<HostState>>>() {
+                });
+            }
+        }
+        return new ServiceResult<>(Collections.emptyList());
     }
 
     @Override
     public ServiceResult<List<HostState>> getElementHostState(BaseSceneElementPageRequest pageRequest) {
-        String mapCsceneId = getRangeMapCscene(pageRequest.getSceneId());
-        pageRequest.setSceneId(mapCsceneId);
-        String result = TestRangeClientUtil.get(TestRangeApiUrl.ELEMENT_STATE, pageRequest, getAuthHeaderMap(), 10000).getResult();
-        return JsonCommon.snakeParse(result, new TypeReference<ServiceResult<List<HostState>>>() {
-        });
+        Map<String,String> mappingCsceneIdToRange = getRangeMapCscene(pageRequest.getSceneId());
+
+        for (Map.Entry<String, String> entry : mappingCsceneIdToRange.entrySet()) {
+            String range = entry.getValue();
+            String mapCsceneId = entry.getKey();
+            if (csceneIdToNodeIds.containsKey(mapCsceneId)) {
+                pageRequest.setSceneId(mapCsceneId);
+                String result = TestRangeClientUtil.get(range, TestRangeApiUrl.ELEMENT_STATE, pageRequest, getAuthHeaderMap(range), 10000).getResult();
+                return JsonCommon.snakeParse(result, new TypeReference<ServiceResult<List<HostState>>>() {
+                });
+            }
+        }
+        return new ServiceResult<>(Collections.emptyList());
     }
 
     @Override
     public ListObjServiceResult<Netiface> pageNetifaces(TimeListPageInfoQueryParams listPageInfoQueryParams) {
-        String mapCsceneId = getRangeMapCscene(listPageInfoQueryParams.getSceneIds().get(0));
-        listPageInfoQueryParams.setSceneIds(List.of(mapCsceneId));
-        String result = TestRangeClientUtil.get(TestRangeApiUrl.ELEMENT_NET_INTERFACE, listPageInfoQueryParams, getAuthHeaderMap(), 10000).getResult();
-        return JsonCommon.snakeParse(result, new TypeReference<ListObjServiceResult<Netiface>>() {
-        });
+        Map<String,String> mappingCsceneIdToRange = getRangeMapCscene(listPageInfoQueryParams.getSceneIds().get(0));
+
+        for (Map.Entry<String, String> entry : mappingCsceneIdToRange.entrySet()) {
+            String range = entry.getValue();
+            String mapCsceneId = entry.getKey();
+            if (csceneIdToNodeIds.containsKey(mapCsceneId)) {
+                listPageInfoQueryParams.setSceneIds(List.of(mapCsceneId));
+                String result = TestRangeClientUtil.get(range, TestRangeApiUrl.ELEMENT_NET_INTERFACE, listPageInfoQueryParams, getAuthHeaderMap(range), 10000).getResult();
+                return JsonCommon.snakeParse(result, new TypeReference<ListObjServiceResult<Netiface>>() {
+                });
+            }
+        }
+        return new ListObjServiceResult<Netiface>(new ListObjResult<>(new ArrayList<Netiface>(), 0));
+
     }
 
     @Override
     public ListObjServiceResult<Port> pagePorts(TimeListPageInfoQueryParams listPageInfoQueryParams) {
-        String mapCsceneId = getRangeMapCscene(listPageInfoQueryParams.getSceneIds().get(0));
-        listPageInfoQueryParams.setSceneIds(List.of(mapCsceneId));
-        String result = TestRangeClientUtil.get(TestRangeApiUrl.ELEMENT_PORT, listPageInfoQueryParams, getAuthHeaderMap(), 10000).getResult();
-        return JsonCommon.snakeParse(result, new TypeReference<ListObjServiceResult<Port>>() {
-        });
+        Map<String,String> mappingCsceneIdToRange = getRangeMapCscene(listPageInfoQueryParams.getSceneIds().get(0));
+
+        for (Map.Entry<String, String> entry : mappingCsceneIdToRange.entrySet()) {
+            String range = entry.getValue();
+            String mapCsceneId = entry.getKey();
+            if (csceneIdToNodeIds.containsKey(mapCsceneId)) {
+                listPageInfoQueryParams.setSceneIds(List.of(mapCsceneId));
+                String result = TestRangeClientUtil.get(range, TestRangeApiUrl.ELEMENT_PORT, listPageInfoQueryParams, getAuthHeaderMap(range), 10000).getResult();
+                return JsonCommon.snakeParse(result, new TypeReference<ListObjServiceResult<Port>>() {
+                });
+            }
+        }
+        return new ListObjServiceResult<Port>(new ListObjResult<>(new ArrayList<Port>(), 0));
+
     }
 
     @Override
     public ListObjServiceResult<Process> pageProcesses(TimeListPageInfoQueryParams listPageInfoQueryParams) {
-        String mapCsceneId = getRangeMapCscene(listPageInfoQueryParams.getSceneIds().get(0));
-        listPageInfoQueryParams.setSceneIds(List.of(mapCsceneId));
-        String result = TestRangeClientUtil.get(TestRangeApiUrl.ELEMENT_PROCESS, listPageInfoQueryParams, getAuthHeaderMap(), 10000).getResult();
-        return JsonCommon.snakeParse(result, new TypeReference<ListObjServiceResult<Process>>() {
-        });
+        Map<String,String> mappingCsceneIdToRange = getRangeMapCscene(listPageInfoQueryParams.getSceneIds().get(0));
+
+        for (Map.Entry<String, String> entry : mappingCsceneIdToRange.entrySet()) {
+            String range = entry.getValue();
+            String mapCsceneId = entry.getKey();
+            if (csceneIdToNodeIds.containsKey(mapCsceneId)) {
+                listPageInfoQueryParams.setSceneIds(List.of(mapCsceneId));
+                String result = TestRangeClientUtil.get(range, TestRangeApiUrl.ELEMENT_PROCESS, listPageInfoQueryParams, getAuthHeaderMap(range), 10000).getResult();
+                return JsonCommon.snakeParse(result, new TypeReference<ListObjServiceResult<Process>>() {
+                });
+            }
+        }
+        return new ListObjServiceResult<Process>(new ListObjResult<>(new ArrayList<Process>(), 0));
     }
 
     @Override
@@ -178,19 +254,21 @@ public class TestRangeApiProxy implements SubRangeMonitorInterface {
          if (CollectionUtils.isEmpty(targetNodeIds)) {
              return new ArrayList<>();
          }
-         Set<String> allTargetNodes = new HashSet<>(queryParams.getTargetNodeIds());
-         Set<String> existElements = elementsExistInCurrentScene(id, allTargetNodes);
-         allTargetNodes.removeAll(existElements);
-         String mapCsceneId = getRangeMapCscene(id);
-         queryParams.setTargetNodeIds(new ArrayList<>(allTargetNodes));
-         queryParams.setId(mapCsceneId);
-         queryParams.setPage(1);
-         queryParams.setPerPage(10000);
+         Map<String, String> mappingCsceneIdToRange = getRangeMapCscene(id);
+         List<FlowAttackDto> finalResult = new ArrayList<>();
+         mappingCsceneIdToRange.forEach((mappingCsceneId, range) -> {
+             queryParams.setId(mappingCsceneId);
+             queryParams.setPage(1);
+             queryParams.setPerPage(10000);
 
-         String result = TestRangeClientUtil.get(TestRangeApiUrl.FLOW_ATTACK_PAGE, queryParams, getAuthHeaderMap(), 10000).getResult();
-         var resultList = JsonCommon.snakeParse(result, new TypeReference<ListObjServiceResult<FlowAttackDto>>() {
+             String result = TestRangeClientUtil.get(range, TestRangeApiUrl.FLOW_ATTACK_PAGE, queryParams, getAuthHeaderMap(range), 10000).getResult();
+             var resultBo = JsonCommon.snakeParse(result, new TypeReference<ListObjServiceResult<FlowAttackDto>>() {
+             });
+             List<FlowAttackDto> resultList = resultBo.getData().getList();
+             finalResult.addAll(resultList);
          });
-         return resultList.getData().getList();
+
+         return finalResult;
     }
 
 
@@ -233,8 +311,7 @@ public class TestRangeApiProxy implements SubRangeMonitorInterface {
     public Set<String> getAllNodeIdsInCurrentCscene(String csceneInstanceId) {
         String sceneInstanceId = csceneInstanceMapper.get(csceneInstanceId).getScene();
         var sceneElements = sceneElementMapper.list(new HumanCondition().select(SceneElementModel::getNodeId)
-                .filterEqual(SceneElementModel::getScene, sceneInstanceId)
-                .filterEqual(SceneElementModel::getCurrentScenePartFlag, 1));
+                .filterEqual(SceneElementModel::getScene, sceneInstanceId));
         return sceneElements.stream().map(SceneElementModel::getNodeId).collect(Collectors.toSet());
     }
 

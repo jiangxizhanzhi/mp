@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.base.util.basic.CollectionUtils;
 import cn.cyberpeace.mp.base.util.basic.IntUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.scene.constant.SceneSingleton;
+import cn.cyberpeace.mp.scene.core.bo.HfdyServerVpnConfig;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
@@ -67,13 +68,6 @@ public class CreateHandler extends HandlerCommon {
     private class HfdyVpnImage {
         public static final String VPN_SERVER = "hfdy-vpn-server";
         public static final String VPN_CLIENT = "hfdy-vpn-client";
-    }
-
-    @Data
-    private static class HfdyServerVpnConfig {
-        private String rangeName;
-        private String ip;
-        private String attackLan;
     }
 
     public static class SceneProcess {

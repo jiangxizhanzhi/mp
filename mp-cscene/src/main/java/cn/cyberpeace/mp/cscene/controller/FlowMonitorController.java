@@ -252,29 +252,26 @@ public class FlowMonitorController {
             queryParams.setPerPage(100);
         }
         queryParams.ensure();
+
         if (CollectionUtils.isEmpty(queryParams.getTargetNodeIds()) || (queryParams.getTargetNodeIds().size() == 1 && queryParams.getTargetNodeIds().get(0).equals("null"))) {
             List<String> allNodes = new ArrayList<>();
-            allNodes.addAll(testRangeApiProxy.getAllNodeIdsInTestRangeByCurrentCsceneIds(id));
             allNodes.addAll(testRangeApiProxy.getAllNodeIdsInCurrentCscene(id));
             queryParams.setTargetNodeIds(allNodes);
-        }
 
-        Set<String> allNodes = new HashSet<>(queryParams.getTargetNodeIds());
-        Set<String> elementsInCurrentScene = testRangeApiProxy.elementsExistInCurrentScene(id, allNodes);
-        if (elementsInCurrentScene.size() == allNodes.size()) {
-            return flowMonitorService.pageFlow(id, queryParams);
+            ListObjServiceResult<FlowAttackDto> result = flowMonitorService.pageFlow(id, queryParams);
+            return result;
         } else {
+
             int originPerPage = queryParams.getPerPage();
             int originPage = queryParams.getPage();
+            var orginTargetNodes = queryParams.getTargetNodeIds();
             var allFlowAttackInTestRange = testRangeApiProxy.pageFlow(id, queryParams);
 
             queryParams.setPerPage(10000);
             queryParams.setPage(1);
-            queryParams.setTargetNodeIds(new ArrayList<>(elementsInCurrentScene));
-            List<FlowAttackDto> flowAttackInCurrentRange = new ArrayList<>();
-            if (CollectionUtils.isNotEmpty(elementsInCurrentScene)) {
-                flowAttackInCurrentRange = flowMonitorService.pageFlow(id, queryParams).getData().getList();
-            }
+            queryParams.setTargetNodeIds(orginTargetNodes);
+            List<FlowAttackDto> flowAttackInCurrentRange = flowMonitorService.pageFlow(id, queryParams).getData().getList();
+
 
             List<FlowAttackDto> allFlowAttack = new ArrayList<>();
             allFlowAttack.addAll(allFlowAttackInTestRange);
@@ -293,10 +290,7 @@ public class FlowMonitorController {
                 log.error(e.getMessage(), e);
                 return new ListObjServiceResult<>(new ListObjResult<>(Collections.emptyList(), sortedFlowAttacks.size()).asResult()).asResult();
             }
-
         }
-
-
     }
 
 

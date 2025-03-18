@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackDto;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.request.hoststate.HostStateTrendRequest;
+import cn.cyberpeace.mp.scene.core.bo.HfdyServerVpnConfig;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.TimeListPageInfoQueryParams;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Netiface;
@@ -18,17 +19,18 @@ import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 子靶场态势监控相关接口
  *
  */
 public interface SubRangeMonitorInterface {
-    String getIdentity(String currentSceneId);
+    Map<String, HfdyServerVpnConfig> getIdentity(String currentSceneId);
 
-    String getAuthorizationHeader();
+    String getAuthorizationHeader(String rangeName);
 
-    String getRangeMapCscene(String identity);
+    Map<String, String> getRangeMapCscene(String identity);
 
     List<ElementMonitorBasicInfo> listAllElementBasicInfo(String rangeMapScene, SceneAllElementsQueryRequest request);
 
