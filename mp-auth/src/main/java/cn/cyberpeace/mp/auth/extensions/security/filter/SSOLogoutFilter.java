@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.auth.extensions.security.filter;
 
 import cn.cyberpeace.mp.auth.bo.sso.SSOLoginOutBO;
 import cn.cyberpeace.mp.auth.constant.SSOSysEnum;
+import cn.cyberpeace.mp.auth.extensions.security.common.JwtCommon;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.SSOService;
 import cn.cyberpeace.mp.auth.service.SSOServiceFactory;
@@ -11,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.Objects;
 
@@ -40,17 +42,26 @@ public class SSOLogoutFilter implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
         throws IOException, ServletException {
-        UserModel loginUser = UserUtils.getLoginUser();
-        SSOSysEnum ssoSysEnum = SSOSysEnum.getSSOSysEnumByCode(loginUser.getOutUserType());
-        if(Objects.isNull(ssoSysEnum)){
-            log.warn("sso log out failed! user type is unknowns");
-            return;
+        if(request instanceof HttpServletRequest && response instanceof HttpServletResponse){
+            HttpServletRequest httpServletRequest = (HttpServletRequest)request;
+            HttpSession session = httpServletRequest.getSession();
+            if (session != null) {
+                session.invalidate();
+            }
+            UserModel loginUser = JwtCommon.verifyToken(httpServletRequest);
+            SSOSysEnum ssoSysEnum = SSOSysEnum.getSSOSysEnumByCode(loginUser.getOutUserType());
+            if(Objects.isNull(ssoSysEnum)){
+                log.warn("sso log out failed! user type is unknowns");
+                return;
+            }
+            SSOService ssoService = ssoServiceFactory.getSSOService(ssoSysEnum);
+            SSOLoginOutBO ssoLoginOutBO =
+                SSOLoginOutBO.builder().ticket(loginUser.getFourATicket()).request(httpServletRequest)
+                    .response((HttpServletResponse)response).build();
+            ssoService.logout(ssoLoginOutBO);
+        }else {
+            throw new ServletException("CASFilter protects only HTTP resources");
         }
-        SSOService ssoService = ssoServiceFactory.getSSOService(ssoSysEnum);
-        SSOLoginOutBO ssoLoginOutBO =
-            SSOLoginOutBO.builder().ticket(loginUser.getFourATicket()).request((HttpServletRequest)request)
-                .response((HttpServletResponse)response).build();
-        ssoService.logout(ssoLoginOutBO);
     }
 
     @Override
