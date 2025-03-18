@@ -125,7 +125,7 @@
                 and i.create_user_name like CONCAT('%',#{createUserName},'%')
             </if>
             <if test="imageResourceType != null">
-                and i.image_resource_type = #{imageResourceType})
+                and i.image_resource_type = #{imageResourceType}
             </if>
 
         </where>

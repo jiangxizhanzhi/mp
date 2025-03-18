@@ -204,6 +204,7 @@ public class ImagesConverter implements BaseConverter{
     @Transactional
     public void update(ImageRequest request) {
         Device device = imagesService.update(request.getUuid(),convertRequest(request));
+        device.setImageResourceType(request.getImageResourceType());
         devopsTargetService.updateById(device);
     }
 
