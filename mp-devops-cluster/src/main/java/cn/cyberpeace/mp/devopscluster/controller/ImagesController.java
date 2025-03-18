@@ -245,6 +245,7 @@ public class ImagesController {
         } else {
             imagesByIdVO.setAllowChangeIso(true);
         }
+        imagesByIdVO.setImageResourceType(model.getImageResourceType());
         return new Result<>(imagesByIdVO);
     }
 

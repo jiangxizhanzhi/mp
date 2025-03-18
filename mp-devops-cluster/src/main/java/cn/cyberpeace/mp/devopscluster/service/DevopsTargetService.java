@@ -234,6 +234,7 @@ public class DevopsTargetService {
             deviceTargetPO.setLanguage(extSystemInfo.getLanguage());
             deviceTargetPO.setSystemArchitecure(extSystemInfo.getSystemArchitecture());
         }
+        deviceTargetPO.setImageResourceType(device.getImageResourceType());
 
         return deviceTargetPO;
     }

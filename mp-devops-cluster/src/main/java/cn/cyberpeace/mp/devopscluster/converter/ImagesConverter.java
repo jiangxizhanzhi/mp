@@ -176,6 +176,8 @@ public class ImagesConverter implements BaseConverter{
      */
     public ImageConvertModel findByUuid(String id) {
         Device device = deviceService.findByUuid(id);
+        DeviceTargetPO deviceTargetPO = deviceTargetMapper.findByUuid(id);
+        device.setImageResourceType(deviceTargetPO.getImageResourceType());
         return wrapperImageConvertModel(device);
     }
 
@@ -458,6 +460,7 @@ public class ImagesConverter implements BaseConverter{
         device.setExtVm(extVm);
         device.setExtDocker(extDocker);
         device.setIsHide(Objects.nonNull(request.getIsHide()) ? request.getIsHide() : Boolean.FALSE );
+        device.setImageResourceType(request.getImageResourceType());
         return device;
     }
 
