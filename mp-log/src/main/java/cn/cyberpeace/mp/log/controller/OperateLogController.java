@@ -75,7 +75,7 @@ public class OperateLogController {
     @GetMapping("/resource_types")
     @ApiOperation(value = "查询镜像靶标资源类型")
     public ServiceResult<List<OptionBO>> getResourceTypes() {
-        return optionService.getIntOptions(LogConstant.MP_COMMON_OPTION_IMAGE_RESOURCE_TYPE);
+        return optionService.getStrOptions(LogConstant.MP_COMMON_OPTION_IMAGE_RESOURCE_TYPE);
     }
 
 }
