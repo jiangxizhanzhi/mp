@@ -494,6 +494,7 @@ public class ImagesConverter implements BaseConverter{
         imageModel.setExtVm(device.getExtVm());
         imageModel.setExtGateway(device.getExtGateway());
         imageModel.setExtDocker(device.getExtDocker());
+        imageModel.setImageResourceType(device.getImageResourceType());
         return imageModel;
     }
 
