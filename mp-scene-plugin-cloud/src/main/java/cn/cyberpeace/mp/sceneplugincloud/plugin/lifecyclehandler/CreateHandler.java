@@ -711,10 +711,43 @@ public class CreateHandler extends HandlerCommon {
             log.info("vpn server cloud init command : " + vpnServerCommand);
 
             Set<String> innerNetworkGatewayIps = getVpnInnerNetworkGatewayIp(currentCloudElement);
-            innerNetworkGatewayIps.forEach(innerNetworkGatewayIp -> {
-                String delInnerGatewayRouteCommand = String.format("ip route del default via %s", innerNetworkGatewayIp);
-                existCommands.add(delInnerGatewayRouteCommand);
-            });
+            if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(innerNetworkGatewayIps)) {
+                // 删除默认路由
+                innerNetworkGatewayIps.forEach(innerNetworkGatewayIp -> {
+                    String delInnerGatewayRouteCommand = String.format("ip route del default via %s", innerNetworkGatewayIp);
+                    existCommands.add(delInnerGatewayRouteCommand);
+                });
+
+
+                String defaultInnerGatewayIp = innerNetworkGatewayIps.iterator().next();
+
+
+                Set<String> asideCidrs = new HashSet<>();
+                Set<String> accessCidrs = currentCloudElement.getAccessNetworks().stream().map(ConnectedNetworkBO::getNetwork)
+                        .map(CloudPluginSceneElementNetworkBO::getCidr)
+                        .filter(cidr -> !StringUtils.isEmpty(cidr)).collect(Collectors.toSet());
+                Set<String> deriveCidrs = currentCloudElement.getDeriveNetworks().stream().map(ConnectedNetworkBO::getNetwork)
+                        .map(CloudPluginSceneElementNetworkBO::getCidr)
+                        .filter(cidr ->!StringUtils.isEmpty(cidr)).collect(Collectors.toSet());
+                asideCidrs.addAll(accessCidrs);
+                asideCidrs.addAll(deriveCidrs);
+                String addRouteToOtherLanTemplate = "ip route add %s via " + defaultInnerGatewayIp;
+
+                getPluginHandler().getElementMap().forEach((nodeId, cloudElement) -> {
+                    if (cloudElement.getExternal()) {
+                        return;
+                    }
+                    cloudElement.getDeriveNetworks().forEach(deriveNetwork -> {
+                        String cidr = deriveNetwork.getNetwork().getCidr();
+                        if (StringUtils.isNotEmpty(cidr)) {
+                            if (!asideCidrs.contains(cidr)) {
+                                existCommands.add(String.format(addRouteToOtherLanTemplate, cidr));
+                            }
+                        }
+                    });
+                });
+            }
+
             existCommands.add(vpnServerCommand);
         } else if (HfdyVpnImage.VPN_CLIENT.equals(currentCloudElement.getImage())) {
             String serverVpnConfig = getPluginHandler().getSceneHandler().getScene().getServerVpnIp();
