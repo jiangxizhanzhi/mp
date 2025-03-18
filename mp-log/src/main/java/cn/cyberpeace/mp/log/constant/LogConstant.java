@@ -30,6 +30,9 @@ public class LogConstant {
 
     public static final String MP_COMMON_OPTION_TYPE_RUNTIME_LOG_TYPE = "runtime_log_type";
 
+
+    public static final String MP_COMMON_OPTION_IMAGE_RESOURCE_TYPE = "image_resource_type";
+
     /**
      * 日志存到es
      */

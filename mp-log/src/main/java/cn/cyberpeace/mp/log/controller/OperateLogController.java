@@ -72,4 +72,10 @@ public class OperateLogController {
         return optionService.getIntOptions(LogConstant.MP_COMMON_OPTION_TYPE_LOG_OP_TYPE);
     }
 
+    @GetMapping("/resource_types")
+    @ApiOperation(value = "查询审计日志操作类型")
+    public ServiceResult<List<OptionBO>> getResourceTypes() {
+        return optionService.getIntOptions(LogConstant.MP_COMMON_OPTION_IMAGE_RESOURCE_TYPE);
+    }
+
 }
