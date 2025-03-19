@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.flow.controller;
 
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.flow.constant.ControllerConstant;
 import cn.cyberpeace.mp.flow.request.CsceneInstanceAddFlowTaskRequest;
@@ -35,6 +36,7 @@ public class FlowCsceneInstanceController {
     @ApiOperation("新增场景实例中的流量任务")
     @PostMapping("/task/add")
     public ListObjServiceResult<CsceneInstanceFlowTaskResponse> add(@RequestBody CsceneInstanceAddFlowTaskRequest request) {
+        log.info("新增场景实例中的流量任务参数: {} ", JsonCommon.stringify(request));
         return flowCsceneInstanceService.add(request).asResult();
     }
 }

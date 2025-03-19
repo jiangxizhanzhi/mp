@@ -81,6 +81,7 @@ public class FlowCsceneInstanceService {
 
     public ListObjServiceResult<CsceneInstanceFlowTaskResponse> add(@RequestBody CsceneInstanceAddFlowTaskRequest request) {
         var flowActuator = flowActuatorMapper.first(new HumanCondition().filterEqual(FlowActuatorModel::getCsceneInstanceId, request.getId()));
+        log.info("查询到的执行器信息: {} ", JsonCommon.stringify(flowActuator));
         String actuatorId = flowActuator.getId();
         log.info("开始处理执行器，在数据库中添加流量任务 {} ", flowActuator.getId());
 
