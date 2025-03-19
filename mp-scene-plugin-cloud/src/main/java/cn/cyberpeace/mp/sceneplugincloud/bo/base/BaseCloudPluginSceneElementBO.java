@@ -113,6 +113,9 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     private List<VirtualUsb> virtualUsbs;
     @ApiModelProperty(value = "实体usb列表")
     private List<EntityUsb> entityUsbs;
+
+    @ApiModelProperty(value = "vlan信息列表")
+    private List<VlanInfo> vlanInfos;
     @ApiModelProperty(value = "docker参数")
     private DockerParams dockerParams;
 
