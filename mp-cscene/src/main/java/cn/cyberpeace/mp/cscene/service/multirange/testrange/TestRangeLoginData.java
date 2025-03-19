@@ -42,7 +42,7 @@ public class TestRangeLoginData {
         AuthToken authToken = rangeToAuthTokenMap.get(rangeName);
         if (Objects.nonNull(authToken) && Objects.nonNull(authToken.getToken()) && Objects.nonNull(authToken.getAuthDataTime())
                 && authToken.getAuthDataTime().isAfter(LocalDateTime.now().minusMinutes(10))) {
-            if (tokenIsValid(authToken.getToken())) {
+            if (tokenIsValid(authToken.getToken(), rangeName)) {
                 authToken.setAuthDataTime(LocalDateTime.now());
                 return authToken.getToken();
             } else {
@@ -70,11 +70,11 @@ public class TestRangeLoginData {
         }
     }
 
-    private boolean tokenIsValid(String token) {
+    private boolean tokenIsValid(String token, String rangeName) {
         Map<String, String> headers = new HashMap<>();
         headers.put("authorization", "JWT " + token);
         try {
-            HttpResult httpResult = TestRangeClientUtil.get(TestRangeApiUrl.AUTH_HEALTH_CHECK, null, headers, 10000);
+            HttpResult httpResult = TestRangeClientUtil.get(rangeName, TestRangeApiUrl.AUTH_HEALTH_CHECK, null, headers, 10000);
             if (httpResult.isSuccess()) {
                 return true;
             } else {
