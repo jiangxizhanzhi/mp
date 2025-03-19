@@ -59,6 +59,8 @@ public class TestRangeApiProxy implements SubRangeMonitorInterface {
     private RangeMapper rangeMapper;
 
     private static final Map<String, Map<String, String>> CSCENE_MAP_CACHE = new ConcurrentHashMap<>();
+
+    private static final Map<String, Integer> csceneCollectedNodeSizeMap = new ConcurrentHashMap<>();
     private static final Map<String, Set<String>> csceneIdToNodeIds = new ConcurrentHashMap<>();
 
     @Override

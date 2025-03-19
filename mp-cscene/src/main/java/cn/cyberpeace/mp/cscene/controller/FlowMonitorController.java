@@ -10,6 +10,9 @@ import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
+import cn.cyberpeace.mp.cscene.controller.request.SceneAllElementsQueryRequest;
+import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
+import cn.cyberpeace.mp.cscene.dto.element.ElementPort;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowAnalysisSummary;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackConfigInfo;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackDto;
@@ -30,9 +33,12 @@ import cn.cyberpeace.mp.cscene.request.flow.FlowTrendRequest;
 import cn.cyberpeace.mp.cscene.response.AssetsStatisticsResponse;
 import cn.cyberpeace.mp.cscene.service.CsceneCommonService;
 import cn.cyberpeace.mp.cscene.service.FlowMonitorService;
+import cn.cyberpeace.mp.cscene.service.SceneMonitorService;
 import cn.cyberpeace.mp.cscene.service.multirange.testrange.TestRangeApiProxy;
 import cn.cyberpeace.mp.cscene.vo.FlowGroupByDestinationIpAndSeverityVO;
 import cn.cyberpeace.mp.cscene.vo.FlowGroupPortWithProtocolVO;
+import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
+import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CategoryGroupBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.SceneAssetsBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.SceneConfigAssetBO;
@@ -79,6 +85,9 @@ public class FlowMonitorController {
     private FlowClassificationsService flowClassificationsService;
     @Autowired
     private TestRangeApiProxy testRangeApiProxy;
+
+    @Autowired
+    private SceneMonitorService sceneMonitorService;
 
     @ApiOperation(value = "模拟流量")
     @GetMapping("/simulation")
@@ -261,22 +270,24 @@ public class FlowMonitorController {
             ListObjServiceResult<FlowAttackDto> result = flowMonitorService.pageFlow(id, queryParams);
             return result;
         } else {
-
+            //查所有，然后按照ip过滤
+            var orginTargetNodes = queryParams.getTargetNodeIds();
             int originPerPage = queryParams.getPerPage();
             int originPage = queryParams.getPage();
-            var orginTargetNodes = queryParams.getTargetNodeIds();
-            var allFlowAttackInTestRange = testRangeApiProxy.pageFlow(id, queryParams);
 
             queryParams.setPerPage(10000);
             queryParams.setPage(1);
-            queryParams.setTargetNodeIds(orginTargetNodes);
+            List<String> allNodes = new ArrayList<>();
+            allNodes.addAll(testRangeApiProxy.getAllNodeIdsInCurrentCscene(id));
+            queryParams.setTargetNodeIds(allNodes);
             List<FlowAttackDto> flowAttackInCurrentRange = flowMonitorService.pageFlow(id, queryParams).getData().getList();
-
-
             List<FlowAttackDto> allFlowAttack = new ArrayList<>();
-            allFlowAttack.addAll(allFlowAttackInTestRange);
             allFlowAttack.addAll(flowAttackInCurrentRange);
-            List<FlowAttackDto> sortedFlowAttacks = allFlowAttack.stream()
+
+            Set<String> validIps = getIpsByNodes(id, orginTargetNodes);
+
+
+            List<FlowAttackDto> sortedFlowAttacks = allFlowAttack.stream().filter(flowAttack -> validIps.contains(flowAttack.getTargetIp()))
                     .sorted((o1, o2) -> (int) (o2.getTimestamp() - o1.getTimestamp())).collect(Collectors.toList());
             int startIncludeIndex = (originPage - 1) * originPerPage;
             int endExcludeIndex = originPage * originPerPage;
@@ -291,6 +302,61 @@ public class FlowMonitorController {
                 return new ListObjServiceResult<>(new ListObjResult<>(Collections.emptyList(), sortedFlowAttacks.size()).asResult()).asResult();
             }
         }
+    }
+
+    private Set<String> getIpsByNodes(String csceneId, List<String> nodes) {
+        Map<String, Set<String>> nodeToIpsMap = getNodeIps(csceneId);
+        Set<String> ips = new HashSet<>();
+        for (String node : nodes) {
+            Set<String> ipsByNode = nodeToIpsMap.get(node);
+            if (CollectionUtils.isNotEmpty(ipsByNode)) {
+                ips.addAll(ipsByNode);
+            }
+        }
+        return ips;
+
+    }
+
+    private Map<String, Set<String>> getNodeIps(String csceneId) {
+        var request = new SceneAllElementsQueryRequest();
+        List<ElementMonitorBasicInfo> basicInfoList = sceneMonitorService.getAllSceneElements(csceneId, true, request);
+        if (Boolean.TRUE.equals(request.getIncludeDeleting())) {
+            return Collections.emptyMap();
+        }
+        List<ElementMonitorBasicInfo> result = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(basicInfoList)) {
+            for (var e : basicInfoList) {
+                if (e.getEvent() != null) {
+                    if (e.getEvent() != SceneElementModel.Event.DELETE) {
+                        result.add(e);
+                    } else if (e.getEvent() == SceneElementModel.Event.DELETE && e.getEventStatus() == EventStatus.OVER) {
+                        result.add(e);
+                    }
+                } else {
+                    result.add(e);
+                }
+            }
+        }
+
+        try {
+            var testRangeResult = testRangeApiProxy.listAllElementBasicInfo(csceneId, request);
+            result.addAll(testRangeResult);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+
+        Map<String, Set<String>> nodesToIpsMap = new HashMap<>();
+        for (ElementMonitorBasicInfo elementMonitorBasicInfo : result) {
+            String nodeId = elementMonitorBasicInfo.getId();
+            var ports = elementMonitorBasicInfo.getPorts();
+            if (CollectionUtils.isEmpty(ports)) {
+                nodesToIpsMap.put(nodeId, Collections.emptySet());
+            } else {
+                nodesToIpsMap.put(nodeId, ports.stream().map(ElementPort::getIp).collect(Collectors.toSet()));
+            }
+        }
+        return nodesToIpsMap;
+
     }
 
 
