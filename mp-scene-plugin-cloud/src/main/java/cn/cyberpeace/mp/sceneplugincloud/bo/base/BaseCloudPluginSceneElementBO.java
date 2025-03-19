@@ -232,6 +232,7 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getAuxiliaryNetworkDnsNameservers),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getVirtualUsbs),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getEntityUsbs),
+                BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getVlanInfos),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getDockerParams),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getAuxiliaryNetworkAllocationPools),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getSnmpConfig),
@@ -261,6 +262,8 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
                 : JsonCommon.parse(obj.getVirtualUsbs(), new TypeReference<List<VirtualUsb>>() {});
         entityUsbs = StringUtils.isEmpty(obj.getEntityUsbs()) ? new ArrayList<>()
                 : JsonCommon.parse(obj.getEntityUsbs(), new TypeReference<List<EntityUsb>>() {});
+        vlanInfos = StringUtils.isEmpty(obj.getVlanInfos()) ? new ArrayList<>()
+            : JsonCommon.parse(obj.getVlanInfos(), new TypeReference<List<VlanInfo>>() {});
         dockerParams = StringUtils.isEmpty(obj.getDockerParams()) ? new DockerParams()
                 : JsonCommon.parse(obj.getDockerParams(), new TypeReference<DockerParams>() {});
         snmpConfig = StringUtils.isEmpty(obj.getSnmpConfig()) ? new SnmpConfig()
@@ -281,6 +284,7 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getAuxiliaryNetworkDnsNameservers),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getVirtualUsbs),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getEntityUsbs),
+                BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getVlanInfos),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getAuxiliaryNetworkAllocationPools),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getSnmpConfig),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getMibData)
@@ -320,6 +324,9 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
         }
         if (entityUsbs != null) {
             obj.setEntityUsbs(JsonCommon.stringify(entityUsbs));
+        }
+        if (vlanInfos != null) {
+            obj.setVlanInfos(JsonCommon.stringify(vlanInfos));
         }
         if(dockerParams != null){
             obj.setDockerParams(JsonCommon.stringify(dockerParams));
