@@ -134,7 +134,7 @@ public class TestRangeApiProxy implements SubRangeMonitorInterface {
             List<ElementMonitorBasicInfo> elementMonitorBasicInfoList = jsonObject.getJSONArray("data").toJavaList(ElementMonitorBasicInfo.class);
             if (CollectionUtils.isNotEmpty(elementMonitorBasicInfoList)) {
                 Set<String> nodes = elementMonitorBasicInfoList.stream().map(ElementMonitorBasicInfo::getId).collect(Collectors.toSet());
-                csceneIdToNodeIds.put(csceneId, nodes);
+                csceneIdToNodeIds.put(mapCsceneId, nodes);
 
                 elementInfos.addAll(elementMonitorBasicInfoList);
             }

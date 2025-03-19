@@ -104,9 +104,10 @@ public class ElementMonitorController {
         //分靶场节点，需要查分靶场
         OS os = null;
         if (testRangeApiProxy.elementExistInCurrentScene(baseRequest)) {
-            os = testRangeApiProxy.getElementOs(baseRequest);
-        } else {
             os = sceneElementMonitorService.getOSInfo(baseRequest);
+        } else {
+            os = testRangeApiProxy.getElementOs(baseRequest);
+
         }
         return ResultCommon.success(os);
     }
