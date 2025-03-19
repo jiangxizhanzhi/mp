@@ -125,10 +125,11 @@ public class CsceneController implements BaseModelListControllerBase {
     }
 
     @Autowired
-    public CsceneController(CsceneService csceneService, CsceneSpecialService csceneSpecialService, BaseAppConfig baseAppConfig) {
+    public CsceneController(CsceneService csceneService, CsceneSpecialService csceneSpecialService, BaseAppConfig baseAppConfig, RangeMapper rangeMapper) {
         setModelService(csceneService);
         setCsceneSpecialService(csceneSpecialService);
         this.baseAppConfig = baseAppConfig;
+        this.rangeMapper = rangeMapper;
     }
 
     @ApiOperation("新增更新靶场信息")
