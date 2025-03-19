@@ -184,7 +184,7 @@ public class AddTaskByRemoteFlowService2 implements IAddTaskService {
         return false;
     }
 
-    private void handleOneTask(FlowActuatorModel flowActuator, String targetIp, String networkId, List<FlowTaskTaskModel> flowTaskTaskModelList, List<RemoteFlowInfo> remoteFlowInfos) {
+    public void handleOneTask(FlowActuatorModel flowActuator, String targetIp, String networkId, List<FlowTaskTaskModel> flowTaskTaskModelList, List<RemoteFlowInfo> remoteFlowInfos) {
 
         // 获取trex虚拟机上和目标网络相连的端口信息 如果没有则会自动创建一个
         log.info("创建和目标网络相连的网口");
