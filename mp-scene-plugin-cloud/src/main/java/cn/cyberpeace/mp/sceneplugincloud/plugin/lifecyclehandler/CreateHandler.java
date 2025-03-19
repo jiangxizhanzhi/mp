@@ -57,9 +57,9 @@ public class CreateHandler extends HandlerCommon {
 
     private final Map<String, BaseNpcData.NetWorkNpcInfo> network2Info = new ConcurrentHashMap<>();
 
-    private final String[] CLIENT_LANS = {"192.168.1.0", "192.168.2.0", "192.168.3.0", "192.168.4.0", "192.168.5.0",
-            "192.168.6.0", "192.168.7.0", "192.168.8.0", "192.168.9.0", "192.168.10.0", "192.168.11.0", "192.168.12.0", "192.168.13.0",
-            "192.168.14.0", "192.168.15.0", "192.168.16.0"};
+    private final String[] CLIENT_LANS = {"10.10.0.0", "10.10.1.0", "10.10.2.0", "10.10.3.0", "10.10.4.0",
+            "10.10.5.0", "10.10.6.0", "10.10.7.0", "10.10.8.0", "10.10.9.0", "10.10.10.0", "10.10.11.0", "10.10.12.0",
+            "10.10.13.0", "10.10.14.0", "10.10.15.0"};
 
     private class HfdyVpnImage {
         public static final String VPN_SERVER = "hfdy-vpn-server";

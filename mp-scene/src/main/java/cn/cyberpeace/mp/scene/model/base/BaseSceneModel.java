@@ -19,7 +19,7 @@ public class BaseSceneModel extends BaseModel {
     private String displayContext;
     @DefaultBool
     private Boolean deleted;
-    @DefaultStr("192.168.1.0/24")
+    @DefaultStr("10.10.0.0/24")
     private String clientLan;
     @DefaultStr
     private String serverVpnIp;
