@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
@@ -56,12 +57,11 @@ public class SSOController {
 
     @ApiOperation(value = "登出跳转", notes = "登出跳转(需要token)")
     @GetMapping("/logout/redirect")
-    public ServiceResult<Boolean> logoutRedirect(HttpServletRequest request, HttpServletResponse response){
-        // 查询当前人员
-        UserModel loginUser = UserUtils.getLoginUser();
-        log.info("logoutRedirect loginUser: {}", JSON.toJSONString(loginUser));
-        if (loginUser.getAccountId() != null && loginUser.getOutUserType() != null) {
-            if (loginUser.getOutUserType().equals(SSOSysEnum.FOUR_A.getCode())) {
+    public ServiceResult<Boolean> logoutRedirect(@RequestParam(value = "out_user_type") String outUserType,@RequestParam(value = "account_id") String accountId, HttpServletRequest request, HttpServletResponse response){
+        // 当前登录人员的平台类型
+        log.info("local user type:" + outUserType + "; local user accountId:" + accountId);
+        if (accountId != null && outUserType != null) {
+            if (outUserType.equals(SSOSysEnum.FOUR_A.getCode())) {
                 // 4a平台用户登出
                 SSOLoginOutBO ssoLoginOutBO = SSOLoginOutBO.builder()
                         .ticket(UserUtils.getLoginUser().getFourATicket())
@@ -75,7 +75,7 @@ public class SSOController {
                     throw new MpRuntimeException(e.getMessage());
                 }
                 return ResultCommon.success(Boolean.TRUE).asResult();
-            } else if(loginUser.getOutUserType().equals(SSOSysEnum.SOC.getCode())) {
+            } else if(outUserType.equals(SSOSysEnum.SOC.getCode())) {
                 return ResultCommon.success(Boolean.TRUE).asResult();
             }
         }
