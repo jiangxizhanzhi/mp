@@ -12,8 +12,9 @@ import cn.cyberpeace.mp.auth.service.SSOServiceFactory;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
-import cn.cyberpeace.mp.base.service.result.ObjResult;
-import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import com.alibaba.fastjson.JSON;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -55,7 +56,7 @@ public class SSOController {
 
     @ApiOperation(value = "登出跳转", notes = "登出跳转(需要token)")
     @GetMapping("/logout/redirect")
-    public void logoutRedirect(HttpServletRequest request, HttpServletResponse response){
+    public ServiceResult<Boolean> logoutRedirect(HttpServletRequest request, HttpServletResponse response){
         // 查询当前人员
         UserModel loginUser = UserUtils.getLoginUser();
         log.info("logoutRedirect loginUser: {}", JSON.toJSONString(loginUser));
@@ -68,11 +69,17 @@ public class SSOController {
                         .response(response)
                         .build();
                 SSOService ssoService = ssoServiceFactory.getSSOService(SSOSysEnum.FOUR_A);
-                ssoService.logout(ssoLoginOutBO);
-            } else {
-
+                try {
+                    ssoService.logout(ssoLoginOutBO);
+                } catch (Exception e) {
+                    throw new MpRuntimeException(e.getMessage());
+                }
+                return ResultCommon.success(Boolean.TRUE).asResult();
+            } else if(loginUser.getOutUserType().equals(SSOSysEnum.SOC.getCode())) {
+                return ResultCommon.success(Boolean.TRUE).asResult();
             }
         }
+        return ResultCommon.success(Boolean.FALSE).asResult();
     }
 
     /**
