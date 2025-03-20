@@ -16,7 +16,8 @@ import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
-import cn.cyberpeace.mp.behavior.bo.NetworkBehaviorBo;
+ import cn.cyberpeace.mp.base.util.mptool.CollectionUtil;
+ import cn.cyberpeace.mp.behavior.bo.NetworkBehaviorBo;
 import cn.cyberpeace.mp.behavior.bo.NodeNetworkBehavior;
 import cn.cyberpeace.mp.behavior.bo.NodeUserBehavior;
 import cn.cyberpeace.mp.behavior.bo.Param;
@@ -169,10 +170,13 @@ public class UserBehaviorService {
 			List<NetworkBehaviorBo> networkBehaviorBos = JSONObject.parseArray(model.getBehaviors(), NetworkBehaviorBo.class);
 			networkBehaviorIds.addAll(networkBehaviorBos.stream().map(NetworkBehaviorBo::getNetworkBehaviorId).collect(Collectors.toSet()));
 		}
-		HumanCondition networkHumanCondition = new HumanCondition().filterIn(NetworkBehaviorModel::getId, networkBehaviorIds.toArray());
-		List<NetworkBehaviorModel> networkBehaviorModelList = networkBehaviorMapper.list(networkHumanCondition);
-		Map<String, NetworkBehaviorModel> networkBehaviorModelMap = networkBehaviorModelList.stream()
-																							.collect(Collectors.toMap(NetworkBehaviorModel::getId, m -> m));
+		Map<String, NetworkBehaviorModel> networkBehaviorModelMap = new HashMap<>();
+		if (CollectionUtil.isNotEmpty(networkBehaviorIds)) {
+			HumanCondition networkHumanCondition = new HumanCondition().filterIn(NetworkBehaviorModel::getId, networkBehaviorIds.toArray());
+			List<NetworkBehaviorModel> networkBehaviorModelList = networkBehaviorMapper.list(networkHumanCondition);
+			networkBehaviorModelMap = networkBehaviorModelList.stream()
+															  .collect(Collectors.toMap(NetworkBehaviorModel::getId, m -> m));
+		}
 		List<NodeUserBehavior> nodeUserBehaviors = new ArrayList<>();
 		for (UserBehaviorModel model : modelList) {
 			NodeUserBehavior nodeUserBehavior = new NodeUserBehavior();
