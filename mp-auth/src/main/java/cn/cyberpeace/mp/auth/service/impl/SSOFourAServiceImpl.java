@@ -28,6 +28,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 /**
  * @BelongsPackage: cn.cyberpeace.mp.auth.service.impl
@@ -104,6 +105,10 @@ public class SSOFourAServiceImpl extends AbstractSSOService {
         }
         //应用资源根据帐号信息做登录后业务处理
         try {
+//            // 测试
+//            userInfo.setRetCode(ResultCode.RESULT_OK);
+//            userInfo.setName(UUID.randomUUID().toString());
+//            userInfo.setAccountID(ssoLoginBO.getTicket());
             UserModel userModel = createOrUpdateFourAUser(ssoLoginBO, userInfo);
             successLoginRedirect(userModel, response);
         } catch (Exception e) {
@@ -127,16 +132,16 @@ public class SSOFourAServiceImpl extends AbstractSSOService {
             //创建用户(待修改信息)
             addRequest.setUsername(userInfo.getName());
             addRequest.setName(userInfo.getName());
-            addRequest.setAccountId(userInfo.getAccountID());
             addRequest.setIdCard(userInfo.getIdCardNum());
             addRequest.setNickname(userInfo.getPhone());
             addRequest.setMobile(userInfo.getMobile());
             addRequest.setEmail(userInfo.getEmail());
+            addRequest.setPassword(AuthConstant.DEFAULT_INITIALPASSWORD);// 该密码为前端加密过后的密码,原始密码为Xctfoj01
             // 登录凭证ticket
             addRequest.setFourATicket(ssoLoginBO.getTicket());
             if (users == null || users.size() == 0) {// 目前无该用户
+                addRequest.setAccountId(userInfo.getAccountID());
                 addRequest.setOutUserType(SSOSysEnum.FOUR_A.getCode());
-                addRequest.setPassword(AuthConstant.DEFAULT_INITIALPASSWORD);// 该密码为前端加密过后的密码,原始密码为Xctfoj01
                 // 预设学员角色和默认组织
                 addRequest.setOrgIds(Collections.singletonList(AuthConstant.ROOT_ORG_ID));
                 addRequest.setRoleIds(Collections.singletonList(AuthConstant.ROLE_XUEYUAN_ID));// 以实际环境的学员角色id为准
@@ -144,6 +149,7 @@ public class SSOFourAServiceImpl extends AbstractSSOService {
             } else if (users.size() == 1) {// 查找到唯一用户
                 // 修改用户,目前无需修改其他信息
                 user = userService.get(users.get(0).getId()).sourceObj();
+                addRequest.setId(user.getId());
                 user = userService.modify(addRequest);
             } else {
                 throw new MpRuntimeException(AuthErrorCode.FOUR_A_USER_SELECT_ERROR);//用户查询错误
