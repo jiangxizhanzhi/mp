@@ -35,4 +35,6 @@ public class BaseCloudPluginSceneModel extends BasePluginSceneModel {
     private String flowMirrorIp;
     @DefaultStr
     private String flowMirrorId;
+    @DefaultStr
+    private String flowMirrors ;
 }

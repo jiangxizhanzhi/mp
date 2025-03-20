@@ -40,6 +40,7 @@ package cn.cyberpeace.mp.cscene.controller;
  import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
  import cn.cyberpeace.mp.cscene.bo.ElementModifyBO;
  import cn.cyberpeace.mp.cscene.bo.SceneAreaTreeBO;
+ import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
  import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
  import cn.cyberpeace.mp.cscene.constant.CsceneConstant;
  import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
@@ -96,6 +97,7 @@ package cn.cyberpeace.mp.cscene.controller;
  import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
  import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
  import cn.cyberpeace.mp.sceneplugincloud.bo.CloudElementAccessMode;
+ import cn.cyberpeace.mp.sceneplugincloud.bo.FlowMirrorIpsBO;
  import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
  import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
  import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
@@ -2007,6 +2009,18 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         handler.save();
 
         return new ServiceResult<>(new SendStrategyResult()).asResult();
+    }
+
+    @ApiOperation("查询可以做流量镜像的ip地址")
+    @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = CsceneStrategyRequest.class)
+    @GetMapping("/get_flow_mirror_ips")
+    public ServiceResult<FlowMirrorIpsBO> getFlowMirrorIps() {
+        CsceneAppConfig config = BeanCommon.getBean(CsceneAppConfig.class);
+        var ipsStr = config.getFlowMirrorIps();
+        if (StringUtils.isEmpty(ipsStr)) {
+            return new ServiceResult<>(new FlowMirrorIpsBO(new String[]{})).asResult();
+        }
+        return new ServiceResult<>(new FlowMirrorIpsBO(ipsStr.split(","))).asResult();
     }
 
     @Getter

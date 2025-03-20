@@ -23,6 +23,7 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.base.VirtualUsb;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConfigNetworkModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConnectionModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.model.CollectionPluginSceneOptionKeyModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.*;
@@ -33,6 +34,7 @@ import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConfigNetwor
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConnectionMapper;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementLogicalSwitchMapper;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementMapper;
+import cn.cyberpeace.mp.sceneplugincloud.repository.CollectionPluginSceneOptionKeyMapper;
 import cn.cyberpeace.mp.sceneplugincloud.util.ConfigNetworkUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.SceneInstanceLinkCacheUtil;
@@ -392,6 +394,9 @@ public class DeleteHandler extends HandlerCommon {
      */
     public void delete() {
         prepareEventProcess();
+        // 删除流量镜像
+        this.deleteFlowMirrors();
+
         // 优先删除实体设备
         List<CloudPluginSceneElementBO> entities = new ArrayList<>();
         getPluginHandler().getElementMap().values().forEach(e -> {
@@ -528,6 +533,25 @@ public class DeleteHandler extends HandlerCommon {
             VirtualMachineDeleteData deleteData = new VirtualMachineDeleteData();
             deleteData.setVms(List.of(getPluginHandler().getScene().getStrategyInstance()));
             vmClient.delete(deleteData);
+        }
+    }
+
+    private void deleteFlowMirrors() {
+        if (getPluginHandler().getScene().getFlowMirrors() != null) {
+            Mirror mirror = new Mirror();
+            for (var flowMirror : getPluginHandler().getScene().getFlowMirrors()) {
+                mirror.delete(flowMirror.getMirrorId());
+            }
+            CollectionPluginSceneOptionKeyMapper optionKeyMapper = BeanCommon.getBean(CollectionPluginSceneOptionKeyMapper.class);
+            var cond = new HumanCondition()
+                    .filterEqual(CollectionPluginSceneOptionKeyModel::getScene, getPluginHandler().getScene());
+            List<CollectionPluginSceneOptionKeyModel> optionKeyModels = optionKeyMapper.list(cond);
+            if (CollectionUtils.isEmpty(optionKeyModels)) {
+                return;
+            }
+            optionKeyMapper.bulkDelete(optionKeyModels.stream()
+                                               .map(CollectionPluginSceneOptionKeyModel::getId)
+                                               .toArray(String[]::new));
         }
     }
 

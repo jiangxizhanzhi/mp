@@ -108,6 +108,8 @@ public class CsceneAppConfig {
     @Value("${mp.cscene.default-container-disk-count:10}")
     private int defaultContainerDiskCount;
 
+    @Value("${mp.cscene.flow-mirror-ips}")
+    private String flowMirrorIps;
 
     @Autowired
     private MessageSource messageSource;

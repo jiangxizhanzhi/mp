@@ -51,6 +51,8 @@ public abstract class BaseCloudPluginSceneBO<M extends BaseCloudPluginSceneModel
     private String flowMirrorIp;
     @ApiModelProperty(value = "流量镜像的id")
     private String flowMirrorId;
+    @ApiModelProperty(value = "节点流量镜像的配置")
+    private List<FlowMirrorBO> flowMirrors;
 
     /**
      * fromModel
@@ -68,6 +70,9 @@ public abstract class BaseCloudPluginSceneBO<M extends BaseCloudPluginSceneModel
         dnsNameservers = StringUtils.isEmpty(obj.getDnsNameservers()) ? new ArrayList<>()
                 : JsonCommon.parse(obj.getDnsNameservers(), new TypeReference<List<DnsPool>>() {
         });
+        flowMirrors = StringUtils.isEmpty(obj.getFlowMirrors()) ? new ArrayList<>()
+                : JsonCommon.parse(obj.getFlowMirrors(), new TypeReference<List<FlowMirrorBO>>() {
+        });
     }
 
     /**
@@ -83,6 +88,9 @@ public abstract class BaseCloudPluginSceneBO<M extends BaseCloudPluginSceneModel
         ));
         if (dnsNameservers != null) {
             obj.setDnsNameservers(JsonCommon.stringify(dnsNameservers));
+        }
+        if (flowMirrors != null) {
+            obj.setFlowMirrors(JsonCommon.stringify(flowMirrors));
         }
         return obj;
     }

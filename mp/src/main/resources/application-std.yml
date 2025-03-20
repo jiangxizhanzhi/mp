@@ -327,6 +327,7 @@ mp:
     default-container-disk-count: ${mp.cscene.ext-var.default-container-disk-count}
     cp-ip: ${mp.common.ext-var.cp-ip}
     cp-port: ${mp.common.ext-var.cp-port}
+    flow-mirror-ips: ${mp.cscene.ext-var.flow-mirror-ips}
   scene:
     scene-pool-size: ${mp.scene.ext-var.scene-pool-size}
     scene-hold-size: ${mp.scene.ext-var.scene-hold-size}

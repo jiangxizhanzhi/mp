@@ -32,7 +32,6 @@ import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.core.event.base.SceneEventProcess;
 import cn.cyberpeace.mp.scene.model.SceneBusinessElementCommandModel;
-import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.repository.SceneBusinessElementCommandMapper;
 import cn.cyberpeace.mp.scene.util.*;
@@ -42,6 +41,7 @@ import cn.cyberpeace.mp.sceneplugincloud.config.CloudAppConfig;
 import cn.cyberpeace.mp.sceneplugincloud.constant.*;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConfigNetworkModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementLogicalSwitchModel;
+import cn.cyberpeace.mp.sceneplugincloud.model.CollectionPluginSceneOptionKeyModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CsceneElementSoftVersionModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
@@ -53,6 +53,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.common.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.CreateTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConfigNetworkMapper;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementLogicalSwitchMapper;
+import cn.cyberpeace.mp.sceneplugincloud.repository.CollectionPluginSceneOptionKeyMapper;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CsceneElementSoftVersionMapper;
 import cn.cyberpeace.mp.sceneplugincloud.util.ConfigNetworkUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
@@ -1961,7 +1962,89 @@ public class CreateHandler extends HandlerCommon {
 
         // 批量创建实体设备
         createEntityElementProcess();
+
+        // 创建流量镜像
+        this.createFlowMirrors();
     }
+
+    private void createFlowMirrors(){
+        if (getPluginHandler().getScene().getFlowMirrors() != null) {
+            for (var flowMirror : getPluginHandler().getScene().getFlowMirrors()) {
+                var sources = flowMirror.getSources();
+                if (StringUtils.isNotEmpty(flowMirror.getTargetIp())) {
+                    this.flowMirrorToIp(flowMirror,sources, flowMirror.getTargetIp());
+                } else {
+                    this.flowMirrorToNode(flowMirror,sources, flowMirror.getTarget());
+                }
+            }
+        }
+    }
+
+    private void flowMirrorToNode(FlowMirrorBO flowMirror , List<FlowMirrorBO.Source> sources, FlowMirrorBO.Target target){
+        CreateMirrorData createData = new CreateMirrorData();
+
+        // 目标节点参数
+        CreateMirrorData.Param param = new CreateMirrorData.Param();
+        var targetNode = getPluginHandler().getElement(target.getNodeId());
+        var targetPort = getPluginHandler().getPort(target.getPortId());
+        CreateMirrorData.Param destParam = new CreateMirrorData.Param();
+        destParam.setId(targetNode.getResourceId());
+        destParam.setDesId(targetPort.getVnicId());
+        if (BaseCloudPluginSceneElementModel.ImageType.VM.equals(targetNode.getImageType())) {
+            param.setType(CreateMirrorData.Type.VM);
+        } else {
+            param.setType(CreateMirrorData.Type.DOCKER);
+        }
+        createData.setDestParam(destParam);
+
+        // 源节点参数
+        List<CreateMirrorData.Param> srcParams = new ArrayList<>();
+        for (var source : sources) {
+            var sourceNode = getPluginHandler().getElement(source.getNodeId());
+            var sourcePorts = getPluginHandler().getPorts(sourceNode);
+            var type = CreateMirrorData.Type.DOCKER ;
+            if (BaseCloudPluginSceneElementModel.ImageType.VM.equals(targetNode.getImageType())) {
+                type = CreateMirrorData.Type.VM;
+            }
+            for(var sourcePort : sourcePorts){
+                CreateMirrorData.Param srcParam = new CreateMirrorData.Param();
+                srcParam.setId(sourceNode.getResourceId());
+                srcParam.setNicId(sourcePort.getVnicId());
+                srcParam.setType(type);
+                srcParams.add(srcParam);
+            }
+        }
+        createData.setSrcParam(srcParams);
+
+        createData.setName(TextUtils.uuid().substring(0, 10));
+        CollectionPluginSceneOptionKeyMapper optionKeyMapper = BeanCommon.getBean(CollectionPluginSceneOptionKeyMapper.class);
+        List<Integer> excludeOptionKey = optionKeyMapper.list(new HumanCondition())
+                .stream()
+                .map(CollectionPluginSceneOptionKeyModel::getOptionKey)
+                .collect(Collectors.toList());
+        int optionKey = this.randomOptionKey(excludeOptionKey);
+        createData.setOptionKey(optionKey);
+        Mirror mirror = new Mirror();
+        var res = mirror.create(createData);
+        flowMirror.setOptionKey(optionKey);
+        flowMirror.setMirrorId(res.getName());
+    }
+
+     private int randomOptionKey(List<Integer> excludeOptionKey) {
+         var random = new Random();
+         int optionKey = 1;
+         for (int i = 0; i < 1; i++) {
+             optionKey = random.nextInt(65535);
+             if (excludeOptionKey.contains(optionKey)) {
+                 i--;
+             }
+         }
+         return optionKey;
+     }
+
+     private void flowMirrorToIp(FlowMirrorBO flowMirror, List<FlowMirrorBO.Source> sources, String targetIp) {
+
+     }
 
      private void createConfigNetworks() {
          if (getHandlerUtils().getConfigNetworks() != null) {
