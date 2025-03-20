@@ -1028,7 +1028,9 @@ public class CreateHandler extends HandlerCommon {
         createData.setCpu(IntUtils.zeroNull(srcElement.getCpu()));
         createData.setRam(IntUtils.zeroNull(srcElement.getRam()));
         createData.setDisk(IntUtils.zeroNull(srcElement.getDisk()));
-        createData.setHost(cloudElement.getHost());
+        if(StringUtils.isNotEmpty(cloudElement.getHost())){
+            createData.setHost(cloudElement.getHost());
+        }
         if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(cloudElement.getEntityUsbs()) && StringUtils.isNotEmpty(cloudElement.getEntityUsbs().get(0).getHost())) {
             createData.setHost(cloudElement.getEntityUsbs().get(0).getHost());
         }
@@ -1075,6 +1077,9 @@ public class CreateHandler extends HandlerCommon {
         }
         var srcElement = cloudElement.getSrcElement();
         var createData = new ContainerCreateData();
+        if(StringUtils.isNotEmpty(cloudElement.getHost())){
+            createData.setHost(cloudElement.getHost());
+        }
         createData.setRequestUser(TextUtils.emptyNull(getHandlerUtils().getRequestUser()));
 //        createData.setDepartment(Optional.ofNullable(getHandlerUtils().getRequestUserOrg()).orElse(StringUtils.EMPTY));
 //        createData.setScene(Optional.ofNullable(getPluginHandler().getSrcScene().getName()).orElse(StringUtils.EMPTY));
