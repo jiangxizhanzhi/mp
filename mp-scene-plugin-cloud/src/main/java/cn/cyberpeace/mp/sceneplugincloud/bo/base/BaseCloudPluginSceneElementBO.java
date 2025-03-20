@@ -119,6 +119,9 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     @ApiModelProperty(value = "docker参数")
     private DockerParams dockerParams;
 
+    @ApiModelProperty(value = "vlan交换机默认访问url")
+    private String vlanSwitchUrl;
+
     // gns3 属性
     @ApiModelProperty(value = "gns3 platform")
     private String platform;

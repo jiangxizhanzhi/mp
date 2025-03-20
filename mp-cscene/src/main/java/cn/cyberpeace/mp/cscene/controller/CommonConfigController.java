@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.cscene.controller;
 
+import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.sceneplugincloud.service.CloudCommonConfigService;
@@ -24,10 +25,19 @@ public class CommonConfigController {
     @Resource
     private CloudCommonConfigService cloudCommonConfigService;
 
+    @Resource
+    private BaseAppConfig baseAppConfig;
+
     @ApiOperation("查询靶标对应的探针系统分类")
     @GetMapping("/system_type_to_agent_support")
     public ServiceResult<Map<String, Object>> getSystemTypeToAgentSupport() {
         return cloudCommonConfigService.getSystemTypeToAgentSupport().asResult();
+    }
+
+    @ApiOperation("查询多vlan交换机默认连接地址")
+    @GetMapping("/vlan_switch_default_url")
+    public ServiceResult<String> getVlanSwitchDefaultUrl() {
+        return new ServiceResult<>(baseAppConfig.getVlanSwitchDefaultUrl());
     }
 
 }

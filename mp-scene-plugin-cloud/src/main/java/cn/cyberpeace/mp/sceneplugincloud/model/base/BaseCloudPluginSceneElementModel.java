@@ -107,6 +107,8 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     @DefaultStr
     private String dockerParams;
     @DefaultStr
+    private String vlanSwitchUrl;
+    @DefaultStr
     private String platform;
 
     @DefaultStr

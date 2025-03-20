@@ -56,6 +56,7 @@ mp:
       file-server: ${FILE_SERVER:lfs}
       lfs-inner-http-url: ${LFS_INNER_HTTP_PROTOCOL:http}://${MP_API_IP:10.100.7.1}:${MP_API_PORT:8001}${LFS_INNER_HTTP_URL:/api/mp/file/%s}
       lfs-outer-http-url: ${LFS_OUTER_HTTP_URL:/api/mp/file/%s}
+      vlan-switch-default-url: ${VLAN_SWITCH_DEFAULT_URL:http://127.0.0.1/guacamole/xx}
   # mp-situationaware 模块配置
   situationaware:
     ext-var:
