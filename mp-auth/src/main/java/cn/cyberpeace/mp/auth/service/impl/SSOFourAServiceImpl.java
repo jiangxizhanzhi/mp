@@ -13,6 +13,7 @@ import cn.cyberpeace.mp.auth.service.AbstractSSOService;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.JwtUtils;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import com.alibaba.fastjson.JSON;
 import com.boco.iam.sso.client.LoginUtil;
 import com.boco.iam.sso.client.ResultCode;
 import com.boco.iam.sso.client.TransferTicket;
@@ -28,7 +29,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 
 /**
  * @BelongsPackage: cn.cyberpeace.mp.auth.service.impl
@@ -74,6 +74,7 @@ public class SSOFourAServiceImpl extends AbstractSSOService {
         }
         //获取ticket信息
         String strTic = loginUtil.getTicket(request);
+        log.info("get ticket :" + strTic);
         TransferTicket ticket = loginUtil.analysTicket(strTic);
         if (Objects.isNull(ticket)) {
             log.warn("4a sso analysis ticket is null!");
@@ -90,6 +91,7 @@ public class SSOFourAServiceImpl extends AbstractSSOService {
             return;
         }
         userInfo = loginUtil.qryUserByTicket(ticket);
+        log.info("local user: {}" + JSON.toJSONString(userInfo));
         if (Objects.isNull(userInfo)) {
             //用户信息不存在
             log.warn("4a sso get userInfo is failed!");
@@ -109,6 +111,7 @@ public class SSOFourAServiceImpl extends AbstractSSOService {
 //            userInfo.setRetCode(ResultCode.RESULT_OK);
 //            userInfo.setName(UUID.randomUUID().toString());
 //            userInfo.setAccountID(ssoLoginBO.getTicket());
+            log.info("4a sso login ,starting create or update user!");
             UserModel userModel = createOrUpdateFourAUser(ssoLoginBO, userInfo);
             successLoginRedirect(userModel, response);
         } catch (Exception e) {
@@ -130,8 +133,8 @@ public class SSOFourAServiceImpl extends AbstractSSOService {
             log.info("查找该4A用户在本系统的账户数量: {}", users.size());
             UserRequest addRequest = new UserRequest();
             //创建用户(待修改信息)
-            addRequest.setUsername(userInfo.getName());
-            addRequest.setName(userInfo.getName());
+            addRequest.setUsername(userInfo.getAccountID());
+            addRequest.setName(userInfo.getAccountID());
             addRequest.setIdCard(userInfo.getIdCardNum());
             addRequest.setNickname(userInfo.getPhone());
             addRequest.setMobile(userInfo.getMobile());
@@ -145,11 +148,13 @@ public class SSOFourAServiceImpl extends AbstractSSOService {
                 // 预设学员角色和默认组织
                 addRequest.setOrgIds(Collections.singletonList(AuthConstant.ROOT_ORG_ID));
                 addRequest.setRoleIds(Collections.singletonList(AuthConstant.ROLE_XUEYUAN_ID));// 以实际环境的学员角色id为准
+                log.info("prepare addFourUser: {}" + JSON.toJSONString(addRequest));
                 user = userService.addFourAUser(addRequest);
             } else if (users.size() == 1) {// 查找到唯一用户
                 // 修改用户,目前无需修改其他信息
                 user = userService.get(users.get(0).getId()).sourceObj();
                 addRequest.setId(user.getId());
+                log.info("prepare modifyFourUser: {}" + JSON.toJSONString(addRequest));
                 user = userService.modify(addRequest);
             } else {
                 throw new MpRuntimeException(AuthErrorCode.FOUR_A_USER_SELECT_ERROR);//用户查询错误
@@ -173,6 +178,7 @@ public class SSOFourAServiceImpl extends AbstractSSOService {
         JwtAuthenticationFilter.addJWTCookieToResponse(response, newJwt);
         response.setHeader(AuthConstant.JWT_HEADER_KEY, newJwt);
         response.setHeader(AuthConstant.CP_TOKEN_REFRESHED_HEADER_KEY, "true");
+        log.info("4a sso login to redirect url:" + ssoConfig.getHomePageUrl());
         response.sendRedirect(ssoConfig.getHomePageUrl());
     }
 
@@ -189,5 +195,8 @@ public class SSOFourAServiceImpl extends AbstractSSOService {
         } catch (Exception e) {
             log.error("4A logout request failed!", e);
         }
+
+        // 跳转
+        loginUtil.redirectToServer(ssoLoginOutBO.getRequest(),ssoLoginOutBO.getResponse());
     }
 }

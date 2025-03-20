@@ -40,9 +40,9 @@ public class AuthConstant {
 
     public static final String ROLE_ADMIN_ID = "5827ff7847504ffd806e0a85c417228d";
 
-    public static final String ROLE_XUEYUAN_ID = "6a38df3740024a7786c523481d9436eb";
+    public static final String ROLE_XUEYUAN_ID = "0fe931924b8743ec8584d13e2f901059";
 
-    public static final String ROLE_JIAOYUAN_ID = "65a1c0738d324d0d8b9605da3751963b";
+    public static final String ROLE_JIAOYUAN_ID = "db4014aeb87843ae8c308233d53b1a10";
 
     public static final String ORG_PATH_SEPARATOR = "/";
 

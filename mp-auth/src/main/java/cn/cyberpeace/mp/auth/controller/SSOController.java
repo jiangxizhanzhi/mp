@@ -53,10 +53,9 @@ public class SSOController {
         log.info("test!!!!!!!!!!!!!!!!!!!!!!");
     }
 
-    @ApiOperation(value = "获取登出跳转url", notes = "获取登出跳转url(需要token)")
+    @ApiOperation(value = "登出跳转", notes = "登出跳转(需要token)")
     @GetMapping("/logout/redirect")
-    public ObjServiceResult logoutRedirect(HttpServletRequest request, HttpServletResponse response){
-        String url = "";
+    public void logoutRedirect(HttpServletRequest request, HttpServletResponse response){
         // 查询当前人员
         UserModel loginUser = UserUtils.getLoginUser();
         log.info("logoutRedirect loginUser: {}", JSON.toJSONString(loginUser));
@@ -65,19 +64,15 @@ public class SSOController {
                 // 4a平台用户登出
                 SSOLoginOutBO ssoLoginOutBO = SSOLoginOutBO.builder()
                         .ticket(UserUtils.getLoginUser().getFourATicket())
-                        .request(null)
-                        .response(null)
+                        .request(request)
+                        .response(response)
                         .build();
                 SSOService ssoService = ssoServiceFactory.getSSOService(SSOSysEnum.FOUR_A);
                 ssoService.logout(ssoLoginOutBO);
-                // 返回登出跳转url
-                url = ssoConfig.getOutHomePageUrl();
             } else {
-//                url = ssoConfig.getHomePageUrl();
+
             }
         }
-        log.info("logoutRedirect url: {}", url);
-        return new ObjServiceResult<>(new ObjResult<>(url)).asResult();
     }
 
     /**
