@@ -2,17 +2,20 @@ package cn.cyberpeace.mp.behavior.req;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 @Data
 public class ReportLogReq implements Serializable {
 
-	@ApiModelProperty("日志文件")
-	private MultipartFile log;
+	@ApiModelProperty(value = "日志内容", required = true)
+	@NotNull
+	private String logContent;
 
-	@ApiModelProperty("运行行为id")
+	@ApiModelProperty(value = "运行行为id", required = true)
+	@NotBlank
 	private String behaviorId;
 
 }

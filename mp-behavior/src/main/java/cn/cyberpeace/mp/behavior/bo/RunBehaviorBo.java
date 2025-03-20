@@ -20,4 +20,7 @@ public class RunBehaviorBo implements Serializable {
 
 	@ApiModelProperty("行为参数列表")
 	private List<Param> paramList;
+
+	@ApiModelProperty("行为名称")
+	private String behaviorName;
 }

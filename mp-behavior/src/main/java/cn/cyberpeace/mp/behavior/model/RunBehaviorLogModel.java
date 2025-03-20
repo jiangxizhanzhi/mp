@@ -13,11 +13,8 @@ import lombok.NoArgsConstructor;
 @Table("mp_run_behavior_log")
 public class RunBehaviorLogModel extends BaseModel {
 
-	@ApiModelProperty("日志名称")
-	private String logName;
-
-	@ApiModelProperty("日志路径")
-	private String logUrl;
+	@ApiModelProperty("日志内容")
+	private String logContent;
 
 	@ApiModelProperty("行为模板id")
 	private String behaviorTemplateId;
@@ -27,5 +24,8 @@ public class RunBehaviorLogModel extends BaseModel {
 
 	@ApiModelProperty("队列名称")
 	private String queueName;
+
+	@ApiModelProperty("行为模板名称")
+	private String behaviorTemplateName;
 
 }

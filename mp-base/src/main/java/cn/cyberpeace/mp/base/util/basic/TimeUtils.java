@@ -10,12 +10,16 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.base.util.basic;
 
-import lombok.extern.slf4j.Slf4j;
+ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+ import lombok.extern.slf4j.Slf4j;
+ import org.apache.commons.lang3.StringUtils;
 
-import java.time.*;
-import java.time.format.DateTimeFormatter;
-import java.util.Date;
-import java.util.TimeZone;
+ import java.sql.Timestamp;
+ import java.time.*;
+ import java.time.format.DateTimeFormatter;
+ import java.time.format.DateTimeParseException;
+ import java.util.Date;
+ import java.util.TimeZone;
 
 /**
  * @ClassName TimeUtils
@@ -274,5 +278,44 @@ public class TimeUtils {
             time = stringToLocalDateTime(utcTime);
         }
         return time;
+    }
+
+    /**
+     * 获取 LocalTime 的下一个 Date
+     *
+     * @param localTime 不带日期的时间
+     * @return 下一次该时间的日期+时间
+     */
+    public static Date getNextDate(LocalTime localTime) {
+        LocalTime now = LocalTime.now();
+        LocalDate localDate = LocalDate.now();
+        // 当前时间已经晚于传入的时间
+        if (localTime.isBefore(now)) {
+            // 获取第二天的该时间点
+            localDate = localDate.plusDays(1L);
+        }
+        Timestamp timestamp = Timestamp.valueOf(localDate.atTime(localTime));
+        return new Date(timestamp.getTime());
+    }
+
+    public static String format(LocalTime localTime) {
+        if (localTime == null) {
+            return null;
+        }
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+        return localTime.format(formatter);
+    }
+
+    public static LocalTime toLocalTime(String time) {
+        if (StringUtils.isEmpty(time)) {
+            return null;
+        }
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+        try {
+            return LocalTime.parse(time, formatter);
+        }catch (DateTimeParseException e) {
+            System.out.println("Error parsing time: " + e.getMessage());
+            throw new MpRuntimeException("时间[" + time + "]格式化错误");
+        }
     }
 }

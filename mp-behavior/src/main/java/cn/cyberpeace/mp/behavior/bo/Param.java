@@ -13,4 +13,7 @@ public class Param implements Serializable {
 
 	@ApiModelProperty("参数值")
 	private String value;
+
+	@ApiModelProperty("描述")
+	private String desc;
 }

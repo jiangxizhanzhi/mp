@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table("mp_network_behavior_template")
-public class NetworkBehaviorTemplateModel extends BaseModel {
+@Table("mp_network_behavior")
+public class NetworkBehaviorModel extends BaseModel {
 
 	@ApiModelProperty("网络行为名称")
 	private String name;
@@ -23,9 +23,18 @@ public class NetworkBehaviorTemplateModel extends BaseModel {
 	private String fileName;
 
 	@ApiModelProperty("文件路径")
-	private String fileUrl;
+	private String filePath;
 
 	@ApiModelProperty("参数配置")
 	private String params;
+
+	@ApiModelProperty("目标服务")
+	private String target;
+
+	@ApiModelProperty("分类")
+	private Integer type;
+
+	@ApiModelProperty("步骤")
+	private Integer step;
 
 }
