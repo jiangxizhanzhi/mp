@@ -793,23 +793,21 @@ public class InitiateHandler extends HandlerCommon {
                 connectNetwork.addPort(port, connectPort, true);
             }
             cloudElement.getDeriveNetworks().add(connectNetwork);
-        } else if(Objects.nonNull(role) && role == BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_VLAN_SWITCH){
+        } else if(ElementTypeUtils.isVlanVirtualSwitch(cloudElement)){
             //内置的多vlan交换机，需要对应多个vlan创建多个网络
             List<VlanInfo> vlanInfos = cloudElement.getVlanInfos();
             //cidr，gateway,vlanId形成一组
             if(CollectionUtils.isNotEmpty(vlanInfos)){
-                int i = 0;
                 for (VlanInfo vlanInfo: vlanInfos) {
                     if(CollectionUtils.isEmpty(vlanInfo.getPorts())){
                         continue;
                     }
                     CloudPluginSceneElementNetworkBO network = new CloudPluginSceneElementNetworkBO(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
-                    network.setGateway(cloudElement.getGateway());
+                    network.setGateway(vlanInfo.getGateway());
                     network.setGatewayOff(cloudElement.getGatewayOff());
-                    network.setCidr(cloudElement.getCidr());
+                    network.setCidr(vlanInfo.getCidr());
                     network.setVlan(Boolean.TRUE);
                     network.setVlanId(vlanInfo.getVlanId());
-                    network.setResourceId(cloudElement.getResourceId()+cloudElement.getVlanId()+"-"+i);
                     var connectNetwork = new ConnectedNetworkBO(network, getHandlerUtils());
                     var ports = Optional
                         .ofNullable(cloudElement.getSrcElement().getPorts())
@@ -830,9 +828,9 @@ public class InitiateHandler extends HandlerCommon {
                         connectNetwork.addPort(port, connectPort, true);
                     }
                     cloudElement.getDeriveNetworks().add(connectNetwork);
-                    i++;
                 }
             }
+            return;
         }
 
         if (Boolean.TRUE.equals(cloudElement.getExternal()) && !ElementTypeUtils.isExternalTerminal(cloudElement)) {
