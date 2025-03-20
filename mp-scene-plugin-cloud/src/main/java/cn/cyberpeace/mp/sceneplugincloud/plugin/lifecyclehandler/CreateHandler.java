@@ -1419,7 +1419,7 @@ public class CreateHandler extends HandlerCommon {
     }
 
     private List<String> getFrameInstallCmds() {
-        String metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataFileServer();
+        String metadataFileServer = SceneSingleton.sceneAppConfig.getVmMetadataFileServer();
         List<LocalFileMappingModel> mappings = LocalFileMappingCommon.getMappings("wazuh_agent_installer");
         Map<String, String> nameFileMap = new HashMap<>();
         for (LocalFileMappingModel localFileMappingModel : mappings) {

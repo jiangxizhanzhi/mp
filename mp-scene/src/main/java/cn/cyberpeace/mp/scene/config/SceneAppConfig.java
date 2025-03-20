@@ -43,6 +43,9 @@ public class SceneAppConfig {
     @Value("${mp.scene.metadata_file_server:http://169.254.169.254/file}")
     private String metadataFileServer;
 
+    @Value("${mp.vm.metadata_file_server:http://10.100.41.1:81/api/mp/file}")
+    private String vmMetadataFileServer;
+
     @Value("${mp.scene.windows_help_installer_dir:}")
     private String windowsHelpInstallerDir;
 
