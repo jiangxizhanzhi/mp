@@ -6,7 +6,6 @@ import cn.cyberpeace.mp.auth.config.SSOConfig;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.constant.SSOSysEnum;
-import cn.cyberpeace.mp.auth.extensions.security.HttpLogoutSuccessHandler;
 import cn.cyberpeace.mp.auth.extensions.security.filter.JwtAuthenticationFilter;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.request.user.UserRequest;
@@ -22,7 +21,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -50,9 +48,6 @@ public class SSOFourAServiceImpl extends AbstractSSOService {
 
     @Autowired
     private UserService userService;
-
-    @Autowired
-    private HttpLogoutSuccessHandler httpLogoutSuccessHandler;
 
     @Override
     public boolean isSupport(SSOSysEnum sysEnum) {
@@ -187,58 +182,6 @@ public class SSOFourAServiceImpl extends AbstractSSOService {
             loginUtil.logout(ssoLoginOutBO.getTicket());
         } catch (Exception e) {
             log.error("4A logout request failed!", e);
-        }
-
-        // 处理本系统登出逻辑
-        try {
-            TransferTicket ticket = loginUtil.analysTicket(ssoLoginOutBO.getTicket());
-            UserInfo userInfo = loginUtil.qryUserByTicket(ticket);
-
-            if (Objects.nonNull(userInfo) && ResultCode.RESULT_OK.equals(userInfo.getRetCode())) {
-                UserModel user = getSingleUserByAccountId(userInfo.getAccountID());
-                if (user != null) {
-                    httpLogoutSuccessHandler.onFourALogoutSuccess(ssoLoginOutBO.getRequest(), ssoLoginOutBO.getResponse(), user);
-                }
-            }
-        } catch (Exception e) {
-            log.error("System logout failed!", e);
-        }
-    }
-
-    /**
-     * 根据 4A 账号 ID 查询用户，并确保唯一性
-     */
-    private UserModel getSingleUserByAccountId(String accountId) {
-        List<UserModel> users = userService.getUserBy4AAccountId(accountId);
-        if (CollectionUtils.isEmpty(users)) {
-            log.warn("No user found for 4A account ID: {}", accountId);
-            return null;
-        }
-        if (users.size() > 1) {
-            log.warn("Multiple users found for 4A account ID: {}, taking the first one.", accountId);
-        }
-        return users.get(0);
-    }
-
-    /**
-     * @param response
-     * @return void
-     * @throws Exception
-     * @description: 退出重定向
-     */
-    private void successLoginOutRedirect(HttpServletResponse response) throws Exception {
-        response.sendRedirect(ssoConfig.getOutHomePageUrl());
-    }
-
-    @Override
-    public void logoutByUser(HttpServletRequest request, HttpServletResponse response, UserModel loginUser) {
-        // 漫游票据登出
-        loginUtil.logout(loginUser.getFourATicket());
-        // 重定向
-        try {
-            successLoginOutRedirect(response);
-        } catch (Exception e) {
-            log.error("Web redirect failed!", e);
         }
     }
 }
