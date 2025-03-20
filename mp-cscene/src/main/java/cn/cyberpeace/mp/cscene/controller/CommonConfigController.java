@@ -37,7 +37,7 @@ public class CommonConfigController {
     @ApiOperation("查询多vlan交换机默认连接地址")
     @GetMapping("/vlan_switch_default_url")
     public ServiceResult<String> getVlanSwitchDefaultUrl() {
-        return new ServiceResult<>(baseAppConfig.getVlanSwitchDefaultUrl());
+        return new ServiceResult<>(baseAppConfig.getVlanSwitchDefaultUrl()).asResult();
     }
 
 }
