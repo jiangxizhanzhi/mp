@@ -59,6 +59,7 @@ public class SSOController {
         String url = "";
         // 查询当前人员
         UserModel loginUser = UserUtils.getLoginUser();
+        log.info("logoutRedirect loginUser: {}", JSON.toJSONString(loginUser));
         if (loginUser.getAccountId() != null && loginUser.getOutUserType() != null) {
             if (loginUser.getOutUserType().equals(SSOSysEnum.FOUR_A.getCode())) {
                 // 4a平台用户登出
@@ -75,6 +76,7 @@ public class SSOController {
 //                url = ssoConfig.getHomePageUrl();
             }
         }
+        log.info("logoutRedirect url: {}", url);
         return new ObjServiceResult<>(new ObjResult<>(url)).asResult();
     }
 
