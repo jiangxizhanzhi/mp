@@ -18,10 +18,10 @@ import com.alibaba.fastjson.JSON;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -36,7 +36,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 @Api(value = "第三方登录管理接口", tags = "UNAUTH-第三方登录接口")
 @Slf4j
-@Controller
+@RestController
 @RequestMapping(ControllerConstant.BASE_UNAUTH_API_PATH + "/sso")
 @AuthTarget(TargetEnum.NO_AUTH)
 public class SSOController {
