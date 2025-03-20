@@ -892,7 +892,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     public ServiceResult<String> execCheckScript(@RequestBody CsceneInstanceCheckRequest checkRequest) {
 
         // 参数校验
-        String csceneId = checkRequest.getCsceneId();
+        String csceneId = checkRequest.getMpScene();
         String nodeId = checkRequest.getNodeId();
         File file = new File(checkRequest.getScriptFilePath());
         if (!file.exists()) {
@@ -930,8 +930,8 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         }
 
         // 获取目标设备上ssh协议的ip、端口、用户名、密码
-        var sshFtpRequest = this.getSshFtpRequest(info.getNode(),throwException);
-        log.info("目标设备信息：{}" + JsonCommon.stringify(sshFtpRequest));
+        var sshFtpRequest = this.getSshFtpRequest(info.getNode(), throwException);
+        log.info("目标设备信息：" + JsonCommon.stringify(sshFtpRequest));
         info.setSshFtpRequest(sshFtpRequest);
 
         // 获取内部服务上的配置网络ip、和目标设备同网段的业务网络ip

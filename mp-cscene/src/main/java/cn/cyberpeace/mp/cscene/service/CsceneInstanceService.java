@@ -1761,16 +1761,18 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
 
-    public ServiceResult<String> execCheck(String frameServerConfigIp, List<String> scriptParams, SshFtpRequest sshFtpRequest, File file) {
+    public ServiceResult<String> execCheck(String frameServerConfigIp, String scriptParams, SshFtpRequest sshFtpRequest, File file) {
         String url = "http://{ip}:8080/agent/checker/exec/pycmd".replace("{ip}", frameServerConfigIp);
 
         String command = "python3 /data/scripts/" + file.getName() + " " + sshFtpRequest.getHost();
         if (scriptParams != null && !scriptParams.isEmpty()) {
-            command = command + " " + Strings.join(scriptParams, ' ');
+            command = command + " " + scriptParams.replaceAll(",", " ");
         }
         Map<String, Object> map = new HashMap<>();
         map.put("command", command);
         String res = HttpUtils.sendUpload(url, map, file);
+
+        log.info("执行checker, url: {}, \n command: {}, \n 返回结果res：{}", url, command, res);
         return new ServiceResult<>(res);
     }
 

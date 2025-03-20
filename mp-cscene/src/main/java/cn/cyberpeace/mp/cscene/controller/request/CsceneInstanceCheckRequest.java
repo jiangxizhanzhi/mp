@@ -1,8 +1,6 @@
 package cn.cyberpeace.mp.cscene.controller.request;
 
 
-import java.util.List;
-
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -10,15 +8,15 @@ import lombok.Data;
 public class CsceneInstanceCheckRequest {
 
     @ApiModelProperty(value = "场景id")
-    private String csceneId;
+    private String mpScene;
 
     @ApiModelProperty(value = "check节点id")
-    String nodeId;
+    private String nodeId;
 
     @ApiModelProperty(value = "checker脚本文件绝对路径")
-    String scriptFilePath;
+    private String scriptFilePath;
 
     @ApiModelProperty(value = "脚本参数")
-    List<String> scriptParams;
+    private String scriptParams;
 
 }
