@@ -271,6 +271,9 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
      @ApiModelProperty("配采网接入的SN router的下一跳地址")
      private String configNetworkNextHopIp;
 
+     @ApiModelProperty("快照id")
+     private String snapshotResourceId;
+
      @Override
     public void fromModel(M obj, String... ignoreFields) {
         //忽略直接赋值处理的字段，需要定制处理

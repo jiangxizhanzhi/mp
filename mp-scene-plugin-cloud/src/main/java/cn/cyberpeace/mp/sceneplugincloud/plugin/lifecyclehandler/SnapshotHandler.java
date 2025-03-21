@@ -30,6 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -66,6 +67,29 @@ public class SnapshotHandler extends HandlerCommon {
      */
     public SnapshotHandler(CloudScenePluginHandler pluginHandler, int event) {
         super(pluginHandler, ResumeTaskPool.getInstance(), event);
+    }
+
+    public void snapshot() {
+        for (CloudPluginSceneElementBO element : getPluginHandler().getElementMap().values()) {
+            String nodeId = element.getSrcElement().getId();
+            if (element.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER) {
+                // 容器快照
+                getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.SNAPSHOT, Arrays.asList(ElementProcess.SNAPSHOT_CONTAINER));
+                runElementProgress(nodeId, SceneElementModel.Event.SNAPSHOT, ElementProcess.SNAPSHOT_CONTAINER, () -> {
+                    var containerSnapshotData = new ContainerSnapshotData();
+                    containerSnapshotData.setName("");
+                    var res = new Container().snapshot(element.getResourceId(), containerSnapshotData);
+                    element.setSnapshotResourceId(res);
+                });
+            } else if (element.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE) {
+                // 虚拟机快照
+                getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.SNAPSHOT, Arrays.asList(ElementProcess.SNAPSHOT_VIRTUAL_MACHINE));
+                runElementProgress(nodeId, SceneElementModel.Event.SNAPSHOT, ElementProcess.SNAPSHOT_VIRTUAL_MACHINE, () -> {
+                    var res = new VirtualMachine().snapshot(element.getResourceId(), "", "", "", "", new HashMap<>());
+                    element.setSnapshotResourceId(res.getId());
+                });
+            }
+        }
     }
 
     /**

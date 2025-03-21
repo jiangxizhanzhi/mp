@@ -1604,6 +1604,11 @@ public class CreateHandler extends HandlerCommon {
         createData.setExtremeSpeed(true);
         createData.setMainCloud(false);
 
+        // 如果有快照标识，使用快照来启动
+        if (StringUtils.isNotEmpty(cloudElement.getSnapshotResourceId())) {
+
+        }
+
         VirtualMachineCreateData virtualMachine = vmClient.create(createData);
         cloudElement.setResourceId(virtualMachine.getId());
         cloudElement.setHost(virtualMachine.getRunHost());
@@ -1667,6 +1672,12 @@ public class CreateHandler extends HandlerCommon {
         createData.setNetwork(CollectionUtils.emptyNull(
                 this.genVirutalNics(cloudElement)
         ));
+
+        // 如果有快照标识，使用快照来启动
+        if (StringUtils.isNotEmpty(cloudElement.getSnapshotResourceId())) {
+
+        }
+
         ContainerCreateData container = containerClient.create(createData);
         cloudElement.setResourceId(container.getId());
         cloudElement.setHost(container.getRunHost());

@@ -30,6 +30,7 @@ import cn.cyberpeace.mp.scene.core.event.base.EventFlag;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.core.event.base.EventTransition;
+import cn.cyberpeace.mp.scene.core.event.base.ProcessStatus;
 import cn.cyberpeace.mp.scene.core.plugin.ScenePluginHandler;
 import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneBO;
 import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneElementBO;
@@ -658,6 +659,21 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     public void snapshot() {
+        prepareAllEvent(SceneModel.Event.SNAPSHOT, SceneElementModel.Event.SNAPSHOT);
+        startAllEvent(SceneModel.Event.SNAPSHOT, SceneElementModel.Event.SNAPSHOT);
+        try {
+            for (ScenePluginHandler handler : getPlugins()) {
+                handler.snapshot();
+            }
+        } catch (Exception e) {
+            log.error("failed to snapshot scene , sceneId is {} , exception is {}", getSceneId(), ExceptionUtils.getStackTrace(e));
+            errorScene(SceneModel.Event.SNAPSHOT, e.getMessage());
+            return;
+        }
+        overAllEvent(SceneModel.Event.SNAPSHOT, SceneElementModel.Event.SNAPSHOT);
+        if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
+            save();
+        }
     }
 
     @Override

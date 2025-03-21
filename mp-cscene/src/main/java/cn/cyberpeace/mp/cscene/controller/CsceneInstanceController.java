@@ -36,6 +36,7 @@ package cn.cyberpeace.mp.cscene.controller;
  import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
  import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
  import cn.cyberpeace.mp.cscene.bo.CsceneInstanceStat;
+ import cn.cyberpeace.mp.cscene.bo.CsceneSnapshotBO;
  import cn.cyberpeace.mp.cscene.bo.CsceneUpdateBO;
  import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
  import cn.cyberpeace.mp.cscene.bo.ElementModifyBO;
@@ -62,7 +63,9 @@ package cn.cyberpeace.mp.cscene.controller;
  import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeFlowsActionRequest;
  import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeProbeActionRequest;
  import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeSnapshotRequest;
+ import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceReverSnapshotRequest;
  import cn.cyberpeace.mp.cscene.controller.request.CsceneInstancesActionRequest;
+ import cn.cyberpeace.mp.cscene.controller.request.CsceneSnapshotRequest;
  import cn.cyberpeace.mp.cscene.controller.request.CsceneStrategyRequest;
  import cn.cyberpeace.mp.cscene.controller.request.DeleteNode;
  import cn.cyberpeace.mp.cscene.controller.request.DeleteNodeCommand;
@@ -92,9 +95,11 @@ package cn.cyberpeace.mp.cscene.controller;
  import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
  import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
  import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+ import cn.cyberpeace.mp.scene.model.SceneSnapshotModel;
  import cn.cyberpeace.mp.scene.model.base.BaseSceneAreaModel;
  import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
  import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
+ import cn.cyberpeace.mp.scene.repository.SceneSnapshotMapper;
  import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
  import cn.cyberpeace.mp.sceneplugincloud.bo.CloudElementAccessMode;
  import cn.cyberpeace.mp.sceneplugincloud.bo.FlowMirrorIpsBO;
@@ -140,7 +145,6 @@ package cn.cyberpeace.mp.cscene.controller;
  import org.springframework.web.bind.annotation.RequestBody;
  import org.springframework.web.bind.annotation.RequestMapping;
  import org.springframework.web.bind.annotation.RequestParam;
- import org.springframework.web.bind.annotation.ResponseBody;
  import org.springframework.web.bind.annotation.RestController;
  import org.springframework.web.multipart.MultipartFile;
 
@@ -1152,6 +1156,45 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         CsceneDataModifier.removeFilePathPrefix(request);
         ServiceResult<CsceneInstanceBO> result = modelService.instanceModify(request).asResult();
         return result;
+    }
+
+    /**
+     * pauseScene
+     *
+     * @param request
+     * @return
+     */
+    @ApiOperation("给场景实例打快照")
+    @PostMapping("/snapshot")
+    public ServiceResult<String> snapshotScene(@RequestBody CsceneSnapshotRequest request) {
+        ServiceResult<String> result = modelService.snapshot(request.getCsceneInstanceId(), request.getSnapshotName(), request.getContext());
+        return result.asResult();
+    }
+
+    @ApiOperation("从快照启动场景实例")
+    @PostMapping("/revert_snapshot")
+    public ServiceResult<CsceneInstanceBO> revertSnapshotScene(@RequestBody CsceneInstanceReverSnapshotRequest request) {
+        String csceneId = request.getCsceneId();
+        String snapshotId = request.getSnapshotId();
+        CsceneInstanceBO result = modelService.revertSnapshot(csceneId, snapshotId);
+        return new ServiceResult<>(result).asResult();
+    }
+
+    @ApiOperation("场景快照列表")
+    @ApiImplicitParams({@ApiImplicitParam(name = "cscene_id", value = "场景模板id", dataTypeClass = String.class)})
+    @PostMapping("/snapshot_list")
+    public ServiceResult<List<CsceneSnapshotBO>> snapshotList(@RequestParam(name = "cscene_id") String csceneId) {
+        var mapper = BeanCommon.getBean(SceneSnapshotMapper.class);
+        var models = mapper.list(new HumanCondition().filterEqual(SceneSnapshotModel::getCsceneId, csceneId));
+        List<CsceneSnapshotBO> list = new ArrayList<>();
+        for (var model : models) {
+            CsceneSnapshotBO snapshotBO = new CsceneSnapshotBO();
+            snapshotBO.setSnapshotId(model.getId());
+            snapshotBO.setCsceneId(model.getCsceneId());
+            snapshotBO.setSnapshotName(model.getSnapshotName());
+            list.add(snapshotBO);
+        }
+        return new ServiceResult<>(list).asResult();
     }
 
     /**

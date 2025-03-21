@@ -383,6 +383,14 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
     }
 
     /**
+     * pause
+     */
+    @Override
+    public void snapshot() {
+        new SnapshotHandler(this, SceneModel.Event.SNAPSHOT).snapshot();
+    }
+
+    /**
      * unpause
      */
     @Override
