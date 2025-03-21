@@ -287,9 +287,11 @@ public class FlowMonitorController {
 
 
         boolean showAllFlows = CollectionUtils.isEmpty(queryParams.getTargetNodeIds()) || (queryParams.getTargetNodeIds().size() == 1 && queryParams.getTargetNodeIds().get(0).equals("null"));
-        Set<String> validIps = new HashSet<>();
+        Set<String> validIps;
         if (!showAllFlows) {
             validIps = getIpsByNodes(id, orginTargetNodes);
+        } else {
+            validIps = new HashSet<>();
         }
 
 
