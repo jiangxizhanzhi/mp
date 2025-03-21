@@ -16,6 +16,8 @@ public class FlowMirrorBO {
     // target 和 targetIp互斥，配置了targetIp则不能配置target
     private Target target;
     private String targetIp;
+    // 目标类型 , ip 或者 node
+    private String targetType;
 
     @Getter
     @Setter
