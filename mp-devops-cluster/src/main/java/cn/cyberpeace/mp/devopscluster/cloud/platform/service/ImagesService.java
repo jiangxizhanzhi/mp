@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.devopscluster.cloud.platform.service;
 
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtDocker;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtImageInfo;
@@ -143,5 +144,21 @@ public class ImagesService extends BaseCpService {
         CloudPlatformPageResult<TargetConnection> model = new CloudPlatformPageResult<>();
         model.setList(list);
         return model;
+    }
+
+
+    /**
+     * 根据靶标ID查询hyper-v设备连接信息
+     * @param deviceUuid
+     * @return
+     */
+    public CloudPlatformPageResult<TargetConnection> connectionHyperV(String deviceUuid){
+        try {
+            String res = HttpUtils.sendGet("http://192.168.5.42:5000/hyper/status?vm_id=" + deviceUuid);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return null;
     }
 }

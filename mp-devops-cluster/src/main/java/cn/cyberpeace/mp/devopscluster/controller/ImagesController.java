@@ -550,6 +550,14 @@ public class ImagesController {
         return new Result<>(connection.getList());
     }
 
+    @ApiOperation("根据设备ID获取登录链接信息")
+    @ApiImplicitParam(name = "uuid", value = "设备ID", dataTypeClass = String.class)
+    @GetMapping("/connection/hyper-v")
+    public Result<List<TargetConnection>> connectionHyperV(@RequestParam String uuid) {
+        CloudPlatformPageResult<TargetConnection> connection = imagesService.connectionHyperV(uuid);
+        return new Result<>(connection.getList());
+    }
+
     @ApiOperation("同步镜像数据")
     @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = ImageAsyncRequest.class)
     @PostMapping("/async")
