@@ -631,6 +631,21 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     public void snapshot() {
+        prepareAllEvent(SceneModel.Event.SNAPSHOT, SceneElementModel.Event.SNAPSHOT);
+        startAllEvent(SceneModel.Event.SNAPSHOT, SceneElementModel.Event.SNAPSHOT);
+        try {
+            for (ScenePluginHandler handler : getPlugins()) {
+                handler.snapshot();
+            }
+        } catch (Exception e) {
+            log.error("failed to snapshot scene , sceneId is {} , exception is {}", getSceneId(), ExceptionUtils.getStackTrace(e));
+            errorScene(SceneModel.Event.SNAPSHOT, e.getMessage());
+            return;
+        }
+        overAllEvent(SceneModel.Event.SNAPSHOT, SceneElementModel.Event.SNAPSHOT);
+        if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
+            save();
+        }
     }
 
     @Override

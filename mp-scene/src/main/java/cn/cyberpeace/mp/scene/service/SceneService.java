@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.scene.service;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -18,6 +20,8 @@ import cn.cyberpeace.mp.scene.core.exception.SceneNotExistException;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.scene.model.SceneSnapshotModel;
+import cn.cyberpeace.mp.scene.repository.SceneSnapshotMapper;
 import cn.cyberpeace.mp.scene.service.taskpool.ElementTaskPool;
 import cn.cyberpeace.mp.scene.service.taskpool.SceneTaskPool;
 import cn.cyberpeace.mp.scene.util.SceneEventUtils;
@@ -694,6 +698,36 @@ public class SceneService {
             }
             return new ServiceResult<>(true);
         } else if (StringUtils.equals(originLockInfo.getNodeId(),nodeId) && originLockInfo.getEvent() == SceneElementModel.Event.SNAPSHOT) {
+            // 锁获取失败, 其它线程正在执行相同操作 则直接返回成功
+            return new ServiceResult<>(true);
+        } else {
+            // 其他线程执行场景的其他操作 则返回报错
+            throw this.createOperateException(originLockInfo);
+        }
+    }
+
+    public ServiceResult<Boolean> snapshot(String snapshotModelId, String sceneId, SceneContextBO context) {
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, context);
+        sceneHandler.setRealTimeUpdate(true);
+        SceneEventUtils.SceneEventInfo newEventInfo = this.createSceneEventInfo(sceneId, null, null, SceneModel.Event.PAUSE);
+        SceneEventUtils.SceneEventInfo originLockInfo = SceneEventUtils.tryLockAndGetInfoIfLockFailed(sceneId, newEventInfo);
+        if (originLockInfo == null) {
+            // 锁获取成功 没有其他线程执行操作
+            SceneTaskPool.getInstance()
+                    .executeTask(() -> {
+                        try {
+                            sceneHandler.snapshot();
+                            var data = sceneHandler.toDataV2();
+                            SceneSnapshotModel model = new SceneSnapshotModel();
+                            model.setId(snapshotModelId);
+                            model.setContent(JsonCommon.snakeStringify(data.exportToSceneConfig()));
+                            BeanCommon.getBean(SceneSnapshotMapper.class).update(model);
+                        } finally {
+                            SceneEventUtils.unLock(sceneId);
+                        }
+                    });
+            return new ServiceResult<>(true);
+        } else if (originLockInfo.getEvent() == SceneModel.Event.PAUSE) {
             // 锁获取失败, 其它线程正在执行相同操作 则直接返回成功
             return new ServiceResult<>(true);
         } else {

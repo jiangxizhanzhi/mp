@@ -305,6 +305,14 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         new UnpauseHandler(this, SceneModel.Event.UNPAUSE).unpause();
     }
 
+    /**
+     * pause
+     */
+    @Override
+    public void snapshot() {
+        new SnapshotHandler(this, SceneModel.Event.SNAPSHOT).snapshot();
+    }
+
     @Override
     public void suspend() {
         new SuspendHandler(this, SceneModel.Event.SUSPEND).suspend();

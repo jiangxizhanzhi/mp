@@ -217,6 +217,9 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     @ApiModelProperty(value = "宿主机名称")
     private String host;
 
+    @ApiModelProperty("快照id")
+    private String snapshotResourceId;
+
     @Override
     public void fromModel(M obj, String... ignoreFields) {
         //忽略直接赋值处理的字段，需要定制处理

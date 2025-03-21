@@ -1064,6 +1064,12 @@ public class CreateHandler extends HandlerCommon {
         if (StringUtils.isNotEmpty(cloudElement.getIsoAttachFilename()) && StringUtils.isNotEmpty(cloudElement.getIsoTmpdirUuid())) {
             createData.setIsoAttach(true);
         }
+
+        // 如果有快照标识，使用快照来启动
+        if (StringUtils.isNotEmpty(cloudElement.getSnapshotResourceId())) {
+
+        }
+
         VirtualMachineCreateData virtualMachine = vmClient.create(createData);
         cloudElement.setResourceId(virtualMachine.getId());
         cloudElement.setHost(virtualMachine.getHost());
@@ -1149,6 +1155,12 @@ public class CreateHandler extends HandlerCommon {
             createData.setNetworks(CollectionUtils.emptyNull(
                     this.genVirutalNics(cloudElement)
             ));
+
+            // 如果有快照标识，使用快照来启动
+            if (StringUtils.isNotEmpty(cloudElement.getSnapshotResourceId())) {
+
+            }
+
             ContainerCreateData container = containerClient.create(createData);
             cloudElement.setResourceId(container.getId());
             cloudElement.setHost(container.getHost());

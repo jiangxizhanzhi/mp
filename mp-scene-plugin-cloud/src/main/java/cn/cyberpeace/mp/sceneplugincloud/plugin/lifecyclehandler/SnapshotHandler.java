@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementSnapshotBO;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.core.event.base.ProcessStatus;
@@ -23,6 +24,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -49,6 +51,27 @@ public class SnapshotHandler extends HandlerCommon {
 
     public SnapshotHandler(CloudScenePluginHandler pluginHandler, int event) {
         super(pluginHandler, ResumeTaskPool.getInstance(), event);
+    }
+
+    public void snapshot() {
+        for (CloudPluginSceneElementBO element : getPluginHandler().getElementMap().values()) {
+            String nodeId = element.getSrcElement().getId();
+            if (element.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER) {
+                // 容器快照
+                getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.SNAPSHOT, Arrays.asList(ElementProcess.SNAPSHOT_CONTAINER));
+                runElementProgress(nodeId, SceneElementModel.Event.SNAPSHOT, ElementProcess.SNAPSHOT_CONTAINER, () -> {
+                    var result = new VirtualMachine().snapshot(element.getResourceId(), element.getImage(), element.getImageUuid(), TextUtils.uuid(), "", new HashMap<>());
+                    element.setImage(result.getImageName());
+                });
+            } else if (element.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE) {
+                // 虚拟机快照
+                getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.SNAPSHOT, Arrays.asList(ElementProcess.SNAPSHOT_VIRTUAL_MACHINE));
+                runElementProgress(nodeId, SceneElementModel.Event.SNAPSHOT, ElementProcess.SNAPSHOT_VIRTUAL_MACHINE, () -> {
+                    var result = new VirtualMachine().snapshot(element.getResourceId(), element.getImage(), element.getImageUuid(), TextUtils.uuid(), "", new HashMap<>());
+                    element.setImage(result.getImageName());
+                });
+            }
+        }
     }
 
     public void snapshotElement(CloudPluginSceneElementBO element, String snapshotId, String snapshotName, String description) {

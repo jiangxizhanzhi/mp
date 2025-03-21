@@ -30,13 +30,13 @@ import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeFlowRecordsR
 import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeFlowsActionRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeProbeActionRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeSnapshotRequest;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceReverSnapshotRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneInstancesActionRequest;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneSnapshotRequest;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.dto.scene.ElementCommandExecResult;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneLinkStatusInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
-import cn.cyberpeace.mp.cscene.model.base.BaseCsceneRoleModel;
-import cn.cyberpeace.mp.cscene.repository.CsceneRoleMapper;
 import cn.cyberpeace.mp.cscene.service.CsceneFileService;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
@@ -47,11 +47,11 @@ import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
 import cn.cyberpeace.mp.scene.core.bo.SceneAreaBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
-import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
+import cn.cyberpeace.mp.scene.model.SceneSnapshotModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneAreaModel;
+import cn.cyberpeace.mp.scene.repository.SceneSnapshotMapper;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
 import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
@@ -90,7 +90,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 @Api(value = "场景实例", tags = "CSCENE-场景实例")
 @Slf4j
@@ -630,6 +629,39 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     public ListObjServiceResult<CsceneCollectionFlowBO> listFlows(@RequestParam String id, FlowQueryParams queryParams) {
         handleQueryParams("listFlows", queryParams);
         return modelService.listFlows(id, queryParams).asResult();
+    }
+
+    @ApiOperation("给场景实例打快照")
+    @PostMapping("/snapshot")
+    public ServiceResult<String> snapshotScene(@RequestBody CsceneSnapshotRequest request) {
+        ServiceResult<String> result = modelService.snapshot(request.getCsceneInstanceId(), request.getSnapshotName(), request.getContext());
+        return result.asResult();
+    }
+
+    @ApiOperation("从快照启动场景实例")
+    @PostMapping("/revert_snapshot")
+    public ServiceResult<CsceneInstanceBO> revertSnapshotScene(@RequestBody CsceneInstanceReverSnapshotRequest request) {
+        String csceneId = request.getCsceneId();
+        String snapshotId = request.getSnapshotId();
+        CsceneInstanceBO result = modelService.revertSnapshot(csceneId, snapshotId);
+        return new ServiceResult<>(result).asResult();
+    }
+
+    @ApiOperation("场景快照列表")
+    @ApiImplicitParams({@ApiImplicitParam(name = "cscene_id", value = "场景模板id", dataTypeClass = String.class)})
+    @PostMapping("/snapshot_list")
+    public ServiceResult<List<CsceneSnapshotBO>> snapshotList(@RequestParam(name = "cscene_id") String csceneId) {
+        var mapper = BeanCommon.getBean(SceneSnapshotMapper.class);
+        var models = mapper.list(new HumanCondition().filterEqual(SceneSnapshotModel::getCsceneId, csceneId));
+        List<CsceneSnapshotBO> list = new ArrayList<>();
+        for (var model : models) {
+            CsceneSnapshotBO snapshotBO = new CsceneSnapshotBO();
+            snapshotBO.setSnapshotId(model.getId());
+            snapshotBO.setCsceneId(model.getCsceneId());
+            snapshotBO.setSnapshotName(model.getSnapshotName());
+            list.add(snapshotBO);
+        }
+        return new ServiceResult<>(list).asResult();
     }
 
     @ApiOperation("场景实例获取分页主机采集数据列表")

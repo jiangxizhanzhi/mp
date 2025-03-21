@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.UserUtils;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
@@ -21,6 +22,7 @@ import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.base.util.define.SerializableFunction;
 import cn.cyberpeace.mp.base.util.mptool.CacheUtil;
 import cn.cyberpeace.mp.base.util.mptool.CollUtil;
+import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneCollectionFlowBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
@@ -59,6 +61,7 @@ import cn.cyberpeace.mp.cscene.service.taskpool.CsceneReportTaskPool;
 import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
 import cn.cyberpeace.mp.base.util.ReentrantLockUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
@@ -71,8 +74,10 @@ import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.SceneElementSnapshotModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.scene.model.SceneSnapshotModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
+import cn.cyberpeace.mp.scene.repository.SceneSnapshotMapper;
 import cn.cyberpeace.mp.scene.service.SceneService;
 import cn.cyberpeace.mp.scene.service.SceneSnapshotService;
 import cn.cyberpeace.mp.sceneplugincloud.bo.AccessUserBO;
@@ -1018,6 +1023,59 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         }
 
         return scenePluginCollectionSceneService.listHostEvents(sceneId, queryParams);
+    }
+
+    public ServiceResult<String> snapshot(String csceneInstanceId,String snapshotName, CsceneContextBO context) {
+        CsceneInstanceModel csceneInstanceModel = this.get(csceneInstanceId).asResult().getData();
+        if (csceneInstanceModel == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        if (context != null) {
+            context.loadTransparentContext();
+            CsceneContextHolder.setCsceneInstanceId(csceneInstanceId);
+        }
+
+        String csceneId = csceneInstanceModel.getCscene();
+        SceneSnapshotModel sceneSnapshotModel = new SceneSnapshotModel();
+        sceneSnapshotModel.setCsceneId(csceneId);
+        sceneSnapshotModel.setCsceneInstanceId(csceneInstanceId);
+        sceneSnapshotModel.setSnapshotName(snapshotName);
+        BeanCommon.getBean(SceneSnapshotMapper.class).save(sceneSnapshotModel);
+        this.sceneService.snapshot(sceneSnapshotModel.getId(), csceneInstanceModel.getScene(), context.toSceneContext());
+        return new ServiceResult<>(sceneSnapshotModel.getId());
+    }
+
+    public CsceneInstanceBO revertSnapshot(String id, String snapshotId) {
+        // 取cscene信息
+        var csceneModel = this.getCsceneService().get(id).asResult().getData();
+        if (csceneModel == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+
+        // 取保存的快照信息
+        var snapshotModel = BeanCommon.getBean(SceneSnapshotMapper.class).get(snapshotId);
+        SceneConfigDataBO configBO = JsonCommon.snakeParse(snapshotModel.getContent(), SceneConfigDataBO.class);
+        // 去掉所有的resourceId
+        for (Map<String, Object> e : configBO.getPlugins().get("cpcloud").getElements().values()) {
+            e.remove("resource_id");
+        }
+        for (Map<String, Object> e : configBO.getPlugins().get("cpcloud").getElementPorts().values()) {
+            e.remove("resource_id");
+        }
+
+        // 使用快照信息重新启动一下场景
+        CsceneBO csceneBO = new CsceneBO();
+        csceneBO.fromModel(csceneModel);
+        csceneBO.setSceneConfig(configBO);
+        CsceneInstanceBO csceneInstance = csceneBO.exportToCsceneInstance();
+        BcSceneInstanceHandler instanceHandler = new BcSceneInstanceHandler(csceneInstance, new CsceneContextBO());
+        instanceHandler.create();
+        var result = instanceHandler.toData();
+        if (result.getScene() != null && result.getScene().getTopology() != null && result.getScene().getTopology()
+                .getScene() != null) {
+            result.getScene().getTopology().getScene().setProgressPercentage(5);
+        }
+        return result;
     }
 
     /**
