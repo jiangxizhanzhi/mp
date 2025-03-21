@@ -45,6 +45,6 @@ public interface SubRangeMonitorInterface {
 
     ListObjServiceResult<Process> pageProcesses(TimeListPageInfoQueryParams listPageInfoQueryParams);
 
-    List<FlowAttackDto> pageFlow(String id, FlowQueryParams queryParams);
+    List<FlowAttackDto> pageFlow(String id, FlowQueryParams queryParams, boolean allFlag);
 
 }

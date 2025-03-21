@@ -251,9 +251,9 @@ public class TestRangeApiProxy implements SubRangeMonitorInterface {
     }
 
     @Override
-    public List<FlowAttackDto> pageFlow(String id, FlowQueryParams queryParams) {
+    public List<FlowAttackDto> pageFlow(String id, FlowQueryParams queryParams, boolean allFlag) {
          List<String> targetNodeIds = queryParams.getTargetNodeIds();
-         if (CollectionUtils.isEmpty(targetNodeIds)) {
+         if (CollectionUtils.isEmpty(targetNodeIds) && !allFlag) {
              return new ArrayList<>();
          }
          Map<String, String> mappingCsceneIdToRange = getRangeMapCscene(id);

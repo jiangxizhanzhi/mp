@@ -262,45 +262,55 @@ public class FlowMonitorController {
         }
         queryParams.ensure();
 
-        if (CollectionUtils.isEmpty(queryParams.getTargetNodeIds()) || (queryParams.getTargetNodeIds().size() == 1 && queryParams.getTargetNodeIds().get(0).equals("null"))) {
-            List<String> allNodes = new ArrayList<>();
-            allNodes.addAll(testRangeApiProxy.getAllNodeIdsInCurrentCscene(id));
-            queryParams.setTargetNodeIds(allNodes);
 
-            ListObjServiceResult<FlowAttackDto> result = flowMonitorService.pageFlow(id, queryParams);
-            return result;
-        } else {
-            //查所有，然后按照ip过滤
-            var orginTargetNodes = queryParams.getTargetNodeIds();
-            int originPerPage = queryParams.getPerPage();
-            int originPage = queryParams.getPage();
+        //查所有，然后按照ip过滤
+        var orginTargetNodes = queryParams.getTargetNodeIds();
+        int originPerPage = queryParams.getPerPage();
+        int originPage = queryParams.getPage();
 
-            queryParams.setPerPage(10000);
-            queryParams.setPage(1);
-            List<String> allNodes = new ArrayList<>();
-            allNodes.addAll(testRangeApiProxy.getAllNodeIdsInCurrentCscene(id));
-            queryParams.setTargetNodeIds(allNodes);
-            List<FlowAttackDto> flowAttackInCurrentRange = flowMonitorService.pageFlow(id, queryParams).getData().getList();
-            List<FlowAttackDto> allFlowAttack = new ArrayList<>();
-            allFlowAttack.addAll(flowAttackInCurrentRange);
+        queryParams.setPerPage(10000);
+        queryParams.setPage(1);
+        List<String> allNodes = new ArrayList<>();
+        allNodes.addAll(testRangeApiProxy.getAllNodeIdsInCurrentCscene(id));
+        queryParams.setTargetNodeIds(allNodes);
+        List<FlowAttackDto> flowAttackInCurrentRange = flowMonitorService.pageFlow(id, queryParams).getData().getList();
 
-            Set<String> validIps = getIpsByNodes(id, orginTargetNodes);
+        FlowQueryParams otherRangeFlowPageQuery = new FlowQueryParams();
+        otherRangeFlowPageQuery.setPerPage(10000);
+        otherRangeFlowPageQuery.setPage(1);
+        otherRangeFlowPageQuery.setTargetNodeIds(Collections.emptyList());
+        List<FlowAttackDto> attackInOtherRange = testRangeApiProxy.pageFlow(id, otherRangeFlowPageQuery, true);
+
+        List<FlowAttackDto> allFlowAttack = new ArrayList<>();
+        allFlowAttack.addAll(flowAttackInCurrentRange);
+        allFlowAttack.addAll(attackInOtherRange);
 
 
-            List<FlowAttackDto> sortedFlowAttacks = allFlowAttack.stream().filter(flowAttack -> validIps.contains(flowAttack.getTargetIp()))
-                    .sorted((o1, o2) -> (int) (o2.getTimestamp() - o1.getTimestamp())).collect(Collectors.toList());
-            int startIncludeIndex = (originPage - 1) * originPerPage;
-            int endExcludeIndex = originPage * originPerPage;
-            if (endExcludeIndex > sortedFlowAttacks.size()) {
-                endExcludeIndex = sortedFlowAttacks.size();
+        boolean showAllFlows = CollectionUtils.isEmpty(queryParams.getTargetNodeIds()) || (queryParams.getTargetNodeIds().size() == 1 && queryParams.getTargetNodeIds().get(0).equals("null"));
+        Set<String> validIps = new HashSet<>();
+        if (!showAllFlows) {
+            validIps = getIpsByNodes(id, orginTargetNodes);
+        }
+
+
+        List<FlowAttackDto> sortedFlowAttacks = allFlowAttack.stream().filter(flowAttack -> {
+            if (showAllFlows) {
+                return true;
+            } else {
+                return validIps.contains(flowAttack.getTargetIp());
             }
-            var subList = sortedFlowAttacks.subList(startIncludeIndex, endExcludeIndex);
-            try {
-                return new ListObjServiceResult<>(new ListObjResult<>(subList, sortedFlowAttacks.size()).asResult()).asResult();
-            } catch (Exception e) {
-                log.error(e.getMessage(), e);
-                return new ListObjServiceResult<>(new ListObjResult<>(Collections.emptyList(), sortedFlowAttacks.size()).asResult()).asResult();
-            }
+        }).sorted((o1, o2) -> (int) (o2.getTimestamp() - o1.getTimestamp())).collect(Collectors.toList());
+        int startIncludeIndex = (originPage - 1) * originPerPage;
+        int endExcludeIndex = originPage * originPerPage;
+        if (endExcludeIndex > sortedFlowAttacks.size()) {
+            endExcludeIndex = sortedFlowAttacks.size();
+        }
+        var subList = sortedFlowAttacks.subList(startIncludeIndex, endExcludeIndex);
+        try {
+            return new ListObjServiceResult<>(new ListObjResult<>(subList, sortedFlowAttacks.size()).asResult()).asResult();
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return new ListObjServiceResult<>(new ListObjResult<>(Collections.emptyList(), sortedFlowAttacks.size()).asResult()).asResult();
         }
     }
 
