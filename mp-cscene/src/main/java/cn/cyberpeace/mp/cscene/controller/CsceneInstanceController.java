@@ -887,7 +887,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     }
 
 
-    @ApiOperation("获取场景内部虚拟机ip")
+    @ApiOperation("执行场景checker")
     @PostMapping("/exec_check_script")
     public ServiceResult<String> execCheckScript(@RequestBody CsceneInstanceCheckRequest checkRequest) {
 
