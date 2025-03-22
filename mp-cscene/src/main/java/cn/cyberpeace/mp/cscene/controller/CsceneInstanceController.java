@@ -890,13 +890,14 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @ApiOperation("执行场景checker")
     @PostMapping("/exec_check_script")
     public ServiceResult<String> execCheckScript(@RequestBody CsceneInstanceCheckRequest checkRequest) {
+        log.info("receive checker request: {}", JsonCommon.snakeStringify(checkRequest));
 
         // 参数校验
         String csceneId = checkRequest.getMpScene();
         String nodeId = checkRequest.getNodeId();
         File file = new File(checkRequest.getScriptFilePath());
         if (!file.exists()) {
-            log.error("脚本文件不存在!");
+            log.error("脚本文件不存在! filepath: " + checkRequest.getScriptFilePath());
             throw new MpRuntimeException(BaseErrorCode.DATA_NOT_EXIST.format("脚本文件不存在!"));
         }
         Info info = this.getParsedInfo(csceneId, nodeId, true);
