@@ -287,10 +287,10 @@ public class HttpUtils {
         CloseableHttpClient httpClient = HttpClients.createDefault();
         HttpPost uploadFile = new HttpPost(url);
         MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-        builder.addBinaryBody("file", file, ContentType.DEFAULT_BINARY, file.getName());
+        builder.addBinaryBody("file", file, ContentType.MULTIPART_FORM_DATA, file.getName());
         for (var entry : params.entrySet()) {
             if(entry.getValue() != null){
-                builder.addTextBody(entry.getKey(), entry.getValue().toString(), ContentType.TEXT_PLAIN);
+                builder.addTextBody(entry.getKey(), entry.getValue().toString(), ContentType.MULTIPART_FORM_DATA);
             }
         }
         HttpEntity multipart = builder.build();

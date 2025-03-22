@@ -915,6 +915,14 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     }
 
 
+    @ApiOperation("执行场景checker")
+    @PostMapping("/test_checker")
+    public ServiceResult<String> testChecker() {
+
+        return modelService.testExecCheck();
+    }
+
+
     private Info getParsedInfo(String csceneId, String nodeId, boolean throwException) {
         Info info = new Info();
 

@@ -1762,12 +1762,36 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
 
     public ServiceResult<String> execCheck(String frameServerConfigIp, String scriptParams, SshFtpRequest sshFtpRequest, File file) {
+        ServiceResult ret = null;
+
         String url = "http://{ip}:8080/agent/checker/exec/pycmd".replace("{ip}", frameServerConfigIp);
 
         String command = "python3 /data/scripts/" + file.getName() + " " + sshFtpRequest.getHost();
         if (scriptParams != null && !scriptParams.isEmpty()) {
             command = command + " " + scriptParams.replaceAll(",", " ");
         }
+        Map<String, Object> map = new HashMap<>();
+        map.put("command", command);
+        log.info("执行checker, url:{}, \n command:{}", url, command);
+        try {
+            String res = HttpUtils.sendUpload(url, map, file);
+            log.info("执行checker 返回结果res：{}", res);
+            ret = JsonCommon.parse(res, ServiceResult.class);
+        }catch (Exception e) {
+            log.error(e.toString());
+            throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("执行checker失败!"));
+        }
+
+        return ret;
+    }
+
+
+    public ServiceResult<String> testExecCheck() {
+        String url = "http://localhost:8090/agent/checker/exec/pycmd";
+        File file = new File("D:\\data\\scripts\\a.py");
+
+        String command = "python3 /data/scripts/" + file.getName() + " " + "127.0.0.1";
+
         Map<String, Object> map = new HashMap<>();
         map.put("command", command);
         String res = HttpUtils.sendUpload(url, map, file);
