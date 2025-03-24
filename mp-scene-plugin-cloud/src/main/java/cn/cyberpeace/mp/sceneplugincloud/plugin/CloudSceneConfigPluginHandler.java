@@ -145,6 +145,10 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
         } else if (role.equals(BaseCloudPluginSceneElementModel.Role.NPC)) {
             cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.NPC);
         }
+
+        if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_SWITCH) && BaseCloudPluginSceneElementModel.ImageType.SIMPLE.equals(imageType)) {
+            cloudElement.setRole(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_2_GATEWAY);
+        }
     }
 
     private void correctElementImageTypeRelated(SceneConfigElementBO srcElement, CloudPluginSceneConfigElementBO cloudElement,

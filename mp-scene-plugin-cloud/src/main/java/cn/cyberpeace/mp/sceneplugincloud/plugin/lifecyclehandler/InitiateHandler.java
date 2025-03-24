@@ -809,30 +809,32 @@ public class InitiateHandler extends HandlerCommon {
                 connectNetwork.network.setVlan(vlan);
             }
 
-            // 未显式关闭
-            if (!Boolean.TRUE.equals(cloudElement.getAuxiliaryRouterOff())) {
-                // 是否开启辅助路由(是否未连接默认路由)
-                boolean routerOn = true;
-                if (this.isGateway(cloudElement.getCoreType(), cloudElement.getVirtualType(), cloudElement.getSrcElement().getType())) {
-                    routerOn = false;
-                } else if (ElementTypeUtils.isEntityGateway(cloudElement)) {
-                    routerOn = false;
-                } else {
-                    for (SceneElementPortBO p : connectNetwork.getFromPorts()) {
-                        SceneElementBO connectedCloudElement = getHandlerUtils().getPortConnectedOpaqueSrcElement(p.getId());
-                        CloudPluginSceneElementBO pluginConnectedCloudElement = connectedCloudElement == null ? null : getPluginHandler().getElement(connectedCloudElement.getId());
-                        if (pluginConnectedCloudElement != null) {
-                            if (this.isGateway(pluginConnectedCloudElement.getCoreType(), pluginConnectedCloudElement.getVirtualType(), pluginConnectedCloudElement.getSrcElement().getType())) {
-                                routerOn = false;
-                                break;
-                            }
-                        }
-                    }
-                }
-                connectNetwork.network.setAuxiliaryNetworkRouterOn(routerOn);
-            } else {
-                connectNetwork.network.setAuxiliaryNetworkRouterOn(false);
-            }
+            connectNetwork.network.setAuxiliaryNetworkRouterOn(false);
+
+//            // 未显式关闭
+//            if (!Boolean.TRUE.equals(cloudElement.getAuxiliaryRouterOff())) {
+//                // 是否开启辅助路由(是否未连接默认路由)
+//                boolean routerOn = true;
+//                if (this.isGateway(cloudElement.getCoreType(), cloudElement.getVirtualType(), cloudElement.getSrcElement().getType())) {
+//                    routerOn = false;
+//                } else if (ElementTypeUtils.isEntityGateway(cloudElement)) {
+//                    routerOn = false;
+//                } else {
+//                    for (SceneElementPortBO p : connectNetwork.getFromPorts()) {
+//                        SceneElementBO connectedCloudElement = getHandlerUtils().getPortConnectedOpaqueSrcElement(p.getId());
+//                        CloudPluginSceneElementBO pluginConnectedCloudElement = connectedCloudElement == null ? null : getPluginHandler().getElement(connectedCloudElement.getId());
+//                        if (pluginConnectedCloudElement != null) {
+//                            if (this.isGateway(pluginConnectedCloudElement.getCoreType(), pluginConnectedCloudElement.getVirtualType(), pluginConnectedCloudElement.getSrcElement().getType())) {
+//                                routerOn = false;
+//                                break;
+//                            }
+//                        }
+//                    }
+//                }
+//                connectNetwork.network.setAuxiliaryNetworkRouterOn(routerOn);
+//            } else {
+//                connectNetwork.network.setAuxiliaryNetworkRouterOn(false);
+//            }
         }
     }
 
