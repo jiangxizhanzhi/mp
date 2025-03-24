@@ -1298,11 +1298,11 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 	public void insertK316User(String username) {
 
         UserRequest request = new UserRequest();
-        request.setUsername(username);
-        request.setName(username);
+        request.setUsername(username + "_k316");
+        request.setName(username + "_k316");
         request.setPassword("d8165e80c4abed2dcc1dd06df1a8be31");
         request.setOrgIds(Lists.newArrayList("a13262d600fe40c799d63dce5c1485af"));
-        request.setRoleIds(Lists.newArrayList("5827ff7847504ffd806e0a85c417228d"));
+        request.setRoleIds(Lists.newArrayList("50ca4660dfc54c55ae820bdf90338662"));
         request.setTenant("K316");
 
         transactionTemplate.execute(new TransactionCallbackWithoutResult() {
