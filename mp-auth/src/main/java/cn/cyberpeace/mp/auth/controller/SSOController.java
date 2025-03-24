@@ -5,15 +5,12 @@ import cn.cyberpeace.mp.auth.bo.sso.SSOLoginOutBO;
 import cn.cyberpeace.mp.auth.config.SSOConfig;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.constant.SSOSysEnum;
-import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.request.sso.SSOLoginRequest;
 import cn.cyberpeace.mp.auth.service.SSOService;
 import cn.cyberpeace.mp.auth.service.SSOServiceFactory;
-import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import com.alibaba.fastjson.JSON;
 import io.swagger.annotations.Api;
@@ -49,37 +46,38 @@ public class SSOController {
     @Resource
     private SSOConfig ssoConfig;
 
-    @ApiOperation(value = "拦截", notes = "拦截")
+    @ApiOperation(value = "拦截测试", notes = "拦截")
     @GetMapping("/logouts")
-    public void logouts(){
+    public void logouts() {
         log.info("test!!!!!!!!!!!!!!!!!!!!!!");
     }
 
-    @ApiOperation(value = "登出跳转", notes = "登出跳转(需要token)")
+    @ApiOperation(value = "登出跳转url获取", notes = "登出跳转url获取")
     @GetMapping("/logout/redirect")
-    public ServiceResult<Boolean> logoutRedirect(@RequestParam(value = "out_user_type") String outUserType,@RequestParam(value = "account_id") String accountId, HttpServletRequest request, HttpServletResponse response){
+    public ServiceResult<String> logoutRedirect(@RequestParam(value = "out_user_type") String outUserType,
+                                                @RequestParam(value = "account_id") String accountId,
+                                                @RequestParam(value = "four_aticket") String fourATicket,
+                                                HttpServletRequest request, HttpServletResponse response) {
+        String url = "";
         // 当前登录人员的平台类型
-        log.info("local user type:" + outUserType + "; local user accountId:" + accountId);
+        log.info("local user type:" + outUserType + "; local user accountId:" + accountId + "; local user ticket:" + fourATicket);
         if (accountId != null && outUserType != null) {
             if (outUserType.equals(SSOSysEnum.FOUR_A.getCode())) {
                 // 4a平台用户登出
                 SSOLoginOutBO ssoLoginOutBO = SSOLoginOutBO.builder()
-                        .ticket(UserUtils.getLoginUser().getFourATicket())
+                        .ticket(fourATicket)
                         .request(request)
                         .response(response)
                         .build();
                 SSOService ssoService = ssoServiceFactory.getSSOService(SSOSysEnum.FOUR_A);
-                try {
-                    ssoService.logout(ssoLoginOutBO);
-                } catch (Exception e) {
-                    throw new MpRuntimeException(e.getMessage());
-                }
-                return ResultCommon.success(Boolean.TRUE).asResult();
-            } else if(outUserType.equals(SSOSysEnum.SOC.getCode())) {
-                return ResultCommon.success(Boolean.TRUE).asResult();
+                ssoService.logout(ssoLoginOutBO);
+                url = ssoConfig.getOutHomePageUrl();
+                return ResultCommon.success(url).asResult();
+            } else if (outUserType.equals(SSOSysEnum.SOC.getCode())) {
+                return ResultCommon.success(url).asResult();
             }
         }
-        return ResultCommon.success(Boolean.FALSE).asResult();
+        return ResultCommon.success(url).asResult();
     }
 
     /**

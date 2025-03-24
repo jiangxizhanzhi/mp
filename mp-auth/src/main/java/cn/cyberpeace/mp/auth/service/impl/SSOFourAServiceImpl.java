@@ -139,7 +139,6 @@ public class SSOFourAServiceImpl extends AbstractSSOService {
             addRequest.setNickname(userInfo.getPhone());
             addRequest.setMobile(userInfo.getMobile());
             addRequest.setEmail(userInfo.getEmail());
-            addRequest.setPassword(AuthConstant.DEFAULT_INITIALPASSWORD);// 该密码为前端加密过后的密码,原始密码为Xctfoj01
             // 登录凭证ticket
             addRequest.setFourATicket(ssoLoginBO.getTicket());
             if (users == null || users.size() == 0) {// 目前无该用户
@@ -148,10 +147,11 @@ public class SSOFourAServiceImpl extends AbstractSSOService {
                 // 预设学员角色和默认组织
                 addRequest.setOrgIds(Collections.singletonList(AuthConstant.ROOT_ORG_ID));
                 addRequest.setRoleIds(Collections.singletonList(AuthConstant.ROLE_XUEYUAN_ID));// 以实际环境的学员角色id为准
+                addRequest.setPassword(AuthConstant.DEFAULT_INITIALPASSWORD);// 该密码为前端加密过后的密码,原始密码为Xctfoj01
                 log.info("prepare addFourUser: {}" + JSON.toJSONString(addRequest));
                 user = userService.addFourAUser(addRequest);
             } else if (users.size() == 1) {// 查找到唯一用户
-                // 修改用户,目前无需修改其他信息
+                // 刷新用户信息
                 user = userService.get(users.get(0).getId()).sourceObj();
                 addRequest.setId(user.getId());
                 log.info("prepare modifyFourUser: {}" + JSON.toJSONString(addRequest));
@@ -184,19 +184,17 @@ public class SSOFourAServiceImpl extends AbstractSSOService {
 
     @Override
     public void doLogout(SSOLoginOutBO ssoLoginOutBO) {
+        log.info("prepare bo");
         if (StringUtils.isBlank(ssoLoginOutBO.getTicket())) {
             log.warn("4A logout failed: Ticket is empty!");
             return;
         }
-
+        log.info("prepare logout");
         // 4A 单点登出
         try {
             loginUtil.logout(ssoLoginOutBO.getTicket());
         } catch (Exception e) {
             log.error("4A logout request failed!", e);
         }
-
-        // 跳转
-        loginUtil.redirectToServer(ssoLoginOutBO.getRequest(),ssoLoginOutBO.getResponse());
     }
 }
