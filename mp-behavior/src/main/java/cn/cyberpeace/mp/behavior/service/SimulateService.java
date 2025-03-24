@@ -6,8 +6,10 @@ import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
+import cn.cyberpeace.mp.base.util.basic.CollectionUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
+import cn.cyberpeace.mp.base.util.mptool.CollectionUtil;
 import cn.cyberpeace.mp.behavior.bo.*;
 import cn.cyberpeace.mp.behavior.mapper.SceneModelMapper;
 import cn.cyberpeace.mp.behavior.mapper.SimulateMapper;
@@ -16,7 +18,9 @@ import cn.cyberpeace.mp.behavior.model.SceneModel;
 import cn.cyberpeace.mp.behavior.model.SimulateModel;
 import cn.cyberpeace.mp.behavior.model.TaskModel;
 import cn.cyberpeace.mp.behavior.req.CreateSimulateReq;
+import cn.cyberpeace.mp.behavior.res.SimulateDetailRes;
 import cn.cyberpeace.mp.behavior.res.SimulatePageRes;
+import cn.cyberpeace.mp.behavior.res.TaskPageRes;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
@@ -77,7 +81,7 @@ public class SimulateService {
 			simulateModel.setDelete(false);
 			simulateModel.setOnline(false);
 			simulateModel.setId(TextUtils.uuid());
-			simulateModel.setIp("");
+			simulateModel.setIp(nodeBo.getNodeIp());
 
 			List<TaskModel> taskModelList = new ArrayList<>();
 			for (NodeUserBehavior nodeUserBehavior : JSONObject.parseArray(sceneModel.getNodeConfig(), NodeUserBehavior.class)) {
@@ -148,7 +152,18 @@ public class SimulateService {
 	}
 
 	public void deleteSimulate(List<String> simulateIds) {
-		simulateMapper.delete(simulateIds);
+
+		transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
+				for (String simulateId : simulateIds) {
+					timerMap.remove(simulateId);
+				}
+				simulateMapper.delete(simulateIds);
+				taskMapper.filterDelete(new HumanCondition().filterIn(TaskModel::getSimulateId, simulateIds.toArray()));
+			}
+		});
 	}
 
 	public ListObjServiceResult<SimulatePageRes> page(QueryParams pageReq) {
@@ -167,8 +182,40 @@ public class SimulateService {
 		return new ListObjServiceResult(new ListObjResult(pageRes, total).asResult());
 	}
 
-	public void startTask() {
+	public void deleteTask(String sceneId) {
+		List<SimulateModel> simulateModelList = simulateMapper.list(new HumanCondition().filterEqual(SimulateModel::getSceneId, sceneId));
+		for (SimulateModel simulateModel : simulateModelList) {
+			stopSimulate(simulateModel.getId());
+		}
+		sceneModelMapper.filterDelete(new HumanCondition().filterEqual(SceneModel::getSceneId, sceneId));
+	}
 
+	public List<String> getNameList() {
+		return simulateMapper.getNameList();
+	}
+
+	public SimulateDetailRes detail(String simulateId) {
+		SimulateModel simulateModel = simulateMapper.get(simulateId);
+		if (simulateModel == null) {
+			log.error("找不到对应仪表, 仪表id:[{}]", simulateId);
+			throw new MpRuntimeException("找不到对应仪表");
+		}
+		SimulateDetailRes simulateDetailRes = new SimulateDetailRes();
+		simulateDetailRes.setId(simulateModel.getId());
+		simulateDetailRes.setIp(simulateModel.getIp());
+		simulateDetailRes.setSceneName(simulateModel.getSceneName());
+		simulateDetailRes.setStartTime(TimeUtils.format(simulateModel.getStartTime()));
+		simulateDetailRes.setEndTime(TimeUtils.format(simulateModel.getEndTime()));
+		List<TaskPageRes> taskPageResList = new ArrayList<>();
+		List<TaskModel> taskModelList = taskMapper.list(new HumanCondition().filterEqual(TaskModel::getSimulateId, simulateId));
+		for (TaskModel taskModel : taskModelList) {
+			TaskPageRes taskPageRes = new TaskPageRes();
+			BeanUtils.copyProperties(taskModel, taskPageRes);
+			taskPageRes.setRunTime(TimeUtils.format(taskModel.getRunTime()));
+			taskPageResList.add(taskPageRes);
+		}
+		simulateDetailRes.setBehaviorList(taskPageResList);
+		return simulateDetailRes;
 	}
 
 	private void recoverTimerTask() {

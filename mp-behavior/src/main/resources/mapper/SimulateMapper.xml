@@ -26,4 +26,9 @@
                 #{id}
             </foreach>
     </update>
+
+    <select id="getNameList" resultType="java.lang.String">
+        select DISTINCT scene_name
+        from mp_behavior_simulate
+    </select>
 </mapper>

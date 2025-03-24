@@ -21,4 +21,6 @@ public interface SimulateMapper extends BaseModelMapper<SimulateModel> {
 	List<String> selectIdByStatus(@Param("status") Integer status);
 
 	void delete(@Param("ids") List<String> ids);
+
+	List<String> getNameList();
 }

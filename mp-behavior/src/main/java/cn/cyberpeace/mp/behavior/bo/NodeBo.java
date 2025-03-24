@@ -13,4 +13,7 @@ public class NodeBo implements Serializable {
 
 	@ApiModelProperty("节点名称")
 	private String nodeName;
+
+	@ApiModelProperty("节点ip")
+	private String nodeIp;
 }

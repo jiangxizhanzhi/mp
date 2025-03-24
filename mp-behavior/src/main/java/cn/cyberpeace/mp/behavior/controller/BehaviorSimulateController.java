@@ -5,7 +5,9 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.behavior.constant.ControllerConstant;
 import cn.cyberpeace.mp.behavior.req.DeleteReq;
+import cn.cyberpeace.mp.behavior.res.SimulateDetailRes;
 import cn.cyberpeace.mp.behavior.res.SimulatePageRes;
+import cn.cyberpeace.mp.behavior.res.TaskPageRes;
 import cn.cyberpeace.mp.behavior.service.SimulateService;
 import cn.cyberpeace.mp.behavior.service.TaskService;
 import io.swagger.annotations.Api;
@@ -14,6 +16,8 @@ import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Slf4j
 @Api(tags = "行为仪表管理")
@@ -28,7 +32,7 @@ public class BehaviorSimulateController {
 	private TaskService taskService;
 
 	@ApiOperation("行为仪表数量")
-	@GetMapping("/count_simulate")
+	@GetMapping("/count")
 	public ServiceResult<Integer> countSimulate() {
 		return new ServiceResult<>(simulateService.countSimulate()).asResult();
 	}
@@ -46,23 +50,30 @@ public class BehaviorSimulateController {
 	}
 
 	@ApiOperation("启动行为仪表")
-	@GetMapping("/run_simulate")
+	@GetMapping("/run")
 	public ServiceResult<Boolean> runSimulate(@ApiParam(name = "simulate_id", value = "仪表id") @RequestParam("simulate_id") String simulateId) {
 		simulateService.runSimulate(simulateId);
 		return new ServiceResult<>(true).asResult();
 	}
 
 	@ApiOperation("停止行为仪表")
-	@GetMapping("/stop_simulate")
+	@GetMapping("/stop")
 	public ServiceResult<Boolean> stopSimulate(@ApiParam(name = "simulate_id", value = "仪表id") @RequestParam("simulate_id") String simulateId) {
 		simulateService.stopSimulate(simulateId);
 		return new ServiceResult<>(true).asResult();
 	}
 
 	@ApiOperation("删除行为仪表")
-	@DeleteMapping("/delete_simulate")
+	@DeleteMapping("/delete")
 	public ServiceResult<Boolean> deleteSimulate(@RequestBody DeleteReq deleteReq) {
 		simulateService.deleteSimulate(deleteReq.getIds());
 		return new ServiceResult<>(true).asResult();
 	}
+
+	@ApiOperation("查看仪表详情")
+	@GetMapping("/detail")
+	public ServiceResult<SimulateDetailRes> detail(@ApiParam(name = "simulate_id", value = "仪表id") @RequestParam("simulate_id") String simulateId) {
+		return new ServiceResult<>(simulateService.detail(simulateId));
+	}
+
 }

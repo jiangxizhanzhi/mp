@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.behavior.service.RunBehaviorLogService;
 import cn.cyberpeace.mp.behavior.service.SimulateService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -42,16 +43,29 @@ public class BehaviorControlController {
 		return new ServiceResult<>(runBehaviorLogService.getQueueList()).asResult();
 	}
 
-	@ApiOperation("创建行为任务")
+	@ApiOperation("运行日志分页")
+	@GetMapping("/run_log_page")
+	public ListObjServiceResult<RunBehaviorLogPage> pageBehavior(QueryParams pageReq) {
+		return runBehaviorLogService.page(pageReq).asResult();
+	}
+
+	@ApiOperation("创建行为任务-创建场景时调用")
 	@PostMapping("/create")
 	public ServiceResult<Boolean> createTask(@RequestBody CreateSimulateReq createSimulateReq) {
 		simulateService.createTask(createSimulateReq);
 		return new ServiceResult<>(true).asResult();
 	}
 
-	@ApiOperation("运行日志分页")
-	@GetMapping("/run_log_page")
-	public ListObjServiceResult<RunBehaviorLogPage> pageBehavior(QueryParams pageReq) {
-		return runBehaviorLogService.page(pageReq).asResult();
+	@ApiOperation("删除行为任务-关闭场景时调用")
+	@DeleteMapping("/delete")
+	public ServiceResult<Boolean> deleteTask(@ApiParam(name = "scene_id", value = "场景id") @RequestParam("scene_id") String sceneId) {
+		simulateService.deleteTask(sceneId);
+		return new ServiceResult<>(true).asResult();
+	}
+
+	@ApiOperation("实验名称列表")
+	@GetMapping("/name_list")
+	public ServiceResult<List<String>> getNameList() {
+		return new ServiceResult<>(simulateService.getNameList());
 	}
 }
