@@ -60,6 +60,17 @@ public enum OpModuleEnums {
     // 25:战队"
     TEAM("team"),
 
+    // 26:网络安全策略科目训练
+    NETWORK_SECURITY_STRATEGY("network_security_strategy"),
+    // 27:网络安全服务科目训练
+    NETWORK_SECURITY_SERVICES("network_security_services"),
+    // 28:网络安全监测预警训练
+    NETWORK_SECURITY_MONITOR("network_security_monitor"),
+    // 29:网络安全应急响应训练
+    NETWORK_SECURITY_RESPONSE("network_security_response"),
+    // 30:网络安全审计训练
+    NETWORK_SECURITY_AUDIT("network_security_audit"),
+
     DEFAULT("");
 
     private String code;
