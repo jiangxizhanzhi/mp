@@ -130,4 +130,7 @@ public class FlowTaskPageResponse {
      */
     @ApiModelProperty(value = "实时速率")
     private List<FlowRealTimeRate> realTimeRateList;
+
+    @ApiModelProperty(value = "流量id")
+    private String flowId;
 }

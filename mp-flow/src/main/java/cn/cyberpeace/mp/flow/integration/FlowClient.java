@@ -50,6 +50,9 @@ public class FlowClient {
         remoteFlowInfo.setFileName(response.getFileName());
         remoteFlowInfo.setPcapFile(response.getPcapFile());
         remoteFlowInfo.setProtocolList(response.getProtocolList());
+        remoteFlowInfo.setPcapSize(response.getPcapSize());
+        remoteFlowInfo.setDuration(response.getDuration());
+        remoteFlowInfo.setPktNum(response.getPktNum());
         if (StringUtils.isNotEmpty(response.getParameter())) {
             var params = JsonCommon.parse(response.getParameter(), new TypeReference<Map<String, List<String>>>() {
             });
@@ -118,6 +121,9 @@ public class FlowClient {
         private String file;
         private String fileName;
         private String pcapFile;
+        private Long duration;
+        private Long pcapSize;
+        private Long pktNum;
         private List<ProtocolBO> protocolList;
         private String parameter;
         private Integer interactiveType;

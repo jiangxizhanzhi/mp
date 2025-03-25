@@ -22,6 +22,7 @@ import cn.cyberpeace.mp.flow.integration.cloud.base.AddVirtualNicParams;
 import cn.cyberpeace.mp.flow.integration.cloud.base.ICloudClient;
 import cn.cyberpeace.mp.flow.model.FlowActuatorModel;
 import cn.cyberpeace.mp.flow.model.FlowInfoModel;
+import cn.cyberpeace.mp.flow.model.FlowPcapModel;
 import cn.cyberpeace.mp.flow.model.FlowProtocolModel;
 import cn.cyberpeace.mp.flow.model.FlowScriptParamModel;
 import cn.cyberpeace.mp.flow.model.FlowTaskConfModel;
@@ -30,6 +31,7 @@ import cn.cyberpeace.mp.flow.model.FlowTaskRecordModel;
 import cn.cyberpeace.mp.flow.model.FlowTaskTaskModel;
 import cn.cyberpeace.mp.flow.repository.FlowActuatorMapper;
 import cn.cyberpeace.mp.flow.repository.FlowInfoMapper;
+import cn.cyberpeace.mp.flow.repository.FlowPcapMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskConfMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskPortMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskRecordMapper;
@@ -100,6 +102,9 @@ public class FlowActuatorTaskService extends BaseModelServiceImpl<FlowTaskTaskMo
 
     @Resource
     private ICloudClient cloudClient;
+
+    @Resource
+    private FlowPcapMapper flowPcapMapper ;
 
     public FlowActuatorTaskService(FlowTaskTaskMapper flowTaskTaskMapper) {
         super();
@@ -300,6 +305,29 @@ public class FlowActuatorTaskService extends BaseModelServiceImpl<FlowTaskTaskMo
             int offset = (params.getPage() - 1) * params.getPageSize();
             int limit = params.getPageSize();
             var list = flowTaskTaskMapper.listTasksByCscene(params, offset, limit);
+            if (CollectionUtils.isNotEmpty(list)) {
+                var flowIds = new ArrayList<>();
+                for (FlowTaskPageResponse l : list) {
+                    flowIds.add(l.getFlowId());
+                }
+                var pcapInfos = flowPcapMapper.list(new HumanCondition().filterIn(FlowPcapModel::getFlowId, flowIds.toArray(new String[]{})));
+                if (CollectionUtils.isNotEmpty(pcapInfos)) {
+                    Map<String,FlowPcapModel> pcapModelMap = new HashMap<>();
+                    for (FlowPcapModel p : pcapInfos) {
+                        pcapModelMap.put(p.getFlowId(), p);
+                    }
+                    for (var f : list) {
+                        var pcapModel = pcapModelMap.get(f.getFlowId());
+                        if (pcapModel == null) {
+                            continue;
+                        }
+                        f.setDuration(pcapModel.getDuration());
+                        f.setPcapSize(pcapModel.getPcapSize());
+                        f.setPktNum(pcapModel.getPktNum());
+                        f.setProtocols(pcapModel.getProtocols());
+                    }
+                }
+            }
             return new ListObjServiceResult<>(new ListObjResult<>(list, total));
         }
     }

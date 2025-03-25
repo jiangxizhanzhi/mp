@@ -34,6 +34,9 @@ public class RemoteFlowInfo {
     private String file;
     private String fileName;
     private String pcapFile;
+    private Long duration;
+    private Long pcapSize;
+    private Long pktNum;
     private Integer interactiveType;
     private List<ProtocolBO> protocolList;
     private List<ScriptParamModel> scriptParamModels;

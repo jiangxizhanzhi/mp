@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.flow.bo.AddFlowTaskFlowInfo;
 import cn.cyberpeace.mp.flow.bo.AddFlowTaskParams;
 import cn.cyberpeace.mp.flow.bo.FlowTaskAttackConf;
 import cn.cyberpeace.mp.flow.bo.FlowTaskConf;
+import cn.cyberpeace.mp.flow.bo.ProtocolBO;
 import cn.cyberpeace.mp.flow.config.FlowConfig;
 import cn.cyberpeace.mp.flow.constant.FlowCategory;
 import cn.cyberpeace.mp.flow.enums.ResourceTypeEnum;
@@ -18,10 +19,12 @@ import cn.cyberpeace.mp.flow.integration.cloud.base.ICloudClient;
 import cn.cyberpeace.mp.flow.integration.cloud.topocloud.TopoCloudClient;
 import cn.cyberpeace.mp.flow.integration.cloud.topocloud.request.BusinessCSceneInstance;
 import cn.cyberpeace.mp.flow.model.FlowActuatorModel;
+import cn.cyberpeace.mp.flow.model.FlowPcapModel;
 import cn.cyberpeace.mp.flow.model.FlowTaskConfModel;
 import cn.cyberpeace.mp.flow.model.FlowTaskPortModel;
 import cn.cyberpeace.mp.flow.model.FlowTaskTaskModel;
 import cn.cyberpeace.mp.flow.repository.FlowActuatorMapper;
+import cn.cyberpeace.mp.flow.repository.FlowPcapMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskConfMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskPortMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskTaskMapper;
@@ -69,6 +72,9 @@ public class AddTaskByRemoteFlowService2 implements IAddTaskService {
 
     @Resource
     private FlowCsceneService flowCsceneService;
+
+    @Resource
+    private FlowPcapMapper flowPcapMapper ;
 
     @Override
     public void addTasksToDb(FlowActuatorModel flowActuator) {
@@ -425,6 +431,7 @@ public class AddTaskByRemoteFlowService2 implements IAddTaskService {
             remoteFlowInfoMap.put(flow.getFlowId(), flow);
         }
 
+        List<FlowPcapModel> pcapModels = new ArrayList<>();
         List<FlowTaskConfModel> confModels = new ArrayList<>();
         for (var taskModel : flowTaskTaskModelList) {
             String taskId = taskModel.getId();
@@ -433,7 +440,25 @@ public class AddTaskByRemoteFlowService2 implements IAddTaskService {
             RemoteFlowInfo remoteFlowInfo = remoteFlowInfoMap.get(taskModel.getFlowId());
             FlowTaskConfModel confModel = createTaskConfig(taskId, resourceType, addFlowTaskFlowInfo.getAttackConfs(), remoteFlowInfo.getScriptParamModels());
             confModels.add(confModel);
+
+            if (resourceType == ResourceTypeEnum.PACP.toValue()) {
+                FlowPcapModel pcapModel = new FlowPcapModel();
+                pcapModel.setFlowId(taskModel.getFlowId());
+                pcapModel.setDuration(remoteFlowInfo.getDuration());
+                pcapModel.setPcapSize(remoteFlowInfo.getPcapSize());
+                pcapModel.setPktNum(remoteFlowInfo.getPktNum());
+                List<String> protocols = new ArrayList<>();
+                if (remoteFlowInfo.getProtocolList() != null) {
+                    for (ProtocolBO p : remoteFlowInfo.getProtocolList()) {
+                        protocols.add(p.getProtocolName());
+                    }
+                }
+                pcapModel.setProtocols(JsonCommon.stringify(protocols));
+                pcapModel.setPcapFile(remoteFlowInfo.getPcapFile());
+                pcapModels.add(pcapModel);
+            }
         }
+        flowPcapMapper.bulkCreate(pcapModels);
         flowTaskConfMapper.bulkCreate(confModels);
         return confModels;
     }
