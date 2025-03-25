@@ -62,6 +62,24 @@ public class BackgroundFlowResponse extends FlowInfoResponse {
     @ApiModelProperty(value = "pcap包含协议集合")
     private List<ProtocolBO> protocolList;
 
+    /**
+     * 时长(单位ms)
+     */
+    @ApiModelProperty(value = "时长(单位ms)")
+    private Long duration;
+
+    /**
+     * 大小(单位Byte)
+     */
+    @ApiModelProperty(value = "大小(单位Byte)")
+    private Long pcapSize;
+
+    /**
+     * 包数(报文数量)
+     */
+    @ApiModelProperty(value = "包数(报文数量)")
+    private Long pktNum;
+
     public BackgroundFlowResponse(FlowInfoModel flowInfoModel, String prefixUrl) {
         setResourceId(flowInfoModel.getId());
         setTitle(flowInfoModel.getTitle());

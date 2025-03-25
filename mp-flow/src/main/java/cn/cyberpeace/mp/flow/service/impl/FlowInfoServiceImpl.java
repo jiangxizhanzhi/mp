@@ -10,6 +10,7 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.flow.service.impl;
 
+ import cn.cyberpeace.mp.base.common.BeanCommon;
  import cn.cyberpeace.mp.base.common.FsCommon;
  import cn.cyberpeace.mp.base.common.MessageCommon;
  import cn.cyberpeace.mp.base.common.TaskCommon;
@@ -33,6 +34,7 @@ package cn.cyberpeace.mp.flow.service.impl;
  import cn.cyberpeace.mp.flow.repository.FlowCollectionMapper;
  import cn.cyberpeace.mp.flow.repository.FlowCollectionRelMapper;
  import cn.cyberpeace.mp.flow.repository.FlowInfoMapper;
+ import cn.cyberpeace.mp.flow.repository.FlowPcapMapper;
  import cn.cyberpeace.mp.flow.repository.FlowTaskMapper;
  import cn.cyberpeace.mp.flow.request.*;
  import cn.cyberpeace.mp.flow.request.queryparam.FlowInfoQueryParams;
@@ -429,6 +431,14 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         }
 
         response.setProtocolList(this.getProtocolBOList(id));
+        // 查询pcap流量的时长、包数量、文件大小
+        FlowPcapMapper flowPcapMapper = BeanCommon.getBean(FlowPcapMapper.class);
+        var flowPcapModel = flowPcapMapper.first(new HumanCondition().filterEqual(FlowPcapModel::getFlowId, id));
+        if (flowPcapModel != null) {
+            response.setDuration(flowPcapModel.getDuration());
+            response.setPktNum(flowPcapModel.getPktNum());
+            response.setPcapSize(flowPcapModel.getPcapSize());
+        }
         return ResultCommon.success(response);
     }
 
