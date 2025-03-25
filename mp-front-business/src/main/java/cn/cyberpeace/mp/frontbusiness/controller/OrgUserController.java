@@ -1,12 +1,13 @@
 package cn.cyberpeace.mp.frontbusiness.controller;
 
+import cn.cyberpeace.mp.auth.bo.org.OrgDto;
 import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
-import cn.cyberpeace.mp.auth.bo.org.OrgDto;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.request.org.BindOrgUsersRequest;
 import cn.cyberpeace.mp.auth.request.org.OrgUserPageRequest;
+import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.auth.service.TenantUserService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
@@ -22,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -38,15 +40,39 @@ public class OrgUserController {
     @Autowired
     private TenantUserService tenantUserService;
 
+    @Autowired
+    private OrgService orgService;
 
-    @ApiOperation(value = "分页查询组织下所有用户信息（默认查询组织下所有层级子组织的用户，" +
-            "可以通过设置showAllUnderLevel=false来关闭默认，只显示当前组织绑定的用户），附带组织，角色信息", notes = "")
+
+    @ApiOperation(value = "查询组织下所有（默认查询组织下所有层级的组织id", notes = "")
     @GetMapping("/page/byorg")
     public ListObjServiceResult<Object> getPageByOrg(OrgUserPageRequest req) {
         req.ensure();
         PageInfo pageInfo = tenantUserService.pageUsersByOrg(req);
 
         return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
+    }
+
+    @ApiOperation(value = "查询多个组织下所有用户", notes = "")
+    @PostMapping("/byorgs")
+    public ListObjServiceResult<Object> getPageByOrg(@RequestBody List<String> orgIds) {
+        UserBo userCondition = new UserBo();
+        userCondition.setUsername(null);
+        userCondition.setIsEnabled(1);
+        userCondition.setIsAudited(1);
+        userCondition.setIsExpired(0);
+        PageInfo pageInfo = tenantUserService.listPageUsers(orgIds, null, null, userCondition, null, null, null, LocalDateTime.now(), 10000, 1);
+
+        return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
+    }
+
+
+    @ApiOperation(value = "分页查询组织下所有用户信息（默认查询组织下所有层级子组织的用户，" +
+            "可以通过设置showAllUnderLevel=false来关闭默认，只显示当前组织绑定的用户），附带组织，角色信息", notes = "")
+    @GetMapping("/byorg")
+    public ServiceResult<List<OrgDto>> getOrgsByOrg() {
+        List<OrgDto> orgDtos = orgService.getTree("a13262d600fe40c799d63dce5c1485af");
+        return ResultCommon.success(orgDtos);
     }
 
     @ApiOperation(value = "根据userId列表查询用户信息", notes = "")

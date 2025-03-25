@@ -167,4 +167,12 @@ public class RoleController {
         }
         return new ServiceResult<>(roleService.getRoleInfoByUserId(userId)).asResult();
     }
+
+    @ApiOperation(value = "批量更新角色，同时完成角色-权限绑定关系", notes = "")
+    @PostMapping("/modify/bc_ids")
+    public ServiceResult<Integer> modifyBcIds(@RequestBody String json) {
+        List<RoleModel> roleModels = JSONArray.parseArray(json, RoleModel.class);
+        ServiceResult<Integer> integerServiceResult = roleService.bulkUpdate(roleModels);
+        return ResultCommon.success(integerServiceResult.getSource());
+    }
 }

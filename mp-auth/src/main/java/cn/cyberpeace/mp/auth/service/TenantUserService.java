@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.base.service.BaseModelService;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import com.github.pagehelper.PageInfo;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -80,5 +81,17 @@ public interface TenantUserService extends BaseModelService<TenantUserModel, Que
 
 
     List<OrgIdAndCount> getGroupByOrg();
+
+    PageInfo<UserBo> listPageUsers(List<String> orgIds,
+                                   List<String> userIds,
+                                   List<String> orders,
+                                   UserBo userBo,
+                                   String selfUserId,
+                                   List<String> excludeRoleIds,
+                                   List<String> excludeUserIds,
+                                   LocalDateTime currentDateTime,
+                                   Integer page,
+                                   Integer pageSize
+    );
 
 }

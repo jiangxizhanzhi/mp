@@ -2,9 +2,13 @@ package cn.cyberpeace.mp.frontbusiness.controller;
 
 import cn.cyberpeace.mp.auth.bo.role.RolePermBo;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
+import cn.cyberpeace.mp.auth.model.UserRoleModel;
+import cn.cyberpeace.mp.auth.repository.UserRoleMapper;
 import cn.cyberpeace.mp.auth.request.role.RolePageRequest;
 import cn.cyberpeace.mp.auth.service.RoleService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -15,6 +19,9 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @Description: 角色管理接口(业务)
@@ -29,6 +36,9 @@ public class RoleController {
 
     @Autowired
     private RoleService roleService;
+
+    @Autowired
+    private UserRoleMapper userRoleMapper;
 
     @ApiOperation("查询指定id角色（附带权限、用户数）")
     @ApiImplicitParams({
@@ -49,6 +59,17 @@ public class RoleController {
         ListObjServiceResult result = roleService.getPageWithUserCnt(pageRequest);
 
         return result;
+    }
+
+
+    @ApiOperation(value = "查询多个角色对应用户信息", notes = "")
+    @PostMapping("/user/roles")
+    public ServiceResult<List<String>> getUserByRole(@RequestBody List<String> roleIds) {
+        HumanCondition humanCondition = new HumanCondition();
+        humanCondition.filterIn(UserRoleModel::getRole, roleIds.toArray());
+        List<UserRoleModel> list = userRoleMapper.list(humanCondition);
+        List<String> userIds = list.stream().map(UserRoleModel::getUser).distinct().collect(Collectors.toList());
+        return ResultCommon.success(userIds);
     }
 
 }
