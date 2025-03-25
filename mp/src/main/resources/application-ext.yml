@@ -97,6 +97,7 @@ mp:
       third-client-secret: ${THIRD_CLIENT_SECRET:111}
   frontbusiness:
     ext-var:
+      third-role-enabled: ${MP_THIRD_ROLE_ENABLED:false}
       url-ac-filter-enabled: ${MP_FRONTBUSINESS_URLACFILTER_ENABLED:true}
   sceneplugincloud:
     ext-var:

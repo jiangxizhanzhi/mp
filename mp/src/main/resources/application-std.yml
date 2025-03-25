@@ -234,6 +234,7 @@ mp:
     license-dir: /home/mp/config/license
   # mp-front-business 模块配置
   frontbusiness:
+    third-role-enabled: ${mp.frontbusiness.ext-var.third-role-enabled}
     url-ac-filter-enabled: ${mp.frontbusiness.ext-var.url-ac-filter-enabled}
     url-ac-filter-method-match: true
     url-ac-filter-authority-match: true

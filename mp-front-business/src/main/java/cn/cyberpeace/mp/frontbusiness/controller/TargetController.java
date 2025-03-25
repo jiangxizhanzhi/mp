@@ -18,8 +18,10 @@ import cn.cyberpeace.mp.auth.service.UserPermissionService;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.impl.ThirdSsoService;
 import cn.cyberpeace.mp.auth.util.UserUtils;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.frontbusiness.config.FrontBusinessConfig;
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -30,8 +32,6 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.kafka.common.protocol.types.Field;
-import org.apache.poi.ss.formula.functions.T;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,7 +40,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -117,6 +116,22 @@ public class TargetController {
      @ApiOperation(value = "查询当前用户菜单")
      @GetMapping("/current_user/menus")
      public ServiceResult<Menus> getMenus() {
+         boolean thirdRoleEnabled = BeanCommon.getBean(FrontBusinessConfig.class).getThirdRoleEnabled();
+         if (thirdRoleEnabled) {
+             return this.getThirdRoleMenus();
+         } else {
+             List<String> parentIds = JsonCommon.parse("[\"knowledge-space-home\",\"zhishiku\",\"recourse-center-folder\",\"xingdongkuangjia\",\"knowledge-base-management\"]", new TypeReference<List<String>>() {
+             });
+             List<String> childs = JsonCommon.parse("[\"back_all\",\"knowledge-mapping\",\"practices-folder\",\"courses\",\"theory-base\",\"flags-solve\",\"direction-manage\",\"apt-report\",\"strategy-library\",\"warfare-folder\",\"attack-warfare-library\",\"defense-warfare-library\",\"defense-warfare-scheme\",\"rule-folder\",\"basic-rule\",\"vulnerability\",\"defense-warning-rule\",\"threat-rule\",\"competition-rule\",\"algorithm-library-folder\",\"assessment-algorithm\",\"member-assessment-algorithm\",\"equipment-assessment-algorithm\",\"tool-magazine\",\"tool\",\"attack-tool\",\"control-tool\",\"defense-tool\",\"action-frame-management\",\"combat-methods-management\",\"combat-activity-management\"]", new TypeReference<List<String>>() {
+             });
+             Menus menus = new Menus();
+             menus.getChildIds().addAll(childs);
+             menus.getParentIds().addAll(parentIds);
+             return new ServiceResult<Menus>(menus).asResult();
+         }
+     }
+
+     private ServiceResult<Menus> getThirdRoleMenus(){
          String userName = UserUtils.getLoginUser().getUsername();
          var userModel = userService.getByUserName(userName);
          String menuContent = userModel.getMenusContent();

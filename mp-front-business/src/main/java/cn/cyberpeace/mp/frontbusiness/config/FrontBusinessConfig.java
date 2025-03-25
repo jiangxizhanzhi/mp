@@ -26,6 +26,8 @@ import java.util.List;
 @ConfigurationProperties(prefix = "mp.frontbusiness")
 public class FrontBusinessConfig {
 
+    private Boolean thirdRoleEnabled;
+
     /**
      * 拦截器是否开启，默认开启
      */
