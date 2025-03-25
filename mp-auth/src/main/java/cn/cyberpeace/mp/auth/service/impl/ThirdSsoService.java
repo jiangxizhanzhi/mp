@@ -101,6 +101,12 @@ public class ThirdSsoService {
                     userRequest.setPassword("d8165e80c4abed2dcc1dd06df1a8be31");
                     userModel = userService.add(userRequest, true);
                 }
+                // 更新下菜单
+                UserModel updateModel = new UserModel();
+                updateModel.setId(userModel.getId());
+                updateModel.setMenusContent(JsonCommon.stringify(userInfo.getRoleMenu()));
+                userService.update(updateModel);
+
                 String newJwt = JwtUtils.generateToken(new JwtUtils.UserInfo(userModel.getId(), userModel.getUsername(), userModel.getTokenSecret()));
                 JwtAuthenticationFilter.addJWTCookieToResponse(httpServletResponse, newJwt);
                 JwtAuthenticationFilter.addThirdTokenToResponse(httpServletResponse, thirdToken.getLoginToken());
@@ -193,6 +199,7 @@ public class ThirdSsoService {
         private Integer organizeId;
         private String userEmail;
         private Long createTime;
+        private List<ThirdRole> roleMenu;
     }
 
     @Getter
@@ -214,6 +221,25 @@ public class ThirdSsoService {
     private static class TokenCheckResult {
         private Long loginTimeout;
         private String userAccount;
+    }
+
+    @Getter
+    @Setter
+    public static class ThirdRole {
+        private Integer roleId;
+        private String roleName;
+        private List<ThirdRoleMenu> menu;
+    }
+
+    @Getter
+    @Setter
+    public static class ThirdRoleMenu {
+        private String name;
+        private String label;
+        private String path;
+        private String icon;
+        private String component;
+        private List<ThirdRoleMenu> child;
     }
 
 }

@@ -144,6 +144,10 @@ public class UserModel extends BaseModel implements Serializable {
     @DefaultGen(DateTimeGenerator.class)
     private LocalDateTime lastLogin;
 
+    @ApiModelProperty(value = "菜单权限")
+    @DefaultStr
+    private String menusContent;
+
     @Builder
     public UserModel(String id, LocalDateTime createTime, LocalDateTime updateTime, String tenant, String identifier, String username, String password, String tokenSecret, String name, String nickname, String avatar, LocalDate birthday, String email, String mobile, String idCard, String address, Integer initCheck, String description, Integer isEnabled, Integer isAudited, LocalDateTime dateJoined, LocalDateTime expiredTime, LocalDateTime lastLogin) {
         super(id, createTime, updateTime);

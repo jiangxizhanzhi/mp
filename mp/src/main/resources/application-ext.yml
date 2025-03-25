@@ -6,11 +6,11 @@ spring:
       max: ${MP_TOMCAT_MAX_POOL_SIZE:200}
   datasource:
     ext-var:
-      db-ip: ${MP_DB_IP:10.100.27.1}
-      db-port: ${MP_DB_PORT:3306}
+      db-ip: ${MP_DB_IP:10.4.1.37}
+      db-port: ${MP_DB_PORT:9306}
       db-database: ${MP_DB_DATABASE:mp}
       username: ${MP_DB_USERNAME:mp}
-      password: ${MP_DB_PASSWORD:YjViMjg0Y2RiZWRh}
+      password: ${MP_DB_PASSWORD:mp@AWJmN}
       maximum-pool-size: ${MP_DB_MAX_POOL_SIZE:10}
       minimum-idle: ${MP_DB_MIN_POOL_SIZE:10}
 
@@ -72,7 +72,7 @@ mp:
   # mp-log 模块
   log:
     ext-var:
-      es-ip: ${LOG_ES_IP:10.100.27.1}
+      es-ip: ${LOG_ES_IP:10.4.1.37}
       es-port: ${LOG_ES_PORT:9206}
       es-max-page-size: ${ES_MAX_PAGESIZE:10000}
       log-db: ${MP_DEVOPS_LOG_DB:sql} #日志存储数据库可以配置：es、sql
