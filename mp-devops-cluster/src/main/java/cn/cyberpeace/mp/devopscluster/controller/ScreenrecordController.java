@@ -1,7 +1,10 @@
 package cn.cyberpeace.mp.devopscluster.controller;
 
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.mptool.CollectionUtil;
+import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.ScreenrecordService;
 import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
@@ -117,8 +120,16 @@ public class ScreenrecordController {
         queryParams.setPageSize(999);
         String sceneId = null;
         if (StringUtils.isNotEmpty(queryParams.getCsceneId())) {
-            var csceneModel = csceneInstanceMapper.get(queryParams.getCsceneId());
-            sceneId = csceneModel == null ? null : csceneModel.getScene();
+            HumanCondition humanCondition = new HumanCondition();
+            humanCondition.filterEqual("cscene", queryParams.getCsceneId());
+            List<CsceneInstanceModel> list = csceneInstanceMapper.list(humanCondition);
+            if (CollectionUtil.isNotEmpty(list)) {
+                CsceneInstanceModel csceneModel = list.get(0);
+                sceneId = csceneModel == null ? null : csceneModel.getScene();
+            }else {
+                return new ServiceResult<>().asResult();
+            }
+
         }
         ListObjServiceResult<ScreenrecordVO> screenrecordVOListObjServiceResult = screenrecordService.pageScreenrecord(queryParams, sceneId);
 
