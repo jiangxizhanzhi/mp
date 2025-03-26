@@ -133,6 +133,14 @@ public class TargetController {
 
      private ServiceResult<Menus> getThirdRoleMenus(){
          String userName = UserUtils.getLoginUser().getUsername();
+         if ("3cf215471268482c88a9986283e38c27".equals(UserUtils.getLoginUser().getId())) {
+             // 资源用户返回固定的菜单即可
+             Menus menus = new Menus();
+             menus.getParentIds().add("recourse-center-folder");
+             menus.getChildIds().add("tool-magazine");
+             menus.getChildIds().add("tool-exp");
+             return new ServiceResult<>(menus).asResult();
+         }
          var userModel = userService.getByUserName(userName);
          String menuContent = userModel.getMenusContent();
 
