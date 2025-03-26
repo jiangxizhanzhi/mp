@@ -36,37 +36,37 @@ public class SceneEventTransition {
                             SceneModel.Event.DEFAULT, SceneModel.Event.INITIATE, SceneModel.Event.CREATE,
                             SceneModel.Event.START, SceneModel.Event.STOP, SceneModel.Event.RESTART,
                             SceneModel.Event.PAUSE, SceneModel.Event.UNPAUSE, SceneModel.Event.SNAPSHOT,
-                            SceneModel.Event.DELETE, SceneModel.Event.MODIFY, SceneModel.Event.SUSPEND, SceneModel.Event.RESUME
+                            SceneModel.Event.DELETE, SceneModel.Event.MODIFY, SceneModel.Event.SUSPEND, SceneModel.Event.RESUME,SceneModel.Event.REVERTSNAPSHOT
                     ),
                     EventTransition.genKey(SceneModel.Event.DEFAULT, EventStatus.START), List.of(
                             SceneModel.Event.DEFAULT, SceneModel.Event.INITIATE, SceneModel.Event.CREATE,
                             SceneModel.Event.START, SceneModel.Event.STOP, SceneModel.Event.RESTART,
                             SceneModel.Event.PAUSE, SceneModel.Event.UNPAUSE, SceneModel.Event.SNAPSHOT,
-                            SceneModel.Event.DELETE, SceneModel.Event.MODIFY, SceneModel.Event.SUSPEND, SceneModel.Event.RESUME
+                            SceneModel.Event.DELETE, SceneModel.Event.MODIFY, SceneModel.Event.SUSPEND, SceneModel.Event.RESUME,SceneModel.Event.REVERTSNAPSHOT
                     ),
                     EventTransition.genKey(SceneModel.Event.DEFAULT, EventStatus.IN_PROGRESS), List.of(
                             SceneModel.Event.DEFAULT, SceneModel.Event.INITIATE, SceneModel.Event.CREATE,
                             SceneModel.Event.START, SceneModel.Event.STOP, SceneModel.Event.RESTART,
                             SceneModel.Event.PAUSE, SceneModel.Event.UNPAUSE, SceneModel.Event.SNAPSHOT,
-                            SceneModel.Event.DELETE, SceneModel.Event.MODIFY, SceneModel.Event.SUSPEND, SceneModel.Event.RESUME
+                            SceneModel.Event.DELETE, SceneModel.Event.MODIFY, SceneModel.Event.SUSPEND, SceneModel.Event.RESUME,SceneModel.Event.REVERTSNAPSHOT
                     ),
                     EventTransition.genKey(SceneModel.Event.DEFAULT, EventStatus.PAUSE), List.of(
                             SceneModel.Event.DEFAULT, SceneModel.Event.INITIATE, SceneModel.Event.CREATE,
                             SceneModel.Event.START, SceneModel.Event.STOP, SceneModel.Event.RESTART,
                             SceneModel.Event.PAUSE, SceneModel.Event.UNPAUSE, SceneModel.Event.SNAPSHOT,
-                            SceneModel.Event.DELETE, SceneModel.Event.MODIFY, SceneModel.Event.SUSPEND, SceneModel.Event.RESUME
+                            SceneModel.Event.DELETE, SceneModel.Event.MODIFY, SceneModel.Event.SUSPEND, SceneModel.Event.RESUME,SceneModel.Event.REVERTSNAPSHOT
                     ),
                     EventTransition.genKey(SceneModel.Event.DEFAULT, EventStatus.OVER), List.of(
                             SceneModel.Event.DEFAULT, SceneModel.Event.INITIATE, SceneModel.Event.CREATE,
                             SceneModel.Event.START, SceneModel.Event.STOP, SceneModel.Event.RESTART,
                             SceneModel.Event.PAUSE, SceneModel.Event.UNPAUSE, SceneModel.Event.SNAPSHOT,
-                            SceneModel.Event.DELETE, SceneModel.Event.MODIFY, SceneModel.Event.SUSPEND, SceneModel.Event.RESUME
+                            SceneModel.Event.DELETE, SceneModel.Event.MODIFY, SceneModel.Event.SUSPEND, SceneModel.Event.RESUME,SceneModel.Event.REVERTSNAPSHOT
                     ),
                     EventTransition.genKey(SceneModel.Event.DEFAULT, EventStatus.ABNORMAL), List.of(
                             SceneModel.Event.DEFAULT, SceneModel.Event.INITIATE, SceneModel.Event.CREATE,
                             SceneModel.Event.START, SceneModel.Event.STOP, SceneModel.Event.RESTART,
                             SceneModel.Event.PAUSE, SceneModel.Event.UNPAUSE, SceneModel.Event.SNAPSHOT,
-                            SceneModel.Event.DELETE, SceneModel.Event.MODIFY, SceneModel.Event.SUSPEND, SceneModel.Event.RESUME
+                            SceneModel.Event.DELETE, SceneModel.Event.MODIFY, SceneModel.Event.SUSPEND, SceneModel.Event.RESUME,SceneModel.Event.REVERTSNAPSHOT
                     ),
 
                     // 初始化事件
@@ -105,7 +105,7 @@ public class SceneEventTransition {
                     EventTransition.genKey(SceneModel.Event.CREATE, EventStatus.OVER), List.of(
                             SceneModel.Event.STOP, SceneModel.Event.RESTART, SceneModel.Event.PAUSE,
                             SceneModel.Event.SNAPSHOT, SceneModel.Event.MODIFY, SceneModel.Event.DELETE,
-                            SceneModel.Event.SUSPEND, SceneModel.Event.RESUME
+                            SceneModel.Event.SUSPEND, SceneModel.Event.RESUME,SceneModel.Event.REVERTSNAPSHOT
                     ),
                     EventTransition.genKey(SceneModel.Event.CREATE, EventStatus.ABNORMAL), List.of(
                             SceneModel.Event.CREATE, SceneModel.Event.DELETE, SceneModel.Event.MODIFY
@@ -127,7 +127,7 @@ public class SceneEventTransition {
                     EventTransition.genKey(SceneModel.Event.START, EventStatus.OVER), List.of(
                             SceneModel.Event.STOP, SceneModel.Event.RESTART, SceneModel.Event.PAUSE,
                             SceneModel.Event.SNAPSHOT, SceneModel.Event.MODIFY, SceneModel.Event.DELETE,
-                            SceneModel.Event.SUSPEND
+                            SceneModel.Event.SUSPEND,SceneModel.Event.REVERTSNAPSHOT
                     ),
                     EventTransition.genKey(SceneModel.Event.START, EventStatus.ABNORMAL), List.of(
                             SceneModel.Event.START, SceneModel.Event.DELETE
@@ -169,7 +169,7 @@ public class SceneEventTransition {
                     EventTransition.genKey(SceneModel.Event.RESTART, EventStatus.OVER), List.of(
                             SceneModel.Event.STOP, SceneModel.Event.RESTART, SceneModel.Event.PAUSE,
                             SceneModel.Event.SNAPSHOT, SceneModel.Event.MODIFY, SceneModel.Event.DELETE,
-                            SceneModel.Event.SUSPEND
+                            SceneModel.Event.SUSPEND,SceneModel.Event.REVERTSNAPSHOT
                     ),
                     EventTransition.genKey(SceneModel.Event.RESTART, EventStatus.ABNORMAL), List.of(
                             SceneModel.Event.RESTART, SceneModel.Event.DELETE
@@ -211,7 +211,7 @@ public class SceneEventTransition {
                     EventTransition.genKey(SceneModel.Event.UNPAUSE, EventStatus.OVER), List.of(
                             SceneModel.Event.STOP, SceneModel.Event.RESTART, SceneModel.Event.PAUSE,
                             SceneModel.Event.SNAPSHOT, SceneModel.Event.MODIFY, SceneModel.Event.DELETE,
-                            SceneModel.Event.SUSPEND, SceneModel.Event.UNPAUSE
+                            SceneModel.Event.SUSPEND, SceneModel.Event.UNPAUSE,SceneModel.Event.REVERTSNAPSHOT
                     ),
                     EventTransition.genKey(SceneModel.Event.UNPAUSE, EventStatus.ABNORMAL), List.of(
                             SceneModel.Event.UNPAUSE, SceneModel.Event.DELETE, SceneModel.Event.UNPAUSE
@@ -253,7 +253,7 @@ public class SceneEventTransition {
                     EventTransition.genKey(SceneModel.Event.RESUME, EventStatus.OVER), List.of(
                             SceneModel.Event.STOP, SceneModel.Event.RESTART, SceneModel.Event.SUSPEND,
                             SceneModel.Event.SNAPSHOT, SceneModel.Event.MODIFY, SceneModel.Event.DELETE,
-                            SceneModel.Event.PAUSE, SceneModel.Event.RESUME
+                            SceneModel.Event.PAUSE, SceneModel.Event.RESUME,SceneModel.Event.REVERTSNAPSHOT
                     ),
                     EventTransition.genKey(SceneModel.Event.RESUME, EventStatus.ABNORMAL), List.of(
                             SceneModel.Event.RESUME, SceneModel.Event.DELETE, SceneModel.Event.RESUME
@@ -275,7 +275,7 @@ public class SceneEventTransition {
                     EventTransition.genKey(SceneModel.Event.SNAPSHOT, EventStatus.OVER), List.of(
                             SceneModel.Event.STOP, SceneModel.Event.RESTART, SceneModel.Event.PAUSE,
                             SceneModel.Event.SNAPSHOT, SceneModel.Event.MODIFY, SceneModel.Event.DELETE,
-                            SceneModel.Event.SUSPEND
+                            SceneModel.Event.SUSPEND,SceneModel.Event.REVERTSNAPSHOT
                     ),
                     EventTransition.genKey(SceneModel.Event.SNAPSHOT, EventStatus.ABNORMAL), List.of(
                             SceneModel.Event.SNAPSHOT, SceneModel.Event.DELETE
@@ -317,10 +317,34 @@ public class SceneEventTransition {
                     EventTransition.genKey(SceneModel.Event.MODIFY, EventStatus.OVER), List.of(
                             SceneModel.Event.STOP, SceneModel.Event.RESTART, SceneModel.Event.PAUSE,
                             SceneModel.Event.SNAPSHOT, SceneModel.Event.MODIFY, SceneModel.Event.DELETE,
-                            SceneModel.Event.SUSPEND
+                            SceneModel.Event.SUSPEND,SceneModel.Event.REVERTSNAPSHOT
                     ),
                     EventTransition.genKey(SceneModel.Event.MODIFY, EventStatus.ABNORMAL), List.of(
                             SceneModel.Event.MODIFY, SceneModel.Event.DELETE
-                    )
+                    ),
+
+                    // 快照恢复事件
+                    EventTransition.genKey(SceneModel.Event.REVERTSNAPSHOT, EventStatus.INITIAL), List.of(
+                            SceneModel.Event.DELETE
+                    ),
+                    EventTransition.genKey(SceneModel.Event.REVERTSNAPSHOT, EventStatus.START), List.of(
+                            SceneModel.Event.DELETE
+                    ),
+                    EventTransition.genKey(SceneModel.Event.REVERTSNAPSHOT, EventStatus.IN_PROGRESS), List.of(
+                            SceneModel.Event.DELETE
+                    ),
+                    EventTransition.genKey(SceneModel.Event.REVERTSNAPSHOT, EventStatus.PAUSE), List.of(
+                            SceneModel.Event.START, SceneModel.Event.DELETE
+                    ),
+                    EventTransition.genKey(SceneModel.Event.REVERTSNAPSHOT, EventStatus.OVER), List.of(
+                            SceneModel.Event.STOP, SceneModel.Event.RESTART, SceneModel.Event.PAUSE,
+                            SceneModel.Event.SNAPSHOT, SceneModel.Event.MODIFY, SceneModel.Event.DELETE,
+                            SceneModel.Event.SUSPEND,SceneModel.Event.REVERTSNAPSHOT
+                    ),
+                    EventTransition.genKey(SceneModel.Event.REVERTSNAPSHOT, EventStatus.ABNORMAL), List.of(
+                            SceneModel.Event.START, SceneModel.Event.DELETE
+                    ),
+
+
             });
 }
