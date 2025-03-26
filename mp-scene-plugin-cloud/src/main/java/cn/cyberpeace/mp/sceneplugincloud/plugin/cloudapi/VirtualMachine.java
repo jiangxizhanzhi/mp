@@ -422,12 +422,7 @@ public class VirtualMachine extends CloudClient {
      */
     public SnapshotResultData snapshot(String instanceId, String image, String imageUUid, String snapshotName, String desc, Map<String, Object> extInfo) {
         SnapshotParams params = new SnapshotParams();
-        params.setImageName(image);
-        params.setDeviceUUid(imageUUid);
-        params.setInstanceUuid(instanceId);
-        params.setName(snapshotName);
         params.setDescription(desc);
-        params.setExtInfo(extInfo);
         var response = cloudPost(CloudUrlConstant.VIRTUAL_MACHINE_SNAPSHOT_URL.replace(VM_ID, instanceId),
                 params, null, new TypeReference<CloudResponse<SnapshotResultData>>() {
                 }, true);
