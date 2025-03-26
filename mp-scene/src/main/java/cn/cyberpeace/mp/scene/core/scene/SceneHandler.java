@@ -676,6 +676,42 @@ public class SceneHandler extends BaseSceneHandler<
         }
     }
 
+    public void runningSnapshot(String snapshotId) {
+        prepareAllEvent(SceneModel.Event.SNAPSHOT, SceneElementModel.Event.SNAPSHOT);
+        startAllEvent(SceneModel.Event.SNAPSHOT, SceneElementModel.Event.SNAPSHOT);
+        try {
+            for (ScenePluginHandler handler : getPlugins()) {
+                handler.runningSnapshot(snapshotId);
+            }
+        } catch (Exception e) {
+            log.error("failed to snapshot scene , sceneId is {} , exception is {}", getSceneId(), ExceptionUtils.getStackTrace(e));
+            errorScene(SceneModel.Event.SNAPSHOT, e.getMessage());
+            return;
+        }
+        overAllEvent(SceneModel.Event.SNAPSHOT, SceneElementModel.Event.SNAPSHOT);
+        if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
+            save();
+        }
+    }
+
+    public void revertRunningSnapshot(String snapshotModelId) {
+        prepareAllEvent(SceneModel.Event.REVERTSNAPSHOT, SceneElementModel.Event.REVERTSNAPSHOT);
+        startAllEvent(SceneModel.Event.REVERTSNAPSHOT, SceneElementModel.Event.REVERTSNAPSHOT);
+        try {
+            for (ScenePluginHandler handler : getPlugins()) {
+                handler.revertRunningSnapshot(snapshotModelId);
+            }
+        } catch (Exception e) {
+            log.error("failed to snapshot scene , sceneId is {} , exception is {}", getSceneId(), ExceptionUtils.getStackTrace(e));
+            errorScene(SceneModel.Event.REVERTSNAPSHOT, e.getMessage());
+            return;
+        }
+        overAllEvent(SceneModel.Event.REVERTSNAPSHOT, SceneElementModel.Event.REVERTSNAPSHOT);
+        if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
+            save();
+        }
+    }
+
     @Override
     public boolean delete() {
         prepareAllEvent(SceneModel.Event.DELETE, SceneElementModel.Event.DELETE);

@@ -11,12 +11,15 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementSnapshotBO;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.core.event.base.ProcessStatus;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.SceneElementSnapshotModel;
+import cn.cyberpeace.mp.scene.model.SceneSnapshotModel;
 import cn.cyberpeace.mp.scene.repository.SceneElementSnapshotMapper;
+import cn.cyberpeace.mp.scene.repository.SceneSnapshotMapper;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
@@ -26,11 +29,16 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerSnapshot
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.SnapshotResultData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.ResumeTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.util.SnapshotAddressUtils;
+import com.fasterxml.jackson.core.type.TypeReference;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -57,6 +65,9 @@ public class SnapshotHandler extends HandlerCommon {
     public static class ElementProcess {
         public static final EventProcess SNAPSHOT_VIRTUAL_MACHINE = new EventProcess("snapshot_virtual_machine", "sceneplugincloud.event.snapshot_virtual_machine");
         public static final EventProcess SNAPSHOT_CONTAINER = new EventProcess("snapshot_container", "sceneplugincloud.event.snapshot_container");
+
+        public static final EventProcess REVERT_SNAPSHOT_VIRTUAL_MACHINE = new EventProcess("revert_snapshot_virtual_machine", "sceneplugincloud.event.revert_snapshot_virtual_machine");
+        public static final EventProcess REVERT_SNAPSHOT_CONTAINER = new EventProcess("revert_snapshot_container", "sceneplugincloud.event.revert_snapshot_container");
     }
 
     /**
@@ -77,7 +88,7 @@ public class SnapshotHandler extends HandlerCommon {
                 getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.SNAPSHOT, Arrays.asList(ElementProcess.SNAPSHOT_CONTAINER));
                 runElementProgress(nodeId, SceneElementModel.Event.SNAPSHOT, ElementProcess.SNAPSHOT_CONTAINER, () -> {
                     var containerSnapshotData = new ContainerSnapshotData();
-                    containerSnapshotData.setName("");
+                    containerSnapshotData.setSnapshotName("");
                     var res = new Container().snapshot(element.getResourceId(), containerSnapshotData);
                     element.setSnapshotResourceId(res);
                 });
@@ -90,6 +101,91 @@ public class SnapshotHandler extends HandlerCommon {
                 });
             }
         }
+    }
+
+    public void runningSnapshot() {
+        String snapshotId = getHandlerUtils().getSceneSnapshotId();
+        List<SnapshotInfo> snapshotInfos = new ArrayList<>();
+        for (CloudPluginSceneElementBO element : getPluginHandler().getElementMap().values()) {
+            String nodeId = element.getSrcElement().getId();
+            if (element.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER) {
+                // 容器快照
+                getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.SNAPSHOT, Arrays.asList(ElementProcess.SNAPSHOT_CONTAINER));
+                runElementProgress(nodeId, SceneElementModel.Event.SNAPSHOT, ElementProcess.SNAPSHOT_CONTAINER, () -> {
+                    var containerSnapshotData = new ContainerSnapshotData();
+                    containerSnapshotData.setSnapshotName(snapshotId + "_" + element.getSrcElement().getId());
+                    var res = new Container().snapshot(element.getResourceId(), containerSnapshotData);
+                    // 记录下本次的快照信息
+                    SnapshotInfo snapshotInfo = new SnapshotInfo();
+                    snapshotInfo.setNodeId(element.getSrcElement().getId());
+                    snapshotInfo.setSnapshotResourceId(res);
+                    snapshotInfos.add(snapshotInfo);
+                });
+            } else if (element.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE) {
+                // 虚拟机快照
+                getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.SNAPSHOT, Arrays.asList(ElementProcess.SNAPSHOT_VIRTUAL_MACHINE));
+                runElementProgress(nodeId, SceneElementModel.Event.SNAPSHOT, ElementProcess.SNAPSHOT_VIRTUAL_MACHINE, () -> {
+                    var res = new VirtualMachine().snapshot(element.getResourceId(), "", "", "", "", new HashMap<>());
+                    // 记录下本次的快照信息
+                    SnapshotInfo snapshotInfo = new SnapshotInfo();
+                    snapshotInfo.setNodeId(element.getSrcElement().getId());
+                    snapshotInfo.setSnapshotResourceId(res.getId());
+                    snapshotInfos.add(snapshotInfo);
+                });
+            }
+        }
+
+        // 将本次创建的所有快照信息保存
+        var snapshotMapper = BeanCommon.getBean(SceneSnapshotMapper.class);
+        SceneSnapshotModel sceneSnapshotModel = new SceneSnapshotModel();
+        sceneSnapshotModel.setId(snapshotId);
+        sceneSnapshotModel.setContent(JsonCommon.stringify(snapshotInfos));
+        snapshotMapper.update(sceneSnapshotModel);
+    }
+
+    public void revertRunningSnapshot(String snapshotModelId) {
+        // 查询保存的快照信息
+        var snapshotMapper = BeanCommon.getBean(SceneSnapshotMapper.class);
+        var model = snapshotMapper.get(snapshotModelId);
+        List<SnapshotInfo> infos = JsonCommon.parse(model.getContent(), new TypeReference<List<SnapshotInfo>>() {
+        });
+        Map<String, SnapshotInfo> infoMap = new HashMap<>();
+        for (SnapshotInfo i : infos) {
+            infoMap.put(i.getNodeId(), i);
+        }
+
+        // 将每个节点的快照恢复
+        for (CloudPluginSceneElementBO element : getPluginHandler().getElementMap().values()) {
+            String nodeId = element.getSrcElement().getId();
+            SnapshotInfo snapshotInfo = infoMap.get(nodeId);
+            if (snapshotInfo != null) {
+                if (element.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER) {
+                    // 容器恢复快照
+                    runElementProgress(nodeId, SceneElementModel.Event.REVERTSNAPSHOT, ElementProcess.REVERT_SNAPSHOT_CONTAINER, () -> {
+                        container.snapshotAction(element.getResourceId(), snapshotInfo.getSnapshotResourceId(), "preview");
+                    });
+                } else if (element.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE) {
+                    runElementProgress(nodeId, SceneElementModel.Event.REVERTSNAPSHOT, ElementProcess.REVERT_SNAPSHOT_VIRTUAL_MACHINE, () -> {
+                        // 虚拟机恢复快照
+                        // 关机
+                        virtualMachine.stop(element.getResourceId());
+                        // 预览
+                        virtualMachine.snapshotAction(element.getResourceId(), snapshotInfo.getSnapshotResourceId(), "preview");
+                        // 提交
+                        virtualMachine.snapshotAction(element.getResourceId(), snapshotInfo.getSnapshotResourceId(), "commit");
+                        // 开机
+                        virtualMachine.start(element.getResourceId());
+                    });
+                }
+            }
+        }
+    }
+
+    @Getter
+    @Setter
+    public static class SnapshotInfo {
+        private String nodeId;
+        private String snapshotResourceId;
     }
 
     /**
@@ -254,7 +350,7 @@ public class SnapshotHandler extends HandlerCommon {
      */
     private void containerSnapshot(CloudPluginSceneElementBO element, String snapshotName, String description) {
         ContainerSnapshotData data = new ContainerSnapshotData();
-        data.setName(snapshotName);
+        data.setSnapshotName(snapshotName);
         var result = container.snapshot(element.getResourceId(), data);
         SceneElementSnapshotBO snapshotBO = new SceneElementSnapshotBO();
         snapshotBO.setId(result);

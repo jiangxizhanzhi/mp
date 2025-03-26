@@ -50,6 +50,7 @@ public class SceneElementEventHandler extends BaseEventHandler<SceneElementBO, E
                     SceneElementModel.Event.DELETE, EVENT_NAME_PREFIX + "delete",
                     SceneElementModel.Event.MODIFY, EVENT_NAME_PREFIX + "modify",
                     SceneElementModel.Event.RECREATE, EVENT_NAME_PREFIX + "recreate",
+                    SceneElementModel.Event.REVERTSNAPSHOT, EVENT_NAME_PREFIX + "revertsnapshot",
             });
 
     public SceneElementEventHandler(SceneElementBO target, int event) {

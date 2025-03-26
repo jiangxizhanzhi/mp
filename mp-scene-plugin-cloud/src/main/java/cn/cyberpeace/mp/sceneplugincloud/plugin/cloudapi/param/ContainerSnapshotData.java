@@ -23,6 +23,6 @@ import lombok.Data;
  */
 @Data
 public class ContainerSnapshotData implements CloudHttpData {
-    private String name;
+    private String snapshotName;
 }
 

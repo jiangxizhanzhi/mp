@@ -1729,6 +1729,35 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
          return result;
      }
 
+     public ServiceResult<String> runningSnapshot(String csceneInstanceId,String snapshotName, CsceneContextBO context) {
+         CsceneInstanceModel csceneInstanceModel = this.get(csceneInstanceId).asResult().getData();
+         if (csceneInstanceModel == null) {
+             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+         }
+         if (context != null) {
+             context.loadTransparentContext();
+             CsceneContextHolder.setCsceneInstanceId(csceneInstanceId);
+         }
+
+         String csceneId = csceneInstanceModel.getCscene();
+         SceneSnapshotModel sceneSnapshotModel = new SceneSnapshotModel();
+         sceneSnapshotModel.setCsceneId(csceneId);
+         sceneSnapshotModel.setCsceneInstanceId(csceneInstanceId);
+         sceneSnapshotModel.setSnapshotName(snapshotName);
+         BeanCommon.getBean(SceneSnapshotMapper.class).save(sceneSnapshotModel);
+         this.sceneService.runningSnapshot(sceneSnapshotModel.getId(), csceneInstanceModel.getScene(),new SceneContextBO());
+         return new ServiceResult<>(sceneSnapshotModel.getId());
+     }
+
+     public void revertRunningSnapshot(String snapshotId) {
+         // 取cscene信息
+         SceneSnapshotMapper snapshotMapper = BeanCommon.getBean(SceneSnapshotMapper.class);
+         var snapshotModel = snapshotMapper.get(snapshotId);
+         var instanceId = snapshotModel.getCsceneInstanceId();
+         var sceneId = this.getSceneId(instanceId);
+         this.sceneService.revertRunningSnapshot(snapshotId, sceneId, new SceneContextBO());
+     }
+
     /**
      * pause
      * @param id

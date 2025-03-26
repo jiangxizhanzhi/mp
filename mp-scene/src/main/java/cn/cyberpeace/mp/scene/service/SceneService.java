@@ -300,6 +300,56 @@ public class SceneService {
         }
     }
 
+    public ServiceResult<Boolean> runningSnapshot(String snapshotModelId, String sceneId, SceneContextBO context) {
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, context);
+        sceneHandler.setRealTimeUpdate(true);
+        SceneEventUtils.SceneEventInfo newEventInfo = this.createSceneEventInfo(sceneId, null, null, SceneModel.Event.PAUSE);
+        SceneEventUtils.SceneEventInfo originLockInfo = SceneEventUtils.tryLockAndGetInfoIfLockFailed(sceneId, newEventInfo);
+        if (originLockInfo == null) {
+            // 锁获取成功 没有其他线程执行操作
+            SceneTaskPool.getInstance()
+                    .executeTask(() -> {
+                        try {
+                            sceneHandler.runningSnapshot(snapshotModelId);
+                        } finally {
+                            SceneEventUtils.unLock(sceneId);
+                        }
+                    });
+            return new ServiceResult<>(true);
+        } else if (originLockInfo.getEvent() == SceneModel.Event.SNAPSHOT) {
+            // 锁获取失败, 其它线程正在执行相同操作 则直接返回成功
+            return new ServiceResult<>(true);
+        } else {
+            // 其他线程执行场景的其他操作 则返回报错
+            throw this.createOperateException(originLockInfo);
+        }
+    }
+
+    public ServiceResult<Boolean> revertRunningSnapshot(String snapshotModelId, String sceneId, SceneContextBO context) {
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, context);
+        sceneHandler.setRealTimeUpdate(true);
+        SceneEventUtils.SceneEventInfo newEventInfo = this.createSceneEventInfo(sceneId, null, null, SceneModel.Event.PAUSE);
+        SceneEventUtils.SceneEventInfo originLockInfo = SceneEventUtils.tryLockAndGetInfoIfLockFailed(sceneId, newEventInfo);
+        if (originLockInfo == null) {
+            // 锁获取成功 没有其他线程执行操作
+            SceneTaskPool.getInstance()
+                    .executeTask(() -> {
+                        try {
+                            sceneHandler.revertRunningSnapshot(snapshotModelId);
+                        } finally {
+                            SceneEventUtils.unLock(sceneId);
+                        }
+                    });
+            return new ServiceResult<>(true);
+        } else if (originLockInfo.getEvent() == SceneModel.Event.REVERTSNAPSHOT) {
+            // 锁获取失败, 其它线程正在执行相同操作 则直接返回成功
+            return new ServiceResult<>(true);
+        } else {
+            // 其他线程执行场景的其他操作 则返回报错
+            throw this.createOperateException(originLockInfo);
+        }
+    }
+
     public ServiceResult<Boolean> snapshot(String snapshotModelId, String sceneId, SceneContextBO context) {
         SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, context);
         sceneHandler.setRealTimeUpdate(true);

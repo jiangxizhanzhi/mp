@@ -30,6 +30,8 @@ public class CsceneSnapshotBO {
     private String snapshotId;
     @ApiModelProperty(value = "场景模板id")
     private String csceneId;
+    @ApiModelProperty(value = "场景实例id")
+    private String csceneInstanceId;
     @ApiModelProperty(value = "场景快照名称")
     private String snapshotName;
 }

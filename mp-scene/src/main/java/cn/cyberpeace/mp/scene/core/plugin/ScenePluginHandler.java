@@ -131,6 +131,14 @@ public abstract class ScenePluginHandler<S extends BasePluginSceneBO<?, S, Scene
 
     }
 
+    public void runningSnapshot(String snapshotId) {
+
+    }
+
+    public void revertRunningSnapshot(String snapshotModelId) {
+
+    }
+
     public void delete() throws Exception {
 
     }

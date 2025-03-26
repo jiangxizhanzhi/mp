@@ -1180,6 +1180,39 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         return new ServiceResult<>(result).asResult();
     }
 
+    @ApiOperation("给场景实例打快照,场景运行时的快照，场景关闭后快照会自动释放")
+    @PostMapping("/running_snapshot")
+    public ServiceResult<String> runningSnapshotScene(@RequestBody CsceneSnapshotRequest request) {
+        ServiceResult<String> result = modelService.runningSnapshot(request.getCsceneInstanceId(), request.getSnapshotName(), request.getContext());
+        return result.asResult();
+    }
+
+    @ApiOperation("在场景运行时恢复快照")
+    @PostMapping("/revert_running_snapshot")
+    public ServiceResult<Boolean> revertRunningSnapshotScene(@RequestBody CsceneInstanceReverSnapshotRequest request) {
+        String snapshotId = request.getSnapshotId();
+        modelService.revertRunningSnapshot(snapshotId);
+        return new ServiceResult<>(true).asResult();
+    }
+
+    @ApiOperation("场景快照列表")
+    @ApiImplicitParams({@ApiImplicitParam(name = "cscene_id", value = "场景模板id", dataTypeClass = String.class)})
+    @PostMapping("/running_snapshot_list")
+    public ServiceResult<List<CsceneSnapshotBO>> runningSnapshotList(@RequestParam(name = "cscene_instance_id") String csceneInstanceId) {
+        var mapper = BeanCommon.getBean(SceneSnapshotMapper.class);
+        var models = mapper.list(new HumanCondition().filterEqual(SceneSnapshotModel::getCsceneInstanceId, csceneInstanceId));
+        List<CsceneSnapshotBO> list = new ArrayList<>();
+        for (var model : models) {
+            CsceneSnapshotBO snapshotBO = new CsceneSnapshotBO();
+            snapshotBO.setSnapshotId(model.getId());
+            snapshotBO.setCsceneId(model.getCsceneId());
+            snapshotBO.setCsceneInstanceId(model.getCsceneInstanceId());
+            snapshotBO.setSnapshotName(model.getSnapshotName());
+            list.add(snapshotBO);
+        }
+        return new ServiceResult<>(list).asResult();
+    }
+
     @ApiOperation("场景快照列表")
     @ApiImplicitParams({@ApiImplicitParam(name = "cscene_id", value = "场景模板id", dataTypeClass = String.class)})
     @PostMapping("/snapshot_list")

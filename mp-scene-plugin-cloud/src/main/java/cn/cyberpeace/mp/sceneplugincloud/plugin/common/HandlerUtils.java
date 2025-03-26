@@ -70,12 +70,18 @@ public class HandlerUtils {
 
     private List<CloudPluginSceneConfigNetworkModel> configNetworks = null ;
 
+    private String sceneSnapshotId = null;
+
     public List<CloudPluginSceneConfigNetworkModel> getConfigNetworks() {
         return configNetworks;
     }
 
     public void setConfigNetworks(List<CloudPluginSceneConfigNetworkModel> configNetworks) {
         this.configNetworks = configNetworks;
+    }
+
+    public void setSceneSnapshotId(String sceneSnapshotId) {
+        this.sceneSnapshotId = sceneSnapshotId;
     }
 
     /**

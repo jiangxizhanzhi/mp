@@ -390,6 +390,17 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         new SnapshotHandler(this, SceneModel.Event.SNAPSHOT).snapshot();
     }
 
+    @Override
+    public void runningSnapshot(String snapshotId) {
+        getHandlerUtils().setSceneSnapshotId(snapshotId);
+        new SnapshotHandler(this, SceneModel.Event.SNAPSHOT).runningSnapshot();
+    }
+
+    @Override
+    public void revertRunningSnapshot(String snapshotModelId) {
+        new SnapshotHandler(this, SceneModel.Event.REVERTSNAPSHOT).revertRunningSnapshot(snapshotModelId);
+    }
+
     /**
      * unpause
      */
