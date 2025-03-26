@@ -127,7 +127,7 @@ public class TargetController {
              Menus menus = new Menus();
              menus.getChildIds().addAll(childs);
              menus.getParentIds().addAll(parentIds);
-             return new ServiceResult<Menus>(menus).asResult();
+             return new ServiceResult<>(menus).asResult();
          }
      }
 
@@ -150,6 +150,8 @@ public class TargetController {
 
          Menus result = new Menus();
          result.getParentIds().addAll(parentIds);
+         // 保证有首页
+         result.getParentIds().add("knowledge-space-home");
          result.getChildIds().addAll(childIds);
          return new ServiceResult<>(result).asResult();
      }
