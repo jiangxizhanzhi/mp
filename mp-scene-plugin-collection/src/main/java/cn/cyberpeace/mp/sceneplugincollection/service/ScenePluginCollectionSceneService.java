@@ -749,8 +749,16 @@ public class ScenePluginCollectionSceneService {
             return new ServiceResult<>(new ArrayList<>());
         }
         List<IntervalSizeBO<LocalDateTime, Long>> result = bos.stream().map(bo -> {
-            LocalDateTime time = TimeUtils.stringToLocalDateTime(bo.getTime(), TimeUtils.tzMillsDateTimeFormatter).atZone(ZoneOffset.UTC).withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime();
-            return Objects.isNull(type) || NumberUtils.INTEGER_ZERO.equals(type) ? new IntervalSizeBO<>(time, time, bo.getTrafficSize().longValue()) : new IntervalSizeBO<>(time, time, bo.getAttackNumber());
+            try {
+                LocalDateTime time = TimeUtils.stringToLocalDateTime(bo.getTime(), TimeUtils.tzMillsDateTimeFormatter)
+                        .atZone(ZoneOffset.UTC).withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime();
+                return Objects.isNull(type) || NumberUtils.INTEGER_ZERO.equals(type) ? new IntervalSizeBO<>(time, time, bo.getTrafficSize()
+                        .longValue()) : new IntervalSizeBO<>(time, time, bo.getAttackNumber());
+            } catch (Exception e) {
+                LocalDateTime time = TimeUtils.timestampToLocalDateTime(Long.valueOf(bo.getTime()));
+                return Objects.isNull(type) || NumberUtils.INTEGER_ZERO.equals(type) ? new IntervalSizeBO<>(time, time, bo.getTrafficSize()
+                        .longValue()) : new IntervalSizeBO<>(time, time, bo.getAttackNumber());
+            }
         }).collect(Collectors.toList());
         Collections.sort(result, Comparator.comparing(IntervalSizeBO::getStart));
         return new ServiceResult<>(result);
