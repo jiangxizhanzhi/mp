@@ -1805,10 +1805,14 @@ public class DataCollectionService extends CollectionBaseService {
             // 默认1000
             wazuhHostStateModel.setMaxNetSpeed(1000);
             String maxSpeedStr = output.getMaxNetSpeed();
-            if (maxSpeedStr.contains("Mb/s")) {
-                maxSpeedStr = maxSpeedStr.replaceAll("Mb/s", "");
-                long maxSpeed = Long.valueOf(maxSpeedStr);
-                wazuhHostStateModel.setMaxNetSpeed(maxSpeed);
+            try {
+                if (maxSpeedStr.contains("Mb/s")) {
+                    maxSpeedStr = maxSpeedStr.replaceAll("Mb/s", "");
+                    long maxSpeed = Long.valueOf(maxSpeedStr);
+                    wazuhHostStateModel.setMaxNetSpeed(maxSpeed);
+                }
+            } catch (Exception e) {
+                log.error("error type", e);
             }
         }
 
