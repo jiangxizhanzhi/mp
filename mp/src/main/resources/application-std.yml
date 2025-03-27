@@ -299,7 +299,8 @@ mp:
     dhcp-control: ${mp.scene.ext-var.dhcp-control:false}
   aggregation:
     export-image-timeout: 1200000
-
+  vm:
+    metadata-file-server: http://${MP_API_IP}:${MP_API_PORT}/api/mp/file
 # for kaptcha
 kaptcha:
   border:
