@@ -47,10 +47,7 @@ import cn.cyberpeace.mp.cscene.service.impl.ScreenshotServiceImpl;
 import cn.cyberpeace.mp.cscene.service.taskpool.CsceneReportTaskPool;
 import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
 import cn.cyberpeace.mp.cscene.util.ReentrantLockUtils;
-import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneTopologyBO;
+import cn.cyberpeace.mp.scene.core.bo.*;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
@@ -65,6 +62,7 @@ import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConnectionModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ConnectedNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConnectionMapper;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneConfigService;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
@@ -1760,5 +1758,26 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     public List<CloudPluginSceneConnectionModel> selectVmHistoryByMpSceneId(String mpSceneId) {
         CsceneInstanceMapper csceneInstanceMapper = BeanCommon.getBean(CsceneInstanceMapper.class);
         return csceneInstanceMapper.selectVmHistoryByMpSceneId(mpSceneId);
+    }
+
+    public String getHefeiNet(String id) {
+        var sceneId = this.getSceneId(id);
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, new SceneContextBO());
+        CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
+        for (CloudPluginSceneElementBO e : pluginHandler.getElementMap().values()) {
+            if (e.getImage().contains("hfdy-vpn-server")) {
+                List<ConnectedNetworkBO> nets = new ArrayList<>();
+                nets.addAll(e.getAccessNetworks());
+                nets.addAll(e.getDeriveNetworks());
+                for (var n : nets) {
+                    if (Boolean.TRUE.equals(n.getNetwork().getExternal())) {
+                        continue;
+                    } else {
+                        return n.getNetwork().getResourceId();
+                    }
+                }
+            }
+        }
+        return "" ;
     }
 }

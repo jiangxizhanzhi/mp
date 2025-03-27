@@ -994,4 +994,11 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         return new ObjServiceResult<>(new ObjResult<>(csceneInstanceModel.getReferenceType(), null)).asResult();
     }
 
+    @ApiOperation("获取合肥电院网络")
+    @GetMapping(value = "/get_hefei_net", params = "id")
+    public ServiceResult<String> getNet(@RequestParam String id) {
+        var net = modelService.getHefeiNet(id);
+        return new ServiceResult<>(net).asResult();
+    }
+
 }
