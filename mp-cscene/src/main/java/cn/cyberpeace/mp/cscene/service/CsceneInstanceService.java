@@ -92,7 +92,7 @@ import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
 import cn.hutool.cache.CacheUtil;
 import cn.hutool.cache.impl.TimedCache;
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.json.JSONObject;
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -1761,8 +1761,8 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
 
-    public ServiceResult<String> execCheck(String frameServerConfigIp, String scriptParams, SshFtpRequest sshFtpRequest, File file) {
-        ServiceResult ret = null;
+    public JSONObject execCheck(String frameServerConfigIp, String scriptParams, SshFtpRequest sshFtpRequest, File file) {
+        JSONObject ret = null;
 
         String url = "http://{ip}:8080/agent/checker/exec/pycmd".replace("{ip}", frameServerConfigIp);
 
@@ -1776,7 +1776,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         try {
             String res = HttpUtils.sendUpload(url, map, file);
             log.info("执行checker 返回结果res：{}", res);
-            ret = JsonCommon.parse(res, ServiceResult.class);
+            ret = JsonCommon.parse(res, JSONObject.class);
         }catch (Exception e) {
             log.error(e.toString());
             throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("执行checker失败!"));

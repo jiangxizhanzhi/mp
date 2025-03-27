@@ -9,6 +9,7 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -884,7 +885,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
 
     @ApiOperation("执行场景checker")
     @PostMapping("/exec_check_script")
-    public ServiceResult<String> execCheckScript(@RequestBody CsceneInstanceCheckRequest checkRequest) {
+    public  ServiceResult<JSONObject> execCheckScript(@RequestBody CsceneInstanceCheckRequest checkRequest) {
         log.info("receive checker request: {}", JsonCommon.snakeStringify(checkRequest));
 
         // 参数校验
@@ -909,7 +910,8 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         String frameServerConfigIp = info.getFrameServerConfigIp();
 //        String frameServerBizIp = info.getFrameServerBizIp();
 
-        return modelService.execCheck(frameServerConfigIp, checkRequest.getScriptParams(), sshFtpRequest, file);
+        JSONObject execRes = modelService.execCheck(frameServerConfigIp, checkRequest.getScriptParams(), sshFtpRequest, file);
+        return new ServiceResult<>(execRes).asResult();
     }
 
 
