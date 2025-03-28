@@ -1765,7 +1765,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, new SceneContextBO());
         CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
         for (CloudPluginSceneElementBO e : pluginHandler.getElementMap().values()) {
-            if (e.getImage().contains("hfdy-vpn-server")) {
+            if (e.getImage().contains("hfdy-vpn-client")) {
                 List<ConnectedNetworkBO> nets = new ArrayList<>();
                 nets.addAll(e.getAccessNetworks());
                 nets.addAll(e.getDeriveNetworks());

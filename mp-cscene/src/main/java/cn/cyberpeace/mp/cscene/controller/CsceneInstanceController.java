@@ -998,7 +998,9 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @GetMapping(value = "/get_hefei_net", params = "id")
     public ServiceResult<String> getNet(@RequestParam String id) {
         var net = modelService.getHefeiNet(id);
-        return new ServiceResult<>(net).asResult();
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("net", net);
+        return new ServiceResult<>(jsonObject.toJSONString()).asResult();
     }
 
 }
