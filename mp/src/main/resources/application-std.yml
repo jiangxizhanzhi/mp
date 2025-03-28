@@ -90,6 +90,11 @@ management:
     elasticsearch:
       enabled: false
 
+ct:
+  common: # 通用配置
+    ip: ${ct.common.ip}
+    port: ${ct.common.port}
+
 # 中台各模块相关配置
 mp:
   common: #公用配置

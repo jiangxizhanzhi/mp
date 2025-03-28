@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
-import cn.cyberpeace.mp.auth.bo.Personnel.management.PersonnelManagementBo;
 import cn.cyberpeace.mp.auth.bo.excel.ExportPersonnelManagementBo;
 import cn.cyberpeace.mp.auth.bo.excel.ExportTeamBO;
 import cn.cyberpeace.mp.auth.bo.user.TeamInfoIdAndName;
@@ -18,27 +17,21 @@ import cn.cyberpeace.mp.auth.request.team.TeamPageRequest;
 import cn.cyberpeace.mp.auth.request.team.TeamRequest;
 import cn.cyberpeace.mp.auth.service.TeamService;
 import cn.cyberpeace.mp.auth.service.TenantUserService;
-import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
-import cn.cyberpeace.mp.base.service.code.ErrorCode;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.hutool.json.JSONUtil;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -46,19 +39,15 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.IdGenerator;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URLEncoder;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -78,6 +67,12 @@ public class TeamServiceImpl implements TeamService {
     @Autowired
     private TenantUserService tenantUserService;
 
+    @Value("${ct.common.ip}")
+    private String CT_COMMON_IP;
+
+    @Value("${ct.common.port}")
+    private String CT_COMMON_PORT;
+
     /**
      *分页查询
      * @param teamPageRequest
@@ -86,7 +81,7 @@ public class TeamServiceImpl implements TeamService {
     @Override
     public ListObjResult getPageTeam(TeamPageRequest teamPageRequest) {
 
-        String url = "http://10.110.3.1:8377/api/ct/admin/nbi/teams/";
+        String url = "http://" + CT_COMMON_IP + ":" + CT_COMMON_PORT + "/api/ct/admin/nbi/teams/";
         ServiceResult ctTeamInfo = getCtTeamInfo(url);
         JSONArray data = (JSONArray) ctTeamInfo.getData();
         List<TeamModel> teamModel = Lists.newArrayList();
