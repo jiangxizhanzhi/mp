@@ -193,6 +193,8 @@ public class SSOFourAServiceImpl extends AbstractSSOService {
         // 4A 单点登出
         try {
             loginUtil.logout(ssoLoginOutBO.getTicket());
+            HttpServletResponse response = ssoLoginOutBO.getResponse();
+            response.sendRedirect(ssoConfig.getOutHomePageUrl());
         } catch (Exception e) {
             log.error("4A logout request failed!", e);
         }

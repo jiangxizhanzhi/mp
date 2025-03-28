@@ -5,9 +5,12 @@ import cn.cyberpeace.mp.auth.bo.sso.SSOLoginOutBO;
 import cn.cyberpeace.mp.auth.config.SSOConfig;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.constant.SSOSysEnum;
+import cn.cyberpeace.mp.auth.extensions.security.common.JwtCommon;
+import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.request.sso.SSOLoginRequest;
 import cn.cyberpeace.mp.auth.service.SSOService;
 import cn.cyberpeace.mp.auth.service.SSOServiceFactory;
+import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
@@ -46,10 +49,21 @@ public class SSOController {
     @Resource
     private SSOConfig ssoConfig;
 
+
+    @Resource
+    private UserService userService;
+
     @ApiOperation(value = "拦截测试", notes = "拦截")
     @GetMapping("/logouts")
-    public void logouts() {
-        log.info("test!!!!!!!!!!!!!!!!!!!!!!");
+    public void logouts(HttpServletRequest request, HttpServletResponse response) {
+        log.info("sso logout ...");
+        UserModel user = JwtCommon.verifyToken(request);
+        if (user != null) {
+            var updateUser = new UserModel();
+            updateUser.setId(user.getId());
+            updateUser.initDefault("tokenSecret");
+            userService.update(updateUser);
+        }
     }
 
     @ApiOperation(value = "登出跳转url获取", notes = "登出跳转url获取")

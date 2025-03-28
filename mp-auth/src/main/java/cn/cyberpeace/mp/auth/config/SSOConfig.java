@@ -1,9 +1,21 @@
 package cn.cyberpeace.mp.auth.config;
 
-
 import lombok.Data;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.ssl.SSLContexts;
+import org.apache.http.ssl.TrustStrategy;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.web.client.RestTemplate;
+
+import javax.net.ssl.SSLContext;
 
 /**
  * @BelongsPackage: cn.cyberpeace.mp.auth.config
@@ -68,5 +80,31 @@ public class SSOConfig {
      */
     private String socTicketCheckUrl;
 
+    /**
+     * soc登出url
+     */
+    private String socLogoutUrl;
 
+
+    @Bean
+    public RestTemplate restTemplate(RestTemplateBuilder builder) {
+        RestTemplate restTemplate = null;
+        try {
+            TrustStrategy acceptingTrustStrategy = (chain, authType) -> true;
+            SSLContext sslContext = SSLContexts.custom().loadTrustMaterial(null, acceptingTrustStrategy).build();
+            SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslContext, NoopHostnameVerifier.INSTANCE);
+
+            HttpClientBuilder clientBuilder = HttpClients.custom();
+
+            CloseableHttpClient httpClient = clientBuilder.setSSLSocketFactory(sslsf).build();
+
+            HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
+            requestFactory.setHttpClient(httpClient);
+
+            restTemplate = new RestTemplate(requestFactory);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return restTemplate;
+    }
 }
