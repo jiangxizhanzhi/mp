@@ -743,6 +743,9 @@ public class CreateHandler extends HandlerCommon {
                 });
             }
 
+            //先写死，只有10.100.13.1分靶场，后续需要修改
+            existCommands.add("ip route add 30.10.254.0/24 via 10.100.13.1");
+
             existCommands.add(vpnServerCommand);
         } else if (HfdyVpnImage.VPN_CLIENT.equals(currentCloudElement.getImage())) {
             String serverVpnIp = getPluginHandler().getSceneHandler().getScene().getServerVpnIp();
