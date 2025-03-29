@@ -286,7 +286,7 @@ public class FlowMonitorController {
         allFlowAttack.addAll(attackInOtherRange);
 
 
-        boolean showAllFlows = CollectionUtils.isEmpty(queryParams.getTargetNodeIds()) || (queryParams.getTargetNodeIds().size() == 1 && queryParams.getTargetNodeIds().get(0).equals("null"));
+        boolean showAllFlows = CollectionUtils.isEmpty(orginTargetNodes) || (orginTargetNodes.size() == 1 && orginTargetNodes.get(0).equals("null"));
         Set<String> validIps;
         if (!showAllFlows) {
             validIps = getIpsByNodes(id, orginTargetNodes);
