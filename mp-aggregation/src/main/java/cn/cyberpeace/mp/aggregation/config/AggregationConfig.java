@@ -37,4 +37,15 @@ public class AggregationConfig {
     @Value("${mp.aggregation.export-image-timeout:3600000}")
     private Integer exportImageTimeout;
 
+    @Value("${mp.aggregation.prefix-linyun:SN-202301}")
+    private String prefixLinyun;
+
+    @Value("${mp.aggregation.prefix-path:E:\\download\\trains}")
+    private String prefixPath;
+
+    @Value("${mp.aggregation.import-image-url:http://10.4.1.36:8008/apitemplate/createBymages}")
+    private String importImageUrl;
+
+    @Value("${mp.aggregation.container-upload-url:http://10.4.1.36:8008/api/devops/cluster/images/custom/upload}")
+    private String containerUploadUrl;
 }

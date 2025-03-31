@@ -343,6 +343,10 @@ mp:
     metadata-file-server: ${mp.scene.ext-var.metadata-file-server}
   aggregation:
     export-image-timeout: ${mp.aggregation.ext-var.export-image-timeout}
+    prefix-linyun: ${mp.aggregation.ext-var.prefix-linyun}
+    prefix-path: ${mp.aggregation.ext-var.prefix-path}
+    import-image-url: ${mp.aggregation.ext-var.import-image-url}
+    container-upload-url: ${mp.aggregation.ext-var.container-upload-url}
 
 # for kaptcha
 kaptcha:
