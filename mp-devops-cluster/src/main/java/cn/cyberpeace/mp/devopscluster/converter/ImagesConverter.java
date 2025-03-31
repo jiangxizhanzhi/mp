@@ -332,6 +332,29 @@ public class ImagesConverter implements BaseConverter {
         devopsTargetService.insert(Collections.singletonList(device));
     }
 
+    @Transactional
+    public Device addByImport(ImageRequest request) {
+        request.setModelId(TextUtils.uuid().substring(0, 15));
+        request.setModelCode(TextUtils.uuid().substring(0, 15));
+        Device device = imagesService.add(convertRequest(request));
+        device.setIsHide(Objects.nonNull(request.getIsHide()) ? request.getIsHide() : Boolean.FALSE);
+        device.setOsVersion(request.getOsVersion());
+        device.setImagePath(request.getImagePath());
+        device.setNetIfCnt(request.getNetIfCnt());
+        device.setBrand(request.getBrand());
+        device.setInnerApps(request.getInnerApps());
+        device.setAttackMockDeviceFlag(Objects.nonNull(request.getAttackMockDeviceFlag()) ? request.getAttackMockDeviceFlag() : Boolean.FALSE);
+        device.setBehaveSupport(Objects.nonNull(request.getBehaviorSimulation()) ? request.getBehaviorSimulation() : Boolean.FALSE);
+        device.setSupportCollect(request.getSupportCollect());
+        device.setExt(request.getExt());
+        device.setSupportQga(request.getSupportQga());
+        device.setCanParticipantsUse(request.getCanParticipantsUse());
+        device.setSupportCollect(request.getSupportCollect());
+        device.setOperateMachine(request.getOperateMachine());
+        devopsTargetService.insertByImport(Collections.singletonList(device));
+        return device;
+    }
+
     public void copy(CopyImageRequest request) {
         var device = deviceService.findByUuid(request.getUuid());
         device.setName(request.getName());

@@ -35,6 +35,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -129,6 +130,30 @@ public class DevopsTargetService {
         for (DeviceTargetPO d : deviceTargetPOS) {
             d.setCreateUser(user != null ? user.getId() : StringUtils.EMPTY);
             d.setCreateUserName(user != null ? user.getName() : StringUtils.EMPTY);
+        }
+        return deviceTargetMapper.batchInsert(deviceTargetPOS);
+    }
+
+    @Transactional
+    public Integer insertByImport(List<Device> deviceList) {
+        if (CollectionUtils.isEmpty(deviceList)) {
+            return 0;
+        }
+        for (Device d : deviceList) {
+            d.setSupportExport(this.getSupportExport(d));
+        }
+        List<DeviceTargetPO> deviceTargetPOS = new ArrayList<>();
+        for (Device device : deviceList) {
+            DeviceTargetPO deviceTargetPO = convertToTargetModel(device);
+            deviceTargetPOS.add(deviceTargetPO);
+        }
+        UserModel user = UserCommon.getCurrentUser();
+        for (DeviceTargetPO d : deviceTargetPOS) {
+            d.setCreateUser(user != null ? user.getId() : StringUtils.EMPTY);
+            d.setCreateUserName(user != null ? user.getName() : StringUtils.EMPTY);
+            d.setQuickCreateSupport(false);
+            d.setSupportQga(false);
+            d.setCanParticipantsUse(false);
         }
         return deviceTargetMapper.batchInsert(deviceTargetPOS);
     }
@@ -301,8 +326,17 @@ public class DevopsTargetService {
             deviceTargetPO.setInitSupport(Boolean.FALSE);
         }
 
-        deviceTargetPO.setCreateTime(TimeUtils.utcStringToLocalDateTime(device.getCreatedAt()));
-        deviceTargetPO.setUpdateTime(TimeUtils.utcStringToLocalDateTime(device.getUpdatedAt()));
+        try {
+            deviceTargetPO.setCreateTime(TimeUtils.utcStringToLocalDateTime(device.getCreatedAt()));
+        } catch (Exception e) {
+            deviceTargetPO.setCreateTime(LocalDateTime.now());
+        }
+        try {
+            deviceTargetPO.setUpdateTime(TimeUtils.utcStringToLocalDateTime(device.getUpdatedAt()));
+        } catch (Exception e) {
+            deviceTargetPO.setUpdateTime(LocalDateTime.now());
+        }
+
         ExtEntity extEntity = device.getExtEntity();
         if (Objects.nonNull(extEntity)) {
             deviceTargetPO.setInPosition(extEntity.getEntityStatus() ? StatusEnum.YES : StatusEnum.NO);
@@ -342,7 +376,7 @@ public class DevopsTargetService {
      */
     private Boolean getSupportExport(Device device) {
         // 内置靶标不可导出
-        if (Boolean.TRUE.equals(device.getIsImport() || Boolean.TRUE.equals(device.getIsInit()) || Boolean.TRUE.equals(device.getIsInternal()))) {
+        if (Boolean.TRUE.equals(device.getIsImport()) || Boolean.TRUE.equals(device.getIsInit()) || Boolean.TRUE.equals(device.getIsInternal())) {
             return false;
         } else if (device.getExtImageInfo() != null && StringUtils.isNotEmpty(device.getExtImageInfo().getBaseImageName())) {
             // 有基础镜像的 以基础镜像为准设置是否可导出
