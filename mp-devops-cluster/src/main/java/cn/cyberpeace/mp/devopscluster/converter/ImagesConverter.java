@@ -166,6 +166,7 @@ public class ImagesConverter implements BaseConverter{
     public void add(ImageRequest request) {
         Device device = imagesService.add(convertRequest(request));
         device.setIsHide(Objects.nonNull(request.getIsHide()) ? request.getIsHide() : Boolean.FALSE);
+        device.setImageResourceType(request.getImageResourceType());
         devopsTargetService.insert(Collections.singletonList(device));
     }
 
