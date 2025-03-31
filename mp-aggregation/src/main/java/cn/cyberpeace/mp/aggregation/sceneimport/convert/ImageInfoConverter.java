@@ -155,6 +155,13 @@ class ImageInfoConverter implements IConverter {
                         mode.setProxy(true);
                     }
                 }
+
+                var flavor = imageInfo.calFlavor();
+                if (flavor != null) {
+                    element.setCpu(flavor.getCpu());
+                    element.setDisk(flavor.getDisk());
+                    element.setRam(flavor.getRam());
+                }
             }
         }
     }

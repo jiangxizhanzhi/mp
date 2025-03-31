@@ -69,7 +69,7 @@ public class ResourceCenterConverter {
         converters.add(new NodeElementConverter(parseResult.getNodes()));
         converters.add(new NetworkElementConverter(parseResult.getNetworks()));
         converters.add(new Node2NodeConnectConverter(parseResult.getNodes()));
-        converters.add(new DeviceInfoConverter(this.targetConverter));
+//        converters.add(new DeviceInfoConverter(this.targetConverter));
         converters.add(new ImageInfoConverter());
         converters.add(new SceneFilePathConverter());
         converters.add(new PortIdAndNameConvert());
