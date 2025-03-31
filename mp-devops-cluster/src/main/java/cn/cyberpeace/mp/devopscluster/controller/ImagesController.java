@@ -731,6 +731,7 @@ public class ImagesController {
                 }
             }
             vo.setCreateUserName(v.getCreateUserName());
+            vo.setImageResourceType(v.getImageResourceType());
             return vo;
         }).collect(Collectors.toList());
     }

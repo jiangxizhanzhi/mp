@@ -210,6 +210,9 @@
             <if test="targetCategory != null and targetCategory == 3">
                 and i.is_import = 0
             </if>
+            <if test="imageResourceType != null">
+                and i.image_resource_type = #{imageResourceType}
+            </if>
         </where>
     </sql>
 
