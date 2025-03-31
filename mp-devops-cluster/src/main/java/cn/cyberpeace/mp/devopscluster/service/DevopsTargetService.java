@@ -169,6 +169,7 @@ public class DevopsTargetService {
         deviceTargetPO.setIsPublic(PublicEnum.ALL_PUBLIC);
         deviceTargetPO.setUseStatus(StatusEnum.NO);
         deviceTargetPO.setReferenceStatus(NumberUtils.INTEGER_ZERO);
+        deviceTargetPO.setImageResourceType(device.getImageResourceType());
         return deviceTargetPO;
     }
 
