@@ -460,7 +460,7 @@ public class BatchSceneHandler {
                 if (StringUtils.isNotEmpty(ipAddr)) {
                     this.allIp2SceneIdMap.put(ipAddr, sceneId);
                     this.allIp2ElementMap.put(ipAddr, srcElement);
-                    List<String> ips = this.nodeId2Ips.getOrDefault(ipAddr, new ArrayList<>());
+                    List<String> ips = this.nodeId2Ips.getOrDefault(srcElement.getId(), new ArrayList<>());
                     ips.add(ipAddr);
                     this.nodeId2Ips.put(srcElement.getId(), ips);
                     if (flowCollectedEnabled) {
