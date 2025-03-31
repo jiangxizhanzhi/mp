@@ -34,7 +34,7 @@ import java.io.InputStream;
  * @see YmlParse
  */
 @Slf4j
-class FilePathYmlParser<T> implements YmlParse<T> {
+public class FilePathYmlParser<T> implements YmlParse<T> {
     private String filePath;
 
     private Class<T> resultType;
