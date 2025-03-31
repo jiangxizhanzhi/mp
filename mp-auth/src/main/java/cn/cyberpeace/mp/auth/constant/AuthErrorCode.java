@@ -144,7 +144,9 @@ public enum AuthErrorCode implements ErrorCode {
     DEMO_ACCESS_ERROR("MP-110163", "demo_access_error"),
 
     // 4A平台用户操作相关报错信息提示
-    FOUR_A_USER_SELECT_ERROR("MP-110170", "4a_user_select_error");// 4a平台用户查询错误
+    FOUR_A_USER_SELECT_ERROR("MP-110170", "4a_user_select_error"),// 4a平台用户查询错误
+
+    SOC_USER_HANDLE_ERROR("MP-110171", "soc_user_handle_error");
 
     AuthErrorCode(String code, String message) {
         setCode(code, AuthConstant.ERROR_CODE_PREFIX + message);

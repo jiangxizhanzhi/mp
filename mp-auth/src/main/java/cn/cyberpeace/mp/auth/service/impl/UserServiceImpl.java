@@ -375,7 +375,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public UserModel addFourAUser(UserRequest createRequest) {
+    public UserModel addSSoUser(UserRequest createRequest) {
         ParamCheck.notNull(createRequest, AuthBasei18nCode.REQUEST_PARAMS);
 //        opUserPermCheckService.checkByTargetRoleIds(createRequest.getRoleIds());// 4a用戶新增不走鉴权
 

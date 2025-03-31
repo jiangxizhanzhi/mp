@@ -5,15 +5,25 @@ import cn.cyberpeace.mp.auth.bo.sso.SSOLoginOutBO;
 import cn.cyberpeace.mp.auth.bo.sso.SocUser;
 import cn.cyberpeace.mp.auth.config.SSOConfig;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
+import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.constant.SSOSysEnum;
 import cn.cyberpeace.mp.auth.extensions.security.filter.JwtAuthenticationFilter;
+import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.repository.RoleMapper;
+import cn.cyberpeace.mp.auth.request.user.UserRequest;
 import cn.cyberpeace.mp.auth.service.AbstractSSOService;
+import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.JwtUtils;
+import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.xml.XmlUtils;
+import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -21,6 +31,11 @@ import org.springframework.web.client.RestTemplate;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.net.URLEncoder;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @BelongsPackage: cn.cyberpeace.mp.auth.service.impl
@@ -40,6 +55,9 @@ public class SSOSocServiceImpl extends AbstractSSOService {
     @Resource(name = "restTemplate")
     private RestTemplate restTemplate;
 
+    @Resource
+    private UserService userService;
+
     @Override
     public boolean isSupport(SSOSysEnum sysEnum) {
         return SSOSysEnum.SOC == sysEnum;
@@ -54,7 +72,9 @@ public class SSOSocServiceImpl extends AbstractSSOService {
         SocUser socUser = null;
         try {
             String url = ssoConfig.getSocTicketCheckUrl()+"?ticket="+ssoLoginBO.getTicket()+"&service="+ssoLoginBO.getService();
+            log.info("url is {}",url);
             responseBody = restTemplate.getForObject(url, String.class);
+            log.info("origin response is {}",responseBody);
             //错误信息处理
             String authenticationFailure = XmlUtils.getTextForElement(responseBody, "authenticationFailure");
             if(StringUtils.isNotEmpty(authenticationFailure)){
@@ -93,8 +113,68 @@ public class SSOSocServiceImpl extends AbstractSSOService {
      * @return UserModel
      */
     private UserModel createOrUpdateSocUser(SSOLoginBO ssoLoginBO, SocUser socUser) {
-
-        return new UserModel();
+        //应用资源根据帐号信息做登录后业务处理
+        SocUser.AuthenticationSuccess authenticationSuccess = socUser.getAuthenticationSuccess();
+        if(Objects.isNull(authenticationSuccess)){
+            log.warn("soc user authenticationSuccess is null!");
+            throw new MpRuntimeException(AuthErrorCode.SOC_USER_HANDLE_ERROR);
+        }
+        SocUser.Attributes attributes = authenticationSuccess.getAttributes();
+        if(Objects.isNull(attributes)){
+            log.warn("soc user attributes is null!");
+            throw new MpRuntimeException(AuthErrorCode.SOC_USER_HANDLE_ERROR);
+        }
+        //用户查询多加类型参数
+        List<UserModel> users = userService.getUserBy4AAccountId(attributes.getUserId());
+        users = users.stream().filter(userModel -> SSOSysEnum.SOC.getCode().equals(userModel.getOutUserType())).collect(
+            Collectors.toList());
+        log.info("查找该soc用户在本系统的账户数量: {}", users.size());
+        UserRequest addRequest = new UserRequest();
+        //信息修改按照实际soc用户信息
+        addRequest.setUsername(attributes.getUsername());
+        addRequest.setName(attributes.getRealName());
+        addRequest.setMobile(attributes.getPhone());
+        addRequest.setEmail(attributes.getEmail());
+        addRequest.setAddress(attributes.getAttributionScope());
+        // 登录凭证ticket
+        addRequest.setFourATicket(ssoLoginBO.getTicket());
+        UserModel user = new UserModel();
+        // 目前无该用户
+        if (CollectionUtils.isEmpty(users)) {
+            addRequest.setAccountId(attributes.getUserId());
+            addRequest.setOutUserType(SSOSysEnum.SOC.getCode());
+            addRequest.setOrgIds(Collections.singletonList(AuthConstant.ROOT_ORG_ID));
+            /**
+             * 山东移动的 超级管理员 管理员 -> 管理员 ， 全部前后台菜单
+             * 山东移动的 省管理 专家 -> 教员 ， 全部前后台菜单（不包含后台系统管理、系统运维菜单）
+             * 山东移动的 学员 -> 学员，全部前台菜单
+             */
+            RoleMapper roleMapper = BeanCommon.getBean(RoleMapper.class);
+            if ("soc_supper_admin".equals(attributes.getRoleCode()) || "sys_admin".equals(attributes.getRoleCode())) {
+                var role = roleMapper.first(new HumanCondition().filterEqual(RoleModel::getName, "管理员"));
+                addRequest.setRoleIds(Arrays.asList(role.getId()));
+            } else if ("soc_admin".equals(attributes.getRoleCode()) || "soc_expert".equals(attributes.getRoleCode())) {
+                var role = roleMapper.first(new HumanCondition().filterEqual(RoleModel::getName, "教员"));
+                addRequest.setRoleIds(Arrays.asList(role.getId()));
+            } else {
+                //默认学员角色
+                var role = roleMapper.first(new HumanCondition().filterEqual(RoleModel::getName, "学员"));
+                addRequest.setRoleIds(Arrays.asList(role.getId()));
+            }
+            addRequest.setPassword(AuthConstant.DEFAULT_INITIALPASSWORD);// 该密码为前端加密过后的密码,原始密码为Xctfoj01
+            log.info("prepare add soc User: {}" + JSON.toJSONString(addRequest));
+            user = userService.addSSoUser(addRequest);
+        } else if (users.size() == 1) {// 查找到唯一用户
+            // 刷新用户信息
+            user = userService.get(users.get(0).getId()).sourceObj();
+            addRequest.setId(user.getId());
+            log.info("prepare modify soc User: {}" + JSON.toJSONString(addRequest));
+            user = userService.modify(addRequest);
+        } else {
+            log.warn("soc user data duplicate!");
+            throw new MpRuntimeException(AuthErrorCode.SOC_USER_HANDLE_ERROR);//用户查询错误
+        }
+        return user;
     }
 
     /**

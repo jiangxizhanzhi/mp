@@ -149,7 +149,7 @@ public class SSOFourAServiceImpl extends AbstractSSOService {
                 addRequest.setRoleIds(Collections.singletonList(AuthConstant.ROLE_XUEYUAN_ID));// 以实际环境的学员角色id为准
                 addRequest.setPassword(AuthConstant.DEFAULT_INITIALPASSWORD);// 该密码为前端加密过后的密码,原始密码为Xctfoj01
                 log.info("prepare addFourUser: {}" + JSON.toJSONString(addRequest));
-                user = userService.addFourAUser(addRequest);
+                user = userService.addSSoUser(addRequest);
             } else if (users.size() == 1) {// 查找到唯一用户
                 // 刷新用户信息
                 user = userService.get(users.get(0).getId()).sourceObj();
