@@ -16,12 +16,11 @@ import cn.cyberpeace.mp.auth.service.AbstractSSOService;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.JwtUtils;
 import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.xml.XmlUtils;
 import com.alibaba.fastjson.JSON;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -31,10 +30,7 @@ import org.springframework.web.client.RestTemplate;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.net.URLEncoder;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -68,7 +64,6 @@ public class SSOSocServiceImpl extends AbstractSSOService {
         log.info("soc sso login ticket is {}, service is {}",ssoLoginBO.getTicket(),ssoLoginBO.getService());
         HttpServletResponse response = ssoLoginBO.getResponse();
         String responseBody = null;
-        XmlMapper xmlMapper = new XmlMapper();
         SocUser socUser = null;
         try {
             String url = ssoConfig.getSocTicketCheckUrl()+"?ticket="+ssoLoginBO.getTicket()+"&service="+ssoLoginBO.getService();
@@ -87,8 +82,8 @@ public class SSOSocServiceImpl extends AbstractSSOService {
                 log.warn("soc sso no principal was found in the response from the CAS server!");
                 return;
             }
-            socUser = xmlMapper.readValue(responseBody, new TypeReference<SocUser>() {
-            });
+            Map<String, Object> userInfoMap = XmlUtils.extractCustomAttributes(responseBody);
+            socUser = JsonCommon.mapToBean(userInfoMap, SocUser.class);
         } catch (Exception e) {
             log.warn("failed to check ticket , response is {}", responseBody, e);
             throw new RuntimeException(e);
@@ -114,34 +109,28 @@ public class SSOSocServiceImpl extends AbstractSSOService {
      */
     private UserModel createOrUpdateSocUser(SSOLoginBO ssoLoginBO, SocUser socUser) {
         //应用资源根据帐号信息做登录后业务处理
-        SocUser.AuthenticationSuccess authenticationSuccess = socUser.getAuthenticationSuccess();
-        if(Objects.isNull(authenticationSuccess)){
-            log.warn("soc user authenticationSuccess is null!");
-            throw new MpRuntimeException(AuthErrorCode.SOC_USER_HANDLE_ERROR);
-        }
-        SocUser.Attributes attributes = authenticationSuccess.getAttributes();
-        if(Objects.isNull(attributes)){
-            log.warn("soc user attributes is null!");
+        if(Objects.isNull(socUser)){
+            log.warn("soc user is null!");
             throw new MpRuntimeException(AuthErrorCode.SOC_USER_HANDLE_ERROR);
         }
         //用户查询多加类型参数
-        List<UserModel> users = userService.getUserBy4AAccountId(attributes.getUserId());
+        List<UserModel> users = userService.getUserBy4AAccountId(socUser.getUserId());
         users = users.stream().filter(userModel -> SSOSysEnum.SOC.getCode().equals(userModel.getOutUserType())).collect(
             Collectors.toList());
         log.info("查找该soc用户在本系统的账户数量: {}", users.size());
         UserRequest addRequest = new UserRequest();
         //信息修改按照实际soc用户信息
-        addRequest.setUsername(attributes.getUsername());
-        addRequest.setName(attributes.getRealName());
-        addRequest.setMobile(attributes.getPhone());
-        addRequest.setEmail(attributes.getEmail());
-        addRequest.setAddress(attributes.getAttributionScope());
+        addRequest.setUsername(socUser.getUsername());
+        addRequest.setName(socUser.getRealName());
+        addRequest.setMobile(socUser.getPhone());
+        addRequest.setEmail(socUser.getEmail());
+        addRequest.setAddress(socUser.getAttributionScope());
         // 登录凭证ticket
         addRequest.setFourATicket(ssoLoginBO.getTicket());
         UserModel user = new UserModel();
         // 目前无该用户
         if (CollectionUtils.isEmpty(users)) {
-            addRequest.setAccountId(attributes.getUserId());
+            addRequest.setAccountId(socUser.getUserId());
             addRequest.setOutUserType(SSOSysEnum.SOC.getCode());
             addRequest.setOrgIds(Collections.singletonList(AuthConstant.ROOT_ORG_ID));
             /**
@@ -150,10 +139,10 @@ public class SSOSocServiceImpl extends AbstractSSOService {
              * 山东移动的 学员 -> 学员，全部前台菜单
              */
             RoleMapper roleMapper = BeanCommon.getBean(RoleMapper.class);
-            if ("soc_supper_admin".equals(attributes.getRoleCode()) || "sys_admin".equals(attributes.getRoleCode())) {
+            if ("soc_supper_admin".equals(socUser.getRoleCode()) || "sys_admin".equals(socUser.getRoleCode())) {
                 var role = roleMapper.first(new HumanCondition().filterEqual(RoleModel::getName, "管理员"));
                 addRequest.setRoleIds(Arrays.asList(role.getId()));
-            } else if ("soc_admin".equals(attributes.getRoleCode()) || "soc_expert".equals(attributes.getRoleCode())) {
+            } else if ("soc_admin".equals(socUser.getRoleCode()) || "soc_expert".equals(socUser.getRoleCode())) {
                 var role = roleMapper.first(new HumanCondition().filterEqual(RoleModel::getName, "教员"));
                 addRequest.setRoleIds(Arrays.asList(role.getId()));
             } else {
