@@ -172,6 +172,7 @@ mp:
         soc-login-url: ${SSO_SOC_LOGIN_URL:https://localhost:8443/login}
         soc-ticket-check-url: ${SSO_SOC_TICKET_CHECK_URL:https://localhost:8443/test/soc/user}
         soc-log-out-url: ${SSO_SOC_LOG_OUT_URL:https://localhost:8443/cas/logout}
+        default-redirect-url: ${SSO_DEFAULT_REDIRECT_URL:https://www.baidu.com}
   sceneplugingns3:
     ext-var:
       gns3-ip: ${GNS3_IP:10.2.58.50}

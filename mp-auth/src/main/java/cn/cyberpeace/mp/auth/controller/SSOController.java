@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.controller;
 
+import cn.cyberpeace.mp.auth.bo.sso.SSOConfigBO;
 import cn.cyberpeace.mp.auth.bo.sso.SSOLoginBO;
 import cn.cyberpeace.mp.auth.bo.sso.SSOLoginOutBO;
 import cn.cyberpeace.mp.auth.config.SSOConfig;
@@ -135,5 +136,13 @@ public class SSOController {
                 .build();
         SSOService ssoService = ssoServiceFactory.getSSOService(SSOSysEnum.SOC);
         ssoService.login(ssoLoginBO);
+    }
+
+
+    @ApiOperation("单点登录相关配置查询")
+    @GetMapping("/get_sso_config")
+    public ServiceResult<SSOConfigBO> getThirdLoginConfig() {
+        SSOConfigBO ssoConfigBO = SSOConfigBO.builder().defaultRedirectUrl(ssoConfig.getDefaultRedirectUrl()).build();
+        return new ServiceResult<>(ssoConfigBO).asResult();
     }
 }

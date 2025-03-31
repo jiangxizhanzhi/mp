@@ -35,7 +35,7 @@ public class SSOConfig {
     private String appId;
 
     /**
-     * 单点登录核心服务url
+     * 4a单点登录核心服务url
      */
     private String url;
 
@@ -58,7 +58,6 @@ public class SSOConfig {
      * 读超时
      */
     private Integer readTimeout;
-
 
     /**
      * 首页url
@@ -84,6 +83,11 @@ public class SSOConfig {
      * soc登出url
      */
     private String socLogoutUrl;
+
+    /**
+     * 默认重定向地址url
+     */
+    private String defaultRedirectUrl;
 
 
     @Bean
