@@ -7,12 +7,16 @@ import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.constant.SSOSysEnum;
 import cn.cyberpeace.mp.auth.extensions.security.filter.JwtAuthenticationFilter;
+import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.repository.RoleMapper;
 import cn.cyberpeace.mp.auth.request.user.UserRequest;
 import cn.cyberpeace.mp.auth.service.AbstractSSOService;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.JwtUtils;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import com.alibaba.fastjson.JSON;
 import com.boco.iam.sso.client.LoginUtil;
 import com.boco.iam.sso.client.ResultCode;
@@ -26,6 +30,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -146,7 +151,9 @@ public class SSOFourAServiceImpl extends AbstractSSOService {
                 addRequest.setOutUserType(SSOSysEnum.FOUR_A.getCode());
                 // 预设学员角色和默认组织
                 addRequest.setOrgIds(Collections.singletonList(AuthConstant.ROOT_ORG_ID));
-                addRequest.setRoleIds(Collections.singletonList(AuthConstant.ROLE_XUEYUAN_ID));// 以实际环境的学员角色id为准
+                RoleMapper roleMapper = BeanCommon.getBean(RoleMapper.class);
+                var role = roleMapper.first(new HumanCondition().filterEqual(RoleModel::getName, "学员"));
+                addRequest.setRoleIds(Arrays.asList(role.getId()));
                 addRequest.setPassword(AuthConstant.DEFAULT_INITIALPASSWORD);// 该密码为前端加密过后的密码,原始密码为Xctfoj01
                 log.info("prepare addFourUser: {}" + JSON.toJSONString(addRequest));
                 user = userService.addSSoUser(addRequest);
