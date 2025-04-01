@@ -38,4 +38,7 @@ public class SceneImportRequest {
 
     @ApiModelProperty("场景文件路径")
     private String sceneFilePath;
+
+    @ApiModelProperty("是否是场景模板")
+    private Boolean template;
 }

@@ -89,13 +89,13 @@ public class ResourceCenterService {
      * @param sceneFilePath
      * @return
      */
-    public ServiceResult<CsceneBO> importByConfig(String ymlFilePath, String imageFilePath, List<String> imageFilePathList, String sceneFilePath) {
+    public ServiceResult<CsceneBO> importByConfig(String ymlFilePath, String imageFilePath, List<String> imageFilePathList, String sceneFilePath, Boolean template) {
         String jsonFilePath = ymlFilePath + "/topo.json";
         File file = new File(jsonFilePath);
         if (file.exists()) {
             return this.importByJsonConfig(ymlFilePath, imageFilePath, imageFilePathList, sceneFilePath);
         } else {
-            return this.importByYmlConfig(ymlFilePath, imageFilePath, imageFilePathList, sceneFilePath);
+            return this.importByYmlConfig(ymlFilePath, imageFilePath, imageFilePathList, sceneFilePath, template);
         }
     }
 
@@ -210,7 +210,7 @@ public class ResourceCenterService {
      * @param sceneFilePath
      * @return
      */
-    public ServiceResult<CsceneBO> importByYmlConfig(String ymlFilePath, String imageFilePath, List<String> imageFilePathList, String sceneFilePath) {
+    public ServiceResult<CsceneBO> importByYmlConfig(String ymlFilePath, String imageFilePath, List<String> imageFilePathList, String sceneFilePath, Boolean template) {
         // 解析 topo.yml
         YmlParseResult ymlParseResult = ResourceCenterYmlParser.parseTopoYml(ymlFilePath);
         // 解析 image/services.yml
@@ -244,6 +244,9 @@ public class ResourceCenterService {
         }
         // 转换bo
         CsceneBO csceneBO = cSceneBoConverter.convert(ymlParseResult, imageInfos, fdfsSceneFilePath);
+        if (Boolean.TRUE.equals(template)) {
+            csceneBO.setType(CsceneModel.Type.TEMPLATE);
+        }
         csceneBO.setLogo(fdfsLogoFilePath);
         // 保存
         return csceneService.syncForImport(csceneBO, new CsceneContextBO());
