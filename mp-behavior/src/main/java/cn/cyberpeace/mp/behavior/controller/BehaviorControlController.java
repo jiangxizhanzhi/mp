@@ -63,9 +63,5 @@ public class BehaviorControlController {
 		return new ServiceResult<>(true).asResult();
 	}
 
-	@ApiOperation("实验名称列表")
-	@GetMapping("/name_list")
-	public ServiceResult<List<String>> getNameList() {
-		return new ServiceResult<>(simulateService.getNameList());
-	}
+
 }

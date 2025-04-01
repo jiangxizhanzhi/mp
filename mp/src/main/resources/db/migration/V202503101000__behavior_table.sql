@@ -12,7 +12,7 @@ CREATE TABLE `mp_behavior_task` (
                                     `target` varchar(255) DEFAULT NULL COMMENT '目标服务',
                                     `type` varchar(255) DEFAULT NULL COMMENT '分类',
                                     `step` varchar(255) DEFAULT NULL COMMENT '步骤',
-                                    `run_time` datetime DEFAULT NULL COMMENT '运行时间',
+                                    `run_time` time DEFAULT NULL COMMENT '运行时间',
                                     `delete` tinyint(1) DEFAULT NULL COMMENT '是否删除',
                                     PRIMARY KEY (`pk`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
@@ -26,10 +26,11 @@ CREATE TABLE `mp_behavior_simulate` (
                                         `scene_name` varchar(255) DEFAULT NULL COMMENT '场景名称',
                                         `node_id` varchar(64) DEFAULT NULL COMMENT '节点id',
                                         `node_name` varchar(255) DEFAULT NULL COMMENT '节点名称',
+                                        `ip` varchar(255) DEFAULT NULL COMMENT '节点ip',
                                         `status` tinyint(2) DEFAULT NULL COMMENT '状态',
                                         `delete` tinyint(1) DEFAULT NULL COMMENT '是否删除',
-                                        `start_time` datetime DEFAULT NULL COMMENT '开始时间',
-                                        `end_time` datetime DEFAULT NULL COMMENT '结束时间',
+                                        `start_time` time DEFAULT NULL COMMENT '开始时间',
+                                        `end_time` time DEFAULT NULL COMMENT '结束时间',
                                         `online` tinyint(1) DEFAULT NULL COMMENT '是否在线',
                                         PRIMARY KEY (`pk`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
@@ -42,6 +43,7 @@ CREATE TABLE `mp_behavior_scene` (
                                      `scene_id` varchar(64) DEFAULT NULL COMMENT '场景id',
                                      `node_id` varchar(64) DEFAULT NULL COMMENT '节点id',
                                      `node_config` text DEFAULT NULL COMMENT '节点配置',
+                                     `instance` tinyint(1) DEFAULT NULL COMMENT '是否是实例',
                                      PRIMARY KEY (`pk`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 

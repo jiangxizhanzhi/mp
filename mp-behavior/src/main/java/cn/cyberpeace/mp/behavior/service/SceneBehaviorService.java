@@ -19,6 +19,9 @@ public class SceneBehaviorService {
 	@Autowired
 	private SceneModelMapper sceneModelMapper;
 
+	@Autowired
+	private SimulateService simulateService;
+
 	public NodeBehavior getNodeBehavior(String sceneId, String nodeId) {
 		HumanCondition condition = new HumanCondition().filterEqual(SceneModel::getSceneId, sceneId)
 													   .filterEqual(SceneModel::getNodeId, nodeId);
@@ -37,11 +40,18 @@ public class SceneBehaviorService {
 	public void save(NodeBehavior nodeBehavior) {
 		HumanCondition condition = new HumanCondition().filterEqual(SceneModel::getSceneId, nodeBehavior.getSceneId())
 													   .filterEqual(SceneModel::getNodeId, nodeBehavior.getNodeId());
+		Boolean instance = sceneModelMapper.getInstanceBySceneAndNode(nodeBehavior.getSceneId(), nodeBehavior.getNodeId());
+		String simulateId = sceneModelMapper.getIdBySceneAndNode(nodeBehavior.getSceneId(), nodeBehavior.getNodeId());
 		sceneModelMapper.filterDelete(condition);
 		SceneModel sceneModel = new SceneModel();
 		sceneModel.setSceneId(nodeBehavior.getSceneId());
 		sceneModel.setNodeId(nodeBehavior.getNodeId());
 		sceneModel.setNodeConfig(JSONObject.toJSONString(nodeBehavior.getUserBehaviorList()));
+		sceneModel.setInstance(false);
 		sceneModelMapper.create(sceneModel);
+		if (instance != null && instance) {
+			simulateService.deleteSimulate(simulateId);
+			simulateService.runSimulate(sceneModel.getId());
+		}
 	}
 }

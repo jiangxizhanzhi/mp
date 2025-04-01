@@ -20,14 +20,8 @@ public class CreateSimulateReq implements Serializable {
 	private String sceneName;
 
 	@ApiModelProperty("行为节点列表")
-	private List<NodeBo> nodeList;
+	private List<NodeBo> behaviorNodeList;
 
-//	@ApiModelProperty("开始时间")
-//	private LocalDateTime startTime;
-//
-//	@ApiModelProperty("结束时间")
-//	private LocalDateTime endTime;
-//
-//	@ApiModelProperty("任务列表")
-//	private List<CreateTaskReq> taskList;
+	@ApiModelProperty("节点ip列表")
+	private List<NodeBo> nodeList;
 }

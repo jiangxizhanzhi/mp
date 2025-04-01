@@ -21,4 +21,7 @@ public class SceneModel extends BaseModel {
 
 	@ApiModelProperty("节点配置")
 	private String nodeConfig;
+
+	@ApiModelProperty("是否是场景实例")
+	private Boolean instance;
 }

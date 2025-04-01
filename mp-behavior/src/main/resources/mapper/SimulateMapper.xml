@@ -3,7 +3,7 @@
 <mapper namespace="cn.cyberpeace.mp.behavior.mapper.SimulateMapper">
 
     <select id="countSimulate" resultType="java.lang.Integer">
-        select count(1) from mp_behavior_simulate where `delete` is not false
+        select count(1) from mp_behavior_simulate where `delete` is false
     </select>
 
     <select id="selectBySceneNode" resultType="cn.cyberpeace.mp.behavior.model.SimulateModel">
@@ -15,7 +15,7 @@
     <select id="selectIdByStatus" resultType="java.lang.String">
         select id
         from mp_behavior_simulate
-        where status = #{status} and `delete` is not false
+        where status = #{status} and `delete` is false
     </select>
 
     <update id="delete">

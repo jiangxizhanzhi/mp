@@ -68,12 +68,20 @@ public class SimulateService {
 
 	public void createTask(CreateSimulateReq createSimulateReq) {
 
+		List<TaskModel> taskModelList = new ArrayList<>();
+		List<SimulateModel> simulateModelList = new ArrayList<>();
+		List<SceneModel> sceneModelList = new ArrayList<>();
+
+		Map<String, String> nodeIpMap = createSimulateReq.getNodeList()
+				.stream()
+				.collect(Collectors.toMap(NodeBo::getNodeId, NodeBo::getNodeIp));
 		for (NodeBo nodeBo : createSimulateReq.getNodeList()) {
-			HumanCondition humanCondition = new HumanCondition().filterEqual(SceneModel::getSceneId, createSimulateReq.getSceneId())
+			HumanCondition humanCondition = new HumanCondition().filterEqual(SceneModel::getSceneId, createSimulateReq.getSceneTemplateId())
 																.filterEqual(SceneModel::getNodeId, nodeBo.getNodeId());
 			SceneModel sceneModel = sceneModelMapper.first(humanCondition);
 			if (sceneModel == null) {
 				log.error("cannot find behavior config, sceneId:[{}], nodeId:[{}]", createSimulateReq.getSceneId(), nodeBo.getNodeId());
+				break;
 			}
 			SimulateModel simulateModel = new SimulateModel();
 			BeanUtils.copyProperties(createSimulateReq, simulateModel);
@@ -82,30 +90,49 @@ public class SimulateService {
 			simulateModel.setOnline(false);
 			simulateModel.setId(TextUtils.uuid());
 			simulateModel.setIp(nodeBo.getNodeIp());
+			simulateModel.setNodeId(nodeBo.getNodeId());
+			simulateModel.setNodeName(nodeBo.getNodeName());
+//			simulateModel.setStartTime(sceneModel.get);
+			simulateModelList.add(simulateModel);
 
-			List<TaskModel> taskModelList = new ArrayList<>();
+			SceneModel newSceneModel = new SceneModel();
+			newSceneModel.setSceneId(createSimulateReq.getSceneId());
+			newSceneModel.setNodeId(nodeBo.getNodeId());
+			newSceneModel.setInstance(true);
+			newSceneModel.setNodeConfig(sceneModel.getNodeConfig());
+			sceneModelList.add(newSceneModel);
+
 			for (NodeUserBehavior nodeUserBehavior : JSONObject.parseArray(sceneModel.getNodeConfig(), NodeUserBehavior.class)) {
 				for (NodeNetworkBehavior nodeNetworkBehavior : nodeUserBehavior.getNetworkBehaviorList()) {
 					TaskModel taskModel = new TaskModel();
 					BeanUtils.copyProperties(nodeNetworkBehavior, taskModel);
 					taskModel.setSimulateId(simulateModel.getId());
 					taskModel.setNetworkBehaviorId(nodeNetworkBehavior.getNetworkBehaviorId());
-					taskModel.setParams(JSONObject.toJSONString(nodeNetworkBehavior.getParamList()));
+					List<Param> params = nodeNetworkBehavior.getParamList();
+					for (Param param : params) {
+						if ("host".equals(param.getParam())) {
+							param.setValue(nodeIpMap.get(param.getValue()));
+						}
+					}
+					taskModel.setParams(JSONObject.toJSONString(params));
 					taskModel.setRunTime(TimeUtils.toLocalTime(nodeNetworkBehavior.getRunTime()));
 					taskModel.setDelete(false);
 					taskModelList.add(taskModel);
 				}
 			}
-			transactionTemplate.execute(new TransactionCallbackWithoutResult() {
 
-				@Override
-				protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
-
-					taskMapper.bulkCreate(taskModelList);
-					simulateMapper.create(simulateModel);
-				}
-			});
 		}
+
+		transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
+
+				taskMapper.bulkCreate(taskModelList);
+				simulateMapper.bulkCreate(simulateModelList);
+				sceneModelMapper.bulkCreate(sceneModelList);
+			}
+		});
 
 
 	}
@@ -204,8 +231,8 @@ public class SimulateService {
 		simulateDetailRes.setId(simulateModel.getId());
 		simulateDetailRes.setIp(simulateModel.getIp());
 		simulateDetailRes.setSceneName(simulateModel.getSceneName());
-		simulateDetailRes.setStartTime(TimeUtils.format(simulateModel.getStartTime()));
-		simulateDetailRes.setEndTime(TimeUtils.format(simulateModel.getEndTime()));
+//		simulateDetailRes.setStartTime(TimeUtils.format(simulateModel.getStartTime()));
+//		simulateDetailRes.setEndTime(TimeUtils.format(simulateModel.getEndTime()));
 		List<TaskPageRes> taskPageResList = new ArrayList<>();
 		List<TaskModel> taskModelList = taskMapper.list(new HumanCondition().filterEqual(TaskModel::getSimulateId, simulateId));
 		for (TaskModel taskModel : taskModelList) {
@@ -216,6 +243,11 @@ public class SimulateService {
 		}
 		simulateDetailRes.setBehaviorList(taskPageResList);
 		return simulateDetailRes;
+	}
+
+	public void deleteSimulate(String simulateId) {
+		timerMap.remove(simulateId);
+		simulateMapper.delete(simulateId);
 	}
 
 	private void recoverTimerTask() {

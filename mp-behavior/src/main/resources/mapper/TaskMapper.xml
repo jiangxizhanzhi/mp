@@ -3,6 +3,6 @@
 <mapper namespace="cn.cyberpeace.mp.behavior.mapper.TaskMapper">
 
     <select id="countTask" resultType="java.lang.Integer">
-        select count(1) from mp_behavior_task where `delete` is not false
+        select count(1) from mp_behavior_task where `delete` is false
     </select>
 </mapper>

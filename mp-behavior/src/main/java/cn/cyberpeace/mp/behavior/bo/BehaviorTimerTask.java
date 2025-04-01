@@ -44,9 +44,6 @@ public class BehaviorTimerTask extends TimerTask {
 	@Override
 	public void run() {
 		RabbitTemplate rabbitTemplate = BeanCommon.getBean(RabbitTemplate.class);
-
-
-
 		RunBehaviorLogModel runBehaviorLogModel = new RunBehaviorLogModel();
 		runBehaviorLogModel.setLogContent("");
 		runBehaviorLogModel.setBehaviorTemplateId(behaviorTemplateId);

@@ -3,5 +3,14 @@
 <mapper namespace="cn.cyberpeace.mp.behavior.mapper.SceneModelMapper">
 
 
-
+    <select id="getInstanceBySceneAndNode" resultType="java.lang.Boolean">
+        select `instance`
+        from mp_behavior_scene
+        where scene_id = #{scene_id} and node_id = #{node_id}
+    </select>
+    <select id="getIdBySceneAndNode" resultType="java.lang.String">
+        select `id`
+        from mp_behavior_scene
+        where scene_id = #{scene_id} and node_id = #{node_id}
+    </select>
 </mapper>

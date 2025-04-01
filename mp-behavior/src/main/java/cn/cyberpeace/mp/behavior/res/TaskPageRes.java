@@ -21,7 +21,7 @@ public class TaskPageRes implements Serializable {
     private String target;
 
     @ApiModelProperty("步骤")
-    private String step;
+    private Integer step;
 
     @ApiModelProperty("运行时间")
     private String runTime;

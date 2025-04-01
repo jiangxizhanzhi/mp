@@ -37,11 +37,11 @@ public class SimulateModel extends BaseModel {
 	@ApiModelProperty("是否删除")
 	private Boolean delete;
 
-	@ApiModelProperty("开始时间")
-	private LocalTime startTime;
-
-	@ApiModelProperty("结束时间")
-	private LocalTime endTime;
+//	@ApiModelProperty("开始时间")
+//	private LocalTime startTime;
+//
+//	@ApiModelProperty("结束时间")
+//	private LocalTime endTime;
 
 	@ApiModelProperty("在线")
 	private Boolean online;
