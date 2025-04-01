@@ -34,6 +34,7 @@ public class AzureDeleteHandler extends DeleteHandler {
     private String privateAzureManagerUrl;
 
     private MicrosoftAzureLoginMapper sceneElementPluginConfigMapper;
+
     public static class ElementProcess {
         public static final EventProcess DELETE_WEBAPP = new EventProcess("delete_webapp", "sceneplugincloud.event" + ".delete_webapp");
     }
@@ -88,34 +89,36 @@ public class AzureDeleteHandler extends DeleteHandler {
         }
 
         // 最后删除资源组 空场景或不涉及云靶标的场景不启动资源组
-        if (!allFilteredElements.isEmpty()) {
-            String groupName = getPluginHandler().getSourceSceneId();
-            groupName = StringUtils.isNotBlank(groupNamePrefix) ? groupNamePrefix + "-" + groupName : groupName;
+        String groupName = getPluginHandler().getSourceSceneId();
+        groupName = StringUtils.isNotBlank(groupNamePrefix) ? groupNamePrefix + "-" + groupName : groupName;
 
-            Integer cloudType = getPluginHandler().getSceneHandler().getScene().getCloudType();
-            JSONObject jsonObject = new JSONObject();
-            //云类型(1: 微软公有云 2:微软私有云 3:微软混合云)
-            jsonObject.put("cloudType", cloudType);
-            MicrosoftAzureUserModel localAzurer = sceneElementPluginConfigMapper.getLocalAzurer(jsonObject);
-            if (cloudType == BaseSceneModel.CloudType.PUBLIC) {
+        Integer cloudType = getPluginHandler().getSceneHandler().getScene().getCloudType();
+        JSONObject jsonObject = new JSONObject();
+        //云类型(1: 微软公有云 2:微软私有云 3:微软混合云)
+        jsonObject.put("cloudType", cloudType);
+        MicrosoftAzureUserModel localAzurer = sceneElementPluginConfigMapper.getLocalAzurer(jsonObject);
+        if (cloudType == BaseSceneModel.CloudType.PUBLIC) {
+            try {
                 resourceService.getManager().resourceGroups().deleteByName(groupName);
-            } else {
-                String azureManagerUrl = mixAzureManagerUrl;
-                if (cloudType == BaseSceneModel.CloudType.PRIVATE) {
-                    azureManagerUrl = privateAzureManagerUrl;
-                }
-                String url = azureManagerUrl + "/cloud/delete_group";
-                Map<String, Object> formMap = new HashMap();
-                formMap.put("azureUser", localAzurer);
-                formMap.put("groupName", groupName);
-                //请求头设置
-                HashMap<String, String> headersMap = new HashMap<>();
-                String body = JsonUtils.stringify(formMap);
-                try {
-                    HttpUtils.sendHttpPost(url, body, headersMap);
-                } catch (IOException ex) {
-                    throw new RuntimeException(ex);
-                }
+            } catch (Exception e) {
+//                    空场景删除报错不处理
+            }
+        } else {
+            String azureManagerUrl = mixAzureManagerUrl;
+            if (cloudType == BaseSceneModel.CloudType.PRIVATE) {
+                azureManagerUrl = privateAzureManagerUrl;
+            }
+            String url = azureManagerUrl + "/cloud/delete_group";
+            Map<String, Object> formMap = new HashMap();
+            formMap.put("azureUser", localAzurer);
+            formMap.put("groupName", groupName);
+            //请求头设置
+            HashMap<String, String> headersMap = new HashMap<>();
+            String body = JsonUtils.stringify(formMap);
+            try {
+                HttpUtils.sendHttpPost(url, body, headersMap);
+            } catch (IOException ex) {
+//                    空场景删除报错不处理
             }
         }
     }

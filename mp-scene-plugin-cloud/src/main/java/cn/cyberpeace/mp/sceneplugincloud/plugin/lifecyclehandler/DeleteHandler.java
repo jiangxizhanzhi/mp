@@ -1,7 +1,11 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
+import cn.cyberpeace.mp.auth.model.MicrosoftAzureUserModel;
+import cn.cyberpeace.mp.auth.repository.MicrosoftAzureLoginMapper;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.util.HttpUtils;
+import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.base.util.mptool.ConcurrentHashSet;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
@@ -27,6 +31,8 @@ import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConnectionMa
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementMapper;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.SceneInstanceLinkCacheUtil;
+import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
+import com.alibaba.fastjson.JSONObject;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -34,6 +40,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -53,6 +60,10 @@ public class DeleteHandler extends HandlerCommon {
 
     private final Map<String, BaseNpcData.NetWorkNpcInfo> network2Info = new ConcurrentHashMap<>();
     private final Set<String> dynamipsIds = new ConcurrentHashSet<>();
+
+    private String mixAzureManagerUrl;
+    private String privateAzureManagerUrl;
+    private MicrosoftAzureLoginMapper sceneElementPluginConfigMapper;
 
     public static class SceneProcess {
         public static final EventProcess DELETE_NPCS = new EventProcess("delete_npcs", "sceneplugincloud.event.delete_npcs");
@@ -310,6 +321,9 @@ public class DeleteHandler extends HandlerCommon {
 
     public DeleteHandler(CloudScenePluginHandler pluginHandler) {
         super(pluginHandler, DeleteTaskPool.getInstance(), SceneModel.Event.DELETE);
+        this.mixAzureManagerUrl = BeanCommon.getBean(SituationAwareConfig.class).getMixAzureManagerUrl();
+        this.privateAzureManagerUrl = BeanCommon.getBean(SituationAwareConfig.class).getPrivateAzureManagerUrl();
+        this.sceneElementPluginConfigMapper = BeanCommon.getBean(MicrosoftAzureLoginMapper.class);
     }
 
     protected void syncFlowPortInfo() {
@@ -456,8 +470,31 @@ public class DeleteHandler extends HandlerCommon {
                 runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.DELETE_VIRTUAL_MACHINE,
                         () -> {
                             SceneTaskPool.getInstance().executeTask(() -> {
-                                AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(IAzureResourceManager.getInstance(cloudType));
-                                azureVirtualMachine.delete(cloudElement);
+                                if (cloudType == BaseSceneModel.CloudType.PUBLIC) {
+                                    AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(IAzureResourceManager.getInstance(cloudType));
+                                    azureVirtualMachine.delete(cloudElement);
+                                } else {
+                                    JSONObject jsonObject = new JSONObject();
+                                    //云类型(1: 微软公有云 2:微软私有云 3:微软混合云)
+                                    jsonObject.put("cloudType", cloudType);
+                                    MicrosoftAzureUserModel localAzurer = sceneElementPluginConfigMapper.getLocalAzurer(jsonObject);
+                                    String azureManagerUrl = mixAzureManagerUrl;
+                                    if(cloudType == BaseSceneModel.CloudType.PRIVATE){
+                                        azureManagerUrl = privateAzureManagerUrl;
+                                    }
+                                    String url = azureManagerUrl + "/cloud/vm_delete";
+                                    Map<String, Object> formMap = new HashMap();
+                                    formMap.put("azureUser", localAzurer);
+                                    formMap.put("vmId", cloudElement.getResourceId());
+                                    //请求头设置
+                                    HashMap<String, String> headersMap = new HashMap<>();
+                                    String body = JsonUtils.stringify(formMap);
+                                    try {
+                                        HttpUtils.sendHttpPost(url, body, headersMap);
+                                    } catch (IOException ex) {
+                                        throw new RuntimeException(ex);
+                                    }
+                                }
                                 this.disableConnectUrl(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
                             });
                         });

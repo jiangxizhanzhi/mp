@@ -1,19 +1,29 @@
 package cn.cyberpeace.mp.sceneplugincollection.plugin.azure.lifecyclehandler;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.util.HttpUtils;
+import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
+import cn.cyberpeace.mp.sceneplugincloud.model.AzureUserModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
+import cn.cyberpeace.mp.sceneplugincloud.repository.AzureUserModelMapper;
 import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSceneStage;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.CreateHandler;
 import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
+import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 public class AzureCreateHandler extends CreateHandler {
@@ -21,11 +31,18 @@ public class AzureCreateHandler extends CreateHandler {
     private String groupNamePrefix;
     private IAzureResourceManager resourceService;
 
+    private String mixAzureManagerUrl;
+    private String privateAzureManagerUrl;
+    private AzureUserModelMapper azureUserModelMapper;
+
     public AzureCreateHandler(int cloudType, CollectionScenePluginHandler pluginHandler) {
         super(pluginHandler);
         this.cloudType = cloudType;
         this.resourceService = IAzureResourceManager.getInstance(cloudType);
         this.groupNamePrefix = BeanCommon.getBean(SituationAwareConfig.class).getGroupNamePrefix();
+        this.mixAzureManagerUrl = BeanCommon.getBean(SituationAwareConfig.class).getMixAzureManagerUrl();
+        this.privateAzureManagerUrl = BeanCommon.getBean(SituationAwareConfig.class).getPrivateAzureManagerUrl();
+        this.azureUserModelMapper = BeanCommon.getBean(AzureUserModelMapper.class);
     }
 
     public void create() {
@@ -193,14 +210,36 @@ public class AzureCreateHandler extends CreateHandler {
         } catch (Exception e) {
             log.error("创建场景失败", e);
 //            云场景启动失败立即删除云资源
-            try {
-                String groupName = getPluginHandler().getSourceSceneId();
-                groupName = StringUtils.isNotBlank(groupNamePrefix) ? groupNamePrefix + "-" + groupName : groupName;
-                resourceService.getManager().resourceGroups().deleteByName(groupName);
-            }catch (Exception exception){
-//                未启云场景会删除失败异常 此处不处理
+            String groupName = getPluginHandler().getSourceSceneId();
+            groupName = StringUtils.isNotBlank(groupNamePrefix) ? groupNamePrefix + "-" + groupName : groupName;
+            if (cloudType == BaseSceneModel.CloudType.PUBLIC) {
+                try {
+                    resourceService.getManager().resourceGroups().deleteByName(groupName);
+                }catch (Exception ex){
+                }
+            } else {
+                // 创建微软云的资源组
+                String azureManagerUrl = mixAzureManagerUrl;
+                if(cloudType == BaseSceneModel.CloudType.PRIVATE){
+                    azureManagerUrl = privateAzureManagerUrl;
+                }
+                JSONObject jsonObject = new JSONObject();
+                //云类型(1: 微软公有云 2:微软私有云 3:微软混合云)
+                jsonObject.put("cloudType", cloudType);
+                AzureUserModel localAzurer = azureUserModelMapper.getLocalAzurer(jsonObject);
+                String url = azureManagerUrl + "/cloud/delete_group";
+                Map<String, Object> formMap = new HashMap();
+                formMap.put("azureUser", localAzurer);
+                formMap.put("groupName", groupName);
+                //请求头设置
+                HashMap<String, String> headersMap = new HashMap<>();
+                String body = JsonUtils.stringify(formMap);
+                try {
+                    HttpUtils.sendHttpPost(url, body, headersMap);
+                } catch (Exception ex) {
+                }
             }
-            throw e;
+            throw new MpRuntimeException(BaseErrorCode.ERROR, e);
         }
     }
 }

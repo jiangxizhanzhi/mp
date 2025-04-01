@@ -456,7 +456,10 @@ public class AzureCreateHandler extends CreateHandler {
             log.error("创建场景失败", e);
 //            云场景启动失败立即删除云资源
             if (cloudType == BaseSceneModel.CloudType.PUBLIC) {
-                resourceService.getManager().resourceGroups().deleteByName(groupName);
+                try {
+                    resourceService.getManager().resourceGroups().deleteByName(groupName);
+                }catch (Exception ex){
+                }
             } else {
                 String url = azureManagerUrl + "/cloud/delete_group";
                 Map<String, Object> formMap = new HashMap();
@@ -467,8 +470,7 @@ public class AzureCreateHandler extends CreateHandler {
                 String body = JsonUtils.stringify(formMap);
                 try {
                     HttpUtils.sendHttpPost(url, body, headersMap);
-                } catch (IOException ex) {
-                    throw new RuntimeException(ex);
+                } catch (Exception ex) {
                 }
             }
             throw new MpRuntimeException(BaseErrorCode.ERROR, e);

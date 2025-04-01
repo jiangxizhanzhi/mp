@@ -37,7 +37,6 @@ public class AzureDeleteHandler extends DeleteHandler {
                 super.delete();
             }
         } catch (Exception e) {
-//            云场景启动失败立即删除云资源
             String groupName = getPluginHandler().getSourceSceneId();
             groupName = StringUtils.isNotBlank(groupNamePrefix) ? groupNamePrefix + "-" + groupName : groupName;
             resourceService.getManager().resourceGroups().deleteByName(groupName);
