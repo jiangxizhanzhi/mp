@@ -102,11 +102,44 @@ public class ImageServerYmlImportController {
 
     private ExecutorService singleThreadExecutor = Executors.newSingleThreadExecutor();
 
-    @ApiOperation("server.yml 导入")
+    @Resource
+    private SceneImportController sceneImportController ;
+
+    @ApiOperation("场景模板导入")
+    @ApiImplicitParam(name = "request", value = "请求", dataTypeClass = SceneImportRequest.class)
+    @PostMapping("/import_scene_templates")
+    public ServiceResult<Boolean> importSceneTemplate(@RequestBody SceneImportRequest request) {
+        log.info("导入场景模板开始 , 输入参数为: {}", JsonCommon.stringify(request));
+        if (StringUtils.isEmpty(request.getImagePath())) {
+            String detail = "导入场景参数错误,缺少path参数 , 输入参数为: " + JsonCommon.stringify(request);
+            log.info(detail);
+            return ResultCommon.fail(detail);
+        }
+        // 遍历目录 取所有的servers.yml的绝对地址
+        List<String> topoYmlFiles = findTopoYmlFiles(Path.of(request.getPath()));
+        List<String> serverYmlFiles = findServersYmlFiles(Path.of(request.getPath()));
+        log.info("发现 topo.yml 文件共 {} 个", serverYmlFiles.size());
+        log.info("发现 servers.yml 文件共 {} 个", serverYmlFiles.size());
+        List<String> imagePathList = new ArrayList<>();
+        for (String s : serverYmlFiles) {
+            imagePathList.add(StringUtils.replace(s, "\\servers.yml", ""));
+        }
+        for (String topo : topoYmlFiles) {
+            String envPath = topo.replace("\\topo.yml", "");
+            SceneImportRequest sceneImportRequest = new SceneImportRequest();
+            sceneImportRequest.setImagePathList(imagePathList);
+            sceneImportRequest.setPath(envPath);
+            sceneImportRequest.setTemplate(true);
+            sceneImportController.importResourceCenterV2(sceneImportRequest);
+        }
+        return ResultCommon.success(true);
+    }
+
+    @ApiOperation("servers.yml 导入")
     @ApiImplicitParam(name = "request", value = "请求", dataTypeClass = SceneImportRequest.class)
     @PostMapping("/import_images")
     public ServiceResult<String> importImages(@RequestBody SceneImportRequest request) {
-        log.info("导入server.yml开始 , 输入参数为: {}", JsonCommon.stringify(request));
+        log.info("导入servers.yml开始 , 输入参数为: {}", JsonCommon.stringify(request));
         if (StringUtils.isEmpty(request.getImagePath())) {
             String detail = "导入场景参数错误,缺少image path参数 , 输入参数为: " + JsonCommon.stringify(request);
             log.info(detail);
@@ -115,9 +148,9 @@ public class ImageServerYmlImportController {
 
         // 开启一个线程跑导入
         singleThreadExecutor.submit(() -> {
-            // 遍历目录 取所有的server.yml的绝对地址
+            // 遍历目录 取所有的servers.yml的绝对地址
             List<String> serverYmlFiles = findServersYmlFiles(Path.of(request.getImagePath()));
-            log.info("发现 server.yml 文件共 {} 个", serverYmlFiles.size());
+            log.info("发现 servers.yml 文件共 {} 个", serverYmlFiles.size());
 
             for (int i =0 ;i<serverYmlFiles.size();i++) {
                 String serverYml = serverYmlFiles.get(i);
@@ -454,6 +487,30 @@ public class ImageServerYmlImportController {
         while (!dirs.isEmpty()) {
             var currentDir = dirs.poll();
             String checkServerYmlPath = currentDir + "\\servers.yml";
+            if (new File(checkServerYmlPath).exists()) {
+                result.add(checkServerYmlPath);
+            }
+            // 将当前目录下的子目录加入队列 等待遍历
+            try {
+                Files.list(currentDir).forEach(path -> {
+                    if (Files.isDirectory(path)) {
+                        dirs.add(path);
+                    }
+                });
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return result;
+    }
+
+    public List<String> findTopoYmlFiles(Path dir) {
+        List<String> result = new ArrayList<>();
+        Queue<Path> dirs = new LinkedList<>();
+        dirs.add(dir);
+        while (!dirs.isEmpty()) {
+            var currentDir = dirs.poll();
+            String checkServerYmlPath = currentDir + "\\topo.yml";
             if (new File(checkServerYmlPath).exists()) {
                 result.add(checkServerYmlPath);
             }

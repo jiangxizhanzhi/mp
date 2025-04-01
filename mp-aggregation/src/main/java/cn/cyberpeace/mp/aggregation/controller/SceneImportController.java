@@ -72,6 +72,18 @@ public class SceneImportController {
         return ResultCommon.success(serviceResult.getSource().getId());
     }
 
+    // 避免走controller的一些切面
+    public ServiceResult<String> importResourceCenterV2(SceneImportRequest request) {
+        log.info("导入场景开始 , 输入参数为: {}", JsonCommon.stringify(request));
+        if (StringUtils.isEmpty(request.getPath())) {
+            String detail = "导入场景参数错误,缺少path参数 , 输入参数为: " + JsonCommon.stringify(request);
+            log.info(detail);
+            return ResultCommon.fail(detail);
+        }
+        ServiceResult<CsceneBO> serviceResult = resourceCenterService.importByConfig(request.getPath(), request.getImagePath(), request.getImagePathList(), request.getSceneFilePath(), request.getTemplate());
+        return ResultCommon.success(serviceResult.getSource().getId());
+    }
+
     /**
      * 场景导入
      *

@@ -248,6 +248,7 @@ public class ResourceCenterService {
             csceneBO.setType(CsceneModel.Type.TEMPLATE);
         }
         csceneBO.setLogo(fdfsLogoFilePath);
+        csceneBO.setName(csceneBO.getSceneConfig().getTopology().getScene().getName());
         // 保存
         return csceneService.syncForImport(csceneBO, new CsceneContextBO());
     }
