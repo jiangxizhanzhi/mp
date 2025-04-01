@@ -260,9 +260,36 @@ public class ImageServerYmlImportController {
 
         log.info("开始创建镜像管理数据");
         var imageRequest = createVmImageRequest(imageName, templateId, templateName, parseResult);
+
+        String logoPath = getDeviceImage(serverImlPath);
+        imageRequest.setLogo(logoPath);
+
         log.info("输入参数: {}", JsonCommon.stringify(imageRequest));
         var device = addByImport(imageRequest);
         log.info("镜像管理创建结束,得到 device id: {}", device.getUuid());
+    }
+
+    private String getDeviceImage(String serverImlPath) {
+        // 处理下靶标图片
+        var logoPath = StringUtils.replace(serverImlPath, "servers.yml", "logo.png");
+        File file = new File(logoPath);
+        if (file.exists()) {
+            String fdfsPath = FsCommon.upload(logoPath);
+            String fileName = file.getName();
+            var fdfsSceneFilePath = String.format("%s?filename=%s", fdfsPath, fileName);
+            return fdfsSceneFilePath;
+        } else {
+            logoPath = StringUtils.replace(serverImlPath, "servers.yml", "logo.jpg");
+            file = new File(logoPath);
+            if (file.exists()) {
+                String fdfsPath = FsCommon.upload(logoPath);
+                String fileName = file.getName();
+                var fdfsSceneFilePath = String.format("%s?filename=%s", fdfsPath, fileName);
+                return fdfsSceneFilePath;
+            } else {
+                return null;
+            }
+        }
     }
 
     private void importContainer(String serverImlPath, String imageName, ImageInfoParseResult parseResult) {
@@ -272,6 +299,10 @@ public class ImageServerYmlImportController {
 
         log.info("开始创建镜像管理数据");
         var imageRequest = createContainerImageRequest(imageName, tempdirUuid, userFileName, parseResult);
+
+        String logoPath = getDeviceImage(serverImlPath);
+        imageRequest.setLogo(logoPath);
+
         log.info("输入参数: {}", JsonCommon.stringify(imageRequest));
         var device = addByImport(imageRequest);
         log.info("镜像管理创建结束,得到 device id: {}", device.getUuid());
