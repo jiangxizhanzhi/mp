@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.controller.request.SceneAllElementsQueryRequest;
+import cn.cyberpeace.mp.cscene.core.CsceneInstanceHandler;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
 import cn.cyberpeace.mp.cscene.dto.element.ElementPort;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowAnalysisSummary;
@@ -34,11 +35,13 @@ import cn.cyberpeace.mp.cscene.response.AssetsStatisticsResponse;
 import cn.cyberpeace.mp.cscene.service.CsceneCommonService;
 import cn.cyberpeace.mp.cscene.service.FlowMonitorService;
 import cn.cyberpeace.mp.cscene.service.SceneMonitorService;
+import cn.cyberpeace.mp.cscene.service.multirange.testrange.NodeInfo;
 import cn.cyberpeace.mp.cscene.service.multirange.testrange.TestRangeApiProxy;
 import cn.cyberpeace.mp.cscene.vo.FlowGroupByDestinationIpAndSeverityVO;
 import cn.cyberpeace.mp.cscene.vo.FlowGroupPortWithProtocolVO;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
+import cn.cyberpeace.mp.scene.repository.SceneMapper;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CategoryGroupBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.SceneAssetsBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.SceneConfigAssetBO;
@@ -312,6 +315,21 @@ public class FlowMonitorController {
             endExcludeIndex = sortedFlowAttacks.size();
         }
         var subList = sortedFlowAttacks.subList(startIncludeIndex, endExcludeIndex);
+
+        Map<String, NodeInfo> ipToNodeInfoMap = testRangeApiProxy.getIpToNodeMap(id);
+        subList.forEach(attackInfo -> {
+            NodeInfo sourceNodeInfo = ipToNodeInfoMap.get(attackInfo.getSourceIp());
+            if (Objects.nonNull(sourceNodeInfo)) {
+                attackInfo.setSourceNodeId(sourceNodeInfo.getNodeId());
+                attackInfo.setSourceNodeName(sourceNodeInfo.getNodeName());
+            }
+            NodeInfo targetNodeInfo = ipToNodeInfoMap.get(attackInfo.getTargetIp());
+            if (Objects.nonNull(targetNodeInfo)) {
+                attackInfo.setTargetNodeId(targetNodeInfo.getNodeId());
+                attackInfo.setTargetNodeName(targetNodeInfo.getNodeName());
+            }
+        });
+
         try {
             return new ListObjServiceResult<>(new ListObjResult<>(subList, sortedFlowAttacks.size()).asResult()).asResult();
         } catch (Exception e) {
@@ -332,6 +350,7 @@ public class FlowMonitorController {
         return ips;
 
     }
+
 
     private Map<String, Set<String>> getNodeIps(String csceneId) {
         var request = new SceneAllElementsQueryRequest();

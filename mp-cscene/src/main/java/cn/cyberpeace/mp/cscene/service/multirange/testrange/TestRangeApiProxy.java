@@ -19,9 +19,11 @@ import cn.cyberpeace.mp.cscene.request.hoststate.HostStateTrendRequest;
 import cn.cyberpeace.mp.cscene.service.multirange.SubRangeMonitorInterface;
 import cn.cyberpeace.mp.scene.core.bo.HfdyServerVpnConfig;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
+import cn.cyberpeace.mp.scene.model.SceneElementPortModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.repository.RangeMapper;
 import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
+import cn.cyberpeace.mp.scene.repository.SceneElementPortMapper;
 import cn.cyberpeace.mp.scene.repository.SceneMapper;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.TimeListPageInfoQueryParams;
@@ -57,6 +59,8 @@ public class TestRangeApiProxy implements SubRangeMonitorInterface {
     private SceneElementMapper sceneElementMapper;
     @Autowired
     private RangeMapper rangeMapper;
+    @Autowired
+    private SceneElementPortMapper sceneElementPortMapper;
 
     private static final Map<String, Map<String, String>> CSCENE_MAP_CACHE = new ConcurrentHashMap<>();
 
@@ -317,6 +321,30 @@ public class TestRangeApiProxy implements SubRangeMonitorInterface {
         return sceneElements.stream().map(SceneElementModel::getNodeId).collect(Collectors.toSet());
     }
 
+    public Map<String, NodeInfo> getIpToNodeMap(String csceneInstanceId) {
+        String sceneInstanceId = csceneInstanceMapper.get(csceneInstanceId).getScene();
+        List<SceneElementPortModel> sceneElementPortModels = sceneElementPortMapper.list(new HumanCondition().filterEqual(SceneElementPortModel::getScene, sceneInstanceId)
+                .select(SceneElementPortModel::getPortId, SceneElementPortModel::getIp));
+
+        Map<String, NodeInfo> idToNodeInfoMap = sceneElementMapper.list(new HumanCondition().filterEqual(SceneElementModel::getScene, sceneInstanceId)
+                .select(SceneElementModel::getNodeId, SceneElementModel::getId))
+                .stream().map(model -> new NodeInfo().setNodeId(model.getNodeId()).setId(model.getId())
+                        .setNodeName(model.getName())).collect(Collectors.toMap(NodeInfo::getId, Function.identity(), (a, b) -> a));
+        if (CollectionUtils.isEmpty(sceneElementPortModels)) {
+            return Collections.emptyMap();
+        } else {
+            Map<String, NodeInfo> ipToNodeInfo = new HashMap<>(8);
+            for (SceneElementPortModel sceneElementPortModel : sceneElementPortModels) {
+                if (StringUtils.isNotEmpty(sceneElementPortModel.getIp())) {
+                    NodeInfo nodeInfo = idToNodeInfoMap.get(sceneElementPortModel.getSceneElement());
+                    if (Objects.nonNull(nodeInfo)) {
+                        ipToNodeInfo.put(sceneElementPortModel.getIp(), nodeInfo);
+                    }
+                }
+            }
+            return ipToNodeInfo;
+        }
+    }
 
 
 
