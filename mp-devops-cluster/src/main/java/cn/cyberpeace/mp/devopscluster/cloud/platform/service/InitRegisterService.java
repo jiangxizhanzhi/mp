@@ -1,9 +1,11 @@
 package cn.cyberpeace.mp.devopscluster.cloud.platform.service;
 
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.CloudPlatformItemsPageResult;
 import cn.cyberpeace.mp.devopscluster.config.DevopsClusterConfig;
+import cn.cyberpeace.mp.devopscluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
 import cn.cyberpeace.mp.devopscluster.repository.DeviceTargetMapper;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetService;
@@ -74,6 +76,15 @@ public class InitRegisterService extends BaseCpService {
         }
         List<Device> deviceList = JSON.parseArray(JSON.toJSONString(result.getItems()), Device.class);
         List<String> uuids = deviceList.stream().map(device -> device.getUuid()).collect(Collectors.toList());
+        var dbTarget = deviceTargetMapper.page(new ImagePageDTO());
+        if (CollectionUtils.isNotEmpty(dbTarget)) {
+            dbTarget.forEach(deviceTargetPO -> {
+                if (!uuids.contains(deviceTargetPO.getUuid())) {
+                    deviceTargetMapper.filterDelete(new HumanCondition().filterEqual(DeviceTargetPO::getUuid, deviceTargetPO.getUuid()));
+                }
+            });
+        }
+
         List<DeviceTargetPO> deviceTargetPOS = deviceTargetMapper.findByUuids(uuids);
         POLogoUtils.changeLogoPathToUrl(deviceTargetPOS);
         List<String> existedUuids = deviceTargetPOS.stream().map(p -> p.getUuid()).collect(Collectors.toList());
