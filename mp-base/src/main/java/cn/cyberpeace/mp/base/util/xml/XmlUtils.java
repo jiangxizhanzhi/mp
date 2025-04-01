@@ -254,34 +254,4 @@ public final class XmlUtils {
             return this.attributes;
         }
     }
-
-    public static void main(String[] args) {
-        String result = "<cas:serviceResponse xmlns:cas='http://www.yale.edu/tp/cas'>\r\n" +
-            "    <cas:authenticationSuccess>\r\n" +
-            "        <cas:user>admin</cas:user>\r\n" +
-            "        <cas:attributes>\r\n" +
-            "            <cas:credentialType>UsernamePasswordCredential</cas:credentialType>\r\n" +
-            "            <cas:isFromNewLogin>true</cas:isFromNewLogin>\r\n" +
-            "            <cas:authenticationDate>2019-08-01T19:33:21.527+08:00[Asia/Shanghai]</cas:authenticationDate>\r\n" +
-            "            <cas:authenticationMethod>RestAuthenticationHandler</cas:authenticationMethod>\r\n" +
-            "            <cas:successfulAuthenticationHandlers>RestAuthenticationHandler</cas:successfulAuthenticationHandlers>\r\n" +
-            "            <cas:longTermAuthenticationRequestTokenUsed>false</cas:longTermAuthenticationRequestTokenUsed>\r\n" +
-            "        </cas:attributes>\r\n" +
-            "    </cas:authenticationSuccess>\r\n" +
-            "</cas:serviceResponse>";
-
-        String errorRes = "<cas:serviceResponse xmlns:cas='http://www.yale.edu/tp/cas'>\r\n" +
-            "    <cas:authenticationFailure code=\"INVALID_TICKET\">未能够识别出目标 &#39;ST-5-1g-9cNES6KXNRwq-GuRET103sm0-DESKTOP-VKLS8B3&#39;票根</cas:authenticationFailure>\r\n" +
-            "</cas:serviceResponse>";
-
-        String error = XmlUtils.getTextForElement(errorRes, "authenticationFailure");
-        System.out.println("------"+error);
-
-        String error2 = XmlUtils.getTextForElement(result, "authenticationFailure");
-        System.out.println("------"+error2);
-        String principal = XmlUtils.getTextForElement(result, "user");
-        System.out.println("---principal---"+principal);
-        Map<String, Object> attributes = XmlUtils.extractCustomAttributes(result);
-        System.out.println("---attributes---"+attributes);
-    }
 }

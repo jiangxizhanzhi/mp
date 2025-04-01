@@ -87,6 +87,7 @@ public class SSOLogoutFilter implements Filter {
                     userService.update(updateUser);
                 }
             }
+            CookieUtils.setCookie((HttpServletResponse)response, "cr_jwttoken", "", null, 0);
             SSOSysEnum ssoSysEnum = SSOSysEnum.getSSOSysEnumByCode(loginUser.getOutUserType());
             if(Objects.isNull(ssoSysEnum)){
                 log.warn("sso log out failed! user type is unknown");

@@ -164,7 +164,7 @@ mp:
         appid: ${SSO_APPID:sn}
         url: ${SSO_URL:http://10.214.71.84:9000/ashe/oss-ticket-sso}
         login-4a-url: ${SSO_LOGIN_4A_URL:http://10.214.71.88:30301}
-        config-file-path: ${SSO_CONFIG_FILE_PATH:d:/}
+        config-file-path: ${SSO_CONFIG_FILE_PATH:/opt/mp/boot/}
         conn-timeout: ${SSO_CONN_TIMEOUT:5000}
         read-timeout: ${SSO_READ_TIMEOUT:20000}
         home-page-url: ${SSO_HOME_PAGE_URL:http://10.100.1.28/page/mg/personal}
