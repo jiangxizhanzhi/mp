@@ -471,7 +471,7 @@
             #{item.referenceStatus},#{item.parentSystemType}, #{item.systemType},
             #{item.systemArchitecure},#{item.language}, #{item.imageStatus},
             #{item.baseImageSupport}, #{item.initSupport}, #{item.imageSource}, #{item.isImport},
-            #{item.isHide},#{item.isInit},#{item.supportExport},#{item.createUser},#{item.createUserName}, #{imageResourceType}
+            #{item.isHide},#{item.isInit},#{item.supportExport},#{item.createUser},#{item.createUserName}, #{item.imageResourceType}
             )
         </foreach>
     </insert>
