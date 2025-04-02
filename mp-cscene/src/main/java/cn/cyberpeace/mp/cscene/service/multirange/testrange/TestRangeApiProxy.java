@@ -324,10 +324,10 @@ public class TestRangeApiProxy implements SubRangeMonitorInterface {
     public Map<String, NodeInfo> getIpToNodeMap(String csceneInstanceId) {
         String sceneInstanceId = csceneInstanceMapper.get(csceneInstanceId).getScene();
         List<SceneElementPortModel> sceneElementPortModels = sceneElementPortMapper.list(new HumanCondition().filterEqual(SceneElementPortModel::getScene, sceneInstanceId)
-                .select(SceneElementPortModel::getPortId, SceneElementPortModel::getIp));
+                .select(SceneElementPortModel::getPortId, SceneElementPortModel::getIp, SceneElementPortModel::getSceneElement));
 
         Map<String, NodeInfo> idToNodeInfoMap = sceneElementMapper.list(new HumanCondition().filterEqual(SceneElementModel::getScene, sceneInstanceId)
-                .select(SceneElementModel::getNodeId, SceneElementModel::getId))
+                .select(SceneElementModel::getNodeId, SceneElementModel::getId, SceneElementModel::getName))
                 .stream().map(model -> new NodeInfo().setNodeId(model.getNodeId()).setId(model.getId())
                         .setNodeName(model.getName())).collect(Collectors.toMap(NodeInfo::getId, Function.identity(), (a, b) -> a));
         if (CollectionUtils.isEmpty(sceneElementPortModels)) {
