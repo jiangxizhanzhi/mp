@@ -109,7 +109,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @Resource(name = "sysOptionServiceImpl")
     private OptionService optionService;
 
-    public static final String GUACAMOLE_IP_PORT = "http://10.110.3.1:8200/remote_access/api/session/tunnels/";
+    public static final String GUACAMOLE_IP_PORT = "http://30.10.254.10:8200/remote_access/api/session/tunnels/";
     @Autowired
     private CsceneInstanceMapper csceneInstanceMapper;
 

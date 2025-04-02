@@ -145,7 +145,7 @@ public class TeamServiceImpl implements TeamService {
         if (StringUtils.isEmpty(teamRequest.getId())) {
             throw new MpRuntimeException( AuthErrorCode.CLAN_QUERY_MISSING_PARAMETERS);
         }
-        String url = "http://10.110.3.1:8377/api/ct/admin/nbi/team/?team_id=" + teamRequest.getId();
+        String url = "http://" + CT_COMMON_IP + ":" + CT_COMMON_PORT + "/api/ct/admin/nbi/team/?team_id=" + teamRequest.getId();
         ServiceResult serviceResult = getCtTeamInfo(url);
         TeamModel teamModel = new TeamModel();
         TeamInfoResult teamInfoResult = JSON.parseObject(serviceResult.getData().toString(), TeamInfoResult.class);
@@ -333,7 +333,7 @@ public class TeamServiceImpl implements TeamService {
     @Override
     public List<TeamIdAndUserInfo>  getTeamList(List<String> list) {
         String teamId = list.get(0);
-        String url = "http://10.110.3.1:8377/api/ct/admin/nbi/team_users/?team_id=" + teamId;
+        String url = "http://" + CT_COMMON_IP + ":" + CT_COMMON_PORT + "/api/ct/admin/nbi/team_users/?team_id=" + teamId;
         List<TeamIdAndUserInfo> teamIdAndUserInfos = Lists.newArrayList();
 
         ServiceResult serviceResult = getCtTeamInfo(url);
@@ -380,7 +380,7 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public TeamInfoIdAndName getTeamInfoByUser(String userId) {
-        String url = "http://10.110.3.1:8377/api/ct/admin/nbi/user_team/?user_id=" + userId;
+        String url = "http://" + CT_COMMON_IP + ":" + CT_COMMON_PORT + "/api/ct/admin/nbi/user_team/?user_id=" + userId;
         ServiceResult ctTeamInfo = getCtTeamInfo(url);
         JSONObject data = (JSONObject) ctTeamInfo.getData();
         TeamInfoIdAndName teamInfoIdAndName = new TeamInfoIdAndName();
@@ -391,7 +391,7 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public String getTeamInfo(String teamId) {
-        String url = "http://10.110.3.1:8377/api/ct/admin/nbi/team/?team_id=" + teamId;
+        String url = "http://" + CT_COMMON_IP + ":" + CT_COMMON_PORT + "/api/ct/admin/nbi/team/?team_id=" + teamId;
         String teamName = null;
         //获取数据
         ServiceResult ctTeamInfo = getCtTeamInfo(url);
