@@ -158,7 +158,7 @@ public class SSOSocServiceImpl extends AbstractSSOService {
             user = userService.get(users.get(0).getId()).sourceObj();
             addRequest.setId(user.getId());
             log.info("prepare modify soc User: {}" + JSON.toJSONString(addRequest));
-            user = userService.modify(addRequest);
+            user = userService.modifySSoUser(addRequest);
         } else {
             log.warn("soc user data duplicate!");
             throw new MpRuntimeException(AuthErrorCode.SOC_USER_HANDLE_ERROR);//用户查询错误

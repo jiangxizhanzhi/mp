@@ -162,7 +162,7 @@ public class SSOFourAServiceImpl extends AbstractSSOService {
                 user = userService.get(users.get(0).getId()).sourceObj();
                 addRequest.setId(user.getId());
                 log.info("prepare modifyFourUser: {}" + JSON.toJSONString(addRequest));
-                user = userService.modify(addRequest);
+                user = userService.modifySSoUser(addRequest);
             } else {
                 throw new MpRuntimeException(AuthErrorCode.FOUR_A_USER_SELECT_ERROR);//用户查询错误
             }

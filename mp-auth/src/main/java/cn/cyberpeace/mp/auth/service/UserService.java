@@ -115,4 +115,6 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
     List<UserModel> getUserBy4AAccountId(String userId);
 
     UserModel addSSoUser(UserRequest addRequest);
+
+    UserModel modifySSoUser(UserRequest modifyRequest);
 }

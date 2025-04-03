@@ -411,6 +411,20 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return userModified;
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public UserModel modifySSoUser(UserRequest modifyRequest) {
+        UserModel userModified = upsertUserModel(modifyRequest);
+        String userId = userModified.getId();
+
+        saveUserOrgRelation(modifyRequest.getOrgIds(), userId);
+        saveUserRoleRelation(modifyRequest.getRoleIds(), userId);
+
+        userCacheService.evictAllUserCache();
+        messageSender.send(Collections.singletonList(userId), AuthConstant.MSG_TYPE_USER_MODIFY, AuthConstant.ROUTING_KEY_USER_MODIFY, null);
+        return userModified;
+    }
+
     private UserModel upsertUserModel(UserModel userModel) {
         if (StringUtils.isNotBlank(userModel.getId())) {
             UserModel existUser = super.getModelMapper().get(userModel.getId());
