@@ -51,7 +51,7 @@ public class FlowCsceneService {
         return new ListObjServiceResult<>(new ListObjResult<>(result, total)).asResult();
     }
 
-    public ListObjServiceResult<CsceneFlowTaskResponse> add(@RequestBody CsceneFlowTaskRequest request) {
+    public ListObjServiceResult<CsceneFlowTaskResponse> add(CsceneFlowTaskRequest request) {
 
         var condition = new HumanCondition().filterEqual(CsceneConfigFlowTaskModel::getCsceneId, request.getId())
                 .filterEqual(CsceneConfigFlowTaskModel::getCsceneNodeId, request.getNodeId());

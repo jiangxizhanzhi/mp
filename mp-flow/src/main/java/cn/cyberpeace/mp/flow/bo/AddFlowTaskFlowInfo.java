@@ -27,11 +27,19 @@ import java.util.List;
 @ApiModel(value = "新增流量任务流量详情")
 public class AddFlowTaskFlowInfo {
 
+    @ApiModelProperty(value = "任务id")
+    private String taskId;
     /**
      * 流量id
      */
     @ApiModelProperty(value = "流量id")
     private String flowId;
+
+    @ApiModelProperty("背景流量速率(单位 mbp/s)")
+    private Integer rate;
+
+    @ApiModelProperty("带宽(单位 mbp/s)")
+    private Integer bandwidth;
 
     /**
      * 攻击流量参数配置

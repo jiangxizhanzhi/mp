@@ -42,4 +42,8 @@ public class FlowTaskRateConf {
      */
     @ApiModelProperty("最大速率(单位Mb/s)")
     private Integer rateMax;
+
+    private Integer rate;
+
+    private Integer bandwidth;
 }

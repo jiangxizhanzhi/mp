@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.flow.bo.AddFlowTaskFlowInfo;
 import cn.cyberpeace.mp.flow.bo.AddFlowTaskParams;
 import cn.cyberpeace.mp.flow.bo.FlowTaskAttackConf;
 import cn.cyberpeace.mp.flow.bo.FlowTaskConf;
+import cn.cyberpeace.mp.flow.bo.FlowTaskRateConf;
 import cn.cyberpeace.mp.flow.bo.ProtocolBO;
 import cn.cyberpeace.mp.flow.config.FlowConfig;
 import cn.cyberpeace.mp.flow.constant.FlowCategory;
@@ -328,6 +329,8 @@ public class AddTaskByRemoteFlowService2 implements IAddTaskService {
             }
             AddFlowTaskFlowInfo flowTaskFlowInfo = new AddFlowTaskFlowInfo();
             flowTaskFlowInfo.setFlowId(e.getFlowId());
+            flowTaskFlowInfo.setBandwidth(e.getBandwidth());
+            flowTaskFlowInfo.setRate(e.getRate());
 
             List<FlowTaskAttackConf> attackConfs = new ArrayList<>();
             if (e.getScriptParamModels() != null) {
@@ -438,7 +441,7 @@ public class AddTaskByRemoteFlowService2 implements IAddTaskService {
             int resourceType = taskModel.getResourceType();
             AddFlowTaskFlowInfo addFlowTaskFlowInfo = addFlowTaskMap.get(taskModel.getFlowId());
             RemoteFlowInfo remoteFlowInfo = remoteFlowInfoMap.get(taskModel.getFlowId());
-            FlowTaskConfModel confModel = createTaskConfig(taskId, resourceType, addFlowTaskFlowInfo.getAttackConfs(), remoteFlowInfo.getScriptParamModels());
+            FlowTaskConfModel confModel = createTaskConfig(taskId, resourceType, addFlowTaskFlowInfo, remoteFlowInfo.getScriptParamModels());
             confModels.add(confModel);
 
             if (resourceType == ResourceTypeEnum.PACP.toValue()) {
@@ -463,13 +466,19 @@ public class AddTaskByRemoteFlowService2 implements IAddTaskService {
         return confModels;
     }
 
-    private FlowTaskConfModel createTaskConfig(String taskId, int resourceType, List<FlowTaskAttackConf> inputAttackConf, List<ScriptParamModel> defaultScriptModels) {
+    private FlowTaskConfModel createTaskConfig(String taskId, int resourceType, AddFlowTaskFlowInfo addFlowTaskFlowInfo, List<ScriptParamModel> defaultScriptModels) {
+        var inputAttackConf = addFlowTaskFlowInfo.getAttackConfs();
         FlowTaskConfModel flowTaskConfModel = new FlowTaskConfModel();
         flowTaskConfModel.setTaskId(taskId);
         flowTaskConfModel.setKeepRunning(0);
         flowTaskConfModel.setReplay(1);
         flowTaskConfModel.setRateUnlimited(1);
         FlowTaskConf flowTaskConf = new FlowTaskConf();
+        // 记录带宽和流速
+        flowTaskConf.setRateConf(new FlowTaskRateConf());
+        flowTaskConf.getRateConf().setRate(addFlowTaskFlowInfo.getRate());
+        flowTaskConf.getRateConf().setBandwidth(addFlowTaskFlowInfo.getBandwidth());
+
         if (ResourceTypeEnum.SCRIPT.toValue() == resourceType) {
             // 优先使用场景页面输入的参数
             flowTaskConf.setAttackConfs(inputAttackConf);

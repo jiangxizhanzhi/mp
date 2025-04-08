@@ -5,15 +5,16 @@ import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.flow.bo.AddFlowTaskFlowInfo;
 import cn.cyberpeace.mp.flow.bo.AddFlowTaskParams;
 import cn.cyberpeace.mp.flow.bo.FlowTaskAttackConf;
 import cn.cyberpeace.mp.flow.bo.FlowTaskConf;
+import cn.cyberpeace.mp.flow.bo.FlowTaskRateConf;
 import cn.cyberpeace.mp.flow.constant.FlowCategory;
 import cn.cyberpeace.mp.flow.enums.ResourceTypeEnum;
 import cn.cyberpeace.mp.flow.integration.FlowClient;
 import cn.cyberpeace.mp.flow.integration.addtask.AddTaskByRemoteFlowService2;
-import cn.cyberpeace.mp.flow.integration.cloud.base.ICloudClient;
 import cn.cyberpeace.mp.flow.integration.cloud.topocloud.TopoCloudClient;
 import cn.cyberpeace.mp.flow.integration.cloud.topocloud.request.BusinessCSceneInstance;
 import cn.cyberpeace.mp.flow.model.FlowActuatorModel;
@@ -21,15 +22,15 @@ import cn.cyberpeace.mp.flow.model.FlowTaskConfModel;
 import cn.cyberpeace.mp.flow.model.FlowTaskTaskModel;
 import cn.cyberpeace.mp.flow.repository.FlowActuatorMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskConfMapper;
-import cn.cyberpeace.mp.flow.repository.FlowTaskPortMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskTaskMapper;
 import cn.cyberpeace.mp.flow.request.CsceneInstanceAddFlowTaskRequest;
 import cn.cyberpeace.mp.flow.request.CsceneInstanceFlowTaskRequest;
 import cn.cyberpeace.mp.flow.response.CsceneInstanceFlowTaskResponse;
 import cn.cyberpeace.mp.flow.response.RemoteFlowInfo;
 import cn.cyberpeace.mp.flow.response.ScriptParamModel;
-import cn.cyberpeace.mp.flow.service.impl.FlowTaskTaskService;
 import com.alibaba.fastjson.JSONObject;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -66,8 +67,10 @@ public class FlowCsceneInstanceService {
         var total = flowTaskTaskMapper.total(condition);
         var list = flowTaskTaskMapper.list(condition);
         List<CsceneInstanceFlowTaskResponse> result = new ArrayList<>();
+        List<String> taskIds = new ArrayList<>();
         for (var m : list) {
             CsceneInstanceFlowTaskResponse response = new CsceneInstanceFlowTaskResponse();
+            taskIds.add(m.getId());
             response.setTaskId(m.getId());
             response.setCsceneInstanceId(m.getSceneId());
             response.setCsceneNodeId(m.getNodeId());
@@ -76,10 +79,29 @@ public class FlowCsceneInstanceService {
             response.setInteractiveType(m.getInteractiveType());
             result.add(response);
         }
+        if (CollectionUtils.isNotEmpty(taskIds)) {
+            var taskConfigs = flowTaskConfMapper.list(new HumanCondition().filterIn(FlowTaskConfModel::getTaskId, taskIds.toArray(new String[]{})));
+            Map<String, FlowTaskConfModel> taskId2Conf = new HashMap<>();
+            for (FlowTaskConfModel t : taskConfigs) {
+                taskId2Conf.put(t.getTaskId(), t);
+            }
+            for (var r : result) {
+                if (taskId2Conf.containsKey(r.getTaskId())) {
+                    var confModel = taskId2Conf.get(r.getTaskId());
+                    if (StringUtils.isNotEmpty(confModel.getConf())) {
+                        var conf = JsonCommon.parse(confModel.getConf(), FlowTaskConf.class);
+                        if (conf.getRateConf() != null) {
+                            r.setBandwidth(conf.getRateConf().getBandwidth());
+                            r.setRate(conf.getRateConf().getRate());
+                        }
+                    }
+                }
+            }
+        }
         return new ListObjServiceResult<>(new ListObjResult<>(result, total)).asResult();
     }
 
-    public ListObjServiceResult<CsceneInstanceFlowTaskResponse> add(@RequestBody CsceneInstanceAddFlowTaskRequest request) {
+    public ListObjServiceResult<CsceneInstanceFlowTaskResponse> add(CsceneInstanceAddFlowTaskRequest request) {
         var flowActuator = flowActuatorMapper.first(new HumanCondition().filterEqual(FlowActuatorModel::getCsceneInstanceId, request.getId()));
         log.info("查询到的执行器信息: {} ", JsonCommon.stringify(flowActuator));
         String actuatorId = flowActuator.getId();
@@ -101,7 +123,10 @@ public class FlowCsceneInstanceService {
         addFlowTaskParams.setTasks(new ArrayList<>());
         for (var task : request.getTasks()) {
             AddFlowTaskFlowInfo flowTaskFlowInfo = new AddFlowTaskFlowInfo();
+            flowTaskFlowInfo.setTaskId(task.getTaskId());
             flowTaskFlowInfo.setFlowId(task.getFlowId());
+            flowTaskFlowInfo.setRate(task.getRate());
+            flowTaskFlowInfo.setBandwidth(task.getBandwidth());
 
             List<FlowTaskAttackConf> attackConfs = new ArrayList<>();
             if (task.getScriptParamModels() != null) {
@@ -124,39 +149,45 @@ public class FlowCsceneInstanceService {
         }
         log.info("节点对应的网络信息：{}", JsonCommon.snakeStringify(addFlowTaskParams));
 
-        var flowTaskTaskModelList = this.createTaskAndConfig(actuatorId, addFlowTaskParams);
+        var result = this.handleTaskAndGetNewTasks(actuatorId, addFlowTaskParams);
         log.info("结束处理执行器 {} 在数据库中添加流量任务", flowActuator.getId());
 
-        // 查流量信息
-        List<String> flowIds = new ArrayList<>();
-        flowTaskTaskModelList.forEach(t -> flowIds.add(t.getFlowId()));
-        var remote = this.getRemoteFlowInfos(flowIds);
-        Map<String, RemoteFlowInfo> flowId2RemoteFlowInfo = new HashMap<>();
-        for (RemoteFlowInfo f : remote) {
-            flowId2RemoteFlowInfo.put(f.getFlowId(), f);
-        }
-
-        // 处理每个节点的任务
-        String nodeId = flowTaskTaskModelList.get(0).getNodeId();
-        String targetIp = flowTaskTaskModelList.get(0).getNodeIp();
-        String networkId = flowTaskTaskModelList.get(0).getNodeNetworkId();
-        log.info("处理节点: {}  , 节点ip:{} , 网络id:{}", nodeId, targetIp, networkId);
-        List<RemoteFlowInfo> remoteFlowInfos = new ArrayList<>();
-        for (FlowTaskTaskModel task : flowTaskTaskModelList) {
-            if (flowId2RemoteFlowInfo.containsKey(task.getFlowId())) {
-                remoteFlowInfos.add(flowId2RemoteFlowInfo.get(task.getFlowId()));
+        if (CollectionUtils.isNotEmpty(result.getAddResult())) {
+            var flowTaskTaskModelList = result.getAddResult();
+            // 查流量信息
+            List<String> flowIds = new ArrayList<>();
+            flowTaskTaskModelList.forEach(t -> flowIds.add(t.getFlowId()));
+            var remote = this.getRemoteFlowInfos(flowIds);
+            Map<String, RemoteFlowInfo> flowId2RemoteFlowInfo = new HashMap<>();
+            for (RemoteFlowInfo f : remote) {
+                flowId2RemoteFlowInfo.put(f.getFlowId(), f);
             }
-        }
-        log.info("流量信息: {} ", JsonCommon.snakeStringify(remoteFlowInfos));
-        BeanCommon.getBean(AddTaskByRemoteFlowService2.class)
-                .handleOneTask(flowActuator, targetIp, networkId, flowTaskTaskModelList, remoteFlowInfos);
-        log.info("处理节点: {} 处理结束", nodeId);
 
-        log.info("更新任务状态");
-        this.updateFlowActuatorDbStatus(actuatorId, 1);
+            // 处理每个节点的任务
+            String nodeId = flowTaskTaskModelList.get(0).getNodeId();
+            String targetIp = flowTaskTaskModelList.get(0).getNodeIp();
+            String networkId = flowTaskTaskModelList.get(0).getNodeNetworkId();
+            log.info("处理节点: {}  , 节点ip:{} , 网络id:{}", nodeId, targetIp, networkId);
+            List<RemoteFlowInfo> remoteFlowInfos = new ArrayList<>();
+            for (FlowTaskTaskModel task : flowTaskTaskModelList) {
+                if (flowId2RemoteFlowInfo.containsKey(task.getFlowId())) {
+                    remoteFlowInfos.add(flowId2RemoteFlowInfo.get(task.getFlowId()));
+                }
+            }
+            log.info("流量信息: {} ", JsonCommon.snakeStringify(remoteFlowInfos));
+            BeanCommon.getBean(AddTaskByRemoteFlowService2.class)
+                    .handleOneTask(flowActuator, targetIp, networkId, flowTaskTaskModelList, remoteFlowInfos);
+            log.info("处理节点: {} 处理结束", nodeId);
+
+            log.info("更新任务状态");
+            this.updateFlowActuatorDbStatus(actuatorId, 1);
+        }
         log.info("完成处理执行器 {} ", flowActuator.getId());
 
         List<CsceneInstanceFlowTaskResponse> responses = new ArrayList<>();
+        List<FlowTaskTaskModel> flowTaskTaskModelList = new ArrayList();
+        flowTaskTaskModelList.addAll(result.getAddResult());
+        flowTaskTaskModelList.addAll(result.getUpdateResult());
         for (var m : flowTaskTaskModelList) {
             CsceneInstanceFlowTaskResponse response = new CsceneInstanceFlowTaskResponse();
             response.setTaskId(m.getId());
@@ -243,7 +274,63 @@ public class FlowCsceneInstanceService {
         return flowTaskTaskModelList;
     }
 
-    private List<FlowTaskTaskModel> createTaskAndConfig(String actuatorId, AddFlowTaskParams addFlowTaskParams) {
+    private FlowTaskTaskModelResult handleTaskAndGetNewTasks(String actuatorId, AddFlowTaskParams addFlowTaskParams) {
+        // 先得到数据库原有的任务
+        var cond = new HumanCondition().filterEqual(FlowTaskTaskModel::getSceneId, addFlowTaskParams.getCsceneInstanceId());
+        var dbTasks = flowTaskTaskMapper.list(cond);
+
+        // 区分新增、更新的流量任务
+        AddFlowTaskParams addTaskParams = new AddFlowTaskParams();
+        AddFlowTaskParams updateTaskParams = new AddFlowTaskParams();
+        BeanUtils.copyProperties(addFlowTaskParams, addTaskParams);
+        addTaskParams.setTasks(new ArrayList<>());
+        BeanUtils.copyProperties(addFlowTaskParams, updateTaskParams);
+        updateTaskParams.setTasks(new ArrayList<>());
+        for (var task : addFlowTaskParams.getTasks()) {
+            if (StringUtils.isNotEmpty(task.getTaskId())) {
+                updateTaskParams.getTasks().add(task);
+            } else {
+                addTaskParams.getTasks().add(task);
+            }
+        }
+
+        // 区分删除的任务
+        Set<String> updateTaskIds = new HashSet<>();
+        for (AddFlowTaskFlowInfo d : updateTaskParams.getTasks()) {
+            updateTaskIds.add(d.getTaskId());
+        }
+        Set<String> toDeleteTaskIds = new HashSet<>();
+        for (FlowTaskTaskModel d : dbTasks) {
+            toDeleteTaskIds.add(d.getId());
+        }
+        toDeleteTaskIds.removeAll(updateTaskIds);
+
+        // 删除
+        if (CollectionUtils.isNotEmpty(toDeleteTaskIds)) {
+            flowTaskTaskMapper.bulkDelete(toDeleteTaskIds.toArray(new String[]{}));
+            flowTaskConfMapper.filterDelete(new HumanCondition().filterIn(FlowTaskConfModel::getTaskId, toDeleteTaskIds.toArray(new String[]{})));
+        }
+        FlowTaskTaskModelResult result = new FlowTaskTaskModelResult();
+        // 更新
+        if (CollectionUtils.isNotEmpty(updateTaskParams.getTasks())) {
+            List<FlowTaskTaskModel> updateModels = new ArrayList<>();
+            for (var m : dbTasks) {
+                if (updateTaskIds.contains(m.getId())) {
+                    updateModels.add(m);
+                }
+            }
+            var updateResult = this.updateTaskAndConfig(updateModels, updateTaskParams);
+            result.setUpdateResult(updateResult);
+        }
+        // 新增
+        if (CollectionUtils.isNotEmpty(addTaskParams.getTasks())) {
+            List<FlowTaskTaskModel> addResult = this.addTaskAndConfig(actuatorId, addTaskParams);
+            result.setAddResult(addResult);
+        }
+        return result;
+    }
+
+    private List<FlowTaskTaskModel> addTaskAndConfig(String actuatorId, AddFlowTaskParams addFlowTaskParams) {
         List<String> flowIds = new ArrayList<>();
         for (var task : addFlowTaskParams.getTasks()) {
             flowIds.add(task.getFlowId());
@@ -255,6 +342,24 @@ public class FlowCsceneInstanceService {
         // 创建任务配置
         this.createTaskConfigs(flowTaskTaskModelList, addFlowTaskParams.getTasks(), remoteFlowInfos);
         return flowTaskTaskModelList;
+    }
+
+    private List<FlowTaskTaskModel> updateTaskAndConfig(List<FlowTaskTaskModel> updateModels, AddFlowTaskParams addFlowTaskParams) {
+        List<String> flowIds = new ArrayList<>();
+        for (var task : addFlowTaskParams.getTasks()) {
+            flowIds.add(task.getFlowId());
+        }
+        List<String> taskIds = new ArrayList<>();
+        for (AddFlowTaskFlowInfo t : addFlowTaskParams.getTasks()) {
+            taskIds.add(t.getTaskId());
+        }
+        // 从远程服务上查询流量的信息
+        var remoteFlowInfos = this.getRemoteFlowInfos(flowIds);
+        // 删除旧配置
+        flowTaskConfMapper.filterDelete(new HumanCondition().filterIn(FlowTaskConfModel::getTaskId, taskIds.toArray(new String[]{})));
+        // 加新配置
+        this.createTaskConfigs(updateModels, addFlowTaskParams.getTasks(), remoteFlowInfos);
+        return updateModels;
     }
 
     private List<FlowTaskConfModel> createTaskConfigs(List<FlowTaskTaskModel> flowTaskTaskModelList, List<AddFlowTaskFlowInfo> inputTasks, List<RemoteFlowInfo> remoteFlowInfos) {
@@ -274,14 +379,14 @@ public class FlowCsceneInstanceService {
             int resourceType = taskModel.getResourceType();
             AddFlowTaskFlowInfo addFlowTaskFlowInfo = addFlowTaskMap.get(taskModel.getFlowId());
             RemoteFlowInfo remoteFlowInfo = remoteFlowInfoMap.get(taskModel.getFlowId());
-            FlowTaskConfModel confModel = createTaskConfig(taskId, resourceType, addFlowTaskFlowInfo.getAttackConfs(), remoteFlowInfo.getScriptParamModels());
+            FlowTaskConfModel confModel = createTaskConfig(taskId, resourceType, addFlowTaskFlowInfo, remoteFlowInfo.getScriptParamModels());
             confModels.add(confModel);
         }
         flowTaskConfMapper.bulkCreate(confModels);
         return confModels;
     }
 
-    private FlowTaskConfModel createTaskConfig(String taskId, int resourceType, List<FlowTaskAttackConf> inputAttackConf, List<ScriptParamModel> defaultScriptModels) {
+    private FlowTaskConfModel createTaskConfig(String taskId, int resourceType, AddFlowTaskFlowInfo addFlowTaskFlowInfo, List<ScriptParamModel> defaultScriptModels) {
         FlowTaskConfModel flowTaskConfModel = new FlowTaskConfModel();
         flowTaskConfModel.setTaskId(taskId);
         flowTaskConfModel.setKeepRunning(0);
@@ -290,6 +395,7 @@ public class FlowCsceneInstanceService {
         FlowTaskConf flowTaskConf = new FlowTaskConf();
         if (ResourceTypeEnum.SCRIPT.toValue() == resourceType) {
             // 优先使用场景页面输入的参数
+            var inputAttackConf = addFlowTaskFlowInfo.getAttackConfs();
             flowTaskConf.setAttackConfs(inputAttackConf);
             // 如果没有输入参数就用流量默认的参数
             if (CollectionUtils.isEmpty(flowTaskConf.getAttackConfs()) && defaultScriptModels != null) {
@@ -305,8 +411,18 @@ public class FlowCsceneInstanceService {
                 flowTaskConf.setAttackConfs(flowTaskAttackConfList);
             }
         }
+        FlowTaskRateConf rateConf = new FlowTaskRateConf();
+        rateConf.setBandwidth(addFlowTaskFlowInfo.getBandwidth());
+        rateConf.setRate(addFlowTaskFlowInfo.getRate());
+        flowTaskConf.setRateConf(rateConf);
         flowTaskConfModel.setConf(JSONObject.toJSONString(flowTaskConf));
         return flowTaskConfModel;
     }
 
+    @Getter
+    @Setter
+    private static class FlowTaskTaskModelResult{
+        private List<FlowTaskTaskModel> addResult = new ArrayList<>();
+        private List<FlowTaskTaskModel> updateResult = new ArrayList<>();
+    }
 }
