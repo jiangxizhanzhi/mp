@@ -53,9 +53,10 @@ public class BehaviorTimerTask extends TimerTask {
 
 		RunBehaviorBo runBehaviorBo = new RunBehaviorBo();
 		runBehaviorBo.setBehaviorTemplateId(behaviorTemplateId);
-		runBehaviorBo.setBehaviorDownloadUrl(FsCommon.genInnerHttpUrl(behaviorDownloadUrl));
+		runBehaviorBo.setBehaviorDownloadUrl(behaviorDownloadUrl);
 		runBehaviorBo.setRunBehaviorId(runBehaviorId);
 		runBehaviorBo.setParamList(paramList);
+		runBehaviorBo.setBehaviorName(behaviorTemplateName);
 		SerializeConfig config = new SerializeConfig();
 		config.setPropertyNamingStrategy(PropertyNamingStrategy.SnakeCase);
 

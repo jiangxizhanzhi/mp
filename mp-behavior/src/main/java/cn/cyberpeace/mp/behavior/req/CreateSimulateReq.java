@@ -19,8 +19,8 @@ public class CreateSimulateReq implements Serializable {
 	@ApiModelProperty("场景名称")
 	private String sceneName;
 
-	@ApiModelProperty("行为节点列表")
-	private List<NodeBo> behaviorNodeList;
+//	@ApiModelProperty("行为节点列表")
+//	private List<NodeBo> behaviorNodeList;
 
 	@ApiModelProperty("节点ip列表")
 	private List<NodeBo> nodeList;

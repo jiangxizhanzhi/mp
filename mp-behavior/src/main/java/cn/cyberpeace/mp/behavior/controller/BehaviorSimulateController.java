@@ -5,8 +5,10 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.behavior.constant.ControllerConstant;
 import cn.cyberpeace.mp.behavior.req.DeleteReq;
+import cn.cyberpeace.mp.behavior.req.SimulatePageReq;
 import cn.cyberpeace.mp.behavior.res.SimulateDetailRes;
 import cn.cyberpeace.mp.behavior.res.SimulatePageRes;
+import cn.cyberpeace.mp.behavior.res.StatusRes;
 import cn.cyberpeace.mp.behavior.res.TaskPageRes;
 import cn.cyberpeace.mp.behavior.service.SimulateService;
 import cn.cyberpeace.mp.behavior.service.TaskService;
@@ -45,7 +47,7 @@ public class BehaviorSimulateController {
 
 	@ApiOperation("行为仪表分页")
 	@GetMapping("/page")
-	public ListObjServiceResult<SimulatePageRes> simulatePage(QueryParams pageReq) {
+	public ListObjServiceResult<SimulatePageRes> simulatePage(SimulatePageReq pageReq) {
 		return simulateService.page(pageReq).asResult();
 	}
 
@@ -80,6 +82,12 @@ public class BehaviorSimulateController {
 	@GetMapping("/name_list")
 	public ServiceResult<List<String>> getNameList() {
 		return new ServiceResult<>(simulateService.getNameList()).asResult();
+	}
+
+	@ApiOperation("任务状态")
+	@GetMapping("/status")
+	public ServiceResult<List<StatusRes>> getStatusList() {
+		return new ServiceResult<>(simulateService.getStatusList()).asResult();
 	}
 
 }

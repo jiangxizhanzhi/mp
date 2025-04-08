@@ -18,8 +18,10 @@ import cn.cyberpeace.mp.behavior.model.SceneModel;
 import cn.cyberpeace.mp.behavior.model.SimulateModel;
 import cn.cyberpeace.mp.behavior.model.TaskModel;
 import cn.cyberpeace.mp.behavior.req.CreateSimulateReq;
+import cn.cyberpeace.mp.behavior.req.SimulatePageReq;
 import cn.cyberpeace.mp.behavior.res.SimulateDetailRes;
 import cn.cyberpeace.mp.behavior.res.SimulatePageRes;
+import cn.cyberpeace.mp.behavior.res.StatusRes;
 import cn.cyberpeace.mp.behavior.res.TaskPageRes;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
@@ -80,7 +82,6 @@ public class SimulateService {
 																.filterEqual(SceneModel::getNodeId, nodeBo.getNodeId());
 			SceneModel sceneModel = sceneModelMapper.first(humanCondition);
 			if (sceneModel == null) {
-				log.error("cannot find behavior config, sceneId:[{}], nodeId:[{}]", createSimulateReq.getSceneId(), nodeBo.getNodeId());
 				break;
 			}
 			SimulateModel simulateModel = new SimulateModel();
@@ -92,7 +93,6 @@ public class SimulateService {
 			simulateModel.setIp(nodeBo.getNodeIp());
 			simulateModel.setNodeId(nodeBo.getNodeId());
 			simulateModel.setNodeName(nodeBo.getNodeName());
-//			simulateModel.setStartTime(sceneModel.get);
 			simulateModelList.add(simulateModel);
 
 			SceneModel newSceneModel = new SceneModel();
@@ -146,6 +146,9 @@ public class SimulateService {
 		if (simulateModel == null) {
 			log.error("找不到对应仪表, 仪表id:[{}]", simulateId);
 			throw new MpRuntimeException("找不到对应仪表");
+		} else if (!SimulateModel.StatusEnum.NOT_STARTED.getCode().equals(simulateModel.getStatus())) {
+			log.error("行为仪表[{}]启动失败，状态错误", simulateId);
+			throw new MpRuntimeException("行为仪表状态必须为未开始");
 		}
 		String queueName = simulateModel.getSceneId() + "_" + simulateModel.getNodeId();
 		simulateModel.setStatus(SimulateModel.StatusEnum.RUNNING.getCode());
@@ -193,13 +196,16 @@ public class SimulateService {
 		});
 	}
 
-	public ListObjServiceResult<SimulatePageRes> page(QueryParams pageReq) {
+	public ListObjServiceResult<SimulatePageRes> page(SimulatePageReq pageReq) {
 		HumanCondition humanCondition = new HumanCondition()
 				.pagination(pageReq.getPage(), pageReq.getPageSize());
-
-		if (StringUtils.isNotEmpty(pageReq.getSearch())) {
-			humanCondition.filterIContains(SimulateModel::getSceneName, pageReq.getSearch());
+		if (StringUtils.isNotEmpty(pageReq.getName())) {
+			humanCondition.filterIContains(SimulateModel::getSceneName, pageReq.getName());
 		}
+		if (pageReq.getStatus() != null) {
+			humanCondition.filterEqual(SimulateModel::getStatus, pageReq.getStatus());
+		}
+
 		humanCondition.filterEqual(SimulateModel::getDelete, false);
 		humanCondition.orderBy(SimulateModel::getCreateTime, true);
 
@@ -212,9 +218,19 @@ public class SimulateService {
 	public void deleteTask(String sceneId) {
 		List<SimulateModel> simulateModelList = simulateMapper.list(new HumanCondition().filterEqual(SimulateModel::getSceneId, sceneId));
 		for (SimulateModel simulateModel : simulateModelList) {
-			stopSimulate(simulateModel.getId());
+			timerMap.remove(simulateModel.getId());
 		}
-		sceneModelMapper.filterDelete(new HumanCondition().filterEqual(SceneModel::getSceneId, sceneId));
+		transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
+
+				sceneModelMapper.filterDelete(new HumanCondition().filterEqual(SceneModel::getSceneId, sceneId).filterEqual(SceneModel::getInstance, true));
+				simulateMapper.filterDelete(new HumanCondition().filterEqual(SimulateModel::getSceneId, sceneId));
+				taskMapper.filterDelete(new HumanCondition().filterIn(TaskModel::getSimulateId, simulateModelList.stream().map(SimulateModel::getId).toArray()));
+
+			}
+		});
 	}
 
 	public List<String> getNameList() {
@@ -248,6 +264,17 @@ public class SimulateService {
 	public void deleteSimulate(String simulateId) {
 		timerMap.remove(simulateId);
 		simulateMapper.delete(simulateId);
+	}
+
+	public List<StatusRes> getStatusList() {
+		List<StatusRes> statusResList = new ArrayList<>();
+		for (SimulateModel.StatusEnum statusEnum:SimulateModel.StatusEnum.values()) {
+			StatusRes statusRes = new StatusRes();
+			statusRes.setStatus(statusEnum.getCode());
+			statusRes.setName(statusEnum.getDesc());
+			statusResList.add(statusRes);
+		}
+		return statusResList;
 	}
 
 	private void recoverTimerTask() {
