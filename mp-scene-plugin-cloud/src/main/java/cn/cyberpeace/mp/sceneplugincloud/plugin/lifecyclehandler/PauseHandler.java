@@ -91,7 +91,7 @@ public class PauseHandler extends HandlerCommon {
 //        判断是否是微软云 容器无暂停操作
         Integer cloudType = getPluginHandler().getSceneHandler().getScene().getCloudType();
         if (cloudType != BaseSceneModel.CloudType.DEFAULT) {
-            if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
+            if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE) && BaseCloudPluginSceneElementModel.ImageType.LAAS_VM.equals(element.getImageType())) {
                 getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.PAUSE, Arrays.asList(ElementProcess.PAUSE_VIRTUAL_MACHINE));
                 runElementProgress(nodeId, SceneElementModel.Event.PAUSE, ElementProcess.PAUSE_VIRTUAL_MACHINE, () -> {
                     closeAccessModes(element);

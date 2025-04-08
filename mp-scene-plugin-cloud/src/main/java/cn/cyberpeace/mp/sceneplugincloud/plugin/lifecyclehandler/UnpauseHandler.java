@@ -92,7 +92,7 @@ public class UnpauseHandler extends HandlerCommon {
         Integer cloudType = getPluginHandler().getSceneHandler().getScene().getCloudType();
 //        微软云容器无暂停操作 不用恢复
         if (cloudType != BaseSceneModel.CloudType.DEFAULT) {
-            if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
+            if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE) && BaseCloudPluginSceneElementModel.ImageType.LAAS_VM.equals(element.getImageType())) {
                 getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.UNPAUSE, Arrays.asList(ElementProcess.UNPAUSE_VIRTUAL_MACHINE));
                 runElementProgress(nodeId, SceneElementModel.Event.UNPAUSE, ElementProcess.UNPAUSE_VIRTUAL_MACHINE, () -> {
 
