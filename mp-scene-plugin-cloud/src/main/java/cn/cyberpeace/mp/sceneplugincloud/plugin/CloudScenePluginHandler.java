@@ -687,6 +687,9 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
             srcElement.setType(BaseSceneElementModel.Type.FIREWALL);
             // 简单三层虚拟防火墙用虚拟默认路由 + 防火墙实现
             cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER);
+        } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_VLAN_SWITCH)) {
+            // 内置的多vlan交换机数据修正
+            cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH);
         } else if (role.equals(BaseCloudPluginSceneElementModel.Role.ENTITY_GATEWAY)) {
             if (isForceCorrectElementType) {
                 // TODO 暂定 - 实体网关就是实体路由
