@@ -39,7 +39,9 @@ import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneAreaModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
+import cn.cyberpeace.mp.scene.repository.SceneConfigElementMapper;
 import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
 import cn.cyberpeace.mp.scene.service.SceneConfigService;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
@@ -383,11 +385,27 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         }
     }
 
-    public ServiceResult<CsceneBO> getById(String id, boolean withInstance, CsceneContextBO context) {
-        var csceneHandler = new CsceneHandler(id, context);
-        var cscene = csceneHandler.toData(withInstance);
-        cscene.setResourceOccupiedNums(NodeLimitUtils.calLimitedNodesNum(cscene));
-        return new ServiceResult<>(cscene);
+    public ServiceResult<CsceneBO> getById(String id,String areaId , boolean withInstance, CsceneContextBO context) {
+        CsceneModel csceneModel = this.getModelMapper().get(id);
+        if (csceneModel == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        SceneConfigHandler sceneConfigHandler = new SceneConfigHandler(csceneModel.getSceneConfig(), areaId, areaId == null ? false : true, null);
+        SceneConfigDataBO sceneConfigData = sceneConfigHandler.toData();
+        CsceneBO csceneBO = new CsceneBO();
+        csceneBO.fromModel(csceneModel);
+        csceneBO.setSceneConfig(sceneConfigData);
+        csceneBO.setRoles(new ArrayList<>());
+        List<CsceneRoleModel> roleModels = this.csceneRoleMapper.list(new HumanCondition().filterEqual(CsceneRoleModel::getCscene, id));
+        if (roleModels != null) {
+            for (CsceneRoleModel roleModel : roleModels) {
+                CsceneRoleBO roleBO = new CsceneRoleBO();
+                roleBO.fromModel(roleModel);
+                csceneBO.getRoles().add(roleBO);
+            }
+        }
+        CsceneDataModifier.correctReturnCsceneData(csceneBO);
+        return new ServiceResult<>(csceneBO);
     }
 
     public ServiceResult<CsceneBO> export(String id, CsceneContextBO context) {
@@ -425,6 +443,10 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                 return new ServiceResult<>(csceneBO);
             }
         } else {
+            if (csceneBO.getId() != null) {
+                String sceneId = this.get(csceneBO.getId()).getSource().getObj().getSceneConfig();
+                csceneBO.getSceneConfig().getTopology().getScene().setEid(sceneId);
+            }
             handlerEnableRate(csceneBO);
             var csceneHandler = new CsceneHandler(csceneBO, context);
             // 以前没有 cscene.name , 目前都和 scene.name 保持一致
@@ -713,5 +735,22 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
 
     public SceneConfigDataBO importThirdPartyScene(MultipartFile file) {
         return sceneConfigService.importThirdPartyScene(file);
+    }
+
+    public int getOutAreaElementNum(String sceneId, String areaId, SceneConfigDataBO dataBO) {
+        List<String> excludeAreaIds = new ArrayList<>();
+        excludeAreaIds.add(areaId);
+        if (CollectionUtils.isNotEmpty(dataBO.getTopology().getAreas())) {
+            for (var a : dataBO.getTopology().getAreas()) {
+                if (a.getType() == BaseSceneAreaModel.Type.COMMON) {
+                    excludeAreaIds.add(a.getId());
+                }
+            }
+        }
+        var condition = new HumanCondition().filterEqual(BaseSceneElementModel::getScene, sceneId)
+                .filterNotIn(BaseSceneElementModel::getArea, excludeAreaIds.toArray(new String[]{}));
+        SceneConfigElementMapper sceneConfigElementMapper = BeanCommon.getBean(SceneConfigElementMapper.class);
+        int num = sceneConfigElementMapper.total(condition);
+        return num;
     }
 }
