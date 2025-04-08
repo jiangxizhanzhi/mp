@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.behavior.mapper.RunBehaviorLogMapper;
 import cn.cyberpeace.mp.behavior.model.RunBehaviorLogModel;
+import cn.cyberpeace.mp.behavior.service.RemoteService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.PropertyNamingStrategy;
@@ -15,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 import java.util.List;
+import java.util.Map;
 import java.util.TimerTask;
 
 @Slf4j
@@ -44,6 +46,13 @@ public class BehaviorTimerTask extends TimerTask {
 	@Override
 	public void run() {
 		RabbitTemplate rabbitTemplate = BeanCommon.getBean(RabbitTemplate.class);
+		RemoteService remoteService = BeanCommon.getBean(RemoteService.class);
+		Map<String, String> idIpMap = remoteService.getIdIpMap(queueName.substring(0, queueName.indexOf("_")));
+		for (Param param : paramList) {
+			if ("host".equals(param.getParam())) {
+				param.setValue(idIpMap.get(param.getValue()));
+			}
+		}
 		RunBehaviorLogModel runBehaviorLogModel = new RunBehaviorLogModel();
 		runBehaviorLogModel.setLogContent("");
 		runBehaviorLogModel.setBehaviorTemplateId(behaviorTemplateId);

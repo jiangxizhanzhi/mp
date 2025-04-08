@@ -4,13 +4,18 @@ import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.behavior.bo.NodeBehavior;
 import cn.cyberpeace.mp.behavior.bo.NodeUserBehavior;
 import cn.cyberpeace.mp.behavior.mapper.SceneModelMapper;
+import cn.cyberpeace.mp.behavior.mapper.SimulateMapper;
+import cn.cyberpeace.mp.behavior.mapper.TaskMapper;
 import cn.cyberpeace.mp.behavior.model.SceneModel;
+import cn.cyberpeace.mp.behavior.model.SimulateModel;
+import cn.cyberpeace.mp.behavior.model.TaskModel;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -21,6 +26,12 @@ public class SceneBehaviorService {
 
 	@Autowired
 	private SimulateService simulateService;
+
+	@Autowired
+	private TaskMapper taskMapper;
+
+	@Autowired
+	private SimulateMapper simulateMapper;
 
 	public NodeBehavior getNodeBehavior(String sceneId, String nodeId) {
 		HumanCondition condition = new HumanCondition().filterEqual(SceneModel::getSceneId, sceneId)
@@ -40,6 +51,7 @@ public class SceneBehaviorService {
 	public void save(NodeBehavior nodeBehavior) {
 		HumanCondition condition = new HumanCondition().filterEqual(SceneModel::getSceneId, nodeBehavior.getSceneId())
 													   .filterEqual(SceneModel::getNodeId, nodeBehavior.getNodeId());
+		SimulateModel oldSimulate = simulateMapper.first(condition);
 		Boolean instance = sceneModelMapper.getInstanceBySceneAndNode(nodeBehavior.getSceneId(), nodeBehavior.getNodeId());
 		String simulateId = sceneModelMapper.getIdBySceneAndNode(nodeBehavior.getSceneId(), nodeBehavior.getNodeId());
 		sceneModelMapper.filterDelete(condition);
@@ -51,7 +63,31 @@ public class SceneBehaviorService {
 		sceneModelMapper.create(sceneModel);
 		if (instance != null && instance) {
 			simulateService.deleteSimulate(simulateId);
-			simulateService.runSimulate(sceneModel.getId());
+			List<TaskModel> taskModelList = simulateService.createTask(nodeBehavior.getUserBehaviorList(), simulateId);
+			taskMapper.bulkCreate(taskModelList);
+
+			SimulateModel simulateModel = new SimulateModel();
+			simulateModel.setSceneId(nodeBehavior.getSceneId());
+			simulateModel.setNodeId(nodeBehavior.getNodeId());
+			simulateModel.setDelete(false);
+
+			if (oldSimulate != null) {
+				simulateModel.setOnline(oldSimulate.getOnline());
+				simulateModel.setIp(oldSimulate.getIp());
+				simulateModel.setNodeName(oldSimulate.getNodeName());
+				simulateModel.setSceneName(oldSimulate.getSceneName());
+				simulateModel.setStatus(oldSimulate.getStatus());
+			} else {
+				simulateModel.setOnline(false);
+				simulateModel.setIp("");
+				simulateModel.setNodeName("");
+				simulateModel.setSceneName("");
+				simulateModel.setStatus(SimulateModel.StatusEnum.NOT_STARTED.getCode());
+			}
+			simulateMapper.create(simulateModel);
+			if ( SimulateModel.StatusEnum.RUNNING.getCode().equals(oldSimulate.getStatus()) ) {
+				simulateService.runSimulate(simulateModel.getId());
+			}
 		}
 	}
 }

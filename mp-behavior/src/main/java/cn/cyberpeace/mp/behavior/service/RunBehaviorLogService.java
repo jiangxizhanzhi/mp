@@ -33,6 +33,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -54,6 +55,9 @@ public class RunBehaviorLogService {
 
 	@Autowired
 	private RabbitAdmin rabbitAdmin;
+
+	@Autowired
+	private RemoteService remoteService;
 
 	Cache<String, String> queueCache = CacheBuilder.newBuilder()
 															.expireAfterWrite(1, TimeUnit.DAYS).build();
@@ -103,6 +107,8 @@ public class RunBehaviorLogService {
 		String[] strings = queueName.split("_");
 		SimulateModel simulateModel = simulateMapper.selectBySceneNode(strings[0], strings[1]);
 		if (simulateModel != null) {
+			Map<String, String> idIpMap = remoteService.getIdIpMap(strings[0]);
+			simulateModel.setIp(idIpMap.get(strings[1]));
 			simulateModel.setOnline(true);
 			simulateMapper.update(simulateModel);
 		}
