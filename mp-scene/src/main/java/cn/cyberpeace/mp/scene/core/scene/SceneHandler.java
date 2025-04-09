@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.scene.core.base.BaseSceneHandler;
 import cn.cyberpeace.mp.scene.core.bo.CollectedSceneBO;
 import cn.cyberpeace.mp.scene.core.bo.CollectedSceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneAreaBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneAreaNodeConnectionBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
@@ -34,6 +35,7 @@ import cn.cyberpeace.mp.scene.model.SceneElementPluginModel;
 import cn.cyberpeace.mp.scene.model.SceneElementPortConnectionModel;
 import cn.cyberpeace.mp.scene.model.SceneElementPortModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.scene.model.SceneNodeConnectionModel;
 import cn.cyberpeace.mp.scene.model.ScenePieceModel;
 import cn.cyberpeace.mp.scene.repository.SceneAreaMapper;
 import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
@@ -41,6 +43,7 @@ import cn.cyberpeace.mp.scene.repository.SceneElementPluginMapper;
 import cn.cyberpeace.mp.scene.repository.SceneElementPortConnectionMapper;
 import cn.cyberpeace.mp.scene.repository.SceneElementPortMapper;
 import cn.cyberpeace.mp.scene.repository.SceneMapper;
+import cn.cyberpeace.mp.scene.repository.SceneNodeConnectionMapper;
 import cn.cyberpeace.mp.scene.repository.ScenePieceMapper;
 import lombok.Data;
 import lombok.Getter;
@@ -78,12 +81,14 @@ import java.util.stream.Collectors;
         SceneElementBO.class,
         SceneElementPortBO.class,
         SceneElementPortConnectionBO.class,
+        SceneAreaNodeConnectionBO.class,
         ScenePieceBO.class,
         SceneModel.class,
         SceneAreaModel.class,
         SceneElementModel.class,
         SceneElementPortModel.class,
         SceneElementPortConnectionModel.class,
+        SceneNodeConnectionModel.class,
         SceneElementPluginModel.class,
         ScenePieceModel.class,
         ScenePluginHandler.class,
@@ -97,20 +102,21 @@ import java.util.stream.Collectors;
         SceneElementPortConnectionMapper.class,
         SceneElementPluginMapper.class,
         ScenePieceMapper.class,
+        SceneNodeConnectionMapper.class,
 })
 public class SceneHandler extends BaseSceneHandler<
         SceneModel,
         SceneAreaModel,
         SceneElementModel,
         SceneElementPortModel,
-        SceneElementPortConnectionModel,
+        SceneElementPortConnectionModel, SceneNodeConnectionModel,
         SceneElementPluginModel,
         ScenePieceModel,
         SceneBO,
         SceneAreaBO,
         SceneElementPortBO,
         SceneElementBO,
-        SceneElementPortConnectionBO,
+        SceneElementPortConnectionBO, SceneAreaNodeConnectionBO,
         ScenePieceBO,
         SceneTopologyBO,
         SceneDataBO,
@@ -121,6 +127,7 @@ public class SceneHandler extends BaseSceneHandler<
         SceneElementPortConnectionMapper,
         SceneElementPluginMapper,
         ScenePieceMapper,
+        SceneNodeConnectionMapper,
         SceneContextBO,
         ScenePluginHandler<?, ?, ?, ?>,
         SceneHandler> {
