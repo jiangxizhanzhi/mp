@@ -331,6 +331,7 @@ public class AddTaskByRemoteFlowService2 implements IAddTaskService {
             flowTaskFlowInfo.setFlowId(e.getFlowId());
             flowTaskFlowInfo.setBandwidth(e.getBandwidth());
             flowTaskFlowInfo.setRate(e.getRate());
+            flowTaskFlowInfo.setResourceType(e.getResourceType());
 
             List<FlowTaskAttackConf> attackConfs = new ArrayList<>();
             if (e.getScriptParamModels() != null) {

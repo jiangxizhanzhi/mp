@@ -41,6 +41,9 @@ public class AddFlowTaskFlowInfo {
     @ApiModelProperty("带宽(单位 mbp/s)")
     private Integer bandwidth;
 
+    @ApiModelProperty(value = "流量资源类型:0 pcap，1 脚本")
+    private Integer resourceType;
+
     /**
      * 攻击流量参数配置
      */

@@ -23,6 +23,8 @@ public class CsceneFlowTaskResponse {
     private Integer interactiveType;
     @ApiModelProperty("背景流量速率(单位 mbp/s)")
     private Integer rate;
+    @ApiModelProperty(value = "流量资源类型:0 pcap，1 脚本")
+    private Integer resourceType;
     @ApiModelProperty("带宽(单位 mbp/s)")
     private Integer bandwidth;
     @ApiModelProperty(value = "攻击流量 脚本运行参数")

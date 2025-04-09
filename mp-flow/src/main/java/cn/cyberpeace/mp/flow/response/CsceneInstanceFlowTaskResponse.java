@@ -21,6 +21,8 @@ public class CsceneInstanceFlowTaskResponse {
     private String name;
     @ApiModelProperty(value = "交互类型：0 背景流量，1 攻击流量")
     private Integer interactiveType;
+    @ApiModelProperty(value = "流量资源类型:0 pcap，1 脚本")
+    private Integer resourceType;
     @ApiModelProperty("背景流量速率(单位 mbp/s)")
     private Integer rate;
     @ApiModelProperty("带宽(单位 mbp/s)")

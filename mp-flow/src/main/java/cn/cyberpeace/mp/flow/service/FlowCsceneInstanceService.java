@@ -77,6 +77,7 @@ public class FlowCsceneInstanceService {
             response.setName(m.getNodeName());
             response.setFlowId(m.getFlowId());
             response.setInteractiveType(m.getInteractiveType());
+            response.setResourceType(m.getResourceType());
             result.add(response);
         }
         if (CollectionUtils.isNotEmpty(taskIds)) {
@@ -127,6 +128,7 @@ public class FlowCsceneInstanceService {
             flowTaskFlowInfo.setFlowId(task.getFlowId());
             flowTaskFlowInfo.setRate(task.getRate());
             flowTaskFlowInfo.setBandwidth(task.getBandwidth());
+            flowTaskFlowInfo.setResourceType(task.getResourceType());
 
             List<FlowTaskAttackConf> attackConfs = new ArrayList<>();
             if (task.getScriptParamModels() != null) {
