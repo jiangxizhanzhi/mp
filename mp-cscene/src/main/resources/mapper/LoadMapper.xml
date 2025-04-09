@@ -741,6 +741,10 @@
         SELECT
         log.*,
         l.tool_name,
+        l.tool_description,
+        l.action_type,
+        l.run_table,
+        l.control_type,
         DATE_FORMAT(log.create_time, '%Y-%m-%d %H:%i:%S') AS create_time
         FROM
         mp_devops_load_scene_result_log log

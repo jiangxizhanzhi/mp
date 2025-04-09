@@ -2762,6 +2762,16 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 //            保存实例信息
             cn.cyberpeace.mp.base.util.basic.BeanUtils.copyProperties(sceneElementModel, sceneConfigElementModel);
             csceneService.saveConfigData(csceneLoadDto.getCsceneId(), sceneConfigElementModel, cloudPluginSceneElementModel, cloudPluginSceneConfigElementModel, arePositionStr);
+        } else {
+            MpDevopsLoad mpDevopsLoad = loadMapper.getLoadById(loadToolId);
+            SceneElementModel sceneElementModel = new SceneElementModel();
+            sceneElementModel.setDefaultCmd(csceneLoadDto.getSceneConfigElement().getDefaultCmd());
+            HumanCondition humanCondition = new HumanCondition();
+            humanCondition.filterEqual(SceneElementModel::getScene,csceneInstanceModel.getScene());
+            humanCondition.filterEqual(SceneElementModel::getArea, "loadUUID");
+            humanCondition.filterEqual(SceneElementModel::getName, mpDevopsLoad.getToolName());
+            humanCondition.filterEqual(SceneElementModel::getActionType, mpDevopsLoad.getActionType());
+            sceneElementMapper.filterUpdate(sceneElementModel, humanCondition);
         }
         log.info("addLoad end.");
         return new ServiceResult<>(true);
