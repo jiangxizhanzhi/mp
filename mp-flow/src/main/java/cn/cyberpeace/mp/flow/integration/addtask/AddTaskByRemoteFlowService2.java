@@ -133,7 +133,7 @@ public class AddTaskByRemoteFlowService2 implements IAddTaskService {
         // 查流量信息
         List<String> flowIds = new ArrayList<>();
         flowTaskTaskModelList.forEach(t -> flowIds.add(t.getFlowId()));
-        var remote = this.getRemoteFlowInfos(flowIds);
+        var remote = FlowClient.getRemoteFlowInfos(flowIds);
         Map<String, RemoteFlowInfo> flowId2RemoteFlowInfo = new HashMap<>();
         for (RemoteFlowInfo f : remote) {
             flowId2RemoteFlowInfo.put(f.getFlowId(), f);
@@ -255,7 +255,7 @@ public class AddTaskByRemoteFlowService2 implements IAddTaskService {
                 flowIds.add(task.getFlowId());
             }
             // 从远程服务上查询流量的信息
-            var remoteFlowInfos = this.getRemoteFlowInfos(flowIds);
+            var remoteFlowInfos = FlowClient.getRemoteFlowInfos(flowIds);
             // 创建流量任务
             var flowTaskTaskModelList = this.createFlowTasks(actuatorId, addFlowTaskParams.getCsceneInstanceId(), addFlowTaskParams.getNodeId(), addFlowTaskParams.getNodeName(), "", addFlowTaskParams.getTargetIp(), addFlowTaskParams.getNetworkId(), remoteFlowInfos);
             // 创建任务配置
@@ -368,34 +368,6 @@ public class AddTaskByRemoteFlowService2 implements IAddTaskService {
             flowTaskPortMapper.save(portModel);
         }
         return portModel;
-    }
-
-    private List<RemoteFlowInfo> getRemoteFlowInfos(List<String> flowIds) {
-        List<RemoteFlowInfo> flowInfos = new ArrayList<>();
-        for (var flowId : flowIds) {
-            RemoteFlowInfo flowInfo = this.getRemoteFlowInfoNoException(flowId, 2);
-            if (flowInfo != null) {
-                flowInfos.add(flowInfo);
-            } else {
-                log.info("未查询到流量,flow id : {}", flowId);
-            }
-        }
-        return flowInfos;
-    }
-
-    private RemoteFlowInfo getRemoteFlowInfoNoException(String flowId, int tryCount) {
-        RemoteFlowInfo flow = null;
-        for (int i = 0; i < tryCount; i++) {
-            try {
-                flow = FlowClient.getRemoteFlowInfo(flowId);
-                if (flow != null) {
-                    break;
-                }
-            } catch (Exception e) {
-                log.error("failed to query flow , flow id is {}", flowId, e);
-            }
-        }
-        return flow;
     }
 
     private List<FlowTaskTaskModel> createFlowTasks(String actuatorId,String csceneInstanceId , String nodeId,String nodeName,  String portId, String targetIp, String networkId, List<RemoteFlowInfo> remoteFlowInfos) {

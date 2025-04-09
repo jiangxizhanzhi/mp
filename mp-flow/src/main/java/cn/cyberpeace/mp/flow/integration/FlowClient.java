@@ -34,6 +34,34 @@ public class FlowClient {
         HEADER.put("clientSecret", "2112f4b855264ad7b1a4209737fc7836");
     }
 
+    public static List<RemoteFlowInfo> getRemoteFlowInfos(List<String> flowIds) {
+        List<RemoteFlowInfo> flowInfos = new ArrayList<>();
+        for (var flowId : flowIds) {
+            RemoteFlowInfo flowInfo = getRemoteFlowInfoNoException(flowId, 2);
+            if (flowInfo != null) {
+                flowInfos.add(flowInfo);
+            } else {
+                log.info("未查询到流量,flow id : {}", flowId);
+            }
+        }
+        return flowInfos;
+    }
+
+    private static RemoteFlowInfo getRemoteFlowInfoNoException(String flowId, int tryCount) {
+        RemoteFlowInfo flow = null;
+        for (int i = 0; i < tryCount; i++) {
+            try {
+                flow = FlowClient.getRemoteFlowInfo(flowId);
+                if (flow != null) {
+                    break;
+                }
+            } catch (Exception e) {
+                log.error("failed to query flow , flow id is {}", flowId, e);
+            }
+        }
+        return flow;
+    }
+
     public static RemoteFlowInfo getRemoteFlowInfo(String id) {
         RemoteFlowInfoResponse response = getRemoteBackgroundFlowInfo(id);
         if (response == null) {
