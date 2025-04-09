@@ -42,6 +42,9 @@ public class FlowInfoResponse {
     @ApiModelProperty(value = "流量id")
     private String resourceId;
 
+    @ApiModelProperty(value = "流量资源类型:0 pcap，1 脚本")
+    private Integer resourceType ;
+
     /**
      * 标题
      */
