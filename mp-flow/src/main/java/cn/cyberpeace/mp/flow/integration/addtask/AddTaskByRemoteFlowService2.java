@@ -414,6 +414,8 @@ public class AddTaskByRemoteFlowService2 implements IAddTaskService {
             int resourceType = taskModel.getResourceType();
             AddFlowTaskFlowInfo addFlowTaskFlowInfo = addFlowTaskMap.get(taskModel.getFlowId());
             RemoteFlowInfo remoteFlowInfo = remoteFlowInfoMap.get(taskModel.getFlowId());
+            addFlowTaskFlowInfo.setDesc(remoteFlowInfo.getFlowDesc());
+            addFlowTaskFlowInfo.setCategory(remoteFlowInfo.getCategory());
             FlowTaskConfModel confModel = createTaskConfig(taskId, resourceType, addFlowTaskFlowInfo, remoteFlowInfo.getScriptParamModels());
             confModels.add(confModel);
 
@@ -451,6 +453,8 @@ public class AddTaskByRemoteFlowService2 implements IAddTaskService {
         flowTaskConf.setRateConf(new FlowTaskRateConf());
         flowTaskConf.getRateConf().setRate(addFlowTaskFlowInfo.getRate());
         flowTaskConf.getRateConf().setBandwidth(addFlowTaskFlowInfo.getBandwidth());
+        flowTaskConf.getRateConf().setCategory(addFlowTaskFlowInfo.getCategory());
+        flowTaskConf.getRateConf().setDesc(addFlowTaskFlowInfo.getDesc());
 
         if (ResourceTypeEnum.SCRIPT.toValue() == resourceType) {
             // 优先使用场景页面输入的参数

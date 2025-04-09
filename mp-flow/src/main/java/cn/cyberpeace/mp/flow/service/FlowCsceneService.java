@@ -4,22 +4,15 @@ import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
-import cn.cyberpeace.mp.flow.constant.ControllerConstant;
+import cn.cyberpeace.mp.flow.integration.FlowClient;
 import cn.cyberpeace.mp.flow.model.CsceneConfigFlowTaskModel;
 import cn.cyberpeace.mp.flow.repository.CsceneConfigFlowTaskMapper;
 import cn.cyberpeace.mp.flow.request.CsceneConfigFlowTaskRequest;
 import cn.cyberpeace.mp.flow.request.CsceneFlowTaskRequest;
 import cn.cyberpeace.mp.flow.response.CsceneFlowTaskResponse;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
@@ -60,6 +53,11 @@ public class FlowCsceneService {
         List<CsceneConfigFlowTaskModel> models = new ArrayList<>();
         for (var task : request.getTasks()) {
             CsceneConfigFlowTaskModel model = new CsceneConfigFlowTaskModel();
+            var flow = FlowClient.getRemoteFlowInfo(task.getFlowId());
+            if (flow != null) {
+                task.setDesc(flow.getFlowDesc());
+                task.setCategory(flow.getCategory());
+            }
             model.setContent(JsonCommon.stringify(task));
             model.setCsceneId(request.getId());
             model.setCsceneNodeId(request.getNodeId());

@@ -81,6 +81,9 @@ public class FlowClient {
         remoteFlowInfo.setPcapSize(response.getPcapSize());
         remoteFlowInfo.setDuration(response.getDuration());
         remoteFlowInfo.setPktNum(response.getPktNum());
+        remoteFlowInfo.setCategory(response.getCategory());
+        remoteFlowInfo.setResourceType(response.getResourceType());
+        remoteFlowInfo.setFlowDesc(response.getFlowDesc());
         if (StringUtils.isNotEmpty(response.getParameter())) {
             var params = JsonCommon.parse(response.getParameter(), new TypeReference<Map<String, List<String>>>() {
             });
@@ -155,5 +158,8 @@ public class FlowClient {
         private List<ProtocolBO> protocolList;
         private String parameter;
         private Integer interactiveType;
+        private Integer category;
+        private Integer resourceType;
+        private String flowDesc;
     }
 }

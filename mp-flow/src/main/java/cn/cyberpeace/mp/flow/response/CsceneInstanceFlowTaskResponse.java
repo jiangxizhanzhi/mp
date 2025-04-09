@@ -27,6 +27,10 @@ public class CsceneInstanceFlowTaskResponse {
     private Integer rate;
     @ApiModelProperty("带宽(单位 mbp/s)")
     private Integer bandwidth;
+    @ApiModelProperty("描述")
+    private String desc;
+    @ApiModelProperty("分类")
+    private Integer category;
     @ApiModelProperty(value = "攻击流量 脚本运行参数")
     private List<ScriptParamModel> scriptParamModels;
 }

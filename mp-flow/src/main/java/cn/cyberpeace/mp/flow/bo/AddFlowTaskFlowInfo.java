@@ -44,6 +44,10 @@ public class AddFlowTaskFlowInfo {
     @ApiModelProperty(value = "流量资源类型:0 pcap，1 脚本")
     private Integer resourceType;
 
+    private String desc;
+
+    private Integer category;
+
     /**
      * 攻击流量参数配置
      */

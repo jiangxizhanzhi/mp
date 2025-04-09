@@ -16,6 +16,10 @@ public class FlowTaskRequest {
     private String flowId;
     @ApiModelProperty(value = "流量名称")
     private String name;
+    @ApiModelProperty(value = "描述")
+    private String desc;
+    @ApiModelProperty(value = "分类")
+    private Integer category;
     @ApiModelProperty(value = "交互类型：0 背景流量，1 攻击流量")
     private Integer interactiveType;
     @ApiModelProperty(value = "流量资源类型:0 pcap，1 脚本")

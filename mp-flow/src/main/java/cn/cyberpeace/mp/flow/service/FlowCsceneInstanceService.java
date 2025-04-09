@@ -94,6 +94,8 @@ public class FlowCsceneInstanceService {
                         if (conf.getRateConf() != null) {
                             r.setBandwidth(conf.getRateConf().getBandwidth());
                             r.setRate(conf.getRateConf().getRate());
+                            r.setDesc(conf.getRateConf().getDesc());
+                            r.setCategory(conf.getRateConf().getCategory());
                         }
                     }
                 }
@@ -381,6 +383,8 @@ public class FlowCsceneInstanceService {
             int resourceType = taskModel.getResourceType();
             AddFlowTaskFlowInfo addFlowTaskFlowInfo = addFlowTaskMap.get(taskModel.getFlowId());
             RemoteFlowInfo remoteFlowInfo = remoteFlowInfoMap.get(taskModel.getFlowId());
+            addFlowTaskFlowInfo.setDesc(remoteFlowInfo.getFlowDesc());
+            addFlowTaskFlowInfo.setCategory(remoteFlowInfo.getCategory());
             FlowTaskConfModel confModel = createTaskConfig(taskId, resourceType, addFlowTaskFlowInfo, remoteFlowInfo.getScriptParamModels());
             confModels.add(confModel);
         }
@@ -416,6 +420,8 @@ public class FlowCsceneInstanceService {
         FlowTaskRateConf rateConf = new FlowTaskRateConf();
         rateConf.setBandwidth(addFlowTaskFlowInfo.getBandwidth());
         rateConf.setRate(addFlowTaskFlowInfo.getRate());
+        rateConf.setDesc(addFlowTaskFlowInfo.getDesc());
+        rateConf.setCategory(addFlowTaskFlowInfo.getCategory());
         flowTaskConf.setRateConf(rateConf);
         flowTaskConfModel.setConf(JSONObject.toJSONString(flowTaskConf));
         return flowTaskConfModel;

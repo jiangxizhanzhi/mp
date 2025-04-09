@@ -46,4 +46,8 @@ public class FlowTaskRateConf {
     private Integer rate;
 
     private Integer bandwidth;
+
+    private String desc;
+
+    private Integer category;
 }

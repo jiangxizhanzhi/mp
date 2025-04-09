@@ -31,6 +31,9 @@ import java.util.List;
 public class RemoteFlowInfo {
     private String flowId;
     private String title;
+    private String flowDesc;
+    private Integer category;
+    private Integer resourceType;
     private String file;
     private String fileName;
     private String pcapFile;
