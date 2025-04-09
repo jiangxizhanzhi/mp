@@ -30,6 +30,9 @@ public class FlowInfoResponse {
     @ApiModelProperty(value = "流量id")
     private String resourceId;
 
+    @ApiModelProperty(value = "流量资源类型:0 pcap，1 脚本")
+    private Integer resourceType ;
+
     /**
      * 标题
      */
@@ -76,6 +79,7 @@ public class FlowInfoResponse {
 
     public FlowInfoResponse(FlowInfoModel flowInfoModel, List<FlowScriptParamModel> scriptParamModels) {
         setResourceId(flowInfoModel.getId());
+        setResourceType(flowInfoModel.getResourceType());
         setTitle(flowInfoModel.getTitle());
         setIntroduction(flowInfoModel.getFlowDesc());
         setCategory(flowInfoModel.getCategory());

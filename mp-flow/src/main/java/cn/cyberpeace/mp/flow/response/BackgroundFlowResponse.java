@@ -51,6 +51,7 @@ public class BackgroundFlowResponse extends FlowInfoResponse {
 
     public BackgroundFlowResponse(FlowInfoModel flowInfoModel, String prefixUrl) {
         setResourceId(flowInfoModel.getId());
+        setResourceType(flowInfoModel.getResourceType());
         setTitle(flowInfoModel.getTitle());
         setIntroduction(flowInfoModel.getFlowDesc());
         setFlowDesc(flowInfoModel.getFlowDesc());

@@ -91,6 +91,7 @@ public class AttackFlowResponse extends FlowInfoResponse {
 
     public AttackFlowResponse(FlowInfoModel flowInfoModel, String prefixUrl, List<FlowScriptParamModel> scriptParamModels) {
         setResourceId(flowInfoModel.getId());
+        setResourceType(flowInfoModel.getResourceType());
         setTitle(flowInfoModel.getTitle());
         setIntroduction(flowInfoModel.getFlowDesc());
         setCategory(flowInfoModel.getCategory());
