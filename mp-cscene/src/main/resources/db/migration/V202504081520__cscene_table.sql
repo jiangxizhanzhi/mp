@@ -1,19 +1,5 @@
 # 场景分层相关的表
 
-alter table mp_scene_scene_config_area add column type tinyint(2) comment '区域类型 0:普通区域 1:层级区域' default 0 after open;
-alter table mp_scene_scene_area add column type tinyint(2) comment '区域类型 0:普通区域 1:层级区域' default 0 after open;
-alter table mp_scene_scene_element add outer_position2 varchar(1024) NOT NULL default '' comment '外部2d坐标';
-alter table mp_scene_scene_config_element add outer_position2 varchar(1024) NOT NULL default ''  comment '外部2d坐标';
-alter table mp_scene_scene_area add outer_position2 varchar(1024) NOT NULL default '' comment '外部2d坐标';
-alter table mp_scene_scene_config_area add outer_position2 varchar(1024) NOT NULL default '' comment '外部2d坐标';
-alter table mp_scene_scene_piece add outer_position2 varchar(1024) NOT NULL default '' comment '外部2d坐标';
-alter table mp_scene_scene_config_piece add outer_position2 varchar(1024) NOT NULL default '' comment '外部2d坐标';
-alter table mp_scene_scene_element_port add column usable tinyint(1) comment '是否可用' default 1 after type;
-alter table mp_scene_scene_config_element_port add column usable tinyint(1) comment '是否可用' default 1 after type;
-ALTER TABLE `mp_scene_scene_config_node_connection` ADD COLUMN `type` varchar(64) default 1 COMMENT '连线类型';
-ALTER TABLE `mp_scene_scene_config_node_connection` ADD COLUMN `vertices` text default 1  COMMENT '路径点';
-ALTER TABLE `mp_scene_scene_node_connection` ADD COLUMN `type` varchar(64) default 1 COMMENT '连线类型';
-ALTER TABLE `mp_scene_scene_node_connection` ADD COLUMN `vertices` text default 1 COMMENT '路径点';
 
 CREATE TABLE `mp_scene_scene_node_connection`
 (
@@ -54,3 +40,19 @@ CREATE TABLE `mp_scene_scene_config_node_connection`
     UNIQUE KEY (`source_node`, `target_node`),
     UNIQUE KEY (`scene`, `source_node_id`, `target_node_id`)
 ) COMMENT ='场景实例节点连线信息表';
+
+
+alter table mp_scene_scene_config_area add column type tinyint(2) comment '区域类型 0:普通区域 1:层级区域' default 0 after open;
+alter table mp_scene_scene_area add column type tinyint(2) comment '区域类型 0:普通区域 1:层级区域' default 0 after open;
+alter table mp_scene_scene_element add outer_position2 varchar(1024) NOT NULL default '' comment '外部2d坐标';
+alter table mp_scene_scene_config_element add outer_position2 varchar(1024) NOT NULL default ''  comment '外部2d坐标';
+alter table mp_scene_scene_area add outer_position2 varchar(1024) NOT NULL default '' comment '外部2d坐标';
+alter table mp_scene_scene_config_area add outer_position2 varchar(1024) NOT NULL default '' comment '外部2d坐标';
+alter table mp_scene_scene_piece add outer_position2 varchar(1024) NOT NULL default '' comment '外部2d坐标';
+alter table mp_scene_scene_config_piece add outer_position2 varchar(1024) NOT NULL default '' comment '外部2d坐标';
+alter table mp_scene_scene_element_port add column usable tinyint(1) comment '是否可用' default 1 after type;
+alter table mp_scene_scene_config_element_port add column usable tinyint(1) comment '是否可用' default 1 after type;
+ALTER TABLE `mp_scene_scene_config_node_connection` ADD COLUMN `type` varchar(64) default 1 COMMENT '连线类型';
+ALTER TABLE `mp_scene_scene_config_node_connection` ADD COLUMN `vertices` text default 1  COMMENT '路径点';
+ALTER TABLE `mp_scene_scene_node_connection` ADD COLUMN `type` varchar(64) default 1 COMMENT '连线类型';
+ALTER TABLE `mp_scene_scene_node_connection` ADD COLUMN `vertices` text default 1 COMMENT '路径点';
