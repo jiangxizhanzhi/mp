@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="cn.cyberpeace.mp.cscene.repository.mapper.LoadMapper">
 
-    <insert id="addLoadExecutionResult">
+    <insert id="addLoadExecutionResult" useGeneratedKeys="true" keyProperty="param.pk">
         INSERT INTO mp_devops_load_scene_result_log
         (id,
          instance_id,
@@ -33,7 +33,7 @@
                 #{param.creatorId},
                 #{param.createTime},
                 #{param.createTime},
-                #{param.command})
+                #{param.command});
     </insert>
 
     <insert id="addResult">

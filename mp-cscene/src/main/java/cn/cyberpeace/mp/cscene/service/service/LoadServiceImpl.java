@@ -630,6 +630,9 @@ public class LoadServiceImpl {
         if (createTime == null) {
             requestData.setCreateTime(LocalDateTime.now());
         }
+        if (requestData.getJudgmentStatus() == null){
+            requestData.setJudgmentStatus(0);
+        }
         Boolean addLoadExecutionResult = loadMapper.addLoadExecutionResult(requestData);
 
         return addLoadExecutionResult;
@@ -641,17 +644,6 @@ public class LoadServiceImpl {
             dstNode = getdstNode(srcNode, ids, random);
         }
         return dstNode;
-    }
-
-    private boolean validateRequestData(List<LoadRequest> requestData) {
-        if (requestData == null || requestData.isEmpty()) {
-            return false;
-        }
-        return requestData.stream().allMatch(request ->
-                request != null &&
-                        !StringUtils.isEmpty(request.getTaskId()) &&
-                        !StringUtils.isEmpty(request.getInstanceId())
-        );
     }
 
     private String convertStatusToCode(String status) {
@@ -666,7 +658,7 @@ public class LoadServiceImpl {
     /*
      * 批量新增载荷执行结果
      * */
-    public ServiceResult updateLoadExecutionOutResult(List<LoadRequest> requestData) {
+    public ServiceResult updateLoadExecutionOutResult(LoadRequest requestData) {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             log.info("begin updateLoadExecutionOutResult requestData:{}", objectMapper.writeValueAsString(requestData));
@@ -674,27 +666,36 @@ public class LoadServiceImpl {
             throw new RuntimeException(e);
         }
         // 验证参数
-        if (!validateRequestData(requestData)) {
+        if (org.apache.commons.lang3.StringUtils.isBlank(requestData.getPk()) ||
+                org.apache.commons.lang3.StringUtils.isBlank(requestData.getResultLog())
+        ) {
             return new ServiceResult(null, BaseErrorCode.ERROR, "列表数据部分参数缺失").asResult();
         }
-
-        LoadRequest loadRequest = requestData.get(0);
-        String instanceId = loadRequest.getInstanceId();
-        String taskId = loadRequest.getTaskId();
         HumanCondition humanCondition = new HumanCondition();
-        humanCondition.filterEqual(CloudPluginSceneElementModel::getResourceId, taskId);
-        humanCondition.filterEqual(CloudPluginSceneElementModel::getLoadResourceInstanceId, instanceId);
+        humanCondition.filterEqual(MpDevopsLoadSceneLog::getPk, requestData.getPk());
+        List<MpDevopsLoadSceneLog> list = devopsLoadSceneLogMapper.list(humanCondition);
+        if(list.size()==0){
+            return new ServiceResult(null, BaseErrorCode.ERROR, "异常数据").asResult();
+        }
+
+        MpDevopsLoadSceneLog mpDevopsLoadSceneLog = list.get(0);
+
+        humanCondition = new HumanCondition();
+        humanCondition.filterEqual(CloudPluginSceneElementModel::getResourceId, mpDevopsLoadSceneLog.getTaskId());
+        humanCondition.filterEqual(CloudPluginSceneElementModel::getLoadResourceInstanceId, mpDevopsLoadSceneLog.getInstanceId());
         List<CloudPluginSceneElementModel> cloudPluginSceneElementModels = cloudPluginSceneElementMapper.list(humanCondition);
         if (cloudPluginSceneElementModels.size() > 0 && BaseCloudPluginSceneElementModel.LoadSourceType.LOCAL == cloudPluginSceneElementModels.get(0).getLoadSource()) {
-            String resultLog = loadRequest.getResultLog();
-            loadRequest.setResultLog(String.format(LOAD_RESULT_LOG, resultLog));
+            String resultLog = requestData.getResultLog();
+            String loadResultLog = String.format(LOAD_RESULT_LOG, resultLog);
+            String newLoadResultLog = mpDevopsLoadSceneLog.getResultLog() == null ? loadResultLog : mpDevopsLoadSceneLog.getResultLog() + "\n" + loadResultLog;
+            mpDevopsLoadSceneLog.setResultLog(newLoadResultLog);
         }
 
         // 状态字符串转状态码
-        requestData.forEach(req -> req.setResultStatus(convertStatusToCode(req.getResultStatus())));
+        mpDevopsLoadSceneLog.setResultStatus(convertStatusToCode(requestData.getResultStatus()));
 
         //根据taskId获取场景id
-        String sceneId = loadMapper.getSceneIdByTaskId(requestData.get(0).getTaskId());
+        String sceneId = loadMapper.getSceneIdByTaskId(mpDevopsLoadSceneLog.getTaskId());
 
         //根据sceneId查找对应ws会话推送消息
         Session session = LoadResultWebSocketServer.sceneIdAndSession.get(sceneId);
@@ -712,7 +713,7 @@ public class LoadServiceImpl {
         }
 
         // 更新数据库
-        Boolean success = requestData.size() > 0 && loadMapper.updateLoadExecutionOutResult(requestData);
+        Boolean success = devopsLoadSceneLogMapper.update(mpDevopsLoadSceneLog);
         log.info("end updateLoadExecutionOutResult success:{}", success);
         return success
                 ? new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult()

@@ -11,6 +11,11 @@ import lombok.NoArgsConstructor;
 public class LoadRequest{
 
     /**
+     * 主键
+     */
+    private String pk;
+
+    /**
      * 工具实例id
      */
     private String instanceId;

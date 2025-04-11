@@ -305,7 +305,7 @@ public class LoadController {
     public ServiceResult addLoadExecutionResult(@RequestBody MpDevopsLoadSceneLog request) {
         Boolean addLoadExecutionResult = loadService.addLoadExecutionResult(request);
         if (addLoadExecutionResult) {
-            return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
+            return new ServiceResult(String.valueOf(request.getPk()), BaseErrorCode.SUCCESS, "SUCCESS").asResult();
         }
         return new ServiceResult(null, BaseErrorCode.ERROR, "新增载荷执行结果失败").asResult();
     }
@@ -323,13 +323,13 @@ public class LoadController {
     /*
      * 批量修改载荷执行结果
      * */
-    @ApiOperation(value = "批量修改载荷执行结果", notes = "")
+    @ApiOperation(value = "修改载荷执行结果", notes = "")
     @CrossOrigin(origins = "*", maxAge = 60L)
     @RequestMapping("/updateLoadExecutionOutResult")
     public ServiceResult updateLoadExecutionOutResult(@RequestBody JSONObject jsonObject) {
         LoadRequest requestData = JSONObject.toJavaObject(jsonObject, LoadRequest.class);
         requestData.setResultStatus("成功");
-        ServiceResult serviceResult = loadService.updateLoadExecutionOutResult(Arrays.asList(requestData));
+        ServiceResult serviceResult = loadService.updateLoadExecutionOutResult(requestData);
         return serviceResult;
     }
 
