@@ -38,6 +38,7 @@ import javax.validation.constraints.NotEmpty;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @Description: 系统配置管理接口
@@ -155,4 +156,9 @@ public class SysConfigController {
         return fileService.uploadFile(file);
     }
 
+    @ApiOperation("查询全局采集代理配置（开光、周期、内容）")
+    @PostMapping(value = "/collect/agent")
+    public ServiceResult<CollectAgentConfig> getCollectAgentConfig() {
+        return new ServiceResult<>(new CollectAgentConfig()).asResult();
+    }
 }

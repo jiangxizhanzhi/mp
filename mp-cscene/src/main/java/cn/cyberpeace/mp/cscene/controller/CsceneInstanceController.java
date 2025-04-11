@@ -18,6 +18,7 @@ import cn.cyberpeace.mp.common.bo.OptionBO;
 import cn.cyberpeace.mp.common.service.OptionService;
 import cn.cyberpeace.mp.cscene.bo.CsceneCollectionFlowBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneElementCollectInfo;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceStat;
 import cn.cyberpeace.mp.cscene.bo.CsceneUpdateBO;
@@ -1022,12 +1023,22 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
 
     @ApiOperation("查询场景实例的采集内容")
     @GetMapping("/get_collect_info")
-    public ServiceResult<CollectionPluginSceneElementBO> getCollectInfo(@RequestParam String id, @RequestParam(name = "node_id") String nodeId) {
+    public ServiceResult<List<CsceneElementCollectInfo>> getCollectInfo(@RequestParam String id, @RequestParam(name = "node_id") String nodeId) {
         var cscene = getModelService().get(id).getSource().getObj();
         SceneHandler sceneHandler = new SceneHandler(cscene.getScene(), null, null);
         CollectionScenePluginHandler configPluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
-        CollectionPluginSceneElementBO elementBO = configPluginHandler.getElementMap().get(nodeId);
-        return new ServiceResult<>(elementBO).asResult();
+        List<CsceneElementCollectInfo> list = new ArrayList<>();
+        if (configPluginHandler != null && configPluginHandler.getElementMap() != null) {
+            for (CollectionPluginSceneElementBO e : configPluginHandler.getElementMap().values()) {
+                CsceneElementCollectInfo csceneElementCollectInfo = new CsceneElementCollectInfo();
+                csceneElementCollectInfo.setNodeId(e.getSrcElement().getId());
+                csceneElementCollectInfo.setNodeName(e.getSrcElement().getName());
+                csceneElementCollectInfo.setEnableProbeCollect(e.getEnableProbeCollect());
+                csceneElementCollectInfo.setProbes(e.getProbes());
+                list.add(csceneElementCollectInfo);
+            }
+        }
+        return new ServiceResult<>(list).asResult();
     }
 
 }
