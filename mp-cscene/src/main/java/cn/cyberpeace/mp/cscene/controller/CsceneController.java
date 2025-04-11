@@ -911,7 +911,7 @@ public class CsceneController implements BaseModelListControllerBase {
 
     @ApiOperation("查询场景模板的采集内容")
     @GetMapping("/get_collect_info")
-    public ServiceResult<List<CsceneElementCollectInfo>> getCollectInfo(@RequestParam String id, @RequestParam(name = "node_id") String nodeId) {
+    public ServiceResult<List<CsceneElementCollectInfo>> getCollectInfo(@RequestParam String id) {
         var cscene = getModelService().get(id).getSource().getObj();
         SceneConfigHandler sceneConfigHandler = new SceneConfigHandler(cscene.getSceneConfig(), null, null);
         CollectionSceneConfigPluginHandler configPluginHandler = sceneConfigHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);

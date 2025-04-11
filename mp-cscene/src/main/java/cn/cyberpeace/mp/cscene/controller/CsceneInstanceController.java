@@ -1023,7 +1023,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
 
     @ApiOperation("查询场景实例的采集内容")
     @GetMapping("/get_collect_info")
-    public ServiceResult<List<CsceneElementCollectInfo>> getCollectInfo(@RequestParam String id, @RequestParam(name = "node_id") String nodeId) {
+    public ServiceResult<List<CsceneElementCollectInfo>> getCollectInfo(@RequestParam String id) {
         var cscene = getModelService().get(id).getSource().getObj();
         SceneHandler sceneHandler = new SceneHandler(cscene.getScene(), null, null);
         CollectionScenePluginHandler configPluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
