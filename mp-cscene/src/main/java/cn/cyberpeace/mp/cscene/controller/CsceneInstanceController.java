@@ -47,6 +47,8 @@ import cn.cyberpeace.mp.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.log.utils.SnUtils;
 import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
 import cn.cyberpeace.mp.scene.core.event.SceneElementEventTransition;
+import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
 import cn.cyberpeace.mp.scene.model.SceneConfigElementModel;
 import cn.cyberpeace.mp.scene.model.SceneElementPortModel;
 import cn.cyberpeace.mp.scene.repository.SceneElementPortMapper;
@@ -57,7 +59,12 @@ import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventTypeBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostStateBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneConfigElementBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
+import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionSceneConfigPluginHandler;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostEventQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams;
@@ -1010,6 +1017,17 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("net", net);
         return new ServiceResult<>(jsonObject.toJSONString()).asResult();
+    }
+
+
+    @ApiOperation("查询场景实例的采集内容")
+    @GetMapping("/get_collect_info")
+    public ServiceResult<CollectionPluginSceneElementBO> getCollectInfo(@RequestParam String id, @RequestParam(name = "node_id") String nodeId) {
+        var cscene = getModelService().get(id).getSource().getObj();
+        SceneHandler sceneHandler = new SceneHandler(cscene.getScene(), null, null);
+        CollectionScenePluginHandler configPluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+        CollectionPluginSceneElementBO elementBO = configPluginHandler.getElementMap().get(nodeId);
+        return new ServiceResult<>(elementBO).asResult();
     }
 
 }

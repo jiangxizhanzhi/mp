@@ -50,6 +50,9 @@ import cn.cyberpeace.mp.scene.model.base.BaseSceneAreaModel;
 import cn.cyberpeace.mp.scene.repository.RangeMapper;
 import cn.cyberpeace.mp.scene.repository.SceneConfigAreaMapper;
 import cn.cyberpeace.mp.scene.service.SceneConfigService;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneConfigElementBO;
+import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionSceneConfigPluginHandler;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.write.metadata.WriteSheet;
@@ -904,5 +907,15 @@ public class CsceneController implements BaseModelListControllerBase {
                 }
             });
         }
+    }
+
+    @ApiOperation("查询场景模板的采集内容")
+    @GetMapping("/get_collect_info")
+    public ServiceResult<CollectionPluginSceneConfigElementBO> getCollectInfo(@RequestParam String id, @RequestParam(name = "node_id") String nodeId) {
+        var cscene = getModelService().get(id).getSource().getObj();
+        SceneConfigHandler sceneConfigHandler = new SceneConfigHandler(cscene.getSceneConfig(), null, null);
+        CollectionSceneConfigPluginHandler configPluginHandler = sceneConfigHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+        CollectionPluginSceneConfigElementBO elementBO = configPluginHandler.getElementMap().get(nodeId);
+        return new ServiceResult<>(elementBO).asResult();
     }
 }
