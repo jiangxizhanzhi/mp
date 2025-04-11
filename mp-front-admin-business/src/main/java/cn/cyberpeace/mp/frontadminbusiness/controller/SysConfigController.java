@@ -1,8 +1,11 @@
 package cn.cyberpeace.mp.frontadminbusiness.controller;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.controller.stereotype.UnlimitPagination;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.constant.CommonErrorCode;
 import cn.cyberpeace.mp.common.constant.FileSuffixConstant;
@@ -11,6 +14,7 @@ import cn.cyberpeace.mp.common.service.FileService;
 import cn.cyberpeace.mp.common.util.SuffixCheckUtil;
 import cn.cyberpeace.mp.frontadmin.constant.AdminErrorCode;
 import cn.cyberpeace.mp.frontadmin.model.SysConfigModel;
+import cn.cyberpeace.mp.frontadmin.repository.SysConfigMapper;
 import cn.cyberpeace.mp.frontadmin.service.sys.SysConfigService;
 import cn.cyberpeace.mp.frontadminbusiness.constant.AdminBusinessConstant;
 import cn.cyberpeace.mp.frontadminbusiness.service.SysConfigCheckService;
@@ -157,8 +161,35 @@ public class SysConfigController {
     }
 
     @ApiOperation("查询全局采集代理配置（开光、周期、内容）")
-    @PostMapping(value = "/collect/agent")
+    @GetMapping(value = "/collect/agent/get_config")
     public ServiceResult<CollectAgentConfig> getCollectAgentConfig() {
-        return new ServiceResult<>(new CollectAgentConfig()).asResult();
+        SysConfigMapper sysConfigMapper = BeanCommon.getBean(SysConfigMapper.class);
+        var model = sysConfigMapper.first(new HumanCondition().filterEqual(SysConfigModel::getKeyName, "collect_agent_info"));
+        if (model == null) {
+            CollectAgentConfig agentConfig = CollectAgentConfig.defaultValue();
+            return new ServiceResult<>(agentConfig).asResult();
+        } else {
+            JsonCommon.parse(model.getValue(), CollectAgentConfig.class);
+            return new ServiceResult<>(new CollectAgentConfig()).asResult();
+        }
+    }
+
+    @ApiOperation("更新全局采集代理配置（开光、周期、内容）")
+    @PostMapping(value = "/collect/agent/update_config")
+    public ServiceResult<CollectAgentConfig> updateCollectAgentConfig(@RequestBody CollectAgentConfig agentConfig) {
+        SysConfigMapper sysConfigMapper = BeanCommon.getBean(SysConfigMapper.class);
+        var model = sysConfigMapper.first(new HumanCondition().filterEqual(SysConfigModel::getKeyName, "collect_agent_info"));
+        if (model == null) {
+            model = new SysConfigModel();
+            model.setInitValue(JsonCommon.stringify(agentConfig));
+            model.setTenant("default");
+            model.setValue(JsonCommon.stringify(agentConfig));
+            sysConfigMapper.save(model);
+        } else {
+            model.setValue(JsonCommon.stringify(agentConfig));
+            model.setInitValue(JsonCommon.stringify(agentConfig));
+            sysConfigMapper.update(model);
+        }
+        return new ServiceResult<>(agentConfig).asResult();
     }
 }
