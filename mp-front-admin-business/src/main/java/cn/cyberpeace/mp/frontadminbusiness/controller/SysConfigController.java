@@ -169,8 +169,8 @@ public class SysConfigController {
             CollectAgentConfig agentConfig = CollectAgentConfig.defaultValue();
             return new ServiceResult<>(agentConfig).asResult();
         } else {
-            JsonCommon.parse(model.getValue(), CollectAgentConfig.class);
-            return new ServiceResult<>(new CollectAgentConfig()).asResult();
+            var result = JsonCommon.parse(model.getValue(), CollectAgentConfig.class);
+            return new ServiceResult<>(result).asResult();
         }
     }
 
@@ -183,6 +183,7 @@ public class SysConfigController {
             model = new SysConfigModel();
             model.setInitValue(JsonCommon.stringify(agentConfig));
             model.setTenant("default");
+            model.setKeyName("collect_agent_info");
             model.setValue(JsonCommon.stringify(agentConfig));
             sysConfigMapper.save(model);
         } else {
