@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementM
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.RecreateTaskPool;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @Description
@@ -30,5 +31,10 @@ public class PrepareHandler extends HandlerCommon {
                 }
             });
         }
+        getPluginHandler().getElementMap().values().forEach(e -> {
+            if (StringUtils.isNotEmpty(e.getSrcElement().getRange())) {
+                getPluginHandler().getSceneHandler().addExcludeHandleNode(e.getSrcElement().getId());
+            }
+        });
     }
 }
