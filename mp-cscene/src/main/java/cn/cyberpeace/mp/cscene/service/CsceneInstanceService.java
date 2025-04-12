@@ -49,6 +49,7 @@ import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
 import cn.cyberpeace.mp.cscene.util.ReentrantLockUtils;
 import cn.cyberpeace.mp.scene.core.bo.*;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
+import cn.cyberpeace.mp.scene.core.event.SceneStageRecorder;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.model.SceneModel;
@@ -601,8 +602,25 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
     public ServiceResult<CsceneInstanceBO> getById(String id, CsceneContextBO context) {
-        var instanceHandler = new CsceneInstanceHandler(id, context);
-        return new ServiceResult<>(instanceHandler.toData());
+        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, null, context);
+        CsceneInstanceBO data = instanceHandler.toData();
+        SceneBO scene = data.getScene().getTopology().getScene();
+        SceneStageRecorder recorder = SceneStageRecorder.getRecorder(scene.getEid());
+        if (recorder != null) {
+            recorder.refreshSceneBO(scene);
+        }
+        return new ServiceResult<>(data);
+    }
+
+    public ServiceResult<CsceneInstanceBO> getById(String id, String areaId, CsceneContextBO context) {
+        var instanceHandler = new CsceneInstanceHandler(id,areaId, context);
+        CsceneInstanceBO data = instanceHandler.toData();
+        SceneBO scene = data.getScene().getTopology().getScene();
+        SceneStageRecorder recorder = SceneStageRecorder.getRecorder(scene.getEid());
+        if (recorder != null) {
+            recorder.refreshSceneBO(scene);
+        }
+        return new ServiceResult<>(data);
     }
 
     public ServiceResult<Boolean> deleteById(String id, boolean logic, CsceneContextBO context) {

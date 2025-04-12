@@ -572,6 +572,7 @@ public class CsceneDataModifier {
 
     public static void correctReturnCsceneData(CsceneInstanceBO csceneInstanceBO) {
         correctReturnCsceneData(csceneInstanceBO, true);
+        handlerReturnPosition(csceneInstanceBO.getScene());
     }
 
     public static void correctReturnCsceneData(CsceneInstanceBO csceneInstanceBO, boolean handlerHidden) {
