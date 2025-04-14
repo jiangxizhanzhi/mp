@@ -455,6 +455,16 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             userModel.setAvatar(DefaultImgUtil.fdfsUrlToPath(userModel.getAvatar()));
         }
 
+        if(userModel.getAccountId() == null){
+            userModel.setAccountId("");
+        }
+        if(userModel.getOutUserType() == null){
+            userModel.setOutUserType("");
+        }
+        if(userModel.getFourATicket() == null){
+            userModel.setFourATicket("");
+        }
+
         createCheckService.check(userModel);
 
         // create中会对密码加密，外层不需要再次加密
