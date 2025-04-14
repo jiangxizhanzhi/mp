@@ -86,7 +86,7 @@ public class FlowActuatorTaskController {
     }
 
     @ApiOperation("关闭多个流量任务")
-    @GetMapping("/stop_tasks")
+    @PostMapping("/stop_tasks")
     public String stopTasks(@RequestBody FlowTaskBatchStartRequest request) {
         flowActuatorTaskService.stopTasks(request.getTaskIds());
         return null;
