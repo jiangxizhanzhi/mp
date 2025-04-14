@@ -172,17 +172,9 @@ public class RangeDataLocalService {
     }
 
     public void saveHostInfo(String sceneId, String nodeId) {
-        BaseSceneElementPageRequest request = new BaseSceneElementPageRequest();
-        request.setSceneId(sceneId);
-        request.setElementIds(Arrays.asList(nodeId));
-        request.setPage(1);
-        request.setPageSize(100);
-
         HostStateTrendRequest hostStateTrendRequest = new HostStateTrendRequest();
         hostStateTrendRequest.setSceneId(sceneId);
         hostStateTrendRequest.setElementIds(Arrays.asList(nodeId));
-        hostStateTrendRequest.setStartTime(LocalDateTime.now().minusSeconds(period));
-        hostStateTrendRequest.setEndTime(LocalDateTime.now());
         var result = hostStateService.getElementHostStateTrend(hostStateTrendRequest);
         if (CollectionUtils.isNotEmpty(result)) {
             var last = result.get(result.size() - 1);

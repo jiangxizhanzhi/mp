@@ -49,6 +49,9 @@ public class RangeDataUtil {
                         rangeDataRemoteService.period = result.getPeriod();
                         var instances = csceneService.getRunningCscenes();
                         for (var instance : instances) {
+                            if (!instance.getId().equals("ffff18d5d9d34ac2996862c1097cd56a")) {
+                                continue;
+                            }
                             try {
                                 rangeDataLocalService.test(instance.getId(), result.info, result.event, result.log);
                             } catch (Exception e) {

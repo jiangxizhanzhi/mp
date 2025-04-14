@@ -121,7 +121,7 @@ public class TestRangeApiProxy implements SubRangeMonitorInterface {
                 String result = TestRangeClientUtil.get(rangeName, String.format("%s?vpnServerIp=%s", TestRangeApiUrl.MAP_SCENE_ID, hfdyServerVpnConfig.getIp()), null, getAuthHeaderMap(rangeName), 10000)
                         .getResult();
                 String mapCsceneId = JSONObject.parseObject(result).getString("data");
-                mapCsceneId = "290e7cfff2a64f8fbf46edb69f274f15" ;
+//                mapCsceneId = "290e7cfff2a64f8fbf46edb69f274f15" ;
                 if (StringUtils.isEmpty(mapCsceneId)) {
                     log.warn("{}靶场无法查询到启动了ip为{}的hfdy vpn server实例", rangeName, hfdyServerVpnConfig.getIp() );
                     throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format(rangeName + "分靶场无法获取到对应拓扑实例"));

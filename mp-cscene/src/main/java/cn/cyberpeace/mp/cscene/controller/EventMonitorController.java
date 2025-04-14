@@ -18,6 +18,7 @@ import cn.cyberpeace.mp.cscene.service.EventMonitorService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -88,31 +89,73 @@ public class EventMonitorController {
     public ServiceResult<EventAggr> getEventAggr(BaseTimeRangeRequest baseRequest) {
         var mapper = BeanCommon.getBean(SceneCycleDataModelMapper.class);
         String sceneId = baseRequest.getSceneId();
-        var totalPort = mapper.total(new HumanCondition().filterEqual(SceneCycleDataModel::getScene, sceneId)
-                                             .filterEqual(SceneCycleDataModel::getType, SceneCycleDataModel.PORT));
-        var totalProcess = mapper.total(new HumanCondition().filterEqual(SceneCycleDataModel::getScene, sceneId)
-                                                .filterEqual(SceneCycleDataModel::getType, SceneCycleDataModel.PROCESS));
-        var totalNet = mapper.total(new HumanCondition().filterEqual(SceneCycleDataModel::getScene, sceneId)
-                                            .filterEqual(SceneCycleDataModel::getType, SceneCycleDataModel.NET));
-        var totalFile = mapper.total(new HumanCondition().filterEqual(SceneCycleDataModel::getScene, sceneId)
-                                             .filterOrStart()
-                                             .orIn(SceneCycleDataModel::getType, new String[]{SceneCycleDataModel.FILE, SceneCycleDataModel.REGISTRY})
-                                             .orStartsWith(SceneCycleDataModel::getType, SceneCycleDataModel.LOG + "_")
-                                             .filterOrEnd());
-        var totalUser = 0;
-        BigDecimal port = BigDecimal.valueOf(totalPort);
-        BigDecimal process = BigDecimal.valueOf(totalProcess);
-        BigDecimal net = BigDecimal.valueOf(totalNet);
-        BigDecimal file = BigDecimal.valueOf(totalFile);
-        BigDecimal user = BigDecimal.valueOf(totalUser);
-        BigDecimal total = port.add(process).add(net).add(file).add(user);
-        EventAggr eventAggr = new EventAggr();
-        eventAggr.setPort(port.multiply(BigDecimal.valueOf(100)).divide(total, 4, BigDecimal.ROUND_HALF_UP).doubleValue());
-        eventAggr.setProcess(process.multiply(BigDecimal.valueOf(100)).divide(total, 4, BigDecimal.ROUND_HALF_UP).doubleValue());
-        eventAggr.setUser(user.multiply(BigDecimal.valueOf(100)).divide(total, 4, BigDecimal.ROUND_HALF_UP).doubleValue());
-        eventAggr.setNetwork(net.multiply(BigDecimal.valueOf(100)).divide(total, 4, BigDecimal.ROUND_HALF_UP).doubleValue());
-        eventAggr.setFile(file.multiply(BigDecimal.valueOf(100)).divide(total, 4, BigDecimal.ROUND_HALF_UP).doubleValue());
-        return ResultCommon.success(eventAggr);
+        if (CollectionUtils.isEmpty(baseRequest.getElementIds())) {
+            var totalPort = mapper.total(new HumanCondition().filterEqual(SceneCycleDataModel::getScene, sceneId)
+                                                 .filterEqual(SceneCycleDataModel::getType, SceneCycleDataModel.PORT));
+            var totalProcess = mapper.total(new HumanCondition().filterEqual(SceneCycleDataModel::getScene, sceneId)
+                                                    .filterEqual(SceneCycleDataModel::getType, SceneCycleDataModel.PROCESS));
+            var totalNet = mapper.total(new HumanCondition().filterEqual(SceneCycleDataModel::getScene, sceneId)
+                                                .filterEqual(SceneCycleDataModel::getType, SceneCycleDataModel.NET));
+            var totalFile = mapper.total(new HumanCondition().filterEqual(SceneCycleDataModel::getScene, sceneId)
+                                                 .filterOrStart()
+                                                 .orIn(SceneCycleDataModel::getType, new String[]{SceneCycleDataModel.FILE, SceneCycleDataModel.REGISTRY})
+                                                 .orStartsWith(SceneCycleDataModel::getType, SceneCycleDataModel.LOG + "_")
+                                                 .filterOrEnd());
+            var totalUser = 0;
+            BigDecimal port = BigDecimal.valueOf(totalPort);
+            BigDecimal process = BigDecimal.valueOf(totalProcess);
+            BigDecimal net = BigDecimal.valueOf(totalNet);
+            BigDecimal file = BigDecimal.valueOf(totalFile);
+            BigDecimal user = BigDecimal.valueOf(totalUser);
+            BigDecimal total = port.add(process).add(net).add(file).add(user);
+            EventAggr eventAggr = new EventAggr();
+            eventAggr.setPort(port.multiply(BigDecimal.valueOf(100)).divide(total, 2, BigDecimal.ROUND_HALF_UP)
+                                      .doubleValue());
+            eventAggr.setProcess(process.multiply(BigDecimal.valueOf(100)).divide(total, 2, BigDecimal.ROUND_HALF_UP)
+                                         .doubleValue());
+            eventAggr.setUser(user.multiply(BigDecimal.valueOf(100)).divide(total, 2, BigDecimal.ROUND_HALF_UP)
+                                      .doubleValue());
+            eventAggr.setNetwork(net.multiply(BigDecimal.valueOf(100)).divide(total, 2, BigDecimal.ROUND_HALF_UP)
+                                         .doubleValue());
+            eventAggr.setFile(file.multiply(BigDecimal.valueOf(100)).divide(total, 2, BigDecimal.ROUND_HALF_UP)
+                                      .doubleValue());
+            return ResultCommon.success(eventAggr);
+        }else{
+            var totalPort = mapper.total(new HumanCondition().filterEqual(SceneCycleDataModel::getScene, sceneId)
+                                                 .filterEqual(SceneCycleDataModel::getSceneElement, baseRequest.getElementIds().get(0))
+                                                 .filterEqual(SceneCycleDataModel::getType, SceneCycleDataModel.PORT));
+            var totalProcess = mapper.total(new HumanCondition().filterEqual(SceneCycleDataModel::getScene, sceneId)
+                                                    .filterEqual(SceneCycleDataModel::getSceneElement, baseRequest.getElementIds().get(0))
+                                                    .filterEqual(SceneCycleDataModel::getType, SceneCycleDataModel.PROCESS));
+            var totalNet = mapper.total(new HumanCondition().filterEqual(SceneCycleDataModel::getScene, sceneId)
+                                                .filterEqual(SceneCycleDataModel::getSceneElement, baseRequest.getElementIds().get(0))
+                                                .filterEqual(SceneCycleDataModel::getType, SceneCycleDataModel.NET));
+            var totalFile = mapper.total(new HumanCondition().filterEqual(SceneCycleDataModel::getScene, sceneId)
+                                                 .filterEqual(SceneCycleDataModel::getSceneElement, baseRequest.getElementIds().get(0))
+                                                 .filterOrStart()
+                                                 .orIn(SceneCycleDataModel::getType, new String[]{SceneCycleDataModel.FILE, SceneCycleDataModel.REGISTRY})
+                                                 .orStartsWith(SceneCycleDataModel::getType, SceneCycleDataModel.LOG + "_")
+                                                 .filterOrEnd());
+            var totalUser = 0;
+            BigDecimal port = BigDecimal.valueOf(totalPort);
+            BigDecimal process = BigDecimal.valueOf(totalProcess);
+            BigDecimal net = BigDecimal.valueOf(totalNet);
+            BigDecimal file = BigDecimal.valueOf(totalFile);
+            BigDecimal user = BigDecimal.valueOf(totalUser);
+            BigDecimal total = port.add(process).add(net).add(file).add(user);
+            EventAggr eventAggr = new EventAggr();
+            eventAggr.setPort(port.multiply(BigDecimal.valueOf(100)).divide(total, 2, BigDecimal.ROUND_HALF_UP)
+                                      .doubleValue());
+            eventAggr.setProcess(process.multiply(BigDecimal.valueOf(100)).divide(total, 2, BigDecimal.ROUND_HALF_UP)
+                                         .doubleValue());
+            eventAggr.setUser(user.multiply(BigDecimal.valueOf(100)).divide(total, 2, BigDecimal.ROUND_HALF_UP)
+                                      .doubleValue());
+            eventAggr.setNetwork(net.multiply(BigDecimal.valueOf(100)).divide(total, 2, BigDecimal.ROUND_HALF_UP)
+                                         .doubleValue());
+            eventAggr.setFile(file.multiply(BigDecimal.valueOf(100)).divide(total, 2, BigDecimal.ROUND_HALF_UP)
+                                      .doubleValue());
+            return ResultCommon.success(eventAggr);
+        }
     }
 
     /**
