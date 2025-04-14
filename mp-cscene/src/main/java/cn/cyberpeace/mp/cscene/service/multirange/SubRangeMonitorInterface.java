@@ -57,5 +57,7 @@ public interface SubRangeMonitorInterface {
 
     ListObjServiceResult<CollectionHostEventBO> listHostEvents(String id, HostEventQueryParams queryParams);
 
-    public ListObjServiceResult<ConnectionState> pageNetworkConnections(BaseSceneElementPageRequest pageRequest);
+    ListObjServiceResult<ConnectionState> pageNetworkConnections(BaseSceneElementPageRequest pageRequest);
+
+    List<HostState> getSceneHostStateTrend(HostStateTrendRequest trendRequest);
 }

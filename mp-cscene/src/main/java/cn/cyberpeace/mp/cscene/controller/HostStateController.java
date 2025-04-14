@@ -68,8 +68,18 @@ public class HostStateController {
             List<HostState> hostStates = hostStateService.getElementHostStateTrend(hostStateTrendRequest);
             return ResultCommon.success(hostStates);
         } else {
-            List<HostState> hostStates = hostStateService.getSceneHostStateTrend(hostStateTrendRequest);
-            return ResultCommon.success(hostStates);
+            var mapper = BeanCommon.getBean(SceneCycleDataModelMapper.class);
+            String sceneId = hostStateTrendRequest.getSceneId();
+            var result = mapper.list(new HumanCondition().filterEqual(SceneCycleDataModel::getScene, sceneId)
+                                             .filterEqual(SceneCycleDataModel::getSceneElement, "")
+                                             .filterEqual(SceneCycleDataModel::getType, SceneCycleDataModel.HOST)
+                                             .orderBy(SceneCycleDataModel::getPk).pagination(1, 20));
+            List<HostState> processes = new ArrayList<>();
+            for (SceneCycleDataModel model : result) {
+                var p = JsonCommon.parse(model.getData(), HostState.class);
+                processes.add(p);
+            }
+            return ResultCommon.success(processes);
         }
     }
 
@@ -99,13 +109,26 @@ public class HostStateController {
     @ApiOperation(value = "节点主机状态趋势图")
     @GetMapping("/element_trend")
     public ServiceResult<List<HostState>> getElementHostStateTrend(HostStateTrendRequest hostStateTrendRequest) {
-        if (testRangeApiProxy.elementExistInCurrentScene(hostStateTrendRequest)) {
-            List<HostState> hostStates = hostStateService.getElementHostStateTrend(hostStateTrendRequest);
-            return ResultCommon.success(hostStates);
+//        if (testRangeApiProxy.elementExistInCurrentScene(hostStateTrendRequest)) {
+//            List<HostState> hostStates = hostStateService.getElementHostStateTrend(hostStateTrendRequest);
+//            return ResultCommon.success(hostStates);
+//        } else {
+//            return testRangeApiProxy.getElementHostStateTrend(hostStateTrendRequest);
+//        }
 
-        } else {
-            return testRangeApiProxy.getElementHostStateTrend(hostStateTrendRequest);
+        var mapper = BeanCommon.getBean(SceneCycleDataModelMapper.class);
+        String sceneId = hostStateTrendRequest.getSceneId();
+        String nodeId = hostStateTrendRequest.getElementIds().get(0);
+        var result = mapper.list(new HumanCondition().filterEqual(SceneCycleDataModel::getScene, sceneId)
+                                         .filterEqual(SceneCycleDataModel::getSceneElement, nodeId)
+                                         .filterEqual(SceneCycleDataModel::getType, SceneCycleDataModel.HOST)
+                                         .orderBy(SceneCycleDataModel::getPk).pagination(1, 20));
+        List<HostState> processes = new ArrayList<>();
+        for (SceneCycleDataModel model : result) {
+            var p = JsonCommon.parse(model.getData(), HostState.class);
+            processes.add(p);
         }
+        return ResultCommon.success(processes);
 
     }
 

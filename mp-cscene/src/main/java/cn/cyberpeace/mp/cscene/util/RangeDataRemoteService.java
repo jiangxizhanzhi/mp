@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.cscene.model.SceneCycleDataModel;
 import cn.cyberpeace.mp.cscene.repository.SceneCycleDataModelMapper;
 import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.request.element.ElementMonitorRequest;
+import cn.cyberpeace.mp.cscene.request.hoststate.HostStateTrendRequest;
 import cn.cyberpeace.mp.cscene.service.multirange.testrange.TestRangeApiProxy;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostEventQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.TimeListPageInfoQueryParams;
@@ -209,9 +210,48 @@ public class RangeDataRemoteService {
         }
     }
 
+    public void saveHostInfo(String sceneId, String nodeId) {
+        HostStateTrendRequest hostStateTrendRequest = new HostStateTrendRequest();
+        hostStateTrendRequest.setSceneId(sceneId);
+        hostStateTrendRequest.setElementIds(Arrays.asList(nodeId));
+        hostStateTrendRequest.setStartTime(LocalDateTime.now().minusSeconds(period));
+        hostStateTrendRequest.setEndTime(LocalDateTime.now());
+        var response = testRangeApiProxy.getElementHostStateTrend(hostStateTrendRequest);
+        var result = response.getData();
+        if (CollectionUtils.isNotEmpty(result)) {
+            var last = result.get(result.size() - 1);
+            SceneCycleDataModel dataModel = new SceneCycleDataModel();
+            dataModel.setScene(sceneId);
+            dataModel.setSceneElement(nodeId);
+            dataModel.setType(SceneCycleDataModel.HOST);
+            dataModel.setData(JsonCommon.stringify(last));
+            sceneCycleDataModelMapper.save(dataModel);
+        }
+    }
+
+    public void saveHostInfo(String sceneId) {
+        HostStateTrendRequest hostStateTrendRequest = new HostStateTrendRequest();
+        hostStateTrendRequest.setSceneId(sceneId);
+        hostStateTrendRequest.setStartTime(LocalDateTime.now().minusSeconds(period));
+        hostStateTrendRequest.setEndTime(LocalDateTime.now());
+        var result = testRangeApiProxy.getSceneHostStateTrend(hostStateTrendRequest);
+        if (CollectionUtils.isNotEmpty(result)) {
+            var last = result.get(result.size() - 1);
+            SceneCycleDataModel dataModel = new SceneCycleDataModel();
+            dataModel.setScene(sceneId);
+            dataModel.setSceneElement("");
+            dataModel.setType(SceneCycleDataModel.HOST);
+            dataModel.setData(JsonCommon.stringify(last));
+            sceneCycleDataModelMapper.save(dataModel);
+        }
+    }
+
     public void test(String sceneId, boolean info, boolean event, boolean log) {
         List<ElementMonitorBasicInfo> testRangeResult = testRangeApiProxy.listAllElementBasicInfo(sceneId, new SceneAllElementsQueryRequest());
         List<Runnable> tasks = new ArrayList<>();
+        if (info) {
+            tasks.add(() -> saveHostInfo(sceneId));
+        }
         for (ElementMonitorBasicInfo elementMonitorBasicInfo : testRangeResult) {
             String nodeId = elementMonitorBasicInfo.getId();
             if (info) {
@@ -223,6 +263,8 @@ public class RangeDataRemoteService {
                 tasks.add(() -> saveNetInfo(sceneId, nodeId));
                 // 信息类 - 连接信息
                 tasks.add(() -> saveConnectInfo(sceneId, nodeId));
+                // 信息类 - cpu\内存\磁盘
+                tasks.add(() -> saveHostInfo(sceneId, nodeId));
             }
 
             if (event) {

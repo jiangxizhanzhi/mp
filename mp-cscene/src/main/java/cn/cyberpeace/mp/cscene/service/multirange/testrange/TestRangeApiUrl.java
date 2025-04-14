@@ -20,6 +20,7 @@ public interface TestRangeApiUrl {
     public static final String FILE_MODIFY = "/api/mp/cscene/monitor/scene/element/file_modify";
     public static final String REGISTRY_MODIFY = "/api/mp/cscene/monitor/scene/element/registry_modify";
     public static final String LIST_HOST_EVENTS = "/api/mp/cscene/cscene_instances/list_host_events";
+    public static final String SCENE_TREND = "/api/mp/cscene/monitor/hoststate/scene_trend";
 
     public static final String FLOW_ATTACK_PAGE = "/api/mp/cscene/monitor/flow/page";
 

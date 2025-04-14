@@ -99,7 +99,35 @@ public class ElementMonitorController {
     @ApiOperation(value = "查询节点实时状态")
     @GetMapping("/rtinfo")
     public ServiceResult<ElementRTInfo> getElementRTInfo(BaseSceneElementRequest baseRequest) {
-        ElementRTInfo rtInfo = sceneElementMonitorService.getElementRTInfo(baseRequest);
+        var mapper = BeanCommon.getBean(SceneCycleDataModelMapper.class);
+        String sceneId = baseRequest.getSceneId();
+        String nodeId = baseRequest.getElementIds().get(0);
+
+        var totalPort = mapper.total(new HumanCondition().filterEqual(SceneCycleDataModel::getScene, sceneId)
+                                             .filterEqual(SceneCycleDataModel::getSceneElement, nodeId)
+                                             .filterEqual(SceneCycleDataModel::getType, SceneCycleDataModel.PORT));
+        var totalProcess = mapper.total(new HumanCondition().filterEqual(SceneCycleDataModel::getScene, sceneId)
+                                                .filterEqual(SceneCycleDataModel::getSceneElement, nodeId)
+                                                .filterEqual(SceneCycleDataModel::getType, SceneCycleDataModel.PROCESS));
+        var totalConnect = mapper.total(new HumanCondition().filterEqual(SceneCycleDataModel::getScene, sceneId)
+                                            .filterEqual(SceneCycleDataModel::getSceneElement, nodeId)
+                                            .filterEqual(SceneCycleDataModel::getType, SceneCycleDataModel.CONNECTION));
+        var totalFile = mapper.total(new HumanCondition().filterEqual(SceneCycleDataModel::getScene, sceneId)
+                                             .filterEqual(SceneCycleDataModel::getSceneElement, nodeId)
+                                             .filterOrStart()
+                                             .orIn(SceneCycleDataModel::getType, new String[]{SceneCycleDataModel.FILE, SceneCycleDataModel.REGISTRY})
+                                             .orStartsWith(SceneCycleDataModel::getType, SceneCycleDataModel.LOG + "_")
+                                             .filterOrEnd());
+        ElementRTInfo rtInfo = new ElementRTInfo();
+        rtInfo.setConnectionCount(totalConnect);
+        rtInfo.setEnvOpCount(0);
+        rtInfo.setFileOpCount(totalFile);
+        rtInfo.setPortsCount(totalPort);
+        rtInfo.setProcessCount(totalProcess);
+        rtInfo.setUserCount(0);
+        rtInfo.setRegistryOpCount(0);
+        rtInfo.setProcessCount(totalProcess);
+//      ElementRTInfo rtInfo = sceneElementMonitorService.getElementRTInfo(baseRequest);
         return ResultCommon.success(rtInfo);
     }
 

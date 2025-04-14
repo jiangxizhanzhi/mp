@@ -424,4 +424,23 @@ public class TestRangeApiProxy implements SubRangeMonitorInterface {
             return ipToNodeInfo;
         }
     }
+
+    @Override
+    public List<HostState> getSceneHostStateTrend(HostStateTrendRequest trendRequest) {
+        Map<String, String> mappingCsceneIdToRange = getRangeMapCscene(trendRequest.getSceneId());
+
+        for (Map.Entry<String, String> entry : mappingCsceneIdToRange.entrySet()) {
+            String range = entry.getValue();
+            String mapCsceneId = entry.getKey();
+            if (csceneIdToNodeIds.containsKey(mapCsceneId)) {
+                trendRequest.setSceneId(mapCsceneId);
+                String result = TestRangeClientUtil.get(range, TestRangeApiUrl.SCENE_TREND, trendRequest, getAuthHeaderMap(range), 10000)
+                        .getResult();
+                var res = JsonCommon.snakeParse(result, new TypeReference<ServiceResult<List<HostState>>>() {
+                });
+                return res.getData();
+            }
+        }
+        return new ArrayList<HostState>();
+    }
 }

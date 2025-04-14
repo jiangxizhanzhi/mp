@@ -23,4 +23,5 @@ public class SceneCycleDataModel extends BasePluginSceneElementModel {
     public static final String REGISTRY = "5";
     public static final String LOG = "6";
     public static final String CONNECTION = "7";
+    public static final String HOST = "8";
 }
