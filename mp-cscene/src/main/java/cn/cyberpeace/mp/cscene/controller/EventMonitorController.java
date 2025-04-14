@@ -107,11 +107,11 @@ public class EventMonitorController {
         BigDecimal user = BigDecimal.valueOf(totalUser);
         BigDecimal total = port.add(process).add(net).add(file).add(user);
         EventAggr eventAggr = new EventAggr();
-        eventAggr.setPort(port.divide(total, 4, BigDecimal.ROUND_HALF_UP).doubleValue() * 100);
-        eventAggr.setProcess(process.divide(total, 4, BigDecimal.ROUND_HALF_UP).doubleValue() * 100);
-        eventAggr.setUser(user.divide(total, 4, BigDecimal.ROUND_HALF_UP).doubleValue() * 100);
-        eventAggr.setNetwork(net.divide(total, 4, BigDecimal.ROUND_HALF_UP).doubleValue() * 100);
-        eventAggr.setFile(file.divide(total, 4, BigDecimal.ROUND_HALF_UP).doubleValue() * 100);
+        eventAggr.setPort(port.multiply(BigDecimal.valueOf(100)).divide(total, 4, BigDecimal.ROUND_HALF_UP).doubleValue());
+        eventAggr.setProcess(process.multiply(BigDecimal.valueOf(100)).divide(total, 4, BigDecimal.ROUND_HALF_UP).doubleValue());
+        eventAggr.setUser(user.multiply(BigDecimal.valueOf(100)).divide(total, 4, BigDecimal.ROUND_HALF_UP).doubleValue());
+        eventAggr.setNetwork(net.multiply(BigDecimal.valueOf(100)).divide(total, 4, BigDecimal.ROUND_HALF_UP).doubleValue());
+        eventAggr.setFile(file.multiply(BigDecimal.valueOf(100)).divide(total, 4, BigDecimal.ROUND_HALF_UP).doubleValue());
         return ResultCommon.success(eventAggr);
     }
 
