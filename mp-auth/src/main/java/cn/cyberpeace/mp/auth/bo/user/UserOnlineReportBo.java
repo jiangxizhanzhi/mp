@@ -29,6 +29,9 @@ public class UserOnlineReportBo {
     @ApiModelProperty(value = "对象")
     private String subject;
 
+    @ApiModelProperty(value = "IP")
+    private String ip;
+
     @ApiModelProperty(value = "累计在线时长（小时）")
     private Double totalOnlineHours;
 

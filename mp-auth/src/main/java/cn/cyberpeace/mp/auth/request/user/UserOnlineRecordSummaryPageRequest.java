@@ -18,6 +18,12 @@ public class UserOnlineRecordSummaryPageRequest extends PageRequest {
     @ApiModelProperty(value = "用户ID列表")
     private List<String> userIds;
 
+    @ApiModelProperty(value = "用户ip")
+    private String ip;
+
+    @ApiModelProperty(value = "用户名")
+    private String userName;
+
     @ApiModelProperty(value = "开始时间")
     private LocalDateTime startTime;
 

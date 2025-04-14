@@ -82,7 +82,7 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
                 .map(entry -> entry.getKey().getId()).collect(Collectors.toList());
 
         PageHelper.startPage(req.getPage(), req.getPageSize());
-        List<UserOnlineRecordSummaryBo> recordSummaryDtoList = getModelMapper().listRecordSummary(req.getUserIds(), onlinedUserIds, req.getStartTime(), req.getEndTime());
+        List<UserOnlineRecordSummaryBo> recordSummaryDtoList = getModelMapper().listRecordSummary(req.getUserIds(), onlinedUserIds, req.getIp(), req.getUserName(),req.getStartTime(), req.getEndTime());
         PageInfo pageInfo = new PageInfo(recordSummaryDtoList);
         List<UserOnlineRecordSummaryBo> summaryDtos = pageInfo.getList();
         if (CollectionUtil.isEmpty(summaryDtos)) {

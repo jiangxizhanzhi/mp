@@ -3,9 +3,19 @@
 <mapper namespace="cn.cyberpeace.mp.auth.repository.UserOnlineRecordMapper">
 
     <select id="listRecordSummary" resultType="cn.cyberpeace.mp.auth.bo.user.UserOnlineRecordSummaryBo">
-        select user, sum(duration_minutes) total_online_minutes, sum(status = 0) unCompleteCnt, mp_auth_user.username, mp_auth_user.name
+        select user, sum(duration_minutes) total_online_minutes, sum(status = 0) unCompleteCnt, mp_auth_user.username, mp_auth_user.name,
+        tt.op_ip as ip
         from mp_auth_user_online_record
         left join mp_auth_user on mp_auth_user_online_record.user = mp_auth_user.id
+        left join
+            (SELECT t.op_ip, t.user_id, t.create_time, m.username
+        FROM (
+            SELECT*,ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY create_time DESC) AS rn
+            FROM mp_devops_log_operation
+            WHERE op_module_id = 4) t left join mp_auth_user m on m.id = t.user_id
+        WHERE t.rn = 1 and m.username is not null
+                ) tt
+            on tt.user_id = mp_auth_user_online_record.user
         <where>
             mp_auth_user.username is not null
             <if test="userIds != null and userIds.size() > 0">
@@ -13,6 +23,12 @@
                 <foreach item="userId" index="index" collection="userIds" open="(" separator="," close=")">
                     #{userId}
                 </foreach>
+            </if>
+            <if test="ip != null and ip != ''">
+                and tt.op_ip like CONCAT('%',#{ip},'%')
+            </if>
+            <if test="userName != null and userName != ''">
+                and (mp_auth_user.username like CONCAT('%',#{userName},'%') or mp_auth_user.name like CONCAT('%',#{userName},'%'))
             </if>
         </where>
         group by user

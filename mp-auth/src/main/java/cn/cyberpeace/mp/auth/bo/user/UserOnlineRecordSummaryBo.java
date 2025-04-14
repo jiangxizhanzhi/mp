@@ -26,6 +26,9 @@ public class UserOnlineRecordSummaryBo {
     @ApiModelProperty(value = "姓名")
     private String name;
 
+    @ApiModelProperty(value = "IP")
+    private String ip;
+
     @ApiModelProperty(value = "累计在线时长（分钟）")
     private Long totalOnlineMinutes;
 
