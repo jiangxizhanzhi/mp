@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.cscene.request.common.PageRequest;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -22,6 +23,18 @@ public class BaseSceneElementPageRequest extends PageRequest {
 
     @ApiModelProperty(value = "rule级别集合 范围 0 ~ 15")
     private List<Integer> levels;
+
+    /**
+     * 开始时间
+     */
+    @ApiModelProperty(value = "开始时间")
+    private LocalDateTime startTime;
+
+    /**
+     * 结束时间
+     */
+    @ApiModelProperty(value = "结束时间")
+    private LocalDateTime endTime;
 
     @ApiModelProperty(value = "场景关闭情况下是否仍然查询数据，默认false，表示不查询")
     private Boolean fetchIfSceneInstanceShutdown = false;

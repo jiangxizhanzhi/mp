@@ -300,6 +300,8 @@ public class HostStateService {
         queryParams.setNodeIds(elementIds);
         queryParams.setPage(pageRequest.getPage());
         queryParams.setPageSize(pageRequest.getPageSize());
+        queryParams.setStartTime(pageRequest.getStartTime());
+        queryParams.setEndTime(pageRequest.getEndTime());
 //
         ListObjServiceResult<CollectionHostStateBO> listObjServiceResult = csceneInstanceService.listHostStates(sceneId, queryParams);
 
