@@ -221,7 +221,7 @@ public class DataCollectionService extends CollectionBaseService {
         //配置索引为空
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
 
-        log.info("elasticsearch JSON query index:{}, DSL:\n{}", indexArray, searchRequest.source().toString());
+        log.debug("elasticsearch JSON query index:{}, DSL:\n{}", indexArray, searchRequest.source().toString());
         try {
             String agentNameTerm = "agent_name", sicLaunchIdTerm = "sic_launch_id";
             AggregationBuilder aggBuilder = AggregationBuilders.terms(agentNameTerm).field("agent.name")
@@ -869,7 +869,7 @@ public class DataCollectionService extends CollectionBaseService {
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
         //配置索引为空
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
-        log.info("monitor JSON query index:{}, \n DSL:{}", indexArray, searchRequest.source().toString());
+        log.debug("monitor JSON query index:{}, \n DSL:{}", indexArray, searchRequest.source().toString());
 
         try {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
@@ -1724,7 +1724,7 @@ public class DataCollectionService extends CollectionBaseService {
             dayList.add(startDate.format(DateTimeFormatter.ofPattern("yyyy.MM.dd")));
             startDate = startDate.plusDays(1);
         }
-        log.info("dayList:{}", dayList);
+        log.debug("dayList:{}", dayList);
         return dayList;
     }
 

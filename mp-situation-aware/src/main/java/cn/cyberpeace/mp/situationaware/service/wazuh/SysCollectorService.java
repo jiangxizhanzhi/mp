@@ -68,7 +68,7 @@ public class SysCollectorService extends RequestProcessor {
 
         List<NameValuePair> params = processRequestParams(collectorBaseRequest);
 
-        log.info("requestUrl:{}", requestUrl);
+        log.debug("requestUrl:{}", requestUrl);
         var res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params);
         BaseResponse<Port> result = JSONObject.parseObject(res, new TypeReference<>() {
         });
@@ -123,11 +123,11 @@ public class SysCollectorService extends RequestProcessor {
 
         List<NameValuePair> params = processRequestParams(collectorBaseRequest);
 
-        log.info("requestUrl:{}", requestUrl);
+        log.debug("requestUrl:{}", requestUrl);
         var res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params);
         BaseResponse<Netiface> result = JSONObject.parseObject(res, new TypeReference<>() {
         });
-        log.info("{}", result);
+        log.debug("{}", result);
         List<Netiface> netifaces = result.getData().getAffectedItems();
 
         netifaces.forEach(n -> {
@@ -163,12 +163,12 @@ public class SysCollectorService extends RequestProcessor {
             params.add(new BasicNameValuePair("proto", URLUtil.encode(proto)));
         }
 
-        log.info("requestUrl:{}, params:{}", requestUrl, params);
+        log.debug("requestUrl:{}, params:{}", requestUrl, params);
 
         var res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params);
         BaseResponse<NetAddr> result = JSONObject.parseObject(res, new TypeReference<>() {
         });
-        log.info("{}", result);
+        log.debug("{}", result);
         if (Objects.isNull(result.getData()) || CollectionUtil.isEmpty(result.getData().getAffectedItems())) {
             return Collections.emptyList();
         }

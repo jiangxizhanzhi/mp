@@ -409,7 +409,7 @@ public class ScenePluginCollectionSceneService {
      * @return
      */
     public ListObjServiceResult<CollectionHostEventBO> listHostEvents(String sceneId, HostEventQueryParams queryParams) {
-        log.info("sceneId:{}, scroll:{}", sceneId, queryParams.getScroll());
+        log.debug("sceneId:{}, scroll:{}", sceneId, queryParams.getScroll());
         var sceneHandler = new SceneHandler(sceneId, null, false, null);
         List<SceneElementBO> srcElements = getSrcElements(sceneHandler, queryParams.getNodeIds());
         CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
@@ -1403,7 +1403,7 @@ public class ScenePluginCollectionSceneService {
         List<WazuhProcessModel> totalList = dataCollectionService.queryProcessesWithTimeRange(wazuhRequest);
 
         int skip = (page - 1) * pageSize;
-        log.info("skip:{}, limit:{}", skip, pageSize);
+        log.debug("skip:{}, limit:{}", skip, pageSize);
         List<WazuhProcessModel> resultList = totalList.stream().filter(Objects::nonNull).skip(skip).limit(pageSize).collect(Collectors.toList());
 
         List<Process> processes = resultList.stream().map(p -> convertWazuhProcess2Process(p)).collect(Collectors.toList());
@@ -1503,7 +1503,7 @@ public class ScenePluginCollectionSceneService {
         List<WazuhNetworkConnectionModel> totalList = dataCollectionService.queryNetConnEventsWithTimeRange(wazuhRequest);
 
         int skip = (page - 1) * pageSize;
-        log.info("skip:{}, limit:{}", skip, pageSize);
+        log.debug("skip:{}, limit:{}", skip, pageSize);
         List<WazuhNetworkConnectionModel> resultList = totalList.stream().skip(skip).limit(pageSize).collect(Collectors.toList());
 
         return new ListObjServiceResult<>(new ListObjResult<>(resultList, totalList.size()).asResult()).asResult();

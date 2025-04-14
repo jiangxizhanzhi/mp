@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincollection.service.param;
 
 import cn.cyberpeace.mp.base.service.param.QueryParams;
+import cn.cyberpeace.mp.base.util.http.HttpParam;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;

@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.controller.request.SceneAllElementsQueryRequest;
+import cn.cyberpeace.mp.cscene.dto.element.ConnectionState;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackDto;
@@ -15,8 +16,10 @@ import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
+import cn.cyberpeace.mp.cscene.request.element.ElementMonitorRequest;
 import cn.cyberpeace.mp.cscene.request.hoststate.HostStateTrendRequest;
 import cn.cyberpeace.mp.cscene.service.multirange.SubRangeMonitorInterface;
+import cn.cyberpeace.mp.cscene.util.HostEventQueryParams2;
 import cn.cyberpeace.mp.scene.core.bo.HfdyServerVpnConfig;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.SceneElementPortModel;
@@ -25,7 +28,9 @@ import cn.cyberpeace.mp.scene.repository.RangeMapper;
 import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
 import cn.cyberpeace.mp.scene.repository.SceneElementPortMapper;
 import cn.cyberpeace.mp.scene.repository.SceneMapper;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.HostEventQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.TimeListPageInfoQueryParams;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Netiface;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.OS;
@@ -37,6 +42,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -115,6 +121,7 @@ public class TestRangeApiProxy implements SubRangeMonitorInterface {
                 String result = TestRangeClientUtil.get(rangeName, String.format("%s?vpnServerIp=%s", TestRangeApiUrl.MAP_SCENE_ID, hfdyServerVpnConfig.getIp()), null, getAuthHeaderMap(rangeName), 10000)
                         .getResult();
                 String mapCsceneId = JSONObject.parseObject(result).getString("data");
+//                mapCsceneId = "290e7cfff2a64f8fbf46edb69f274f15" ;
                 if (StringUtils.isEmpty(mapCsceneId)) {
                     log.warn("{}靶场无法查询到启动了ip为{}的hfdy vpn server实例", rangeName, hfdyServerVpnConfig.getIp() );
                     throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format(rangeName + "分靶场无法获取到对应拓扑实例"));
@@ -238,6 +245,62 @@ public class TestRangeApiProxy implements SubRangeMonitorInterface {
     }
 
     @Override
+    public ListObjServiceResult<CollectionHostEventBO> getFileModifyData(ElementMonitorRequest pageRequest, String path) {
+        Map<String, String> mappingCsceneIdToRange = getRangeMapCscene(pageRequest.getSceneId());
+
+        for (Map.Entry<String, String> entry : mappingCsceneIdToRange.entrySet()) {
+            String range = entry.getValue();
+            String mapCsceneId = entry.getKey();
+            if (csceneIdToNodeIds.containsKey(mapCsceneId)) {
+                pageRequest.setSceneId(mapCsceneId);
+                String result = TestRangeClientUtil.get(range, TestRangeApiUrl.FILE_MODIFY, pageRequest, getAuthHeaderMap(range), 10000)
+                        .getResult();
+                return JsonCommon.snakeParse(result, new TypeReference<ListObjServiceResult<CollectionHostEventBO>>() {
+                });
+            }
+        }
+        return new ListObjServiceResult<CollectionHostEventBO>(new ListObjResult<>(new ArrayList<CollectionHostEventBO>(), 0));
+    }
+
+    @Override
+    public ListObjServiceResult<CollectionHostEventBO> getRegistryModifyData(ElementMonitorRequest pageRequest, String path) {
+        Map<String, String> mappingCsceneIdToRange = getRangeMapCscene(pageRequest.getSceneId());
+
+        for (Map.Entry<String, String> entry : mappingCsceneIdToRange.entrySet()) {
+            String range = entry.getValue();
+            String mapCsceneId = entry.getKey();
+            if (csceneIdToNodeIds.containsKey(mapCsceneId)) {
+                pageRequest.setSceneId(mapCsceneId);
+                String result = TestRangeClientUtil.get(range, TestRangeApiUrl.REGISTRY_MODIFY, pageRequest, getAuthHeaderMap(range), 10000)
+                        .getResult();
+                return JsonCommon.snakeParse(result, new TypeReference<ListObjServiceResult<CollectionHostEventBO>>() {
+                });
+            }
+        }
+        return new ListObjServiceResult<CollectionHostEventBO>(new ListObjResult<>(new ArrayList<CollectionHostEventBO>(), 0));
+    }
+
+    @Override
+    public ListObjServiceResult<CollectionHostEventBO> listHostEvents(String id, HostEventQueryParams queryParams) {
+        Map<String, String> mappingCsceneIdToRange = getRangeMapCscene(id);
+
+        for (Map.Entry<String, String> entry : mappingCsceneIdToRange.entrySet()) {
+            String range = entry.getValue();
+            String mapCsceneId = entry.getKey();
+            if (csceneIdToNodeIds.containsKey(mapCsceneId)) {
+                HostEventQueryParams2 params = new HostEventQueryParams2();
+                BeanUtils.copyProperties(queryParams, params);
+                params.setId(id);
+                String result = TestRangeClientUtil.get(range, TestRangeApiUrl.LIST_HOST_EVENTS, params, getAuthHeaderMap(range), 10000)
+                        .getResult();
+                return JsonCommon.snakeParse(result, new TypeReference<ListObjServiceResult<CollectionHostEventBO>>() {
+                });
+            }
+        }
+        return new ListObjServiceResult<CollectionHostEventBO>(new ListObjResult<>(new ArrayList<CollectionHostEventBO>(), 0));
+    }
+
+    @Override
     public ListObjServiceResult<Process> pageProcesses(TimeListPageInfoQueryParams listPageInfoQueryParams) {
         Map<String,String> mappingCsceneIdToRange = getRangeMapCscene(listPageInfoQueryParams.getSceneIds().get(0));
 
@@ -252,6 +315,23 @@ public class TestRangeApiProxy implements SubRangeMonitorInterface {
             }
         }
         return new ListObjServiceResult<Process>(new ListObjResult<>(new ArrayList<Process>(), 0));
+    }
+
+    @Override
+    public ListObjServiceResult<ConnectionState> pageNetworkConnections(BaseSceneElementPageRequest pageRequest){
+        Map<String,String> mappingCsceneIdToRange = getRangeMapCscene(pageRequest.getSceneId());
+
+        for (Map.Entry<String, String> entry : mappingCsceneIdToRange.entrySet()) {
+            String range = entry.getValue();
+            String mapCsceneId = entry.getKey();
+            if (csceneIdToNodeIds.containsKey(mapCsceneId)) {
+                pageRequest.setSceneId(mapCsceneId);
+                String result = TestRangeClientUtil.get(range, TestRangeApiUrl.ELEMENT_CONNECT, pageRequest, getAuthHeaderMap(range), 10000).getResult();
+                return JsonCommon.snakeParse(result, new TypeReference<ListObjServiceResult<ConnectionState>>() {
+                });
+            }
+        }
+        return new ListObjServiceResult<ConnectionState>(new ListObjResult<>(new ArrayList<ConnectionState>(), 0));
     }
 
     @Override
@@ -276,7 +356,6 @@ public class TestRangeApiProxy implements SubRangeMonitorInterface {
 
          return finalResult;
     }
-
 
     public boolean elementExistInCurrentScene(BaseSceneElementRequest baseRequest) {
         String csceneInstanceId = baseRequest.getSceneId();
@@ -345,7 +424,4 @@ public class TestRangeApiProxy implements SubRangeMonitorInterface {
             return ipToNodeInfo;
         }
     }
-
-
-
 }

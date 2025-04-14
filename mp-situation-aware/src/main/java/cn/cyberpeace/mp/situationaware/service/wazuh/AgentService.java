@@ -52,7 +52,7 @@ public class AgentService extends RequestProcessor {
         log.info("requestUrl:{}", requestUrl);
         var res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params);
         BaseResponse<Agent> result = JSONObject.parseObject(res, new TypeReference<BaseResponse<Agent>>() {});
-        log.info("{}", result);
+        log.debug("{}", result);
         List<Agent> agents = result.getData().getAffectedItems();
 
         PageInfo pageInfo = new PageInfo(agents);

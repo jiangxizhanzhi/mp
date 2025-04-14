@@ -1,10 +1,16 @@
 package cn.cyberpeace.mp.cscene.controller;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
+import cn.cyberpeace.mp.cscene.model.SceneCycleDataModel;
+import cn.cyberpeace.mp.cscene.repository.SceneCycleDataModelMapper;
 import cn.cyberpeace.mp.cscene.request.agent.AgentNameBasedRequest;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
@@ -142,31 +148,69 @@ public class HostStateController {
     @ApiOperation(value = "节点端口信息")
     @GetMapping("/element_port")
     public ListObjServiceResult<Port> pagePorts(TimeListPageInfoQueryParams listPageInfoQueryParams) {
-        if (testRangeApiProxy.elementExistInCurrentScene(toBaseSceneElementRequest(listPageInfoQueryParams))) {
-            return hostStateService.pagePorts(listPageInfoQueryParams).asResult();
-        } else {
-            return testRangeApiProxy.pagePorts(listPageInfoQueryParams);
+        var mapper = BeanCommon.getBean(SceneCycleDataModelMapper.class);
+        String sceneId = listPageInfoQueryParams.getSceneIds().get(0);
+        String nodeId = listPageInfoQueryParams.getNodeIds().get(0);
+        var result = mapper.list(new HumanCondition().filterEqual(SceneCycleDataModel::getScene, sceneId)
+                                         .filterEqual(SceneCycleDataModel::getSceneElement, nodeId)
+                                         .filterEqual(SceneCycleDataModel::getType, SceneCycleDataModel.PORT));
+        List<Port> processes = new ArrayList<>();
+        for (SceneCycleDataModel model : result) {
+            var p = JsonCommon.parse(model.getData(), Port.class);
+            processes.add(p);
         }
+        return new ListObjServiceResult<>(new ListObjResult<>(processes, processes.size())).asResult();
+//        if (testRangeApiProxy.elementExistInCurrentScene(toBaseSceneElementRequest(listPageInfoQueryParams))) {
+//            return hostStateService.pagePorts(listPageInfoQueryParams).asResult();
+//        } else {
+//            return testRangeApiProxy.pagePorts(listPageInfoQueryParams);
+//        }
     }
 
     @ApiOperation(value = "节点进程信息")
     @GetMapping("/element_process")
     public ListObjServiceResult<Process> pageProcesses(TimeListPageInfoQueryParams listPageInfoQueryParams) {
-        if (testRangeApiProxy.elementExistInCurrentScene(toBaseSceneElementRequest(listPageInfoQueryParams))) {
-            return hostStateService.pageProcesses(listPageInfoQueryParams).asResult();
-        } else {
-            return testRangeApiProxy.pageProcesses(listPageInfoQueryParams);
+        var mapper = BeanCommon.getBean(SceneCycleDataModelMapper.class);
+        String sceneId = listPageInfoQueryParams.getSceneIds().get(0);
+        String nodeId = listPageInfoQueryParams.getNodeIds().get(0);
+        var result = mapper.list(new HumanCondition().filterEqual(SceneCycleDataModel::getScene, sceneId)
+                                         .filterEqual(SceneCycleDataModel::getSceneElement, nodeId)
+                                         .filterEqual(SceneCycleDataModel::getType, SceneCycleDataModel.PROCESS));
+        List<Process> processes = new ArrayList<>();
+        for (SceneCycleDataModel model : result) {
+            var p = JsonCommon.parse(model.getData(), Process.class);
+            processes.add(p);
         }
+        return new ListObjServiceResult<>(new ListObjResult<>(processes, processes.size())).asResult();
+
+//        if (testRangeApiProxy.elementExistInCurrentScene(toBaseSceneElementRequest(listPageInfoQueryParams))) {
+//            return hostStateService.pageProcesses(listPageInfoQueryParams).asResult();
+//        } else {
+//            return testRangeApiProxy.pageProcesses(listPageInfoQueryParams);
+//        }
     }
 
     @ApiOperation(value = "节点网卡信息")
     @GetMapping("/element_netifaces")
     public ListObjServiceResult<Netiface> pageNetifaces(TimeListPageInfoQueryParams listPageInfoQueryParams) {
-        if (testRangeApiProxy.elementExistInCurrentScene(toBaseSceneElementRequest(listPageInfoQueryParams))) {
-            return hostStateService.pageNetifaces(listPageInfoQueryParams).asResult();
-        } else {
-            return testRangeApiProxy.pageNetifaces(listPageInfoQueryParams);
+//        if (testRangeApiProxy.elementExistInCurrentScene(toBaseSceneElementRequest(listPageInfoQueryParams))) {
+//            return hostStateService.pageNetifaces(listPageInfoQueryParams).asResult();
+//        } else {
+//            return testRangeApiProxy.pageNetifaces(listPageInfoQueryParams);
+//        }
+
+        var mapper = BeanCommon.getBean(SceneCycleDataModelMapper.class);
+        String sceneId = listPageInfoQueryParams.getSceneIds().get(0);
+        String nodeId = listPageInfoQueryParams.getNodeIds().get(0);
+        var result = mapper.list(new HumanCondition().filterEqual(SceneCycleDataModel::getScene, sceneId)
+                                         .filterEqual(SceneCycleDataModel::getSceneElement, nodeId)
+                                         .filterEqual(SceneCycleDataModel::getType, SceneCycleDataModel.NET));
+        List<Netiface> processes = new ArrayList<>();
+        for (SceneCycleDataModel model : result) {
+            var p = JsonCommon.parse(model.getData(), Netiface.class);
+            processes.add(p);
         }
+        return new ListObjServiceResult<>(new ListObjResult<>(processes, processes.size())).asResult();
     }
 
 

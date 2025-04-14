@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.cscene.controller;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
@@ -14,7 +16,9 @@ import cn.cyberpeace.mp.cscene.dto.element.ElementRTInfo;
 import cn.cyberpeace.mp.cscene.dto.element.ElementVulnerabilityCountInfo;
 import cn.cyberpeace.mp.cscene.dto.element.ElementVulnerabilityInfo;
 import cn.cyberpeace.mp.cscene.dto.element.ElementVulnerabilityPieChartInfo;
+import cn.cyberpeace.mp.cscene.model.SceneCycleDataModel;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
+import cn.cyberpeace.mp.cscene.repository.SceneCycleDataModelMapper;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.request.element.ElementMonitorRequest;
@@ -26,6 +30,7 @@ import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.OS;
+import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -38,6 +43,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -117,8 +123,22 @@ public class ElementMonitorController {
     @GetMapping("/connection_state")
     public ListObjServiceResult<ConnectionState> pageConnectionStates(BaseSceneElementPageRequest pageRequest) {
         pageRequest.ensure();
+        var mapper = BeanCommon.getBean(SceneCycleDataModelMapper.class);
+        String sceneId = pageRequest.getSceneId();
+        String nodeId = pageRequest.getElementIds().get(0);
+        var result = mapper.list(new HumanCondition().filterEqual(SceneCycleDataModel::getScene, sceneId)
+                                         .filterEqual(SceneCycleDataModel::getSceneElement, nodeId)
+                                         .filterEqual(SceneCycleDataModel::getType, SceneCycleDataModel.CONNECTION));
+        List<ConnectionState> processes = new ArrayList<>();
+        for (SceneCycleDataModel model : result) {
+            var p = JsonCommon.parse(model.getData(), ConnectionState.class);
+            processes.add(p);
+        }
+        return new ListObjServiceResult<>(new ListObjResult<>(processes, processes.size())).asResult();
 
-        return sceneElementMonitorService.pageNetworkConnections(pageRequest);
+//        pageRequest.ensure();
+//
+//        return sceneElementMonitorService.pageNetworkConnections(pageRequest);
     }
 
     @ApiOperation(value = "查询节点文件变更事件")
@@ -128,8 +148,20 @@ public class ElementMonitorController {
     @GetMapping("/file_modify")
     public ListObjServiceResult<CollectionHostEventBO> fileModify(ElementMonitorRequest pageRequest, @RequestParam(required = false) String path) {
         pageRequest.ensure();
+        var mapper = BeanCommon.getBean(SceneCycleDataModelMapper.class);
+        String sceneId = pageRequest.getSceneId();
+        String nodeId = pageRequest.getElementIds().get(0);
+        var result = mapper.list(new HumanCondition().filterEqual(SceneCycleDataModel::getScene, sceneId)
+                                         .filterEqual(SceneCycleDataModel::getSceneElement, nodeId)
+                                         .filterEqual(SceneCycleDataModel::getType, SceneCycleDataModel.FILE));
+        List<CollectionHostEventBO> processes = new ArrayList<>();
+        for (SceneCycleDataModel model : result) {
+            var p = JsonCommon.parse(model.getData(), CollectionHostEventBO.class);
+            processes.add(p);
+        }
+        return new ListObjServiceResult<>(new ListObjResult<>(processes, processes.size())).asResult();
 
-        return sceneElementMonitorService.getModifyData(pageRequest, CsceneBizConstant.FILE_MODIFY_GROUP, path).asResult();
+//        return sceneElementMonitorService.getModifyData(pageRequest, CsceneBizConstant.FILE_MODIFY_GROUP, path).asResult();
     }
 
     @ApiOperation(value = "节点文件变更事件柱状图")
@@ -159,7 +191,20 @@ public class ElementMonitorController {
     public ListObjServiceResult<CollectionHostEventBO> registryModify(ElementMonitorRequest pageRequest, @RequestParam(required = false) String path) {
         pageRequest.ensure();
 
-        return sceneElementMonitorService.getModifyData(pageRequest, CsceneBizConstant.REGISTRY_MODIFY_GROUP, path).asResult();
+        var mapper = BeanCommon.getBean(SceneCycleDataModelMapper.class);
+        String sceneId = pageRequest.getSceneId();
+        String nodeId = pageRequest.getElementIds().get(0);
+        var result = mapper.list(new HumanCondition().filterEqual(SceneCycleDataModel::getScene, sceneId)
+                                         .filterEqual(SceneCycleDataModel::getSceneElement, nodeId)
+                                         .filterEqual(SceneCycleDataModel::getType, SceneCycleDataModel.REGISTRY));
+        List<CollectionHostEventBO> processes = new ArrayList<>();
+        for (SceneCycleDataModel model : result) {
+            var p = JsonCommon.parse(model.getData(), CollectionHostEventBO.class);
+            processes.add(p);
+        }
+        return new ListObjServiceResult<>(new ListObjResult<>(processes, processes.size())).asResult();
+
+//        return sceneElementMonitorService.getModifyData(pageRequest, CsceneBizConstant.REGISTRY_MODIFY_GROUP, path).asResult();
     }
 
     @ApiOperation(value = "节点注册表变更事件柱状图")

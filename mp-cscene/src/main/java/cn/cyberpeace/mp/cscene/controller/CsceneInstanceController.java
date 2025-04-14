@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ObjResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
@@ -32,8 +33,10 @@ import cn.cyberpeace.mp.cscene.dto.scene.ElementCommandExecResult;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneLinkStatusInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
+import cn.cyberpeace.mp.cscene.model.SceneCycleDataModel;
 import cn.cyberpeace.mp.cscene.model.SceneSwitchInfoModel;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
+import cn.cyberpeace.mp.cscene.repository.SceneCycleDataModelMapper;
 import cn.cyberpeace.mp.cscene.repository.SceneSwitchInfoMapper;
 import cn.cyberpeace.mp.cscene.response.GuacamoleRep;
 import cn.cyberpeace.mp.cscene.service.CsceneFileService;
@@ -72,6 +75,7 @@ import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams
 import cn.cyberpeace.mp.sceneplugincollection.service.param.QueryCollectionDataCountParams;
 import cn.cyberpeace.mp.scenepluginflow.service.response.SceneFlowRecordsResponse;
 import cn.cyberpeace.mp.situationaware.model.enums.FileEventType;
+import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.Api;
@@ -549,8 +553,32 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @GetMapping(value = "/list_host_events", params = "id")
     public ListObjServiceResult<CollectionHostEventBO> listHostEvents(@RequestParam String id,
                                                                       HostEventQueryParams queryParams) {
-        handleQueryParams("listHostEvents", queryParams);
-        return modelService.listHostEvents(id, queryParams).asResult();
+//        handleQueryParams("listHostEvents", queryParams);
+//        return modelService.listHostEvents(id, queryParams).asResult();
+        var mapper = BeanCommon.getBean(SceneCycleDataModelMapper.class);
+        String sceneId = id;
+        var condition = new HumanCondition();
+        condition.filterEqual(SceneCycleDataModel::getScene, sceneId);
+        if (CollectionUtils.isNotEmpty(queryParams.getNodeIds())) {
+            String nodeId = queryParams.getNodeIds().get(0);
+            condition.filterEqual(SceneCycleDataModel::getSceneElement, nodeId);
+        }
+        if (CollectionUtils.isNotEmpty(queryParams.getCatagories())) {
+            List<String> categories = new ArrayList<>();
+            for (String c : queryParams.getCatagories()) {
+                categories.add(SceneCycleDataModel.LOG + "_" + c);
+            }
+            condition.filterIn(SceneCycleDataModel::getType, categories.toArray(new String[]{}));
+        } else {
+            condition.filterStartsWith(SceneCycleDataModel::getType, SceneCycleDataModel.LOG + "_");
+        }
+        var list = mapper.list(condition);
+        List<CollectionHostEventBO> processes = new ArrayList<>();
+        for (SceneCycleDataModel model : list) {
+            var p = JsonCommon.parse(model.getData(), CollectionHostEventBO.class);
+            processes.add(p);
+        }
+        return new ListObjServiceResult<>(new ListObjResult<>(processes, processes.size())).asResult();
     }
 
     @ApiOperation("查询场景实例复盘时各类别采集数据的总数")
