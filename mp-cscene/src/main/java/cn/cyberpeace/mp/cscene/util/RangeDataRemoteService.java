@@ -214,8 +214,6 @@ public class RangeDataRemoteService {
         HostStateTrendRequest hostStateTrendRequest = new HostStateTrendRequest();
         hostStateTrendRequest.setSceneId(sceneId);
         hostStateTrendRequest.setElementIds(Arrays.asList(nodeId));
-        hostStateTrendRequest.setStartTime(LocalDateTime.now().minusSeconds(period));
-        hostStateTrendRequest.setEndTime(LocalDateTime.now());
         var response = testRangeApiProxy.getElementHostStateTrend(hostStateTrendRequest);
         var result = response.getData();
         if (CollectionUtils.isNotEmpty(result)) {
@@ -232,8 +230,6 @@ public class RangeDataRemoteService {
     public void saveHostInfo(String sceneId) {
         HostStateTrendRequest hostStateTrendRequest = new HostStateTrendRequest();
         hostStateTrendRequest.setSceneId(sceneId);
-        hostStateTrendRequest.setStartTime(LocalDateTime.now().minusSeconds(period));
-        hostStateTrendRequest.setEndTime(LocalDateTime.now());
         var result = testRangeApiProxy.getSceneHostStateTrend(hostStateTrendRequest);
         if (CollectionUtils.isNotEmpty(result)) {
             var last = result.get(result.size() - 1);
@@ -249,9 +245,9 @@ public class RangeDataRemoteService {
     public void test(String sceneId, boolean info, boolean event, boolean log) {
         List<ElementMonitorBasicInfo> testRangeResult = testRangeApiProxy.listAllElementBasicInfo(sceneId, new SceneAllElementsQueryRequest());
         List<Runnable> tasks = new ArrayList<>();
-        if (info) {
-            tasks.add(() -> saveHostInfo(sceneId));
-        }
+//        if (info) {
+//            tasks.add(() -> saveHostInfo(sceneId));
+//        }
         for (ElementMonitorBasicInfo elementMonitorBasicInfo : testRangeResult) {
             String nodeId = elementMonitorBasicInfo.getId();
             if (info) {

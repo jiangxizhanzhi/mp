@@ -32,14 +32,16 @@ public class RangeDataUtil {
 
     private Long startTime = System.currentTimeMillis();
 
-    @Scheduled(cron = "0/1 * * * * ?")
+    @Scheduled(cron = "0/30 * * * * ?")
     public void test() {
         SysConfigMapper sysConfigMapper = BeanCommon.getBean(SysConfigMapper.class);
         var model = sysConfigMapper.first(new HumanCondition().filterEqual(SysConfigModel::getKeyName, "collect_agent_info"));
         var result = JsonCommon.parse(model.getValue(), CollectAgentConfig.class);
 
         if (result.getEnable()) {
-            if ((System.currentTimeMillis() - startTime) % (result.getPeriod() * 1000) <= 1000) {
+            long runTime = System.currentTimeMillis() / 1000 - startTime / 1000;
+            log.info("数据采集定时任务 , runtime {} ", runTime);
+            if (runTime % result.getPeriod() == 0) {
                 if (lock.tryLock()) {
                     try {
                         log.info("开始采集各个节点的数据");
