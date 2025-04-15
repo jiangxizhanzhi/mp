@@ -31,6 +31,15 @@ public class UserSimpleBo {
     @ApiModelProperty(value = "用户名")
     private String username;
 
+    @ApiModelProperty(value = "外部平台用户id")
+    private String accountId;
+
+    @ApiModelProperty(value = "外部平台用户类型")
+    private String outUserType;
+
+    @ApiModelProperty(value = "外部平台用户ticket")
+    private String fourATicket;
+
     @ApiModelProperty(value = "是否是管理员 1：是 0：否")
     private Integer isAdmin;
 
