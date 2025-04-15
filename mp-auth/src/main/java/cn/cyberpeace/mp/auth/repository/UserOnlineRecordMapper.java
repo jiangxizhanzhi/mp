@@ -23,8 +23,7 @@ public interface UserOnlineRecordMapper extends BaseModelMapper<UserOnlineRecord
 
     List<UserOnlineRecordSummaryBo> listRecordSummary(@Param("userIds") List<String> userIds,
                                                       @Param("priorityUserIds") List<String> priorityUserIds,
-                                                      @Param("ip") String ip,
-                                                      @Param("userName") String userName,
+                                                      @Param("search") String search,
                                                       @Param("startTime") LocalDateTime startTime,
                                                       @Param("endTime") LocalDateTime endTime);
 

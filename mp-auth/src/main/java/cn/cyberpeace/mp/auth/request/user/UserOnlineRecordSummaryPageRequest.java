@@ -21,6 +21,9 @@ public class UserOnlineRecordSummaryPageRequest extends PageRequest {
     @ApiModelProperty(value = "用户ip")
     private String ip;
 
+    @ApiModelProperty(value = "查询框值")
+    private String search;
+
     @ApiModelProperty(value = "用户名")
     private String userName;
 

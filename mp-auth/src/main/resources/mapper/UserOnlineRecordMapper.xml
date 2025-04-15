@@ -24,11 +24,10 @@
                     #{userId}
                 </foreach>
             </if>
-            <if test="ip != null and ip != ''">
-                and tt.op_ip like CONCAT('%',#{ip},'%')
-            </if>
-            <if test="userName != null and userName != ''">
-                and (mp_auth_user.username like CONCAT('%',#{userName},'%') or mp_auth_user.name like CONCAT('%',#{userName},'%'))
+            <if test="search != null and search != ''">
+                and (mp_auth_user.username like CONCAT('%',#{search},'%')
+                    or mp_auth_user.name like CONCAT('%',#{search},'%')
+                    or tt.op_ip like CONCAT('%',#{search},'%'))
             </if>
         </where>
         group by user
