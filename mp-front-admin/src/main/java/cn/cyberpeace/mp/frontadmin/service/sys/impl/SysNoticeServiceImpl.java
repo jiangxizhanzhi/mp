@@ -216,7 +216,8 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
                 noticeModel.setPublisher(currentUser.getId());
             }
         }
-
+        noticeModel.setTeamId("");
+        noticeModel.setTeamName("");
         ObjServiceResult<SysNoticeModel> result = create(noticeModel);
         if (Objects.isNull(result.getSource())) {
             log.error("save notice error!");
