@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.cscene.controller.response;
 
+import com.alibaba.excel.annotation.ExcelIgnore;
 import com.alibaba.excel.annotation.ExcelProperty;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -30,7 +31,7 @@ public class HostAcquisitionEventExportResponse {
     @ApiModelProperty("事件名称")
     private String eventDesc;
 
-//    @ExcelProperty("级别")
+    @ExcelIgnore
     @ApiModelProperty("级别")
     private Integer level;
 
