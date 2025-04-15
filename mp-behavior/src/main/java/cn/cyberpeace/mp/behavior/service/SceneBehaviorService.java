@@ -51,42 +51,27 @@ public class SceneBehaviorService {
 	public void save(NodeBehavior nodeBehavior) {
 		HumanCondition condition = new HumanCondition().filterEqual(SceneModel::getSceneId, nodeBehavior.getSceneId())
 													   .filterEqual(SceneModel::getNodeId, nodeBehavior.getNodeId());
-		SimulateModel oldSimulate = simulateMapper.first(condition);
-		Boolean instance = sceneModelMapper.getInstanceBySceneAndNode(nodeBehavior.getSceneId(), nodeBehavior.getNodeId());
-		String simulateId = sceneModelMapper.getIdBySceneAndNode(nodeBehavior.getSceneId(), nodeBehavior.getNodeId());
-		sceneModelMapper.filterDelete(condition);
-		SceneModel sceneModel = new SceneModel();
-		sceneModel.setSceneId(nodeBehavior.getSceneId());
-		sceneModel.setNodeId(nodeBehavior.getNodeId());
-		sceneModel.setNodeConfig(JSONObject.toJSONString(nodeBehavior.getUserBehaviorList()));
-		sceneModel.setInstance(false);
-		sceneModelMapper.create(sceneModel);
-		if (instance != null && instance) {
-			simulateService.deleteSimulate(simulateId);
-			List<TaskModel> taskModelList = simulateService.createTask(nodeBehavior.getUserBehaviorList(), simulateId);
+		SimulateModel simulateModel = simulateMapper.first(condition);
+		SceneModel sceneModel = sceneModelMapper.first(condition);
+		if (sceneModel != null) {
+			sceneModel.setNodeConfig(JSONObject.toJSONString(nodeBehavior.getUserBehaviorList()));
+			sceneModelMapper.update(sceneModel);
+		} else {
+			sceneModel = new SceneModel();
+			sceneModel.setSceneId(nodeBehavior.getSceneId());
+			sceneModel.setNodeId(nodeBehavior.getNodeId());
+			sceneModel.setNodeConfig(JSONObject.toJSONString(nodeBehavior.getUserBehaviorList()));
+			sceneModel.setInstance(false);
+			sceneModelMapper.create(sceneModel);
+		}
+
+		if (sceneModel.getInstance()) {
+			simulateService.deleteTask(simulateModel);
+			List<TaskModel> taskModelList = simulateService.createTask(nodeBehavior.getUserBehaviorList(), simulateModel.getId());
 			taskMapper.bulkCreate(taskModelList);
-
-			SimulateModel simulateModel = new SimulateModel();
-			simulateModel.setSceneId(nodeBehavior.getSceneId());
-			simulateModel.setNodeId(nodeBehavior.getNodeId());
-			simulateModel.setDelete(false);
-
-			if (oldSimulate != null) {
-				simulateModel.setOnline(oldSimulate.getOnline());
-				simulateModel.setIp(oldSimulate.getIp());
-				simulateModel.setNodeName(oldSimulate.getNodeName());
-				simulateModel.setSceneName(oldSimulate.getSceneName());
-				simulateModel.setStatus(oldSimulate.getStatus());
-			} else {
-				simulateModel.setOnline(false);
-				simulateModel.setIp("");
-				simulateModel.setNodeName("");
-				simulateModel.setSceneName("");
-				simulateModel.setStatus(SimulateModel.StatusEnum.NOT_STARTED.getCode());
-			}
 			simulateMapper.create(simulateModel);
-			if ( SimulateModel.StatusEnum.RUNNING.getCode().equals(oldSimulate.getStatus()) ) {
-				simulateService.runSimulate(simulateModel.getId());
+			if (SimulateModel.StatusEnum.RUNNING.getCode().equals(simulateModel.getStatus()) ) {
+				simulateService.runSimulate(simulateModel.getId(), true);
 			}
 		}
 	}

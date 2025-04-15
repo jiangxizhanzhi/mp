@@ -2,11 +2,9 @@ package cn.cyberpeace.mp.behavior.service;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
-import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
-import cn.cyberpeace.mp.base.util.basic.CollectionUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.base.util.mptool.CollectionUtil;
@@ -19,10 +17,7 @@ import cn.cyberpeace.mp.behavior.model.SimulateModel;
 import cn.cyberpeace.mp.behavior.model.TaskModel;
 import cn.cyberpeace.mp.behavior.req.CreateSimulateReq;
 import cn.cyberpeace.mp.behavior.req.SimulatePageReq;
-import cn.cyberpeace.mp.behavior.res.SimulateDetailRes;
-import cn.cyberpeace.mp.behavior.res.SimulatePageRes;
-import cn.cyberpeace.mp.behavior.res.StatusRes;
-import cn.cyberpeace.mp.behavior.res.TaskPageRes;
+import cn.cyberpeace.mp.behavior.res.*;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
@@ -78,8 +73,7 @@ public class SimulateService {
 //				.stream()
 //				.collect(Collectors.toMap(NodeBo::getNodeId, NodeBo::getNodeIp));
 		for (NodeBo nodeBo : createSimulateReq.getNodeList()) {
-			HumanCondition humanCondition = new HumanCondition().filterEqual(SceneModel::getSceneId, createSimulateReq.getSceneTemplateId())
-																.filterEqual(SceneModel::getNodeId, nodeBo.getNodeId());
+			HumanCondition humanCondition = new HumanCondition().filterEqual(SceneModel::getNodeId, nodeBo.getNodeId());
 			SceneModel sceneModel = sceneModelMapper.first(humanCondition);
 			if (sceneModel == null) {
 				break;
@@ -122,12 +116,13 @@ public class SimulateService {
 		return simulateMapper.countSimulate();
 	}
 
-	public void runSimulate(String simulateId) {
+	public void runSimulate(String simulateId, Boolean dynamic) {
 		SimulateModel simulateModel = simulateMapper.get(simulateId);
 		if (simulateModel == null) {
 			log.error("找不到对应仪表, 仪表id:[{}]", simulateId);
 			throw new MpRuntimeException("找不到对应仪表");
-		} else if (!SimulateModel.StatusEnum.NOT_STARTED.getCode().equals(simulateModel.getStatus())) {
+		}
+		if (!dynamic && !SimulateModel.StatusEnum.NOT_STARTED.getCode().equals(simulateModel.getStatus())) {
 			log.error("行为仪表[{}]启动失败，状态错误", simulateId);
 			throw new MpRuntimeException("行为仪表状态必须为未开始");
 		}
@@ -137,6 +132,8 @@ public class SimulateService {
 		List<TaskModel> taskModelList = taskMapper.list(new HumanCondition().filterEqual(TaskModel::getSimulateId, simulateId));
 		for (TaskModel taskModel : taskModelList) {
 			BehaviorTimer behaviorTimer = new BehaviorTimer();
+			behaviorTimer.setTime(TimeUtils.format(taskModel.getRunTime()));
+			behaviorTimer.setQueueName(queueName);
 			BehaviorTimerTask behaviorTimerTask = new BehaviorTimerTask();
 			behaviorTimerTask.setBehaviorTemplateId(taskModel.getNetworkBehaviorId());
 			behaviorTimerTask.setBehaviorTemplateName(taskModel.getName());
@@ -206,10 +203,11 @@ public class SimulateService {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
 
-				sceneModelMapper.filterDelete(new HumanCondition().filterEqual(SceneModel::getSceneId, sceneId).filterEqual(SceneModel::getInstance, true));
-				simulateMapper.filterDelete(new HumanCondition().filterEqual(SimulateModel::getSceneId, sceneId));
-				taskMapper.filterDelete(new HumanCondition().filterIn(TaskModel::getSimulateId, simulateModelList.stream().map(SimulateModel::getId).toArray()));
-
+				if (CollectionUtil.isNotEmpty(simulateModelList)) {
+					sceneModelMapper.filterDelete(new HumanCondition().filterEqual(SceneModel::getSceneId, sceneId).filterEqual(SceneModel::getInstance, true));
+					simulateMapper.filterDelete(new HumanCondition().filterEqual(SimulateModel::getSceneId, sceneId));
+					taskMapper.filterDelete(new HumanCondition().filterIn(TaskModel::getSimulateId, simulateModelList.stream().map(SimulateModel::getId).toArray()));
+				}
 			}
 		});
 	}
@@ -242,10 +240,11 @@ public class SimulateService {
 		return simulateDetailRes;
 	}
 
-	public void deleteSimulate(String simulateId) {
-		timerMap.remove(simulateId);
-		simulateMapper.delete(simulateId);
-		taskMapper.filterDelete(new HumanCondition().filterEqual(TaskModel::getSimulateId, simulateId));
+	public void deleteTask(SimulateModel simulateModel) {
+		if (simulateModel != null) {
+			timerMap.remove(simulateModel.getId());
+			taskMapper.filterDelete(new HumanCondition().filterEqual(TaskModel::getSimulateId, simulateModel.getId()));
+		}
 	}
 
 	public List<StatusRes> getStatusList() {
@@ -262,7 +261,7 @@ public class SimulateService {
 	private void recoverTimerTask() {
 		List<String> simulateIdList = simulateMapper.selectIdByStatus(SimulateModel.StatusEnum.RUNNING.getCode());
 		for (String simulateId : simulateIdList) {
-			runSimulate(simulateId);
+			runSimulate(simulateId, true);
 		}
 	}
 
@@ -293,5 +292,25 @@ public class SimulateService {
 			}
 		}
 		return taskModelList;
+	}
+
+	public List<TimerRes> getTimerMap() {
+		List<TimerRes> timerResList = new ArrayList<>();
+		for (String simulateId : timerMap.keySet()) {
+			TimerRes timerRes = new TimerRes();
+			timerRes.setSimulateId(simulateId);
+			List<TaskRes> taskResList = new ArrayList<>();
+			for (String taskId : timerMap.get(simulateId).keySet()) {
+				BehaviorTimer behaviorTimer = timerMap.get(simulateId).get(taskId);
+				TaskRes taskRes = new TaskRes();
+				taskRes.setTaskId(taskId);
+				taskRes.setTime(behaviorTimer.getTime());
+				taskRes.setQueueName(behaviorTimer.getQueueName());
+				taskResList.add(taskRes);
+			}
+			timerRes.setTaskResList(taskResList);
+			timerResList.add(timerRes);
+		}
+		return timerResList;
 	}
 }

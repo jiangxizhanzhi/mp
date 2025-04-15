@@ -8,4 +8,8 @@ import java.util.Timer;
 public class BehaviorTimer extends Timer {
 
 	private Boolean running = true;
+
+	private String queueName;
+
+	private String time;
 }

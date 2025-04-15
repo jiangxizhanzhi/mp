@@ -1,15 +1,10 @@
 package cn.cyberpeace.mp.behavior.controller;
 
-import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.behavior.constant.ControllerConstant;
-import cn.cyberpeace.mp.behavior.req.DeleteReq;
 import cn.cyberpeace.mp.behavior.req.SimulatePageReq;
-import cn.cyberpeace.mp.behavior.res.SimulateDetailRes;
-import cn.cyberpeace.mp.behavior.res.SimulatePageRes;
-import cn.cyberpeace.mp.behavior.res.StatusRes;
-import cn.cyberpeace.mp.behavior.res.TaskPageRes;
+import cn.cyberpeace.mp.behavior.res.*;
 import cn.cyberpeace.mp.behavior.service.SimulateService;
 import cn.cyberpeace.mp.behavior.service.TaskService;
 import io.swagger.annotations.Api;
@@ -54,7 +49,7 @@ public class BehaviorSimulateController {
 	@ApiOperation("启动行为仪表")
 	@GetMapping("/run")
 	public ServiceResult<Boolean> runSimulate(@ApiParam(name = "simulate_id", value = "仪表id") @RequestParam("simulate_id") String simulateId) {
-		simulateService.runSimulate(simulateId);
+		simulateService.runSimulate(simulateId, false);
 		return new ServiceResult<>(true).asResult();
 	}
 
@@ -88,6 +83,12 @@ public class BehaviorSimulateController {
 	@GetMapping("/status")
 	public ServiceResult<List<StatusRes>> getStatusList() {
 		return new ServiceResult<>(simulateService.getStatusList()).asResult();
+	}
+
+	@ApiOperation("查询任务")
+	@GetMapping("/time_map")
+	public ServiceResult<List<TimerRes>> getTimeMap() {
+		return new ServiceResult<>(simulateService.getTimerMap()).asResult();
 	}
 
 }

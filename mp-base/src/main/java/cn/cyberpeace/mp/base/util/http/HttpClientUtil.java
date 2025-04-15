@@ -117,7 +117,6 @@ public class HttpClientUtil {
 	private static <T> T doHttp(HttpUriRequest httpRequest, Class<T> resultType) {
 		HttpResponse response = null;
 		String httpResponse = null;
-		HttpclientContext.getContext().setMethod(httpRequest.getMethod());
 		try {
 			// 1、调用远程服务
 			response = getClient().execute(httpRequest);
@@ -125,21 +124,11 @@ public class HttpClientUtil {
 			// 2、解析远程服务的返回值
 			httpResponse = EntityUtils.toString(response.getEntity(), WebConstant.ENCODING);
 
-			// 3、记录调用日志
-			HttpclientContext.getContext().addLog(httpResponse);
 		} catch (Exception e) {
-			try {
-				HttpclientContext.getContext().doRemoteException(e);
-			} catch (Exception e1) {
-				LOG.error("remote error logging Exception", e1);
-			} finally {
-				HttpclientContext.removeContext();
-				throw new MpRuntimeException("远程服务异常");
-			}
+			throw new MpRuntimeException("远程服务异常");
 		}
 
 		if (StringUtils.isBlank(httpResponse)) {
-			HttpclientContext.getContext().addLog("httpResponse is null");
 			HttpclientContext.removeContext();
 			throw new MpRuntimeException("远程服务异常");
 		}
@@ -150,7 +139,7 @@ public class HttpClientUtil {
 
 	private static HttpClient getClient() {
 
-		return HttpClients.custom().setDefaultHeaders(defaultHeader()).build();
+		return HttpClients.custom().build();
 	}
 
 	/**

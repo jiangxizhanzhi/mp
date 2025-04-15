@@ -17,7 +17,7 @@ import java.util.Map;
 @CacheConfig(cacheNames = { "remoteService" })
 public class RemoteService {
 
-    private String SCENE_RETRIEVE = "http://172.30.103.38:8083/api/cscene/cscene_instances/";
+    private String SCENE_RETRIEVE = "http://172.30.102.38:8083/api/cscene/cscene_instances/";
 
     @Cacheable(key = "#p0")
     public Map<String, String> getIdIpMap(String sceneId) {
