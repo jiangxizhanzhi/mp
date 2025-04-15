@@ -92,7 +92,7 @@ public class CleanJob implements SchedulingConfigurer {
 
         // 清除拓扑模板
         SysConfigModel sceneSwitch = getSysConfig(SCENE_DEL_CONFIG);
-        String value1 = imagesSwitch.getValue();
+        String value1 = sceneSwitch.getValue();
         log.info("清除拓扑模板设置: " + value1);
         if (StringUtils.isNotEmpty(value1) && JsonCommon.parse(value1, SceneDelConfig.class).getEnable()) {
             SceneDelConfig parse = JsonCommon.parse(value1, SceneDelConfig.class);
@@ -119,7 +119,7 @@ public class CleanJob implements SchedulingConfigurer {
 
         // 清除截图文件
         SysConfigModel screenshotSwitch = getSysConfig(SCREENSHOT_CONFIG);
-        String value3 = imagesSwitch.getValue();
+        String value3 = screenshotSwitch.getValue();
         if (StringUtils.isNotEmpty(value3) && JsonCommon.parse(value3, ScreenshotDeleteConfigResponse.class).getEnable()) {
             ScreenshotDeleteConfigResponse parse = JsonCommon.parse(value3, ScreenshotDeleteConfigResponse.class);
             taskRegistrar.addTriggerTask(
