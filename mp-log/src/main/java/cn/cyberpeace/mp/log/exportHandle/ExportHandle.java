@@ -101,6 +101,7 @@ public class ExportHandle {
             return null;
         }
         ExportLogBo exportLogBo = ExportLogBo.builder().username(log.getUserName())
+                .userId(log.getUserId())
                 .module(log.getOpModule())
                 .operate_type(log.getOpType())
                 .operate_object(log.getOpTarget())
