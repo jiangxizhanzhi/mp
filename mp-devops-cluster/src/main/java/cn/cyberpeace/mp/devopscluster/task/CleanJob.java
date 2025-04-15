@@ -215,7 +215,7 @@ public class CleanJob implements SchedulingConfigurer {
         var cscenes = csceneMapper.list(new HumanCondition()
                 .filterEqual(CsceneModel::getType, CsceneModel.Type.TEMPLATE)
                 .filterEqual(CsceneModel::getDeleted, false)
-                .filterLessThan(CsceneModel::getCreateTime, LocalDateTime.now().minusMonths(1))
+//                .filterLessThan(CsceneModel::getCreateTime, LocalDateTime.now().minusMonths(1))
         );
         if (CollectionUtils.isEmpty(cscenes)) {
             return;
