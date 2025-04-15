@@ -22,6 +22,7 @@ import org.apache.poi.util.IOUtils;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 import java.util.concurrent.*;
 
 /**
@@ -46,12 +47,6 @@ public class SshUtil {
         Session session = null;
         ChannelSftp sftpChannel = null;
         try {
-            File file = new File(srcFilePath);
-            if (!file.exists()) {
-                log.error("[{}] file not exist", srcFilePath);
-                return;
-            }
-
             // 1.创建session
             session = createSession(jsch, serverInfo.getHost(), serverInfo.getPort(), serverInfo.getUser());
             // 2.密码登录
@@ -63,10 +58,23 @@ public class SshUtil {
             sftpChannel = (ChannelSftp) session.openChannel("sftp");
             // 4.建立sftp通道连接
             sftpChannel.connect(TIME_OUT);
+            InputStream inputStream = SshUtil.class.getClassLoader().getResourceAsStream(srcFilePath);
+            if (Objects.isNull(inputStream)) {
+                log.error("[{}] file not exist", srcFilePath);
+                return;
+            }
+
+            String fileName = "";
+            int lastIndexOfSlash = srcFilePath.lastIndexOf("/");
+            if (lastIndexOfSlash == -1) {
+                fileName = srcFilePath;
+            } else {
+                fileName = srcFilePath.substring(lastIndexOfSlash + 1);
+            }
 
             // 5. 上传代码
-            sftpChannel.put(srcFilePath, destFilePath + "/" + file.getName(), ChannelSftp.OVERWRITE);
-            log.info("put file [{}] from [{}] to [{}] success", file.getName(), srcFilePath, destFilePath);
+            sftpChannel.put(srcFilePath, destFilePath + "/" + fileName, ChannelSftp.OVERWRITE);
+            log.info("put file [{}] from [{}] to [{}] success", fileName, srcFilePath, destFilePath);
 
             try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
                 log.info("start exec shell script: {}", commands);

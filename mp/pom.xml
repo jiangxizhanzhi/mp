@@ -43,6 +43,13 @@
                 </includes>
                 <filtering>true</filtering>
             </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+                <includes>
+                    <include>traffic_generators.zip</include>
+                </includes>
+            </resource>
         </resources>
 
         <plugins>
