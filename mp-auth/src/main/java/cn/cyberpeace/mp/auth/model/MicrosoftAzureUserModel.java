@@ -53,4 +53,7 @@ public class MicrosoftAzureUserModel extends BaseModel {
 
     @ApiModelProperty(value = "过期时间")
     private LocalDateTime expireTime;
+
+    @ApiModelProperty(value = "采集服务器地址")
+    private String wazuhManagerIp;
 }

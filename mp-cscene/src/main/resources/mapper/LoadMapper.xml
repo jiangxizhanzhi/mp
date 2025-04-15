@@ -117,7 +117,8 @@
          script_file,
          script_type,
          script_code,
-         technology)
+         technology,
+         delivery)
         VALUES (UUID(),
                 #{param.toolName},
                 #{param.toolDescription},
@@ -141,7 +142,8 @@
                 #{param.scriptFile},
                 #{param.scriptType},
                 #{param.scriptCode},
-                #{param.technology})
+                #{param.technology},
+                #{param.delivery})
     </insert>
 
     <insert id="addSynchronousDataSource">
@@ -338,6 +340,9 @@
             </if>
             <if test="param != null and param.technology != null">
                 technology = #{param.technology},
+            </if>
+            <if test="param != null and param.delivery != null">
+                delivery = #{param.delivery},
             </if>
             update_time= now()
         </set>

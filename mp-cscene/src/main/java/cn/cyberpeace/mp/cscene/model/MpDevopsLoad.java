@@ -145,6 +145,11 @@ public class MpDevopsLoad extends BaseModel {
      */
     private Integer technology;
 
+    /**
+     * 是否投送
+     */
+    private Boolean delivery;
+
     public void setConvertRunTable(String runTable) {
         String s = LoadConvertCode.getRunTableConvertMap().get(runTable);
         this.runTable = s != null ? s : LoadConvertCode.RUN_TABLE_OTHER;

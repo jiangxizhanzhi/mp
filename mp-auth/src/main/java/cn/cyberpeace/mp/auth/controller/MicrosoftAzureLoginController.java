@@ -65,4 +65,11 @@ public class MicrosoftAzureLoginController {
         ServiceResult updateLocalAzurer = microsoftAzureLoginService.updateLocalAzurer(requestData);
         return updateLocalAzurer;
     }
+
+    @ApiOperation(value = "采集服务器地址修改", notes = "")
+    @PutMapping("/updateWazuhManagerIp")
+    public ServiceResult updateWazuhManagerIp(@RequestBody MicrosoftAzureUserModel requestData) {
+        ServiceResult updateLocalAzurer = microsoftAzureLoginService.updateWazuhManagerIp(requestData);
+        return updateLocalAzurer;
+    }
 }

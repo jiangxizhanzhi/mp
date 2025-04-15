@@ -28,4 +28,6 @@ public interface MicrosoftAzureLoginService {
      * 修改微软云用户
      */
     ServiceResult updateLocalAzurer(MicrosoftAzureUserModel requestData);
+
+    ServiceResult updateWazuhManagerIp(MicrosoftAzureUserModel requestData);
 }

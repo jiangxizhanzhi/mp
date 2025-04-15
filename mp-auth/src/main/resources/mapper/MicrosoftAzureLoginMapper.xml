@@ -61,6 +61,9 @@
             <if test="param.expireTime != null ">
                 expire_time = #{param.expireTime},
             </if>
+            <if test="param.wazuhManagerIp != null ">
+                wazuh_manager_ip = #{param.wazuhManagerIp},
+            </if>
         </set>
         WHERE
             pk = #{pk}

@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.auth.model.MicrosoftAzureUserModel;
 import cn.cyberpeace.mp.auth.repository.MicrosoftAzureLoginMapper;
 import cn.cyberpeace.mp.auth.service.MicrosoftAzureLoginService;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -76,6 +77,14 @@ public class MicrosoftAzureLoginServiceImpl implements MicrosoftAzureLoginServic
         }
 
         return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "无修改信息，操作成功").asResult();
+    }
+
+    @Override
+    public ServiceResult updateWazuhManagerIp(MicrosoftAzureUserModel requestData) {
+        microsoftAzureLoginMapper.updateLocalAzurer(requestData.getPk().toString(), requestData);
+
+//        TODO 采集服务器地址修改
+        return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "采集服务器地址修改成功").asResult();
     }
 
     // 检查是否有字段需要更新
