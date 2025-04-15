@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.log.bo;
 
+import com.alibaba.excel.annotation.ExcelIgnore;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.write.style.ColumnWidth;
 import com.alibaba.excel.annotation.write.style.HeadRowHeight;
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
 @Builder
 public class ExportLogBo {
 
+    @ExcelIgnore
     private String userId;
 
     @ExcelProperty("用户名")
