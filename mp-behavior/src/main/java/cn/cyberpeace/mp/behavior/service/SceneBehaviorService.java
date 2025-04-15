@@ -69,7 +69,7 @@ public class SceneBehaviorService {
 			simulateService.deleteTask(simulateModel);
 			List<TaskModel> taskModelList = simulateService.createTask(nodeBehavior.getUserBehaviorList(), simulateModel.getId());
 			taskMapper.bulkCreate(taskModelList);
-			simulateMapper.create(simulateModel);
+			simulateMapper.update(simulateModel);
 			if (SimulateModel.StatusEnum.RUNNING.getCode().equals(simulateModel.getStatus()) ) {
 				simulateService.runSimulate(simulateModel.getId(), true);
 			}
