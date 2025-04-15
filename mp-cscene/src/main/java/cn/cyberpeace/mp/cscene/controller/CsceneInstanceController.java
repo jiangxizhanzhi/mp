@@ -1126,7 +1126,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @ApiOperation("添加载荷")
     @ApiImplicitParam(name = "csceneLoadDto", value = "请求体", dataTypeClass = CsceneLoadDto.class)
     @PostMapping("/add_load")
-    public ServiceResult<Object> addLoad(@RequestBody CsceneLoadDto csceneLoadDto) {
+    public ServiceResult<String> addLoad(@RequestBody CsceneLoadDto csceneLoadDto) {
         return modelService.addLoad(csceneLoadDto).asResult();
     }
 

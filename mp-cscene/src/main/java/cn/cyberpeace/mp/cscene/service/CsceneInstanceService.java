@@ -26,6 +26,8 @@ import cn.cyberpeace.mp.base.util.define.SerializableFunction;
 import cn.cyberpeace.mp.base.util.mptool.CacheUtil;
 import cn.cyberpeace.mp.base.util.mptool.CollUtil;
 import cn.cyberpeace.mp.base.util.mptool.CollectionUtil;
+import cn.cyberpeace.mp.common.constant.codeEnum.CommonStatusCodeEnum;
+import cn.cyberpeace.mp.common.service.impl.CommonCodeServiceImpl;
 import cn.cyberpeace.mp.cscene.CscenePluginDataRecordService;
 import cn.cyberpeace.mp.cscene.bo.*;
 import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
@@ -54,6 +56,7 @@ import cn.cyberpeace.mp.cscene.util.ReentrantLockUtils;
 import cn.cyberpeace.mp.scene.bo.AlertRuleBO;
 import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.scene.core.bo.*;
+import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.event.SceneStageRecorder;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
@@ -297,6 +300,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     @Resource
     private LocalLoadExecutionRecordMapper localLoadExecutionRecordMapper;
+
+    @Autowired
+    private CommonCodeServiceImpl commonCodeService;
 
     // expires in 10 minutes
     private Cache<String, String> TIMED_CACHE = CacheUtil.newTimedCache(10 * 60 * 1000);
@@ -2643,19 +2649,110 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ServiceResult<Object> addLoad(CsceneLoadDto csceneLoadDto) {
+    public ServiceResult<String> addLoad(CsceneLoadDto csceneLoadDto) {
 //        过滤出所有load节点 数据库过滤出要新增节点
         String sceneId = csceneLoadDto.getSceneId();
         String loadToolId = csceneLoadDto.getPluginSceneConfigElement().getLoadToolId();
         log.info("addLoad begin. sceneId:{} loadToolId:{}", sceneId, loadToolId);
         CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(sceneId, null, true);
+        SceneHandler sceneHandler = new SceneHandler(instanceHandler.getSceneId(), null, false, null);
+        CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
+        List<CloudPluginSceneElementBO> terminalExcludeNpcCloudElements = pluginHandler.getTerminalExcludeNpcCloudElements();
+        if(terminalExcludeNpcCloudElements.size()==0){
+            return new ServiceResult<String>("场景中未找到本地kali节点",BaseErrorCode.NO_KALI);
+        }
+        CloudPluginSceneElementBO loadToolElementBO = pluginHandler.getTerminalExcludeNpcCloudElements().get(0);
         CsceneInstanceModel csceneInstanceModel = getModelMapper().get(sceneId);
 //        根据场景id获取对应模板
         HumanCondition selectHumanCondition = new HumanCondition()
                 .filterEqual(CloudPluginSceneElementModel::getScene, csceneInstanceModel.getScene())
                 .filterEqual(CloudPluginSceneElementModel::getLoadToolId, loadToolId);
         List<CloudPluginSceneElementModel> list = cloudPluginSceneElementMapper.list(selectHumanCondition);
+//        上传载荷文件
+        uploadLoadFile(loadToolId, instanceHandler);
 
+        if (list.isEmpty()) {
+//            增加载荷
+//            确定位置
+
+            Map<String, SceneAreaBO> areaMap = sceneHandler.getAreaMap();
+            SceneAreaBO sceneAreaBO = areaMap.get("loadUUID");
+            Position arePosition = JsonCommon.parse(sceneAreaBO.getPosition2(), Position.class);
+
+            String position2 = getPosition2(csceneInstanceModel, arePosition);
+            String outerPosition2 = getOuterPosition2(csceneInstanceModel, arePosition);
+            String arePositionStr = JsonCommon.stringify(arePosition);
+            sceneAreaBO.setPosition2(arePositionStr);
+            //            实例场景保存
+            SceneConfigElementModel sceneConfigElementModel = csceneLoadDto.getSceneConfigElement().toModel();
+            CloudPluginSceneConfigElementModel cloudPluginSceneConfigElementModel = csceneLoadDto.getPluginSceneConfigElement().toModel();
+            MpDevopsLoad mpDevopsLoad = loadMapper.getLoadById(cloudPluginSceneConfigElementModel.getLoadToolId());
+            Map<String, String> nextLevelMapsByCodes = commonCodeService.getNextLevelMapsByCodes(CommonStatusCodeEnum.CODE.getCode());
+            log.info("addLoad mpDevopsLoad:{}", JsonCommon.stringify(mpDevopsLoad));
+            SceneElementModel sceneElementModel = new SceneElementModel();
+            cn.cyberpeace.mp.base.util.basic.BeanUtils.copyProperties(sceneConfigElementModel, sceneElementModel);
+            sceneElementModel.setScene(csceneInstanceModel.getScene());
+            sceneElementModel.setArea("loadUUID");
+            sceneElementModel.setPosition2(position2);
+            sceneElementModel.setOuterPosition2(outerPosition2);
+            sceneElementModel.setName(mpDevopsLoad.getToolName());
+            sceneElementModel.setActionType(mpDevopsLoad.getActionType());
+            sceneElementModel.setActionTypeName(mpDevopsLoad.getActionTypeName());
+            sceneElementModel.setControlType(mpDevopsLoad.getControlType());
+            sceneElementModel.setControlTypeName(nextLevelMapsByCodes.get(mpDevopsLoad.getControlType()));
+            sceneElementModel.setIcon2(mpDevopsLoad.getCover());
+            sceneElementMapper.create(sceneElementModel);
+            SceneElementPluginModel sceneElementPluginModel = new SceneElementPluginModel();
+            sceneElementPluginModel.setScene(csceneInstanceModel.getScene());
+            sceneElementPluginModel.setSceneElement(sceneElementModel.getId());
+            sceneElementPluginModel.setPluginKey("cpcloud");
+            sceneElementPluginMapper.create(sceneElementPluginModel);
+            CloudPluginSceneElementModel cloudPluginSceneElementModel = new CloudPluginSceneElementModel();
+            cn.cyberpeace.mp.base.util.basic.BeanUtils.copyProperties(cloudPluginSceneConfigElementModel, cloudPluginSceneElementModel);
+            cloudPluginSceneElementModel.setScene(csceneInstanceModel.getScene());
+            cloudPluginSceneElementModel.setSceneElement(sceneElementModel.getNodeId());
+            cloudPluginSceneElementModel.setRole(BaseSceneElementModel.Type.LOAD);
+            cloudPluginSceneElementModel.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.LOAD);
+            cloudPluginSceneElementModel.setLoadResourceInstanceId(loadToolElementBO.getSrcElement().getId());
+            List<CloudPluginSceneElementPortBO> ports = pluginHandler.getPorts(loadToolElementBO.getSrcElement());
+            List<CloudAccessMode> collect = ports.get(0).getAccessModes().stream().filter(cloudAccessMode -> AccessMode.Protocol.RDP.equals(cloudAccessMode.getProtocol())).collect(Collectors.toList());
+            if("shell".equals(sceneElementModel.getControlTypeName())){
+                collect = ports.get(0).getAccessModes().stream().filter(cloudAccessMode -> AccessMode.Protocol.SSH.equals(cloudAccessMode.getProtocol())).collect(Collectors.toList());
+            }
+            if(collect.size()>0){
+                cloudPluginSceneElementModel.setLoadAccessModel(collect.get(0).getId());
+            }
+            cloudPluginSceneElementMapper.create(cloudPluginSceneElementModel);
+            SceneAreaModel model = sceneAreaBO.toModel();
+            sceneAreaMapper.update(model);
+//            启动载荷节点
+            log.info("addLoad.createElement");
+            this.addLoad(sceneId, cloudPluginSceneElementModel.getSceneElement(), csceneLoadDto.getContext());
+
+//            保存实例信息
+            cn.cyberpeace.mp.base.util.basic.BeanUtils.copyProperties(sceneElementModel, sceneConfigElementModel);
+            csceneService.saveConfigData(csceneLoadDto.getCsceneId(), sceneConfigElementModel, cloudPluginSceneElementModel, cloudPluginSceneConfigElementModel, arePositionStr);
+        } else {
+            MpDevopsLoad mpDevopsLoad = loadMapper.getLoadById(loadToolId);
+            SceneElementModel sceneElementModel = new SceneElementModel();
+            sceneElementModel.setDefaultCmd(csceneLoadDto.getSceneConfigElement().getDefaultCmd());
+            HumanCondition humanCondition = new HumanCondition();
+            humanCondition.filterEqual(SceneElementModel::getScene,csceneInstanceModel.getScene());
+            humanCondition.filterEqual(SceneElementModel::getArea, "loadUUID");
+            humanCondition.filterEqual(SceneElementModel::getName, mpDevopsLoad.getToolName());
+            humanCondition.filterEqual(SceneElementModel::getActionType, mpDevopsLoad.getActionType());
+            sceneElementMapper.filterUpdate(sceneElementModel, humanCondition);
+        }
+        log.info("addLoad end.");
+        return new ServiceResult<>();
+    }
+
+    /**
+     * 上传载荷文件
+     * @param loadToolId
+     * @param instanceHandler
+     */
+    private static void uploadLoadFile(String loadToolId, CsceneInstanceHandler instanceHandler) {
         DevopsLoadSourceMapper devopsLoadSourceMapper = BeanCommon.getBean(DevopsLoadSourceMapper.class);
         String scriptFilePath = devopsLoadSourceMapper.getLoadId(loadToolId);
         log.info("loadById info：{}", scriptFilePath);
@@ -2689,7 +2786,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 com.jcraft.jsch.Session session = jsch.getSession(username, remoteHost, port);
                 session.setPassword(password);
                 // 配置会话的其他选项,如主机密钥检查等
-                java.util.Properties config = new java.util.Properties();
+                Properties config = new Properties();
                 config.put("StrictHostKeyChecking", "no");
                 log.info("config info:{}", JSON.toJSONString(config));
                 session.setConfig(config);
@@ -2710,71 +2807,6 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 e.printStackTrace();
             }
         }
-
-        if (list.isEmpty()) {
-//            增加载荷
-//            确定位置
-            SceneHandler sceneHandler = new SceneHandler(instanceHandler.getSceneId(), null, false, null);
-            Map<String, SceneAreaBO> areaMap = sceneHandler.getAreaMap();
-            SceneAreaBO sceneAreaBO = areaMap.get("loadUUID");
-            Position arePosition = JsonCommon.parse(sceneAreaBO.getPosition2(), Position.class);
-
-            String position2 = getPosition2(csceneInstanceModel, arePosition);
-            String outerPosition2 = getOuterPosition2(csceneInstanceModel, arePosition);
-            String arePositionStr = JsonCommon.stringify(arePosition);
-            sceneAreaBO.setPosition2(arePositionStr);
-            //            实例场景保存
-            SceneConfigElementModel sceneConfigElementModel = csceneLoadDto.getSceneConfigElement().toModel();
-            CloudPluginSceneConfigElementModel cloudPluginSceneConfigElementModel = csceneLoadDto.getPluginSceneConfigElement().toModel();
-            MpDevopsLoad mpDevopsLoad = loadMapper.getLoadById(cloudPluginSceneConfigElementModel.getLoadToolId());
-            log.info("addLoad mpDevopsLoad:{}", JsonCommon.stringify(mpDevopsLoad));
-            SceneElementModel sceneElementModel = new SceneElementModel();
-            cn.cyberpeace.mp.base.util.basic.BeanUtils.copyProperties(sceneConfigElementModel, sceneElementModel);
-            sceneElementModel.setScene(csceneInstanceModel.getScene());
-            sceneElementModel.setArea("loadUUID");
-            sceneElementModel.setPosition2(position2);
-            sceneElementModel.setOuterPosition2(outerPosition2);
-            sceneElementModel.setName(mpDevopsLoad.getToolName());
-            sceneElementModel.setActionType(mpDevopsLoad.getActionType());
-            sceneElementModel.setActionTypeName(mpDevopsLoad.getActionTypeName());
-            sceneElementModel.setControlType(mpDevopsLoad.getControlType());
-            sceneElementModel.setControlTypeName(mpDevopsLoad.getControlTypeName());
-            sceneElementModel.setIcon2(mpDevopsLoad.getCover());
-            sceneElementMapper.create(sceneElementModel);
-            SceneElementPluginModel sceneElementPluginModel = new SceneElementPluginModel();
-            sceneElementPluginModel.setScene(csceneInstanceModel.getScene());
-            sceneElementPluginModel.setSceneElement(sceneElementModel.getId());
-            sceneElementPluginModel.setPluginKey("cpcloud");
-            sceneElementPluginMapper.create(sceneElementPluginModel);
-            CloudPluginSceneElementModel cloudPluginSceneElementModel = new CloudPluginSceneElementModel();
-            cn.cyberpeace.mp.base.util.basic.BeanUtils.copyProperties(cloudPluginSceneConfigElementModel, cloudPluginSceneElementModel);
-            cloudPluginSceneElementModel.setScene(csceneInstanceModel.getScene());
-            cloudPluginSceneElementModel.setSceneElement(sceneElementModel.getNodeId());
-            cloudPluginSceneElementModel.setRole(BaseSceneElementModel.Type.LOAD);
-            cloudPluginSceneElementModel.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.LOAD);
-            cloudPluginSceneElementMapper.create(cloudPluginSceneElementModel);
-            SceneAreaModel model = sceneAreaBO.toModel();
-            sceneAreaMapper.update(model);
-//            启动载荷节点
-            log.info("addLoad.createElement");
-            this.addLoad(sceneId, cloudPluginSceneElementModel.getSceneElement(), csceneLoadDto.getContext());
-
-//            保存实例信息
-            cn.cyberpeace.mp.base.util.basic.BeanUtils.copyProperties(sceneElementModel, sceneConfigElementModel);
-            csceneService.saveConfigData(csceneLoadDto.getCsceneId(), sceneConfigElementModel, cloudPluginSceneElementModel, cloudPluginSceneConfigElementModel, arePositionStr);
-        } else {
-            MpDevopsLoad mpDevopsLoad = loadMapper.getLoadById(loadToolId);
-            SceneElementModel sceneElementModel = new SceneElementModel();
-            sceneElementModel.setDefaultCmd(csceneLoadDto.getSceneConfigElement().getDefaultCmd());
-            HumanCondition humanCondition = new HumanCondition();
-            humanCondition.filterEqual(SceneElementModel::getScene,csceneInstanceModel.getScene());
-            humanCondition.filterEqual(SceneElementModel::getArea, "loadUUID");
-            humanCondition.filterEqual(SceneElementModel::getName, mpDevopsLoad.getToolName());
-            humanCondition.filterEqual(SceneElementModel::getActionType, mpDevopsLoad.getActionType());
-            sceneElementMapper.filterUpdate(sceneElementModel, humanCondition);
-        }
-        log.info("addLoad end.");
-        return new ServiceResult<>(true);
     }
 
     private ServiceResult<Boolean> addLoad(String id, String nodeId, CsceneContextBO context) {
