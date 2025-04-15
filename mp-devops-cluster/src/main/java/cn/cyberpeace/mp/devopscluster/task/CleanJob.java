@@ -93,6 +93,7 @@ public class CleanJob implements SchedulingConfigurer {
         // 清除拓扑模板
         SysConfigModel sceneSwitch = getSysConfig(SCENE_DEL_CONFIG);
         String value1 = imagesSwitch.getValue();
+        log.info("清除拓扑模板设置: " + value1);
         if (StringUtils.isNotEmpty(value1) && JsonCommon.parse(value1, SceneDelConfig.class).getEnable()) {
             SceneDelConfig parse = JsonCommon.parse(value1, SceneDelConfig.class);
             taskRegistrar.addTriggerTask(
@@ -236,12 +237,12 @@ public class CleanJob implements SchedulingConfigurer {
     @Getter
     @Setter
     public static class ImageDelConfig {
-        private Integer referenceNums = 0;
-        private Integer useDuration = 0;
+        private Integer referenceNums;
+        private Integer useDuration;
         @ApiModelProperty(value = "是否开启")
-        private Boolean enable = false;
+        private Boolean enable;
         @ApiModelProperty(value = "定时任务cron表达式")
-        private String cron = "0 0 * * * ?";// 每小时
+        private String cron;
         @ApiModelProperty(value = "需要进行删除比较的日期属性")
         private String deleteDateTimeField;
         @ApiModelProperty(value = "需要进行删除的日期期限天数")
@@ -253,11 +254,11 @@ public class CleanJob implements SchedulingConfigurer {
     @Getter
     @Setter
     public static class SceneDelConfig {
-        private Integer nodeNum = 0;
+        private Integer nodeNum;
         @ApiModelProperty(value = "是否开启")
-        private Boolean enable = false;
+        private Boolean enable;
         @ApiModelProperty(value = "定时任务执行时间")
-        private String cron = "0 0 * * * ?";
+        private String cron;
     }
 
 }
