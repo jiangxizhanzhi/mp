@@ -60,13 +60,6 @@ public class BehaviorSimulateController {
 		return new ServiceResult<>(true).asResult();
 	}
 
-//	@ApiOperation("删除行为仪表")
-//	@DeleteMapping("/delete")
-//	public ServiceResult<Boolean> deleteSimulate(@RequestBody DeleteReq deleteReq) {
-//		simulateService.deleteSimulate(deleteReq.getIds());
-//		return new ServiceResult<>(true).asResult();
-//	}
-
 	@ApiOperation("查看仪表详情")
 	@GetMapping("/detail")
 	public ServiceResult<SimulateDetailRes> detail(@ApiParam(name = "simulate_id", value = "仪表id") @RequestParam("simulate_id") String simulateId) {

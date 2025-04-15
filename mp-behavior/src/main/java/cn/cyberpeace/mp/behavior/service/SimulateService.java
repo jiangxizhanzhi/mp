@@ -159,21 +159,6 @@ public class SimulateService {
 		simulateMapper.update(simulateModel);
 	}
 
-	public void deleteSimulate(List<String> simulateIds) {
-
-		transactionTemplate.execute(new TransactionCallbackWithoutResult() {
-
-			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
-				for (String simulateId : simulateIds) {
-					timerMap.remove(simulateId);
-				}
-				simulateMapper.delete(simulateIds);
-				taskMapper.filterDelete(new HumanCondition().filterIn(TaskModel::getSimulateId, simulateIds.toArray()));
-			}
-		});
-	}
-
 	public ListObjServiceResult<SimulatePageRes> page(SimulatePageReq pageReq) {
 		HumanCondition humanCondition = new HumanCondition()
 				.pagination(pageReq.getPage(), pageReq.getPageSize());
