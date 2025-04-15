@@ -16,10 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 public class FlowClient {
@@ -34,7 +31,7 @@ public class FlowClient {
         HEADER.put("clientSecret", "2112f4b855264ad7b1a4209737fc7836");
     }
 
-    public static List<RemoteFlowInfo> getRemoteFlowInfos(List<String> flowIds) {
+    public static List<RemoteFlowInfo> getRemoteFlowInfos(Set<String> flowIds) {
         List<RemoteFlowInfo> flowInfos = new ArrayList<>();
         for (var flowId : flowIds) {
             RemoteFlowInfo flowInfo = getRemoteFlowInfoNoException(flowId, 2);

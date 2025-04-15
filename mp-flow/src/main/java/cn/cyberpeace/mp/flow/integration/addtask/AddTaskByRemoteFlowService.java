@@ -40,10 +40,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Service(value = "addTaskByRemoteFlowService")
@@ -91,7 +88,7 @@ public class AddTaskByRemoteFlowService implements IAddTaskService {
     }
 
     public void addTasks(List<AddFlowTaskFlowInfo> tasks, String actuatorId, String networkId, String targetIp) {
-        List<String> flowIds = new ArrayList<>();
+        Set<String> flowIds = new HashSet<>();
         for (AddFlowTaskFlowInfo task : tasks) {
             flowIds.add(task.getFlowId());
         }
@@ -164,7 +161,7 @@ public class AddTaskByRemoteFlowService implements IAddTaskService {
         return portModel;
     }
 
-    private List<RemoteFlowInfo> getRemoteFlowInfos(List<String> flowIds) {
+    private List<RemoteFlowInfo> getRemoteFlowInfos(Set<String> flowIds) {
         List<RemoteFlowInfo> remoteFlowInfos = new ArrayList<>();
         for (var flowId : flowIds) {
             var flow = FlowClient.getRemoteFlowInfo(flowId);

@@ -42,12 +42,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Slf4j
 @Service(value = "addTaskByRemoteFlowService2")
@@ -131,7 +126,7 @@ public class AddTaskByRemoteFlowService2 implements IAddTaskService {
         }
 
         // 查流量信息
-        List<String> flowIds = new ArrayList<>();
+        Set<String> flowIds = new HashSet<>();
         flowTaskTaskModelList.forEach(t -> flowIds.add(t.getFlowId()));
         var remote = FlowClient.getRemoteFlowInfos(flowIds);
         Map<String, RemoteFlowInfo> flowId2RemoteFlowInfo = new HashMap<>();
@@ -250,7 +245,7 @@ public class AddTaskByRemoteFlowService2 implements IAddTaskService {
     private void createTaskAndConfig(String actuatorId, Map<String, AddFlowTaskParams> map) {
         for (var e : map.entrySet()) {
             var addFlowTaskParams = e.getValue();
-            List<String> flowIds = new ArrayList<>();
+            Set<String> flowIds = new HashSet<>();
             for (var task : addFlowTaskParams.getTasks()) {
                 flowIds.add(task.getFlowId());
             }
@@ -433,12 +428,30 @@ public class AddTaskByRemoteFlowService2 implements IAddTaskService {
                 }
                 pcapModel.setProtocols(JsonCommon.stringify(protocols));
                 pcapModel.setPcapFile(remoteFlowInfo.getPcapFile());
-                pcapModels.add(pcapModel);
+                FlowPcapModel existedFlowPcap = getFlowPcapModelByFlowId(taskModel.getFlowId());
+                if (Objects.isNull(existedFlowPcap)) {
+                    flowPcapMapper.create(pcapModel);
+                } else {
+                    pcapModel.setId(existedFlowPcap.getId());
+                    flowPcapMapper.update(pcapModel);
+                }
             }
         }
-        flowPcapMapper.bulkCreate(pcapModels);
         flowTaskConfMapper.bulkCreate(confModels);
         return confModels;
+    }
+
+    private FlowPcapModel getFlowPcapModelByFlowId(String flowId) {
+        if (StringUtils.isEmpty(flowId)) {
+            return null;
+        } else {
+            var flowPcapModels = flowPcapMapper.list(new HumanCondition().filterEqual(FlowPcapModel::getFlowId, flowId));
+            if (CollectionUtils.isEmpty(flowPcapModels)) {
+                return null;
+            } else {
+                return flowPcapModels.get(0);
+            }
+        }
     }
 
     private FlowTaskConfModel createTaskConfig(String taskId, int resourceType, AddFlowTaskFlowInfo addFlowTaskFlowInfo, List<ScriptParamModel> defaultScriptModels) {
