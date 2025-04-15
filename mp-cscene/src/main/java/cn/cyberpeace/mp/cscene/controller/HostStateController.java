@@ -1001,6 +1001,9 @@ public class HostStateController implements BaseModelListControllerBase {
         List<HostAcquisitionEventExportResponse> response = new ArrayList<>();
         list.forEach(e -> {
             HostAcquisitionEventExportResponse hostAcquisitionEventExportResponse = new HostAcquisitionEventExportResponse();
+            Integer level = hostAcquisitionEventExportResponse.getLevel();
+            // 0-4 低 5-9 中 10-- 高
+            hostAcquisitionEventExportResponse.setLevelName(level == null ? "未知" : level > 9 ? "高" : level < 5 ? "低" : "中");
             BeanUtils.copyProperties(e, hostAcquisitionEventExportResponse);
             response.add(hostAcquisitionEventExportResponse);
         });

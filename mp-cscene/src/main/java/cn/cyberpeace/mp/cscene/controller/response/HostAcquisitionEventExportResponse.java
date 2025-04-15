@@ -30,9 +30,13 @@ public class HostAcquisitionEventExportResponse {
     @ApiModelProperty("事件名称")
     private String eventDesc;
 
-    @ExcelProperty("级别")
+//    @ExcelProperty("级别")
     @ApiModelProperty("级别")
     private Integer level;
+
+    @ExcelProperty("级别")
+    @ApiModelProperty("级别")
+    private String levelName;
 
     @ExcelProperty("规则描述")
     @ApiModelProperty("规则描述")

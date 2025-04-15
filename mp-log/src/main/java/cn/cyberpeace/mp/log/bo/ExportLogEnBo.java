@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.log.bo;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.write.style.ColumnWidth;
 import com.alibaba.excel.annotation.write.style.HeadRowHeight;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Builder;
 import lombok.Data;
 
@@ -15,9 +16,19 @@ public class ExportLogEnBo {
     @ColumnWidth(15)
     private String username;
 
+    private String userId;
+
     @ExcelProperty("Modules")
     @ColumnWidth(12)
     private String name;
+
+    @ExcelProperty("realname")
+    @ColumnWidth(12)
+    /**
+     * 用户姓名
+     */
+    @ApiModelProperty(value = "用户姓名")
+    private String userRealname;
 
     @ExcelProperty("Operation type")
     @ColumnWidth(12)
