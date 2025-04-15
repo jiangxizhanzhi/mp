@@ -54,6 +54,7 @@ public class BehaviorTimerTask extends TimerTask {
 			}
 		}
 		RunBehaviorLogModel runBehaviorLogModel = new RunBehaviorLogModel();
+		runBehaviorLogModel.setId(runBehaviorId);
 		runBehaviorLogModel.setLogContent("");
 		runBehaviorLogModel.setBehaviorTemplateId(behaviorTemplateId);
 		runBehaviorLogModel.setBehaviorTemplateName(behaviorTemplateName);

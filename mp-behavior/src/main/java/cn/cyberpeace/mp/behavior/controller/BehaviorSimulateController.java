@@ -84,4 +84,11 @@ public class BehaviorSimulateController {
 		return new ServiceResult<>(simulateService.getTimerMap()).asResult();
 	}
 
+	@ApiOperation("执行单个行为")
+	@GetMapping("/run_task")
+	public ServiceResult<Boolean> runTask(@ApiParam(name = "task_id", value = "任务id") @RequestParam("task_id") String taskId) {
+		taskService.runTask(taskId);
+		return new ServiceResult<>(true).asResult();
+	}
+
 }
