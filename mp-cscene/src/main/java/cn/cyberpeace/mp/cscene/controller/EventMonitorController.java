@@ -146,6 +146,9 @@ public class EventMonitorController {
             BigDecimal file = BigDecimal.valueOf(totalFile);
             BigDecimal user = BigDecimal.valueOf(totalUser);
             BigDecimal total = port.add(process).add(net).add(file).add(user);
+            if (total.intValue() == 0) {
+                total = BigDecimal.valueOf(100);
+            }
             EventAggr eventAggr = new EventAggr();
             eventAggr.setPort(port.multiply(BigDecimal.valueOf(100)).divide(total, 2, BigDecimal.ROUND_HALF_UP)
                                       .doubleValue());
