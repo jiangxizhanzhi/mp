@@ -322,7 +322,7 @@ kaptcha:
 
 hyperv:
   cluster:
-    images:
+    imagesMap:
       001: 80a64817-0fe1-49e7-9e1a-95071bb0097b
       002: c38bab41-39b0-4088-9578-cbdf4514f5ea
   vm:

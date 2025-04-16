@@ -89,6 +89,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -119,6 +120,7 @@ import java.util.stream.Collectors;
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/images")
 @Api(tags = "靶标管理-镜像管理")
 @RequiredArgsConstructor
+@ConfigurationProperties(prefix = "hyperv.cluster")
 public class ImagesController {
 
     private final ImagesConverter imagesConverter;
@@ -166,8 +168,8 @@ public class ImagesController {
     @NonNull
     private CsceneSnapshotService csceneSnapshotService;
 
-    @Value("${hyperv.cluster.images}")
-    private Map<String, String> hypervImages;
+
+    private Map<String, String> imagesMap;
 
     /**
      * 分页查询
@@ -357,8 +359,8 @@ public class ImagesController {
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.START, title = "创建虚拟机/容器", target = OpTargetEnums.IMAGE)
     public ServiceResult create(@PathVariable("id") String uuid){
         //判断镜像是否是hyperV镜像
-        if (hypervImages.containsValue(uuid)) {
-            for (Map.Entry<String, String> entry : hypervImages.entrySet()) {
+        if (imagesMap.containsValue(uuid)) {
+            for (Map.Entry<String, String> entry : imagesMap.entrySet()) {
                 if (entry.getValue().equals(uuid)) {
                     String key = entry.getKey();
                     JSONObject res = imagesService.vmAction(key, "start");
@@ -379,8 +381,8 @@ public class ImagesController {
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.STOP, title = "释放镜像", target = OpTargetEnums.IMAGE)
     public ServiceResult deleteInstance(@RequestBody ImagesDeleteInstanceRequest request){
         //判断镜像是否是hyperV镜像
-        if (hypervImages.containsValue(request.getUuid())) {
-            for (Map.Entry<String, String> entry : hypervImages.entrySet()) {
+        if (imagesMap.containsValue(request.getUuid())) {
+            for (Map.Entry<String, String> entry : imagesMap.entrySet()) {
                 if (entry.getValue().equals(request.getUuid())) {
                     String key = entry.getKey();
                     JSONObject res = imagesService.vmAction(key, "delete");
@@ -402,8 +404,8 @@ public class ImagesController {
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.RECOVER, title = "重启镜像", target = OpTargetEnums.IMAGE)
     public ServiceResult reboot(@RequestBody ImagesRebootInstanceRequest request){
         //判断镜像是否是hyperV镜像
-        if (hypervImages.containsValue(request.getInstanceId())) {
-            for (Map.Entry<String, String> entry : hypervImages.entrySet()) {
+        if (imagesMap.containsValue(request.getInstanceId())) {
+            for (Map.Entry<String, String> entry : imagesMap.entrySet()) {
                 if (entry.getValue().equals(request.getInstanceId())) {
                     String key = entry.getKey();
                     JSONObject res = imagesService.vmAction(key, "reboot");
@@ -591,8 +593,8 @@ public class ImagesController {
     @GetMapping("/connection/hyper-v")
     public Result<JSONObject> connectionHyperV(@RequestParam String uuid) {
 
-        if (hypervImages.containsValue(uuid)) {
-            for (Map.Entry<String, String> entry : hypervImages.entrySet()) {
+        if (imagesMap.containsValue(uuid)) {
+            for (Map.Entry<String, String> entry : imagesMap.entrySet()) {
                 if (entry.getValue().equals(uuid)) {
                     String key = entry.getKey();
                     JSONObject res = imagesService.connectionHyperV(key);

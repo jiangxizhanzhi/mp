@@ -41,7 +41,7 @@ public class ImagesService extends BaseCpService {
     /**
      * hyper处理服务地址
      */
-    @Value("${hyper.vm.action.url}")
+    @Value("${hyperv.vm.action.url}")
     private String hyperVUrl;
 
     public ImagesService(DevopsClusterConfig devopsClusterConfig) {
