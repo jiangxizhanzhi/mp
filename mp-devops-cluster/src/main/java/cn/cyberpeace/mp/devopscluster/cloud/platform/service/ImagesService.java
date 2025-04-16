@@ -167,8 +167,10 @@ public class ImagesService extends BaseCpService {
             JSONObject ret = JSONObject.parseObject(res);
             return ret;
         } catch (Exception e) {
-            throw new RuntimeException("Failed to request get vm status server", e);
+            log.error("Failed to request get vm status server", e);
+//            throw new RuntimeException("Failed to request get vm status server", e);
         }
+        return null;
     }
 
     /**

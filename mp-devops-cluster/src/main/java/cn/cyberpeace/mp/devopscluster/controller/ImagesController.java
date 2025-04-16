@@ -171,6 +171,10 @@ public class ImagesController {
 
     private Map<String, String> imagesMap;
 
+    public void setImagesMap(Map<String, String> imagesMap) {
+        this.imagesMap = imagesMap;
+    }
+
     /**
      * 分页查询
      */
@@ -783,7 +787,7 @@ public class ImagesController {
             vo.setImageResourceType(v.getImageResourceType());
 
             //hyper-v靶标处理
-            if (this.connectionHyperV(vo.getUuid()).getData() != null) {
+            if (this.connectionHyperV(vo.getUuid()) != null && this.connectionHyperV(vo.getUuid()).getData() != null) {
                 JSONObject json = this.connectionHyperV(vo.getUuid()).getData();
                 JSONObject data = json.getJSONObject("data");
                 String status = data.getString("status");
