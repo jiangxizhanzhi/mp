@@ -50,6 +50,7 @@ import cn.cyberpeace.mp.cscene.util.ReentrantLockUtils;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.log.utils.SnUtils;
 import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
+import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
 import cn.cyberpeace.mp.scene.core.event.SceneElementEventTransition;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
@@ -1072,6 +1073,30 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
             }
         }
         return new ServiceResult<>(list).asResult();
+    }
+
+    @ApiOperation("查询场景实例")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "area_id", value = "场景实例区域id", dataTypeClass = String.class)
+    })
+    @GetMapping("get_by_area")
+    public ServiceResult<CsceneInstanceBO> getByArea(@RequestParam String id, @RequestParam(required = false,name = "area_id") String areaId) {
+        if (areaId == null) {
+            areaId = StringUtils.EMPTY;
+        }
+        String sceneId = this.modelService.get(id).getSource().getObj().getScene();
+        var csceneBO = getByAreaId(sceneId, areaId);
+        return new ServiceResult<>(csceneBO).asResult();
+    }
+
+    private CsceneInstanceBO getByAreaId(String sceneId, String areaId) {
+        SceneHandler sceneHandler = new SceneHandler(sceneId, areaId, true, null);
+        SceneDataBO dataBO = sceneHandler.toData();
+        CsceneInstanceBO csceneBO = new CsceneInstanceBO();
+        csceneBO.setScene(dataBO);
+        CsceneDataModifier.correctReturnCsceneData(csceneBO);
+        return csceneBO;
     }
 
 }
