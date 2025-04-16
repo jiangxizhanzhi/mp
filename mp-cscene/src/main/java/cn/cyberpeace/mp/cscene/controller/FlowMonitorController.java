@@ -377,18 +377,20 @@ public class FlowMonitorController {
             }
 
             String sourceNodeId = item.getSourceNodeId();
-            List<SceneSwitchInfoModel> sceneSwitchInfoModels = collect2.get(sourceNodeId);
-            Optional<SceneSwitchInfoModel> max = sceneSwitchInfoModels.stream().filter(ii -> ii.getSceneId().equals(id)).max(Comparator.comparing(SceneSwitchInfoModel::getCreateTime));
-            var ref = new Object() {
-                String userId = null;
-            };
-            max.ifPresent(o-> ref.userId = o.getUserId());
-            if(userModelMap.containsKey(ref.userId)){
-                UserModel userModel = userModelMap.get(ref.userId);
-                String name = userModel.getName();
-                String username = userModel.getUsername();
-                item.setUserName(username);
-                item.setName(name);
+            if (collect2.containsKey(sourceNodeId)) {
+                List<SceneSwitchInfoModel> sceneSwitchInfoModels = collect2.get(sourceNodeId);
+                Optional<SceneSwitchInfoModel> max = sceneSwitchInfoModels.stream().filter(ii -> ii.getSceneId().equals(id)).max(Comparator.comparing(SceneSwitchInfoModel::getCreateTime));
+                var ref = new Object() {
+                    String userId = null;
+                };
+                max.ifPresent(o-> ref.userId = o.getUserId());
+                if(userModelMap.containsKey(ref.userId)){
+                    UserModel userModel = userModelMap.get(ref.userId);
+                    String name = userModel.getName();
+                    String username = userModel.getUsername();
+                    item.setUserName(username);
+                    item.setName(name);
+                }
             }
         });
         try {
