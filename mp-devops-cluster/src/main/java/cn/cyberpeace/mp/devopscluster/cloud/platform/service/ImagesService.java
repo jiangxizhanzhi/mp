@@ -20,6 +20,7 @@ import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -36,6 +37,12 @@ import java.util.Objects;
 public class ImagesService extends BaseCpService {
 
     private static final String NORMAL = "/normal";
+
+    /**
+     * hyper处理服务地址
+     */
+    @Value("${hyper.vm.action.url}")
+    private String hyperVUrl;
 
     public ImagesService(DevopsClusterConfig devopsClusterConfig) {
         super(devopsClusterConfig);
@@ -152,13 +159,36 @@ public class ImagesService extends BaseCpService {
      * @param deviceUuid
      * @return
      */
-    public CloudPlatformPageResult<TargetConnection> connectionHyperV(String deviceUuid){
+    public JSONObject connectionHyperV(String deviceUuid){
+        String targetUrl = hyperVUrl + "/status?vm_id=" + deviceUuid;
+
         try {
-            String res = HttpUtils.sendGet("http://192.168.5.42:5000/hyper/status?vm_id=" + deviceUuid);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            String res = HttpUtils.sendGet(targetUrl);
+            JSONObject ret = JSONObject.parseObject(res);
+            return ret;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to request get vm status server", e);
+        }
+    }
+
+    /**
+     * hyper-v虚拟机动作
+     * @param vmId
+     * @return
+     */
+    public JSONObject vmAction(String vmId, String action) {
+        String targetUrl = hyperVUrl + "/action";
+        JSONObject json = new JSONObject();
+        json.put("vm_id", vmId);
+        json.put("action", action);
+
+        try {
+            String res = HttpUtils.sendPost(targetUrl, json.toJSONString());
+            JSONObject ret = JSONObject.parseObject(res);
+            return ret;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to request vm action server", e);
         }
 
-        return null;
     }
 }

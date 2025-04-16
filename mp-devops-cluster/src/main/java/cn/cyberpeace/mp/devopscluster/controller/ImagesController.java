@@ -76,6 +76,7 @@ import cn.cyberpeace.mp.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudmessageconvert.CloudMessageConvertUtil;
 import cn.hutool.core.util.URLUtil;
+import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -87,6 +88,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -163,6 +165,9 @@ public class ImagesController {
 
     @NonNull
     private CsceneSnapshotService csceneSnapshotService;
+
+    @Value("${hyperv.cluster.images}")
+    private Map<String, String> hypervImages;
 
     /**
      * 分页查询
@@ -351,6 +356,16 @@ public class ImagesController {
     @PostMapping("/{id}/create")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.START, title = "创建虚拟机/容器", target = OpTargetEnums.IMAGE)
     public ServiceResult create(@PathVariable("id") String uuid){
+        //判断镜像是否是hyperV镜像
+        if (hypervImages.containsValue(uuid)) {
+            for (Map.Entry<String, String> entry : hypervImages.entrySet()) {
+                if (entry.getValue().equals(uuid)) {
+                    String key = entry.getKey();
+                    JSONObject res = imagesService.vmAction(key, "start");
+                    return ResultCommon.success();
+                }
+            }
+        }
         imagesConverter.create(uuid);
         return ResultCommon.success();
     }
@@ -363,6 +378,17 @@ public class ImagesController {
     @PostMapping("/delete-instance")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.STOP, title = "释放镜像", target = OpTargetEnums.IMAGE)
     public ServiceResult deleteInstance(@RequestBody ImagesDeleteInstanceRequest request){
+        //判断镜像是否是hyperV镜像
+        if (hypervImages.containsValue(request.getUuid())) {
+            for (Map.Entry<String, String> entry : hypervImages.entrySet()) {
+                if (entry.getValue().equals(request.getUuid())) {
+                    String key = entry.getKey();
+                    JSONObject res = imagesService.vmAction(key, "delete");
+                    return ResultCommon.success();
+                }
+            }
+        }
+
         imagesConverter.delete(request);
         return ResultCommon.success();
     }
@@ -375,6 +401,16 @@ public class ImagesController {
     @PostMapping("/reboot")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.RECOVER, title = "重启镜像", target = OpTargetEnums.IMAGE)
     public ServiceResult reboot(@RequestBody ImagesRebootInstanceRequest request){
+        //判断镜像是否是hyperV镜像
+        if (hypervImages.containsValue(request.getInstanceId())) {
+            for (Map.Entry<String, String> entry : hypervImages.entrySet()) {
+                if (entry.getValue().equals(request.getInstanceId())) {
+                    String key = entry.getKey();
+                    JSONObject res = imagesService.vmAction(key, "reboot");
+                    return ResultCommon.success();
+                }
+            }
+        }
         imagesConverter.reboot(request);
         return ResultCommon.success();
     }
@@ -550,12 +586,23 @@ public class ImagesController {
         return new Result<>(connection.getList());
     }
 
-    @ApiOperation("根据设备ID获取登录链接信息")
+    @ApiOperation("根据设备ID查看hyperv状态信息")
     @ApiImplicitParam(name = "uuid", value = "设备ID", dataTypeClass = String.class)
     @GetMapping("/connection/hyper-v")
-    public Result<List<TargetConnection>> connectionHyperV(@RequestParam String uuid) {
-        CloudPlatformPageResult<TargetConnection> connection = imagesService.connectionHyperV(uuid);
-        return new Result<>(connection.getList());
+    public Result<JSONObject> connectionHyperV(@RequestParam String uuid) {
+
+        if (hypervImages.containsValue(uuid)) {
+            for (Map.Entry<String, String> entry : hypervImages.entrySet()) {
+                if (entry.getValue().equals(uuid)) {
+                    String key = entry.getKey();
+                    JSONObject res = imagesService.connectionHyperV(key);
+                    return new Result<>(res);
+                }
+            }
+
+        }
+
+        return new Result<>();
     }
 
     @ApiOperation("同步镜像数据")
@@ -732,6 +779,30 @@ public class ImagesController {
             }
             vo.setCreateUserName(v.getCreateUserName());
             vo.setImageResourceType(v.getImageResourceType());
+
+            //hyper-v靶标处理
+            if (this.connectionHyperV(vo.getUuid()).getData() != null) {
+                JSONObject json = this.connectionHyperV(vo.getUuid()).getData();
+                JSONObject data = json.getJSONObject("data");
+                String status = data.getString("status");
+                /**
+                 * 启动条件：
+                 * instance_state = '0'  & deviceActions中没有'e' & image_status = '2'
+                 * 查看条件：
+                 * instance_state = '2'  & deviceActions中没有'f'
+                 */
+                if ("running".equals(status)) {
+                    vo.getExtVm().setInstanceState(2);
+                    vo.getExtImageInfo().setDeviceActions("");
+                }
+                if ("deleted".equals(status)) {
+                    vo.getExtVm().setInstanceState(0);
+                    vo.getExtImageInfo().setDeviceActions("");
+                    vo.setImageStatus(2);
+                    vo.getExtImageInfo().setImageStatus(2);
+                }
+            }
+
             return vo;
         }).collect(Collectors.toList());
     }
