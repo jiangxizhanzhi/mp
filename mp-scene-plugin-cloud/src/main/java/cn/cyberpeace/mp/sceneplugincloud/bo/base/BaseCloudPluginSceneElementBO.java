@@ -49,6 +49,10 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     private Integer loadSource;
     @ApiModelProperty(value = "本地载荷接入id")
     private String loadAccessModel;
+    @ApiModelProperty(value = "投递节点")
+    private String deliveryNodeId;
+    @ApiModelProperty(value = "投递文件路径")
+    private String deliveryFilePath;
 
     @ApiModelProperty(value = "云平台三层防火墙资源id")
     private String firewallResourceId;

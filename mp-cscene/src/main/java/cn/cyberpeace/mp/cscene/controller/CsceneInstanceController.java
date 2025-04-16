@@ -34,8 +34,10 @@ import cn.cyberpeace.mp.scene.core.bo.SceneAreaBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneAreaModel;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.AzureVirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
@@ -1128,6 +1130,17 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @PostMapping("/add_load")
     public ServiceResult<String> addLoad(@RequestBody CsceneLoadDto csceneLoadDto) {
         return modelService.addLoad(csceneLoadDto).asResult();
+    }
+
+    /**
+     * @param deliveryLoadFileRequest
+     * @return
+     */
+    @ApiOperation("投递载荷文件")
+    @ApiImplicitParam(name = "csceneLoadDto", value = "请求体", dataTypeClass = CsceneLoadDto.class)
+    @PostMapping("/delivery_load_file")
+    public ServiceResult<Map> deliveryLoadFile(@RequestBody DeliveryLoadFileRequest deliveryLoadFileRequest) {
+        return modelService.deliveryLoadFile(deliveryLoadFileRequest).asResult();
     }
 
     private CsceneInstanceBO getByAreaId(String sceneId, String areaId) {

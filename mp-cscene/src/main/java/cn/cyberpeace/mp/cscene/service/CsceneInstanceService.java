@@ -17,6 +17,7 @@ import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.fields.BaseModelFields;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
+import cn.cyberpeace.mp.base.service.result.BaseServiceResult;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -34,6 +35,7 @@ import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.context.CsceneContextHolder;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeExpansionDiskActionRequest;
+import cn.cyberpeace.mp.cscene.controller.request.DeliveryLoadFileRequest;
 import cn.cyberpeace.mp.cscene.core.CsceneInstanceHandler;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.dto.logfile.LogFileVO;
@@ -81,6 +83,7 @@ import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementM
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.AzureVirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConfigElementMapper;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConnectionMapper;
@@ -172,6 +175,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     private CsceneInstanceRoleMapper csceneInstanceRoleMapper;
     private CloudPluginSceneConnectionMapper cloudPluginSceneConnectionMapper;
+    private String groupNamePrefix;
 
     public static final String PROBE_COLLECTION_DATA_REQUEST_ID = "mp:probe:collection:request_id:";
 
@@ -292,16 +296,19 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     @Resource
     private MicrosoftAzureLoginMapper sceneElementPluginConfigMapper;
 
-    @Autowired
+    @Resource
     private LoadServiceImpl loadService;
 
-    @Autowired
+    @Resource
     private CscenePluginDataRecordService dataRecordService;
 
     @Resource
     private LocalLoadExecutionRecordMapper localLoadExecutionRecordMapper;
 
-    @Autowired
+    @Resource
+    private DevopsLoadSourceMapper devopsLoadSourceMapper;
+
+    @Resource
     private CommonCodeServiceImpl commonCodeService;
 
     // expires in 10 minutes
@@ -743,6 +750,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         setModelMapper(modelMapper);
         setCsceneInstanceRoleMapper(csceneInstanceRoleMapper);
         setCloudPluginSceneConnectionMapper(cloudPluginSceneConnectionMapper);
+        this.groupNamePrefix = BeanCommon.getBean(SituationAwareConfig.class).getGroupNamePrefix();
     }
 
     public ListObjServiceResult<CsceneInstanceBO> listCsceneInstanceBO(QueryParams queryParams,
@@ -2658,8 +2666,8 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         SceneHandler sceneHandler = new SceneHandler(instanceHandler.getSceneId(), null, false, null);
         CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
         List<CloudPluginSceneElementBO> terminalExcludeNpcCloudElements = pluginHandler.getTerminalExcludeNpcCloudElements();
-        if(terminalExcludeNpcCloudElements.size()==0){
-            return new ServiceResult<String>("场景中未找到本地kali节点",BaseErrorCode.NO_KALI);
+        if (terminalExcludeNpcCloudElements.size() == 0) {
+            return new ServiceResult<String>("场景中未找到本地kali节点", BaseErrorCode.NO_KALI);
         }
         CloudPluginSceneElementBO loadToolElementBO = pluginHandler.getTerminalExcludeNpcCloudElements().get(0);
         CsceneInstanceModel csceneInstanceModel = getModelMapper().get(sceneId);
@@ -2716,10 +2724,10 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             cloudPluginSceneElementModel.setLoadResourceInstanceId(loadToolElementBO.getSrcElement().getId());
             List<CloudPluginSceneElementPortBO> ports = pluginHandler.getPorts(loadToolElementBO.getSrcElement());
             List<CloudAccessMode> collect = ports.get(0).getAccessModes().stream().filter(cloudAccessMode -> AccessMode.Protocol.RDP.equals(cloudAccessMode.getProtocol())).collect(Collectors.toList());
-            if("shell".equals(sceneElementModel.getControlTypeName())){
+            if ("shell".equals(sceneElementModel.getControlTypeName())) {
                 collect = ports.get(0).getAccessModes().stream().filter(cloudAccessMode -> AccessMode.Protocol.SSH.equals(cloudAccessMode.getProtocol())).collect(Collectors.toList());
             }
-            if(collect.size()>0){
+            if (collect.size() > 0) {
                 cloudPluginSceneElementModel.setLoadAccessModel(collect.get(0).getId());
             }
             cloudPluginSceneElementMapper.create(cloudPluginSceneElementModel);
@@ -2737,7 +2745,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             SceneElementModel sceneElementModel = new SceneElementModel();
             sceneElementModel.setDefaultCmd(csceneLoadDto.getSceneConfigElement().getDefaultCmd());
             HumanCondition humanCondition = new HumanCondition();
-            humanCondition.filterEqual(SceneElementModel::getScene,csceneInstanceModel.getScene());
+            humanCondition.filterEqual(SceneElementModel::getScene, csceneInstanceModel.getScene());
             humanCondition.filterEqual(SceneElementModel::getArea, "loadUUID");
             humanCondition.filterEqual(SceneElementModel::getName, mpDevopsLoad.getToolName());
             humanCondition.filterEqual(SceneElementModel::getActionType, mpDevopsLoad.getActionType());
@@ -2749,11 +2757,11 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     /**
      * 上传载荷文件
+     *
      * @param loadToolId
      * @param instanceHandler
      */
-    private static void uploadLoadFile(String loadToolId, CsceneInstanceHandler instanceHandler) {
-        DevopsLoadSourceMapper devopsLoadSourceMapper = BeanCommon.getBean(DevopsLoadSourceMapper.class);
+    private void uploadLoadFile(String loadToolId, CsceneInstanceHandler instanceHandler) {
         String scriptFilePath = devopsLoadSourceMapper.getLoadId(loadToolId);
         log.info("loadById info：{}", scriptFilePath);
         if (StringUtils.isNotBlank(scriptFilePath)) {
@@ -2814,85 +2822,6 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         boolean result = instanceHandler.addLoad(nodeId);
         return new ServiceResult<>(result);
     }
-
-    /**
-     * 根据所有载荷获取新增载荷位置
-     *
-     * @param csceneInstanceModel
-     * @return
-     */
-    /*private String getPosition2(CsceneInstanceModel csceneInstanceModel) {
-        log.info("getPosition2 begin. sceneId:{}", csceneInstanceModel.getScene());
-        HumanCondition humanCondition = new HumanCondition();
-        humanCondition.filterEqual(SceneElementModel::getScene, csceneInstanceModel.getScene())
-                .filterEqual(SceneElementModel::getArea, "loadUUID");
-        List<SceneElementModel> sceneElementModelList = sceneElementMapper.list(humanCondition);
-        List<Origin> originList = sceneElementModelList
-                .stream()
-                .map(SceneElementModel::getPosition2)
-                .filter(StringUtils::isNotBlank)
-                .map(position2 -> JsonCommon.parse(position2, Origin.class))
-                .collect(Collectors.toList());
-
-        double maxX = originList.stream()
-                .mapToDouble(Origin::getX)
-                .max()
-                .orElse(0);
-        double maxY = originList.stream()
-                .mapToDouble(Origin::getY)
-                .max()
-                .orElse(0);
-        log.info("getPosition2 end. sceneId:{},maxX:{}, maxY:{}", csceneInstanceModel.getScene(), maxX, maxY);
-        if (maxX != 0 && maxY != 0) {
-            Origin origin = new Origin(maxX + 100, maxY);
-            return JsonCommon.stringify(origin);
-        }
-        return "";
-    }
-
-    *//**
-     * 根据所有载荷获取新增载荷位置
-     *
-     * @param csceneInstanceModel
-     * @return
-     *//*
-    private String getOuterPosition2(CsceneInstanceModel csceneInstanceModel) {
-        log.info("getPosition2 begin. sceneId:{}", csceneInstanceModel.getScene());
-        HumanCondition humanCondition = new HumanCondition();
-        humanCondition.filterEqual(SceneElementModel::getScene, csceneInstanceModel.getScene())
-                .filterEqual(SceneElementModel::getArea, "loadUUID");
-        List<SceneElementModel> sceneElementModelList = sceneElementMapper.list(humanCondition);
-        List<Origin> originList = sceneElementModelList
-                .stream()
-                .map(SceneElementModel::getOuterPosition2)
-                .filter(StringUtils::isNotBlank)
-                .map(position2 -> {
-//                    云场景无多层
-                    Map<String, String> parse = JsonCommon.parse(position2, new TypeReference<Map<String, String>>() {
-                    });
-                    return parse.get("");
-                })
-                .filter(StringUtils::isNotBlank)
-                .map(position2 -> JsonCommon.parse(position2, Origin.class))
-                .collect(Collectors.toList());
-
-        double maxX = originList.stream()
-                .mapToDouble(Origin::getX)
-                .max()
-                .orElse(0);
-        double maxY = originList.stream()
-                .mapToDouble(Origin::getY)
-                .max()
-                .orElse(0);
-        log.info("getPosition2 end. sceneId:{},maxX:{}, maxY:{}", csceneInstanceModel.getScene(), maxX, maxY);
-        if (maxX != 0 && maxY != 0) {
-            Origin origin = new Origin(maxX + 100, maxY);
-            HashMap<String, String> map = new HashMap<>();
-            map.put("", JsonCommon.stringify(origin));
-            return JsonCommon.stringify(map);
-        }
-        return "";
-    }*/
 
     /**
      * 根据所有载荷获取新增载荷位置
@@ -3005,24 +2934,8 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             localLoadExecutionRecordModel.setDemoStatus(LocalLoadExecutionRecordModel.Status.NOT_EXECUTED.getCode());
             localLoadExecutionRecordMapper.create(localLoadExecutionRecordModel);
         }
-//        业务修改 此处不执行命令
-        /*var execBO = scenePluginCloudSceneService.execElementCommandV2(sceneId, nodeId, command, user).getSource();
 
-        if (null != localLoadExecutionRecordModel.getId()) {
-//            执行过慢的命令可能已经出流量发送了态势动效
-            localLoadExecutionRecordModel = localLoadExecutionRecordMapper.get(localLoadExecutionRecordModel.getId());
-            if (LocalLoadExecutionRecordModel.Status.ANIMATION_SENT.getCode() != localLoadExecutionRecordModel.getStatus()) {
-                if (execBO.getStatus()) {
-                    localLoadExecutionRecordModel.setStatus(LocalLoadExecutionRecordModel.Status.EXECUTED.getCode());
-                } else {
-                    localLoadExecutionRecordModel.setStatus(LocalLoadExecutionRecordModel.Status.EXECUTION_FAILED.getCode());
-                }
-                localLoadExecutionRecordMapper.update(localLoadExecutionRecordModel);
-            }
-        }*/
         var result = new ElementCommandExecResult();
-//        result.setOutput(execBO.getOutput());
-//        result.setStatus(execBO.getStatus());
         result.setStatus(true);
         result.setOutput(localLoadExecutionRecordModel.getId());
         return new ServiceResult<>(result);
@@ -3043,9 +2956,75 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         sceneElementModel.setDefaultCmd(command);
         HumanCondition humanCondition = new HumanCondition();
         humanCondition.filterEqual(SceneElementModel::getNodeId, loadNodeId);
-        humanCondition.filterEqual(SceneElementModel::getScene,scene);
+        humanCondition.filterEqual(SceneElementModel::getScene, scene);
         int i = sceneElementMapper.filterUpdate(sceneElementModel, humanCondition);
         return new ServiceResult<>(i);
+    }
+
+    private static final String WINDOWS_DELIVERY_LOAD_FILE_COMMAND = "curl -o %s \"http://%s/download/tmp/%s\"";
+    private static final String LINUX_DELIVERY_LOAD_FILE_COMMAND = "curl -o %s \"http://%s/download/tmp/%s\"";
+
+    /**
+     * 投递载荷文件
+     *
+     * @param deliveryLoadFileRequest
+     * @return
+     */
+    public ServiceResult<Map> deliveryLoadFile(DeliveryLoadFileRequest deliveryLoadFileRequest) {
+//        获取场景内载荷信息、目标节点信息
+        String sceneId = deliveryLoadFileRequest.getSceneId();
+        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(sceneId, null, true);
+        SceneHandler sceneHandler = new SceneHandler(instanceHandler.getSceneId(), null, false, null);
+        CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
+        Map<String, CloudPluginSceneElementBO> elementMap = pluginHandler.getElementMap();
+        CloudPluginSceneElementBO loadElement = elementMap.get(deliveryLoadFileRequest.getLoadNodeId());
+        CloudPluginSceneElementBO targetElement = elementMap.get(deliveryLoadFileRequest.getTargetNodeId());
+//        文件位置
+        String scriptFilePath = devopsLoadSourceMapper.getLoadId(loadElement.getLoadToolId());
+        String fileName = scriptFilePath.substring(scriptFilePath.lastIndexOf('/') + 1);
+
+//        生成资源组名称
+        String groupName = pluginHandler.getSourceSceneId();
+        groupName = StringUtils.isNotBlank(groupNamePrefix) ? groupNamePrefix + "-" + groupName : groupName;
+        // 生成虚拟机名称
+        String vmName = HandlerUtils.genResourceName(targetElement.getSrcElement().getEid());
+//        根据目标节点虚拟机类型不同使用不同的方法投递载荷文件
+        String vmType = targetElement.getVmType().toLowerCase();
+        String filePath = "";
+        if (BaseSceneModel.CloudType.PUBLIC == sceneHandler.getScene().getCloudType()) {
+            IAzureResourceManager azureResourceManager = IAzureResourceManager.getInstance(BaseSceneModel.CloudType.PUBLIC);
+            String wazuhManagerIp = azureResourceManager.getUser().getWazuhManagerIp();
+            if (BaseSceneElementModel.SystemType.WINDOWS.equals(vmType)) {
+                filePath = "C:\\"+fileName;
+                String command = String.format(WINDOWS_DELIVERY_LOAD_FILE_COMMAND, filePath, wazuhManagerIp, fileName);
+                List<String> commands = Arrays.asList(command);
+                azureResourceManager
+                        .getManager()
+                        .virtualMachines()
+                        .runPowerShellScript(groupName, vmName, commands, new ArrayList<>());
+            } else {
+                filePath = "/tmp/"+fileName;
+                String command = String.format(LINUX_DELIVERY_LOAD_FILE_COMMAND, filePath, wazuhManagerIp, fileName);
+                    List<String> commands = Arrays.asList(command);
+                    azureResourceManager
+                            .getManager()
+                            .virtualMachines()
+                            .runShellScript(groupName, vmName, commands, new ArrayList<>());
+            }
+        }
+//        阶段载荷上保存投递的节点id
+        loadElement.setDeliveryNodeId(deliveryLoadFileRequest.getTargetNodeId());
+        loadElement.setDeliveryFilePath(filePath);
+        cloudPluginSceneElementMapper.update(loadElement.toModel());
+
+//        返回远程信息
+        List<CloudPluginSceneElementPortBO> ports = pluginHandler.getPorts(targetElement.getSrcElement());
+        CloudAccessMode collect = ports.get(0).getAccessModes().get(0);
+
+        HashMap<String, String> data = new HashMap<>();
+        data.put("access_mode_id",collect.getId());
+        data.put("node_id",deliveryLoadFileRequest.getTargetNodeId());
+        return new ServiceResult<>(data);
     }
 
     @Getter
