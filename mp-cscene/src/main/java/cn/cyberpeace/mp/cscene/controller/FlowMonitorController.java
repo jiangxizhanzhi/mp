@@ -1,11 +1,14 @@
 package cn.cyberpeace.mp.cscene.controller;
 
+import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -23,6 +26,8 @@ import cn.cyberpeace.mp.cscene.dto.flow.FlowPcapFileInfo;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowRiskCount;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowTrend;
 import cn.cyberpeace.mp.cscene.dto.flow.TotalFlowAttackRatio;
+import cn.cyberpeace.mp.cscene.model.SceneSwitchInfoModel;
+import cn.cyberpeace.mp.cscene.repository.SceneSwitchInfoMapper;
 import cn.cyberpeace.mp.cscene.request.common.AssetsStatisticsRequest;
 import cn.cyberpeace.mp.cscene.request.common.AttackCountRequest;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
@@ -33,6 +38,7 @@ import cn.cyberpeace.mp.cscene.request.flow.FlowSceneSimulationRequest;
 import cn.cyberpeace.mp.cscene.request.flow.FlowTrendRequest;
 import cn.cyberpeace.mp.cscene.response.AssetsStatisticsResponse;
 import cn.cyberpeace.mp.cscene.service.CsceneCommonService;
+import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.FlowMonitorService;
 import cn.cyberpeace.mp.cscene.service.SceneMonitorService;
 import cn.cyberpeace.mp.cscene.service.multirange.testrange.NodeInfo;
@@ -41,7 +47,9 @@ import cn.cyberpeace.mp.cscene.vo.FlowGroupByDestinationIpAndSeverityVO;
 import cn.cyberpeace.mp.cscene.vo.FlowGroupPortWithProtocolVO;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
+import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
 import cn.cyberpeace.mp.scene.repository.SceneMapper;
+import cn.cyberpeace.mp.sceneplugincloud.service.CloudCommonConfigService;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CategoryGroupBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.SceneAssetsBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.SceneConfigAssetBO;
@@ -65,6 +73,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.Resource;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -92,6 +101,21 @@ public class FlowMonitorController {
 
     @Autowired
     private SceneMonitorService sceneMonitorService;
+
+    @Autowired
+    private SceneElementMapper sceneElementMapper;
+
+    @Autowired
+    private SceneSwitchInfoMapper sceneSwitchInfoMapper;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private CsceneInstanceService csceneInstanceService;
+
+    @Resource
+    private CloudCommonConfigService cloudCommonConfigService;
 
     @ApiOperation(value = "模拟流量")
     @GetMapping("/simulation")
@@ -329,7 +353,44 @@ public class FlowMonitorController {
                 attackInfo.setTargetNodeName(targetNodeInfo.getNodeName());
             }
         });
+        ServiceResult<Map<String, Object>> mapServiceResult = cloudCommonConfigService.getSystemTypeToAgentSupport().asResult();
+        HumanCondition humanCondition = new HumanCondition();
+        String sceneId = csceneInstanceService.getSceneId(id);
+        humanCondition.filterEqual(SceneElementModel::getScene, sceneId);
+        List<SceneElementModel> list = sceneElementMapper.list(humanCondition);
+        Map<String, String> collect = list.stream().collect(Collectors.toMap(SceneElementModel::getNodeId, SceneElementModel::getSystemType));
+        HumanCondition humanCondition1 = new HumanCondition();
+        humanCondition1.filterEqual(SceneSwitchInfoModel::getSceneId, id);
+        List<SceneSwitchInfoModel> list1 = sceneSwitchInfoMapper.list(humanCondition1);
+        Map<String, List<SceneSwitchInfoModel>> collect2 = list1.stream().collect(Collectors.groupingBy(SceneSwitchInfoModel::getNodeId));
+        List<UserModel> userModels = userService.listByUsers();
+        Map<String, UserModel> userModelMap = userModels.stream().collect(Collectors.toMap(UserModel::getId, s -> s));
+        subList.stream().forEach(item -> {
+            String targetNodeId = item.getTargetNodeId();
+            String systemType = collect.get(targetNodeId);
+            if(mapServiceResult.getSource().containsKey(systemType)){
 
+                Object o = mapServiceResult.getSource().get(systemType);
+                item.setTargetNodeType(o.toString());
+            } else {
+                item.setTargetNodeType("其他");
+            }
+
+            String sourceNodeId = item.getSourceNodeId();
+            List<SceneSwitchInfoModel> sceneSwitchInfoModels = collect2.get(sourceNodeId);
+            Optional<SceneSwitchInfoModel> max = sceneSwitchInfoModels.stream().filter(ii -> ii.getSceneId().equals(id)).max(Comparator.comparing(SceneSwitchInfoModel::getCreateTime));
+            var ref = new Object() {
+                String userId = null;
+            };
+            max.ifPresent(o-> ref.userId = o.getUserId());
+            if(userModelMap.containsKey(ref.userId)){
+                UserModel userModel = userModelMap.get(ref.userId);
+                String name = userModel.getName();
+                String username = userModel.getUsername();
+                item.setUserName(username);
+                item.setName(name);
+            }
+        });
         try {
             return new ListObjServiceResult<>(new ListObjResult<>(subList, sortedFlowAttacks.size()).asResult()).asResult();
         } catch (Exception e) {

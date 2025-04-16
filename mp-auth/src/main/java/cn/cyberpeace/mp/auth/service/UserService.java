@@ -38,6 +38,7 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
     UserModel getByUserName(String userName);
 
     List<UserModel> listByUserName(List<String> userNames);
+    List<UserModel> listByUsers();
 
     UserModel getByIdent(String ident);
 

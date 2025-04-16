@@ -488,6 +488,14 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
     @Override
+    public List<UserModel> listByUsers() {
+        HumanCondition humanCondition = new HumanCondition();
+        List<UserModel> userModels = getModelMapper().list(humanCondition);
+        userModels.stream().forEach(userModel -> setDefaultIfNoAvatar(userModel));
+        return userModels;
+    }
+
+    @Override
     public UserModel getByIdent(String ident) {
         UserModel userModel = getModelMapper().first(new HumanCondition().filterEqual("identifier", ident));
         setDefaultIfNoAvatar(userModel);

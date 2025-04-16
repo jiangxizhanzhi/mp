@@ -16,4 +16,12 @@ public class FlowAttackDto extends FlowBO {
     @ApiModelProperty("攻击类型信息")
     private AttackInfo attackInfo;
 
+    @ApiModelProperty("用户")
+    private String userName;
+
+    @ApiModelProperty("姓名")
+    private String name;
+
+    @ApiModelProperty("目的节点类型")
+    private String targetNodeType;
 }
