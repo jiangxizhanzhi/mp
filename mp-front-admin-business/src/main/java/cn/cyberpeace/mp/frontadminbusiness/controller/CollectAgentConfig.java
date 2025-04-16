@@ -7,6 +7,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class CollectAgentConfig {
+    @ApiModelProperty(value = "分靶场id")
+    private String id ;
     @ApiModelProperty(value = "采集开关")
     private Boolean enable;
     @ApiModelProperty(value = "采集周期，单位秒")
@@ -23,7 +25,7 @@ public class CollectAgentConfig {
     public static CollectAgentConfig defaultValue(){
         CollectAgentConfig agentConfig = new CollectAgentConfig();
         agentConfig.setEnable(true);
-        agentConfig.setPeriod(180);
+        agentConfig.setPeriod(1);
         agentConfig.setInfo(true);
         agentConfig.setFlow(true);
         agentConfig.setEvent(true);
