@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.scene.core.bo.base;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementPortConnectionBO;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneAreaNodeConnectionModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementPortConnectionModel;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -25,6 +26,8 @@ import java.util.regex.Pattern;
 @Data
 public abstract class BaseSceneAreaNodeConnectionBO<M extends BaseSceneAreaNodeConnectionModel,
         T extends BaseSceneAreaNodeConnectionBO<M, T>> extends EidBO<M, T> {
+    private static final String regex = "port_(.+)_(layer_[0-9]+)";
+    private static final Pattern pattern = Pattern.compile(regex);
     /**
      * 连接id
      */
@@ -56,6 +59,8 @@ public abstract class BaseSceneAreaNodeConnectionBO<M extends BaseSceneAreaNodeC
 
     @ApiModelProperty(value = "路径点")
     private List<Map<String, Object>> vertices;
+
+    public abstract <C extends BaseSceneElementPortConnectionBO<?, ?>> C convertAreaNodeConnectToConnection();
 
     /**
      * 从模型加载
@@ -105,6 +110,18 @@ public abstract class BaseSceneAreaNodeConnectionBO<M extends BaseSceneAreaNodeC
         Matcher matcher = pattern.matcher(input);
         if (matcher.find()) {
             String extracted = matcher.group(1);
+            return extracted;
+        }
+        return input;
+    }
+
+    public String getSourceNodeConnectPortName() { return parseNodeConnectPortName(source); }
+    public String getTargetNodeConnectPortName() { return parseNodeConnectPortName(target); }
+
+    private String parseNodeConnectPortName(String input) {
+        Matcher matcher = pattern.matcher(input);
+        if (matcher.find()) {
+            String extracted = matcher.group(2);
             return extracted;
         }
         return input;

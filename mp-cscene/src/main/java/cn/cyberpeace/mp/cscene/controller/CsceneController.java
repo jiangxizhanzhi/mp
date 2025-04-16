@@ -928,4 +928,32 @@ public class CsceneController implements BaseModelListControllerBase {
         }
         return new ServiceResult<>(list).asResult();
     }
+
+    @ApiOperation("根据区域获取指定id场景模板，同时针对3d态势特制，额外将层节点放到elements处")
+    @GetMapping("/get_by_area/3d")
+    public ServiceResult<CsceneBO> getByAreaFor3D(@RequestParam String id, @RequestParam(required = false, name = "area_id") String areaId) {
+        if (areaId == null) {
+            areaId = StringUtils.EMPTY;
+        }
+        String sceneId = this.modelService.get(id).getSource().getObj().getSceneConfig();
+        var csceneBO = getByAreaIdFor3D(sceneId, areaId);
+        var roleMapper = BeanCommon.getBean(CsceneRoleMapper.class);
+        var list = roleMapper.list(new HumanCondition().filterEqual(BaseCsceneRoleModel::getCscene, id)
+                                           .orderBy(BaseCsceneRoleModel::getPk));
+        if (list != null) {
+            csceneBO.setRoles(convertToRoleBOs(list, CsceneRoleBO.class));
+        } else {
+            csceneBO.setRoles(new ArrayList<>());
+        }
+        return new ServiceResult<>(csceneBO).asResult();
+    }
+
+    private CsceneBO getByAreaIdFor3D(String sceneId, String areaId) {
+        SceneConfigHandler sceneConfigHandler = new SceneConfigHandler(sceneId, areaId, true, null);
+        SceneConfigDataBO dataBO = sceneConfigHandler.toDataFor3D();
+        CsceneBO csceneBO = new CsceneBO();
+        csceneBO.setSceneConfig(dataBO);
+        CsceneDataModifier.correctReturnCsceneData(csceneBO);
+        return csceneBO;
+    }
 }

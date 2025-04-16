@@ -1171,7 +1171,7 @@ public class CreateHandler extends HandlerCommon {
             createData.setEgressRules(cloudFirewallRules.getEgressRules());
         }
 
-        // 防火墙连接的虚拟路由端口
+        //防火墙连接的虚拟路由端口
         Set<String> targetPorts = new HashSet<>();
         var connectedSrcPorts = getPluginHandler().getElementConnectedSrcPorts(srcElement.getId());
         for (var connectedSrcPort : connectedSrcPorts) {

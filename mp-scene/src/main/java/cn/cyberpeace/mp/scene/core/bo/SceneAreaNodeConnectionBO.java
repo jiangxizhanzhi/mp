@@ -17,4 +17,17 @@ public class SceneAreaNodeConnectionBO extends BaseSceneAreaNodeConnectionBO<Sce
         return new SceneNodeConnectionModel();
     }
 
+    @Override
+    public SceneElementPortConnectionBO convertAreaNodeConnectToConnection() {
+        SceneElementPortConnectionBO sceneElementPortConnectionBO = new SceneElementPortConnectionBO();
+        sceneElementPortConnectionBO.setId(this.getId());
+        sceneElementPortConnectionBO.setSource(this.getSource());
+        sceneElementPortConnectionBO.setTarget(this.getTarget());
+        sceneElementPortConnectionBO.setEid(this.getEid());
+        sceneElementPortConnectionBO.setName(this.getName());
+        sceneElementPortConnectionBO.setDisplayContext(this.getDisplayContext());
+        sceneElementPortConnectionBO.setVertices(this.getVertices());
+        return sceneElementPortConnectionBO;
+    }
+
 }

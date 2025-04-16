@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.base.util.basic.MapUtils;
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldNames;
 import cn.cyberpeace.mp.base.util.define.ListTreeNode;
 import cn.cyberpeace.mp.base.util.mptool.ConcurrentHashSet;
@@ -2442,5 +2443,98 @@ public abstract class BaseSceneHandler<
 
     private boolean isLayerArea(A0 model) {
         return model != null && model.getType() != null && model.getType() == BaseSceneAreaModel.Type.LAYER;
+    }
+
+    public D toDataFor3D() {
+        D dataBO = this.toData();
+        T topologyBO = dataBO.getTopology();
+
+        //处理topo connection异常多的问题
+        if (CollectionUtils.isNotEmpty(topologyBO.getConnections())) {
+            Set<String> allPorts = topologyBO.getElements().stream().flatMap(element -> Optional.of(element).map(BaseSceneElementBO::getPorts).orElse(new ArrayList<>())
+                    .stream()).map(BaseSceneElementPortBO::getId).collect(Collectors.toSet());
+            Iterator<C> connectionBOIterator = topologyBO.getConnections().iterator();
+            while (connectionBOIterator.hasNext()) {
+                C connection = connectionBOIterator.next();
+                boolean connectPortsExistFlag = allPorts.contains(connection.getSource()) && allPorts.contains(connection.getTarget());
+                if (!connectPortsExistFlag) {
+                    connectionBOIterator.remove();
+                }
+            }
+        }
+
+        //将node connect转为connect
+        List<C3> tSceneAreaNodeConnectionBOS = topologyBO.getNodeConnections();
+        if (CollectionUtils.isNotEmpty(tSceneAreaNodeConnectionBOS)) {
+            tSceneAreaNodeConnectionBOS.forEach(nodeConnection -> {
+                if (Objects.isNull(topologyBO.getConnections())) {
+                    topologyBO.setConnections(new ArrayList<>());
+
+                }
+                topologyBO.getConnections().add(nodeConnection.convertAreaNodeConnectToConnection());
+            });
+        }
+
+        List<BaseSceneAreaNodeConnectionBO> nodeConnections = new ArrayList<>(tSceneAreaNodeConnectionBOS);
+
+
+        topologyBO.getElements().forEach(element -> {
+            try {
+                if (CollectionUtils.isNotEmpty(nodeConnections)) {
+                    for (BaseSceneAreaNodeConnectionBO nodeConnection : nodeConnections) {
+                        if (nodeConnection.getSourceNodeId().equals(element.getId())) {
+                            P sceneElementPortBO = sceneElementPortBOClass.getDeclaredConstructor().newInstance();
+                            sceneElementPortBO.setElement(element);
+                            sceneElementPortBO.setEid(TextUtils.uuid());
+                            sceneElementPortBO.setId(nodeConnection.getSource());
+                            sceneElementPortBO.setName(nodeConnection.getSourceNodeConnectPortName());
+                            if (Objects.isNull(element.getPorts())) {
+                                element.setPorts(new ArrayList<>());
+                            }
+                            Set<String> existPorts = element.getPorts().stream().map(port -> port.getId()).collect(Collectors.toSet());
+                            if (!existPorts.contains(sceneElementPortBO.getId())) {
+                                element.getPorts().add(sceneElementPortBO);
+                            }
+
+                        } else if (nodeConnection.getTargetNodeId().equals(element.getId())) {
+                            P sceneElementPortBO = sceneElementPortBOClass.getDeclaredConstructor().newInstance();
+                            sceneElementPortBO.setElement(element);
+                            sceneElementPortBO.setEid(TextUtils.uuid());
+                            sceneElementPortBO.setId(nodeConnection.getTarget());
+                            sceneElementPortBO.setName(nodeConnection.getTargetNodeConnectPortName());
+                            if (Objects.isNull(element.getPorts())) {
+                                element.setPorts(new ArrayList<>());
+                            }
+                            Set<String> existPorts = element.getPorts().stream().map(port -> port.getId()).collect(Collectors.toSet());
+                            if (!existPorts.contains(sceneElementPortBO.getId())) {
+                                element.getPorts().add(sceneElementPortBO);
+                            }
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+            }
+        });
+
+        //将layer area转为element
+        List<A> AS = topologyBO.getAreas();
+        List<A> sceneAreaWithoutLayerAreas = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(AS)) {
+            AS.forEach(area -> {
+                if (BaseSceneAreaModel.Type.LAYER == area.getType()) {
+                    if (Objects.isNull(topologyBO.getElements())) {
+                        topologyBO.setElements(new ArrayList<>());
+                    }
+                    topologyBO.getElements().add(area.convertSceneAreaToElement(nodeConnections));
+                } else {
+                    sceneAreaWithoutLayerAreas.add(area);
+                }
+            });
+        }
+        topologyBO.setAreas(sceneAreaWithoutLayerAreas);
+
+
+        return dataBO;
     }
 }
