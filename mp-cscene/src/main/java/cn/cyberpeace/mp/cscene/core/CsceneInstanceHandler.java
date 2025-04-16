@@ -50,6 +50,8 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
 
     private SceneService sceneService;
 
+    private String areaId;
+
     private CsceneInstanceUserCountService csceneInstanceUserCountService;
 
     private SceneContextBO generateSceneContext() {
@@ -77,6 +79,11 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         } else {
             init(csceneId, context);
         }
+    }
+
+    public CsceneInstanceHandler(String csceneId,String areaId, CsceneContextBO context) {
+        this.areaId = areaId;
+        init(csceneId, context);
     }
 
     public CsceneInstanceHandler(String csceneId, CsceneContextBO context) {
@@ -118,7 +125,8 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
 
     @Override
     public void loadScene(CsceneInstanceBO csceneBO, String sceneId) {
-        csceneBO.setScene(sceneService.get(sceneId, false, null, generateSceneContext()).getSource());
+        csceneBO.setScene(sceneService.get(sceneId, areaId == null ? false : true, areaId, generateSceneContext())
+                                  .getSource());
     }
 
     @Override
