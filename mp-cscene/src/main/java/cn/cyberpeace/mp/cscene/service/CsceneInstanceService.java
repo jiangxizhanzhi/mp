@@ -175,9 +175,11 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     private CsceneInstanceRoleMapper csceneInstanceRoleMapper;
     private CloudPluginSceneConnectionMapper cloudPluginSceneConnectionMapper;
-    private String groupNamePrefix;
 
     public static final String PROBE_COLLECTION_DATA_REQUEST_ID = "mp:probe:collection:request_id:";
+
+    private static final String WINDOWS_DELIVERY_LOAD_FILE_COMMAND = "curl -o %s \"http://%s/download/tmp/%s\"";
+    private static final String LINUX_DELIVERY_LOAD_FILE_COMMAND = "curl -o %s \"http://%s/download/tmp/%s\"";
 
     @Autowired
     private RabbitmqCsceneReporter csceneReporter;
@@ -310,6 +312,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     @Resource
     private CommonCodeServiceImpl commonCodeService;
+
+    @Resource
+    private SituationAwareConfig situationAwareConfig;
 
     // expires in 10 minutes
     private Cache<String, String> TIMED_CACHE = CacheUtil.newTimedCache(10 * 60 * 1000);
@@ -750,7 +755,6 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         setModelMapper(modelMapper);
         setCsceneInstanceRoleMapper(csceneInstanceRoleMapper);
         setCloudPluginSceneConnectionMapper(cloudPluginSceneConnectionMapper);
-        this.groupNamePrefix = BeanCommon.getBean(SituationAwareConfig.class).getGroupNamePrefix();
     }
 
     public ListObjServiceResult<CsceneInstanceBO> listCsceneInstanceBO(QueryParams queryParams,
@@ -2961,9 +2965,6 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return new ServiceResult<>(i);
     }
 
-    private static final String WINDOWS_DELIVERY_LOAD_FILE_COMMAND = "curl -o %s \"http://%s/download/tmp/%s\"";
-    private static final String LINUX_DELIVERY_LOAD_FILE_COMMAND = "curl -o %s \"http://%s/download/tmp/%s\"";
-
     /**
      * 投递载荷文件
      *
@@ -2985,7 +2986,8 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
 //        生成资源组名称
         String groupName = pluginHandler.getSourceSceneId();
-        groupName = StringUtils.isNotBlank(groupNamePrefix) ? groupNamePrefix + "-" + groupName : groupName;
+        String groupNamePrefix = situationAwareConfig.getGroupNamePrefix();
+        groupName = StringUtils.isNotBlank(situationAwareConfig.getGroupNamePrefix()) ? groupNamePrefix + "-" + groupName : groupName;
         // 生成虚拟机名称
         String vmName = HandlerUtils.genResourceName(targetElement.getSrcElement().getEid());
 //        根据目标节点虚拟机类型不同使用不同的方法投递载荷文件
