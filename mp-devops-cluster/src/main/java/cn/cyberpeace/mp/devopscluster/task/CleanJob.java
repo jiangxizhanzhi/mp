@@ -14,6 +14,7 @@ import cn.cyberpeace.mp.devopscluster.repository.DeviceTargetMapper;
 import cn.cyberpeace.mp.devopscluster.request.ImagesDeleteRequest;
 import cn.cyberpeace.mp.frontadmin.model.SysConfigModel;
 import cn.cyberpeace.mp.frontadmin.service.sys.SysConfigService;
+import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
@@ -198,6 +199,10 @@ public class CleanJob implements SchedulingConfigurer {
 
 //        var list = deviceTargetMapper.list(cond);
         List<DeviceTargetPO> list = deviceTargetMapper.getList(delConfig);
+        if(list != null){
+            log.info("符合清除云靶标策略的靶标数量:" + list.size());
+            log.info("符合清除云靶标策略的靶标:" + JSONObject.toJSONString(list));
+        }
         if (CollectionUtils.isNotEmpty(list)) {
             for (var m : list) {
                 ImagesDeleteRequest request = new ImagesDeleteRequest();
