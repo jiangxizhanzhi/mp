@@ -21,17 +21,21 @@ import cn.cyberpeace.mp.cscene.service.HostStateService;
 import cn.cyberpeace.mp.cscene.service.SceneElementMonitorService;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.OS;
+import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.XmlOS;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.xml.bind.annotation.XmlRootElement;
 import java.util.List;
 import java.util.Objects;
 
@@ -90,6 +94,15 @@ public class ElementMonitorController {
     public ServiceResult<OS> getOS(BaseSceneElementRequest baseRequest) {
         OS os = sceneElementMonitorService.getOSInfo(baseRequest);
         return ResultCommon.success(os);
+    }
+
+    @ApiOperation(value = "节点操作系统信息")
+    @GetMapping(value = "/xml/os", produces = MediaType.APPLICATION_XML_VALUE)
+    public XmlOS getXmlOS(BaseSceneElementRequest baseRequest) {
+        OS os = sceneElementMonitorService.getOSInfo(baseRequest);
+        XmlOS xmlOS = new XmlOS();
+        BeanUtils.copyProperties(os, xmlOS);
+        return xmlOS;
     }
 
 
