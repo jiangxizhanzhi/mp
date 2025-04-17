@@ -155,7 +155,7 @@ public class SceneService {
         }
     }
 
-    public ServiceResult<SceneDataBO> modify(String sceneId, SceneDataBO updatedSceneData, SceneContextBO context, SceneHandler originSceneHandler,  Runnable runner) {
+    public ServiceResult<SceneDataBO> modify(String sceneId, SceneDataBO updatedSceneData, SceneContextBO context, SceneHandler originSceneHandler, Runnable runner) {
         // 场景信息目前只更新显示参数
         String newDisplayContext = updatedSceneData.getTopology().getScene().getDisplayContext();
         updatedSceneData.getTopology().setScene(originSceneHandler.getScene());
@@ -291,11 +291,11 @@ public class SceneService {
     }
 
     /**
-     * @description: 启动节点
      * @param id
      * @param nodeId
      * @param context
      * @return ServiceResult<Boolean>
+     * @description: 启动节点
      */
     public ServiceResult<Boolean> startElement(String id, String nodeId, SceneContextBO context) {
         SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
@@ -306,11 +306,11 @@ public class SceneService {
     }
 
     /**
-     * @description: 关闭节点
      * @param id
      * @param nodeId
      * @param context
      * @return ServiceResult<Boolean>
+     * @description: 关闭节点
      */
     public ServiceResult<Boolean> stopElement(String id, String nodeId, SceneContextBO context) {
         SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
@@ -351,12 +351,12 @@ public class SceneService {
         return new ServiceResult<>(true);
     }
 
-    public ServiceResult<Boolean> recreateElement(String id, String nodeId,String image, SceneContextBO context,
+    public ServiceResult<Boolean> recreateElement(String id, String nodeId, String image, SceneContextBO context,
                                                   Runnable callback) {
         SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
         sceneHandler.setRealTimeUpdate(true);
         ElementTaskPool.getInstance().executeTask(() -> {
-            sceneHandler.recreateElement(nodeId,image);
+            sceneHandler.recreateElement(nodeId, image);
             callback.run();
         });
         return new ServiceResult<>(true);
@@ -428,8 +428,12 @@ public class SceneService {
             Object cloudElement = sceneHandler.getPluginElement("cpcloud", nodeId);
             JSONObject jsonObject = JSON.parseObject(JSON.toJSONString(cloudElement), JSONObject.class);
             String loadToolId = jsonObject.getString("loadToolId");
-            sceneHandler.reportLoadSuccess(nodeId,loadToolId);
+            reportLoadSuccess(nodeId, sceneHandler, loadToolId);
         });
         return new ServiceResult<>(true);
+    }
+
+    public void reportLoadSuccess(String nodeId, SceneHandler sceneHandler, String loadToolId) {
+        sceneHandler.reportLoadSuccess(nodeId, loadToolId);
     }
 }

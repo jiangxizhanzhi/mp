@@ -2754,7 +2754,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             humanCondition.filterEqual(SceneElementModel::getActionType, mpDevopsLoad.getActionType());
             List<SceneElementModel> sceneElementModels = sceneElementMapper.list(humanCondition);
             sceneElementMapper.filterUpdate(sceneElementModel, humanCondition);
-            sceneHandler.reportLoadSuccess(sceneElementModels.get(0).getNodeId(),loadToolId);
+            this.reportLoadSuccess(sceneId,sceneElementModels.get(0).getNodeId(), csceneLoadDto.getContext());
         }
         log.info("addLoad end.");
         return new ServiceResult<>();
@@ -2844,6 +2844,11 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
         boolean result = instanceHandler.addLoad(nodeId);
         return new ServiceResult<>(result);
+    }
+
+    private void reportLoadSuccess(String id, String nodeId, CsceneContextBO context) {
+        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
+        instanceHandler.reportLoadSuccess(nodeId);
     }
 
     /**

@@ -24,6 +24,8 @@ import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.service.SceneService;
 import cn.cyberpeace.mp.sceneplugincloud.util.SceneInstanceLinkCacheUtil;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -370,7 +372,18 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         if (sceneId == null) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
         }
-
         return this.sceneService.addLoad(sceneId, nodeId, generateSceneContext()).getSource();
+    }
+    public void reportLoadSuccess(String nodeId) {
+        String sceneId = this.getSceneId();
+        if (sceneId == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, generateSceneContext());
+        //            通知载荷添加
+        Object cloudElement = sceneHandler.getPluginElement("cpcloud", nodeId);
+        JSONObject jsonObject = JSON.parseObject(JSON.toJSONString(cloudElement), JSONObject.class);
+        String loadToolId = jsonObject.getString("loadToolId");
+        this.sceneService.reportLoadSuccess( nodeId, sceneHandler,loadToolId);
     }
 }
