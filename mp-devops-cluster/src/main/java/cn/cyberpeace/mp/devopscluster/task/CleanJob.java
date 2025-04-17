@@ -198,6 +198,7 @@ public class CleanJob implements SchedulingConfigurer {
 //        }
 
 //        var list = deviceTargetMapper.list(cond);
+
         List<DeviceTargetPO> list = deviceTargetMapper.getList(delConfig);
         if(list != null){
             log.info("符合清除云靶标策略的靶标数量:" + list.size());

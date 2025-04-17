@@ -545,10 +545,10 @@
                 and i.reference_nums = #{param.referenceNums}
             </if>
             <if test="param != null and param.useDurationEnd != null">
-                and i.use_duration &gt;= #{param.useDurationEnd}
+                and i.use_duration &lt;= #{param.useDurationEnd}
             </if>
             <if test="param != null and param.useDurationStart != null">
-                and i.use_duration &lt;= #{param.useDurationStart}
+                and i.use_duration &gt;= #{param.useDurationStart}
             </if>
             <if test="param != null and param.deleteDateTimeField != null and param.deleteDateTime != null and param.deleteDateTimeRule != null">
                 <if test="param.deleteDateTimeRule == 0">
