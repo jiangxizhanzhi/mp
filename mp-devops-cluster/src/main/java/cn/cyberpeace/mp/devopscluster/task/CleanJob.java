@@ -237,8 +237,12 @@ public class CleanJob implements SchedulingConfigurer {
     @Getter
     @Setter
     public static class ImageDelConfig {
+        @ApiModelProperty(value = "引用次数")
         private Integer referenceNums;
-        private Integer useDuration;
+        @ApiModelProperty(value = "使用时长(秒)")
+        private Integer useDurationStart;
+        @ApiModelProperty(value = "使用时长(秒)")
+        private Integer useDurationEnd;
         @ApiModelProperty(value = "是否开启")
         private Boolean enable;
         @ApiModelProperty(value = "定时任务cron表达式")

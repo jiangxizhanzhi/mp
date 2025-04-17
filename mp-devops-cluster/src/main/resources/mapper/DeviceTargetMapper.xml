@@ -542,10 +542,13 @@
         mp_devops_target i
         <where>
             <if test="param != null and param.referenceNums != null">
-                and i.reference_nums &lt;= #{param.referenceNums}
+                and i.reference_nums = #{param.referenceNums}
             </if>
-            <if test="param != null and param.useDuration != null">
-                and i.use_duration &lt;= #{param.useDuration}
+            <if test="param != null and param.useDurationEnd != null">
+                and i.use_duration &gt;= #{param.useDurationEnd}
+            </if>
+            <if test="param != null and param.useDurationStart != null">
+                and i.use_duration &lt;= #{param.useDurationStart}
             </if>
             <if test="param != null and param.deleteDateTimeField != null and param.deleteDateTime != null and param.deleteDateTimeRule != null">
                 <if test="param.deleteDateTimeRule == 0">
