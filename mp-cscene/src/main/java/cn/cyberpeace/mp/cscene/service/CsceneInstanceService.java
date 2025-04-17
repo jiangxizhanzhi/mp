@@ -2686,7 +2686,6 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         if (list.isEmpty()) {
 //            增加载荷
 //            确定位置
-
             Map<String, SceneAreaBO> areaMap = sceneHandler.getAreaMap();
             SceneAreaBO sceneAreaBO = areaMap.get("loadUUID");
             Position arePosition = JsonCommon.parse(sceneAreaBO.getPosition2(), Position.class);
@@ -2766,33 +2765,51 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
      * @param instanceHandler
      */
     private void uploadLoadFile(String loadToolId, CsceneInstanceHandler instanceHandler) {
-        String scriptFilePath = devopsLoadSourceMapper.getLoadId(loadToolId);
-        log.info("loadById info：{}", scriptFilePath);
+        Map loadMap = devopsLoadSourceMapper.getLoadById(loadToolId);
+        log.info("loadById info：{}", loadMap.toString());
+        String scriptFilePath = loadMap.getOrDefault("script_file_path","").toString();
+        String scriptFile = loadMap.getOrDefault("script_file", "").toString();
+        log.info("需要添加文件的载荷信息：{}", scriptFilePath);
+        String username = null;
+        String password = null;
+        String remoteHost = null;
+        Integer port;
+        String remoteDir = "/tmp/";
+        String localFile = null;
         if (StringUtils.isNotBlank(scriptFilePath)) {
-            log.info("需要添加文件的载荷信息：{}", scriptFilePath);
             SceneHandler sceneHandler = new SceneHandler(instanceHandler.getSceneId(), null, false, null);
-            CloudScenePluginHandler handler = sceneHandler.getPluginHandler(PluginConstant.CPCLOUD);
-            Map<String, CloudPluginSceneElementPortBO> elementPortMap = handler.getElementPortMap();
-            Map<String, CloudPluginSceneElementPortBO> elementNameMap = new HashMap<>();
-            if (CollectionUtil.isNotEmpty(elementPortMap)) {
-                for (CloudPluginSceneElementPortBO value : elementPortMap.values()) {
-                    elementNameMap.put(value.getSrcPort().getElement().getName(), value);
+            if (Boolean.valueOf(loadMap.getOrDefault("delivery",false).toString())) {
+//                投递文件上传至云资源服务器
+                IAzureResourceManager azureResourceManager = IAzureResourceManager.getInstance(sceneHandler.getScene().getCloudType());
+                MicrosoftAzureUserModel user = azureResourceManager.getUser();
+                username = user.getWazuhManagerUser();
+                password = user.getWazuhManagerPassword();
+                remoteHost = user.getWazuhManagerIp();
+                port = 22;
+                localFile = scriptFilePath;
+            } else {
+                CloudScenePluginHandler handler = sceneHandler.getPluginHandler(PluginConstant.CPCLOUD);
+                Map<String, CloudPluginSceneElementPortBO> elementPortMap = handler.getElementPortMap();
+                Map<String, CloudPluginSceneElementPortBO> elementNameMap = new HashMap<>();
+                if (CollectionUtil.isNotEmpty(elementPortMap)) {
+                    for (CloudPluginSceneElementPortBO value : elementPortMap.values()) {
+                        elementNameMap.put(value.getSrcPort().getElement().getName(), value);
+                    }
                 }
-            }
 
-            CloudPluginSceneElementPortBO kali = elementNameMap.get("kali");
-            Map<String, CloudAccessMode> cloudAccessModeMap = new HashMap<>();
-            for (CloudAccessMode accessMode : kali.getAccessModes()) {
-                cloudAccessModeMap.put(accessMode.getProtocol(), accessMode);
+                CloudPluginSceneElementPortBO kali = elementNameMap.get("kali");
+                Map<String, CloudAccessMode> cloudAccessModeMap = new HashMap<>();
+                for (CloudAccessMode accessMode : kali.getAccessModes()) {
+                    cloudAccessModeMap.put(accessMode.getProtocol(), accessMode);
+                }
+                CloudAccessMode ssh = cloudAccessModeMap.get("ssh");
+                remoteHost = ssh.getAccessIp();
+                port = ssh.getAccessPort();
+                username = ssh.getUsername();
+                password = ssh.getPassword();
+                localFile = scriptFilePath;
             }
-            CloudAccessMode ssh = cloudAccessModeMap.get("ssh");
-            String remoteHost = ssh.getAccessIp();
-            Integer port = ssh.getAccessPort();
-            String username = ssh.getUsername();
-            String password = ssh.getPassword();
-            String remoteDir = "/tmp/";
-            String localFile = scriptFilePath;
-            log.info("kali 主机ip:{} 端口:{} 用户名:{} 密码:{}", remoteHost, port, username, password);
+            log.info("上传载荷文件 主机ip:{} 端口:{} 用户名:{} 密码:{}", remoteHost, port, username, password);
             try {
                 JSch jsch = new JSch();
                 com.jcraft.jsch.Session session = jsch.getSession(username, remoteHost, port);
@@ -2810,7 +2827,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 sftpChannel.cd(remoteDir);
                 // 上传文件
                 File file = new File(localFile);
-                sftpChannel.put(new FileInputStream(file), file.getName());
+                sftpChannel.put(new FileInputStream(file), scriptFile);
                 session.disconnect();
                 sftpChannel.exit();
                 log.info("载荷文件上传成功{}", scriptFilePath);
@@ -2997,7 +3014,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             IAzureResourceManager azureResourceManager = IAzureResourceManager.getInstance(BaseSceneModel.CloudType.PUBLIC);
             String wazuhManagerIp = azureResourceManager.getUser().getWazuhManagerIp();
             if (BaseSceneElementModel.SystemType.WINDOWS.equals(vmType)) {
-                filePath = "C:\\"+fileName;
+                filePath = "C:\\" + fileName;
                 String command = String.format(WINDOWS_DELIVERY_LOAD_FILE_COMMAND, filePath, wazuhManagerIp, fileName);
                 List<String> commands = Arrays.asList(command);
                 azureResourceManager
@@ -3005,13 +3022,13 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                         .virtualMachines()
                         .runPowerShellScript(groupName, vmName, commands, new ArrayList<>());
             } else {
-                filePath = "/tmp/"+fileName;
+                filePath = "/tmp/" + fileName;
                 String command = String.format(LINUX_DELIVERY_LOAD_FILE_COMMAND, filePath, wazuhManagerIp, fileName);
-                    List<String> commands = Arrays.asList(command);
-                    azureResourceManager
-                            .getManager()
-                            .virtualMachines()
-                            .runShellScript(groupName, vmName, commands, new ArrayList<>());
+                List<String> commands = Arrays.asList(command);
+                azureResourceManager
+                        .getManager()
+                        .virtualMachines()
+                        .runShellScript(groupName, vmName, commands, new ArrayList<>());
             }
         }
 //        阶段载荷上保存投递的节点id
@@ -3024,8 +3041,8 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         CloudAccessMode collect = ports.get(0).getAccessModes().get(0);
 
         HashMap<String, String> data = new HashMap<>();
-        data.put("access_mode_id",collect.getId());
-        data.put("node_id",deliveryLoadFileRequest.getTargetNodeId());
+        data.put("access_mode_id", collect.getId());
+        data.put("node_id", deliveryLoadFileRequest.getTargetNodeId());
         return new ServiceResult<>(data);
     }
 

@@ -8,6 +8,7 @@ import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
 
 @Mapper
 @Repository
@@ -16,4 +17,6 @@ public interface DevopsLoadSourceMapper extends BaseModelMapper<DevopsLoadSource
     DevopsLoadSourceModel getSynchronousDataSource();
 
     String getLoadId(@Param("loadId") String loadId);
+
+    Map getLoadById(@Param("loadId") String loadId);
 }

@@ -64,6 +64,12 @@
             <if test="param.wazuhManagerIp != null ">
                 wazuh_manager_ip = #{param.wazuhManagerIp},
             </if>
+            <if test="param.wazuhManagerUser != null ">
+                wazuh_manager_user = #{param.wazuhManagerUser},
+            </if>
+            <if test="param.wazuhManagerPassword != null ">
+                wazuh_manager_password = #{param.wazuhManagerPassword},
+            </if>
         </set>
         WHERE
             pk = #{pk}

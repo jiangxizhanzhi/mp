@@ -56,4 +56,10 @@ public class MicrosoftAzureUserModel extends BaseModel {
 
     @ApiModelProperty(value = "采集服务器地址")
     private String wazuhManagerIp;
+
+    @ApiModelProperty(value = "采集服务器账号")
+    private String wazuhManagerUser;
+
+    @ApiModelProperty(value = "采集服务器密码")
+    private String wazuhManagerPassword;
 }

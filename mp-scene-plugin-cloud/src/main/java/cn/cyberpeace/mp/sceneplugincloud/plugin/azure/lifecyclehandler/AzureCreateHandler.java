@@ -395,9 +395,9 @@ public class AzureCreateHandler extends CreateHandler {
                 // 获取ssh链接信息
                 String remoteHost = collect.get(0).getAccessIp();
                 Integer port = collect.get(0).getAccessPort();
-                String username = collect.get(0).getUsername();
-                String password = collect.get(0).getPassword();
                 String protocol = collect.get(0).getProtocol();
+//                投递文件上传至云资源机
+                MicrosoftAzureUserModel user = resourceService.getUser();
                 Runnable checkSuccessCallback = () -> {
                     for (CloudPluginSceneElementBO cloudPlugin : cloudPlugins) {
                         log.info("cloudPlugin info：{}", JSON.toJSONString(cloudPlugin));
@@ -406,16 +406,30 @@ public class AzureCreateHandler extends CreateHandler {
                         if (StringUtils.isNotBlank(loadToolId)) {
                             log.info("isNotBlank loadToolId info：{}", JSON.toJSONString(loadToolId));
                             DevopsLoadSourceMapper devopsLoadSourceMapper = BeanCommon.getBean(DevopsLoadSourceMapper.class);
-                            String scriptFilePath = devopsLoadSourceMapper.getLoadId(loadToolId);
+                            Map loadMap = devopsLoadSourceMapper.getLoadById(loadToolId);
+                            String scriptFilePath = loadMap.getOrDefault("script_file_path","").toString();
+                            String scriptFile = loadMap.getOrDefault("script_file", "").toString();
                             log.info("loadById info：{}", scriptFilePath);
                             if (StringUtils.isNotBlank(scriptFilePath)) {
+                                String resourceRemoteHost = collect.get(0).getAccessIp();
+                                Integer resourcePort = collect.get(0).getAccessPort();
+                                String username = collect.get(0).getUsername();
+                                String password = collect.get(0).getPassword();
+                                String resourceProtocol = collect.get(0).getProtocol();
+                                if (Boolean.valueOf(loadMap.getOrDefault("delivery",false).toString())) {
+                                    resourceRemoteHost = user.getWazuhManagerIp();
+                                    resourcePort = 22;
+                                    username = user.getWazuhManagerUser();
+                                    password = user.getWazuhManagerPassword();
+                                    resourceProtocol = "ssh";
+                                }
                                 log.info("需要添加文件的载荷信息：{}", scriptFilePath);
                                 String remoteDir = "/tmp/";
                                 String localFile = scriptFilePath;
-                                log.info("kali 主机ip:{} 端口:{} 用户名:{} 密码:{} 协议:{}", remoteHost, port, username, password, protocol);
+                                log.info("kali 主机ip:{} 端口:{} 用户名:{} 密码:{} 协议:{}", resourceRemoteHost, resourcePort, username, password, resourceProtocol);
                                 try {
                                     JSch jsch = new JSch();
-                                    com.jcraft.jsch.Session session = jsch.getSession(username, remoteHost, port);
+                                    com.jcraft.jsch.Session session = jsch.getSession(username, resourceRemoteHost, resourcePort);
                                     session.setPassword(password);
                                     // 配置会话的其他选项,如主机密钥检查等
                                     java.util.Properties config = new java.util.Properties();
@@ -431,7 +445,7 @@ public class AzureCreateHandler extends CreateHandler {
                                     sftpChannel.cd(remoteDir);
                                     // 上传文件
                                     File file = new File(localFile);
-                                    sftpChannel.put(new FileInputStream(file), file.getName());
+                                    sftpChannel.put(new FileInputStream(file), scriptFile);
                                     session.disconnect();
                                     sftpChannel.exit();
                                     log.info("载荷文件上传成功{}", scriptFilePath);
