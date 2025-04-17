@@ -2752,7 +2752,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             humanCondition.filterEqual(SceneElementModel::getArea, "loadUUID");
             humanCondition.filterEqual(SceneElementModel::getName, mpDevopsLoad.getToolName());
             humanCondition.filterEqual(SceneElementModel::getActionType, mpDevopsLoad.getActionType());
+            List<SceneElementModel> sceneElementModels = sceneElementMapper.list(humanCondition);
             sceneElementMapper.filterUpdate(sceneElementModel, humanCondition);
+            sceneHandler.reportLoadSuccess(sceneElementModels.get(0).getNodeId(),loadToolId);
         }
         log.info("addLoad end.");
         return new ServiceResult<>();
