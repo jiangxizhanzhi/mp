@@ -6,7 +6,6 @@ import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.repository.MicrosoftAzureLoginMapper;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.UserUtils;
-import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
@@ -17,13 +16,14 @@ import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.fields.BaseModelFields;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
-import cn.cyberpeace.mp.base.service.result.BaseServiceResult;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.base.util.define.SerializableFunction;
+import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.base.util.mptool.CacheUtil;
 import cn.cyberpeace.mp.base.util.mptool.CollUtil;
 import cn.cyberpeace.mp.base.util.mptool.CollectionUtil;
@@ -2767,7 +2767,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     private void uploadLoadFile(String loadToolId, CsceneInstanceHandler instanceHandler) {
         Map loadMap = devopsLoadSourceMapper.getLoadById(loadToolId);
         log.info("loadById info：{}", loadMap.toString());
-        String scriptFilePath = loadMap.getOrDefault("script_file_path","").toString();
+        String scriptFilePath = loadMap.getOrDefault("script_file_path", "").toString();
         String scriptFile = loadMap.getOrDefault("script_file", "").toString();
         log.info("需要添加文件的载荷信息：{}", scriptFilePath);
         String username = null;
@@ -2778,7 +2778,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         String localFile = null;
         if (StringUtils.isNotBlank(scriptFilePath)) {
             SceneHandler sceneHandler = new SceneHandler(instanceHandler.getSceneId(), null, false, null);
-            if (Boolean.valueOf(loadMap.getOrDefault("delivery",false).toString())) {
+            if (Boolean.valueOf(loadMap.getOrDefault("delivery", false).toString())) {
 //                投递文件上传至云资源服务器
                 IAzureResourceManager azureResourceManager = IAzureResourceManager.getInstance(sceneHandler.getScene().getCloudType());
                 MicrosoftAzureUserModel user = azureResourceManager.getUser();
@@ -2998,8 +2998,8 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         CloudPluginSceneElementBO loadElement = elementMap.get(deliveryLoadFileRequest.getLoadNodeId());
         CloudPluginSceneElementBO targetElement = elementMap.get(deliveryLoadFileRequest.getTargetNodeId());
 //        文件位置
-        String scriptFilePath = devopsLoadSourceMapper.getLoadId(loadElement.getLoadToolId());
-        String fileName = scriptFilePath.substring(scriptFilePath.lastIndexOf('/') + 1);
+        Map loadMap = devopsLoadSourceMapper.getLoadById(loadElement.getLoadToolId());
+        String scriptFile = loadMap.getOrDefault("script_file", "").toString();
 
 //        生成资源组名称
         String groupName = pluginHandler.getSourceSceneId();
@@ -3010,25 +3010,50 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 //        根据目标节点虚拟机类型不同使用不同的方法投递载荷文件
         String vmType = targetElement.getVmType().toLowerCase();
         String filePath = "";
+
+        IAzureResourceManager azureResourceManager = IAzureResourceManager.getInstance(sceneHandler.getScene().getCloudType());
+        List<String> commands = new ArrayList<>();
+        String wazuhManagerIp = azureResourceManager.getUser().getWazuhManagerIp();
+        if (BaseSceneElementModel.SystemType.WINDOWS.equals(vmType)) {
+            filePath = "C:\\" + scriptFile;
+            String command = String.format(WINDOWS_DELIVERY_LOAD_FILE_COMMAND, filePath, wazuhManagerIp, scriptFile);
+            commands.add(command);
+        } else {
+            filePath = "/tmp/" + scriptFile;
+            String command = String.format(LINUX_DELIVERY_LOAD_FILE_COMMAND, filePath, wazuhManagerIp, scriptFile);
+            commands.add(command);
+        }
         if (BaseSceneModel.CloudType.PUBLIC == sceneHandler.getScene().getCloudType()) {
-            IAzureResourceManager azureResourceManager = IAzureResourceManager.getInstance(BaseSceneModel.CloudType.PUBLIC);
-            String wazuhManagerIp = azureResourceManager.getUser().getWazuhManagerIp();
             if (BaseSceneElementModel.SystemType.WINDOWS.equals(vmType)) {
-                filePath = "C:\\" + fileName;
-                String command = String.format(WINDOWS_DELIVERY_LOAD_FILE_COMMAND, filePath, wazuhManagerIp, fileName);
-                List<String> commands = Arrays.asList(command);
                 azureResourceManager
                         .getManager()
                         .virtualMachines()
                         .runPowerShellScript(groupName, vmName, commands, new ArrayList<>());
             } else {
-                filePath = "/tmp/" + fileName;
-                String command = String.format(LINUX_DELIVERY_LOAD_FILE_COMMAND, filePath, wazuhManagerIp, fileName);
-                List<String> commands = Arrays.asList(command);
                 azureResourceManager
                         .getManager()
                         .virtualMachines()
                         .runShellScript(groupName, vmName, commands, new ArrayList<>());
+            }
+        } else {
+            try {
+                String azureManagerUrl = situationAwareConfig.getMixAzureManagerUrl();
+                if (sceneHandler.getScene().getCloudType() == BaseSceneModel.CloudType.PRIVATE) {
+                    azureManagerUrl = situationAwareConfig.getPrivateAzureManagerUrl();
+                }
+                String url = azureManagerUrl + "/cloud/run_shell_script";
+                Map<String, Object> formMap = new HashMap();
+                formMap.put("azureUser", azureResourceManager.getUser());
+                formMap.put("groupName", groupName);
+                formMap.put("vmType", vmType);
+                formMap.put("vmName", vmName);
+                formMap.put("command", commands);
+                //请求头设置
+                HashMap<String, String> headersMap = new HashMap<>();
+                String body = JsonUtils.stringify(formMap);
+                HttpUtils.sendHttpPost(url, body, headersMap);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
         }
 //        阶段载荷上保存投递的节点id
