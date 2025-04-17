@@ -24,6 +24,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 分靶场的数据
@@ -242,37 +243,45 @@ public class RangeDataRemoteService {
         }
     }
 
-    public void test(String sceneId, boolean info, boolean event, boolean log) {
+    public void test(String sceneId, long startTime, Map<String, RangeDataUtil.CollectAgentConfig> configs) {
         List<ElementMonitorBasicInfo> testRangeResult = testRangeApiProxy.listAllElementBasicInfo(sceneId, new SceneAllElementsQueryRequest());
         List<Runnable> tasks = new ArrayList<>();
 //        if (info) {
 //            tasks.add(() -> saveHostInfo(sceneId));
 //        }
         for (ElementMonitorBasicInfo elementMonitorBasicInfo : testRangeResult) {
-            String nodeId = elementMonitorBasicInfo.getId();
-            if (info) {
-                // 信息类 - 端口信息 采集周期到了查询最新数据保存即可
-                tasks.add(() -> savePortInfo(sceneId, nodeId));
-                // 信息类 - 进程信息 采集周期到了查询最新数据保存即可
-                tasks.add(() -> saveProcessInfo(sceneId, nodeId));
-                // 信息类 - 网卡信息 采集周期到了查询最新数据保存即可
-                tasks.add(() -> saveNetInfo(sceneId, nodeId));
-                // 信息类 - 连接信息
-                tasks.add(() -> saveConnectInfo(sceneId, nodeId));
-                // 信息类 - cpu\内存\磁盘
-                tasks.add(() -> saveHostInfo(sceneId, nodeId));
-            }
+            String range = elementMonitorBasicInfo.getRange();
+            RangeDataUtil.CollectAgentConfig config = configs.get(range);
+            if (config.getEnable() && startTime % config.getPeriod() == 0) {
+                boolean info = config.isInfo();
+                boolean event = config.isEvent();
+                boolean log = config.isLog();
 
-            if (event) {
-                // 事件类 - 文件变更 采集周期到了查询最近一个周期的数据保存即可
-                tasks.add(() -> saveFileModify(sceneId, nodeId));
-                // 事件类 - 注册表变更 采集周期到了查询最近一个周期的数据保存即可
-                tasks.add(() -> saveRegistryModify(sceneId, nodeId));
-            }
+                String nodeId = elementMonitorBasicInfo.getId();
+                if (info) {
+                    // 信息类 - 端口信息 采集周期到了查询最新数据保存即可
+                    tasks.add(() -> savePortInfo(sceneId, nodeId));
+                    // 信息类 - 进程信息 采集周期到了查询最新数据保存即可
+                    tasks.add(() -> saveProcessInfo(sceneId, nodeId));
+                    // 信息类 - 网卡信息 采集周期到了查询最新数据保存即可
+                    tasks.add(() -> saveNetInfo(sceneId, nodeId));
+                    // 信息类 - 连接信息
+                    tasks.add(() -> saveConnectInfo(sceneId, nodeId));
+                    // 信息类 - cpu\内存\磁盘
+                    tasks.add(() -> saveHostInfo(sceneId, nodeId));
+                }
 
-            if (log) {
-                // 日志类
-                tasks.add(() -> saveLog(sceneId, nodeId));
+                if (event) {
+                    // 事件类 - 文件变更 采集周期到了查询最近一个周期的数据保存即可
+                    tasks.add(() -> saveFileModify(sceneId, nodeId));
+                    // 事件类 - 注册表变更 采集周期到了查询最近一个周期的数据保存即可
+                    tasks.add(() -> saveRegistryModify(sceneId, nodeId));
+                }
+
+                if (log) {
+                    // 日志类
+                    tasks.add(() -> saveLog(sceneId, nodeId));
+                }
             }
         }
         TaskCommon.runTasks(tasks);

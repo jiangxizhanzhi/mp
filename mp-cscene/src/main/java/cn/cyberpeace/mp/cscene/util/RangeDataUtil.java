@@ -6,13 +6,19 @@ import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
 import cn.cyberpeace.mp.frontadmin.model.SysConfigModel;
 import cn.cyberpeace.mp.frontadmin.repository.SysConfigMapper;
+import cn.cyberpeace.mp.scene.model.RangeModel;
+import cn.cyberpeace.mp.scene.repository.RangeMapper;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
 @Component
@@ -30,46 +36,62 @@ public class RangeDataUtil {
     @Resource
     private CsceneService csceneService;
 
-    private Long startTime = System.currentTimeMillis();
+    @Resource
+    private RangeMapper rangeMapper;
 
-    @Scheduled(cron = "0/30 * * * * ?")
+    private volatile long startTime = 0L;
+
+    @Scheduled(cron = "0 0/1 * * * ?")
     public void test() {
-        SysConfigMapper sysConfigMapper = BeanCommon.getBean(SysConfigMapper.class);
-        var model = sysConfigMapper.first(new HumanCondition().filterEqual(SysConfigModel::getKeyName, "collect_agent_info"));
-        var result = JsonCommon.parse(model.getValue(), CollectAgentConfig.class);
+        // 周期按照分钟计算 startTime 表示从第一次启动到现在经过了几分钟
+        startTime++;
+        if (lock.tryLock()) {
+            try {
+                doAction();
+            } finally {
+                lock.unlock();
+            }
+        }
+    }
 
-        if (result.getEnable()) {
-            long runTime = System.currentTimeMillis() / 1000 - startTime / 1000;
-            log.info("数据采集定时任务 , runtime {} ", runTime);
-            if (runTime % result.getPeriod() == 0) {
-                if (lock.tryLock()) {
-                    try {
-                        log.info("开始采集各个节点的数据");
-                        rangeDataRemoteService.period = result.getPeriod();
-                        rangeDataRemoteService.period = result.getPeriod();
-                        var instances = csceneService.getRunningCscenes();
-                        for (var instance : instances) {
-                            if (!instance.getId().equals("ffff18d5d9d34ac2996862c1097cd56a")) {
-                                continue;
-                            }
-                            try {
-                                rangeDataLocalService.test(instance.getId(), result.info, result.event, result.log);
-                            } catch (Exception e) {
-                                log.error("failed to get range data remote , cscene instance id {}", instance.getId(), e);
-                            }
-                            try {
-                                rangeDataRemoteService.test(instance.getId(), result.info, result.event, result.log);
-                            } catch (Exception e) {
-                                log.error("failed to get range data remote , cscene instance id {}", instance.getId(), e);
-                            }
-                        }
-                        log.info("结束采集各个节点的数据");
-                    } finally {
-                        lock.unlock();
-                    }
-                } else {
-                    log.info("锁获取失败,已有线程正在执行数据采集的任务");
-                }
+    private void doAction() {
+        // 查询所有的分靶场 并给每个靶场设置默认的周期配置
+        List<RangeModel> rangeModelList = rangeMapper.list(new HumanCondition());
+        Map<String, RangeModel> id2RangeModel = new HashMap<>();
+        Map<String, CollectAgentConfig> configs = new HashMap<>();
+        for (RangeModel r : rangeModelList) {
+            id2RangeModel.put(r.getRangeName(), r);
+            configs.put(r.getRangeName(), CollectAgentConfig.defaultValue());
+        }
+
+        // 如果数据库中有数据 ， 则使用数据库中的数据覆盖默认配置
+        SysConfigMapper sysConfigMapper = BeanCommon.getBean(SysConfigMapper.class);
+        var models = sysConfigMapper.list(new HumanCondition().filterStartsWith(SysConfigModel::getKeyName, "collect_agent_info"));
+        for (var model : models) {
+            var result = JsonCommon.parse(model.getValue(), CollectAgentConfig.class);
+            String rangeId = StringUtils.replace(model.getKeyName(), "collect_agent_info_", "");
+            if (id2RangeModel.containsKey(rangeId)) {
+                var rangeName = id2RangeModel.get(rangeId).getRangeName();
+                configs.put(rangeName, result);
+            }
+        }
+
+        // 查询所有运行着的场景
+        var instances = csceneService.getRunningCscenes();
+
+        for (var instance : instances) {
+//            if (!instance.getId().equals("ffff18d5d9d34ac2996862c1097cd56a")) {
+//                continue;
+//            }
+            try {
+                rangeDataLocalService.test(instance.getId(), true, true, true);
+            } catch (Exception e) {
+                log.error("failed to get range data local , cscene instance id {}", instance.getId(), e);
+            }
+            try {
+                rangeDataRemoteService.test(instance.getId(), startTime, configs);
+            } catch (Exception e) {
+                log.error("failed to get range data remote , cscene instance id {}", instance.getId(), e);
             }
         }
     }
@@ -83,5 +105,16 @@ public class RangeDataUtil {
         private boolean event;
         private boolean log;
         private boolean flow;
+
+        public static CollectAgentConfig defaultValue() {
+            CollectAgentConfig agentConfig = new CollectAgentConfig();
+            agentConfig.setEnable(true);
+            agentConfig.setPeriod(1);
+            agentConfig.setInfo(true);
+            agentConfig.setFlow(true);
+            agentConfig.setEvent(true);
+            agentConfig.setLog(true);
+            return agentConfig;
+        }
     }
 }
