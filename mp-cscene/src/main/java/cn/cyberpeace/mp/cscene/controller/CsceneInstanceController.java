@@ -1174,4 +1174,24 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         return csceneBO;
     }
 
+    @ApiOperation("根据区域获取指定id场景模板，同时针对3d态势特制，额外将层节点放到elements处")
+    @GetMapping("/get_by_area/3d")
+    public ServiceResult<CsceneInstanceBO> getByAreaFor3D(@RequestParam String id, @RequestParam(required = false, name = "area_id") String areaId) {
+        if (areaId == null) {
+            areaId = StringUtils.EMPTY;
+        }
+        String sceneId = this.modelService.get(id).getSource().getObj().getScene();
+        var csceneBO = getByAreaIdFor3D(sceneId, areaId);
+        return new ServiceResult<>(csceneBO).asResult();
+
+    }
+
+    private CsceneInstanceBO getByAreaIdFor3D(String sceneId, String areaId) {
+        SceneHandler sceneHandler = new SceneHandler(sceneId, areaId, true, null);
+        SceneDataBO dataBO = sceneHandler.toDataFor3D();
+        CsceneInstanceBO csceneBO = new CsceneInstanceBO();
+        csceneBO.setScene(dataBO);
+        CsceneDataModifier.correctReturnCsceneData(csceneBO);
+        return csceneBO;
+    }
 }
