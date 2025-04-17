@@ -146,6 +146,14 @@ public class ElementMonitorController {
         return ResultCommon.success(os);
     }
 
+    @ApiOperation(value = "节点操作系统信息")
+    @GetMapping("/xml/os")
+    public String getXmlOS(BaseSceneElementRequest baseRequest) {
+        //分靶场节点，需要查分靶场
+        String os = testRangeApiProxy.getElementXmlOs(baseRequest);
+        return os;
+    }
+
 
     @ApiOperation(value = "查询节点网络连接状态")
     @GetMapping("/connection_state")

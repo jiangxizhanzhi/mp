@@ -175,6 +175,24 @@ public class TestRangeApiProxy implements SubRangeMonitorInterface {
     }
 
     @Override
+    public String getElementXmlOs(BaseSceneElementRequest baseRequest) {
+        Map<String, String> mappingCsceneIdToRange = getRangeMapCscene(baseRequest.getSceneId());
+
+        for (Map.Entry<String, String> entry : mappingCsceneIdToRange.entrySet()) {
+            String range = entry.getValue();
+            String mapCsceneId = entry.getKey();
+            if (csceneIdToNodeIds.containsKey(mapCsceneId)) {
+                baseRequest.setSceneId(mapCsceneId);
+                String result = TestRangeClientUtil.get(range, TestRangeApiUrl.ELEMENT_XML_OS, baseRequest, getAuthHeaderMap(range), 10000)
+                        .getResult();
+                return result;
+            }
+        }
+
+        return "";
+    }
+
+    @Override
     public ServiceResult<List<HostState>> getElementHostStateTrend(HostStateTrendRequest hostStateTrendRequest) {
         Map<String,String> mappingCsceneIdToRange = getRangeMapCscene(hostStateTrendRequest.getSceneId());
 

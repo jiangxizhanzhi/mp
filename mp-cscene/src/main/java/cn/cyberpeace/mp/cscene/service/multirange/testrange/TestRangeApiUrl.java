@@ -10,6 +10,7 @@ public interface TestRangeApiUrl {
 
     public static final String MAP_SCENE_ID = "/api/mp/cscene/cscenes/get_scene_id_by_vpn_server_ip";
     public static final String ELEMENT_OS = "/api/mp/cscene/monitor/scene/element/os";
+    public static final String ELEMENT_XML_OS = "/api/mp/cscene/monitor/scene/element/xml/os";
 
     public static final String ELEMENT_TREND_STATE = "/api/mp/cscene/monitor/hoststate/element_trend";
     public static final String ELEMENT_STATE = "/api/mp/cscene/monitor/hoststate";

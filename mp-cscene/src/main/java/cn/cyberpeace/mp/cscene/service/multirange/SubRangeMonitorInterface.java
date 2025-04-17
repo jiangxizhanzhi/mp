@@ -40,6 +40,8 @@ public interface SubRangeMonitorInterface {
 
     OS getElementOs(BaseSceneElementRequest baseRequest);
 
+    String getElementXmlOs(BaseSceneElementRequest baseRequest);
+
     ServiceResult<List<HostState>> getElementHostStateTrend(HostStateTrendRequest hostStateTrendRequest);
 
     ServiceResult<List<HostState>> getElementHostState(BaseSceneElementPageRequest pageRequest);
