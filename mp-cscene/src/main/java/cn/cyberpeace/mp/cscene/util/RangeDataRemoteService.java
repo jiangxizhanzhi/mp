@@ -211,14 +211,17 @@ public class RangeDataRemoteService {
         }
     }
 
-    public void saveHostInfo(String sceneId, String nodeId) {
+    public void saveHostInfo(String sceneId, String nodeId, LocalDateTime currentTime) {
         HostStateTrendRequest hostStateTrendRequest = new HostStateTrendRequest();
         hostStateTrendRequest.setSceneId(sceneId);
         hostStateTrendRequest.setElementIds(Arrays.asList(nodeId));
+        hostStateTrendRequest.setStartTime(LocalDateTime.now().minusMinutes(1));
+        hostStateTrendRequest.setEndTime(LocalDateTime.now());
         var response = testRangeApiProxy.getElementHostStateTrend(hostStateTrendRequest);
         var result = response.getData();
         if (CollectionUtils.isNotEmpty(result)) {
             var last = result.get(result.size() - 1);
+            last.setTime(currentTime);
             SceneCycleDataModel dataModel = new SceneCycleDataModel();
             dataModel.setScene(sceneId);
             dataModel.setSceneElement(nodeId);
@@ -231,6 +234,8 @@ public class RangeDataRemoteService {
     public void saveHostInfo(String sceneId) {
         HostStateTrendRequest hostStateTrendRequest = new HostStateTrendRequest();
         hostStateTrendRequest.setSceneId(sceneId);
+        hostStateTrendRequest.setStartTime(LocalDateTime.now().minusMinutes(1));
+        hostStateTrendRequest.setEndTime(LocalDateTime.now());
         var result = testRangeApiProxy.getSceneHostStateTrend(hostStateTrendRequest);
         if (CollectionUtils.isNotEmpty(result)) {
             var last = result.get(result.size() - 1);
@@ -243,7 +248,7 @@ public class RangeDataRemoteService {
         }
     }
 
-    public void test(String sceneId, long startTime, Map<String, RangeDataUtil.CollectAgentConfig> configs) {
+    public void test(String sceneId, long startTime, Map<String, RangeDataUtil.CollectAgentConfig> configs, LocalDateTime currentTime) {
         List<ElementMonitorBasicInfo> testRangeResult = testRangeApiProxy.listAllElementBasicInfo(sceneId, new SceneAllElementsQueryRequest());
         List<Runnable> tasks = new ArrayList<>();
 //        if (info) {
@@ -268,7 +273,7 @@ public class RangeDataRemoteService {
                     // 信息类 - 连接信息
                     tasks.add(() -> saveConnectInfo(sceneId, nodeId));
                     // 信息类 - cpu\内存\磁盘
-                    tasks.add(() -> saveHostInfo(sceneId, nodeId));
+                    tasks.add(() -> saveHostInfo(sceneId, nodeId, currentTime));
                 }
 
                 if (event) {

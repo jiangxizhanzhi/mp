@@ -151,17 +151,20 @@ public class RangeDataLocalService {
         }
     }
 
-    public void saveHostInfo(String sceneId) {
+    public void saveHostInfo(String sceneId,LocalDateTime currentTime) {
         BaseSceneElementPageRequest request = new BaseSceneElementPageRequest();
         request.setSceneId(sceneId);
         request.setPage(1);
         request.setPageSize(100);
 
         HostStateTrendRequest hostStateTrendRequest = new HostStateTrendRequest();
+        hostStateTrendRequest.setStartTime(LocalDateTime.now().minusMinutes(1));
+        hostStateTrendRequest.setEndTime(LocalDateTime.now());
         hostStateTrendRequest.setSceneId(sceneId);
         var result = hostStateService.getSceneHostStateTrend(hostStateTrendRequest);
         if (CollectionUtils.isNotEmpty(result)) {
             var last = result.get(result.size() - 1);
+            last.setTime(currentTime);
             SceneCycleDataModel dataModel = new SceneCycleDataModel();
             dataModel.setScene(sceneId);
             dataModel.setSceneElement("");
@@ -171,13 +174,16 @@ public class RangeDataLocalService {
         }
     }
 
-    public void saveHostInfo(String sceneId, String nodeId) {
+    public void saveHostInfo(String sceneId, String nodeId,LocalDateTime currentTime) {
         HostStateTrendRequest hostStateTrendRequest = new HostStateTrendRequest();
         hostStateTrendRequest.setSceneId(sceneId);
         hostStateTrendRequest.setElementIds(Arrays.asList(nodeId));
+        hostStateTrendRequest.setStartTime(LocalDateTime.now().minusMinutes(1));
+        hostStateTrendRequest.setEndTime(LocalDateTime.now());
         var result = hostStateService.getElementHostStateTrend(hostStateTrendRequest);
         if (CollectionUtils.isNotEmpty(result)) {
             var last = result.get(result.size() - 1);
+            last.setTime(currentTime);
             SceneCycleDataModel dataModel = new SceneCycleDataModel();
             dataModel.setScene(sceneId);
             dataModel.setSceneElement(nodeId);
@@ -261,11 +267,11 @@ public class RangeDataLocalService {
         }
     }
 
-    public void test(String sceneId, boolean info, boolean event, boolean log) {
+    public void test(String sceneId, boolean info, boolean event, boolean log, LocalDateTime currentTime ) {
         List<ElementMonitorBasicInfo> basicInfoList = sceneMonitorService.getAllSceneElements(sceneId, false, new SceneAllElementsQueryRequest());
         List<Runnable> tasks = new ArrayList<>();
         if (info) {
-            tasks.add(() -> saveHostInfo(sceneId));
+            tasks.add(() -> saveHostInfo(sceneId, currentTime));
         }
         for (ElementMonitorBasicInfo elementMonitorBasicInfo : basicInfoList) {
             String nodeId = elementMonitorBasicInfo.getId();
@@ -279,7 +285,7 @@ public class RangeDataLocalService {
                 // 信息类 - 连接信息
                 tasks.add(() -> saveConnectInfo(sceneId, nodeId));
                 // 信息类 - cpu\内存\磁盘
-                tasks.add(() -> saveHostInfo(sceneId, nodeId));
+                tasks.add(() -> saveHostInfo(sceneId, nodeId,currentTime));
             }
 
             if (event) {

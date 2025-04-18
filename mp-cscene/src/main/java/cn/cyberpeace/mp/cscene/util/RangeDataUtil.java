@@ -2,7 +2,9 @@ package cn.cyberpeace.mp.cscene.util;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.common.RangeTaskCommon;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
 import cn.cyberpeace.mp.frontadmin.model.SysConfigModel;
 import cn.cyberpeace.mp.frontadmin.repository.SysConfigMapper;
@@ -16,9 +18,15 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 @Component
@@ -41,6 +49,8 @@ public class RangeDataUtil {
 
     private volatile long startTime = 0L;
 
+    ExecutorService executor = new ThreadPoolExecutor(2, 10, 10L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
+
     @Scheduled(cron = "0 0/1 * * * ?")
     public void test() {
         // 周期按照分钟计算 startTime 表示从第一次启动到现在经过了几分钟
@@ -55,6 +65,7 @@ public class RangeDataUtil {
     }
 
     private void doAction() {
+        LocalDateTime currentTime = LocalDateTime.now();
         long timeA = System.currentTimeMillis();
         // 查询所有的分靶场 并给每个靶场设置默认的周期配置
         List<RangeModel> rangeModelList = rangeMapper.list(new HumanCondition());
@@ -85,26 +96,41 @@ public class RangeDataUtil {
         var instances = csceneService.getRunningCscenes();
         log.info("查询所有运行着的场景耗时 {}", System.currentTimeMillis() - timeA);
 
+        // 顺序执行所有场景
         for (var instance : instances) {
 //            if (!instance.getId().equals("ffff18d5d9d34ac2996862c1097cd56a")) {
 //                continue;
 //            }
-            timeA = System.currentTimeMillis();
-            try {
-                rangeDataLocalService.test(instance.getId(), true, true, true);
-            } catch (Exception e) {
-                log.error("failed to get range data local , cscene instance id {}", instance.getId(), e);
-            }
-            log.info("查询场景 {} 主靶场数据耗时 {}", instance.getId(), System.currentTimeMillis() - timeA);
-
-            timeA = System.currentTimeMillis();
-            try {
-                rangeDataRemoteService.test(instance.getId(), startTime, configs);
-            } catch (Exception e) {
-                log.error("failed to get range data remote , cscene instance id {}", instance.getId(), e);
-            }
-            log.info("查询场景 {} 分靶场数据耗时 {}", instance.getId(), System.currentTimeMillis() - timeA);
+            handleOneInstance(instance, configs, currentTime);
         }
+
+//         并行执行所有场景
+//        List<Runnable> tasks = new ArrayList<>();
+//        for (var instance : instances) {
+////            if (!instance.getId().equals("ffff18d5d9d34ac2996862c1097cd56a")) {
+////                continue;
+////            }
+//            tasks.add(() -> handleOneInstance(instance, configs, currentTime));
+//        }
+//        RangeTaskCommon.runTasks(tasks);
+    }
+
+    private void handleOneInstance(CsceneInstanceModel instance, Map<String, CollectAgentConfig> configs, LocalDateTime currentTime) {
+        long timeA = System.currentTimeMillis();
+        try {
+            rangeDataLocalService.test(instance.getId(), true, true, true, currentTime);
+        } catch (Exception e) {
+            log.error("failed to get range data local , cscene instance id {}", instance.getId(), e);
+        }
+        log.info("查询场景 {} 主靶场数据耗时 {}", instance.getId(), System.currentTimeMillis() - timeA);
+
+        timeA = System.currentTimeMillis();
+        try {
+            rangeDataRemoteService.test(instance.getId(), startTime, configs, currentTime);
+        } catch (Exception e) {
+            log.error("failed to get range data remote , cscene instance id {}", instance.getId(), e);
+        }
+        log.info("查询场景 {} 分靶场数据耗时 {}", instance.getId(), System.currentTimeMillis() - timeA);
     }
 
     @Getter
