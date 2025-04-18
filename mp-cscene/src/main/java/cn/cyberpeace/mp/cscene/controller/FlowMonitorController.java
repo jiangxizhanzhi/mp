@@ -301,7 +301,13 @@ public class FlowMonitorController {
         List<String> allNodes = new ArrayList<>();
         allNodes.addAll(testRangeApiProxy.getAllNodeIdsInCurrentCscene(id));
         queryParams.setTargetNodeIds(allNodes);
-        List<FlowAttackDto> flowAttackInCurrentRange = flowMonitorService.pageFlow(id, queryParams).getData().getList();
+        List<FlowAttackDto> flowAttackInCurrentRange = new ArrayList<>();
+        try {
+            flowAttackInCurrentRange = flowMonitorService.pageFlow(id, queryParams).getData().getList();
+        } catch (MpRuntimeException e) {
+            log.error("error", e);
+            return new ListObjServiceResult<>(new ListObjResult<>(Collections.emptyList(), 0).asResult()).asResult();
+        }
 
         FlowQueryParams otherRangeFlowPageQuery = new FlowQueryParams();
         BeanUtils.copyProperties(queryParams, otherRangeFlowPageQuery);
@@ -309,12 +315,15 @@ public class FlowMonitorController {
         otherRangeFlowPageQuery.setPage(1);
         otherRangeFlowPageQuery.setTargetNodeIds(Collections.emptyList());
 
-
-        List<FlowAttackDto> attackInOtherRange = testRangeApiProxy.pageFlow(id, otherRangeFlowPageQuery, true);
-
         List<FlowAttackDto> allFlowAttack = new ArrayList<>();
         allFlowAttack.addAll(flowAttackInCurrentRange);
-        allFlowAttack.addAll(attackInOtherRange);
+
+        try {
+            List<FlowAttackDto> attackInOtherRange = testRangeApiProxy.pageFlow(id, otherRangeFlowPageQuery, true);
+            allFlowAttack.addAll(attackInOtherRange);
+        } catch (MpRuntimeException e) {
+            log.error("error", e);
+        }
 
 
         boolean showAllFlows = CollectionUtils.isEmpty(orginTargetNodes) || (orginTargetNodes.size() == 1 && orginTargetNodes.get(0).equals("null"));
