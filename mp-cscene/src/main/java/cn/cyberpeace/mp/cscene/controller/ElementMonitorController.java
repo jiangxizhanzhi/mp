@@ -101,7 +101,9 @@ public class ElementMonitorController {
     public XmlOS getXmlOS(BaseSceneElementRequest baseRequest) {
         OS os = sceneElementMonitorService.getOSInfo(baseRequest);
         XmlOS xmlOS = new XmlOS();
-        BeanUtils.copyProperties(os, xmlOS);
+        if (os != null) {
+            BeanUtils.copyProperties(os, xmlOS);
+        }
         return xmlOS;
     }
 
