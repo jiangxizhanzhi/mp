@@ -8,4 +8,5 @@ import lombok.Setter;
 public class AddVirtualNicParams {
     private String instanceId;
     private String networkId;
+    private String ip;
 }

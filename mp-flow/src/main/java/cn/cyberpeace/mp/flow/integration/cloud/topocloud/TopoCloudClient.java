@@ -2,6 +2,9 @@ package cn.cyberpeace.mp.flow.integration.cloud.topocloud;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.flow.config.FlowConfig;
 import cn.cyberpeace.mp.flow.controller.FlowActuatorController;
@@ -39,6 +42,8 @@ public class TopoCloudClient implements ICloudClient {
     private static final String DELETE_TOPO_URL = "/api/cscene/cscene_instances";
 
     private static final String GET_TOPO_URL = "/api/cscene/cscene_instances?id={id}";
+
+    private static final String GET_NETWORK_TREX_IP = "/api/cscene/cscene_instances/get_trex_ip?network_id=%s";
 
     private static final String TOPO_NAME = "trex_topo";
 
@@ -169,6 +174,16 @@ public class TopoCloudClient implements ICloudClient {
     @Override
     public AddVirtualNicResult addVirtualNic(AddVirtualNicParams params) {
         return null;
+    }
+
+    public static String getTrexIp(String networkId) {
+        try {
+            String result = HttpUtils.sendGet(String.format(GET_NETWORK_TREX_IP, networkId));
+            return JsonCommon.snakeParse(result, new TypeReference<ServiceResult<String>>() {
+            }).getData();
+        } catch (Exception e) {
+            throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("获取trex ip异常"));
+        }
     }
 
     private String getFlowNodeResourceId(BusinessCSceneInstance instance) {

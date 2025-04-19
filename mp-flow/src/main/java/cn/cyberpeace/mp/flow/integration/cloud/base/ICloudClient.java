@@ -1,7 +1,5 @@
 package cn.cyberpeace.mp.flow.integration.cloud.base;
 
-import java.util.List;
-
 public interface ICloudClient {
     GetVirtualMachineResult getVirtualMachine(String id);
 

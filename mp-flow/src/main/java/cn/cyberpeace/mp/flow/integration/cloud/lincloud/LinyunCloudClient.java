@@ -3,11 +3,7 @@ package cn.cyberpeace.mp.flow.integration.cloud.lincloud;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.flow.config.FlowConfig;
-import cn.cyberpeace.mp.flow.integration.cloud.base.AddVirtualNicParams;
-import cn.cyberpeace.mp.flow.integration.cloud.base.AddVirtualNicResult;
-import cn.cyberpeace.mp.flow.integration.cloud.base.DeleteVirtualMachineResult;
-import cn.cyberpeace.mp.flow.integration.cloud.base.GetVirtualMachineResult;
-import cn.cyberpeace.mp.flow.integration.cloud.base.ICloudClient;
+import cn.cyberpeace.mp.flow.integration.cloud.base.*;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,10 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 
