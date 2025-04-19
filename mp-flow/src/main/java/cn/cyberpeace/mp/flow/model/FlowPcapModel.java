@@ -11,6 +11,7 @@
 package cn.cyberpeace.mp.flow.model;
 
 import cn.cyberpeace.mp.base.model.BaseModel;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultLong;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
 import io.swagger.annotations.ApiModelProperty;
@@ -45,18 +46,21 @@ public class FlowPcapModel extends BaseModel {
 	 * 时长(单位ms)
 	 */
 	@ApiModelProperty(value = "时长(单位ms)")
+	@DefaultLong(1000)
 	private Long duration;
 
 	/**
 	 * 大小(单位Byte)
 	 */
 	@ApiModelProperty(value = "大小(单位Byte)")
+	@DefaultLong(1000)
 	private Long pcapSize;
 
 	/**
 	 * 包数(报文数量)
 	 */
 	@ApiModelProperty(value = "包数(报文数量)")
+	@DefaultLong
 	private Long pktNum;
 
 	/**
