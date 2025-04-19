@@ -137,8 +137,7 @@ public class FlowActuator {
         object.put("flow_id", flowInfoModel.getId());
         if (ResourceTypeEnum.PACP.toValue() == flowInfoModel.getResourceType()) {
             fileByte = FsCommon.downloadRawContent(flowInfoModel.getPcapFile());
-            String fileName = flowInfoModel.getTitle() + System.currentTimeMillis() + "." + flowInfoModel.getPcapFile()
-                    .split(BaseConstants.SPOT)[1];
+            String fileName = flowInfoModel.getTitle() + System.currentTimeMillis() + ".pcap";
             object.put("fileName", fileName);
             object.put("file_name", fileName);
             if (CollectionUtils.isNotEmpty(flowProtocolModelList)) {
@@ -212,7 +211,7 @@ public class FlowActuator {
         object.put("flowId", flowId);
         object.put("flow_id", flowId);
         if (ResourceTypeEnum.PACP.toValue() == resourceType) {
-            String fileName = flowTile + System.currentTimeMillis() + "." + flowFileName.split(BaseConstants.SPOT)[1];
+            String fileName = flowTile + System.currentTimeMillis() + ".pcap";
             object.put("fileName", fileName);
             object.put("file_name", fileName);
             if (CollectionUtils.isNotEmpty(flowProtocolModelList)) {
