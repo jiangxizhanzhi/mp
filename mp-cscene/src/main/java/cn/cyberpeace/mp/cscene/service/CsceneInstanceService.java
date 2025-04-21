@@ -3135,6 +3135,8 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
             CloudScenePluginHandler cloudPlugin = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
             String groupName = cloudPlugin.getSourceSceneId();
+            String groupNamePrefix = situationAwareConfig.getGroupNamePrefix();
+            groupName = StringUtils.isNotBlank(situationAwareConfig.getGroupNamePrefix()) ? groupNamePrefix + "-" + groupName : groupName;
             CollectionScenePluginHandler collectPlugin = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
             for (CloudPluginSceneElementBO cloudPluginSceneElementBO : cloudPlugin.filterVirtualMachineElements()) {
                 CollectionPluginSceneElementBO collectionElement = collectPlugin.getElementMap().get(cloudPluginSceneElementBO.getSrcElement().getId());
@@ -3143,8 +3145,8 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     if (BaseSceneModel.CloudType.PUBLIC == requestData.getCloudType()) {
                         if (BaseSceneElementModel.SystemType.WINDOWS.equals(cloudPluginSceneElementBO.getVmType().toLowerCase())) {
                             List<String> initCommands = cloudPluginSceneElementBO.getSrcElement().getInitCommands();
-                            initCommands.add(0,"call c:\\wazuha\\uninstall.bat");
-                            initCommands.add(0,"c:\\wazuha");
+                            initCommands.add(0,"rd/s/q C:\\wazuha");
+                            initCommands.add(0,"call C:\\wazuha\\uninstall.bat");
 //                            先卸载删除目录再执行
                             azureResourceManager
                                     .getManager()
