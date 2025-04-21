@@ -1002,13 +1002,22 @@ public class CsceneDataModifier {
             String areaId = topologyBO.getAreaId();
             for (BaseSceneElementBO e : elements) {
                 Map<String, String> outPosition = e.getOuterPosition2();
-                if (outPosition == null) {
-                    outPosition = new HashMap<>();
-                }
                 String pos = e.getPosition2();
-                outPosition.put(areaId, pos);
-                e.setOuterPosition2(outPosition);
-                e.setPosition2(outPosition.getOrDefault(e.getArea(), ""));
+                if(MapUtils.isEmpty(outPosition) && StringUtils.isEmpty(pos)){
+                    log.warn("data error! element name is {}",e.getName());
+                    return;
+                }
+                if(MapUtils.isNotEmpty(outPosition)){
+                    String position2 = outPosition.getOrDefault(e.getArea(), "");
+                    e.setPosition2(position2);
+                    continue;
+                }
+                if(StringUtils.isNotEmpty(pos)){
+                    outPosition = new HashMap<>();
+                    outPosition.put(areaId, pos);
+                    e.setOuterPosition2(outPosition);
+                    e.setPosition2(outPosition.getOrDefault(e.getArea(), ""));
+                }
             }
         }
     }
