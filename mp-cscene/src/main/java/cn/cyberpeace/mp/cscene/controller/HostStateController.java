@@ -74,7 +74,7 @@ public class HostStateController {
             var result = mapper.list(new HumanCondition().filterEqual(SceneCycleDataModel::getScene, sceneId)
                                              .filterEqual(SceneCycleDataModel::getSceneElement, "")
                                              .filterEqual(SceneCycleDataModel::getType, SceneCycleDataModel.HOST)
-                                             .orderBy(SceneCycleDataModel::getPk).pagination(1, 20));
+                                             .reverseOrderBy(SceneCycleDataModel::getPk).pagination(1, 20));
             List<HostState> processes = new ArrayList<>();
             for (SceneCycleDataModel model : result) {
                 var p = JsonCommon.parse(model.getData(), HostState.class);

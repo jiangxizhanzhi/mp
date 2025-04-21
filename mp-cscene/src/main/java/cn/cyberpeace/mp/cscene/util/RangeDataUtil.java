@@ -23,8 +23,10 @@ import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -51,24 +53,26 @@ public class RangeDataUtil {
 
     private volatile long startTime = 0L;
 
+    private Set<String> removedIds = new HashSet<>();
+
     ExecutorService executor = new ThreadPoolExecutor(2, 10, 10L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
 
-    @Scheduled(cron = "0 0/1 * * * ?")
+    //    @Scheduled(cron = "0 0/1 * * * ?")
     public void test() {
         // 周期按照分钟计算 startTime 表示从第一次启动到现在经过了几分钟
         startTime++;
+        LocalDateTime currentTime = LocalDateTime.now();
+        log.info("current time : {}", TimeUtils.localDateTimeToString(currentTime));
         if (lock.tryLock()) {
             try {
-                doAction();
+                doAction(currentTime);
             } finally {
                 lock.unlock();
             }
         }
     }
 
-    private void doAction() {
-        LocalDateTime currentTime = LocalDateTime.now();
-        log.info("current time : {}" , TimeUtils.localDateTimeToString(currentTime));
+    private void doAction(LocalDateTime currentTime) {
         long timeA = System.currentTimeMillis();
         // 查询所有的分靶场 并给每个靶场设置默认的周期配置
         List<RangeModel> rangeModelList = rangeMapper.list(new HumanCondition());
@@ -129,9 +133,12 @@ public class RangeDataUtil {
 
         timeA = System.currentTimeMillis();
         try {
-            rangeDataRemoteService.test(instance.getId(), startTime, configs, currentTime);
+            if (!removedIds.contains(instance.getId())) {
+                rangeDataRemoteService.test(instance.getId(), startTime, configs, currentTime);
+            }
         } catch (MpRuntimeException e) {
             log.error("failed to get range data remote , cscene instance id {} , exception : {}", instance.getId(), e.getMessage());
+            removedIds.add(instance.getId());
         } catch (Exception e) {
             log.error("failed to get range data remote , cscene instance id {}", instance.getId(), e);
         }
