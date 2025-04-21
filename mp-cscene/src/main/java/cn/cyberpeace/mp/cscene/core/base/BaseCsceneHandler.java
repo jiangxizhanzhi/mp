@@ -350,7 +350,11 @@ public abstract class BaseCsceneHandler<
      */
     public void save() {
         saveCscene();
-        saveCsceneRoles();
+        try {
+            saveCsceneRoles();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**
