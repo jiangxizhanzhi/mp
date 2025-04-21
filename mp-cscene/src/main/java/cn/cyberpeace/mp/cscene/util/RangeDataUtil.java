@@ -55,9 +55,9 @@ public class RangeDataUtil {
 
     private Set<String> removedIds = new HashSet<>();
 
-    ExecutorService executor = new ThreadPoolExecutor(2, 10, 10L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
+    ExecutorService executor = new ThreadPoolExecutor(2, 5, 10L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
 
-    //    @Scheduled(cron = "0 0/1 * * * ?")
+    @Scheduled(cron = "0 0/1 * * * ?")
     public void test() {
         // 周期按照分钟计算 startTime 表示从第一次启动到现在经过了几分钟
         startTime++;
@@ -103,23 +103,23 @@ public class RangeDataUtil {
         var instances = csceneService.getRunningCscenes();
         log.info("查询所有运行着的场景耗时 {}", System.currentTimeMillis() - timeA);
 
-        // 顺序执行所有场景
-        for (var instance : instances) {
-//            if (!instance.getId().equals("ffff18d5d9d34ac2996862c1097cd56a")) {
-//                continue;
-//            }
-            handleOneInstance(instance, configs, currentTime);
-        }
-
-//         并行执行所有场景
-//        List<Runnable> tasks = new ArrayList<>();
+//        // 顺序执行所有场景
 //        for (var instance : instances) {
 ////            if (!instance.getId().equals("ffff18d5d9d34ac2996862c1097cd56a")) {
 ////                continue;
 ////            }
-//            tasks.add(() -> handleOneInstance(instance, configs, currentTime));
+//            handleOneInstance(instance, configs, currentTime);
 //        }
-//        RangeTaskCommon.runTasks(tasks);
+
+//         并行执行所有场景
+        List<Runnable> tasks = new ArrayList<>();
+        for (var instance : instances) {
+//            if (!instance.getId().equals("ffff18d5d9d34ac2996862c1097cd56a")) {
+//                continue;
+//            }
+            tasks.add(() -> handleOneInstance(instance, configs, currentTime));
+        }
+        RangeTaskCommon.runTasks(tasks);
     }
 
     private void handleOneInstance(CsceneInstanceModel instance, Map<String, CollectAgentConfig> configs, LocalDateTime currentTime) {
