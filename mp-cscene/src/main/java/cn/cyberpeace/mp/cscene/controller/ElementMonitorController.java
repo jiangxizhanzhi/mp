@@ -186,10 +186,13 @@ public class ElementMonitorController {
         pageRequest.ensure();
         var mapper = BeanCommon.getBean(SceneCycleDataModelMapper.class);
         String sceneId = pageRequest.getSceneId();
-        String nodeId = pageRequest.getElementIds().get(0);
-        var result = mapper.list(new HumanCondition().filterEqual(SceneCycleDataModel::getScene, sceneId)
-                                         .filterEqual(SceneCycleDataModel::getSceneElement, nodeId)
-                                         .filterEqual(SceneCycleDataModel::getType, SceneCycleDataModel.FILE));
+        var cond = new HumanCondition().filterEqual(SceneCycleDataModel::getScene, sceneId);
+        if (CollectionUtils.isNotEmpty(pageRequest.getElementIds())) {
+            var nodeIds = pageRequest.getElementIds();
+            cond.filterIn(SceneCycleDataModel::getSceneElement, nodeIds.toArray(new String[]{}));
+        }
+        cond.filterEqual(SceneCycleDataModel::getType, SceneCycleDataModel.FILE);
+        var result = mapper.list(cond);
         List<CollectionHostEventBO> processes = new ArrayList<>();
         for (SceneCycleDataModel model : result) {
             var p = JsonCommon.parse(model.getData(), CollectionHostEventBO.class);
@@ -229,10 +232,13 @@ public class ElementMonitorController {
 
         var mapper = BeanCommon.getBean(SceneCycleDataModelMapper.class);
         String sceneId = pageRequest.getSceneId();
-        String nodeId = pageRequest.getElementIds().get(0);
-        var result = mapper.list(new HumanCondition().filterEqual(SceneCycleDataModel::getScene, sceneId)
-                                         .filterEqual(SceneCycleDataModel::getSceneElement, nodeId)
-                                         .filterEqual(SceneCycleDataModel::getType, SceneCycleDataModel.REGISTRY));
+        var cond = new HumanCondition().filterEqual(SceneCycleDataModel::getScene, sceneId);
+        if (CollectionUtils.isNotEmpty(pageRequest.getElementIds())) {
+            var nodeIds = pageRequest.getElementIds();
+            cond.filterIn(SceneCycleDataModel::getSceneElement, nodeIds.toArray(new String[]{}));
+        }
+        cond.filterEqual(SceneCycleDataModel::getType, SceneCycleDataModel.REGISTRY);
+        var result = mapper.list(cond);
         List<CollectionHostEventBO> processes = new ArrayList<>();
         for (SceneCycleDataModel model : result) {
             var p = JsonCommon.parse(model.getData(), CollectionHostEventBO.class);
