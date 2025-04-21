@@ -30,6 +30,7 @@ import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.OS;
+import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.OSV2;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;

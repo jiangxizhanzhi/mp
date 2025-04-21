@@ -34,6 +34,7 @@ import cn.cyberpeace.mp.sceneplugincollection.service.param.HostEventQueryParams
 import cn.cyberpeace.mp.sceneplugincollection.service.param.TimeListPageInfoQueryParams;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Netiface;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.OS;
+import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.OSV2;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
 import com.alibaba.fastjson.JSON;
@@ -165,10 +166,27 @@ public class TestRangeApiProxy implements SubRangeMonitorInterface {
             String mapCsceneId = entry.getKey();
             if (csceneIdToNodeIds.containsKey(mapCsceneId)) {
                 baseRequest.setSceneId(mapCsceneId);
-                String result = TestRangeClientUtil.get(range, TestRangeApiUrl.ELEMENT_OS, baseRequest, getAuthHeaderMap(range), 10000)
+                String result = TestRangeClientUtil.get(range, TestRangeApiUrl.ELEMENT_SYS_INFO, baseRequest, getAuthHeaderMap(range), 10000)
                         .getResult();
                 JSONObject jsonObject = JSONObject.parseObject(result);
-                return jsonObject.getObject("data", OS.class);
+                var rs = jsonObject.getObject("data", OSV2.class);
+
+                OS os = new OS();
+                os.setScan(rs.getScan());
+                os.setRelease(rs.getRelease());
+                os.setSysname(rs.getSystemName());
+                os.setHostname(rs.getSystemHostname());
+                os.setArchitecture(rs.getSystemArchitecture());
+
+                OS.OSDetail detail = new OS.OSDetail();
+                detail.setMajor(rs.getOs().getMajor());
+                detail.setMinor(rs.getOs().getMinor());
+                detail.setName(rs.getOs().getName());
+                detail.setPlatform(rs.getOs().getPlatform());
+                detail.setVersion(rs.getOs().getSystemVersion());
+
+                os.setOs(detail);
+                return os;
             }
         }
         return new OS();
