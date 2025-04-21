@@ -179,11 +179,13 @@ public class TestRangeApiProxy implements SubRangeMonitorInterface {
                 os.setArchitecture(rs.getSystemArchitecture());
 
                 OS.OSDetail detail = new OS.OSDetail();
-                detail.setMajor(rs.getOs().getMajor());
-                detail.setMinor(rs.getOs().getMinor());
-                detail.setName(rs.getOs().getName());
-                detail.setPlatform(rs.getOs().getPlatform());
-                detail.setVersion(rs.getOs().getSystemVersion());
+                if (rs.getOs() != null) {
+                    detail.setMajor(rs.getOs().getMajor());
+                    detail.setMinor(rs.getOs().getMinor());
+                    detail.setName(rs.getOs().getName());
+                    detail.setPlatform(rs.getOs().getPlatform());
+                    detail.setVersion(rs.getOs().getSystemVersion());
+                }
 
                 os.setOs(detail);
                 return os;
