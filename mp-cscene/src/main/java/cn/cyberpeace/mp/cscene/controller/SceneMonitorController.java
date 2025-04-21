@@ -76,13 +76,18 @@ public class SceneMonitorController {
                                                                             @RequestParam(required = false) Boolean realTimeHostState,
                                                                             SceneAllElementsQueryRequest request) {
 
-        List<ElementMonitorBasicInfo> basicInfoList = sceneMonitorService.getAllSceneElements(sceneId, realTimeHostState, request);
+        SceneMonitorService.Info info = sceneMonitorService.getAllSceneElementsV2(sceneId, realTimeHostState, request);
+        var basicInfoList = info.getList();
+
         if (Boolean.TRUE.equals(request.getIncludeDeleting())) {
             return ResultCommon.success(basicInfoList);
         }
         List<ElementMonitorBasicInfo> result = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(basicInfoList)) {
             for (var e : basicInfoList) {
+                if (!e.getCurrentScenePartFlag()) {
+                    continue;
+                }
                 if (e.getEvent() != null) {
                     if (e.getEvent() != SceneElementModel.Event.DELETE) {
                         result.add(e);
@@ -97,6 +102,18 @@ public class SceneMonitorController {
 
         try {
             var testRangeResult = testRangeApiProxy.listAllElementBasicInfo(sceneId, request);
+            var ip2Elements = info.getIp2Elements();
+            for (var e : testRangeResult) {
+                if (CollectionUtils.isEmpty(e.getPorts())) {
+                    continue;
+                }
+                for (var p : e.getPorts()) {
+                    if (p.getIp() != null && ip2Elements.containsKey(p.getIp())) {
+                        var currentNode = ip2Elements.get(p.getIp());
+                        e.setName(currentNode.getName());
+                    }
+                }
+            }
             result.addAll(testRangeResult);
         } catch (Exception e) {
             log.error(e.getMessage(), e);

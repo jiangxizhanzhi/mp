@@ -91,4 +91,6 @@ public class ElementMonitorBasicInfo {
 
     private String range ;
 
+    private Boolean currentScenePartFlag;
+
 }

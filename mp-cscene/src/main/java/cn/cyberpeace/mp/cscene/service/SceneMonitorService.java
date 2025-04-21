@@ -37,6 +37,8 @@ import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.hutool.core.collection.CollectionUtil;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -362,6 +364,162 @@ public class SceneMonitorService {
         return basicInfos;
     }
 
+    public Info getAllSceneElementsV2(String sceneId, Boolean fetchRealTimeHostState, SceneAllElementsQueryRequest request) {
+        log.info("sceneId:{}, fetchRealTimeHostState:{}", sceneId, fetchRealTimeHostState);
+        if (Objects.isNull(fetchRealTimeHostState)) {
+            fetchRealTimeHostState = true;
+        }
+        boolean isAll = Objects.nonNull(request) && Objects.nonNull(request.getIsAll()) ? request.getIsAll() : Boolean.FALSE;
+        var result = csceneInstanceService.getById(sceneId, null);
+        var csceneInstanceBO = result.getSource();
+        var sceneInstanceId = csceneCommonService.translateSceneId(sceneId);
+
+        if (StringUtils.isEmpty(sceneInstanceId)) {
+            return new Info();
+        }
+
+        SceneHandler sceneHandler = new SceneHandler(sceneInstanceId, null, null);
+        CloudScenePluginHandler cloudPlugin = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+
+        Map<String, SceneElementBO> ip2Elements = new HashMap<>();
+        for (var r : sceneHandler.getElementMap().values()) {
+            if (CollectionUtils.isEmpty(r.getPorts())) {
+                continue;
+            }
+            for (var p : r.getPorts()) {
+                if (StringUtils.isNotEmpty(p.getIp())) {
+                    ip2Elements.put(p.getIp(), r);
+                }
+            }
+        }
+
+        // 根据名称模糊筛选
+        var stream = sceneHandler.getElementMap().values().stream().filter(BaseSceneElementBO::getCurrentScenePartFlag);
+        if (Objects.nonNull(request) && StringUtils.isNotEmpty(request.getName())) {
+            stream = stream.filter(e -> e.getName().toLowerCase().contains(request.getName().toLowerCase()));
+        }
+        List<String> nodeIds = stream
+                .filter(n -> !Boolean.TRUE.equals(n.getIsAuxiliary()))
+                .map(SceneElementBO::getId)
+                .collect(Collectors.toList());
+        // 根据节点id筛选
+        if (Objects.nonNull(request) && CollectionUtils.isNotEmpty(request.getElementIds())) {
+            nodeIds.retainAll(request.getElementIds());
+        }
+
+        List<ElementMonitorBasicInfo> basicInfos = new ArrayList<>();
+        List<CompletableFuture<ElementMonitorBasicInfo>> cfList = new ArrayList<>();
+        for (String nodeId : nodeIds) {
+            // 此处fetchRealTimeHostState设定为false，因为后面会统一查询一次
+            var cf = CompletableFuture.supplyAsync(() -> processElementBasicInfo(csceneInstanceBO, sceneId, nodeId, false, isAll));
+            cfList.add(cf);
+        }
+
+        if (CollectionUtil.isNotEmpty(cfList)) {
+            var cfArray = cfList.toArray(new CompletableFuture[0]);
+            CompletableFuture<List<ElementMonitorBasicInfo>> finalCF = CompletableFuture.allOf(cfArray).thenApply(v -> cfList.stream().map(CompletableFuture::join).collect(Collectors.toList()));
+            basicInfos = finalCF.join();
+
+            if (CollectionUtil.isNotEmpty(basicInfos)) {
+                if (Boolean.TRUE.equals(request.getIsCollect())) {
+                    basicInfos = basicInfos.stream().filter(basicInfo -> Objects.nonNull(basicInfo)
+                            && !ElementTypeUtils.isCoreRouter(basicInfo.getImageName())
+                            && !BaseCloudPluginSceneElementModel.ImageType.ENTITY.equals(basicInfo.getImageType())).collect(Collectors.toList());
+                } else {
+                    basicInfos = basicInfos.stream().filter(Objects::nonNull).collect(Collectors.toList());
+                }
+                Collections.sort(basicInfos, (o1, o2) -> {
+                    int o1i = 0;
+                    int o2i = 0;
+                    for (int i = 0; i < nodeIds.size(); i++) {
+                        if (Objects.equals(nodeIds.get(i), o1.getId())) {
+                            o1i = i;
+                        }
+                        if (Objects.equals(nodeIds.get(i), o2.getId())) {
+                            o2i = i;
+                        }
+                    }
+                    return o1i - o2i;
+                });
+            }
+
+        }
+
+        // 根据设备类型筛选
+        if (Objects.nonNull(request) && Objects.nonNull(request.getCategory())) {
+            basicInfos = basicInfos.stream().filter(b -> b.getCategory().equals(request.getCategory())).collect(Collectors.toList());
+        }
+        // 根据操作系统名称筛选
+        if (Objects.nonNull(request) && StringUtils.isNotEmpty(request.getSystemTypeName())) {
+            basicInfos = basicInfos.stream().filter(b -> b.getSystemTypeName().equals(request.getSystemTypeName())).collect(Collectors.toList());
+        }
+
+        // 添加云插件端口接入方式
+        if (CollectionUtils.isNotEmpty(basicInfos)) {
+            for (var basicInfo : basicInfos) {
+                if (CollectionUtils.isEmpty(basicInfo.getPorts())) {
+                    continue;
+                }
+                for (var p : basicInfo.getPorts()) {
+                    var cloudPort = cloudPlugin.getPort(p.getId());
+                    p.setCloudAccessModes(cloudPort.getAccessModes());
+                }
+            }
+        }
+
+        if (fetchRealTimeHostState && CollectionUtil.isNotEmpty(basicInfos)) {
+            // 查询实时主机状态
+            var agentNames = csceneCommonService.getAgentNamesBySceneIdAndElementIds(sceneId, null);
+            if (CollectionUtil.isNotEmpty(agentNames)) {
+                AgentNameBasedRequest agentNameBasedRequest = new AgentNameBasedRequest();
+                agentNameBasedRequest.setAgentNames(agentNames);
+                agentNameBasedRequest.setPageSize(1);
+
+                Map<String, List<HostState>> map = hostStateService.mapHostStatesByAgentName(agentNameBasedRequest);
+                basicInfos.forEach(basicInfo -> {
+                    var hostStates = map.get(basicInfo.getEid());
+                    if (CollectionUtil.isNotEmpty(hostStates)) {
+                        basicInfo.setHostState(hostStates.get(0));
+                    }
+                });
+            }
+
+            // 查询用户连接信息
+            var connections = cloudPluginSceneConnectionMapper.list(new HumanCondition()
+                                                                            .select(CloudPluginSceneConnectionModel::getSceneElement)
+                                                                            .select(CloudPluginSceneConnectionModel::getAccessUser)
+                                                                            .filterEqual(CloudPluginSceneConnectionModel::getDisable, false)
+                                                                            .filterEqual(CloudPluginSceneConnectionModel::getScene, csceneInstanceBO.getScene().getTopology().getScene().getEid())
+                                                                            .reverseOrderBy(CloudPluginSceneConnectionModel::getPk));
+            Map<String, List<AccessUserBO>> nodeId2Users = new HashMap<>();
+            if (CollectionUtils.isNotEmpty(connections)) {
+                Set<String> userIds = connections.stream().map(CloudPluginSceneConnectionModel::getAccessUser).collect(Collectors.toSet());
+                var userModels = UserCommon.getUsers(new ArrayList<>(userIds));
+                Map<String, UserModel> userId2User = userModels.stream().collect(Collectors.toMap(UserModel::getId, userModel -> userModel));
+                connections.forEach(model -> {
+                    var users = nodeId2Users.getOrDefault(model.getSceneElement(), new ArrayList<>());
+                    nodeId2Users.put(model.getSceneElement(), users);
+                    var userModel = userId2User.get(model.getAccessUser());
+                    if (userModel != null) {
+                        AccessUserBO accessUser = new AccessUserBO();
+                        accessUser.setId(userModel.getId());
+                        accessUser.setName(userModel.getName());
+                        users.add(accessUser);
+                    }
+                });
+            }
+            basicInfos.forEach(basicInfo -> basicInfo.setAccessUsers(nodeId2Users.getOrDefault(basicInfo.getId(), new ArrayList<>())
+                                                                             .stream().distinct().collect(Collectors.toList())));
+
+            // 添加定时上报任务
+            SceneHostStateReportScheduleService.addCsceneInstance(sceneId);
+        }
+        Info info = new Info();
+        info.setList(basicInfos);
+        info.setIp2Elements(ip2Elements);
+        return info;
+    }
+
     public List<ElementMonitorBasicInfo> getAllSceneConfigElements(String id, SceneAllElementsQueryRequest request) {
         String sceneConfigId = csceneCommonService.translateSceneConfigId(id);
         if (sceneConfigId == null) {
@@ -531,5 +689,10 @@ public class SceneMonitorService {
         return supported;
     }
 
-
+    @Getter
+    @Setter
+    public static class Info{
+        List<ElementMonitorBasicInfo> list = new ArrayList<>();
+        Map<String, SceneElementBO> ip2Elements = new HashMap<>();
+    }
 }

@@ -239,6 +239,7 @@ public class SceneElementMonitorService {
 
         if (tpoEleOptional.isPresent()) {
             SceneElementBO tpoEleBO = tpoEleOptional.get();
+            basicInfo.setCurrentScenePartFlag(tpoEleBO.getCurrentScenePartFlag());
             sceneElementBO2ElementMonitorBasicInfo(basicInfo, tpoEleBO, csceneInstanceBO, fetchRealTimeHostState);
         }
     }
