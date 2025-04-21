@@ -21,6 +21,7 @@ import cn.cyberpeace.mp.cscene.service.HostStateService;
 import cn.cyberpeace.mp.cscene.service.SceneElementMonitorService;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.OS;
+import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.OSV2;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.XmlOS;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -94,6 +95,35 @@ public class ElementMonitorController {
     public ServiceResult<OS> getOS(BaseSceneElementRequest baseRequest) {
         OS os = sceneElementMonitorService.getOSInfo(baseRequest);
         return ResultCommon.success(os);
+    }
+
+    @ApiOperation(value = "节点操作系统信息")
+    @GetMapping("/sys_info")
+    public ServiceResult<OSV2> getSysOS(BaseSceneElementRequest baseRequest) {
+        OS os = sceneElementMonitorService.getOSInfo(baseRequest);
+
+        OSV2 osv2 = new OSV2();
+        if (os != null) {
+            osv2.setScan(os.getScan());
+            osv2.setRelease(os.getRelease());
+            osv2.setVersion(os.getVersion());
+            osv2.setAgentId(os.getAgentId());
+            osv2.setSystemArchitecture(os.getSystemArchitecture());
+            osv2.setSystemHostname(os.getSystemHostname());
+            osv2.setSystemName(os.getSystemName());
+
+            if (os.getOs() != null) {
+                OSV2.OSDetail detail = new OSV2.OSDetail();
+                detail.setMajor(os.getOs().getMajor());
+                detail.setMinor(os.getOs().getMinor());
+                detail.setName(os.getOs().getName());
+                detail.setPlatform(os.getOs().getPlatform());
+                detail.setSystemVersion(os.getOs().getSystemVersion());
+                osv2.setOs(detail);
+            }
+        }
+
+        return ResultCommon.success(osv2);
     }
 
     @ApiOperation(value = "节点操作系统信息")
