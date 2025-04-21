@@ -80,6 +80,7 @@ public class HostStateController {
                 var p = JsonCommon.parse(model.getData(), HostState.class);
                 processes.add(p);
             }
+            Collections.reverse(processes);
             return ResultCommon.success(processes);
         }
     }
