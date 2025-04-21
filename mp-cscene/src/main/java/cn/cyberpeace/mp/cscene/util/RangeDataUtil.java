@@ -3,7 +3,9 @@ package cn.cyberpeace.mp.cscene.util;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.RangeTaskCommon;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
 import cn.cyberpeace.mp.frontadmin.model.SysConfigModel;
@@ -66,6 +68,7 @@ public class RangeDataUtil {
 
     private void doAction() {
         LocalDateTime currentTime = LocalDateTime.now();
+        log.info("current time : {}" , TimeUtils.localDateTimeToString(currentTime));
         long timeA = System.currentTimeMillis();
         // 查询所有的分靶场 并给每个靶场设置默认的周期配置
         List<RangeModel> rangeModelList = rangeMapper.list(new HumanCondition());
@@ -127,6 +130,8 @@ public class RangeDataUtil {
         timeA = System.currentTimeMillis();
         try {
             rangeDataRemoteService.test(instance.getId(), startTime, configs, currentTime);
+        } catch (MpRuntimeException e) {
+            log.error("failed to get range data remote , cscene instance id {} , exception : {}", instance.getId(), e.getMessage());
         } catch (Exception e) {
             log.error("failed to get range data remote , cscene instance id {}", instance.getId(), e);
         }

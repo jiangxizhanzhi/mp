@@ -163,14 +163,18 @@ public class RangeDataLocalService {
         hostStateTrendRequest.setSceneId(sceneId);
         var result = hostStateService.getSceneHostStateTrend(hostStateTrendRequest);
         if (CollectionUtils.isNotEmpty(result)) {
-            var last = result.get(result.size() - 1);
-            last.setTime(currentTime);
-            SceneCycleDataModel dataModel = new SceneCycleDataModel();
-            dataModel.setScene(sceneId);
-            dataModel.setSceneElement("");
-            dataModel.setType(SceneCycleDataModel.HOST);
-            dataModel.setData(JsonCommon.stringify(last));
-            sceneCycleDataModelMapper.save(dataModel);
+            for (var tmp : result) {
+                if (tmp.getCpuPercent() > 0) {
+                    tmp.setTime(currentTime);
+                    SceneCycleDataModel dataModel = new SceneCycleDataModel();
+                    dataModel.setScene(sceneId);
+                    dataModel.setSceneElement("");
+                    dataModel.setType(SceneCycleDataModel.HOST);
+                    dataModel.setData(JsonCommon.stringify(tmp));
+                    sceneCycleDataModelMapper.save(dataModel);
+                    break;
+                }
+            }
         }
     }
 
