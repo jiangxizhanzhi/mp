@@ -41,6 +41,28 @@ public class OS {
     @JSONField(name = "agent_id")
     private String agentId;
 
+    @ApiModelProperty(value = "主机名")
+    @JSONField(name = "systemHostname")
+    private String systemHostname;
+
+    @ApiModelProperty(value = "系统名称")
+    private String systemName;
+
+    @ApiModelProperty(value = "架构")
+    private String systemArchitecture;
+
+    public String getSystemHostname() {
+        return hostname;
+    }
+
+    public String getSystemName() {
+        return sysname;
+    }
+
+    public String getSystemArchitecture() {
+        return architecture;
+    }
+
     @Data
     @ApiModel("操作系统详细信息")
     public static class OSDetail {
@@ -59,6 +81,13 @@ public class OS {
 
         @ApiModelProperty(value = "版本号")
         private String version;
+
+        @ApiModelProperty(value = "版本号")
+        private String systemVersion;
+
+        public String getSystemVersion() {
+            return version;
+        }
     }
 
 }
