@@ -127,6 +127,11 @@ public class CollectionScenePluginHandler extends ScenePluginHandler<CollectionP
     }
 
     @Override
+    public void initializeProbeInstallationScripts(){
+        initiateHandler.initializeProbeInstallationScripts();
+    }
+
+    @Override
     public void create() {
         createHandler.create();
     }

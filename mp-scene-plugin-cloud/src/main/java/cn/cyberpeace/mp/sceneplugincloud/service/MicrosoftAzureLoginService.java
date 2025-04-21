@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.auth.service;
+package cn.cyberpeace.mp.sceneplugincloud.service;
 
 import cn.cyberpeace.mp.auth.model.MicrosoftAzureUserModel;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;

@@ -44,7 +44,7 @@ public class CollectionAppConfig {
     private String wazuhPrivateServerHost;
 
     @Value("${mp.sceneplugincollection.azureMixed.wazuh-server-host:127.0.0.1}")
-    private String wazuhMixedServerHost;
+    private String wazuhMixServerHost;
 
     @Value("${mp.sceneplugincollection.wazuh_remote_port:8514}")
     private Integer wazuhRemotePort;

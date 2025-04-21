@@ -1,11 +1,11 @@
-package cn.cyberpeace.mp.auth.controller;
+package cn.cyberpeace.mp.sceneplugincloud.controller;
 
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.model.MicrosoftAzureUserModel;
-import cn.cyberpeace.mp.auth.service.MicrosoftAzureLoginService;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.sceneplugincloud.service.MicrosoftAzureLoginService;
 import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

@@ -62,4 +62,15 @@ public class MicrosoftAzureUserModel extends BaseModel {
 
     @ApiModelProperty(value = "采集服务器密码")
     private String wazuhManagerPassword;
+
+    public static class CloudType {
+        public static final int DEFAULT = 0;
+        public static final int PUBLIC = 1;
+        public static final int PRIVATE = 2;
+        public static final int MIX = 3;
+
+        private CloudType() {
+        }
+    }
+
 }

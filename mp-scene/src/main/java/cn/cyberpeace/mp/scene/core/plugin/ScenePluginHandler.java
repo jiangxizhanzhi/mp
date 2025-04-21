@@ -193,4 +193,7 @@ public abstract class ScenePluginHandler<S extends BasePluginSceneBO<?, S, Scene
 
     public void completionKaliTopo() {
     }
+
+    public void initializeProbeInstallationScripts() {
+    }
 }

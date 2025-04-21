@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.scene.core.bo.SceneBO;
 import cn.cyberpeace.mp.scene.core.event.base.SceneEventProcess;
 import cn.cyberpeace.mp.scene.model.SceneElementSituationProbeModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
 import cn.cyberpeace.mp.scene.repository.SceneElementSituationProbeMapper;
 import cn.cyberpeace.mp.scene.util.InstallerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.HostRoute;
@@ -79,7 +80,7 @@ public class InitiateHandler extends HandlerCommon {
         String eid = scene.getSrcScene().getEid();
 
         //当前云类型
-        Integer cloudType = scene.getSrcScene().getCloudType() != null ? scene.getSrcScene().getCloudType() : 1;
+        Integer cloudType = scene.getSrcScene().getCloudType() != null ? scene.getSrcScene().getCloudType() : BaseSceneModel.CloudType.PUBLIC;
         // 全局开启流量采集
         if (Boolean.TRUE.equals(CollectionSingleton.collectionAppConfig.getEnableFlowCollect())
                 || Boolean.TRUE.equals(scene.getEnableFlowCollect()) || Boolean.TRUE.equals(scene.getEnableFlowMirror())) {
@@ -229,8 +230,8 @@ public class InitiateHandler extends HandlerCommon {
 
                     }
                     //生成探测安装脚本
-                    /*var probeInstallScript = getProbeCollector().generateProbeInstallScript(cloudElement, cloudType, systemType,
-                            srcElement.getEid(), collectionId, controlParam, isContainer);*/
+                /*var probeInstallScript = getProbeCollector().generateProbeInstallScript(cloudElement, cloudType, systemType,
+                        srcElement.getEid(), collectionId, controlParam, isContainer);*/
                     SceneBO srcScene = getPluginHandler().getScene().getSrcScene();
 
                     List<String> probeInstallScript = getProbeCollector().generateProbeInstallScript(cloudElement, cloudType, systemType,
@@ -247,6 +248,52 @@ public class InitiateHandler extends HandlerCommon {
             });
         }
 
+    }
+
+    public void initializeProbeInstallationScripts() {
+        var scene = getPluginHandler().getScene();
+        String eid = scene.getSrcScene().getEid();
+        Integer cloudType = scene.getSrcScene().getCloudType() != null ? scene.getSrcScene().getCloudType() : BaseSceneModel.CloudType.PUBLIC;
+        var probeCollectionElements = getPluginHandler().getElementMap().values()
+                .stream()
+                .filter(collectionElement -> Boolean.TRUE.equals(collectionElement.getEnableProbeCollect()))
+                .collect(Collectors.toList());
+        initializeProbeInstallationScripts(probeCollectionElements, cloudType, eid);
+    }
+
+    /**
+     * 初始化安装探针脚本
+     *
+     * @param probeCollectionElements
+     * @param cloudType
+     * @param eid
+     */
+    public void initializeProbeInstallationScripts(List<CollectionPluginSceneElementBO> probeCollectionElements, Integer cloudType, String eid) {
+        var collectionId = getPluginHandler().getScene().getProbeCollector();
+        CloudScenePluginHandler cloudPluginHandler = getPluginHandler().getSceneHandler()
+                .getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
+        probeCollectionElements.forEach(collectionElement -> {
+            var srcElement = collectionElement.getSrcElement();
+            var cloudElement = cloudPluginHandler.getElement(srcElement.getId());
+            boolean isContainer = cloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER;
+            WazuhControl.ControlConfigParam controlParam = new WazuhControl.ControlConfigParam();
+            String systemType = SystemTypeUtils.getStandardSystemType(srcElement.getSystemType());
+            if (collectionElement.getProbes() != null && !collectionElement.getProbes().isEmpty()) {
+                List<Probe> probes = collectionElement.getProbes();
+
+                controlParam = this.getControlConfigParam(probes, srcElement.getEid(),
+                        systemType, this.getLocationMap(), cloudType);
+            }
+            SceneBO srcScene = getPluginHandler().getScene().getSrcScene();
+
+            List<String> probeInstallScript = getProbeCollector().generateProbeInstallScript(cloudElement, cloudType, systemType,
+                    srcElement.getEid(), collectionId, controlParam, isContainer, srcScene.getIntervalSec());
+            List initCommands = new ArrayList<>();
+            if (CollectionUtils.isNotEmpty(probeInstallScript)) {
+                initCommands.addAll(probeInstallScript);
+            }
+            srcElement.setInitCommands(initCommands);
+        });
     }
 
     /**

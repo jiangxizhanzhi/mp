@@ -30,7 +30,7 @@ public class ProbeCollector {
                 wazuhHost = CollectionSingleton.collectionAppConfig.getWazuhPrivateServerHost();
                 break;
             case 3:
-                wazuhHost = CollectionSingleton.collectionAppConfig.getWazuhMixedServerHost();
+                wazuhHost = CollectionSingleton.collectionAppConfig.getWazuhMixServerHost();
                 break;
             default:
                 wazuhHost = CollectionSingleton.collectionAppConfig.getWazuhServerHost();

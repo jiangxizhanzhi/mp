@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.cscene.controller;
 
+import cn.cyberpeace.mp.auth.model.MicrosoftAzureUserModel;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
@@ -34,14 +35,12 @@ import cn.cyberpeace.mp.scene.core.bo.SceneAreaBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneAreaModel;
-import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
-import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.AzureVirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleCreateConnectionData;
+import cn.cyberpeace.mp.sceneplugincloud.service.MicrosoftAzureLoginService;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
 import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
@@ -53,6 +52,7 @@ import cn.cyberpeace.mp.sceneplugincollection.service.param.HostEventQueryParams
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.QueryCollectionDataCountParams;
 import cn.cyberpeace.mp.scenepluginflow.service.response.SceneFlowRecordsResponse;
+import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.model.enums.FileEventType;
 import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.Api;
@@ -92,6 +92,12 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
 
     @Autowired
     private ScenePluginCloudSceneService scenePluginCloudSceneService;
+
+    @Autowired
+    private MicrosoftAzureLoginService microsoftAzureLoginService;
+
+    @Autowired
+    private SituationAwareConfig situationAwareConfig;
 
     private CsceneInstanceActionRequest formatActionRequest(CsceneInstanceActionRequest request, String paramId) {
         if (request == null) {
@@ -240,7 +246,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     })
     @GetMapping(params = "id")
     public ServiceResult<CsceneInstanceBO> get(@RequestParam String id,
-                                               @RequestParam(required = false) String accessUserId,@RequestParam(required = false,name = "area_id") String areaId,@RequestParam(required = false,name = "whole") Boolean whole) {
+                                               @RequestParam(required = false) String accessUserId, @RequestParam(required = false, name = "area_id") String areaId, @RequestParam(required = false, name = "whole") Boolean whole) {
         if (Boolean.TRUE.equals(whole)) {
             areaId = null;
         } else if (areaId == null) {
@@ -589,7 +595,6 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         result.add(new CollectionHostEventTypeBO("OTHER", 8));
         return new ServiceResult<>(result).asResult();
     }
-
 
 
     @ApiOperation("查询场景实例事件列表（滚动分页）")
@@ -1117,7 +1122,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @GetMapping("getSceneLoadInfo")
     public ServiceResult<JSONObject> getSceneLoadInfo(@RequestParam String id) {
         String sceneId = this.modelService.get(id).getSource().getObj().getScene();
-         JSONObject result = CsceneCommonService.getSceneLoadInfo(sceneId);
+        JSONObject result = CsceneCommonService.getSceneLoadInfo(sceneId);
         return new ServiceResult<>(result).asResult();
     }
 
@@ -1187,16 +1192,31 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     public ServiceResult<ElementCommandExecResult> elementExecute(@RequestBody CsceneInstanceNodeCommandActionRequest request) {
         log.info("element execute , params is {}", JsonCommon.stringify(request));
         return modelService.execElementV2(request.getId(), request.getNodeId(), request.getCommand(),
-                request.getExecUser(), request.getContext(),request.getLoadNodeId(),request.getResourceId()).asResult();
+                request.getExecUser(), request.getContext(), request.getLoadNodeId(), request.getResourceId()).asResult();
     }
 
-//    修改节点默认命令
+    //    修改节点默认命令
     @ApiOperation("修改节点默认命令")
     @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = CsceneInstanceNodeCommandActionRequest.class)
     @PostMapping("/element/defaultCommand")
     public ServiceResult<Integer> elementDefaultCommand(@RequestBody CsceneInstanceNodeCommandActionRequest request) {
         log.info("element defaultCommand , params is {}", JsonCommon.stringify(request));
-        return modelService.updateElementDefaultCommand(request.getLoadNodeId(),request.getScene(),request.getCommand()).asResult();
+        return modelService.updateElementDefaultCommand(request.getLoadNodeId(), request.getScene(), request.getCommand()).asResult();
+    }
+
+    @ApiOperation(value = "采集服务器地址修改", notes = "")
+    @PutMapping("/updateWazuhManagerIp")
+    public ServiceResult updateWazuhManagerIp(@RequestBody MicrosoftAzureUserModel requestData) {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("cloudType", requestData.getCloudType());
+        MicrosoftAzureUserModel localAzurer = microsoftAzureLoginService.getLocalAzurer(jsonObject);
+        ServiceResult updateLocalAzurer = microsoftAzureLoginService.updateWazuhManagerIp(requestData);
+//        TODO 采集服务器地址修改
+        if (StringUtils.isNotBlank(localAzurer.getWazuhManagerIp()) &&
+                !localAzurer.getWazuhManagerIp().equals(requestData.getWazuhManagerIp())) {
+            modelService.updateWazuhManagerIp(requestData);
+        }
+        return updateLocalAzurer;
     }
 
 }

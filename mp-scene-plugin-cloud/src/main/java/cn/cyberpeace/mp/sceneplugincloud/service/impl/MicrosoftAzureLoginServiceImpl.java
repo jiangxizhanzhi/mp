@@ -1,14 +1,12 @@
-package cn.cyberpeace.mp.auth.service.impl;
+package cn.cyberpeace.mp.sceneplugincloud.service.impl;
 
 import cn.cyberpeace.mp.auth.model.MicrosoftAzureUserModel;
 import cn.cyberpeace.mp.auth.repository.MicrosoftAzureLoginMapper;
-import cn.cyberpeace.mp.auth.service.MicrosoftAzureLoginService;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
-import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.common.util.CheckUtil;
+import cn.cyberpeace.mp.sceneplugincloud.service.MicrosoftAzureLoginService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,7 +15,7 @@ import org.springframework.util.StringUtils;
 import java.util.List;
 
 @Service
-public class MicrosoftAzureLoginServiceImpl implements MicrosoftAzureLoginService  {
+public class MicrosoftAzureLoginServiceImpl implements MicrosoftAzureLoginService {
 
     @Autowired
     private MicrosoftAzureLoginMapper microsoftAzureLoginMapper;
@@ -29,7 +27,7 @@ public class MicrosoftAzureLoginServiceImpl implements MicrosoftAzureLoginServic
     public ListObjServiceResult getMicrosoftAzureUserList(JSONObject requestData) {
         Integer pageNum = requestData != null && requestData.get("pageNum") != null ? requestData.getInteger("pageNum") : 1;
         Integer pageSize = requestData != null && requestData.get("pageSize") != null ? requestData.getInteger("pageSize") : 10;
-        requestData.put("pageSize",pageSize);
+        requestData.put("pageSize", pageSize);
         requestData.put("offset", (pageNum - 1) * pageSize);
         List<MicrosoftAzureUserModel> list = microsoftAzureLoginMapper.getMicrosoftAzureUserList(requestData);
         return new ListObjServiceResult<>(new ListObjResult<>(list, list.size()));
@@ -42,7 +40,7 @@ public class MicrosoftAzureLoginServiceImpl implements MicrosoftAzureLoginServic
 
     @Override
     public Boolean deleteAzurer(String pk) {
-        if(pk == null || pk.equals("")){
+        if (pk == null || pk.equals("")) {
             return false;
         }
         Boolean deleteAzurer = microsoftAzureLoginMapper.deleteAzurer(pk);
@@ -82,8 +80,6 @@ public class MicrosoftAzureLoginServiceImpl implements MicrosoftAzureLoginServic
     @Override
     public ServiceResult updateWazuhManagerIp(MicrosoftAzureUserModel requestData) {
         microsoftAzureLoginMapper.updateLocalAzurer(requestData.getPk().toString(), requestData);
-
-//        TODO 采集服务器地址修改
         return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "采集服务器地址修改成功").asResult();
     }
 

@@ -96,7 +96,7 @@ public class AzureCreateHandler extends CreateHandler {
         int stepPercentage = this.getStepPercentage();
         List<CloudPluginSceneElementBO> allElements = new ArrayList<>(getPluginHandler().getElementMap().values());
         List<CloudPluginSceneElementBO> allFilteredElements = new ArrayList<>();
-        List<CloudPluginSceneElementBO> filteredVirtualMachineElements = this.filterVirtualMachineElements(allElements);
+        List<CloudPluginSceneElementBO> filteredVirtualMachineElements = getPluginHandler().filterVirtualMachineElements();
 
         List<CloudPluginSceneElementBO> filteredContainerElements = this.filterContainerElements(allElements);
         allFilteredElements.addAll(filteredVirtualMachineElements);
@@ -633,23 +633,6 @@ public class AzureCreateHandler extends CreateHandler {
             }
         }
 
-        return filterElements;
-    }
-
-
-    /**
-     * 筛选虚拟机节点
-     *
-     * @param allElements
-     * @return
-     */
-    private List<CloudPluginSceneElementBO> filterVirtualMachineElements(List<CloudPluginSceneElementBO> allElements) {
-        List<CloudPluginSceneElementBO> filterElements = new ArrayList<>();
-        for (var c : allElements) {
-            if (BaseCloudPluginSceneElementModel.ImageType.LAAS_VM.equals(c.getImageType()) && BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE == c.getVirtualType()) {
-                filterElements.add(c);
-            }
-        }
         return filterElements;
     }
 

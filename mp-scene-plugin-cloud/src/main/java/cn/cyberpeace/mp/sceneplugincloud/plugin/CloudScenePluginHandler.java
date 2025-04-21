@@ -639,6 +639,17 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         }
     }
 
+    public List<CloudPluginSceneElementBO> filterVirtualMachineElements() {
+        List<CloudPluginSceneElementBO> allElements = new ArrayList<>(getElementMap().values());
+        List<CloudPluginSceneElementBO> filterElements = new ArrayList<>();
+        for (var c : allElements) {
+            if (BaseCloudPluginSceneElementModel.ImageType.LAAS_VM.equals(c.getImageType()) && BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE == c.getVirtualType()) {
+                filterElements.add(c);
+            }
+        }
+        return filterElements;
+    }
+
     @Getter
     @Setter
     protected static class Origin {

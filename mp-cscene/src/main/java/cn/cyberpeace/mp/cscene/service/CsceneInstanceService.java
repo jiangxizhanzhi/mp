@@ -98,6 +98,7 @@ import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostStateBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
+import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
 import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincollection.constant.ProbeConstant;
 import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneDataModel;
@@ -180,6 +181,10 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     private static final String WINDOWS_DELIVERY_LOAD_FILE_COMMAND = "curl -o %s \"http://%s/download/tmp/%s\"";
     private static final String LINUX_DELIVERY_LOAD_FILE_COMMAND = "curl -o %s \"http://%s/download/tmp/%s\"";
+    private static final String IP_PATTERN = "\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b";
+
+    @Autowired
+    private SituationAwareConfig situationAwareConfig;
 
     @Autowired
     private RabbitmqCsceneReporter csceneReporter;
@@ -314,7 +319,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     private CommonCodeServiceImpl commonCodeService;
 
     @Resource
-    private SituationAwareConfig situationAwareConfig;
+    private MicrosoftAzureLoginMapper microsoftAzureLoginMapper;
 
     // expires in 10 minutes
     private Cache<String, String> TIMED_CACHE = CacheUtil.newTimedCache(10 * 60 * 1000);
@@ -2754,7 +2759,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             humanCondition.filterEqual(SceneElementModel::getActionType, mpDevopsLoad.getActionType());
             List<SceneElementModel> sceneElementModels = sceneElementMapper.list(humanCondition);
             sceneElementMapper.filterUpdate(sceneElementModel, humanCondition);
-            this.reportLoadSuccess(sceneId,sceneElementModels.get(0).getNodeId(), csceneLoadDto.getContext());
+            this.reportLoadSuccess(sceneId, sceneElementModels.get(0).getNodeId(), csceneLoadDto.getContext());
         }
         log.info("addLoad end.");
         return new ServiceResult<>();
@@ -3076,6 +3081,158 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         data.put("access_mode_id", collect.getId());
         data.put("node_id", deliveryLoadFileRequest.getTargetNodeId());
         return new ServiceResult<>(data);
+    }
+
+    public void updateWazuhManagerIp(MicrosoftAzureUserModel requestData) {
+        Integer cloudType = requestData.getCloudType();
+        String wazuhManagerIp = requestData.getWazuhManagerIp();
+
+
+        updateWazuhManagerIpByCloudType(cloudType, wazuhManagerIp);
+
+
+        IAzureResourceManager azureResourceManager = IAzureResourceManager.getInstance(requestData.getCloudType());
+        var humanCondition = new HumanCondition()
+                .link(CsceneInstanceModel.class, SceneModel.class)
+                .filterLink(CsceneInstanceModel.class, CsceneInstanceModel::getScene, SceneModel.class,
+                        SceneModel::getId)
+                .currentLink(SceneModel.class)
+                .selectAs("pk", "pk")
+                .selectAs(SceneModel::getId, CsceneInstanceStat::getId);
+        humanCondition
+                .filterEqual(SceneModel::getCloudType, requestData.getCloudType())
+                .filterOrStart()
+                .orAndStart()
+                .andEqual(SceneModel::getEvent, SceneModel.Event.CREATE)
+                .andEqual(SceneModel::getEventStatus, EventStatus.OVER)
+                .orAndEnd()
+                .orAndStart()
+                .andEqual(SceneModel::getEvent, SceneModel.Event.UNPAUSE)
+                .andEqual(SceneModel::getEventStatus, EventStatus.OVER)
+                .orAndEnd()
+                .orAndStart()
+                .andEqual(SceneModel::getEvent, SceneModel.Event.RESUME)
+                .andEqual(SceneModel::getEventStatus, EventStatus.OVER)
+                .orAndEnd()
+                .orAndStart()
+                .andIn(SceneModel::getEvent, new Integer[]{
+                        SceneModel.Event.START, SceneModel.Event.STOP, SceneModel.Event.RESTART,
+                        SceneModel.Event.SNAPSHOT, SceneModel.Event.MODIFY
+                })
+                .andNotEqual(SceneModel::getEventStatus, EventStatus.ABNORMAL)
+                .orAndEnd()
+                .filterOrEnd();
+
+        ArrayList<String> linuxCommands = new ArrayList<>();
+        linuxCommands.add(String.format("export SIC_WAZUH_MANAGER_IP=%s", wazuhManagerIp));
+        linuxCommands.add("sh /opt/wazuha/config.sh");
+        linuxCommands.add("sh /opt/wazuha/start.sh");
+
+        List<CsceneInstanceStat> list = instanceMapper.list(humanCondition, CsceneInstanceStat.class);
+        for (CsceneInstanceStat csceneInstanceStat : list) {
+            SceneHandler sceneHandler = new SceneHandler(csceneInstanceStat.getId(), null, false, null);
+            sceneHandler.initializeProbeInstallationScripts();
+
+            CloudScenePluginHandler cloudPlugin = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
+            String groupName = cloudPlugin.getSourceSceneId();
+            CollectionScenePluginHandler collectPlugin = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+            for (CloudPluginSceneElementBO cloudPluginSceneElementBO : cloudPlugin.filterVirtualMachineElements()) {
+                CollectionPluginSceneElementBO collectionElement = collectPlugin.getElementMap().get(cloudPluginSceneElementBO.getSrcElement().getId());
+                if (collectionElement.getProbes() != null && !collectionElement.getProbes().isEmpty()) {
+                    String vmName = HandlerUtils.genResourceName(cloudPluginSceneElementBO.getSrcElement().getEid());
+                    if (BaseSceneModel.CloudType.PUBLIC == requestData.getCloudType()) {
+                        if (BaseSceneElementModel.SystemType.WINDOWS.equals(cloudPluginSceneElementBO.getVmType().toLowerCase())) {
+                            List<String> initCommands = cloudPluginSceneElementBO.getSrcElement().getInitCommands();
+                            /*initCommands.add(0,"call c:\\wazuha\\uninstall.bat");
+                            initCommands.add(0,"c:\\wazuha");*/
+//                            先卸载删除目录再执行
+                            /*azureResourceManager
+                                    .getManager()
+                                    .virtualMachines()
+                                    .runPowerShellScript(groupName, vmName, initCommands, new ArrayList<>());*/
+                            System.out.println(initCommands);
+                        } else {
+                            /*azureResourceManager
+                                    .getManager()
+                                    .virtualMachines()
+                                    .runShellScript(groupName, vmName, linuxCommands, new ArrayList<>());*/
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+
+    /**
+     * 更新Wazuh管理器IP配置
+     * 根据云类型替换相应配置中的IP地址
+     *
+     * @param cloudType 云类型，决定使用哪套配置
+     * @param wazuhManagerIp 新的Wazuh管理器IP地址
+     */
+    private void updateWazuhManagerIpByCloudType(Integer cloudType, String wazuhManagerIp) {
+        // 编译IP地址匹配模式
+        Pattern pattern = Pattern.compile(IP_PATTERN);
+        // 根据云类型执行相应的配置更新
+        switch (cloudType) {
+            case BaseSceneModel.CloudType.PUBLIC:
+                // 创建匹配器并替换公共Wazuh API服务器地址中的IP
+                Matcher matcherPublicWazuhApiServer = pattern.matcher(CollectionSingleton.collectionAppConfig.getPublicWazuhApiServer());
+                String newPublicWazuhApiServer = matcherPublicWazuhApiServer.replaceAll(wazuhManagerIp);
+                // 替换公共文件服务器地址中的IP
+                Matcher matcherPublicFileServe = pattern.matcher(SceneSingleton.sceneAppConfig.getMetadataPublicFileServer());
+                String newMetadataPublicFileServer = matcherPublicFileServe.replaceAll(wazuhManagerIp);
+                // 替换公共Wazuh基础URL中的IP
+                Matcher matcherPublicWazuhBaseUrl = pattern.matcher(situationAwareConfig.getPublicWazuhBaseUrl());
+                String newPublicWazuhBaseUrl = matcherPublicWazuhBaseUrl.replaceAll(wazuhManagerIp);
+
+                // 更新配置信息
+                CollectionSingleton.collectionAppConfig.setWazuhPublicServerHost(wazuhManagerIp);
+                CollectionSingleton.collectionAppConfig.setPublicWazuhApiServer(newPublicWazuhApiServer);
+                SceneSingleton.sceneAppConfig.setMetadataPublicFileServer(newMetadataPublicFileServer);
+                // 保留端口信息，仅替换IP地址
+                situationAwareConfig.setPublicWazuhEsNodes(wazuhManagerIp + situationAwareConfig.getPublicWazuhEsNodes().substring(situationAwareConfig.getPublicWazuhEsNodes().indexOf(":")));
+                situationAwareConfig.setPublicWazuhBaseUrl(newPublicWazuhBaseUrl);
+                break;
+            case BaseSceneModel.CloudType.PRIVATE:
+                // 对私有云环境执行类似的替换操作
+                Matcher privateMatcher = pattern.matcher(SceneSingleton.sceneAppConfig.getMetadataPrivateFileServer());
+                String newMetadataPrivateFileServer = privateMatcher.replaceAll(wazuhManagerIp);
+                Matcher matcherPrivateWazuhBaseUrl = pattern.matcher(situationAwareConfig.getPrivateWazuhBaseUrl());
+                String newPrivateWazuhBaseUrl = matcherPrivateWazuhBaseUrl.replaceAll(wazuhManagerIp);
+
+                CollectionSingleton.collectionAppConfig.setWazuhPrivateServerHost(wazuhManagerIp);
+                SceneSingleton.sceneAppConfig.setMetadataPrivateFileServer(newMetadataPrivateFileServer);
+                situationAwareConfig.setPrivateWazuhEsNodes(wazuhManagerIp + situationAwareConfig.getPrivateWazuhEsNodes().substring(situationAwareConfig.getPrivateWazuhEsNodes().indexOf(":")));
+                situationAwareConfig.setPrivateWazuhBaseUrl(newPrivateWazuhBaseUrl);
+                break;
+            case BaseSceneModel.CloudType.MIX:
+                // 对混合云环境执行类似的替换操作
+                Matcher mixMatcher = pattern.matcher(SceneSingleton.sceneAppConfig.getMetadataMixFileServer());
+                String newMetadataMixFileServer = mixMatcher.replaceAll(wazuhManagerIp);
+                Matcher matcherMixWazuhBaseUrl = pattern.matcher(situationAwareConfig.getMixWazuhBaseUrl());
+                String newMixWazuhBaseUrl = matcherMixWazuhBaseUrl.replaceAll(wazuhManagerIp);
+
+                CollectionSingleton.collectionAppConfig.setWazuhMixServerHost(wazuhManagerIp);
+                SceneSingleton.sceneAppConfig.setMetadataMixFileServer(newMetadataMixFileServer);
+                situationAwareConfig.setMixWazuhEsNodes(wazuhManagerIp + situationAwareConfig.getMixWazuhEsNodes().substring(situationAwareConfig.getMixWazuhEsNodes().indexOf(":")));
+                situationAwareConfig.setMixWazuhBaseUrl(newMixWazuhBaseUrl);
+                break;
+        }
+    }
+
+    /**
+     * 初始化AzureWazuh管理器的IP配置
+     * 此方法从MicrosoftAzure登录映射中获取用户列表，并为每个用户更新Wazuh管理器的IP配置
+     * 根据云类型更新对应的Wazuh管理器IP
+     */
+    public void initializeAzureWazuhManagerIpConfigs() {
+        HumanCondition humanCondition = new HumanCondition();
+        List<MicrosoftAzureUserModel> list = microsoftAzureLoginMapper.list(humanCondition);
+        for (MicrosoftAzureUserModel microsoftAzureUserModel : list) {
+            updateWazuhManagerIpByCloudType(microsoftAzureUserModel.getCloudType(), microsoftAzureUserModel.getWazuhManagerIp());
+        }
     }
 
     @Getter

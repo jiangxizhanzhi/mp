@@ -2,6 +2,7 @@ package cn.cyberpeace.mp;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.constant.BaseSingleton;
+import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.CommandLineRunner;
@@ -34,8 +35,12 @@ public class Application {
     }
 
     @Bean
-    public CommandLineRunner commandLineRunner(ApplicationContext ctx) {
+    public CommandLineRunner commandLineRunner(ApplicationContext ctx, CsceneInstanceService csceneInstanceService) {
         return args -> {
+
+            // 初始化配置
+            csceneInstanceService.initializeAzureWazuhManagerIpConfigs();
+
             var localHost = "localhost";
             var serverProperties = BaseSingleton.baseAppConfig.getServerProperties();
             var protocol = (serverProperties.getSsl() != null && serverProperties.getSsl().isEnabled()) ? "https" : "http";

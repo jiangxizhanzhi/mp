@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager;
 
 import cn.cyberpeace.mp.auth.model.MicrosoftAzureUserModel;
-import cn.cyberpeace.mp.auth.service.impl.MicrosoftAzureLoginServiceImpl;
+import cn.cyberpeace.mp.sceneplugincloud.service.impl.MicrosoftAzureLoginServiceImpl;
 import com.alibaba.fastjson.JSONObject;
 import com.azure.core.credential.TokenCredential;
 import com.azure.core.http.policy.HttpLogDetailLevel;
@@ -11,7 +11,6 @@ import com.azure.core.management.profile.AzureProfile;
 import com.azure.identity.AzureAuthorityHosts;
 import com.azure.identity.ClientSecretCredential;
 import com.azure.identity.ClientSecretCredentialBuilder;
-import com.azure.identity.DefaultAzureCredentialBuilder;
 import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.loganalytics.LogAnalyticsManager;
 import com.azure.resourcemanager.monitor.MonitorManager;
