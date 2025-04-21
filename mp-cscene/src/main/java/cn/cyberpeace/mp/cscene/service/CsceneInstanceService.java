@@ -3143,19 +3143,20 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     if (BaseSceneModel.CloudType.PUBLIC == requestData.getCloudType()) {
                         if (BaseSceneElementModel.SystemType.WINDOWS.equals(cloudPluginSceneElementBO.getVmType().toLowerCase())) {
                             List<String> initCommands = cloudPluginSceneElementBO.getSrcElement().getInitCommands();
-                            /*initCommands.add(0,"call c:\\wazuha\\uninstall.bat");
-                            initCommands.add(0,"c:\\wazuha");*/
+                            initCommands.add(0,"call c:\\wazuha\\uninstall.bat");
+                            initCommands.add(0,"c:\\wazuha");
 //                            先卸载删除目录再执行
-                            /*azureResourceManager
+                            azureResourceManager
                                     .getManager()
                                     .virtualMachines()
-                                    .runPowerShellScript(groupName, vmName, initCommands, new ArrayList<>());*/
-                            System.out.println(initCommands);
+                                    .runPowerShellScript(groupName, vmName, initCommands, new ArrayList<>());
+                            log.info("updateWazuhManagerIp initCommands",initCommands);
                         } else {
-                            /*azureResourceManager
+                            azureResourceManager
                                     .getManager()
                                     .virtualMachines()
-                                    .runShellScript(groupName, vmName, linuxCommands, new ArrayList<>());*/
+                                    .runShellScript(groupName, vmName, linuxCommands, new ArrayList<>());
+                            log.info("updateWazuhManagerIp linuxCommands",linuxCommands);
                         }
                     }
                 }
