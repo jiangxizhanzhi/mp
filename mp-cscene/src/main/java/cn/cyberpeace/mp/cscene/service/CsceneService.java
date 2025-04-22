@@ -43,6 +43,7 @@ import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigAreaBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigTopologyBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
 import cn.cyberpeace.mp.scene.model.SceneConfigAreaModel;
@@ -69,6 +70,7 @@ import com.github.pagehelper.PageInfo;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -364,6 +366,9 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         }
         if (CollectionUtils.isNotEmpty(listResult.getSource().getObjs())) {
             for (CsceneBO temp : csceneBOs) {
+                //场景数据信息修正
+                correctSceneData(temp);
+                //创建人用户信息补充
                 if (StringUtils.isNotEmpty(temp.getCreateUsername())) {
                     UserModel userModel = userService.getByUserName(temp.getCreateUsername());
                     if (userModel != null) {
@@ -373,6 +378,55 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
             }
         }
         return new ListObjServiceResult<>(new ListObjResult<>(csceneBOs, listResult.getSource().getTotal()));
+    }
+
+
+    /**
+     * @description: 修正场景数据
+     * @param csceneBO 
+     * @throws
+     * @return void
+     */
+    private void correctSceneData(CsceneBO csceneBO){
+        if (Objects.isNull(csceneBO) || Objects.isNull(csceneBO.getSceneConfig())){
+            return;
+        }
+        SceneConfigDataBO sceneConfig = csceneBO.getSceneConfig();
+        SceneConfigTopologyBO topology = sceneConfig.getTopology();
+        //处理场景拓扑数据
+        if(Objects.isNull(topology)){
+            return;
+        }
+        //处理节点数据
+        List<SceneConfigElementBO> elements = topology.getElements();
+        if(CollectionUtils.isEmpty(elements)){
+            return;
+        }
+        //areaId不能为null，可以为空字符串
+        if(Objects.isNull(topology.getAreaId())){
+            return;
+        }
+        String areaId = topology.getAreaId();
+        //修正节点数据
+        for (SceneConfigElementBO sceneConfigElementBO :elements) {
+            Map<String, String> outPosition = sceneConfigElementBO.getOuterPosition2();
+            String pos = sceneConfigElementBO.getPosition2();
+            if(MapUtils.isEmpty(outPosition) && StringUtils.isEmpty(pos)){
+                log.warn("data error! element name is {}",sceneConfigElementBO.getName());
+                return;
+            }
+            if(MapUtils.isNotEmpty(outPosition)){
+                String position2 = outPosition.getOrDefault(sceneConfigElementBO.getArea(), "");
+                sceneConfigElementBO.setPosition2(position2);
+                continue;
+            }
+            if(StringUtils.isNotEmpty(pos)){
+                outPosition = new HashMap<>();
+                outPosition.put(areaId, pos);
+                sceneConfigElementBO.setOuterPosition2(outPosition);
+                sceneConfigElementBO.setPosition2(outPosition.getOrDefault(sceneConfigElementBO.getArea(), ""));
+            }
+        }
     }
 
     public void setSharedUser(List<CsceneBO> csceneBOs, CsceneQueryParams queryParams) {
