@@ -93,4 +93,49 @@ public class MpDevopsLoadSceneLog extends MpDevopsLoad {
      * 命令
      */
     private String command;
+
+//    建一个枚举 /**
+//     * 研判结果(0:未研判 1:成功 2:失败)
+//     */
+    public enum JudgmentStatus {
+        /**
+         * 未研判
+         */
+        UNJUDGED(0, "未研判"),
+        /**
+         * 成功
+         */
+        SUCCESS(1, "成功"),
+        /**
+         * 失败
+         */
+        FAILURE(2, "失败");
+
+        private final Integer code;
+
+        private final String name;
+
+        JudgmentStatus(Integer value, String name) {
+            this.code = value;
+            this.name = name;
+        }
+
+        public Integer getCode() {
+            return code;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+//        根据code 获取name
+        public static String getName(Integer code) {
+            for (JudgmentStatus status : JudgmentStatus.values()) {
+                if (status.getCode().equals(code)) {
+                    return status.getName();
+                }
+            }
+            return null;
+        }
+    }
 }

@@ -18,10 +18,7 @@ import cn.cyberpeace.mp.cscene.dto.element.LoadFileInfo;
 import cn.cyberpeace.mp.cscene.model.*;
 import cn.cyberpeace.mp.cscene.repository.mapper.DevopsLoadSceneLogMapper;
 import cn.cyberpeace.mp.cscene.repository.mapper.LoadMapper;
-import cn.cyberpeace.mp.cscene.request.load.LoadRequest;
-import cn.cyberpeace.mp.cscene.request.load.LoadResultExportRequest;
-import cn.cyberpeace.mp.cscene.request.load.LoadResultSearchRequest;
-import cn.cyberpeace.mp.cscene.request.load.OutLoadModifyTagsRequest;
+import cn.cyberpeace.mp.cscene.request.load.*;
 import cn.cyberpeace.mp.cscene.request.ojj.IdsRequest;
 import cn.cyberpeace.mp.cscene.service.CsceneCommonService;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
@@ -509,6 +506,14 @@ public class LoadServiceImpl {
             requestData.setPageSize(pageSize);
         }
         List<MpDevopsLoadSceneLog> list = loadMapper.getLoadExecutionResult(requestData);
+
+        list = getMpDevopsLoadSceneLogs(list);
+        //总数量
+        Integer num = loadMapper.getLoadExecutionResultNum(requestData);
+        return new ListObjServiceResult(list, num).asResult();
+    }
+
+    private List<MpDevopsLoadSceneLog> getMpDevopsLoadSceneLogs(List<MpDevopsLoadSceneLog> list) {
         String[] codes = {CommonStatusCodeEnum.RESULT_STATUS.getCode(), CommonStatusCodeEnum.ACTION_TYPE.getCode(),
                 CommonStatusCodeEnum.RESULT_TYPE.getCode(), CommonStatusCodeEnum.CONTROL_TYPE.getCode()};
         Map<String, String> codeMap = commonCodeService.convertNextLevelDatasByCodes(codes);
@@ -524,9 +529,7 @@ public class LoadServiceImpl {
                     return log;
                 })
                 .collect(Collectors.toList());
-        //总数量
-        Integer num = loadMapper.getLoadExecutionResultNum(requestData);
-        return new ListObjServiceResult(list, num).asResult();
+        return list;
     }
 
     public ListObjServiceResult getLoadExecutionResultList(String sceneId) {
@@ -556,21 +559,7 @@ public class LoadServiceImpl {
                 .filterEqual(MpDevopsLoadSceneLog::getSceneId, sceneId)
                 .orderBy(MpDevopsLoadSceneLog::getCreateTime, true);
         List<MpDevopsLoadSceneLog> list = devopsLoadSceneLogMapper.list(humanCondition);
-        String[] codes = {CommonStatusCodeEnum.RESULT_STATUS.getCode(), CommonStatusCodeEnum.ACTION_TYPE.getCode(),
-                CommonStatusCodeEnum.RESULT_TYPE.getCode(), CommonStatusCodeEnum.CONTROL_TYPE.getCode()};
-        Map<String, String> codeMap = commonCodeService.convertNextLevelDatasByCodes(codes);
-        //将list中的resultStatus转换成codeName
-        list = list.stream()
-                .map(log -> {
-                    log.setControlTypeName(log.getControlType() != null ? codeMap.get(log.getControlType()) : log.getControlType());
-                    if (StringUtils.hasText(log.getActionType())) {
-                        log.setActionTypeConvertName(log.getActionType(), codeMap);
-                    }
-                    log.setResultTypeName(log.getResultType() != null ? codeMap.get(log.getResultType()) : log.getResultType());
-                    log.setResultStatusName(log.getResultStatus() != null ? codeMap.get(log.getResultStatus()) : log.getResultStatus());
-                    return log;
-                })
-                .collect(Collectors.toList());
+        list = getMpDevopsLoadSceneLogs(list);
         return new ListObjServiceResult(list, list.size()).asResult();
     }
 
@@ -630,7 +619,7 @@ public class LoadServiceImpl {
         if (createTime == null) {
             requestData.setCreateTime(LocalDateTime.now());
         }
-        if (requestData.getJudgmentStatus() == null){
+        if (requestData.getJudgmentStatus() == null) {
             requestData.setJudgmentStatus(0);
         }
         Boolean addLoadExecutionResult = loadMapper.addLoadExecutionResult(requestData);
@@ -674,7 +663,7 @@ public class LoadServiceImpl {
         HumanCondition humanCondition = new HumanCondition();
         humanCondition.filterEqual(MpDevopsLoadSceneLog::getPk, requestData.getPk());
         List<MpDevopsLoadSceneLog> list = devopsLoadSceneLogMapper.list(humanCondition);
-        if(list.size()==0){
+        if (list.size() == 0) {
             return new ServiceResult(null, BaseErrorCode.ERROR, "异常数据").asResult();
         }
 
@@ -879,7 +868,10 @@ public class LoadServiceImpl {
         //数据
         LoadResultSearchRequest requestParam = new LoadResultSearchRequest();
         BeanUtils.copyProperties(requestData, requestParam);
-        List<MpDevopsLoadSceneLog> list = loadMapper.getLoadExecutionResult(requestParam);
+        List<MpDevopsLoadSceneLog> list = getMpDevopsLoadSceneLogs(loadMapper.getLoadExecutionResult(requestParam));
+
+        Map<String, String> stageMap = requestData.getStages() == null ? new HashMap<>() : requestData.getStages().stream()
+                .collect(Collectors.toMap(EvalCodeStageRsp::getCode, EvalCodeStageRsp::getName));
         //导出文件xlsx
         if (requestData.getExportType() != null && requestData.getExportType() == 1) {
             try {
@@ -888,51 +880,35 @@ public class LoadServiceImpl {
 //                //code对应值
 //                Map<String, String> nextLevelMapsByCodes = commonCodeService.convertNextLevelDatasByCodes(codes);
                 //***********************************数据写入Excel***********************************
-                String[] title = {"工具id", "工具名称", "工具实例id", "场景id", "阶段id", "任务id",
-                        "作用类型", "执行类型", "结果类型", "结果状态", "结果日志", "记录时间"};
+                String[] title = {"名称", "记录时间", "阶段", "作用类型", "结果类型", "执行状态", "研判结果"};
                 int ol = list.size() + 1;
                 String[][] content = new String[ol][];
-                String tool_id = "";
                 String tool_name = "";
-                String instance_id = "";
-                String scene_id = "";
-                String stage_id = "";
-                String task_id = "";
-                String action_type = "";
-                String control_type = "";
-                String result_type = "";
-                String result_status = "";
-                String result_log = "";
                 String create_time = "";
+                String stage_name = "";
+                String action_type_name = "";
+                String result_type_name = "";
+                String result_status_name = "";
+                String judgment_status = "";
                 for (int i = 0; i < ol; i++) {
                     content[i] = new String[title.length];
                     if (i == list.size()) {
-                        content[i][0] = tool_id;
-                        content[i][1] = tool_name;
-                        content[i][2] = instance_id;
-                        content[i][3] = scene_id;
-                        content[i][4] = stage_id;
-                        content[i][5] = task_id;
-                        content[i][6] = action_type;
-                        content[i][7] = control_type;
-                        content[i][8] = result_type;
-                        content[i][9] = result_status;
-                        content[i][10] = result_log;
-                        content[i][11] = create_time;
+                        content[i][0] = tool_name;
+                        content[i][1] = create_time;
+                        content[i][2] = stage_name;
+                        content[i][3] = action_type_name;
+                        content[i][4] = result_type_name;
+                        content[i][5] = result_status_name;
+                        content[i][6] = judgment_status;
                     } else {
                         MpDevopsLoadSceneLog obj = list.get(i);
-                        content[i][0] = obj.getId() != null ? obj.getId() : "";
-                        content[i][1] = obj.getToolName() != null ? obj.getToolName() : "";
-                        content[i][2] = obj.getInstanceId() != null ? obj.getInstanceId() : "";
-                        content[i][3] = obj.getSceneId() != null ? obj.getSceneId() : "";
-                        content[i][4] = obj.getStageId() != null ? obj.getStageId() : "";
-                        content[i][5] = obj.getTaskId() != null ? obj.getTaskId() : "";
-                        content[i][6] = obj.getActionType() != null ? obj.getActionType() : "";
-                        content[i][7] = obj.getControlType() != null ? obj.getControlType() : "";
-                        content[i][8] = obj.getResultType() != null ? obj.getResultType() : "";
-                        content[i][9] = obj.getResultStatus() != null ? obj.getResultStatus() : "";
-                        content[i][10] = obj.getResultLog() != null ? obj.getResultLog() : "";
-                        content[i][11] = formattedDate;
+                        content[i][0] = obj.getToolName() != null ? obj.getToolName() : "";
+                        content[i][1] = formattedDate;
+                        content[i][2] = obj.getStageId() != null ? stageMap.getOrDefault(obj.getStageId(), "") : "";
+                        content[i][3] = obj.getActionTypeName() != null ? obj.getActionTypeName() : "";
+                        content[i][4] = obj.getResultTypeName() != null ? obj.getResultTypeName() : "";
+                        content[i][5] = obj.getResultStatusName() != null ? obj.getResultStatusName() : "";
+                        content[i][6] = obj.getJudgmentStatus() != null ? MpDevopsLoadSceneLog.JudgmentStatus.getName(obj.getJudgmentStatus()) : "";
                     }
                 }
                 //创建HSSFWorkbook
@@ -950,15 +926,15 @@ public class LoadServiceImpl {
             }
         } else if (requestData.getExportType() != null && requestData.getExportType() == 2) {
             // 将jsonList导出为json文件并通过HttpServletResponse响应
-            exportJsonToResponse(response, list);
+            exportJsonToResponse(response, list, stageMap, formattedDate);
         } else if (requestData.getExportType() != null && requestData.getExportType() == 3) {
             // 将list导出为xml文件并通过HttpServletResponse响应
-            exportXmlToResponse(response, list);
+            exportXmlToResponse(response, list, stageMap, formattedDate);
         }
         return true;
     }
 
-    private void exportJsonToResponse(HttpServletResponse response, List<MpDevopsLoadSceneLog> list) {
+    private void exportJsonToResponse(HttpServletResponse response, List<MpDevopsLoadSceneLog> list, Map<String, String> stageMap, String formattedDate) {
         List<JSONObject> jsonList = new ArrayList<>();
         for (MpDevopsLoadSceneLog obj : list) {
             JSONObject jsonObject = new JSONObject();
@@ -967,13 +943,19 @@ public class LoadServiceImpl {
             jsonObject.put("instance_id", obj.getInstanceId());
             jsonObject.put("scene_id", obj.getSceneId());
             jsonObject.put("stage_id", obj.getStageId());
+            jsonObject.put("stage_name", obj.getStageId() != null ? stageMap.getOrDefault(obj.getStageId(), "") : "");
             jsonObject.put("task_id", obj.getTaskId());
             jsonObject.put("action_type", obj.getActionType());
             jsonObject.put("control_type", obj.getControlType());
+            jsonObject.put("action_type_name", obj.getActionTypeName() != null ? obj.getActionTypeName() : "");
             jsonObject.put("result_type", obj.getResultType());
+            jsonObject.put("result_type_name", obj.getResultTypeName() != null ? obj.getResultTypeName() : "");
             jsonObject.put("result_status", obj.getResultStatus());
+            jsonObject.put("result_status_name", obj.getResultStatusName() != null ? obj.getResultStatusName() : "");
             jsonObject.put("result_log", obj.getResultLog());
-            jsonObject.put("create_time", obj.getCreateTime().toString());
+            jsonObject.put("judgment_status", obj.getJudgmentStatus());
+            jsonObject.put("judgment_status_name", obj.getJudgmentStatus() != null ? MpDevopsLoadSceneLog.JudgmentStatus.getName(obj.getJudgmentStatus()) : "");
+            jsonObject.put("create_time", formattedDate);
             jsonList.add(jsonObject);
         }
         // 创建Jackson的ObjectMapper实例
@@ -991,25 +973,31 @@ public class LoadServiceImpl {
         }
     }
 
-    private void exportXmlToResponse(HttpServletResponse response, List<MpDevopsLoadSceneLog> list) {
+    private void exportXmlToResponse(HttpServletResponse response, List<MpDevopsLoadSceneLog> list, Map<String, String> stageMap, String formattedDate) {
         StringBuffer xmlnodes = new StringBuffer();
         if (list != null && list.size() > 0) {
             xmlnodes.append("<?" + "xml version=\"1.0\" encoding=\"UTF-8\" " + "?>");
             xmlnodes.append("<mpDevopsLoadSceneLogs>");
             for (int i = 0; i < list.size(); i++) {
                 MpDevopsLoadSceneLog log = list.get(i);
-                xmlnodes.append("<mpDevopsLoadSceneLog id='" + log.getId()
-                        + "' resultType='" + log.getResultType()
-                        + "' instanceId='" + log.getInstanceId()
-                        + "' createTime='" + log.getCreateTime().toString()
-                        + "' actionType='" + log.getActionType()
-                        + "' resultStatus='" + log.getResultStatus()
-                        + "' stageId='" + log.getStageId()
-                        + "' sceneId='" + log.getSceneId()
-                        + "' taskId='" + log.getTaskId()
-                        + "' resultLog='" + log.getResultLog()
-                        + "' controlType='" + log.getControlType()
-                        + "'>" + log.getToolName() + "</mpDevopsLoadSceneLog>");
+                xmlnodes.append("<mpDevopsLoadSceneLog id='" ).append( log.getId())
+                        .append("' resultType='" ).append( log.getResultType())
+                        .append("' resultTypeName='" ).append( log.getResultTypeName() != null ? log.getResultTypeName() : "")
+                        .append("' instanceId='" ).append( log.getInstanceId())
+                        .append("' createTime='" ).append( formattedDate)
+                        .append("' actionType='" ).append( log.getActionType())
+                        .append("' actionTypeName='" ).append( log.getActionTypeName() != null ? log.getActionTypeName() : "")
+                        .append("' resultStatus='" ).append( log.getResultStatus())
+                        .append("' resultStatusName='" ).append( log.getResultStatusName() != null ? log.getResultStatusName() : "")
+                        .append("' stageId='" ).append( log.getStageId())
+                        .append("' stageName='" ).append( log.getStageId() != null ? stageMap.getOrDefault(log.getStageId(), "") : "")
+                        .append("' sceneId='" ).append( log.getSceneId())
+                        .append("' taskId='" ).append( log.getTaskId())
+                        .append("' resultLog='" ).append( log.getResultLog())
+                        .append("' controlType='" ).append( log.getControlType())
+                        .append("' judgmentStatus='" ).append( log.getJudgmentStatus())
+                        .append("' judgmentStatusName='" ).append( log.getJudgmentStatus() != null ? MpDevopsLoadSceneLog.JudgmentStatus.getName(log.getJudgmentStatus()) : "")
+                        .append("'>" ).append( log.getToolName() ).append( "</mpDevopsLoadSceneLog>");
             }
             xmlnodes.append("</mpDevopsLoadSceneLogs>");
         }
@@ -1271,21 +1259,7 @@ public class LoadServiceImpl {
             getLoadResultByPks = loadMapper.getLoadResultByLoadIds(loadIds, sceneId, startDateTime, localDateTime);
         }
         if (getLoadResultByPks != null && getLoadResultByPks.size() > 0) {
-            String[] codes = {CommonStatusCodeEnum.RESULT_STATUS.getCode(), CommonStatusCodeEnum.ACTION_TYPE.getCode(),
-                    CommonStatusCodeEnum.RESULT_TYPE.getCode(), CommonStatusCodeEnum.CONTROL_TYPE.getCode()};
-            Map<String, String> codeMap = commonCodeService.convertNextLevelDatasByCodes(codes);
-            //将list中的resultStatus转换成codeName
-            getLoadResultByPks = getLoadResultByPks.stream()
-                    .map(log -> {
-                        log.setControlTypeName(log.getControlType() != null ? codeMap.get(log.getControlType()) : log.getControlType());
-                        if (StringUtils.hasText(log.getActionType())) {
-                            log.setActionTypeConvertName(log.getActionType(), codeMap);
-                        }
-                        log.setResultTypeName(log.getResultType() != null ? codeMap.get(log.getResultType()) : log.getResultType());
-                        log.setResultStatusName(log.getResultStatus() != null ? codeMap.get(log.getResultStatus()) : log.getResultStatus());
-                        return log;
-                    })
-                    .collect(Collectors.toList());
+            getLoadResultByPks = getMpDevopsLoadSceneLogs(getLoadResultByPks);
         }
         return getLoadResultByPks;
     }

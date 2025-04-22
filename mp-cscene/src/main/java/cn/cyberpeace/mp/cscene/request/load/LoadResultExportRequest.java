@@ -38,6 +38,9 @@ public class LoadResultExportRequest {
     @ApiModelProperty(value = "导出格式(1:xlsx 2:json 3:xml)")
     private Integer exportType;
 
+    @ApiModelProperty(value = "阶段")
+    private List<EvalCodeStageRsp> stages;
+
     @JsonIgnore
     private Integer offset;
 
