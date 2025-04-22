@@ -956,6 +956,10 @@ public class CreateHandler extends HandlerCommon {
                         accessMode.setAccessIp(accessModeData.getIpAddress());
                         accessMode.setAccessPort(accessModeData.getPort());
                     }
+                    // 如果access port 为空，使用协议端口号
+                    if (accessMode.getAccessPort() == null) {
+                        accessMode.setAccessPort(accessMode.getPort());
+                    }
                     if (StringUtils.isNotEmpty(accessModeData.getIpAddress()) && cloudPort.getSrcPort() != null) {
                         cloudPort.getSrcPort().setIp(accessModeData.getIpAddress());
                     }
