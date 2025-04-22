@@ -3087,11 +3087,11 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         Integer cloudType = requestData.getCloudType();
         String wazuhManagerIp = requestData.getWazuhManagerIp();
 
+//        TODO 改bug暂时停止开发0422
+//        updateWazuhManagerIpByCloudType(cloudType, wazuhManagerIp);
 
-        updateWazuhManagerIpByCloudType(cloudType, wazuhManagerIp);
 
-
-        IAzureResourceManager azureResourceManager = IAzureResourceManager.getInstance(requestData.getCloudType());
+        /*IAzureResourceManager azureResourceManager = IAzureResourceManager.getInstance(requestData.getCloudType());
         var humanCondition = new HumanCondition()
                 .link(CsceneInstanceModel.class, SceneModel.class)
                 .filterLink(CsceneInstanceModel.class, CsceneInstanceModel::getScene, SceneModel.class,
@@ -3148,22 +3148,24 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                             initCommands.add(0,"rd/s/q C:\\wazuha");
                             initCommands.add(0,"call C:\\wazuha\\uninstall.bat");
 //                            先卸载删除目录再执行
-                            azureResourceManager
+                            *//*azureResourceManager
                                     .getManager()
                                     .virtualMachines()
-                                    .runPowerShellScript(groupName, vmName, initCommands, new ArrayList<>());
-                            log.info("updateWazuhManagerIp initCommands",initCommands);
+                                    .runPowerShellScript(groupName, vmName, initCommands, new ArrayList<>());*//*
+
+                            log.info("updateWazuhManagerIp initCommands : {}",JsonUtils.stringify(initCommands));
+                            System.out.println(213);
                         } else {
                             azureResourceManager
                                     .getManager()
                                     .virtualMachines()
                                     .runShellScript(groupName, vmName, linuxCommands, new ArrayList<>());
-                            log.info("updateWazuhManagerIp linuxCommands",linuxCommands);
+                            log.info("updateWazuhManagerIp linuxCommands : {}",JsonUtils.stringify(linuxCommands));
                         }
                     }
                 }
             }
-        }
+        }*/
 
     }
 
@@ -3234,7 +3236,8 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         HumanCondition humanCondition = new HumanCondition();
         List<MicrosoftAzureUserModel> list = microsoftAzureLoginMapper.list(humanCondition);
         for (MicrosoftAzureUserModel microsoftAzureUserModel : list) {
-            updateWazuhManagerIpByCloudType(microsoftAzureUserModel.getCloudType(), microsoftAzureUserModel.getWazuhManagerIp());
+//            TODO 改bug暂时停止开发
+//            updateWazuhManagerIpByCloudType(microsoftAzureUserModel.getCloudType(), microsoftAzureUserModel.getWazuhManagerIp());
         }
     }
 

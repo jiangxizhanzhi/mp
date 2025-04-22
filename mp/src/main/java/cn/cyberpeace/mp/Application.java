@@ -38,8 +38,8 @@ public class Application {
     public CommandLineRunner commandLineRunner(ApplicationContext ctx, CsceneInstanceService csceneInstanceService) {
         return args -> {
 
-            // 初始化配置
-            csceneInstanceService.initializeAzureWazuhManagerIpConfigs();
+//            TODO 改bug暂时停止开发
+//            csceneInstanceService.initializeAzureWazuhManagerIpConfigs();
 
             var localHost = "localhost";
             var serverProperties = BaseSingleton.baseAppConfig.getServerProperties();
