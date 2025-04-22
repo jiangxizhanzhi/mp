@@ -28,6 +28,8 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.ElementFileListBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.ElementLogListBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.ImportFileBO;
 import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
 import cn.cyberpeace.mp.sceneplugincollection.model.ElementFileCountModel;
@@ -947,7 +949,7 @@ public class SceneElementMonitorService {
         JSONObject result = new JSONObject();
 
         //文件变更列表
-        List<ElementFileListModel> fileList = getModifyData(JsonCommon.parse(JsonCommon.stringify(pageRequest), ElementMonitorRequest.class), CsceneBizConstant.FILE_MODIFY_GROUP, null)
+        List<ElementFileListBO> fileList = getModifyData(JsonCommon.parse(JsonCommon.stringify(pageRequest), ElementMonitorRequest.class), CsceneBizConstant.FILE_MODIFY_GROUP, null)
                 .asResult().sourceList().stream()
                 .map(file -> collectionHostEventBO2ElementFileListModel(file, CsceneBizConstant.FILE_MODIFY_GROUP.get(0)))
                 .collect(Collectors.toList());
@@ -961,7 +963,7 @@ public class SceneElementMonitorService {
         result.put(FILE_COUNT, JSON.toJSON(fileCount));
 
         //注册表变更列表
-        List<ElementFileListModel> registryList = getModifyData(JsonCommon.parse(JsonCommon.stringify(pageRequest), ElementMonitorRequest.class), CsceneBizConstant.REGISTRY_MODIFY_GROUP, null)
+        List<ElementFileListBO> registryList = getModifyData(JsonCommon.parse(JsonCommon.stringify(pageRequest), ElementMonitorRequest.class), CsceneBizConstant.REGISTRY_MODIFY_GROUP, null)
                 .asResult().sourceList().stream()
                 .map(registry -> collectionHostEventBO2ElementFileListModel(registry, CsceneBizConstant.REGISTRY_MODIFY_GROUP.get(0)))
                 .collect(Collectors.toList());
@@ -980,7 +982,7 @@ public class SceneElementMonitorService {
                 "020301", "020302", "020303", "020304", "020305", "020313"));
 
         //日志事件
-        List<ElementLogListModel> logList = csceneInstanceService.listHostEvents(sceneId, queryParams)
+        List<ElementLogListBO> logList = csceneInstanceService.listHostEvents(sceneId, queryParams)
                 .asResult().sourceList().stream()
                 .map(this::collectionHostEventBO2ElementLogListModel)
                 .collect(Collectors.toList());
@@ -996,7 +998,7 @@ public class SceneElementMonitorService {
         queryParams.setCatagories(Arrays.asList("020301", "020302", "020303", "020304", "020305", "020306", "020307", "020308", "020309", "020310", "020311", "020312"));
         //告警信息
         queryParams.setCatagories(new ArrayList<>());
-        List<ElementLogListModel> alarmList = csceneInstanceService.listHostEvents(sceneId, queryParams)
+        List<ElementLogListBO> alarmList = csceneInstanceService.listHostEvents(sceneId, queryParams)
                 .asResult().sourceList().stream()
                 .map(this::collectionHostEventBO2ElementLogListModel)
                 .collect(Collectors.toList());
@@ -1051,8 +1053,8 @@ public class SceneElementMonitorService {
         }
     }
 
-    private ElementFileListModel collectionHostEventBO2ElementFileListModel(CollectionHostEventBO bo, String group) {
-        ElementFileListModel model = new ElementFileListModel();
+    private ElementFileListBO collectionHostEventBO2ElementFileListModel(CollectionHostEventBO bo, String group) {
+        ElementFileListBO model = new ElementFileListBO();
         model.setNodeName(bo.getNodeName());
         model.setTime(bo.getTime());
         model.setPath(bo.getPath());
@@ -1070,8 +1072,23 @@ public class SceneElementMonitorService {
         } else {
             model.setMd5After(bo.getMd5After());
         }
+
+        // 设置 levelName
+        model.setLevelName(getLevelName(bo.getLevel()));
         return model;
     }
+
+     private String getLevelName(Integer level){
+        if (level >= 0 && level <= 4) {
+            return "低";
+        } else if (level >=5 && level <= 9) {
+            return "中";
+        } else if (level >=10){
+            return "高";
+        } else {
+            return "-";
+        }
+     }
 
     private ElementFileCountModel elementHistogramInfo2ElementFileCountModel(ElementHistogramInfo info, String group) {
         ElementFileCountModel model = new ElementFileCountModel();
@@ -1081,8 +1098,8 @@ public class SceneElementMonitorService {
         return model;
     }
 
-    private ElementLogListModel collectionHostEventBO2ElementLogListModel(CollectionHostEventBO bo) {
-        ElementLogListModel model = new ElementLogListModel();
+    private ElementLogListBO collectionHostEventBO2ElementLogListModel(CollectionHostEventBO bo) {
+        ElementLogListBO model = new ElementLogListBO();
         model.setNodeName(bo.getNodeName());
         model.setTime(bo.getTime());
         model.setAppName(bo.getAppName());
@@ -1097,6 +1114,9 @@ public class SceneElementMonitorService {
         } else {
             System.out.println("bo.getContent() is null");
         }
+
+        // 设置 levelName
+        model.setLevelName(getLevelName(bo.getLevel()));
         return model;
     }
 
@@ -1188,7 +1208,7 @@ public class SceneElementMonitorService {
                     fileListModel.setTime(LocalDateTime.parse(fileData.get(1)));
                     fileListModel.setPath(fileData.get(2));
                     fileListModel.setEventDesc(fileData.get(3));
-                    fileListModel.setLevel(Integer.parseInt(fileData.get(4)));
+                    fileListModel.setLevel(Integer.parseInt(fileData.get(5)));
                     fileListModel.setFileSize(fileData.get(5));
                     fileListModels.add(fileListModel);
                 }
@@ -1220,7 +1240,7 @@ public class SceneElementMonitorService {
                     registryListModel.setTime(LocalDateTime.parse(registryData.get(1)));
                     registryListModel.setPath(registryData.get(2));
                     registryListModel.setEventDesc(registryData.get(3));
-                    registryListModel.setLevel(Integer.parseInt(registryData.get(4)));
+                    registryListModel.setLevel(Integer.parseInt(registryData.get(5)));
                     registryListModel.setMd5Before(registryData.get(5));
                     registryListModel.setMd5After(registryData.get(6));
                     registryListModels.add(registryListModel);
@@ -1236,7 +1256,7 @@ public class SceneElementMonitorService {
                     logListModel.setTime(LocalDateTime.parse(logData.get(1)));
                     logListModel.setAppName(logData.get(2));
                     logListModel.setEventDesc(logData.get(3));
-                    logListModel.setLevel(Integer.parseInt(logData.get(4)));
+                    logListModel.setLevel(Integer.parseInt(logData.get(5)));
                     logListModel.setDescription(logData.get(5));
                     logListModel.setCatagory(logData.get(6));
                     logListModel.setLogType(LOG);
@@ -1268,7 +1288,7 @@ public class SceneElementMonitorService {
                     logListModel.setTime(LocalDateTime.parse(logData.get(1)));
                     logListModel.setAppName(logData.get(2));
                     logListModel.setEventDesc(logData.get(3));
-                    logListModel.setLevel(Integer.parseInt(logData.get(4)));
+                    logListModel.setLevel(Integer.parseInt(logData.get(5)));
                     logListModel.setDescription(logData.get(5));
                     logListModel.setCatagory(logData.get(6));
                     logListModel.setLogType(ALARM);
