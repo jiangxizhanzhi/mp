@@ -680,10 +680,10 @@ public class LoadServiceImpl {
 
         MpDevopsLoadSceneLog mpDevopsLoadSceneLog = list.get(0);
 
-        humanCondition = new HumanCondition();
-        humanCondition.filterEqual(CloudPluginSceneElementModel::getResourceId, mpDevopsLoadSceneLog.getTaskId());
-        humanCondition.filterEqual(CloudPluginSceneElementModel::getLoadResourceInstanceId, mpDevopsLoadSceneLog.getInstanceId());
-        List<CloudPluginSceneElementModel> cloudPluginSceneElementModels = cloudPluginSceneElementMapper.list(humanCondition);
+        HumanCondition filterHumanCondition = new HumanCondition();
+        filterHumanCondition.filterEqual(CloudPluginSceneElementModel::getResourceId, mpDevopsLoadSceneLog.getTaskId());
+        filterHumanCondition.filterEqual(CloudPluginSceneElementModel::getLoadResourceInstanceId, mpDevopsLoadSceneLog.getInstanceId());
+        List<CloudPluginSceneElementModel> cloudPluginSceneElementModels = cloudPluginSceneElementMapper.list(filterHumanCondition);
         if (cloudPluginSceneElementModels.size() > 0 && BaseCloudPluginSceneElementModel.LoadSourceType.LOCAL == cloudPluginSceneElementModels.get(0).getLoadSource()) {
             String resultLog = requestData.getResultLog();
             String loadResultLog = String.format(LOAD_RESULT_LOG, resultLog);
@@ -713,9 +713,9 @@ public class LoadServiceImpl {
         }
 
         // 更新数据库
-        Boolean success = devopsLoadSceneLogMapper.update(mpDevopsLoadSceneLog);
-        log.info("end updateLoadExecutionOutResult success:{}", success);
-        return success
+        int i = devopsLoadSceneLogMapper.filterUpdate(mpDevopsLoadSceneLog, humanCondition);
+        log.info("end updateLoadExecutionOutResult i:{}", i);
+        return i == 1
                 ? new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult()
                 : new ServiceResult(null, BaseErrorCode.ERROR, "载荷执行结果更新失败").asResult();
     }

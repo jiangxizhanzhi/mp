@@ -40,12 +40,14 @@ public class MicrosoftAzureController {
     public ListObjServiceResult getCloudTargetList(@RequestParam(value = "per_page", defaultValue = "10") Integer pageSize,
                                                    @RequestParam(value = "page", defaultValue = "1") Integer pageNum,
                                                    @RequestParam(value = "name", required = false) String name,
-                                                   @RequestParam(value = "operating_system", required = false) String operatingSystem) {
+                                                   @RequestParam(value = "operating_system", required = false) String operatingSystem,
+                                                   @RequestParam(value = "cloud_type",required = false) String cloudType) {
         JSONObject requestData = new JSONObject();
         requestData.put("name", name);
         requestData.put("operatingSystem", operatingSystem);
         requestData.put("pageNum", pageNum);
         requestData.put("pageSize", pageSize);
+        requestData.put("cloudType", cloudType);
         JSONObject result = microsoftAzureConverter.getCloudTargetList(requestData);
 //        List returnData = microsoftAzureConverter.getTarget(jsonObject);
         return new ListObjServiceResult((List) result.get("source"), (int) result.get("total")).asResult();
