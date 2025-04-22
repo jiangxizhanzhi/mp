@@ -999,7 +999,6 @@ public class CsceneDataModifier {
             if (elements == null) {
                 return;
             }
-            String areaId = topologyBO.getAreaId();
             for (BaseSceneElementBO e : elements) {
                 Map<String, String> outPosition = e.getOuterPosition2();
                 String pos = e.getPosition2();
@@ -1008,15 +1007,14 @@ public class CsceneDataModifier {
                     return;
                 }
                 if(MapUtils.isNotEmpty(outPosition)){
-                    String position2 = outPosition.getOrDefault(e.getArea(), "");
+                    String position2 = outPosition.get("");
                     e.setPosition2(position2);
                     continue;
                 }
                 if(StringUtils.isNotEmpty(pos)){
                     outPosition = new HashMap<>();
-                    outPosition.put(areaId, pos);
+                    outPosition.put("", pos);
                     e.setOuterPosition2(outPosition);
-                    e.setPosition2(outPosition.getOrDefault(e.getArea(), ""));
                 }
             }
         }
