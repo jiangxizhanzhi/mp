@@ -414,15 +414,15 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                 log.warn("data error! element name is {}",sceneConfigElementBO.getName());
                 return;
             }
-            if(MapUtils.isNotEmpty(outPosition)){
-                String position2 = outPosition.get("");
-                sceneConfigElementBO.setPosition2(position2);
-                continue;
-            }
             if(StringUtils.isNotEmpty(pos)){
                 outPosition = new HashMap<>();
                 outPosition.put("", pos);
                 sceneConfigElementBO.setOuterPosition2(outPosition);
+            }
+            if(MapUtils.isNotEmpty(outPosition)){
+                String position2 = outPosition.get("");
+                sceneConfigElementBO.setPosition2(position2);
+                continue;
             }
         }
     }

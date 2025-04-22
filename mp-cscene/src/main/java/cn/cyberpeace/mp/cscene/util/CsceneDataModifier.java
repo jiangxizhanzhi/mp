@@ -1006,15 +1006,15 @@ public class CsceneDataModifier {
                     log.warn("data error! element name is {}",e.getName());
                     return;
                 }
-                if(MapUtils.isNotEmpty(outPosition)){
-                    String position2 = outPosition.get("");
-                    e.setPosition2(position2);
-                    continue;
-                }
                 if(StringUtils.isNotEmpty(pos)){
                     outPosition = new HashMap<>();
                     outPosition.put("", pos);
                     e.setOuterPosition2(outPosition);
+                }
+                if(MapUtils.isNotEmpty(outPosition)){
+                    String position2 = outPosition.get("");
+                    e.setPosition2(position2);
+                    continue;
                 }
             }
         }
