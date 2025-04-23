@@ -391,7 +391,13 @@ public class FlowMonitorController {
         humanCondition1.filterEqual(SceneSwitchInfoModel::getSceneId, id);
         List<SceneSwitchInfoModel> list1 = sceneSwitchInfoMapper.list(humanCondition1);
         Map<String, List<SceneSwitchInfoModel>> collect2 = list1.stream().collect(Collectors.groupingBy(SceneSwitchInfoModel::getNodeId));
+
         List<UserModel> userModels = userService.listByUsers();
+
+        log.info("--------------------------------5");
+        log.info(String.valueOf(System.currentTimeMillis()-startTime));
+        startTime = System.currentTimeMillis();
+
         Map<String, UserModel> userModelMap = userModels.stream().collect(Collectors.toMap(UserModel::getId, s -> s));
         subList.stream().forEach(item -> {
             String targetNodeId = item.getTargetNodeId();
@@ -421,6 +427,11 @@ public class FlowMonitorController {
                 }
             }
         });
+
+        log.info("--------------------------------6");
+        log.info(String.valueOf(System.currentTimeMillis()-startTime));
+        startTime = System.currentTimeMillis();
+
         try {
             return new ListObjServiceResult<>(new ListObjResult<>(subList, sortedFlowAttacks.size()).asResult()).asResult();
         } catch (Exception e) {

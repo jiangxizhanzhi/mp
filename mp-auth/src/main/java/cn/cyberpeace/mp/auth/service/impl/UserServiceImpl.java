@@ -46,6 +46,8 @@ import cn.hutool.core.io.FileUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.compress.utils.Lists;
@@ -62,6 +64,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -487,12 +490,22 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return userModels;
     }
 
+    Cache<String, List<UserModel>> cache = CacheBuilder.newBuilder()
+            .expireAfterWrite(5, TimeUnit.MINUTES) // 写入后5分钟过期
+            .build();
+
     @Override
     public List<UserModel> listByUsers() {
-        HumanCondition humanCondition = new HumanCondition();
-        List<UserModel> userModels = getModelMapper().list(humanCondition);
-        userModels.stream().forEach(userModel -> setDefaultIfNoAvatar(userModel));
-        return userModels;
+        var res = cache.getIfPresent("users");
+        if (res == null) {
+            HumanCondition humanCondition = new HumanCondition();
+            List<UserModel> userModels = getModelMapper().list(humanCondition);
+            userModels.stream().forEach(userModel -> setDefaultIfNoAvatar(userModel));
+            cache.put("users", userModels);
+            return userModels;
+        } else {
+            return res;
+        }
     }
 
     @Override

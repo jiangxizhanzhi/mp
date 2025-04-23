@@ -54,7 +54,7 @@ public class RangeDataUtil {
 
     private boolean executed = false;
 
-    @Scheduled(cron = "0 0/1 * * * ?")
+    @Scheduled(cron = "0/5 * * * * ?")
     public void registerTasks() {
         if (!executed) {
             // 在第0秒时注册一下任务，任务每分钟执行一次

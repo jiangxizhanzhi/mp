@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -79,6 +80,20 @@ public class SceneMonitorController {
                                                                             @RequestParam(required = false) Boolean realTimeHostState,
                                                                             @RequestParam(required = false) String isQuerySubRangeNodes,
                                                                             SceneAllElementsQueryRequest request) {
+        boolean canUseCache = true;
+        if (realTimeHostState != null || isQuerySubRangeNodes != null) {
+            canUseCache = false;
+        }
+        Map<String, Object> map = JsonCommon.beanToMap(request);
+        for (Map.Entry<String, Object> m : map.entrySet()) {
+            if (m.getValue() != null) {
+                canUseCache = false;
+            }
+        }
+        if (canUseCache && cache.containsKey(sceneId)) {
+            var res = cache.get(sceneId);
+            return ResultCommon.success(res);
+        }
 
         SceneMonitorService.Info info = sceneMonitorService.getAllSceneElementsV2(sceneId, realTimeHostState, request);
         var basicInfoList = info.getList();
@@ -104,6 +119,9 @@ public class SceneMonitorController {
             }
         }
         if(StringUtils.isNotEmpty(isQuerySubRangeNodes)){
+            if (canUseCache) {
+                cache.put(sceneId, result);
+            }
             return ResultCommon.success(result);
         }
         try {
@@ -125,6 +143,9 @@ public class SceneMonitorController {
             log.error(e.getMessage(), e);
         }
 
+        if (canUseCache) {
+            cache.put(sceneId, result);
+        }
         return ResultCommon.success(result);
     }
 

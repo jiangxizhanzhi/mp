@@ -438,7 +438,12 @@ public class TestRangeApiProxy implements SubRangeMonitorInterface {
         return sceneElements.stream().map(SceneElementModel::getNodeId).collect(Collectors.toSet());
     }
 
+    private Map<String, Map<String, NodeInfo>> IpToNodeMapCache = new ConcurrentHashMap<>();
+
     public Map<String, NodeInfo> getIpToNodeMap(String csceneInstanceId) {
+        if (IpToNodeMapCache.containsKey(csceneInstanceId)) {
+            return IpToNodeMapCache.get(csceneInstanceId);
+        }
         String sceneInstanceId = csceneInstanceMapper.get(csceneInstanceId).getScene();
         List<SceneElementPortModel> sceneElementPortModels = sceneElementPortMapper.list(new HumanCondition().filterEqual(SceneElementPortModel::getScene, sceneInstanceId)
                 .select(SceneElementPortModel::getPortId, SceneElementPortModel::getIp, SceneElementPortModel::getSceneElement));
@@ -448,6 +453,7 @@ public class TestRangeApiProxy implements SubRangeMonitorInterface {
                 .stream().map(model -> new NodeInfo().setNodeId(model.getNodeId()).setId(model.getId())
                         .setNodeName(model.getName())).collect(Collectors.toMap(NodeInfo::getId, Function.identity(), (a, b) -> a));
         if (CollectionUtils.isEmpty(sceneElementPortModels)) {
+            IpToNodeMapCache.put(csceneInstanceId, Collections.emptyMap());
             return Collections.emptyMap();
         } else {
             Map<String, NodeInfo> ipToNodeInfo = new HashMap<>(8);
@@ -459,6 +465,7 @@ public class TestRangeApiProxy implements SubRangeMonitorInterface {
                     }
                 }
             }
+            IpToNodeMapCache.put(csceneInstanceId, ipToNodeInfo);
             return ipToNodeInfo;
         }
     }
