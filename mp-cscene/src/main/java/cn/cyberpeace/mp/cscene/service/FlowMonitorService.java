@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.mptool.CollectionUtil;
 import cn.cyberpeace.mp.base.util.mptool.NumberUtil;
 import cn.cyberpeace.mp.base.util.mptool.URLUtil;
+import cn.cyberpeace.mp.common.config.CommonAppConfig;
 import cn.cyberpeace.mp.cscene.bo.CsceneCollectionFlowBO;
 import cn.cyberpeace.mp.cscene.controller.request.SceneAllElementsQueryRequest;
 import cn.cyberpeace.mp.cscene.dto.element.ConnectionState;
@@ -669,7 +670,21 @@ public class FlowMonitorService {
             if (config.getPublicNetProxy() && config.getPublicNetProxyServer()) {
                 if (StringUtils.isNotEmpty(config.getPublicNetProxyIp())) {
                     URL u = URLUtil.url(url);
-                    url = StringUtils.replaceOnce(url, u.getHost(), config.getPublicNetProxyIp());
+                    // 如果和cpcloud同网段的才进行ip的替换
+                    CommonAppConfig commonAppConfig = BeanCommon.getBean(CommonAppConfig.class);
+                    String[] ip1 = commonAppConfig.getCpIp().split("\\.");
+                    String[] ip2 = u.getHost().split("\\.");
+                    // 比较前三个分段
+                    boolean replace = true;
+                    for (int i = 0; i < 3; i++) {
+                        if (!ip1[i].equals(ip2[i])) {
+                            replace = false;
+                            break;
+                        }
+                    }
+                    if (replace) {
+                        url = StringUtils.replaceOnce(url, u.getHost(), config.getPublicNetProxyIp());
+                    }
                 }
             }
         }

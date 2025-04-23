@@ -13,6 +13,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.*;
 import cn.cyberpeace.mp.base.util.mptool.FileUtil;
 import cn.cyberpeace.mp.base.util.mptool.URLUtil;
+import cn.cyberpeace.mp.common.config.CommonAppConfig;
 import cn.cyberpeace.mp.scene.core.bo.SceneBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
@@ -276,7 +277,21 @@ public class ScenePluginCloudSceneService {
                     if (config.getPublicNetProxy() && config.getPublicNetProxyServer()) {
                         if (StringUtils.isNotEmpty(config.getPublicNetProxyIp())) {
                             URL u = URLUtil.url(formatUrl);
-                            formatUrl = StringUtils.replaceOnce(formatUrl, u.getHost(), config.getPublicNetProxyIp());
+                            // 如果和cpcloud同网段的才进行ip的替换
+                            CommonAppConfig commonAppConfig = BeanCommon.getBean(CommonAppConfig.class);
+                            String[] ip1 = commonAppConfig.getCpIp().split("\\.");
+                            String[] ip2 = u.getHost().split("\\.");
+                            // 比较前三个分段
+                            boolean replace = true;
+                            for (int i = 0; i < 3; i++) {
+                                if (!ip1[i].equals(ip2[i])) {
+                                    replace = false;
+                                    break;
+                                }
+                            }
+                            if (replace) {
+                                formatUrl = StringUtils.replaceOnce(formatUrl, u.getHost(), config.getPublicNetProxyIp());
+                            }
                         }
                     }
                     nodeSession.setMonitorUrl(formatUrl);
@@ -297,7 +312,21 @@ public class ScenePluginCloudSceneService {
                     if (config.getPublicNetProxy() && config.getPublicNetProxyServer()) {
                         if (StringUtils.isNotEmpty(config.getPublicNetProxyIp())) {
                             URL u = URLUtil.url(formatUrl);
-                            formatUrl = StringUtils.replaceOnce(formatUrl, u.getHost(), config.getPublicNetProxyIp());
+                            // 如果和cpcloud同网段的才进行ip的替换
+                            CommonAppConfig commonAppConfig = BeanCommon.getBean(CommonAppConfig.class);
+                            String[] ip1 = commonAppConfig.getCpIp().split("\\.");
+                            String[] ip2 = u.getHost().split("\\.");
+                            // 比较前三个分段
+                            boolean replace = true;
+                            for (int i = 0; i < 3; i++) {
+                                if (!ip1[i].equals(ip2[i])) {
+                                    replace = false;
+                                    break;
+                                }
+                            }
+                            if (replace) {
+                                formatUrl = StringUtils.replaceOnce(formatUrl, u.getHost(), config.getPublicNetProxyIp());
+                            }
                         }
                     }
                     nodeSession.setAssistanceUrl(formatUrl);
@@ -371,13 +400,41 @@ public class ScenePluginCloudSceneService {
                     if (StringUtils.isNotEmpty(recording.getFileUrl())) {
                         String formatUrl = recording.getFileUrl();
                         URL u = URLUtil.url(formatUrl);
-                        formatUrl = StringUtils.replaceOnce(formatUrl, u.getHost(), config.getPublicNetProxyIp());
+                        // 如果和cpcloud同网段的才进行ip的替换
+                        CommonAppConfig commonAppConfig = BeanCommon.getBean(CommonAppConfig.class);
+                        String[] ip1 = commonAppConfig.getCpIp().split("\\.");
+                        String[] ip2 = u.getHost().split("\\.");
+                        // 比较前三个分段
+                        boolean replace = true;
+                        for (int i = 0; i < 3; i++) {
+                            if (!ip1[i].equals(ip2[i])) {
+                                replace = false;
+                                break;
+                            }
+                        }
+                        if (replace) {
+                            formatUrl = StringUtils.replaceOnce(formatUrl, u.getHost(), config.getPublicNetProxyIp());
+                        }
                         recording.setFileUrl(formatUrl);
                     }
                     if (StringUtils.isNotEmpty(recording.getPlayUrl())) {
                         String formatUrl = recording.getPlayUrl();
                         URL u = URLUtil.url(formatUrl);
-                        formatUrl = StringUtils.replaceOnce(formatUrl, u.getHost(), config.getPublicNetProxyIp());
+                        // 如果和cpcloud同网段的才进行ip的替换
+                        CommonAppConfig commonAppConfig = BeanCommon.getBean(CommonAppConfig.class);
+                        String[] ip1 = commonAppConfig.getCpIp().split("\\.");
+                        String[] ip2 = u.getHost().split("\\.");
+                        // 比较前三个分段
+                        boolean replace = true;
+                        for (int i = 0; i < 3; i++) {
+                            if (!ip1[i].equals(ip2[i])) {
+                                replace = false;
+                                break;
+                            }
+                        }
+                        if (replace) {
+                            formatUrl = StringUtils.replaceOnce(formatUrl, u.getHost(), config.getPublicNetProxyIp());
+                        }
                         recording.setPlayUrl(formatUrl);
                     }
                 }
@@ -528,10 +585,37 @@ public class ScenePluginCloudSceneService {
             if (accessMode.getPublicNetProxy() != null) {
                 if (Boolean.TRUE.equals(accessMode.getPublicNetProxy())) {
                     String ip = StringUtils.isNotEmpty(accessMode.getPublicNetProxyIp()) ? accessMode.getPublicNetProxyIp() : CloudSingleton.cloudAppConfig.getPublicNetProxyIp();
-                    formatUrl = StringUtils.replaceOnce(formatUrl, u.getHost(), ip);
+                    CommonAppConfig commonAppConfig = BeanCommon.getBean(CommonAppConfig.class);
+                    String[] ip1 = commonAppConfig.getCpIp().split("\\.");
+                    String[] ip2 = u.getHost().split("\\.");
+                    // 比较前三个分段
+                    boolean replace = true;
+                    for (int i = 0; i < 3; i++) {
+                        if (!ip1[i].equals(ip2[i])) {
+                            replace = false;
+                            break;
+                        }
+                    }
+                    if (replace) {
+                        formatUrl = StringUtils.replaceOnce(formatUrl, u.getHost(), ip);
+                    }
                 }
             } else if (CloudSingleton.cloudAppConfig.getPublicNetProxy()) {
-                formatUrl = StringUtils.replaceOnce(formatUrl, u.getHost(), CloudSingleton.cloudAppConfig.getPublicNetProxyIp());
+                // 如果和cpcloud同网段的才进行ip的替换
+                CommonAppConfig commonAppConfig = BeanCommon.getBean(CommonAppConfig.class);
+                String[] ip1 = commonAppConfig.getCpIp().split("\\.");
+                String[] ip2 = u.getHost().split("\\.");
+                // 比较前三个分段
+                boolean replace = true;
+                for (int i = 0; i < 3; i++) {
+                    if (!ip1[i].equals(ip2[i])) {
+                        replace = false;
+                        break;
+                    }
+                }
+                if (replace) {
+                    formatUrl = StringUtils.replaceOnce(formatUrl, u.getHost(), CloudSingleton.cloudAppConfig.getPublicNetProxyIp());
+                }
             }
         }
         return formatUrl;
@@ -975,7 +1059,20 @@ public class ScenePluginCloudSceneService {
                     if (config.getPublicNetProxy() && config.getPublicNetProxyServer()) {
                         if (StringUtils.isNotEmpty(config.getPublicNetProxyIp())) {
                             URL u = URLUtil.url(formatUrl);
-                            formatUrl = StringUtils.replaceOnce(formatUrl, u.getHost(), config.getPublicNetProxyIp());
+                            CommonAppConfig commonAppConfig = BeanCommon.getBean(CommonAppConfig.class);
+                            String[] ip1 = commonAppConfig.getCpIp().split("\\.");
+                            String[] ip2 = u.getHost().split("\\.");
+                            // 比较前三个分段
+                            boolean replace = true;
+                            for (int i = 0; i < 3; i++) {
+                                if (!ip1[i].equals(ip2[i])) {
+                                    replace = false;
+                                    break;
+                                }
+                            }
+                            if (replace) {
+                                formatUrl = StringUtils.replaceOnce(formatUrl, u.getHost(), config.getPublicNetProxyIp());
+                            }
                         }
                     }
                     nodeSession.setMonitorUrl(formatUrl);
@@ -995,7 +1092,20 @@ public class ScenePluginCloudSceneService {
                     if (config.getPublicNetProxy() && config.getPublicNetProxyServer()) {
                         if (StringUtils.isNotEmpty(config.getPublicNetProxyIp())) {
                             URL u = URLUtil.url(formatUrl);
-                            formatUrl = StringUtils.replaceOnce(formatUrl, u.getHost(), config.getPublicNetProxyIp());
+                            CommonAppConfig commonAppConfig = BeanCommon.getBean(CommonAppConfig.class);
+                            String[] ip1 = commonAppConfig.getCpIp().split("\\.");
+                            String[] ip2 = u.getHost().split("\\.");
+                            // 比较前三个分段
+                            boolean replace = true;
+                            for (int i = 0; i < 3; i++) {
+                                if (!ip1[i].equals(ip2[i])) {
+                                    replace = false;
+                                    break;
+                                }
+                            }
+                            if (replace) {
+                                formatUrl = StringUtils.replaceOnce(formatUrl, u.getHost(), config.getPublicNetProxyIp());
+                            }
                         }
                     }
                     nodeSession.setAssistanceUrl(formatUrl);
