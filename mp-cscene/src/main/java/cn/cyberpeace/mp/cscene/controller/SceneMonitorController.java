@@ -23,6 +23,7 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -74,6 +75,7 @@ public class SceneMonitorController {
     @GetMapping("/all_elements/{sceneId}")
     public ServiceResult<List<ElementMonitorBasicInfo>> getSceneAllElements(@PathVariable String sceneId,
                                                                             @RequestParam(required = false) Boolean realTimeHostState,
+                                                                            @RequestParam(required = false) String isQuerySubRangeNodes,
                                                                             SceneAllElementsQueryRequest request) {
 
         SceneMonitorService.Info info = sceneMonitorService.getAllSceneElementsV2(sceneId, realTimeHostState, request);
@@ -99,7 +101,9 @@ public class SceneMonitorController {
                 }
             }
         }
-
+        if(StringUtils.isNotEmpty(isQuerySubRangeNodes)){
+            return ResultCommon.success(result);
+        }
         try {
             var testRangeResult = testRangeApiProxy.listAllElementBasicInfo(sceneId, request);
             var ip2Elements = info.getIp2Elements();
