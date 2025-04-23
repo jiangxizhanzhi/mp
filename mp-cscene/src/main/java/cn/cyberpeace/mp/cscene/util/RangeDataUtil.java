@@ -140,7 +140,7 @@ public class RangeDataUtil {
             Map<String, RangeModel> id2RangeModel = new HashMap<>();
             Map<String, CollectAgentConfig> configs = new HashMap<>();
             for (RangeModel r : rangeModelList) {
-                id2RangeModel.put(r.getRangeName(), r);
+                id2RangeModel.put(r.getId(), r);
                 configs.put(r.getRangeName(), CollectAgentConfig.defaultValue());
             }
             log.info("查询所有分靶场耗时 {}", System.currentTimeMillis() - timeA);
@@ -157,6 +157,7 @@ public class RangeDataUtil {
                     configs.put(rangeName, result);
                 }
             }
+            log.info("周期配置：{}", JsonCommon.stringify(configs));
             log.info("查询所有分靶场周期配置耗时 {}", System.currentTimeMillis() - timeA);
 
             timeA = System.currentTimeMillis();
