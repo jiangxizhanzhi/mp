@@ -939,7 +939,7 @@ public class SceneElementMonitorService {
         return countInfos;
     }
 
-    public void exportData(HttpServletResponse response, String sceneId, String elementId, String type) {
+    public void exportData1(HttpServletResponse response, String sceneId, String elementId, String type) {
         ElementMonitorRequest pageRequest = new ElementMonitorRequest();
         pageRequest.setSceneId(sceneId);
         pageRequest.setPage(1);
@@ -1072,7 +1072,7 @@ public class SceneElementMonitorService {
             }
         }
     }
-    public void exportData1(HttpServletResponse response, String sceneId, String elementId, String type) {
+    public void exportData(HttpServletResponse response, String sceneId, String elementId, String type) {
         ElementMonitorRequest pageRequest = new ElementMonitorRequest();
         pageRequest.setSceneId(sceneId);
         pageRequest.setPage(1);

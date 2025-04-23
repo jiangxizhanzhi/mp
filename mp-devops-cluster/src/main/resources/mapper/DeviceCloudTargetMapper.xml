@@ -253,12 +253,21 @@
         <if test="cloudServiceType != null and cloudServiceType == 1">
             mp_devops_cloud_target_net
         </if>
-        <if test="cloudServiceType != null and cloudServiceType == 2">
-            mp_devops_cloud_target_calculate
-        </if>
         <if test="cloudServiceType != null and cloudServiceType == 3">
             mp_devops_cloud_target_container
         </if>
+        SET
+        <if test="param != null and param.logo != null">
+            logo = #{param.logo},
+        </if>
+        update_time = now()
+        WHERE
+        link_id = #{id}
+    </update>
+
+    <update id="updateCloudVM">
+        UPDATE
+            mp_devops_cloud_target_calculate
         SET
         <if test="param != null and param.logo != null">
             logo = #{param.logo},

@@ -881,20 +881,24 @@ public class MicrosoftAzureConverter implements BaseConverter {
     @Transactional
     public Boolean updateCloudTarget(JSONObject requestData) {
         if (requestData != null && requestData.get("id") != null && !requestData.get("id").toString().equals("")) {
-            Boolean updateCloudTarget = microsoftAzureMapper.updateCloudTarget(requestData.get("id").toString(), requestData.getInteger("cloudServiceType"), requestData);
-            return updateCloudTarget;
+            String cloudServiceType = requestData.getString("cloudServiceType");
+            if(cloudServiceType.equals("1") || cloudServiceType.equals("3")){
+                return microsoftAzureMapper.updateCloudTarget(requestData.get("id").toString(), requestData.getString("cloudServiceType"), requestData);
+            }else {
+                return microsoftAzureMapper.updateCloudVM(requestData.get("id").toString(), requestData);
+            }
         }
         return false;
     }
 
     public DeviceCloudTargetVO getCloudTargetById(JSONObject requestData) {
         DeviceCloudTargetVO data = new DeviceCloudTargetVO();
-        if (requestData.get("cloudServiceType").toString().equals("2")) {
-            data = microsoftAzureMapper.getCloudTargetCalculateById(requestData.get("id").toString());
-        } else if (requestData.get("cloudServiceType").toString().equals("3")) {
+         if (requestData.get("cloudServiceType").toString().equals("3")) {
             data = microsoftAzureMapper.getCloudTargetContainerById(requestData.get("id").toString());
         } else if (requestData.get("cloudServiceType").toString().equals("1")) {
             data = microsoftAzureMapper.getCloudTargetNetById(requestData.get("id").toString());
+        } else {
+            data = microsoftAzureMapper.getCloudTargetCalculateById(requestData.get("id").toString());
         }
         return data;
     }

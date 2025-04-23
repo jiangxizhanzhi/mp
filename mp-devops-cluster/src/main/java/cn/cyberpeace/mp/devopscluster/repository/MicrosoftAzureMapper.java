@@ -35,7 +35,7 @@ public interface MicrosoftAzureMapper extends BaseModelMapper<DeviceCloudTargetP
 
     Integer deleteContainersByIds(@Param("id") String id, @Param("param") List<String> ids);
 
-    Boolean updateCloudTarget(@Param("id") String id, @Param("cloudServiceType") Integer cloudServiceType, @Param("param") JSONObject requestData);
+    Boolean updateCloudTarget(@Param("id") String id, @Param("cloudServiceType") String cloudServiceType, @Param("param") JSONObject requestData);
 
     DeviceCloudTargetVO getCloudTargetCalculateById(@Param("id") String id);
 
@@ -84,4 +84,6 @@ public interface MicrosoftAzureMapper extends BaseModelMapper<DeviceCloudTargetP
     void addCloudTargetCommonData(@Param("uuid") String uuid, @Param("param") DeviceCloudTargetPO commonCloudTarget);
 
     void addCalculateTargetData(@Param("uuid") String uuid, @Param("param") DeviceCloudTargetCalculate calculateTarget);
+
+    Boolean updateCloudVM(@Param("id") String id, @Param("param")  JSONObject requestData);
 }

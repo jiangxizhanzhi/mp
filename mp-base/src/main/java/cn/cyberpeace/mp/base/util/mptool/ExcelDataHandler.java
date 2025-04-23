@@ -8,9 +8,11 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.*;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
@@ -198,23 +200,23 @@ public class ExcelDataHandler {
 		}
 
 		if (!file.exists()) {
-			try	(HSSFWorkbook hssfWorkbook = new HSSFWorkbook()) {
-				hssfWorkbook.write(file);
+			try	(XSSFWorkbook hssfWorkbook = new XSSFWorkbook()) {
+				hssfWorkbook.write(new FileOutputStream(file));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
 
-		try (HSSFWorkbook wb = new HSSFWorkbook(Files.newInputStream(Paths.get(filePath)))){
+		try (XSSFWorkbook wb = new XSSFWorkbook(Files.newInputStream(Paths.get(filePath)))){
 			// 创建HSSFSheet对象
-			HSSFSheet sheet = wb.createSheet(sheetName);
+			XSSFSheet sheet = wb.createSheet(sheetName);
 			// 创建HSSFRow对象
-			HSSFRow row = sheet.createRow(0);
+			XSSFRow row = sheet.createRow(0);
 			// 在excel表中添加表头
 			for (int i = 0; i < excelHeader.getCnName().length; i++) {
 				// 创建HSSFCell对象
-				HSSFCell cell = row.createCell(i);
-				HSSFRichTextString text = new HSSFRichTextString(excelHeader.getCnName()[i]);
+				XSSFCell cell = row.createCell(i);
+				XSSFRichTextString text = new XSSFRichTextString(excelHeader.getCnName()[i]);
 				cell.setCellValue(text);
 			}
 			int rowNum = 1;
@@ -225,7 +227,7 @@ public class ExcelDataHandler {
 				Field[] allFields = ArrayUtils.addAll(fields, superClassFields);
 				for (T customersForm : list) {
 					int cellNum = 0;
-					HSSFRow dataRow = sheet.createRow(rowNum);
+					XSSFRow dataRow = sheet.createRow(rowNum);
 					for (Field field : allFields) {
 						// 设置允许通过反射访问私有变量
 						field.setAccessible(true);
@@ -247,7 +249,10 @@ public class ExcelDataHandler {
 				}
 			}
 			// 输出Excel文件
-			wb.write(file);
+			try (FileOutputStream fileOut = new FileOutputStream(file)) {
+				wb.write(fileOut);
+				log.info("Excel file written successfully: {}", filePath);
+			}
 
 		} catch (Exception e) {
 			log.error(
