@@ -1261,6 +1261,11 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             bo.setLevel(model.getLevel());
             bo.setCatagory(model.getCatagory());
             bo.setType(model.getLogType());
+            HashMap<Object, Object> ruleMap = new HashMap<>();
+            ruleMap.put("id",model.getRuleId());
+            HashMap<String, Object> contentMap = new HashMap<>();
+            contentMap.put("rule", ruleMap);
+            bo.setContent(contentMap);
             bos.add(bo);
             if (bos.size() == queryParams.getPageSize()) {
                 return;

@@ -6,6 +6,7 @@ public enum ExcelHeader {
 	FILE_LIST(new String[]{"主机名称", "时间", "文件名称", "动作", "级别", "级别编码", "文件"}),
 	REGISTRY_LIST(new String[]{"主机名称", "时间", "注册表名称", "动作", "级别", "级别编码", "修改前", "修改后"}),
 	LOG_LIST(new String[]{"主机名称", "时间", "应用名", "事件名称", "级别", "级别编码", "规则描述", "category","规则编码"}),
+	ALARM_LIST(new String[]{"主机名称", "时间", "应用名", "事件名称", "级别", "级别编码", "告警描述", "category","规则编码"}),
 	PROBE_LIST(new String[]{"主机名称", "探针名称", "详情", "时间"}),
 	;
 

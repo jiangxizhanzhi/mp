@@ -1047,7 +1047,7 @@ public class SceneElementMonitorService {
                     Arrays.asList("sceneId", "log", "eventDesc"), ExcelHeader.PROBE_LIST);
 
             ExcelDataHandler.exportExcel(alarmList, filePath, "告警事件",
-                    Arrays.asList("sceneId", "log", "logType"), ExcelHeader.LOG_LIST);
+                    Arrays.asList("sceneId", "log", "logType"), ExcelHeader.ALARM_LIST);
 
             FileUtil.setResponse(new File(fileName + ".xlsx"), true, response);
         }
@@ -1209,7 +1209,7 @@ public class SceneElementMonitorService {
                     fileListModel.setPath(fileData.get(2));
                     fileListModel.setEventDesc(fileData.get(3));
                     fileListModel.setLevel(Integer.parseInt(fileData.get(5)));
-                    fileListModel.setFileSize(fileData.get(5));
+                    fileListModel.setFileSize(fileData.get(6));
                     fileListModels.add(fileListModel);
                 }
             } else if (1 == type) {
@@ -1241,8 +1241,8 @@ public class SceneElementMonitorService {
                     registryListModel.setPath(registryData.get(2));
                     registryListModel.setEventDesc(registryData.get(3));
                     registryListModel.setLevel(Integer.parseInt(registryData.get(5)));
-                    registryListModel.setMd5Before(registryData.get(5));
-                    registryListModel.setMd5After(registryData.get(6));
+                    registryListModel.setMd5Before(registryData.get(6));
+                    registryListModel.setMd5After(registryData.size() >=8 ?registryData.get(7):"");
                     registryListModels.add(registryListModel);
                 }
             } else if (2 == type) {
@@ -1257,10 +1257,10 @@ public class SceneElementMonitorService {
                     logListModel.setAppName(logData.get(2));
                     logListModel.setEventDesc(logData.get(3));
                     logListModel.setLevel(Integer.parseInt(logData.get(5)));
-                    logListModel.setDescription(logData.get(5));
-                    logListModel.setCatagory(logData.get(6));
+                    logListModel.setDescription(logData.get(6));
+                    logListModel.setCatagory(logData.get(7));
                     logListModel.setLogType(LOG);
-                    logListModel.setRuleId(logData.get(7));
+                    logListModel.setRuleId(logData.get(8));
                     sanitizeEventDescription(logListModel);
                     logListModels.add(logListModel);
                 }
@@ -1289,10 +1289,10 @@ public class SceneElementMonitorService {
                     logListModel.setAppName(logData.get(2));
                     logListModel.setEventDesc(logData.get(3));
                     logListModel.setLevel(Integer.parseInt(logData.get(5)));
-                    logListModel.setDescription(logData.get(5));
-                    logListModel.setCatagory(logData.get(6));
+                    logListModel.setDescription(logData.get(6));
+                    logListModel.setCatagory(logData.get(7));
                     logListModel.setLogType(ALARM);
-                    logListModel.setRuleId(logData.get(7));
+                    logListModel.setRuleId(logData.get(8));
                     sanitizeEventDescription(logListModel);
                     logListModels.add(logListModel);
                 }
