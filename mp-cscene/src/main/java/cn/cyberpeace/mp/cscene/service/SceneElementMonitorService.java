@@ -75,6 +75,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -711,7 +713,7 @@ public class SceneElementMonitorService {
                 .filterEqual(ElementFileCountModel::getSceneId, sceneId)
                 .filterNotEqual(ElementFileCountModel::getCount, 0)
                 .filterIn(ElementFileCountModel::getGroup, group.toArray());
-        if(timeList.size()>0){
+        if (timeList.size() > 0) {
             humanCondition.filterIn(ElementFileCountModel::getTime, timeList.toArray());
         }
         List<ElementFileCountModel> countModels = elementFileCountMapper.list(humanCondition);
@@ -937,8 +939,140 @@ public class SceneElementMonitorService {
         return countInfos;
     }
 
-
     public void exportData(HttpServletResponse response, String sceneId, String elementId, String type) {
+        ElementMonitorRequest pageRequest = new ElementMonitorRequest();
+        pageRequest.setSceneId(sceneId);
+        pageRequest.setPage(1);
+        pageRequest.setPageSize(1000);
+        if (StringUtils.isNotBlank(elementId)) {
+            pageRequest.setElementIds(Collections.singletonList(elementId));
+        }
+        JSONObject result = new JSONObject();
+
+        // 创建 CompletableFuture 对象
+        CompletableFuture<List<ElementFileListBO>> fileListFuture = CompletableFuture.supplyAsync(() ->
+                getModifyData(JsonCommon.parse(JsonCommon.stringify(pageRequest), ElementMonitorRequest.class), CsceneBizConstant.FILE_MODIFY_GROUP, null)
+                        .asResult().sourceList().stream()
+                        .map(file -> collectionHostEventBO2ElementFileListModel(file, CsceneBizConstant.FILE_MODIFY_GROUP.get(0)))
+                        .collect(Collectors.toList())
+        );
+
+        CompletableFuture<List<ElementFileCountModel>> fileCountFuture = CompletableFuture.supplyAsync(() ->
+                listEventHistogram(JsonCommon.parse(JsonCommon.stringify(pageRequest), ElementMonitorRequest.class), CsceneBizConstant.FILE_MODIFY_GROUP, 15, 15)
+                        .stream()
+                        .map(count -> elementHistogramInfo2ElementFileCountModel(count, CsceneBizConstant.FILE_MODIFY_GROUP.get(0)))
+                        .collect(Collectors.toList())
+        );
+
+        CompletableFuture<List<ElementFileListBO>> registryListFuture = CompletableFuture.supplyAsync(() ->
+                getModifyData(JsonCommon.parse(JsonCommon.stringify(pageRequest), ElementMonitorRequest.class), CsceneBizConstant.REGISTRY_MODIFY_GROUP, null)
+                        .asResult().sourceList().stream()
+                        .map(registry -> collectionHostEventBO2ElementFileListModel(registry, CsceneBizConstant.REGISTRY_MODIFY_GROUP.get(0)))
+                        .collect(Collectors.toList())
+        );
+
+        CompletableFuture<List<ElementFileCountModel>> registryCountFuture = CompletableFuture.supplyAsync(() ->
+                listEventHistogram(JsonCommon.parse(JsonCommon.stringify(pageRequest), ElementMonitorRequest.class), CsceneBizConstant.REGISTRY_MODIFY_GROUP, 15, 15)
+                        .stream()
+                        .map(count -> elementHistogramInfo2ElementFileCountModel(count, CsceneBizConstant.REGISTRY_MODIFY_GROUP.get(0)))
+                        .collect(Collectors.toList())
+        );
+
+        HostEventQueryParams queryParams = getExportDataParams(sceneId, elementId);
+        queryParams.setCatagories(Arrays.asList("020101", "020102", "020103", "020104", "020105", "020106", "020107",
+                "020201", "020202", "020203", "020204", "020205", "020206", "020207", "020208", "020210",
+                "020301", "020302", "020303", "020304", "020305", "020313"));
+
+        CompletableFuture<List<ElementLogListBO>> logListFuture = CompletableFuture.supplyAsync(() ->
+                csceneInstanceService.listHostEvents(sceneId, queryParams)
+                        .asResult().sourceList().stream()
+                        .map(this::collectionHostEventBO2ElementLogListModel)
+                        .collect(Collectors.toList())
+        );
+
+        CompletableFuture<List<WazuhProbeDataModel>> probeListFuture = CompletableFuture.supplyAsync(() ->
+                csceneInstanceService.getProbeCollectionData(null, sceneId, null, queryParams, null)
+                        .asResult().sourceList().stream()
+                        .map(this::collectionHostEventBO2WazuhProbeDataModel)
+                        .collect(Collectors.toList())
+        );
+
+        queryParams.setCatagories(Arrays.asList("020301", "020302", "020303", "020304", "020305", "020306", "020307", "020308", "020309", "020310", "020311", "020312"));
+        queryParams.setCatagories(new ArrayList<>());
+        CompletableFuture<List<ElementLogListBO>> alarmListFuture = CompletableFuture.supplyAsync(() ->
+                csceneInstanceService.listHostEvents(sceneId, queryParams)
+                        .asResult().sourceList().stream()
+                        .map(this::collectionHostEventBO2ElementLogListModel)
+                        .collect(Collectors.toList())
+        );
+
+        // 等待所有 CompletableFuture 完成
+        try {
+            result.put(FILE_LIST, JSON.toJSON(fileListFuture.get()));
+            result.put(FILE_COUNT, JSON.toJSON(fileCountFuture.get()));
+            result.put(REGISTRY_LIST, JSON.toJSON(registryListFuture.get()));
+            result.put(REGISTRY_COUNT, JSON.toJSON(registryCountFuture.get()));
+            result.put(LOG, JSON.toJSON(logListFuture.get()));
+            result.put(PROBE, JSON.toJSON(probeListFuture.get()));
+            result.put(ALARM, JSON.toJSON(alarmListFuture.get()));
+        } catch (InterruptedException | ExecutionException e) {
+            log.error("export data fail, sceneId = {}, elementId = {}, type = {}", sceneId, elementId, type, e);
+            throw new MpRuntimeException(CsceneErrorCode.EXPORT_ERROR);
+        }
+
+        String fileName = FileUtil.getTmpDirPath() + File.separator + "data";
+
+        if ("json".equals(type)) {
+            try (FileWriter writer = new FileWriter(fileName + ".json")) {
+                writer.write(result.toString());
+            } catch (IOException e) {
+                log.error("export data fail, sceneId = {}, elementId = {}, type = {}", sceneId, elementId, type, e);
+                throw new MpRuntimeException(CsceneErrorCode.EXPORT_ERROR);
+            }
+            FileUtil.setResponse(new File(fileName + ".json"), true, response);
+        } else if ("xml".equals(type)) {
+            try (FileWriter fileWriter = new FileWriter(fileName + ".xml")) {
+                ObjectMapper objectMapper = new ObjectMapper();
+                JsonNode jsonNode = objectMapper.readTree(result.toJSONString());
+
+                fileWriter.write(new XmlMapper().writeValueAsString(jsonNode));
+            } catch (IOException e) {
+                log.error("export data fail, sceneId = {}, elementId = {}, type = {}", sceneId, elementId, type, e);
+                throw new MpRuntimeException(CsceneErrorCode.EXPORT_ERROR);
+            }
+            FileUtil.setResponse(new File(fileName + ".xml"), true, response);
+        } else if ("xlsx".equals(type)) {
+            try {
+                String filePath = fileName + ".xlsx";
+                ExcelDataHandler.exportExcel(fileCountFuture.get(), filePath, "文件变更数量",
+                        Arrays.asList("sceneId", "group", "log"), ExcelHeader.FILE_COUNT);
+
+                ExcelDataHandler.exportExcel(fileListFuture.get(), filePath, "文件变更列表",
+                        Arrays.asList("sceneId", "group", "md5Before", "md5After", "log"), ExcelHeader.FILE_LIST);
+
+                ExcelDataHandler.exportExcel(registryCountFuture.get(), filePath, "注册表变更数量",
+                        Arrays.asList("sceneId", "group", "log"), ExcelHeader.FILE_COUNT);
+
+                ExcelDataHandler.exportExcel(registryListFuture.get(), filePath, "注册表变更列表",
+                        Arrays.asList("sceneId", "group", "fileSize", "log"), ExcelHeader.REGISTRY_LIST);
+
+                ExcelDataHandler.exportExcel(logListFuture.get(), filePath, "日志事件",
+                        Arrays.asList("sceneId", "log", "logType"), ExcelHeader.LOG_LIST);
+
+                ExcelDataHandler.exportExcel(probeListFuture.get(), filePath, "自定义采集",
+                        Arrays.asList("sceneId", "log", "eventDesc"), ExcelHeader.PROBE_LIST);
+
+                ExcelDataHandler.exportExcel(alarmListFuture.get(), filePath, "告警事件",
+                        Arrays.asList("sceneId", "log", "logType"), ExcelHeader.ALARM_LIST);
+
+                FileUtil.setResponse(new File(fileName + ".xlsx"), true, response);
+            } catch (InterruptedException | ExecutionException e) {
+                log.error("export data fail, sceneId = {}, elementId = {}, type = {}", sceneId, elementId, type, e);
+                throw new MpRuntimeException(CsceneErrorCode.EXPORT_ERROR);
+            }
+        }
+    }
+    public void exportData1(HttpServletResponse response, String sceneId, String elementId, String type) {
         ElementMonitorRequest pageRequest = new ElementMonitorRequest();
         pageRequest.setSceneId(sceneId);
         pageRequest.setPage(1);
@@ -1078,17 +1212,17 @@ public class SceneElementMonitorService {
         return model;
     }
 
-     private String getLevelName(Integer level){
+    private String getLevelName(Integer level) {
         if (level >= 0 && level <= 4) {
             return "低";
-        } else if (level >=5 && level <= 9) {
+        } else if (level >= 5 && level <= 9) {
             return "中";
-        } else if (level >=10){
+        } else if (level >= 10) {
             return "高";
         } else {
             return "-";
         }
-     }
+    }
 
     private ElementFileCountModel elementHistogramInfo2ElementFileCountModel(ElementHistogramInfo info, String group) {
         ElementFileCountModel model = new ElementFileCountModel();
@@ -1242,7 +1376,7 @@ public class SceneElementMonitorService {
                     registryListModel.setEventDesc(registryData.get(3));
                     registryListModel.setLevel(Integer.parseInt(registryData.get(5)));
                     registryListModel.setMd5Before(registryData.get(6));
-                    registryListModel.setMd5After(registryData.size() >=8 ?registryData.get(7):"");
+                    registryListModel.setMd5After(registryData.size() >= 8 ? registryData.get(7) : "");
                     registryListModels.add(registryListModel);
                 }
             } else if (2 == type) {
