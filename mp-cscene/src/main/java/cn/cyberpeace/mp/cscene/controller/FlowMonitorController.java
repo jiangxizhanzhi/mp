@@ -281,6 +281,7 @@ public class FlowMonitorController {
     @ApiImplicitParams({@ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),})
     @GetMapping("/page")
     public ListObjServiceResult<?> pageFlow(@RequestParam String id, FlowQueryParams queryParams) {
+        long startTime = System.currentTimeMillis();
         log.info("pageFlow ====>> id:{}, queryParams:{}", id, queryParams);
         if (Objects.isNull(queryParams.getPage())) {
             queryParams.setPage(1);
@@ -302,12 +303,21 @@ public class FlowMonitorController {
         allNodes.addAll(testRangeApiProxy.getAllNodeIdsInCurrentCscene(id));
         queryParams.setTargetNodeIds(allNodes);
         List<FlowAttackDto> flowAttackInCurrentRange = new ArrayList<>();
+
+        log.info("--------------------------------1");
+        log.info(String.valueOf(System.currentTimeMillis()-startTime));
+        startTime = System.currentTimeMillis();
+
         try {
             flowAttackInCurrentRange = flowMonitorService.pageFlow(id, queryParams).getData().getList();
         } catch (MpRuntimeException e) {
             log.error("error", e);
             return new ListObjServiceResult<>(new ListObjResult<>(Collections.emptyList(), 0).asResult()).asResult();
         }
+
+        log.info("--------------------------------2");
+        log.info(String.valueOf(System.currentTimeMillis()-startTime));
+        startTime = System.currentTimeMillis();
 
         FlowQueryParams otherRangeFlowPageQuery = new FlowQueryParams();
         BeanUtils.copyProperties(queryParams, otherRangeFlowPageQuery);
@@ -324,6 +334,10 @@ public class FlowMonitorController {
         } catch (MpRuntimeException e) {
             log.error("error", e);
         }
+
+        log.info("--------------------------------3");
+        log.info(String.valueOf(System.currentTimeMillis()-startTime));
+        startTime = System.currentTimeMillis();
 
 
         boolean showAllFlows = CollectionUtils.isEmpty(orginTargetNodes) || (orginTargetNodes.size() == 1 && orginTargetNodes.get(0).equals("null"));
@@ -350,6 +364,11 @@ public class FlowMonitorController {
         var subList = sortedFlowAttacks.subList(startIncludeIndex, endExcludeIndex);
 
         Map<String, NodeInfo> ipToNodeInfoMap = testRangeApiProxy.getIpToNodeMap(id);
+
+        log.info("--------------------------------4");
+        log.info(String.valueOf(System.currentTimeMillis()-startTime));
+        startTime = System.currentTimeMillis();
+
         subList.forEach(attackInfo -> {
             NodeInfo sourceNodeInfo = ipToNodeInfoMap.get(attackInfo.getSourceIp());
             if (Objects.nonNull(sourceNodeInfo)) {
@@ -423,10 +442,17 @@ public class FlowMonitorController {
 
     }
 
+    Map<String, List<ElementMonitorBasicInfo>> basicInfoElements = new HashMap<>();
 
     private Map<String, Set<String>> getNodeIps(String csceneId) {
         var request = new SceneAllElementsQueryRequest();
-        List<ElementMonitorBasicInfo> basicInfoList = sceneMonitorService.getAllSceneElements(csceneId, true, request);
+        long t = System.currentTimeMillis();
+        List<ElementMonitorBasicInfo> basicInfoList = basicInfoElements.get(csceneId);
+        if (basicInfoList == null) {
+            basicInfoList = sceneMonitorService.getAllSceneElements(csceneId, false, request);
+            basicInfoElements.put(csceneId, basicInfoList);
+        }
+        System.out.println(System.currentTimeMillis() - t);
         if (Boolean.TRUE.equals(request.getIncludeDeleting())) {
             return Collections.emptyMap();
         }

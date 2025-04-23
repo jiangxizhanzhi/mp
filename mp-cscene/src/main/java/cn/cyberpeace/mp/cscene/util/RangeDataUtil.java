@@ -192,13 +192,9 @@ public class RangeDataUtil {
 
             timeA = System.currentTimeMillis();
             try {
-                if (ignoreIds.contains(instance.getId())) {
-                    return;
-                }
                 rangeDataRemoteService.test(instance.getId(), cycleTimes, configs, currentTime);
             } catch (MpRuntimeException e) {
                 log.error("failed to get range data remote , cscene instance id {} , exception : {}", instance.getId(), e.getMessage());
-                ignoreIds.add(instance.getId());
             } catch (Exception e) {
                 log.error("failed to get range data remote , cscene instance id {}", instance.getId(), e);
             }
