@@ -325,11 +325,24 @@ public class LoadController {
      * */
     @ApiOperation(value = "修改载荷执行结果", notes = "")
     @CrossOrigin(origins = "*", maxAge = 60L)
+    @RequestMapping("/updateLoadExecutionResult")
+    public ServiceResult updateLoadExecutionResult(@RequestBody JSONObject jsonObject) {
+        LoadRequest requestData = JSONObject.toJavaObject(jsonObject, LoadRequest.class);
+        requestData.setResultStatus("成功");
+        ServiceResult serviceResult = loadService.updateLoadExecutionOutResult(requestData);
+        return serviceResult;
+    }
+
+    /*
+     * 批量修改载荷执行结果
+     * */
+    @ApiOperation(value = "批量修改载荷执行结果", notes = "")
+    @CrossOrigin(origins = "*", maxAge = 60L)
     @RequestMapping("/updateLoadExecutionOutResult")
     public ServiceResult updateLoadExecutionOutResult(@RequestBody JSONObject jsonObject) {
         LoadRequest requestData = JSONObject.toJavaObject(jsonObject, LoadRequest.class);
         requestData.setResultStatus("成功");
-        ServiceResult serviceResult = loadService.updateLoadExecutionOutResult(requestData);
+        ServiceResult serviceResult = loadService.updateLoadExecutionOutResult(Arrays.asList(requestData));
         return serviceResult;
     }
 

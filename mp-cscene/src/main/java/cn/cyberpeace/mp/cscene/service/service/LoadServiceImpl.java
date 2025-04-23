@@ -644,6 +644,73 @@ public class LoadServiceImpl {
         return ""; // 或者处理无效状态的逻辑
     }
 
+    private boolean validateRequestData(List<LoadRequest> requestData) {
+        if (requestData == null || requestData.isEmpty()) {
+            return false;
+        }
+        return requestData.stream().allMatch(request ->
+                request != null &&
+                        !StringUtils.isEmpty(request.getTaskId()) &&
+                        !StringUtils.isEmpty(request.getInstanceId())
+        );
+    }
+
+    /*
+     * 批量新增载荷执行结果
+     * */
+    public ServiceResult updateLoadExecutionOutResult(List<LoadRequest> requestData) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            log.info("begin updateLoadExecutionOutResult requestData:{}", objectMapper.writeValueAsString(requestData));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        // 验证参数
+        if (!validateRequestData(requestData)) {
+            return new ServiceResult(null, BaseErrorCode.ERROR, "列表数据部分参数缺失").asResult();
+        }
+
+        LoadRequest loadRequest = requestData.get(0);
+        String instanceId = loadRequest.getInstanceId();
+        String taskId = loadRequest.getTaskId();
+        HumanCondition humanCondition = new HumanCondition();
+        humanCondition.filterEqual(CloudPluginSceneElementModel::getResourceId, taskId);
+        humanCondition.filterEqual(CloudPluginSceneElementModel::getLoadResourceInstanceId, instanceId);
+        List<CloudPluginSceneElementModel> cloudPluginSceneElementModels = cloudPluginSceneElementMapper.list(humanCondition);
+        if (cloudPluginSceneElementModels.size() > 0 && BaseCloudPluginSceneElementModel.LoadSourceType.LOCAL == cloudPluginSceneElementModels.get(0).getLoadSource()) {
+            String resultLog = loadRequest.getResultLog();
+            loadRequest.setResultLog(String.format(LOAD_RESULT_LOG, resultLog));
+        }
+
+        // 状态字符串转状态码
+        requestData.forEach(req -> req.setResultStatus(convertStatusToCode(req.getResultStatus())));
+
+        //根据taskId获取场景id
+        String sceneId = loadMapper.getSceneIdByTaskId(requestData.get(0).getTaskId());
+
+        //根据sceneId查找对应ws会话推送消息
+        Session session = LoadResultWebSocketServer.sceneIdAndSession.get(sceneId);
+        if (session != null) {
+            LoadResultWebSocketServer loadResultWebSocketServer = LoadResultWebSocketServer.sessionPools.get(session);
+            if (loadResultWebSocketServer != null) {
+                Map jsonObject = new LinkedHashMap<>();
+                jsonObject.put("code", CommonFunctionCodeEnum.LOAD_RESULT_ACTION_CODE.getCode());
+                Map data = new LinkedHashMap<>();
+                Integer sort = 0;
+                String message = requestData.toString();
+                Boolean result = true;
+                sendResultMessage(loadResultWebSocketServer, session, jsonObject, data, sort, message, result);
+            }
+        }
+
+        // 更新数据库
+        Boolean success = requestData.size() > 0 && loadMapper.updateLoadExecutionOutResult(requestData);
+        log.info("end updateLoadExecutionOutResult success:{}", success);
+        return success
+                ? new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult()
+                : new ServiceResult(null, BaseErrorCode.ERROR, "载荷执行结果更新失败").asResult();
+    }
+
     /*
      * 批量新增载荷执行结果
      * */
