@@ -54,6 +54,8 @@ public class RangeDataUtil {
 
     private boolean executed = false;
 
+    public static Map<String, CollectAgentConfig> configs = null;
+
     @Scheduled(cron = "0/5 * * * * ?")
     public void registerTasks() {
         if (!executed) {
@@ -159,6 +161,7 @@ public class RangeDataUtil {
             }
             log.info("周期配置：{}", JsonCommon.stringify(configs));
             log.info("查询所有分靶场周期配置耗时 {}", System.currentTimeMillis() - timeA);
+            RangeDataUtil.configs = configs;
 
             timeA = System.currentTimeMillis();
             // 查询所有运行着的场景

@@ -20,6 +20,7 @@ import cn.cyberpeace.mp.cscene.request.element.ElementMonitorRequest;
 import cn.cyberpeace.mp.cscene.request.hoststate.HostStateTrendRequest;
 import cn.cyberpeace.mp.cscene.service.multirange.SubRangeMonitorInterface;
 import cn.cyberpeace.mp.cscene.util.HostEventQueryParams2;
+import cn.cyberpeace.mp.cscene.util.RangeDataUtil;
 import cn.cyberpeace.mp.scene.core.bo.HfdyServerVpnConfig;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.SceneElementPortModel;
@@ -384,6 +385,13 @@ public class TestRangeApiProxy implements SubRangeMonitorInterface {
              queryParams.setId(mappingCsceneId);
              queryParams.setPage(1);
              queryParams.setPerPage(10000);
+
+             if(RangeDataUtil.configs != null && RangeDataUtil.configs.containsKey(range)){
+                 var config = RangeDataUtil.configs.get(range);
+                 if(!config.getEnable() || !config.isFlow()){
+                     return;
+                 }
+             }
 
              String result = TestRangeClientUtil.get(range, TestRangeApiUrl.FLOW_ATTACK_PAGE, queryParams, getAuthHeaderMap(range), 10000).getResult();
              var resultBo = JsonCommon.snakeParse(result, new TypeReference<ListObjServiceResult<FlowAttackDto>>() {
