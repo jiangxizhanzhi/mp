@@ -47,17 +47,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.ObjectUtils;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @Description
@@ -999,6 +989,11 @@ public class CsceneDataModifier {
             if (elements == null) {
                 return;
             }
+            //areaId不能为null，可以为空字符串
+            if(Objects.isNull(topologyBO.getAreaId())){
+                return;
+            }
+            String areaId = topologyBO.getAreaId();
             for (BaseSceneElementBO e : elements) {
                 Map<String, String> outPosition = e.getOuterPosition2();
                 String pos = e.getPosition2();
@@ -1007,14 +1002,20 @@ public class CsceneDataModifier {
                     return;
                 }
                 if(StringUtils.isNotEmpty(pos)){
-                    outPosition = new HashMap<>();
-                    outPosition.put("", pos);
+                    if(MapUtils.isEmpty(outPosition)){
+                        outPosition = new HashMap<>();
+                    }
+                    outPosition.put(areaId, pos);
                     e.setOuterPosition2(outPosition);
+                    continue;
                 }
                 if(MapUtils.isNotEmpty(outPosition)){
-                    String position2 = outPosition.get("");
+                    String position2 = outPosition.get(areaId);
+                    if(StringUtils.isEmpty(position2)){
+                        log.warn("topo data is error,element name is {}",e.getName());
+                        continue;
+                    }
                     e.setPosition2(position2);
-                    continue;
                 }
             }
         }

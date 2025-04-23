@@ -406,6 +406,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         if(Objects.isNull(topology.getAreaId())){
             return;
         }
+        String areaId = topology.getAreaId();
         //修正节点数据
         for (SceneConfigElementBO sceneConfigElementBO :elements) {
             Map<String, String> outPosition = sceneConfigElementBO.getOuterPosition2();
@@ -415,14 +416,20 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                 return;
             }
             if(StringUtils.isNotEmpty(pos)){
-                outPosition = new HashMap<>();
-                outPosition.put("", pos);
+                if(MapUtils.isEmpty(outPosition)){
+                    outPosition = new HashMap<>();
+                }
+                outPosition.put(areaId, pos);
                 sceneConfigElementBO.setOuterPosition2(outPosition);
+                continue;
             }
             if(MapUtils.isNotEmpty(outPosition)){
-                String position2 = outPosition.get("");
+                String position2 = outPosition.get(areaId);
+                if(StringUtils.isEmpty(position2)){
+                    log.warn("topo data is error,element name is {}",sceneConfigElementBO.getName());
+                    continue;
+                }
                 sceneConfigElementBO.setPosition2(position2);
-                continue;
             }
         }
     }
