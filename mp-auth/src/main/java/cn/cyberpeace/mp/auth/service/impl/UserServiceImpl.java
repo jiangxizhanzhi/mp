@@ -491,7 +491,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
     Cache<String, List<UserModel>> cache = CacheBuilder.newBuilder()
-            .expireAfterWrite(5, TimeUnit.MINUTES) // 写入后5分钟过期
+            .expireAfterWrite(30, TimeUnit.MINUTES) // 写入后5分钟过期
             .build();
 
     @Override

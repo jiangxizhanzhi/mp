@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.cscene.service.multirange.testrange;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -21,7 +22,10 @@ import cn.cyberpeace.mp.cscene.request.hoststate.HostStateTrendRequest;
 import cn.cyberpeace.mp.cscene.service.multirange.SubRangeMonitorInterface;
 import cn.cyberpeace.mp.cscene.util.HostEventQueryParams2;
 import cn.cyberpeace.mp.cscene.util.RangeDataUtil;
+import cn.cyberpeace.mp.frontadmin.model.SysConfigModel;
+import cn.cyberpeace.mp.frontadmin.repository.SysConfigMapper;
 import cn.cyberpeace.mp.scene.core.bo.HfdyServerVpnConfig;
+import cn.cyberpeace.mp.scene.model.RangeModel;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.SceneElementPortModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
@@ -379,6 +383,29 @@ public class TestRangeApiProxy implements SubRangeMonitorInterface {
          if (CollectionUtils.isEmpty(targetNodeIds) && !allFlag) {
              return new ArrayList<>();
          }
+
+        // 查询所有的分靶场 并给每个靶场设置默认的周期配置
+        List<RangeModel> rangeModelList = rangeMapper.list(new HumanCondition());
+        Map<String, RangeModel> id2RangeModel = new HashMap<>();
+        Map<String, RangeDataUtil.CollectAgentConfig> configs = new HashMap<>();
+        for (RangeModel r : rangeModelList) {
+            id2RangeModel.put(r.getId(), r);
+            configs.put(r.getRangeName(), RangeDataUtil.CollectAgentConfig.defaultValue());
+        }
+
+        // 如果数据库中有数据 ， 则使用数据库中的数据覆盖默认配置
+        SysConfigMapper sysConfigMapper = BeanCommon.getBean(SysConfigMapper.class);
+        var models = sysConfigMapper.list(new HumanCondition().filterStartsWith(SysConfigModel::getKeyName, "collect_agent_info"));
+        for (var model : models) {
+            var result = JsonCommon.parse(model.getValue(), RangeDataUtil.CollectAgentConfig.class);
+            String rangeId = StringUtils.replace(model.getKeyName(), "collect_agent_info_", "");
+            if (id2RangeModel.containsKey(rangeId)) {
+                var rangeName = id2RangeModel.get(rangeId).getRangeName();
+                configs.put(rangeName, result);
+            }
+        }
+        log.info("周期配置：{}", JsonCommon.stringify(configs));
+
          Map<String, String> mappingCsceneIdToRange = getRangeMapCscene(id);
          List<FlowAttackDto> finalResult = new ArrayList<>();
          mappingCsceneIdToRange.forEach((mappingCsceneId, range) -> {
@@ -386,8 +413,8 @@ public class TestRangeApiProxy implements SubRangeMonitorInterface {
              queryParams.setPage(1);
              queryParams.setPerPage(10000);
 
-             if(RangeDataUtil.configs != null && RangeDataUtil.configs.containsKey(range)){
-                 var config = RangeDataUtil.configs.get(range);
+             if(configs != null && configs.containsKey(range)){
+                 var config =configs.get(range);
                  if(!config.getEnable() || !config.isFlow()){
                      return;
                  }
