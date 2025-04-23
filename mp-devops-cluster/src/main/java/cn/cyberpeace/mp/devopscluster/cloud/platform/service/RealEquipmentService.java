@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.devopscluster.cloud.platform.service;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.common.config.CommonAppConfig;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.EntityUsb;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.SnmpParams;
@@ -178,7 +179,21 @@ public class RealEquipmentService extends BaseCpService {
                     continue;
                 }
                 URL u = URLUtils.url(l.getUrl());
-                l.setUrl(StringUtils.replaceOnce(l.getUrl(), u.getHost(), config.getPublicNetProxyIp()));
+                // 如果和cpcloud同网段的才进行ip的替换
+                CommonAppConfig commonAppConfig = BeanCommon.getBean(CommonAppConfig.class);
+                String[] ip1 = commonAppConfig.getCpIp().split("\\.");
+                String[] ip2 = u.getHost().split("\\.");
+                // 比较前三个分段
+                boolean replace = true;
+                for (int i = 0; i < 3; i++) {
+                    if (!ip1[i].equals(ip2[i])) {
+                        replace = false;
+                        break;
+                    }
+                }
+                if (replace) {
+                    l.setUrl(StringUtils.replaceOnce(l.getUrl(), u.getHost(), config.getPublicNetProxyIp()));
+                }
             }
         }
         CloudPlatformPageResult<TargetConnection> model = new CloudPlatformPageResult<>();
