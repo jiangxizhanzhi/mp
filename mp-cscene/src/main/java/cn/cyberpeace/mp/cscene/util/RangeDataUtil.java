@@ -50,7 +50,7 @@ public class RangeDataUtil {
     );
 
 
-    @Scheduled(cron = "0/1 * * * * ?")
+    @Scheduled(cron = "0 0/1 * * * ?")
     public void test() {
         // 周期按照分钟计算 startTime 表示从第一次启动到现在经过了几分钟
         cycleTimes++;
