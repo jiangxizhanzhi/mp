@@ -31,7 +31,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
@@ -46,20 +47,31 @@ public class RangeDataUtil {
 
     private Set<String> ignoreIds = new ConcurrentHashSet<>();
 
-    ExecutorService executor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<Runnable>(1), new ThreadPoolExecutor.DiscardOldestPolicy() // 拒绝策略
+    ScheduledExecutorService scheduleExecutor = Executors.newScheduledThreadPool(1);
+
+    ExecutorService workExecutor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<Runnable>(1), new ThreadPoolExecutor.DiscardOldestPolicy() // 拒绝策略
     );
 
+    private boolean executed = false;
 
     @Scheduled(cron = "0 0/1 * * * ?")
-    public void test() {
+    public void registerTasks() {
+        if (!executed) {
+            // 在第0秒时注册一下任务，任务每分钟执行一次
+            scheduleExecutor.scheduleAtFixedRate(() -> doWork(), 0, 1, TimeUnit.MINUTES);
+            executed = true;
+        }
+    }
+
+    public void doWork() {
         // 周期按照分钟计算 startTime 表示从第一次启动到现在经过了几分钟
-        cycleTimes++;
+        long finalCycleTimes = cycleTimes++;
         LocalDateTime currentTime = LocalDateTime.now();
         String traceId = TextUtils.uuid();
-        log.info("尝试执行采集数据查询：current time : {} , trace id is {}", TimeUtils.localDateTimeToString(currentTime), traceId);
-        executor.submit(ThreadUtils.format(() -> {
+        log.info("尝试执行采集数据查询：current time : {} , trace id is {},cycleTimes is {}", TimeUtils.localDateTimeToString(currentTime), traceId, cycleTimes);
+        workExecutor.submit(ThreadUtils.format(() -> {
             SysContextHolder.setCallChainId(traceId);
-            new RangeDataQueryTask(cycleTimes, currentTime, lock, ignoreIds).run();
+            new RangeDataQueryTask(finalCycleTimes, currentTime, lock, ignoreIds).run();
         }));
     }
 
