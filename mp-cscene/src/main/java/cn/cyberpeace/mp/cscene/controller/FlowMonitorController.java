@@ -49,6 +49,7 @@ import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
 import cn.cyberpeace.mp.scene.repository.SceneMapper;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.service.CloudCommonConfigService;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CategoryGroupBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.SceneAssetsBO;
@@ -403,9 +404,8 @@ public class FlowMonitorController {
             String targetNodeId = item.getTargetNodeId();
             String systemType = collect.get(targetNodeId);
             if(mapServiceResult.getSource().containsKey(systemType)){
-
-                Object o = mapServiceResult.getSource().get(systemType);
-                item.setTargetNodeType(o.toString());
+                String standardSystemType = SystemTypeUtils.getStandardSystemType(systemType);
+                item.setTargetNodeType(standardSystemType);
             } else {
                 item.setTargetNodeType("其他");
             }
