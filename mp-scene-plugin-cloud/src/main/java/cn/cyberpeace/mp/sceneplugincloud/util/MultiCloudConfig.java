@@ -1,9 +1,11 @@
 package cn.cyberpeace.mp.sceneplugincloud.util;
 
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.sceneplugincloud.config.CloudAppConfig;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Network;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualInternet;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.NetworkData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpClient;
 import lombok.Getter;
 import lombok.Setter;
@@ -101,16 +103,66 @@ public class MultiCloudConfig {
         public CloudConfig(String server) {
             this.serverUrl = server;
             this.cloudHttpClient = new CloudHttpClient(serverUrl);
-            this.externalNetId = new VirtualInternet(cloudHttpClient).create().getExternalNetId();
-            this.externalNetCidr = new Network(cloudHttpClient).get(this.externalNetId).getSubnet().getCidr();
-            String mgmtName = CloudSingleton.cloudAppConfig.getMgmtName();
-            if (StringUtils.isNotEmpty(mgmtName)) {
-                try {
-                    this.mgmtNetId = new Network(cloudHttpClient).getByName(mgmtName).getId();
-                } catch (Exception e) {
-                    log.error("Try to get mgmt net failed: ", e);
-                }
+        }
+
+        public synchronized String getExternalNetId() {
+            if (!StringUtils.isEmpty(externalNetId)) {
+                return externalNetId;
             }
+
+            try {
+                externalNetId = new VirtualInternet(cloudHttpClient).create().getExternalNetId();
+            } catch (Exception e) {
+                log.error("Try to get external net failed: ", e);
+                throw e;
+            }
+
+            return externalNetId;
+        }
+
+        public synchronized String getExternalNetCidr() {
+            if (!StringUtils.isEmpty(externalNetCidr)) {
+                return externalNetCidr;
+            }
+
+            var netId = getExternalNetId();
+            if (StringUtils.isEmpty(netId)) {
+                return null;
+            }
+
+            try {
+                externalNetCidr = new Network(cloudHttpClient).get(netId).getSubnet().getCidr();
+            } catch (Exception e) {
+                log.error("Try to get external net cidr failed: ", e);
+                throw e;
+            }
+
+            return externalNetCidr;
+        }
+
+        public synchronized String getMgmtNetId() {
+            if (!StringUtils.isEmpty(mgmtNetId)) {
+                return mgmtNetId;
+            }
+
+            String mgmtName = CloudSingleton.cloudAppConfig.getMgmtName();
+            NetworkData networkData;
+            try {
+                networkData = new Network(cloudHttpClient).getByName(mgmtName);
+            } catch (Exception e) {
+                log.error("Try to get mgmt net failed: ", e);
+                throw e;
+            }
+
+            if (networkData != null) {
+                mgmtNetId = networkData.getId();
+            } else {
+                var message = String.format("Unable to find mgmt network with name `%s`", mgmtName);
+                log.error("Try to get mgmt net failed: {}", message);
+                throw new MpRuntimeException(message);
+            }
+
+            return mgmtNetId;
         }
     }
 }
