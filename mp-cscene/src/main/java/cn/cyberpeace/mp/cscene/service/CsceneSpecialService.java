@@ -142,8 +142,7 @@ public class CsceneSpecialService {
 
         Map<String, CsceneStat> statMap = new HashMap<>();
         HumanCondition humanCondition = new HumanCondition()
-                .filterIn(CsceneModel::getId, ids)
-                .filterEqual(SceneModel::getDeleted, false);
+                .filterIn(CsceneModel::getId, ids);
 
         long startTime = System.currentTimeMillis();
         Map<String, String> csceneModelMap = csceneMapper.list(humanCondition).stream().collect(Collectors.toMap(CsceneModel::getSceneConfig, CsceneModel::getId));
