@@ -931,6 +931,7 @@ public class LoadServiceImpl {
         String sheetTempName = "resultLog";
         // 获取当前时间
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        DateTimeFormatter localDateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         Date currentDate = new Date();
         String formattedDate = formatter.format(currentDate);
         //数据
@@ -971,7 +972,7 @@ public class LoadServiceImpl {
                     } else {
                         MpDevopsLoadSceneLog obj = list.get(i);
                         content[i][0] = obj.getToolName() != null ? obj.getToolName() : "";
-                        content[i][1] = formattedDate;
+                        content[i][1] = obj.getCreateTime() != null ? obj.getCreateTime().format(localDateTimeFormatter) : "";
                         content[i][2] = obj.getStageId() != null ? stageMap.getOrDefault(obj.getStageId(), "") : "";
                         content[i][3] = obj.getActionTypeName() != null ? obj.getActionTypeName() : "";
                         content[i][4] = obj.getResultTypeName() != null ? obj.getResultTypeName() : "";
