@@ -280,6 +280,7 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
 
             JSONObject object = new JSONObject();
             object.put("flowId", flowInfoModel.getId());
+            object.put("flow_id", flowInfoModel.getId());
             // 判断是pcap包还是脚本
             if (ResourceTypeEnum.PACP.toValue() == flowInfoModel.getResourceType()) {
                 fileByte = FsCommon.downloadRawContent(flowInfoModel.getPcapFile());
