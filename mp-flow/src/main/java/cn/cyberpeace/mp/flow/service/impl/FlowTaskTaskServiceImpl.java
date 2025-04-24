@@ -284,6 +284,7 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
             if (ResourceTypeEnum.PACP.toValue() == flowInfoModel.getResourceType()) {
                 fileByte = FsCommon.downloadRawContent(flowInfoModel.getPcapFile());
                 object.put("fileName", flowInfoModel.getTitle() + System.currentTimeMillis() + "." + flowInfoModel.getPcapFile().split(BaseConstants.SPOT)[1]);
+                object.put("file_name", object.get("fileName"));
                 List<FlowProtocolModel> flowProtocolModelList = flowProtocolService.selectByFlowId(flowInfoModel.getId());
                 if (CollectionUtils.isNotEmpty(flowProtocolModelList)) {
                     JSONObject protocolRate = new JSONObject();
@@ -294,6 +295,7 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
                 }
             } else {
                 fileByte = FsCommon.downloadRawContent(flowInfoModel.getScriptFile());
+                object.put("file_name", object.get("fileName"));
                 object.put("fileName", flowInfoModel.getTitle() + System.currentTimeMillis() + "." + flowInfoModel.getScriptFile().split(BaseConstants.SPOT)[1]);
             }
             String pcapRsp = HttpUtils.postFileV2(resourceUrl + "/pcap/upload", fileByte, "file", object);
