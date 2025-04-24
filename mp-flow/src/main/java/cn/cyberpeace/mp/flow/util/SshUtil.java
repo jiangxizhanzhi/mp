@@ -26,18 +26,17 @@ public class SshUtil {
     private static final int TIME_OUT = 30000;
 
     public static void refreshDir(ServerInfo serverInfo, String commands, String srcFilePath, String destFilePath) {
-        int i = 1 ;
-        try {
-            for (; i <= 50; i++) {
+        for (int i = 0; i <= 50; i++) {
+            try {
                 doRefreshDir(serverInfo, commands, srcFilePath, destFilePath);
                 return;
-            }
-        } catch (Exception e) {
-            log.error("failed to refresh dir at {} times", i);
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException ex) {
-                throw new RuntimeException(ex);
+            } catch (Exception e) {
+                log.error("failed to refresh dir at {} times", i);
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException ex) {
+                    throw new RuntimeException(ex);
+                }
             }
         }
     }
