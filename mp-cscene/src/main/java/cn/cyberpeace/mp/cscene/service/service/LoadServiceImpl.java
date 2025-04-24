@@ -949,7 +949,7 @@ public class LoadServiceImpl {
 //                //code对应值
 //                Map<String, String> nextLevelMapsByCodes = commonCodeService.convertNextLevelDatasByCodes(codes);
                 //***********************************数据写入Excel***********************************
-                String[] title = {"名称", "记录时间", "阶段", "作用类型", "结果类型", "执行状态", "研判结果"};
+                String[] title = {"名称", "记录时间", "阶段", "作用类型", "结果类型", "执行状态", "研判结果","工具id"};
                 int ol = list.size() + 1;
                 String[][] content = new String[ol][];
                 String tool_name = "";
@@ -959,6 +959,7 @@ public class LoadServiceImpl {
                 String result_type_name = "";
                 String result_status_name = "";
                 String judgment_status = "";
+                String tool_id = "";
                 for (int i = 0; i < ol; i++) {
                     content[i] = new String[title.length];
                     if (i == list.size()) {
@@ -969,6 +970,7 @@ public class LoadServiceImpl {
                         content[i][4] = result_type_name;
                         content[i][5] = result_status_name;
                         content[i][6] = judgment_status;
+                        content[i][7] = tool_id;
                     } else {
                         MpDevopsLoadSceneLog obj = list.get(i);
                         content[i][0] = obj.getToolName() != null ? obj.getToolName() : "";
@@ -978,6 +980,7 @@ public class LoadServiceImpl {
                         content[i][4] = obj.getResultTypeName() != null ? obj.getResultTypeName() : "";
                         content[i][5] = obj.getResultStatusName() != null ? obj.getResultStatusName() : "";
                         content[i][6] = obj.getJudgmentStatus() != null ? MpDevopsLoadSceneLog.JudgmentStatus.getName(obj.getJudgmentStatus()) : "";
+                        content[i][7] = obj.getId() != null ? obj.getId() : "";
                     }
                 }
                 //创建HSSFWorkbook
