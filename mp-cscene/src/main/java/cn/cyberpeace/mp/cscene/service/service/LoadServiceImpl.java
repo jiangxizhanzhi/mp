@@ -995,15 +995,15 @@ public class LoadServiceImpl {
             }
         } else if (requestData.getExportType() != null && requestData.getExportType() == 2) {
             // 将jsonList导出为json文件并通过HttpServletResponse响应
-            exportJsonToResponse(response, list, stageMap, formattedDate);
+            exportJsonToResponse(response, list, stageMap, localDateTimeFormatter);
         } else if (requestData.getExportType() != null && requestData.getExportType() == 3) {
             // 将list导出为xml文件并通过HttpServletResponse响应
-            exportXmlToResponse(response, list, stageMap, formattedDate);
+            exportXmlToResponse(response, list, stageMap, localDateTimeFormatter);
         }
         return true;
     }
 
-    private void exportJsonToResponse(HttpServletResponse response, List<MpDevopsLoadSceneLog> list, Map<String, String> stageMap, String formattedDate) {
+    private void exportJsonToResponse(HttpServletResponse response, List<MpDevopsLoadSceneLog> list, Map<String, String> stageMap, DateTimeFormatter localDateTimeFormatter) {
         List<JSONObject> jsonList = new ArrayList<>();
         for (MpDevopsLoadSceneLog obj : list) {
             JSONObject jsonObject = new JSONObject();
@@ -1024,7 +1024,7 @@ public class LoadServiceImpl {
             jsonObject.put("result_log", obj.getResultLog());
             jsonObject.put("judgment_status", obj.getJudgmentStatus());
             jsonObject.put("judgment_status_name", obj.getJudgmentStatus() != null ? MpDevopsLoadSceneLog.JudgmentStatus.getName(obj.getJudgmentStatus()) : "");
-            jsonObject.put("create_time", formattedDate);
+            jsonObject.put("create_time", obj.getCreateTime() != null ? obj.getCreateTime().format(localDateTimeFormatter) : "");
             jsonList.add(jsonObject);
         }
         // 创建Jackson的ObjectMapper实例
@@ -1042,7 +1042,7 @@ public class LoadServiceImpl {
         }
     }
 
-    private void exportXmlToResponse(HttpServletResponse response, List<MpDevopsLoadSceneLog> list, Map<String, String> stageMap, String formattedDate) {
+    private void exportXmlToResponse(HttpServletResponse response, List<MpDevopsLoadSceneLog> list, Map<String, String> stageMap, DateTimeFormatter localDateTimeFormatter) {
         StringBuffer xmlnodes = new StringBuffer();
         if (list != null && list.size() > 0) {
             xmlnodes.append("<?" + "xml version=\"1.0\" encoding=\"UTF-8\" " + "?>");
@@ -1053,7 +1053,7 @@ public class LoadServiceImpl {
                         .append("' resultType='" ).append( log.getResultType())
                         .append("' resultTypeName='" ).append( log.getResultTypeName() != null ? log.getResultTypeName() : "")
                         .append("' instanceId='" ).append( log.getInstanceId())
-                        .append("' createTime='" ).append( formattedDate)
+                        .append("' createTime='" ).append( log.getCreateTime() != null ? log.getCreateTime().format(localDateTimeFormatter) : "")
                         .append("' actionType='" ).append( log.getActionType())
                         .append("' actionTypeName='" ).append( log.getActionTypeName() != null ? log.getActionTypeName() : "")
                         .append("' resultStatus='" ).append( log.getResultStatus())
