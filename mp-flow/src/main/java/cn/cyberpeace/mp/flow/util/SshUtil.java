@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.flow.util;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import com.jcraft.jsch.*;
 import lombok.Data;
@@ -24,6 +25,23 @@ public class SshUtil {
 
     private static final int TIME_OUT = 30000;
 
+    public static void refreshDir(ServerInfo serverInfo, String commands, String srcFilePath, String destFilePath) {
+        int i = 1 ;
+        try {
+            for (; i <= 50; i++) {
+                doRefreshDir(serverInfo, commands, srcFilePath, destFilePath);
+                return;
+            }
+        } catch (Exception e) {
+            log.error("failed to refresh dir at {} times", i);
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+    }
+
     /**
      * 刷新目录
      * @param serverInfo
@@ -31,7 +49,7 @@ public class SshUtil {
      * @param srcFilePath
      * @param destFilePath
      */
-    public static void refreshDir(ServerInfo serverInfo, String commands, String srcFilePath, String destFilePath) {
+    public static void doRefreshDir(ServerInfo serverInfo, String commands, String srcFilePath, String destFilePath) {
         JSch jsch = new JSch();
         Session session = null;
         ChannelSftp sftpChannel = null;
@@ -72,8 +90,10 @@ public class SshUtil {
                 log.info("exec shell task result: {}", execResult);
             } catch (TimeoutException ex) {
                 log.error("exec shell task timeout", ex);
+                throw new MpRuntimeException(BaseErrorCode.ERROR, ex);
             } catch (Exception e) {
                 log.error("exec shell task failed", e);
+                throw new MpRuntimeException(BaseErrorCode.ERROR, e);
             } finally {
                 log.info("exec shell end and close thread pool");
                 executorService.shutdown();
@@ -90,6 +110,7 @@ public class SshUtil {
         } catch (Exception e) {
             //设置执行失败的响应内容
             log.error("refresh dir error , serverInfo is {},exception is {}", JsonCommon.stringify(serverInfo), ExceptionUtils.getStackTrace(e));
+            throw new MpRuntimeException(BaseErrorCode.ERROR, e);
         } finally {
             close(sftpChannel);
             close(session);
