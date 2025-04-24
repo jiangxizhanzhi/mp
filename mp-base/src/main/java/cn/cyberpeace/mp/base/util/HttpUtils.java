@@ -459,6 +459,8 @@ public class HttpUtils {
                 log.info("请求参数================>{}", jsonObj.toJSONString());
                 fileName = jsonObj.getString("fileName");
                 for (Object key : jsonObj.keySet()) {
+                    log.info("key.toString() , {}", key.toString());
+                    log.info("jsonObj.getString(key.toString()) , {}", jsonObj.getString(key.toString()));
                     builder.addFormDataPart(key.toString(), jsonObj.getString(key.toString()));
                 }
             } else {

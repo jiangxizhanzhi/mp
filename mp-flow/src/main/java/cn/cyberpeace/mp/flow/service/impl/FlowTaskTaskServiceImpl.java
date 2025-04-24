@@ -295,8 +295,8 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
                 }
             } else {
                 fileByte = FsCommon.downloadRawContent(flowInfoModel.getScriptFile());
-                object.put("file_name", object.get("fileName"));
                 object.put("fileName", flowInfoModel.getTitle() + System.currentTimeMillis() + "." + flowInfoModel.getScriptFile().split(BaseConstants.SPOT)[1]);
+                object.put("file_name", object.get("fileName"));
             }
             String pcapRsp = HttpUtils.postFileV2(resourceUrl + "/pcap/upload", fileByte, "file", object);
             JSONObject jsonObject = JSONObject.parseObject(pcapRsp);
