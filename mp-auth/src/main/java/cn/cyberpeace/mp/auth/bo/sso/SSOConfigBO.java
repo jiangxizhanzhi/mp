@@ -22,4 +22,10 @@ public class SSOConfigBO {
     @ApiModelProperty("默认重定向地址")
     private String defaultRedirectUrl;
 
+    @ApiModelProperty("soc登录接口前缀")
+    private String socLoginPrefixUrl;
+
+    @ApiModelProperty("soc访问的mp入口url")
+    private String socConfigMpUrl;
+
 }

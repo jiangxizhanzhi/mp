@@ -139,10 +139,29 @@ public class SSOController {
     }
 
 
+    /**
+     * @description: soc平台单点配置的url
+     * 主要在原来入口的基础上包一层url，用于隐藏重定向到soc涿鹿平台的url细节，以简化soc平台配置的我们的url
+     * @param request
+     * @param response
+     * @throws Exception
+     * @return void
+     */
+    @ApiOperation(value = "soc单点登录配置入口", notes = "soc单点登录配置入口")
+    @GetMapping("/login/page/soc")
+    public void ssoSocLoginHomePage(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        log.info("soc login home page request...");
+        response.sendRedirect(ssoConfig.getSocLoginRedirectPrefixUrl()+"?service="+ssoConfig.getSocConfigMpUrl());
+    }
+
+
     @ApiOperation("单点登录相关配置查询")
     @GetMapping("/get_sso_config")
     public ServiceResult<SSOConfigBO> getThirdLoginConfig() {
-        SSOConfigBO ssoConfigBO = SSOConfigBO.builder().defaultRedirectUrl(ssoConfig.getDefaultRedirectUrl()).build();
+        SSOConfigBO ssoConfigBO = SSOConfigBO.builder()
+            .defaultRedirectUrl(ssoConfig.getDefaultRedirectUrl())
+            .socLoginPrefixUrl(ssoConfig.getSocLoginRedirectPrefixUrl())
+            .socConfigMpUrl(ssoConfig.getSocConfigMpUrl()).build();
         return new ServiceResult<>(ssoConfigBO).asResult();
     }
 }

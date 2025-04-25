@@ -86,6 +86,11 @@ public class SSOConfig {
     private String socLoginUrl;
 
     /**
+     * 重定向的soc登录接口
+     */
+    private String socLoginRedirectPrefixUrl;
+
+    /**
      * soc票据校验url
      */
     private String socTicketCheckUrl;

@@ -172,6 +172,7 @@ mp:
         soc-config-mp-url: ${SSO_SOC_CONFIG_MP_URL:http://10.19.102.178/api/mp/unauth/sso/login/soc}
         soc-success-home-page-url: ${SSO_SOC_SUCCESS_HOME_PAGE_URL:http://10.19.102.178/page/mg/personal}
         soc-login-url: ${SSO_SOC_LOGIN_URL:https://localhost:8443/login}
+        soc-login-redirect-prefix-url: ${SSO_SOC_LOGIN_REDIRECT_PREFIX_URL:https://172.21.179.18:18443/cas/login}
         soc-ticket-check-url: ${SSO_SOC_TICKET_CHECK_URL:https://localhost:8443/test/soc/user}
         soc-log-out-url: ${SSO_SOC_LOG_OUT_URL:https://localhost:8443/cas/logout}
         default-redirect-url: ${SSO_DEFAULT_REDIRECT_URL:https://www.baidu.com}
