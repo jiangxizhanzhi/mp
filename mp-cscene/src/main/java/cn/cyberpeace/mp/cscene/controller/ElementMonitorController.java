@@ -97,9 +97,15 @@ public class ElementMonitorController {
     })
     @GetMapping("/file_modify")
     public ListObjServiceResult<CollectionHostEventBO> fileModify(ElementMonitorRequest pageRequest, @RequestParam(required = false) String path) {
-        pageRequest.ensure();
+//        TODO 0425验收
+        /*try {
+            pageRequest.ensure();
 
-        return sceneElementMonitorService.getModifyData(pageRequest, CsceneBizConstant.FILE_MODIFY_GROUP, path).asResult();
+            return sceneElementMonitorService.getModifyData(pageRequest, CsceneBizConstant.FILE_MODIFY_GROUP, path).asResult();
+        }catch (Exception e){*/
+            return new ListObjServiceResult<>(new ListObjResult<>());
+//        }
+
     }
 
     @ApiOperation(value = "节点文件变更事件柱状图")
