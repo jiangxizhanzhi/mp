@@ -216,6 +216,8 @@ mp:
       read-timeout: ${mp.auth.sso.ext-var.read-timeout}
       home-page-url: ${mp.auth.sso.ext-var.home-page-url}
       out-home-page-url: ${mp.auth.sso.ext-var.out-home-page-url}
+      soc-config-mp-url: ${mp.auth.sso.ext-var.soc-config-mp-url}
+      soc-success-home-page-url: ${mp.auth.sso.ext-var.soc-success-home-page-url}
       soc-login-url: ${mp.auth.sso.ext-var.soc-login-url}
       soc-ticket-check-url: ${mp.auth.sso.ext-var.soc-ticket-check-url}
       soc-log-out-url: ${mp.auth.sso.ext-var.soc-log-out-url}

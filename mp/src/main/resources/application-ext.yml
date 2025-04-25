@@ -169,6 +169,8 @@ mp:
         read-timeout: ${SSO_READ_TIMEOUT:20000}
         home-page-url: ${SSO_HOME_PAGE_URL:http://10.100.1.28/page/mg/personal}
         out-home-page-url: ${SSO_OUT_HOME_PAGE_URL:https://www.baidu.com}
+        soc-config-mp-url: ${SSO_SOC_CONFIG_MP_URL:http://10.19.102.178/api/mp/unauth/sso/login/soc}
+        soc-success-home-page-url: ${SSO_SOC_SUCCESS_HOME_PAGE_URL:http://10.19.102.178/page/mg/personal}
         soc-login-url: ${SSO_SOC_LOGIN_URL:https://localhost:8443/login}
         soc-ticket-check-url: ${SSO_SOC_TICKET_CHECK_URL:https://localhost:8443/test/soc/user}
         soc-log-out-url: ${SSO_SOC_LOG_OUT_URL:https://localhost:8443/cas/logout}

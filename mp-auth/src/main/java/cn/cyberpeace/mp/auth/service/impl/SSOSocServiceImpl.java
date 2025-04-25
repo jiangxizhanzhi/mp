@@ -66,7 +66,7 @@ public class SSOSocServiceImpl extends AbstractSSOService {
         String responseBody = null;
         SocUser socUser = null;
         try {
-            String url = ssoConfig.getSocTicketCheckUrl()+"?ticket="+ssoLoginBO.getTicket()+"&service="+ssoLoginBO.getService();
+            String url = ssoConfig.getSocTicketCheckUrl()+"?ticket="+ssoLoginBO.getTicket()+"&service="+ssoConfig.getSocConfigMpUrl();
             log.info("url is {}",url);
             responseBody = restTemplate.getForObject(url, String.class);
             log.info("origin response is {}",responseBody);
@@ -178,8 +178,8 @@ public class SSOSocServiceImpl extends AbstractSSOService {
         JwtAuthenticationFilter.addJWTCookieToResponse(response, newJwt);
         response.setHeader(AuthConstant.JWT_HEADER_KEY, newJwt);
         response.setHeader(AuthConstant.CP_TOKEN_REFRESHED_HEADER_KEY, "true");
-        log.info("soc sso login to redirect url:" + ssoConfig.getHomePageUrl());
-        response.sendRedirect(ssoConfig.getHomePageUrl());
+        log.info("soc sso login to redirect url:" + ssoConfig.getSocSuccessHomePageUrl());
+        response.sendRedirect(ssoConfig.getSocSuccessHomePageUrl());
     }
 
 

@@ -65,6 +65,17 @@ public class SSOConfig {
     private String homePageUrl;
 
     /**
+     * soc配置的我们地址
+     */
+    private String socConfigMpUrl;
+
+
+    /**
+     * soc成功登录后跳转的我们系统首页url
+     */
+    private String socSuccessHomePageUrl;
+
+    /**
      * 外部首页url
      */
     private String outHomePageUrl;
