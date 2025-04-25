@@ -726,7 +726,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
                         .collect(Collectors.toList());
                 arrayList.addAll(data);
             } catch (IOException e) {
-                throw new RuntimeException("synchronous vm images fault");
+                log.error("synchronous vm images fault :{}",e);
             }
             skip += 1000;
             break;
