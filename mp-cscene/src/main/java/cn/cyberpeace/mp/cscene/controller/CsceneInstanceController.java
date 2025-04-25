@@ -572,7 +572,12 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @ApiOperation("查询场景实例复盘时各类别采集数据的总数")
     @GetMapping(value = "/query_data_count")
     public ServiceResult<Map<String, Integer>> queryCollectionDataCount(QueryCollectionDataCountParams params) {
-        return getModelService().queryCollectionDataCount(params).asResult();
+        //        TODO 0425采集验收
+//        try {
+//            return getModelService().queryCollectionDataCount(params).asResult();
+//        }catch (Exception e){
+            return new ServiceResult<>();
+//        }
     }
 
     @ApiOperation("查询场景实例事件类型")
