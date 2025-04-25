@@ -60,46 +60,46 @@ public class LogFileController {
     @GetMapping("/page")
     public ListObjServiceResult<LogFileVO> pageLogFiles(LogFileSceneElementPageRequest pageRequest) {
         //        TODO 0425采集验收
-        /*try {
-        log.info("page query log files, pageRequest = {}, sceneId = {}", pageRequest, pageRequest.getSceneId());
-        if (StringUtils.isNotEmpty(pageRequest.getStartTime()) || StringUtils.isNotEmpty(pageRequest.getEndTime())) {
-            var instance = instanceService.get(pageRequest.getSceneId()).getSource().getObj();
-            LocalDateTime startTime = null;
-            if (StringUtils.isNotEmpty(pageRequest.getStartTime())) {
-                startTime = TimeUtils.stringToLocalDateTime(pageRequest.getStartTime());
-            } else {
-                startTime = instance.getCreateTime();
-            }
-            LocalDateTime endTime = null;
-            if (StringUtils.isNotEmpty(pageRequest.getEndTime())) {
-                endTime = TimeUtils.stringToLocalDateTime(pageRequest.getEndTime());
-            } else {
-                endTime = LocalDateTime.now();
-            }
-            TimeListPageInfoQueryParams params = new TimeListPageInfoQueryParams();
-            params.setSceneIds(List.of(instance.getScene()));
-            params.setNodeIds(pageRequest.getElementIds());
-            var dataModels = dataRecordService.getData(params, CollectionPluginSceneDataModel.Type.LOGFile, startTime,
-                    endTime);
-            var logs = dataModels.stream().map(d -> {
-                return JsonCommon.parse(d.getData(), LogFileVO.class);
-            }).collect(Collectors.toList());
-            Set<String> exists = new HashSet<>();
-            List<LogFileVO> finalResult = new ArrayList<>();
-            for (var log : logs) {
-                if (!exists.contains(log.getPath())) {
-                    exists.add(log.getPath());
-                    finalResult.add(log);
+        try {
+            log.info("page query log files, pageRequest = {}, sceneId = {}", pageRequest, pageRequest.getSceneId());
+            if (StringUtils.isNotEmpty(pageRequest.getStartTime()) || StringUtils.isNotEmpty(pageRequest.getEndTime())) {
+                var instance = instanceService.get(pageRequest.getSceneId()).getSource().getObj();
+                LocalDateTime startTime = null;
+                if (StringUtils.isNotEmpty(pageRequest.getStartTime())) {
+                    startTime = TimeUtils.stringToLocalDateTime(pageRequest.getStartTime());
+                } else {
+                    startTime = instance.getCreateTime();
                 }
+                LocalDateTime endTime = null;
+                if (StringUtils.isNotEmpty(pageRequest.getEndTime())) {
+                    endTime = TimeUtils.stringToLocalDateTime(pageRequest.getEndTime());
+                } else {
+                    endTime = LocalDateTime.now();
+                }
+                TimeListPageInfoQueryParams params = new TimeListPageInfoQueryParams();
+                params.setSceneIds(List.of(instance.getScene()));
+                params.setNodeIds(pageRequest.getElementIds());
+                var dataModels = dataRecordService.getData(params, CollectionPluginSceneDataModel.Type.LOGFile, startTime,
+                        endTime);
+                var logs = dataModels.stream().map(d -> {
+                    return JsonCommon.parse(d.getData(), LogFileVO.class);
+                }).collect(Collectors.toList());
+                Set<String> exists = new HashSet<>();
+                List<LogFileVO> finalResult = new ArrayList<>();
+                for (var log : logs) {
+                    if (!exists.contains(log.getPath())) {
+                        exists.add(log.getPath());
+                        finalResult.add(log);
+                    }
+                }
+                return new ListObjServiceResult(new ListObjResult(finalResult, finalResult.size()).asResult()).asResult();
+            } else {
+                ListObjServiceResult<LogFileVO> result = logFileService.pageByElementId(pageRequest);
+                return result;
             }
-            return new ListObjServiceResult(new ListObjResult(finalResult, finalResult.size()).asResult()).asResult();
-        } else {
-            ListObjServiceResult<LogFileVO> result = logFileService.pageByElementId(pageRequest);
-            return result;
-        }
-        } catch (Exception e) {*/
+        } catch (Exception e) {
             return new ListObjServiceResult(new ListObjResult<>()).asResult();
-//        }
+        }
     }
 
 

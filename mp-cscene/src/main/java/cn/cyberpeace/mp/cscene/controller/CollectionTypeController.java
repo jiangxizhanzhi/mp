@@ -45,12 +45,12 @@ public class CollectionTypeController {
     @ApiOperation(value = "查询节点应用列表")
     public ServiceResult<List<CollectionApp>> getApps(CollectionAppRequest appRequest) {
         //        TODO 0425采集验收
-//        try {
-//            List<CollectionApp> appNames = collectionTypeService.getAppNames(appRequest);
-//            return ResultCommon.success(appNames);
-//        }catch (Exception e){
+        try {
+            List<CollectionApp> appNames = collectionTypeService.getAppNames(appRequest);
+            return ResultCommon.success(appNames);
+        }catch (Exception e){
             return ResultCommon.success();
-//        }
+        }
     }
 
 

@@ -99,14 +99,14 @@ public class HostStateController {
     @GetMapping("/element_trend")
     public ServiceResult<List<HostState>> getElementHostStateTrend(HostStateTrendRequest hostStateTrendRequest) {
         //        TODO 0425采集验收
-        /*try {
+        try {
             List<HostState> hostStates = hostStateService.getElementHostStateTrend(hostStateTrendRequest);
 
             return ResultCommon.success(hostStates);
         } catch (Exception e) {
-            ArrayList<HostState> hostStates = new ArrayList<>();*/
+            ArrayList<HostState> hostStates = new ArrayList<>();
             return ResultCommon.success();
-//        }
+        }
     }
 
 
@@ -142,33 +142,33 @@ public class HostStateController {
     @GetMapping("/element_port")
     public ListObjServiceResult<Port> pagePorts(TimeListPageInfoQueryParams listPageInfoQueryParams) {
         //        TODO 0425采集验收
-//        try {
-//            return hostStateService.pagePorts(listPageInfoQueryParams).asResult();
-//        }catch (Exception e){
-        return new ListObjServiceResult<>(new ListObjResult<>());
-//        }
+        try {
+            return hostStateService.pagePorts(listPageInfoQueryParams).asResult();
+        } catch (Exception e) {
+            return new ListObjServiceResult<>(new ListObjResult<>());
+        }
     }
 
     @ApiOperation(value = "节点进程信息")
     @GetMapping("/element_process")
     public ListObjServiceResult<Process> pageProcesses(TimeListPageInfoQueryParams listPageInfoQueryParams) {
         //        TODO 0425采集验收
-//        try {
-//            return hostStateService.pageProcesses(listPageInfoQueryParams).asResult();
-//        }catch (Exception e){
-        return new ListObjServiceResult<>(new ListObjResult<>());
-//        }
+        try {
+            return hostStateService.pageProcesses(listPageInfoQueryParams).asResult();
+        } catch (Exception e) {
+            return new ListObjServiceResult<>(new ListObjResult<>());
+        }
     }
 
     @ApiOperation(value = "节点网卡信息")
     @GetMapping("/element_netifaces")
     public ListObjServiceResult<Netiface> pageNetifaces(TimeListPageInfoQueryParams listPageInfoQueryParams) {
         //        TODO 0425采集验收
-//        try {
-//            return hostStateService.pageNetifaces(listPageInfoQueryParams).asResult();
-//        }catch (Exception e){
+        try {
+            return hostStateService.pageNetifaces(listPageInfoQueryParams).asResult();
+        }catch (Exception e){
             return new ListObjServiceResult<>(new ListObjResult<>());
-//        }
+        }
     }
 
     @ApiOperation(value = "场景网卡top")

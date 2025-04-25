@@ -561,23 +561,23 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     public ListObjServiceResult<CollectionHostEventBO> listHostEvents(@RequestParam String id,
                                                                       HostEventQueryParams queryParams) {
 //        TODO 0425采集验收
-//        try {
-//            handleQueryParams("listHostEvents", queryParams);
-//            return modelService.listHostEvents(id, queryParams).asResult();
-//        }catch (Exception e){
+        try {
+            handleQueryParams("listHostEvents", queryParams);
+            return modelService.listHostEvents(id, queryParams).asResult();
+        }catch (Exception e){
             return new ListObjServiceResult<>();
-//        }
+        }
     }
 
     @ApiOperation("查询场景实例复盘时各类别采集数据的总数")
     @GetMapping(value = "/query_data_count")
     public ServiceResult<Map<String, Integer>> queryCollectionDataCount(QueryCollectionDataCountParams params) {
         //        TODO 0425采集验收
-//        try {
-//            return getModelService().queryCollectionDataCount(params).asResult();
-//        }catch (Exception e){
+        try {
+            return getModelService().queryCollectionDataCount(params).asResult();
+        }catch (Exception e){
             return new ServiceResult<>();
-//        }
+        }
     }
 
     @ApiOperation("查询场景实例事件类型")
@@ -632,12 +632,12 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                                                                               @RequestParam(required = false) String probeId,
                                                                               HostEventQueryParams queryParams) {
         //        TODO 0425采集验收
-//        try {
-//            handleQueryParams("getProbeCollectionData", queryParams);
-//            return modelService.getProbeCollectionData(requestId, id, probeId, queryParams, null).asResult();
-//        }catch (Exception e){
+        try {
+            handleQueryParams("getProbeCollectionData", queryParams);
+            return modelService.getProbeCollectionData(requestId, id, probeId, queryParams, null).asResult();
+        }catch (Exception e){
             return new ListObjServiceResult<>();
-//        }
+        }
     }
 
     @ApiOperation("统计靶标对应引用该靶标的场景实例")

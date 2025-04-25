@@ -79,12 +79,12 @@ public class ElementMonitorController {
     @GetMapping("/os")
     public ServiceResult<OS> getOS(BaseSceneElementRequest baseRequest) {
         //        TODO 0425采集验收
-        /*try {
+        try {
             OS os = sceneElementMonitorService.getOSInfo(baseRequest);
             return ResultCommon.success(os);
-        }catch (Exception e){*/
+        }catch (Exception e){
             return ResultCommon.success();
-//        }
+        }
     }
 
 
@@ -130,12 +130,12 @@ public class ElementMonitorController {
 
 
         //        TODO 0425采集验收
-//        try {
-//            return new ServiceResult<>(sceneElementMonitorService.listEventHistogram(pageRequest, CsceneBizConstant.FILE_MODIFY_GROUP,
-//                    intervalMinutes, bucketSize)).asResult();
-//        } catch (Exception e) {
+        try {
+            return new ServiceResult<>(sceneElementMonitorService.listEventHistogram(pageRequest, CsceneBizConstant.FILE_MODIFY_GROUP,
+                    intervalMinutes, bucketSize)).asResult();
+        } catch (Exception e) {
             return new ServiceResult<>();
-//        }
+        }
 
     }
 
@@ -146,12 +146,12 @@ public class ElementMonitorController {
     @GetMapping("/registry_modify")
     public ListObjServiceResult<CollectionHostEventBO> registryModify(ElementMonitorRequest pageRequest, @RequestParam(required = false) String path) {
         //        TODO 0425采集验收
-//        try {
-//            pageRequest.ensure();
-//            return sceneElementMonitorService.getModifyData(pageRequest, CsceneBizConstant.REGISTRY_MODIFY_GROUP, path).asResult();
-//        } catch (Exception e) {
+        try {
+            pageRequest.ensure();
+            return sceneElementMonitorService.getModifyData(pageRequest, CsceneBizConstant.REGISTRY_MODIFY_GROUP, path).asResult();
+        } catch (Exception e) {
             return new ListObjServiceResult<>(new ListObjResult<>());
-//        }
+        }
 
     }
 
@@ -172,12 +172,12 @@ public class ElementMonitorController {
         }
 
         //        TODO 0425采集验收
-//        try {
-//        return new ServiceResult<>(sceneElementMonitorService.listEventHistogram(pageRequest, CsceneBizConstant.REGISTRY_MODIFY_GROUP,
-//                intervalMinutes, bucketSize)).asResult();
-        //        } catch (Exception e) {
-        return new ServiceResult<>();
-//        }
+        try {
+            return new ServiceResult<>(sceneElementMonitorService.listEventHistogram(pageRequest, CsceneBizConstant.REGISTRY_MODIFY_GROUP,
+                    intervalMinutes, bucketSize)).asResult();
+        } catch (Exception e) {
+            return new ServiceResult<>();
+        }
     }
 
     @ApiOperation(value = "查询节点服务漏洞Top10")
