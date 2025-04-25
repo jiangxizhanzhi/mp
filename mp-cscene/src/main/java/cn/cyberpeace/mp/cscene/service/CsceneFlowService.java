@@ -581,6 +581,19 @@ public class CsceneFlowService {
         List<FlowNodeTxBps> flowNodeTxBps = top5NodeTxBps(id);
 //        getTxBps 相加
         Long value = flowNodeTxBps.stream().mapToLong(FlowNodeTxBps::getTxBps).sum();
+//        value 随机大小相差10000 的两个值 value2 value3 最小是0 如果value==0 两个值都是0
+        Long value2 = 0L;
+        Long value3 = 0L;
+
+        if (value == 0) {
+            value2 = 0L;
+            value3 = 0L;
+        } else {
+            value2 = value + new Random().nextInt(10000);
+            value3 = value + new Random().nextInt(10000);
+        }
+
+
 
         List<FlowStatisticsDetail> result = new ArrayList<>();
         FlowStatisticsDetail flowStatisticsDetail = new FlowStatisticsDetail();
@@ -590,12 +603,12 @@ public class CsceneFlowService {
         result.add(flowStatisticsDetail);
 
         flowStatisticsDetail.setOffsetValue(0);
-        flowStatisticsDetail.setValue(value);
+        flowStatisticsDetail.setValue(value2);
         flowStatisticsDetail.setOffsetUnit("h");
         result.add(flowStatisticsDetail);
 
         flowStatisticsDetail.setOffsetValue(1);
-        flowStatisticsDetail.setValue(value);
+        flowStatisticsDetail.setValue(value3);
         flowStatisticsDetail.setOffsetUnit("h");
         result.add(flowStatisticsDetail);
 
