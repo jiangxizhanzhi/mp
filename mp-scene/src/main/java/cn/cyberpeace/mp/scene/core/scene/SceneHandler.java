@@ -508,8 +508,6 @@ public class SceneHandler extends BaseSceneHandler<
         }
         prepareAllEvent(SceneModel.Event.PAUSE, SceneElementModel.Event.PAUSE);
         startAllEvent(SceneModel.Event.PAUSE, SceneElementModel.Event.PAUSE);
-//        TODO 0425验收
-        asyncAckSceneChanged(false, false);
         try {
             for (var plugin : getPlugins()) {
                 plugin.pause();

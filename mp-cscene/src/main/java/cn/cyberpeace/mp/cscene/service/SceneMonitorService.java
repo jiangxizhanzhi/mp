@@ -315,66 +315,71 @@ public class SceneMonitorService {
             }
         }
 
-        if (fetchRealTimeHostState && CollectionUtil.isNotEmpty(basicInfos)) {
-            // 查询实时主机状态
-            var agentNames = csceneCommonService.getAgentNamesBySceneIdAndElementIds(sceneId, null);
-            if (CollectionUtil.isNotEmpty(agentNames)) {
-                AgentNameBasedRequest agentNameBasedRequest = new AgentNameBasedRequest();
-                agentNameBasedRequest.setAgentNames(agentNames);
-                agentNameBasedRequest.setPageSize(1);
-                agentNameBasedRequest.setCloudType(sceneHandler.getScene().getCloudType());
+//        TODO 0425采集验收
+        try {
+            if (fetchRealTimeHostState && CollectionUtil.isNotEmpty(basicInfos)) {
+                // 查询实时主机状态
+                var agentNames = csceneCommonService.getAgentNamesBySceneIdAndElementIds(sceneId, null);
+                if (CollectionUtil.isNotEmpty(agentNames)) {
+                    AgentNameBasedRequest agentNameBasedRequest = new AgentNameBasedRequest();
+                    agentNameBasedRequest.setAgentNames(agentNames);
+                    agentNameBasedRequest.setPageSize(1);
+                    agentNameBasedRequest.setCloudType(sceneHandler.getScene().getCloudType());
 
 
-                Map<String, List<HostState>> map = hostStateService.mapHostStatesByAgentName(agentNameBasedRequest);
-                basicInfos.forEach(basicInfo -> {
-                    var hostStates = map.get(basicInfo.getEid());
-                    //非容器的，如果从ES取到了系统运行资源信息，就设置上，否则就使用靶标创建时配置上的。容器如果靶标创建时有配置就使用配置，否则使用默认1C512MB10GB
-                    if (CollectionUtils.isNotEmpty(hostStates)) {
-                        if (!(BaseCloudPluginSceneElementModel.ImageType.CONTAINER.equals(basicInfo.getImageType())
-                                || BaseCloudPluginSceneElementModel.ImageType.CONTAINER_REGISTRY.equals(basicInfo.getImageType()))) {
-                            basicInfo.setHostState(hostStates.get(0));
-                        } else {
-                            HostState realTimeHostState = getRealTimeHostState(basicInfo, hostStates);
-                            basicInfo.setHostState(realTimeHostState);
+                    Map<String, List<HostState>> map = hostStateService.mapHostStatesByAgentName(agentNameBasedRequest);
+                    basicInfos.forEach(basicInfo -> {
+                        var hostStates = map.get(basicInfo.getEid());
+                        //非容器的，如果从ES取到了系统运行资源信息，就设置上，否则就使用靶标创建时配置上的。容器如果靶标创建时有配置就使用配置，否则使用默认1C512MB10GB
+                        if (CollectionUtils.isNotEmpty(hostStates)) {
+                            if (!(BaseCloudPluginSceneElementModel.ImageType.CONTAINER.equals(basicInfo.getImageType())
+                                    || BaseCloudPluginSceneElementModel.ImageType.CONTAINER_REGISTRY.equals(basicInfo.getImageType()))) {
+                                basicInfo.setHostState(hostStates.get(0));
+                            } else {
+                                HostState realTimeHostState = getRealTimeHostState(basicInfo, hostStates);
+                                basicInfo.setHostState(realTimeHostState);
+                            }
                         }
-                    }
+                    });
+                }
+
+                // 查询用户连接信息
+                var connections = cloudPluginSceneConnectionMapper.list(new HumanCondition()
+                        .select(CloudPluginSceneConnectionModel::getSceneElement)
+                        .select(CloudPluginSceneConnectionModel::getAccessUser)
+                        .filterEqual(CloudPluginSceneConnectionModel::getDisable, false)
+                        .filterEqual(CloudPluginSceneConnectionModel::getScene, csceneInstanceBO.getScene().getTopology().getScene().getEid())
+                        .reverseOrderBy(CloudPluginSceneConnectionModel::getPk));
+                Map<String, List<AccessUserBO>> nodeId2Users = new HashMap<>();
+                if (CollectionUtils.isNotEmpty(connections)) {
+                    Set<String> userIds = connections.stream().map(CloudPluginSceneConnectionModel::getAccessUser).collect(Collectors.toSet());
+                    var userModels = UserCommon.getUsers(new ArrayList<>(userIds));
+                    Map<String, UserModel> userId2User = userModels.stream().collect(Collectors.toMap(UserModel::getId, userModel -> userModel));
+                    connections.forEach(model -> {
+                        var users = nodeId2Users.getOrDefault(model.getSceneElement(), new ArrayList<>());
+                        nodeId2Users.put(model.getSceneElement(), users);
+                        var userModel = userId2User.get(model.getAccessUser());
+                        if (userModel != null) {
+                            AccessUserBO accessUser = new AccessUserBO();
+                            accessUser.setId(userModel.getId());
+                            accessUser.setName(userModel.getName());
+                            users.add(accessUser);
+                        }
+                    });
+                }
+                ServiceResult<Map<String, Object>> systemTypeToAgentSupport = cloudCommonConfigService.getSystemTypeToAgentSupport();
+                basicInfos.forEach(basicInfo -> {
+                    basicInfo.setAccessUsers(nodeId2Users.getOrDefault(basicInfo.getId(), new ArrayList<>())
+                            .stream().distinct().collect(Collectors.toList()));
+                    basicInfo.setOsType(systemTypeToAgentSupport.getSource().get(basicInfo.getSystemType()).toString());
+
                 });
+
+                // 添加定时上报任务
+                SceneHostStateReportScheduleService.addCsceneInstance(sceneId);
             }
-
-            // 查询用户连接信息
-            var connections = cloudPluginSceneConnectionMapper.list(new HumanCondition()
-                    .select(CloudPluginSceneConnectionModel::getSceneElement)
-                    .select(CloudPluginSceneConnectionModel::getAccessUser)
-                    .filterEqual(CloudPluginSceneConnectionModel::getDisable, false)
-                    .filterEqual(CloudPluginSceneConnectionModel::getScene, csceneInstanceBO.getScene().getTopology().getScene().getEid())
-                    .reverseOrderBy(CloudPluginSceneConnectionModel::getPk));
-            Map<String, List<AccessUserBO>> nodeId2Users = new HashMap<>();
-            if (CollectionUtils.isNotEmpty(connections)) {
-                Set<String> userIds = connections.stream().map(CloudPluginSceneConnectionModel::getAccessUser).collect(Collectors.toSet());
-                var userModels = UserCommon.getUsers(new ArrayList<>(userIds));
-                Map<String, UserModel> userId2User = userModels.stream().collect(Collectors.toMap(UserModel::getId, userModel -> userModel));
-                connections.forEach(model -> {
-                    var users = nodeId2Users.getOrDefault(model.getSceneElement(), new ArrayList<>());
-                    nodeId2Users.put(model.getSceneElement(), users);
-                    var userModel = userId2User.get(model.getAccessUser());
-                    if (userModel != null) {
-                        AccessUserBO accessUser = new AccessUserBO();
-                        accessUser.setId(userModel.getId());
-                        accessUser.setName(userModel.getName());
-                        users.add(accessUser);
-                    }
-                });
-            }
-            ServiceResult<Map<String, Object>> systemTypeToAgentSupport = cloudCommonConfigService.getSystemTypeToAgentSupport();
-            basicInfos.forEach(basicInfo -> {
-                basicInfo.setAccessUsers(nodeId2Users.getOrDefault(basicInfo.getId(), new ArrayList<>())
-                        .stream().distinct().collect(Collectors.toList()));
-                basicInfo.setOsType(systemTypeToAgentSupport.getSource().get(basicInfo.getSystemType()).toString());
-
-            });
-
-            // 添加定时上报任务
-            SceneHostStateReportScheduleService.addCsceneInstance(sceneId);
+        }catch (Exception e){
+            log.error("获取场景节点实时信息失败", e);
         }
         return basicInfos;
     }

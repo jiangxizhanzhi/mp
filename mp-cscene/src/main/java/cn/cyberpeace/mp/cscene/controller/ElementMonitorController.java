@@ -78,8 +78,13 @@ public class ElementMonitorController {
     @ApiOperation(value = "节点操作系统信息")
     @GetMapping("/os")
     public ServiceResult<OS> getOS(BaseSceneElementRequest baseRequest) {
-        OS os = sceneElementMonitorService.getOSInfo(baseRequest);
-        return ResultCommon.success(os);
+        //        TODO 0425采集验收
+        /*try {
+            OS os = sceneElementMonitorService.getOSInfo(baseRequest);
+            return ResultCommon.success(os);
+        }catch (Exception e){*/
+            return ResultCommon.success();
+//        }
     }
 
 
@@ -97,14 +102,13 @@ public class ElementMonitorController {
     })
     @GetMapping("/file_modify")
     public ListObjServiceResult<CollectionHostEventBO> fileModify(ElementMonitorRequest pageRequest, @RequestParam(required = false) String path) {
-//        TODO 0425验收
-        /*try {
+//        TODO 0425采集验收
+        try {
             pageRequest.ensure();
-
             return sceneElementMonitorService.getModifyData(pageRequest, CsceneBizConstant.FILE_MODIFY_GROUP, path).asResult();
-        }catch (Exception e){*/
+        } catch (Exception e) {
             return new ListObjServiceResult<>(new ListObjResult<>());
-//        }
+        }
 
     }
 
@@ -123,8 +127,16 @@ public class ElementMonitorController {
         if (Objects.isNull(bucketSize)) {
             bucketSize = 15;
         }
-        return new ServiceResult<>(sceneElementMonitorService.listEventHistogram(pageRequest, CsceneBizConstant.FILE_MODIFY_GROUP,
-                intervalMinutes, bucketSize)).asResult();
+
+
+        //        TODO 0425采集验收
+//        try {
+//            return new ServiceResult<>(sceneElementMonitorService.listEventHistogram(pageRequest, CsceneBizConstant.FILE_MODIFY_GROUP,
+//                    intervalMinutes, bucketSize)).asResult();
+//        } catch (Exception e) {
+            return new ServiceResult<>();
+//        }
+
     }
 
     @ApiOperation(value = "查询节点注册表变更事件")
@@ -133,9 +145,14 @@ public class ElementMonitorController {
     })
     @GetMapping("/registry_modify")
     public ListObjServiceResult<CollectionHostEventBO> registryModify(ElementMonitorRequest pageRequest, @RequestParam(required = false) String path) {
-        pageRequest.ensure();
+        //        TODO 0425采集验收
+//        try {
+//            pageRequest.ensure();
+//            return sceneElementMonitorService.getModifyData(pageRequest, CsceneBizConstant.REGISTRY_MODIFY_GROUP, path).asResult();
+//        } catch (Exception e) {
+            return new ListObjServiceResult<>(new ListObjResult<>());
+//        }
 
-        return sceneElementMonitorService.getModifyData(pageRequest, CsceneBizConstant.REGISTRY_MODIFY_GROUP, path).asResult();
     }
 
     @ApiOperation(value = "节点注册表变更事件柱状图")
@@ -153,8 +170,14 @@ public class ElementMonitorController {
         if (Objects.isNull(bucketSize)) {
             bucketSize = 15;
         }
-        return new ServiceResult<>(sceneElementMonitorService.listEventHistogram(pageRequest, CsceneBizConstant.REGISTRY_MODIFY_GROUP,
-                intervalMinutes, bucketSize)).asResult();
+
+        //        TODO 0425采集验收
+//        try {
+//        return new ServiceResult<>(sceneElementMonitorService.listEventHistogram(pageRequest, CsceneBizConstant.REGISTRY_MODIFY_GROUP,
+//                intervalMinutes, bucketSize)).asResult();
+        //        } catch (Exception e) {
+        return new ServiceResult<>();
+//        }
     }
 
     @ApiOperation(value = "查询节点服务漏洞Top10")
@@ -196,7 +219,7 @@ public class ElementMonitorController {
 
     @ApiOperation("采集数据导入 (Json,Xml,Xlsx)")
     @PostMapping("/import")
-    public ServiceResult<Boolean> importFile(ImportFileBO bo){
+    public ServiceResult<Boolean> importFile(ImportFileBO bo) {
         sceneElementMonitorService.importData(bo);
         return ResultCommon.success(true);
     }

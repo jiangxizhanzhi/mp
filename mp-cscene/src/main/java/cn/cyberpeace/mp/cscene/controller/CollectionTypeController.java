@@ -44,8 +44,13 @@ public class CollectionTypeController {
     @GetMapping("/apps")
     @ApiOperation(value = "查询节点应用列表")
     public ServiceResult<List<CollectionApp>> getApps(CollectionAppRequest appRequest) {
-        List<CollectionApp> appNames = collectionTypeService.getAppNames(appRequest);
-        return ResultCommon.success(appNames);
+        //        TODO 0425采集验收
+//        try {
+//            List<CollectionApp> appNames = collectionTypeService.getAppNames(appRequest);
+//            return ResultCommon.success(appNames);
+//        }catch (Exception e){
+            return ResultCommon.success();
+//        }
     }
 
 

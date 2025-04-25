@@ -59,6 +59,8 @@ public class LogFileController {
     @ApiOperation(value = "分页查询日志文件")
     @GetMapping("/page")
     public ListObjServiceResult<LogFileVO> pageLogFiles(LogFileSceneElementPageRequest pageRequest) {
+        //        TODO 0425采集验收
+        /*try {
         log.info("page query log files, pageRequest = {}, sceneId = {}", pageRequest, pageRequest.getSceneId());
         if (StringUtils.isNotEmpty(pageRequest.getStartTime()) || StringUtils.isNotEmpty(pageRequest.getEndTime())) {
             var instance = instanceService.get(pageRequest.getSceneId()).getSource().getObj();
@@ -95,6 +97,9 @@ public class LogFileController {
             ListObjServiceResult<LogFileVO> result = logFileService.pageByElementId(pageRequest);
             return result;
         }
+        } catch (Exception e) {*/
+            return new ListObjServiceResult(new ListObjResult<>()).asResult();
+//        }
     }
 
 

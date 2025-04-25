@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
@@ -55,13 +56,19 @@ public class HostStateController {
         if (StringUtils.isEmpty(hostStateTrendRequest.getSceneId())) {
             return ResultCommon.success(new ArrayList<>());
         }
-        if (CollectionUtils.isNotEmpty(hostStateTrendRequest.getElementIds())) {
-            List<HostState> hostStates = hostStateService.getElementHostStateTrend(hostStateTrendRequest);
-            return ResultCommon.success(hostStates);
-        } else {
-            List<HostState> hostStates = hostStateService.getSceneHostStateTrend(hostStateTrendRequest);
-            return ResultCommon.success(hostStates);
+        //        TODO 0425采集验收
+        try {
+            if (CollectionUtils.isNotEmpty(hostStateTrendRequest.getElementIds())) {
+                List<HostState> hostStates = hostStateService.getElementHostStateTrend(hostStateTrendRequest);
+                return ResultCommon.success(hostStates);
+            } else {
+                List<HostState> hostStates = hostStateService.getSceneHostStateTrend(hostStateTrendRequest);
+                return ResultCommon.success(hostStates);
+            }
+        }catch (Exception e){
+            return ResultCommon.success(new ArrayList<>());
         }
+
     }
 
 
@@ -91,9 +98,15 @@ public class HostStateController {
     @ApiOperation(value = "节点主机状态趋势图")
     @GetMapping("/element_trend")
     public ServiceResult<List<HostState>> getElementHostStateTrend(HostStateTrendRequest hostStateTrendRequest) {
-        List<HostState> hostStates = hostStateService.getElementHostStateTrend(hostStateTrendRequest);
+        //        TODO 0425采集验收
+        /*try {
+            List<HostState> hostStates = hostStateService.getElementHostStateTrend(hostStateTrendRequest);
 
-        return ResultCommon.success(hostStates);
+            return ResultCommon.success(hostStates);
+        } catch (Exception e) {
+            ArrayList<HostState> hostStates = new ArrayList<>();*/
+            return ResultCommon.success();
+//        }
     }
 
 
@@ -128,19 +141,34 @@ public class HostStateController {
     @ApiOperation(value = "节点端口信息")
     @GetMapping("/element_port")
     public ListObjServiceResult<Port> pagePorts(TimeListPageInfoQueryParams listPageInfoQueryParams) {
-        return hostStateService.pagePorts(listPageInfoQueryParams).asResult();
+        //        TODO 0425采集验收
+//        try {
+//            return hostStateService.pagePorts(listPageInfoQueryParams).asResult();
+//        }catch (Exception e){
+        return new ListObjServiceResult<>(new ListObjResult<>());
+//        }
     }
 
     @ApiOperation(value = "节点进程信息")
     @GetMapping("/element_process")
     public ListObjServiceResult<Process> pageProcesses(TimeListPageInfoQueryParams listPageInfoQueryParams) {
-        return hostStateService.pageProcesses(listPageInfoQueryParams).asResult();
+        //        TODO 0425采集验收
+//        try {
+//            return hostStateService.pageProcesses(listPageInfoQueryParams).asResult();
+//        }catch (Exception e){
+        return new ListObjServiceResult<>(new ListObjResult<>());
+//        }
     }
 
     @ApiOperation(value = "节点网卡信息")
     @GetMapping("/element_netifaces")
     public ListObjServiceResult<Netiface> pageNetifaces(TimeListPageInfoQueryParams listPageInfoQueryParams) {
-        return hostStateService.pageNetifaces(listPageInfoQueryParams).asResult();
+        //        TODO 0425采集验收
+//        try {
+//            return hostStateService.pageNetifaces(listPageInfoQueryParams).asResult();
+//        }catch (Exception e){
+            return new ListObjServiceResult<>(new ListObjResult<>());
+//        }
     }
 
     @ApiOperation(value = "场景网卡top")

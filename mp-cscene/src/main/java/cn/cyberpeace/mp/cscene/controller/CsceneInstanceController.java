@@ -560,8 +560,13 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @GetMapping(value = "/list_host_events", params = "id")
     public ListObjServiceResult<CollectionHostEventBO> listHostEvents(@RequestParam String id,
                                                                       HostEventQueryParams queryParams) {
-        handleQueryParams("listHostEvents", queryParams);
-        return modelService.listHostEvents(id, queryParams).asResult();
+//        TODO 0425采集验收
+//        try {
+//            handleQueryParams("listHostEvents", queryParams);
+//            return modelService.listHostEvents(id, queryParams).asResult();
+//        }catch (Exception e){
+            return new ListObjServiceResult<>();
+//        }
     }
 
     @ApiOperation("查询场景实例复盘时各类别采集数据的总数")
@@ -621,8 +626,13 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                                                                               @RequestParam(required = false) String requestId,
                                                                               @RequestParam(required = false) String probeId,
                                                                               HostEventQueryParams queryParams) {
-        handleQueryParams("getProbeCollectionData", queryParams);
-        return modelService.getProbeCollectionData(requestId, id, probeId, queryParams, null).asResult();
+        //        TODO 0425采集验收
+//        try {
+//            handleQueryParams("getProbeCollectionData", queryParams);
+//            return modelService.getProbeCollectionData(requestId, id, probeId, queryParams, null).asResult();
+//        }catch (Exception e){
+            return new ListObjServiceResult<>();
+//        }
     }
 
     @ApiOperation("统计靶标对应引用该靶标的场景实例")
