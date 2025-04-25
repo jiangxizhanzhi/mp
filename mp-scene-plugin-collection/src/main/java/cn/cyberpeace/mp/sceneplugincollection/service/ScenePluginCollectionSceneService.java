@@ -20,7 +20,6 @@ import cn.cyberpeace.mp.base.util.mptool.URLUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
-import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudSceneConfigPluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
@@ -327,11 +326,7 @@ public class ScenePluginCollectionSceneService {
         // 开始时间,默认为场景创建时间
         request.setStartTime(Optional.ofNullable(queryParams.getStartTime()).orElse(sceneHandler.getScene().getCreateTime()));
         // 结束时间,默认为当前时间
-        if(sceneHandler.getScene().getEvent() == SceneModel.Event.DELETE){
-            request.setEndTime(Optional.ofNullable(queryParams.getEndTime()).orElse(sceneHandler.getScene().getUpdateTime()));
-        }else {
-            request.setEndTime(Optional.ofNullable(queryParams.getEndTime()).orElse(LocalDateTime.now()));
-        }
+        request.setEndTime(Optional.ofNullable(queryParams.getEndTime()).orElse(LocalDateTime.now()));
         return doQueryHostStateEventsWithTimeRange(sceneId, agentName2Element, request, sceneHandler.getScene().getCloudType());
     }
 
