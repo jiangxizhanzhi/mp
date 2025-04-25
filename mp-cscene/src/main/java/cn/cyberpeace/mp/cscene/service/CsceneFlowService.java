@@ -584,7 +584,17 @@ public class CsceneFlowService {
 
         List<FlowStatisticsDetail> result = new ArrayList<>();
         FlowStatisticsDetail flowStatisticsDetail = new FlowStatisticsDetail();
+        flowStatisticsDetail.setOffsetValue(-1);
+        flowStatisticsDetail.setValue(value);
+        flowStatisticsDetail.setOffsetUnit("h");
+        result.add(flowStatisticsDetail);
+
         flowStatisticsDetail.setOffsetValue(0);
+        flowStatisticsDetail.setValue(value);
+        flowStatisticsDetail.setOffsetUnit("h");
+        result.add(flowStatisticsDetail);
+
+        flowStatisticsDetail.setOffsetValue(1);
         flowStatisticsDetail.setValue(value);
         flowStatisticsDetail.setOffsetUnit("h");
         result.add(flowStatisticsDetail);
