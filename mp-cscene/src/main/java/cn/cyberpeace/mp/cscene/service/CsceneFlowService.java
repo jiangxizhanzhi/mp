@@ -539,7 +539,7 @@ public class CsceneFlowService {
      * @return
      */
     public List<FlowStatisticsDetail> totalRate(String id) {
-        log.info("CsceneFlowService.totalRate begin. id:{}", id);
+        /*log.info("CsceneFlowService.totalRate begin. id:{}", id);
         var sceneId = csceneInstanceService.getSceneId(id);
         if (StringUtils.isEmpty(sceneId)) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_STARTED);
@@ -576,7 +576,19 @@ public class CsceneFlowService {
                 }
             }
         }
-        log.info("CsceneFlowService.totalRate end. result:{}", result);
+        log.info("CsceneFlowService.totalRate end. result:{}", result);*/
+
+        List<FlowNodeTxBps> flowNodeTxBps = top5NodeTxBps(id);
+//        getTxBps 相加
+        Long value = flowNodeTxBps.stream().mapToLong(FlowNodeTxBps::getTxBps).sum();
+
+        List<FlowStatisticsDetail> result = new ArrayList<>();
+        FlowStatisticsDetail flowStatisticsDetail = new FlowStatisticsDetail();
+        flowStatisticsDetail.setOffsetValue(0);
+        flowStatisticsDetail.setValue(value);
+        flowStatisticsDetail.setOffsetUnit("m");
+        result.add(flowStatisticsDetail);
+
         return result;
     }
 
