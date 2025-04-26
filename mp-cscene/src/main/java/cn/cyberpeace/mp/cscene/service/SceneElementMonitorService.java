@@ -1073,118 +1073,124 @@ public class SceneElementMonitorService {
         }
     }
     public void exportData(HttpServletResponse response, String sceneId, String elementId, String type) {
-        ElementMonitorRequest pageRequest = new ElementMonitorRequest();
-        pageRequest.setSceneId(sceneId);
-        pageRequest.setPage(1);
-        pageRequest.setPageSize(1000);
-        if (StringUtils.isNotBlank(elementId)) {
-            pageRequest.setElementIds(Collections.singletonList(elementId));
-        }
-        JSONObject result = new JSONObject();
-
-        //文件变更列表
-        List<ElementFileListBO> fileList = getModifyData(JsonCommon.parse(JsonCommon.stringify(pageRequest), ElementMonitorRequest.class), CsceneBizConstant.FILE_MODIFY_GROUP, null)
-                .asResult().sourceList().stream()
-                .map(file -> collectionHostEventBO2ElementFileListModel(file, CsceneBizConstant.FILE_MODIFY_GROUP.get(0)))
-                .collect(Collectors.toList());
-        result.put(FILE_LIST, JSON.toJSON(fileList));
-
-        //文件变更数据
-        List<ElementFileCountModel> fileCount = listEventHistogram(JsonCommon.parse(JsonCommon.stringify(pageRequest), ElementMonitorRequest.class), CsceneBizConstant.FILE_MODIFY_GROUP, 15, 15)
-                .stream()
-                .map(count -> elementHistogramInfo2ElementFileCountModel(count, CsceneBizConstant.FILE_MODIFY_GROUP.get(0)))
-                .collect(Collectors.toList());
-        result.put(FILE_COUNT, JSON.toJSON(fileCount));
-
-        //注册表变更列表
-        List<ElementFileListBO> registryList = getModifyData(JsonCommon.parse(JsonCommon.stringify(pageRequest), ElementMonitorRequest.class), CsceneBizConstant.REGISTRY_MODIFY_GROUP, null)
-                .asResult().sourceList().stream()
-                .map(registry -> collectionHostEventBO2ElementFileListModel(registry, CsceneBizConstant.REGISTRY_MODIFY_GROUP.get(0)))
-                .collect(Collectors.toList());
-        result.put(REGISTRY_LIST, JSON.toJSON(registryList));
-
-        //注册表变更数量
-        List<ElementFileCountModel> registryCount = listEventHistogram(JsonCommon.parse(JsonCommon.stringify(pageRequest), ElementMonitorRequest.class), CsceneBizConstant.REGISTRY_MODIFY_GROUP, 15, 15)
-                .stream()
-                .map(count -> elementHistogramInfo2ElementFileCountModel(count, CsceneBizConstant.REGISTRY_MODIFY_GROUP.get(0)))
-                .collect(Collectors.toList());
-        result.put(REGISTRY_COUNT, JSON.toJSON(registryCount));
-
-        HostEventQueryParams queryParams = getExportDataParams(sceneId, elementId);
-        queryParams.setCatagories(Arrays.asList("020101", "020102", "020103", "020104", "020105", "020106", "020107",
-                "020201", "020202", "020203", "020204", "020205", "020206", "020207", "020208", "020210",
-                "020301", "020302", "020303", "020304", "020305", "020313"));
-
-        //日志事件
-        List<ElementLogListBO> logList = csceneInstanceService.listHostEvents(sceneId, queryParams)
-                .asResult().sourceList().stream()
-                .map(this::collectionHostEventBO2ElementLogListModel)
-                .collect(Collectors.toList());
-        result.put(LOG, JSON.toJSON(logList));
-
-        //自定义采集
-        List<WazuhProbeDataModel> probeList = csceneInstanceService.getProbeCollectionData(null, sceneId, null, queryParams, null)
-                .asResult().sourceList().stream()
-                .map(this::collectionHostEventBO2WazuhProbeDataModel)
-                .collect(Collectors.toList());
-        result.put(PROBE, JSON.toJSON(probeList));
-
-        queryParams.setCatagories(Arrays.asList("020301", "020302", "020303", "020304", "020305", "020306", "020307", "020308", "020309", "020310", "020311", "020312"));
-        //告警信息
-        queryParams.setCatagories(new ArrayList<>());
-        List<ElementLogListBO> alarmList = csceneInstanceService.listHostEvents(sceneId, queryParams)
-                .asResult().sourceList().stream()
-                .map(this::collectionHostEventBO2ElementLogListModel)
-                .collect(Collectors.toList());
-        result.put(ALARM, JSON.toJSON(alarmList));
-
-        String fileName = FileUtil.getTmpDirPath() + File.separator + "data";
-
-        if ("json".equals(type)) {
-            try (FileWriter writer = new FileWriter(fileName + ".json")) {
-                writer.write(result.toString());
-            } catch (IOException e) {
-                log.error("export data fail, sceneId = {}, elementId = {}, type = {}", sceneId, elementId, type);
-                throw new MpRuntimeException(CsceneErrorCode.EXPORT_ERROR);
+//        TODO 0425采集验收
+        try {
+            ElementMonitorRequest pageRequest = new ElementMonitorRequest();
+            pageRequest.setSceneId(sceneId);
+            pageRequest.setPage(1);
+            pageRequest.setPageSize(1000);
+            if (StringUtils.isNotBlank(elementId)) {
+                pageRequest.setElementIds(Collections.singletonList(elementId));
             }
-            FileUtil.setResponse(new File(fileName + ".json"), true, response);
-        } else if ("xml".equals(type)) {
-            try (FileWriter fileWriter = new FileWriter(fileName + ".xml")) {
-                ObjectMapper objectMapper = new ObjectMapper();
-                JsonNode jsonNode = objectMapper.readTree(result.toJSONString());
+            JSONObject result = new JSONObject();
 
-                fileWriter.write(new XmlMapper().writeValueAsString(jsonNode));
-            } catch (IOException e) {
-                log.error("export data fail, sceneId = {}, elementId = {}, type = {}", sceneId, elementId, type);
-                throw new MpRuntimeException(CsceneErrorCode.EXPORT_ERROR);
+            //文件变更列表
+            List<ElementFileListBO> fileList = getModifyData(JsonCommon.parse(JsonCommon.stringify(pageRequest), ElementMonitorRequest.class), CsceneBizConstant.FILE_MODIFY_GROUP, null)
+                    .asResult().sourceList().stream()
+                    .map(file -> collectionHostEventBO2ElementFileListModel(file, CsceneBizConstant.FILE_MODIFY_GROUP.get(0)))
+                    .collect(Collectors.toList());
+            result.put(FILE_LIST, JSON.toJSON(fileList));
+
+            //文件变更数据
+            List<ElementFileCountModel> fileCount = listEventHistogram(JsonCommon.parse(JsonCommon.stringify(pageRequest), ElementMonitorRequest.class), CsceneBizConstant.FILE_MODIFY_GROUP, 15, 15)
+                    .stream()
+                    .map(count -> elementHistogramInfo2ElementFileCountModel(count, CsceneBizConstant.FILE_MODIFY_GROUP.get(0)))
+                    .collect(Collectors.toList());
+            result.put(FILE_COUNT, JSON.toJSON(fileCount));
+
+            //注册表变更列表
+            List<ElementFileListBO> registryList = getModifyData(JsonCommon.parse(JsonCommon.stringify(pageRequest), ElementMonitorRequest.class), CsceneBizConstant.REGISTRY_MODIFY_GROUP, null)
+                    .asResult().sourceList().stream()
+                    .map(registry -> collectionHostEventBO2ElementFileListModel(registry, CsceneBizConstant.REGISTRY_MODIFY_GROUP.get(0)))
+                    .collect(Collectors.toList());
+            result.put(REGISTRY_LIST, JSON.toJSON(registryList));
+
+            //注册表变更数量
+            List<ElementFileCountModel> registryCount = listEventHistogram(JsonCommon.parse(JsonCommon.stringify(pageRequest), ElementMonitorRequest.class), CsceneBizConstant.REGISTRY_MODIFY_GROUP, 15, 15)
+                    .stream()
+                    .map(count -> elementHistogramInfo2ElementFileCountModel(count, CsceneBizConstant.REGISTRY_MODIFY_GROUP.get(0)))
+                    .collect(Collectors.toList());
+            result.put(REGISTRY_COUNT, JSON.toJSON(registryCount));
+
+            HostEventQueryParams queryParams = getExportDataParams(sceneId, elementId);
+            queryParams.setCatagories(Arrays.asList("020101", "020102", "020103", "020104", "020105", "020106", "020107",
+                    "020201", "020202", "020203", "020204", "020205", "020206", "020207", "020208", "020210",
+                    "020301", "020302", "020303", "020304", "020305", "020313"));
+
+            //日志事件
+            List<ElementLogListBO> logList = csceneInstanceService.listHostEvents(sceneId, queryParams)
+                    .asResult().sourceList().stream()
+                    .map(this::collectionHostEventBO2ElementLogListModel)
+                    .collect(Collectors.toList());
+            result.put(LOG, JSON.toJSON(logList));
+
+            //自定义采集
+            List<WazuhProbeDataModel> probeList = csceneInstanceService.getProbeCollectionData(null, sceneId, null, queryParams, null)
+                    .asResult().sourceList().stream()
+                    .map(this::collectionHostEventBO2WazuhProbeDataModel)
+                    .collect(Collectors.toList());
+            result.put(PROBE, JSON.toJSON(probeList));
+
+            queryParams.setCatagories(Arrays.asList("020301", "020302", "020303", "020304", "020305", "020306", "020307", "020308", "020309", "020310", "020311", "020312"));
+            //告警信息
+            queryParams.setCatagories(new ArrayList<>());
+            List<ElementLogListBO> alarmList = csceneInstanceService.listHostEvents(sceneId, queryParams)
+                    .asResult().sourceList().stream()
+                    .map(this::collectionHostEventBO2ElementLogListModel)
+                    .collect(Collectors.toList());
+            result.put(ALARM, JSON.toJSON(alarmList));
+
+            String fileName = FileUtil.getTmpDirPath() + File.separator + "data";
+
+            if ("json".equals(type)) {
+                try (FileWriter writer = new FileWriter(fileName + ".json")) {
+                    writer.write(result.toString());
+                } catch (IOException e) {
+                    log.error("export data fail, sceneId = {}, elementId = {}, type = {}", sceneId, elementId, type);
+                    throw new MpRuntimeException(CsceneErrorCode.EXPORT_ERROR);
+                }
+                FileUtil.setResponse(new File(fileName + ".json"), true, response);
+            } else if ("xml".equals(type)) {
+                try (FileWriter fileWriter = new FileWriter(fileName + ".xml")) {
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    JsonNode jsonNode = objectMapper.readTree(result.toJSONString());
+
+                    fileWriter.write(new XmlMapper().writeValueAsString(jsonNode));
+                } catch (IOException e) {
+                    log.error("export data fail, sceneId = {}, elementId = {}, type = {}", sceneId, elementId, type);
+                    throw new MpRuntimeException(CsceneErrorCode.EXPORT_ERROR);
+                }
+                FileUtil.setResponse(new File(fileName + ".xml"), true, response);
+            } else if ("xlsx".equals(type)) {
+
+                String filePath = fileName + ".xlsx";
+                ExcelDataHandler.exportExcel(fileCount, filePath, "文件变更数量",
+                        Arrays.asList("sceneId", "group", "log"), ExcelHeader.FILE_COUNT);
+
+                ExcelDataHandler.exportExcel(fileList, filePath, "文件变更列表",
+                        Arrays.asList("sceneId", "group", "md5Before", "md5After", "log"), ExcelHeader.FILE_LIST);
+
+                ExcelDataHandler.exportExcel(registryCount, filePath, "注册表变更数量",
+                        Arrays.asList("sceneId", "group", "log"), ExcelHeader.FILE_COUNT);
+
+                ExcelDataHandler.exportExcel(registryList, filePath, "注册表变更列表",
+                        Arrays.asList("sceneId", "group", "fileSize", "log"), ExcelHeader.REGISTRY_LIST);
+
+                ExcelDataHandler.exportExcel(logList, filePath, "日志事件",
+                        Arrays.asList("sceneId", "log", "logType"), ExcelHeader.LOG_LIST);
+
+                ExcelDataHandler.exportExcel(probeList, filePath, "自定义采集",
+                        Arrays.asList("sceneId", "log", "eventDesc"), ExcelHeader.PROBE_LIST);
+
+                ExcelDataHandler.exportExcel(alarmList, filePath, "告警事件",
+                        Arrays.asList("sceneId", "log", "logType"), ExcelHeader.ALARM_LIST);
+
+                FileUtil.setResponse(new File(fileName + ".xlsx"), true, response);
             }
-            FileUtil.setResponse(new File(fileName + ".xml"), true, response);
-        } else if ("xlsx".equals(type)) {
-
-            String filePath = fileName + ".xlsx";
-            ExcelDataHandler.exportExcel(fileCount, filePath, "文件变更数量",
-                    Arrays.asList("sceneId", "group", "log"), ExcelHeader.FILE_COUNT);
-
-            ExcelDataHandler.exportExcel(fileList, filePath, "文件变更列表",
-                    Arrays.asList("sceneId", "group", "md5Before", "md5After", "log"), ExcelHeader.FILE_LIST);
-
-            ExcelDataHandler.exportExcel(registryCount, filePath, "注册表变更数量",
-                    Arrays.asList("sceneId", "group", "log"), ExcelHeader.FILE_COUNT);
-
-            ExcelDataHandler.exportExcel(registryList, filePath, "注册表变更列表",
-                    Arrays.asList("sceneId", "group", "fileSize", "log"), ExcelHeader.REGISTRY_LIST);
-
-            ExcelDataHandler.exportExcel(logList, filePath, "日志事件",
-                    Arrays.asList("sceneId", "log", "logType"), ExcelHeader.LOG_LIST);
-
-            ExcelDataHandler.exportExcel(probeList, filePath, "自定义采集",
-                    Arrays.asList("sceneId", "log", "eventDesc"), ExcelHeader.PROBE_LIST);
-
-            ExcelDataHandler.exportExcel(alarmList, filePath, "告警事件",
-                    Arrays.asList("sceneId", "log", "logType"), ExcelHeader.ALARM_LIST);
-
-            FileUtil.setResponse(new File(fileName + ".xlsx"), true, response);
+        }catch (Exception e){
+            log.error("export data fail, sceneId = {}, elementId = {}, type = {}", sceneId, elementId, type);
         }
+
     }
 
     private ElementFileListBO collectionHostEventBO2ElementFileListModel(CollectionHostEventBO bo, String group) {
