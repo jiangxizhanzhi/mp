@@ -128,6 +128,10 @@ public class HostStateController {
         List<HostState> processes = new ArrayList<>();
         for (SceneCycleDataModel model : result) {
             var p = JsonCommon.parse(model.getData(), HostState.class);
+            if (p.getMemoryPercent() != null && p.getMemoryPercent() > 100) {
+                log.info("发现内存使用率大于100的数据，设置异常标记");
+                p.setErrorData(true);
+            }
             processes.add(p);
         }
         Collections.reverse(processes);

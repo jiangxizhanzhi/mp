@@ -92,4 +92,6 @@ public class HostState {
 
     @ApiModelProperty("磁盘IO利用率 百分比")
     private Double diskIoPercent;
+
+    private Boolean errorData;
 }

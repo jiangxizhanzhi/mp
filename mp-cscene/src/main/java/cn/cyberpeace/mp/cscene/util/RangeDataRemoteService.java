@@ -23,8 +23,10 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * 分靶场的数据
@@ -72,7 +74,14 @@ public class RangeDataRemoteService {
         var result = testRangeApiProxy.pageProcesses(listPageInfoQueryParams);
         // 存库
         List<SceneCycleDataModel> dataToSave = new ArrayList<>();
+        Set<String> pids = new HashSet<>();
         for (var r : result.getData().getList()) {
+            if (pids.contains(String.valueOf(r.getPid()))) {
+                log.info("发现重复的pid:{} ， 跳过记录", r.getPid());
+                continue;
+            } else {
+                pids.add(String.valueOf(r.getPid()));
+            }
             SceneCycleDataModel dataModel = new SceneCycleDataModel();
             dataModel.setScene(sceneId);
             dataModel.setSceneElement(nodeId);
