@@ -15,6 +15,7 @@ public interface TestRangeApiUrl {
 
     public static final String ELEMENT_TREND_STATE = "/api/mp/cscene/monitor/hoststate/element_trend";
     public static final String ELEMENT_STATE = "/api/mp/cscene/monitor/hoststate";
+    public static final String ELEMENT_STATE_XML = "/api/mp/cscene/monitor/hoststate/xml";
     public static final String ELEMENT_NET_INTERFACE = "/api/mp/cscene/monitor/hoststate/element_netifaces";
     public static final String ELEMENT_PORT = "/api/mp/cscene/monitor/hoststate/element_port";
     public static final String ELEMENT_PROCESS = "/api/mp/cscene/monitor/hoststate/element_process";

@@ -244,6 +244,7 @@ public class TestRangeApiProxy implements SubRangeMonitorInterface {
             if (csceneIdToNodeIds.containsKey(mapCsceneId)) {
                 pageRequest.setSceneId(mapCsceneId);
                 String result = TestRangeClientUtil.get(range, TestRangeApiUrl.ELEMENT_STATE, pageRequest, getAuthHeaderMap(range), 10000).getResult();
+                String result1 = TestRangeClientUtil.get(range, TestRangeApiUrl.ELEMENT_STATE_XML, pageRequest, getAuthHeaderMap(range), 10000).getResult();
                 return JsonCommon.snakeParse(result, new TypeReference<ServiceResult<List<HostState>>>() {
                 });
             }
