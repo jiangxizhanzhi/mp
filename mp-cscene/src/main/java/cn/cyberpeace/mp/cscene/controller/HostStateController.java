@@ -10,7 +10,6 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
 import cn.cyberpeace.mp.cscene.dto.element.XmlHostState;
-import cn.cyberpeace.mp.cscene.dto.element.XmlInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneAttCkTypeCountInfo;
 import cn.cyberpeace.mp.cscene.request.agent.AgentNameBasedRequest;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
