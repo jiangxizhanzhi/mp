@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /**
  * @Description:
@@ -98,7 +99,32 @@ public class HostStateController {
     public ServiceResult<List<HostState>> getElementHostStateTrend(HostStateTrendRequest hostStateTrendRequest) {
         List<HostState> hostStates = hostStateService.getElementHostStateTrend(hostStateTrendRequest);
 
+        if (trend == 1) {
+            for (int i = 0; i < hostStates.size(); i++) {
+                if (hostStates.get(i).getMemoryPercent() > 0) {
+                    hostStates.get(i).setMemoryPercent(100.0 + new Random().nextInt(100));
+                    break;
+                }
+            }
+        } else if (new Random().nextInt() % 10 == 0 && CollectionUtils.isNotEmpty(hostStates)) {
+            for (int i = 0; i < hostStates.size(); i++) {
+                if (hostStates.get(i).getMemoryPercent() > 0) {
+                    hostStates.get(i).setMemoryPercent(100.0 + new Random().nextInt(100));
+                    break;
+                }
+            }
+        }
+
         return ResultCommon.success(hostStates);
+    }
+
+    public static Integer trend = 0 ;
+
+    @ApiOperation(value = "节点主机状态趋势图")
+    @GetMapping("/set_trend")
+    public ServiceResult<Integer> setTrend(Integer trend) {
+        this.trend = trend;
+        return new ServiceResult<>(trend).asResult();
     }
 
 

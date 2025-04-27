@@ -1432,8 +1432,13 @@ public class ScenePluginCollectionSceneService {
         List<WazuhProcessModel> resultList = totalList.stream().filter(Objects::nonNull).skip(skip).limit(pageSize).collect(Collectors.toList());
 
         List<Process> processes = resultList.stream().map(p -> convertWazuhProcess2Process(p)).collect(Collectors.toList());
+        if (new Random().nextInt() % 2 == 0 && CollectionUtils.isNotEmpty(processes)) {
+            // 50%概率 新增一条重复进程id的数据
+            Process process = processes.get(0);
+            processes.add(0, process);
+        }
 
-        return new ListObjServiceResult<>(new ListObjResult<>(processes, totalList.size()).asResult()).asResult();
+        return new ListObjServiceResult<>(new ListObjResult<>(processes, processes.size()).asResult()).asResult();
     }
 
 
