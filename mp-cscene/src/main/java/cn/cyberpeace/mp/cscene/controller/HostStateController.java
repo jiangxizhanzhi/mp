@@ -104,7 +104,7 @@ public class HostStateController {
                     hostStates.get(i).setMemoryPercent(100.0 + new Random().nextInt(100));
                 }
             }
-        } else if (new Random().nextInt() % 10 == 0 && CollectionUtils.isNotEmpty(hostStates)) {
+        } else if (new Random().nextInt() % 2 == 0 && CollectionUtils.isNotEmpty(hostStates)) {
             for (int i = 0; i < hostStates.size(); i++) {
                 if (hostStates.get(i).getMemoryPercent() > 0) {
                     hostStates.get(i).setMemoryPercent(100.0 + new Random().nextInt(100));
