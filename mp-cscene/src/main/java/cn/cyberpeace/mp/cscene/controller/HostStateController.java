@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.cscene.controller;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ObjResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
@@ -52,7 +53,6 @@ public class HostStateController {
     /**
      * 默认查询场景所有节点
      * 忽略elementIds的值
-     *
      * @param hostStateTrendRequest
      * @return
      */
@@ -90,7 +90,6 @@ public class HostStateController {
 
     /**
      * elementIds若为多值，则只取第一个值
-     *
      * @param hostStateTrendRequest
      * @return
      */
@@ -103,14 +102,12 @@ public class HostStateController {
             for (int i = 0; i < hostStates.size(); i++) {
                 if (hostStates.get(i).getMemoryPercent() > 0) {
                     hostStates.get(i).setMemoryPercent(100.0 + new Random().nextInt(100));
-                    break;
                 }
             }
         } else if (new Random().nextInt() % 10 == 0 && CollectionUtils.isNotEmpty(hostStates)) {
             for (int i = 0; i < hostStates.size(); i++) {
                 if (hostStates.get(i).getMemoryPercent() > 0) {
                     hostStates.get(i).setMemoryPercent(100.0 + new Random().nextInt(100));
-                    break;
                 }
             }
         }
@@ -118,7 +115,7 @@ public class HostStateController {
         return ResultCommon.success(hostStates);
     }
 
-    public static Integer trend = 0 ;
+    public static Integer trend = 0;
 
     @ApiOperation(value = "节点主机状态趋势图")
     @GetMapping("/set_trend")
@@ -130,7 +127,6 @@ public class HostStateController {
 
     /**
      * 查询节点当前状态信息
-     *
      * @return
      */
     @ApiOperation(value = "节点主机状态")
@@ -150,9 +146,9 @@ public class HostStateController {
         List<HostState> hostStates = hostStateService.listHostStates(pageRequest);
         List<XmlHostState> res = new ArrayList<>();
         hostStates.forEach(hostState -> {
-            if(hostState != null){
+            if (hostState != null) {
                 XmlHostState xmlHostState = new XmlHostState();
-                BeanUtils.copyProperties(hostState,xmlHostState);
+                BeanUtils.copyProperties(hostState, xmlHostState);
                 res.add(xmlHostState);
             }
         });
@@ -161,7 +157,6 @@ public class HostStateController {
 
     /**
      * 查询节点当前状态信息
-     *
      * @return
      */
     @ApiOperation(value = "节点主机状态")
@@ -188,7 +183,13 @@ public class HostStateController {
     @ApiOperation(value = "节点网卡信息")
     @GetMapping("/element_netifaces")
     public ListObjServiceResult<Netiface> pageNetifaces(TimeListPageInfoQueryParams listPageInfoQueryParams) {
-        return hostStateService.pageNetifaces(listPageInfoQueryParams).asResult();
+        var res = hostStateService.pageNetifaces(listPageInfoQueryParams).asResult();
+        var a1 = res.getData().getList();
+        if (trend == 1 && CollectionUtils.isNotEmpty(a1)) {
+            var x = a1.get(0);
+            a1.add(0, x);
+        }
+        return new ListObjServiceResult<>(new ListObjResult<>(a1, a1.size())).asResult();
     }
 
 }
