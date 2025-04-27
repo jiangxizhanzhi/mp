@@ -1,10 +1,16 @@
 package cn.cyberpeace.mp.cscene.controller;
 
+import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.base.service.result.ObjResult;
+import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
+import cn.cyberpeace.mp.cscene.dto.element.XmlHostState;
+import cn.cyberpeace.mp.cscene.dto.element.XmlInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneAttCkTypeCountInfo;
 import cn.cyberpeace.mp.cscene.request.agent.AgentNameBasedRequest;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
@@ -12,15 +18,16 @@ import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.request.hoststate.HostStateTrendRequest;
 import cn.cyberpeace.mp.cscene.service.HostStateService;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.TimeListPageInfoQueryParams;
-import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Netiface;
-import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
+import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.*;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -108,6 +115,23 @@ public class HostStateController {
         pageRequest.setPageSize(1);
         List<HostState> hostStates = hostStateService.listHostStates(pageRequest);
         return ResultCommon.success(hostStates);
+    }
+
+    @ApiOperation(value = "节点主机状态")
+    @GetMapping(value = "/xml", produces = MediaType.APPLICATION_XML_VALUE)
+    public ServiceResult<List<XmlHostState>> getXmlOS(BaseSceneElementPageRequest pageRequest) {
+        pageRequest.setPage(1);
+        pageRequest.setPageSize(1);
+        List<HostState> hostStates = hostStateService.listHostStates(pageRequest);
+        List<XmlHostState> res = new ArrayList<>();
+        hostStates.forEach(hostState -> {
+            if(hostState != null){
+                XmlHostState xmlHostState = new XmlHostState();
+                BeanUtils.copyProperties(hostState,xmlHostState);
+                res.add(xmlHostState);
+            }
+        });
+        return ResultCommon.success(res);
     }
 
     /**
