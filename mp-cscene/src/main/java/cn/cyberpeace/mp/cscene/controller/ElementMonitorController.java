@@ -133,12 +133,16 @@ public class ElementMonitorController {
     @ApiOperation(value = "节点操作系统信息")
     @GetMapping(value = "/xml/os", produces = MediaType.APPLICATION_XML_VALUE)
     public XmlOS getXmlOS(BaseSceneElementRequest baseRequest) {
-        OS os = sceneElementMonitorService.getOSInfo(baseRequest);
-        XmlOS xmlOS = new XmlOS();
-        if (os != null) {
-            BeanUtils.copyProperties(os, xmlOS);
+        try {
+            OS os = sceneElementMonitorService.getOSInfo(baseRequest);
+            XmlOS xmlOS = new XmlOS();
+            if (os != null) {
+                BeanUtils.copyProperties(os, xmlOS);
+            }
+            return xmlOS;
+        } catch (Exception e) {
+            return new XmlOS();
         }
-        return xmlOS;
     }
 
 
