@@ -100,30 +100,34 @@ public class ElementMonitorController {
     @ApiOperation(value = "节点操作系统信息")
     @GetMapping("/sys_info")
     public ServiceResult<OSV2> getSysOS(BaseSceneElementRequest baseRequest) {
-        OS os = sceneElementMonitorService.getOSInfo(baseRequest);
+        try {
+            OS os = sceneElementMonitorService.getOSInfo(baseRequest);
 
-        OSV2 osv2 = new OSV2();
-        if (os != null) {
-            osv2.setScan(os.getScan());
-            osv2.setRelease(os.getRelease());
-            osv2.setVersion(os.getVersion());
-            osv2.setAgentId(os.getAgentId());
-            osv2.setSystemArchitecture(os.getSystemArchitecture());
-            osv2.setSystemHostname(os.getSystemHostname());
-            osv2.setSystemName(os.getSystemName());
+            OSV2 osv2 = new OSV2();
+            if (os != null) {
+                osv2.setScan(os.getScan());
+                osv2.setRelease(os.getRelease());
+                osv2.setVersion(os.getVersion());
+                osv2.setAgentId(os.getAgentId());
+                osv2.setSystemArchitecture(os.getSystemArchitecture());
+                osv2.setSystemHostname(os.getSystemHostname());
+                osv2.setSystemName(os.getSystemName());
 
-            if (os.getOs() != null) {
-                OSV2.OSDetail detail = new OSV2.OSDetail();
-                detail.setMajor(os.getOs().getMajor());
-                detail.setMinor(os.getOs().getMinor());
-                detail.setName(os.getOs().getName());
-                detail.setPlatform(os.getOs().getPlatform());
-                detail.setSystemVersion(os.getOs().getSystemVersion());
-                osv2.setOs(detail);
+                if (os.getOs() != null) {
+                    OSV2.OSDetail detail = new OSV2.OSDetail();
+                    detail.setMajor(os.getOs().getMajor());
+                    detail.setMinor(os.getOs().getMinor());
+                    detail.setName(os.getOs().getName());
+                    detail.setPlatform(os.getOs().getPlatform());
+                    detail.setSystemVersion(os.getOs().getSystemVersion());
+                    osv2.setOs(detail);
+                }
             }
-        }
 
-        return ResultCommon.success(osv2);
+            return ResultCommon.success(osv2);
+        } catch (Exception e) {
+            return ResultCommon.success(new OSV2());
+        }
     }
 
     @ApiOperation(value = "节点操作系统信息")
