@@ -16,4 +16,6 @@ public class RoleBo extends RoleModel {
     @ApiModelProperty(value = "角色绑定的权限列表")
     private List<TargetModel> targets;
 
+
+
 }
