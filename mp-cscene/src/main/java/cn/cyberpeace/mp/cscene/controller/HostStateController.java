@@ -131,6 +131,9 @@ public class HostStateController {
             if (p.getMemoryPercent() != null && p.getMemoryPercent() > 100) {
                 log.info("发现内存使用率大于100的数据，设置异常标记");
                 p.setErrorData(true);
+                p.setOriginMemoryPercent(p.getMemoryPercent());
+                // 纠正为 100
+                p.setMemoryPercent(100.0);
             }
             processes.add(p);
         }

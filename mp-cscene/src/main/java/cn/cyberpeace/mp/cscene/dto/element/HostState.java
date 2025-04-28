@@ -94,4 +94,6 @@ public class HostState {
     private Double diskIoPercent;
 
     private Boolean errorData;
+
+    private Double originMemoryPercent;
 }
