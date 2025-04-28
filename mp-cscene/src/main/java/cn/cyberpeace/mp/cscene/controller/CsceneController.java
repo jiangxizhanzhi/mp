@@ -325,6 +325,13 @@ public class CsceneController implements BaseModelListControllerBase {
         return csceneSpecialService.statCscenes(ids).asResult();
     }
 
+    @ApiOperation("获取场景模板统计数据")
+    @ApiImplicitParam(name = "ids", value = "请求参数", dataTypeClass = String[].class)
+    @PostMapping("/stat")
+    public ServiceResult<List<CsceneStat>> postStatCscenes(@RequestBody postStatCscenesRequest postStatCscenesRequest) {
+        return csceneSpecialService.statCscenes(postStatCscenesRequest.getIds()).asResult();
+    }
+
     @ApiOperation("统计靶标对应引用该靶标的场景模板")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "images", value = "靶标名称", dataTypeClass = String[].class, allowMultiple = true),
