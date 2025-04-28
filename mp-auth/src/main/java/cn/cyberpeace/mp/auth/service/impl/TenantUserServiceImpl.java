@@ -33,10 +33,12 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
+//import cn.cyberpeace.mp.base.util.basic.CollectionUtils;
 import cn.hutool.core.collection.CollectionUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -572,6 +574,7 @@ public class TenantUserServiceImpl
             if (Objects.nonNull(userBo.getIsExpired()) && !Objects.equals(userBo.getIsExpired(), 0)) {
                 humanCondition.filterLessThan(UserModel::getExpiredTime, currentDateTime);
             }
+
             if (StringUtils.isNotBlank((userBo.getUsername()))) {
                 humanCondition.filterOrStart()
                         .orContains(UserModel::getUsername, userBo.getUsername())
@@ -579,6 +582,21 @@ public class TenantUserServiceImpl
                         .filterOrEnd();
             }
         }
+
+
+        // 新增部分：根据角色 ID 筛选用户
+        if (StringUtils.isNotBlank(userBo.getRoleId())) {
+            HumanCondition roleCondition = new HumanCondition()
+                    .filterEqual(UserRoleModel::getRole, userBo.getRoleId())
+                    .select(UserRoleModel::getUser)
+                    .distinct();
+            List<UserRoleModel> roleRelatedUserModels = userRoleMapper.list(roleCondition);
+            List<String> userIdsByRole = roleRelatedUserModels.stream().map(UserRoleModel::getUser).collect(Collectors.toList());
+            if (CollectionUtils.isNotEmpty(userIdsByRole)) {
+                humanCondition.filterIn(UserModel::getId, userIdsByRole.toArray());
+            }
+        }
+
         humanCondition.groupBy(UserModel::getId);
         if (CollectionUtil.isNotEmpty(orders)) {
             for (String order : orders) {

@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.auth.bo.excel.ExportUserBo;
 import cn.cyberpeace.mp.auth.bo.excel.ExportUserEnBo;
 import cn.cyberpeace.mp.auth.bo.excel.ImportUserBo;
 import cn.cyberpeace.mp.auth.bo.org.OrgBO;
+import cn.cyberpeace.mp.auth.bo.role.RoleBo;
 import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.bo.user.UserOrgRoleBo;
 import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
@@ -16,6 +17,7 @@ import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.TenantUserModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserRoleModel;
+import cn.cyberpeace.mp.auth.repository.RoleMapper;
 import cn.cyberpeace.mp.auth.repository.TenantUserMapper;
 import cn.cyberpeace.mp.auth.repository.UserMapper;
 import cn.cyberpeace.mp.auth.repository.UserRoleMapper;
@@ -130,7 +132,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Autowired
     private UserRoleMapper userRoleMapper;
 
-
+    @Autowired
+    private RoleMapper roleMapper;
     @Autowired
     public UserServiceImpl(UserMapper modelMapper, UserFields modelFields) {
         setModelMapper(modelMapper);
@@ -1162,6 +1165,21 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             return list.stream().map(UserModel::getUsername).collect(Collectors.toList());
         }
         return new ArrayList<>();
+    }
+
+    @Override
+    public List<UserBo> getRoleDropdownList() {
+        // 查询所有角色
+        List<RoleModel> roleModels = roleMapper.list(new HumanCondition().select(RoleModel::getId, RoleModel::getName));
+        // 把角色封装成 UserBo 对象列表
+        List<UserBo> result = new ArrayList<>();
+        for (RoleModel roleModel : roleModels) {
+            UserBo userBo = new UserBo();
+            userBo.setRoleId(roleModel.getId());
+            userBo.setRoleName(roleModel.getName());
+            result.add(userBo);
+        }
+        return result;
     }
 }
 

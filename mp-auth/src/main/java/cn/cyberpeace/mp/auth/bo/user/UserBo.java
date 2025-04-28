@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.auth.bo.user;
 import cn.cyberpeace.mp.auth.bo.org.OrgBO;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -39,5 +40,15 @@ public class UserBo extends UserModel {
 
     @ApiModelProperty(value = "角色集合")
     List<RoleModel> roles;
+
+    @ApiModelProperty(value = "角色ID")
+    private String roleId;
+
+    @ApiModelProperty(value = "角色名称")
+    private String roleName;
+
+    @ApiModelProperty(value = "1: 正常 0：禁用")
+    @DefaultInt(1)
+    private Integer isEnabled;
 
 }

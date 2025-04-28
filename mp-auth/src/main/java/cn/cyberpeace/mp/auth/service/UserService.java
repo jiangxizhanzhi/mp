@@ -113,5 +113,6 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
     ServiceResult<Integer> bulkCreateWithPasswordPreSet(List<UserModel> objs);
 
    List<String> listExistedUserNames(List<String> userNames, Integer limit);
-
+    //下拉
+    List<UserBo> getRoleDropdownList();
 }
