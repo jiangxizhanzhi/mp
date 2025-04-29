@@ -117,6 +117,7 @@ import cn.cyberpeace.mp.sceneplugincollection.service.param.*;
 import cn.cyberpeace.mp.scenepluginflow.plugin.params.FlowIdWithSourceIp;
 import cn.cyberpeace.mp.scenepluginflow.service.ScenePluginFlowSceneService;
 import cn.cyberpeace.mp.scenepluginflow.service.response.SceneFlowRecordsResponse;
+import cn.cyberpeace.mp.situationaware.config.AzureEsClientManager;
 import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.model.ProbeModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
@@ -146,10 +147,14 @@ import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpHost;
+import org.apache.http.util.Asserts;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
 import javax.annotation.Resource;
 import java.io.File;
@@ -1262,7 +1267,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             bo.setCatagory(model.getCatagory());
             bo.setType(model.getLogType());
             HashMap<Object, Object> ruleMap = new HashMap<>();
-            ruleMap.put("id",model.getRuleId());
+            ruleMap.put("id", model.getRuleId());
             HashMap<String, Object> contentMap = new HashMap<>();
             contentMap.put("rule", ruleMap);
             bo.setContent(contentMap);
@@ -3093,7 +3098,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         String wazuhManagerIp = requestData.getWazuhManagerIp();
 
 //        TODO 改bug暂时停止开发0422
-//        updateWazuhManagerIpByCloudType(cloudType, wazuhManagerIp);
+        updateWazuhManagerIpByCloudType(cloudType, wazuhManagerIp);
 
 
         /*IAzureResourceManager azureResourceManager = IAzureResourceManager.getInstance(requestData.getCloudType());
@@ -3174,14 +3179,20 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     }
 
+    @Autowired
+    private ConfigurableApplicationContext applicationContext;
+
+    @Autowired
+    private AzureEsClientManager azureEsClientManager;
+
     /**
      * 更新Wazuh管理器IP配置
      * 根据云类型替换相应配置中的IP地址
      *
-     * @param cloudType 云类型，决定使用哪套配置
+     * @param cloudType      云类型，决定使用哪套配置
      * @param wazuhManagerIp 新的Wazuh管理器IP地址
      */
-    private void updateWazuhManagerIpByCloudType(Integer cloudType, String wazuhManagerIp) {
+    private synchronized void updateWazuhManagerIpByCloudType(Integer cloudType, String wazuhManagerIp) {
         // 编译IP地址匹配模式
         Pattern pattern = Pattern.compile(IP_PATTERN);
         // 根据云类型执行相应的配置更新
@@ -3204,6 +3215,8 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 // 保留端口信息，仅替换IP地址
                 situationAwareConfig.setPublicWazuhEsNodes(wazuhManagerIp + situationAwareConfig.getPublicWazuhEsNodes().substring(situationAwareConfig.getPublicWazuhEsNodes().indexOf(":")));
                 situationAwareConfig.setPublicWazuhBaseUrl(newPublicWazuhBaseUrl);
+
+                azureEsClientManager.updateClient("publicWazuhRestHighLevelClient", situationAwareConfig.getPublicWazuhEsNodes());
                 break;
             case BaseSceneModel.CloudType.PRIVATE:
                 // 对私有云环境执行类似的替换操作
@@ -3232,6 +3245,21 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         }
     }
 
+    public HttpHost[] createPublicWazuHttpHost() {
+        String wazuhEsNodes = situationAwareConfig.getPublicWazuhEsNodes();
+        Asserts.check(!ObjectUtils.isEmpty(wazuhEsNodes), "ElasticSearch cluster ip address cannot empty");
+        String[] ipArray = wazuhEsNodes.split(",");
+        var httpHosts = new HttpHost[ipArray.length];
+        for (int i = 0, len = ipArray.length; i < len; i++) {
+            var ipAddress = ipArray[i];
+            String[] values = ipAddress.split(":");
+            String ip = values[0];
+            var port = Integer.parseInt(values[1]);
+            httpHosts[i] = new HttpHost(ip, port, "http");
+        }
+        return httpHosts;
+    }
+
     /**
      * 初始化AzureWazuh管理器的IP配置
      * 此方法从MicrosoftAzure登录映射中获取用户列表，并为每个用户更新Wazuh管理器的IP配置
@@ -3241,8 +3269,8 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         HumanCondition humanCondition = new HumanCondition();
         List<MicrosoftAzureUserModel> list = microsoftAzureLoginMapper.list(humanCondition);
         for (MicrosoftAzureUserModel microsoftAzureUserModel : list) {
-//            TODO 改bug暂时停止开发
-//            updateWazuhManagerIpByCloudType(microsoftAzureUserModel.getCloudType(), microsoftAzureUserModel.getWazuhManagerIp());
+//            TODO 改bug暂时停止开发0422
+            updateWazuhManagerIpByCloudType(microsoftAzureUserModel.getCloudType(), microsoftAzureUserModel.getWazuhManagerIp());
         }
     }
 

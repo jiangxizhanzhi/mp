@@ -21,22 +21,6 @@ public class SituationAwareEsConfig {
     public RestHighLevelClient wazuhRestHighLevelClient() {
         return new RestHighLevelClient(RestClient.builder(this.createWazuHttpHost()));
     }
-
-    @Bean(name = "publicWazuhRestHighLevelClient")
-    public RestHighLevelClient publicWazuhRestHighLevelClient() {
-        return new RestHighLevelClient(RestClient.builder(this.createPublicWazuHttpHost()));
-    }
-
-    @Bean(name = "privateWazuhRestHighLevelClient")
-    public RestHighLevelClient privateWazuhRestHighLevelClient() {
-        return new RestHighLevelClient(RestClient.builder(this.createPrivateWazuHttpHost()));
-    }
-
-    @Bean(name = "mixWazuhRestHighLevelClient")
-    public RestHighLevelClient mixWazuhRestHighLevelClient() {
-        return new RestHighLevelClient(RestClient.builder(this.createMixWazuHttpHost()));
-    }
-
     @Bean(name = "datasandtableRestHighLevelClient")
     public RestHighLevelClient datasandtableRestHighLevelClient() {
         return new RestHighLevelClient(RestClient.builder(this.createArkimeHttpHost()));

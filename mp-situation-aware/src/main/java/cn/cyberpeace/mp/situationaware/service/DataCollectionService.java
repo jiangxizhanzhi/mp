@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
+import cn.cyberpeace.mp.situationaware.config.AzureEsClientManager;
 import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.config.SituationCacheConfig;
 import cn.cyberpeace.mp.situationaware.constant.SicLaunchConfig;
@@ -93,16 +94,6 @@ public class DataCollectionService extends CollectionBaseService {
 
     @Resource(name = "wazuhRestHighLevelClient")
     private RestHighLevelClient restHighLevelClient;
-
-    @Resource(name = "publicWazuhRestHighLevelClient")
-    private RestHighLevelClient publicWazuhRestHighLevelClient;
-
-    @Resource(name = "privateWazuhRestHighLevelClient")
-    private RestHighLevelClient privateWazuhRestHighLevelClient;
-
-    @Resource(name = "mixWazuhRestHighLevelClient")
-    private RestHighLevelClient mixWazuhRestHighLevelClient;
-
 
     @Autowired
     private WazuhRepository wazuhRepository;
@@ -972,14 +963,19 @@ public class DataCollectionService extends CollectionBaseService {
         }
     }
 
+    @Autowired
+    private AzureEsClientManager azureEsClientManager;
     private SearchResponse getSearchResponseWithRetry(Integer cloudType, SearchRequest searchRequest) throws IOException {
         if (null != cloudType && BaseSceneModel.CloudType.PUBLIC == cloudType) {
+            RestHighLevelClient publicWazuhRestHighLevelClient = azureEsClientManager.getClient("publicWazuhRestHighLevelClient");
             SearchResponse response = publicWazuhRestHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
             return response;
         } else if (null != cloudType && BaseSceneModel.CloudType.PRIVATE == cloudType) {
+            RestHighLevelClient privateWazuhRestHighLevelClient = azureEsClientManager.getClient("privateWazuhRestHighLevelClient");
             SearchResponse response = privateWazuhRestHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
             return response;
         } else if (null != cloudType && BaseSceneModel.CloudType.MIX == cloudType) {
+            RestHighLevelClient mixWazuhRestHighLevelClient = azureEsClientManager.getClient("mixWazuhRestHighLevelClient");
             SearchResponse response = mixWazuhRestHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
             return response;
         } else {
@@ -990,12 +986,15 @@ public class DataCollectionService extends CollectionBaseService {
 
     private SearchResponse getScrollResponseWithRetry(Integer cloudType, SearchScrollRequest searchScrollRequest) throws IOException {
         if (null != cloudType && BaseSceneModel.CloudType.PUBLIC == cloudType) {
+            RestHighLevelClient publicWazuhRestHighLevelClient = azureEsClientManager.getClient("publicWazuhRestHighLevelClient");
             SearchResponse response = publicWazuhRestHighLevelClient.scroll(searchScrollRequest, RequestOptions.DEFAULT);
             return response;
         } else if (null != cloudType && BaseSceneModel.CloudType.PRIVATE == cloudType) {
+            RestHighLevelClient privateWazuhRestHighLevelClient = azureEsClientManager.getClient("privateWazuhRestHighLevelClient");
             SearchResponse response = privateWazuhRestHighLevelClient.scroll(searchScrollRequest, RequestOptions.DEFAULT);
             return response;
         } else if (null != cloudType && BaseSceneModel.CloudType.MIX == cloudType) {
+            RestHighLevelClient mixWazuhRestHighLevelClient = azureEsClientManager.getClient("mixWazuhRestHighLevelClient");
             SearchResponse response = mixWazuhRestHighLevelClient.scroll(searchScrollRequest, RequestOptions.DEFAULT);
             return response;
         } else {
@@ -1586,14 +1585,14 @@ public class DataCollectionService extends CollectionBaseService {
                 client = restHighLevelClient;
             } else {
                 switch (cloudType) {
-                    case 1:
-                        client = publicWazuhRestHighLevelClient;
+                    case BaseSceneModel.CloudType.PUBLIC:
+                        client = azureEsClientManager.getClient("publicWazuhRestHighLevelClient");
                         break;
-                    case 2:
-                        client = privateWazuhRestHighLevelClient;
+                    case BaseSceneModel.CloudType.PRIVATE:
+                        client = azureEsClientManager.getClient("privateWazuhRestHighLevelClient");
                         break;
-                    case 3:
-                        client = mixWazuhRestHighLevelClient;
+                    case BaseSceneModel.CloudType.MIX:
+                        client = azureEsClientManager.getClient("mixWazuhRestHighLevelClient");
                         break;
                 }
             }
