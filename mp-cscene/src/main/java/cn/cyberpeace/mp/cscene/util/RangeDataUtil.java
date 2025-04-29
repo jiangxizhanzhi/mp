@@ -56,7 +56,7 @@ public class RangeDataUtil {
 
     public static Map<String, CollectAgentConfig> configs = null;
 
-    @Scheduled(cron = "0/5 * * * * ?")
+    @Scheduled(cron = "0 0/1 * * * ?")
     public void registerTasks() {
         if (!executed) {
             // 在第0秒时注册一下任务，任务每分钟执行一次

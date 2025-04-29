@@ -50,7 +50,16 @@ public class RangeDataRemoteService {
         var result = testRangeApiProxy.pagePorts(listPageInfoQueryParams);
         // 存库
         List<SceneCycleDataModel> dataToSave = new ArrayList<>();
+        Set<String> port = new HashSet<>();
         for (var r : result.getData().getList()) {
+            String key = String.format("%s_%s_%s_%s", r.getLocal().getIp(), r.getLocal().getPort(), r.getRemote()
+                    .getIp(), r.getRemote().getPort());
+            if (port.contains(key)) {
+                log.info("发现重复的端口:{} ， 跳过记录", key);
+                continue;
+            } else {
+                port.add(key);
+            }
             SceneCycleDataModel dataModel = new SceneCycleDataModel();
             dataModel.setScene(sceneId);
             dataModel.setSceneElement(nodeId);
@@ -105,7 +114,14 @@ public class RangeDataRemoteService {
         var result = testRangeApiProxy.pageNetifaces(listPageInfoQueryParams);
         // 存库
         List<SceneCycleDataModel> dataToSave = new ArrayList<>();
+        Set<String> pids = new HashSet<>();
         for (var r : result.getData().getList()) {
+            if (pids.contains(String.valueOf(r.getName()))) {
+                log.info("发现重复的网卡:{} ， 跳过记录", r.getName());
+                continue;
+            } else {
+                pids.add(String.valueOf(r.getName()));
+            }
             SceneCycleDataModel dataModel = new SceneCycleDataModel();
             dataModel.setScene(sceneId);
             dataModel.setSceneElement(nodeId);
@@ -203,7 +219,15 @@ public class RangeDataRemoteService {
         hostEventQueryParams.setNodeIds(Arrays.asList(nodeId));
         var result = testRangeApiProxy.listHostEvents(sceneId, hostEventQueryParams);
         List<SceneCycleDataModel> dataToSave = new ArrayList<>();
+        Set<String> hosts = new HashSet<>();
         for (var r : result.getData().getList()) {
+            String key = r.getNodeName() + r.getAppName() + TimeUtils.localDateTimeToString(r.getTime());
+            if (hosts.contains(key)) {
+                log.info("发现重复的日志数据:{} ， 跳过记录", key);
+                continue;
+            } else {
+                hosts.add(key);
+            }
             SceneCycleDataModel dataModel = new SceneCycleDataModel();
             dataModel.setScene(sceneId);
             dataModel.setSceneElement(nodeId);
