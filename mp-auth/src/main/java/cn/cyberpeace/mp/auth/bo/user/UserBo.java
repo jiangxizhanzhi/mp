@@ -41,6 +41,11 @@ public class UserBo extends UserModel {
     @ApiModelProperty(value = "角色集合")
     List<RoleModel> roles;
 
+    @ApiModelProperty(value = "角色ID")
+    private String roleId;
+
+    @ApiModelProperty(value = "角色名称")
+    private String roleName;
 
     @ApiModelProperty(value = "1: 正常 0：禁用")
     @DefaultInt(1)

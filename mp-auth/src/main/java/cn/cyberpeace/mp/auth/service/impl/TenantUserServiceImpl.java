@@ -10,7 +10,10 @@ import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
-import cn.cyberpeace.mp.auth.model.*;
+import cn.cyberpeace.mp.auth.model.OrgModel;
+import cn.cyberpeace.mp.auth.model.TenantUserModel;
+import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.model.UserRoleModel;
 import cn.cyberpeace.mp.auth.repository.OrgMapper;
 import cn.cyberpeace.mp.auth.repository.TenantUserMapper;
 import cn.cyberpeace.mp.auth.repository.UserMapper;
@@ -102,8 +105,6 @@ public class TenantUserServiceImpl
 
     @Autowired
     private UserMapper userMapper;
-    @Autowired
-    private RoleModel roleModel;
 
     @Override
     public List<UserModel> listUsersByOrgId(String orgId) {
@@ -581,31 +582,20 @@ public class TenantUserServiceImpl
                         .filterOrEnd();
             }
         }
-        if (CollectionUtils.isNotEmpty(userBo.getRoles())) {
-            // 从 roles 集合中提取 roleId
-            List<String> roleIds = userBo.getRoles().stream()
-                    .map(RoleModel::getId)
-                    .collect(Collectors.toList());
-            //条件 找到与user相关联的
+
+
+        // 新增部分：根据角色 ID 筛选用户
+        if (StringUtils.isNotBlank(userBo.getRoleId())) {
             HumanCondition roleCondition = new HumanCondition()
-                    .filterIn(UserRoleModel::getRole, roleIds.toArray())
+                    .filterEqual(UserRoleModel::getRole, userBo.getRoleId())
                     .select(UserRoleModel::getUser)
                     .distinct();
-            //查到 相关的roles
-            List<UserRoleModel> roleRelateUserModels = userRoleMapper.list(roleCondition);
-            //提取有关用户id
-            List<String> userIdsByRole = new ArrayList<>();
-            for (UserRoleModel roleRelateUserModel : roleRelateUserModels) {
-                String user = roleRelateUserModel.getUser();
-                userIdsByRole.add(user);
-            }
-            //不为空 筛选出来
+            List<UserRoleModel> roleRelatedUserModels = userRoleMapper.list(roleCondition);
+            List<String> userIdsByRole = roleRelatedUserModels.stream().map(UserRoleModel::getUser).collect(Collectors.toList());
             if (CollectionUtils.isNotEmpty(userIdsByRole)) {
                 humanCondition.filterIn(UserModel::getId, userIdsByRole.toArray());
             }
         }
-
-
 
         humanCondition.groupBy(UserModel::getId);
         if (CollectionUtil.isNotEmpty(orders)) {

@@ -1169,15 +1169,16 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     public List<UserBo> getRoleDropdownList() {
-        // 构建查询条件
-        HumanCondition condition = new HumanCondition().select(RoleModel::getId, RoleModel::getName);
-        // 执行查询获取所有角色列表
-        List<RoleModel> roleModels = roleMapper.list(condition);
-        // 封装到 UserBo 对象
+        // 查询所有角色
+        List<RoleModel> roleModels = roleMapper.list(new HumanCondition().select(RoleModel::getId, RoleModel::getName));
+        // 把角色封装成 UserBo 对象列表
         List<UserBo> result = new ArrayList<>();
-        UserBo userBo = new UserBo();
-        userBo.setRoles(roleModels);
-        result.add(userBo);
+        for (RoleModel roleModel : roleModels) {
+            UserBo userBo = new UserBo();
+            userBo.setRoleId(roleModel.getId());
+            userBo.setRoleName(roleModel.getName());
+            result.add(userBo);
+        }
         return result;
     }
 }
