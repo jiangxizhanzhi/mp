@@ -55,7 +55,6 @@ public class HostStateController {
     /**
      * 默认查询场景所有节点
      * 忽略elementIds的值
-     *
      * @param hostStateTrendRequest
      * @return
      */
@@ -104,7 +103,6 @@ public class HostStateController {
 
     /**
      * elementIds若为多值，则只取第一个值
-     *
      * @param hostStateTrendRequest
      * @return
      */
@@ -128,12 +126,46 @@ public class HostStateController {
         List<HostState> processes = new ArrayList<>();
         for (SceneCycleDataModel model : result) {
             var p = JsonCommon.parse(model.getData(), HostState.class);
-            if (p.getMemoryPercent() != null && p.getMemoryPercent() > 100) {
-                log.info("发现内存使用率大于100的数据，设置异常标记");
-                p.setErrorData(true);
-                p.setOriginMemoryPercent(p.getMemoryPercent());
-                // 纠正为 100
-                p.setMemoryPercent(100.0);
+            if (p.getMemoryPercent() != null) {
+                if (p.getMemoryPercent() > 100) {
+                    log.info("发现内存使用率大于100的数据，设置异常标记");
+                    p.setErrorData(true);
+                    p.setOriginMemoryPercent(p.getMemoryPercent());
+                    // 纠正为 100
+                    p.setMemoryPercent(100.0);
+                } else if (p.getMemoryPercent() < 0) {
+                    log.info("发现内存使用率小于0的数据，设置异常标记");
+                    p.setErrorData(true);
+                    p.setOriginMemoryPercent(p.getMemoryPercent());
+                    // 纠正为 1
+                    p.setMemoryPercent(1.0);
+                }
+            }
+
+            if (p.getDiskPercent() != null) {
+                if (p.getDiskPercent() > 100) {
+                    log.info("发现磁盘使用率大于100的数据，设置异常标记");
+                    p.setErrorData(true);
+                    p.setOriginDiskPercent(p.getDiskPercent());
+                    // 纠正为 100
+                    p.setDiskPercent(100.0);
+                } else if (p.getDiskPercent() < 0) {
+                    log.info("发现磁盘使用率小于0的数据，设置异常标记");
+                    p.setErrorData(true);
+                    p.setOriginDiskPercent(p.getDiskPercent());
+                    // 纠正为 1
+                    p.setDiskPercent(1.0);
+                }
+            }
+
+            if (p.getCpuPercent() != null) {
+                if (p.getCpuPercent() < 0) {
+                    log.info("发现cpu使用率小于0的数据，设置异常标记");
+                    p.setErrorData(true);
+                    p.setOriginCpuPercent(p.getCpuPercent());
+                    // 纠正为 1
+                    p.setCpuPercent(1.0);
+                }
             }
             processes.add(p);
         }
@@ -145,7 +177,6 @@ public class HostStateController {
 
     /**
      * 查询节点当前状态信息
-     *
      * @return
      */
     @ApiOperation(value = "节点主机状态")
@@ -166,7 +197,6 @@ public class HostStateController {
 
     /**
      * 查询节点当前状态信息
-     *
      * @return
      */
     @ApiOperation(value = "节点主机状态")

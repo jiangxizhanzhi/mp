@@ -96,4 +96,8 @@ public class HostState {
     private Boolean errorData;
 
     private Double originMemoryPercent;
+
+    private Double originCpuPercent;
+
+    private Double originDiskPercent;
 }
