@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.bo.OptionBO;
@@ -521,7 +522,14 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     public ListObjServiceResult<CollectionHostEventBO> listHostEvents(@RequestParam String id,
                                                                       HostEventQueryParams queryParams) {
         handleQueryParams("listHostEvents", queryParams);
-        return modelService.listHostEvents(id, queryParams).asResult();
+        var res = modelService.listHostEvents(id, queryParams).asResult();
+
+        var a1 = res.getData().getList();
+        if (HostStateController.trend == 1 && CollectionUtils.isNotEmpty(a1)) {
+            var x = a1.get(0);
+            a1.add(0, x);
+        }
+        return new ListObjServiceResult<>(new ListObjResult<>(a1, a1.size())).asResult();
     }
 
     @ApiOperation("查询场景实例复盘时各类别采集数据的总数")

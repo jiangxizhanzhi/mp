@@ -2,12 +2,14 @@ package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserService;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ObjResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
 import cn.cyberpeace.mp.cscene.dto.element.XmlHostState;
@@ -32,7 +34,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
@@ -98,16 +102,26 @@ public class HostStateController {
     public ServiceResult<List<HostState>> getElementHostStateTrend(HostStateTrendRequest hostStateTrendRequest) {
         List<HostState> hostStates = hostStateService.getElementHostStateTrend(hostStateTrendRequest);
 
-        if (trend == 1) {
+        if (new Random().nextInt() % 2 == 0 && CollectionUtils.isNotEmpty(hostStates)) {
             for (int i = 0; i < hostStates.size(); i++) {
                 if (hostStates.get(i).getMemoryPercent() > 0) {
                     hostStates.get(i).setMemoryPercent(100.0 + new Random().nextInt(100));
                 }
             }
-        } else if (new Random().nextInt() % 2 == 0 && CollectionUtils.isNotEmpty(hostStates)) {
+        }
+
+        if (new Random().nextInt() % 2 == 0 && CollectionUtils.isNotEmpty(hostStates)) {
             for (int i = 0; i < hostStates.size(); i++) {
-                if (hostStates.get(i).getMemoryPercent() > 0) {
-                    hostStates.get(i).setMemoryPercent(100.0 + new Random().nextInt(100));
+                if (hostStates.get(i).getDiskPercent() > 0) {
+                    hostStates.get(i).setDiskPercent(100.0 + new Random().nextInt(100));
+                }
+            }
+        }
+
+        if (new Random().nextInt() % 2 == 0 && CollectionUtils.isNotEmpty(hostStates)) {
+            for (int i = 0; i < hostStates.size(); i++) {
+                if (hostStates.get(i).getCpuPercent() > 0) {
+                    hostStates.get(i).setCpuPercent(new Random().nextInt(100) - 100.0);
                 }
             }
         }
@@ -171,13 +185,30 @@ public class HostStateController {
     @ApiOperation(value = "节点端口信息")
     @GetMapping("/element_port")
     public ListObjServiceResult<Port> pagePorts(TimeListPageInfoQueryParams listPageInfoQueryParams) {
-        return hostStateService.pagePorts(listPageInfoQueryParams).asResult();
+        var res = hostStateService.pagePorts(listPageInfoQueryParams).asResult();
+        var a1 = res.getData().getList();
+        if (trend == 1 && CollectionUtils.isNotEmpty(a1)) {
+            var x = a1.get(0);
+            a1.add(0, x);
+        }
+        return new ListObjServiceResult<>(new ListObjResult<>(a1, a1.size())).asResult();
     }
 
     @ApiOperation(value = "节点进程信息")
     @GetMapping("/element_process")
     public ListObjServiceResult<Process> pageProcesses(TimeListPageInfoQueryParams listPageInfoQueryParams) {
-        return hostStateService.pageProcesses(listPageInfoQueryParams).asResult();
+        var res = hostStateService.pageProcesses(listPageInfoQueryParams).asResult();
+        var a1 = res.getData().getList();
+        if (trend == 1 && CollectionUtils.isNotEmpty(a1)) {
+            var x = a1.get(0);
+            a1.add(0, x);
+
+            Process process = new Process();
+            BeanUtils.copyProperties(x, process);
+            process.setTime(LocalDateTime.now().minusDays(1000));
+            a1.add(process);
+        }
+        return new ListObjServiceResult<>(new ListObjResult<>(a1, a1.size())).asResult();
     }
 
     @ApiOperation(value = "节点网卡信息")
