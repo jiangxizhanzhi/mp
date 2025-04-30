@@ -7,11 +7,13 @@ import cn.cyberpeace.mp.base.snmp_device.netgear.CommandTopData;
 import cn.cyberpeace.mp.base.snmp_device.netgear.JuniperData;
 import cn.cyberpeace.mp.base.snmp_device.netgear.NetgearData;
 import cn.cyberpeace.mp.base.util.basic.*;
+import cn.cyberpeace.mp.base.util.thread.ThreadUtils;
 import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.scene.repository.SceneMapper;
 import cn.cyberpeace.mp.scene.util.*;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
@@ -47,8 +49,10 @@ import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.support.IndicesOptions;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.core.io.ClassPathResource;
@@ -75,7 +79,8 @@ public class CreateHandler extends HandlerCommon {
             });
     private static final Random RANDOM = new Random();
 
-    private final Set<String> NOT_FAKE_EID_SET = new ConcurrentHashSet<>();
+
+    private static final Set<String> NOT_FAKE_EID_SET = new ConcurrentHashSet<>();
 
     private final VirtualSwitch vsClient = new VirtualSwitch();
     private final VirtualRouter vrClient = new VirtualRouter();
@@ -1378,20 +1383,26 @@ public class CreateHandler extends HandlerCommon {
         }
 
         //提交伪造数据
-        INSERT_FAKE_DATA_POOL.scheduleWithFixedDelay(() -> {
-            getPluginHandler().getElementMap().forEach((nodeId, cloudElement) -> {
-                try {
-                    setTopData(cloudElement);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                String eid = cloudElement.getSrcElement().getEid();
-                if (needFake(eid)) {
-                    //伪造主机信息数据
-                    insertHostInfoData(cloudElement);
-                }
-            });
-        }, 5000, 10000, TimeUnit.MILLISECONDS);
+        INSERT_FAKE_DATA_POOL.scheduleWithFixedDelay(ThreadUtils.format(() -> {
+            try {
+                getPluginHandler().getElementMap().forEach((nodeId, cloudElement) -> {
+                    try {
+                        setTopData(cloudElement);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    String eid = cloudElement.getSrcElement().getEid();
+                    if (needFake(eid, getPluginHandler().getScene().getSrcScene().getEid())) {
+                        //伪造主机信息数据
+                        log.info("start fake eid : {}", cloudElement.getSrcElement().getEid());
+                        insertHostInfoData(cloudElement);
+                    }
+                });
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+                log.error("fake data failed");
+            }
+        }), 5000, 15000, TimeUnit.MILLISECONDS);
 
     }
 
@@ -1522,7 +1533,8 @@ public class CreateHandler extends HandlerCommon {
     }
 
 
-    private void insertHostInfoData(CloudPluginSceneElementBO cloudElement) {
+
+    public static void insertHostInfoData(CloudPluginSceneElementBO cloudElement) {
         String eid = cloudElement.getSrcElement().getEid();
         String imageName = cloudElement.getImage();
         String hostInfoTemplate = getTemplate("config/host_info.json");
@@ -1533,23 +1545,34 @@ public class CreateHandler extends HandlerCommon {
             ip = "";
         }
         hostInfoTemplate = hostInfoTemplate.replace("$ip", ip);
-        hostInfoTemplate = hostInfoTemplate.replace("$name", cloudElement.getSrcElement().getName());
+
+        hostInfoTemplate = hostInfoTemplate.replace("$name", eid);
         hostInfoTemplate = hostInfoTemplate.replace("$id", eid);
 
         hostInfoTemplate = hostInfoTemplate.replace("$timestamp", TimeUtils.localDateTimeToUtcString(LocalDateTime.now()));
         hostInfoTemplate = hostInfoTemplate.replace("$@timestamp", TimeUtils.localDateTimeToUtcString(LocalDateTime.now()));
         hostInfoTemplate = hostInfoTemplate.replace("$sic_launch_time", TimeUtils.localDateTimeToUtcString(LocalDateTime.now()));
-        hostInfoTemplate = hostInfoTemplate.replace("$memory_used_percent", 50 +RANDOM.nextInt(20) + "");
         hostInfoTemplate = hostInfoTemplate.replace("$cpu_used_percent", 20 +RANDOM.nextInt(20) + "");
-        int ram = Optional.ofNullable(cloudElement.getSrcElement().getRam()).orElse(1) * 1024 * 1024;
-        hostInfoTemplate = hostInfoTemplate.replace("$memory_free", ram / (7 + RANDOM.nextInt(3)) + "");
+        long ram = Optional.ofNullable(cloudElement.getSrcElement().getRam()).orElse(1) * 1024 * 1024L;
+        if (ram == 0) {
+            ram = (long) 1024 * 1024;
+        }
+        long fakeRamUsed = (ram / (6 + RANDOM.nextInt(5)));
+
+        hostInfoTemplate = hostInfoTemplate.replace("$memory_free", ram - fakeRamUsed  + "");
         hostInfoTemplate = hostInfoTemplate.replace("$memory_total", ram + "");
+        hostInfoTemplate = hostInfoTemplate.replace("$memory_used_percent", (fakeRamUsed * 100L) / ram + "");
+
         int cpu = Optional.ofNullable(cloudElement.getSrcElement().getCpu()).orElse(1);
         hostInfoTemplate = hostInfoTemplate.replace("$cpu_count", cpu + "");
         hostInfoTemplate = hostInfoTemplate.replace("$cpu_percent", 1 + RANDOM.nextInt(5) + "");
         hostInfoTemplate = hostInfoTemplate.replace("$cpu_freq", "1861");
 
-        int disk = Optional.ofNullable(cloudElement.getSrcElement().getDisk()).orElse(10) * 1024 * 1024 * 1024;
+
+        long disk = Optional.ofNullable(cloudElement.getSrcElement().getDisk()).orElse(10) * 1024L * 1024L * 1024L;
+        if (disk == 0) {
+            disk = 10L * 1024 * 1024 * 1024;
+        }
         hostInfoTemplate = hostInfoTemplate.replace("$disk_total", disk + "");
         hostInfoTemplate = hostInfoTemplate.replace("$disk_used", disk / (7 + RANDOM.nextInt(3))  + "");
         hostInfoTemplate = hostInfoTemplate.replace("$disk_io_percent", 1 + RANDOM.nextInt(3) + "");
@@ -1560,6 +1583,7 @@ public class CreateHandler extends HandlerCommon {
         IndexRequest request = new IndexRequest(indexName).source(JsonCommon.parseMap(hostInfoTemplate));
         BulkRequest bulkRequest = new BulkRequest();
         bulkRequest.add(request);
+        log.info("save to es : {} {}", indexName, hostInfoTemplate);
         saveDataToEs(bulkRequest);
     }
 
@@ -1568,27 +1592,41 @@ public class CreateHandler extends HandlerCommon {
      * @param eid
      * @return
      */
-    private boolean needFake(String eid) {
-        if (StringUtils.isEmpty(eid)) {
+    public static boolean needFake(String eid, String sceneInstanceId) {
+        //如果当前场景实例关闭了也就需要伪造数据了。
+        SceneMapper sceneMapper =  BeanCommon.getBean(SceneMapper.class);
+        SceneModel sceneModel = sceneMapper.get(sceneInstanceId);
+        if (Objects.isNull(sceneModel)) {
             return false;
+        } else {
+            if (Objects.nonNull(sceneModel.getDeleted()) && sceneModel.getDeleted()) {
+                return false;
+            }
         }
-        if (NOT_FAKE_EID_SET.contains(eid)) {
-            return false;
-        }
+        // 1. 使用 BoolQuery 组合多个条件
+        BoolQueryBuilder boolQuery = QueryBuilders.boolQuery()
+                .must(QueryBuilders.termQuery("agent.id", eid))  // 精确匹配 agent.id
+                .must(QueryBuilders.termQuery("data.sic_launch_id.keyword", "eda72998ba654c8d8625f61eaa918eb3"))  // 确保字段为 keyword
+                .must(QueryBuilders.existsQuery("fake"));  // 存在 fake 字段
 
-        RestHighLevelClient restHighLevelClient = (RestHighLevelClient) BeanCommon.getBean("logRestHighLevelClient");
+// 2. 创建 SearchSourceBuilder
+        SearchSourceBuilder sourceBuilder = SearchSourceBuilder.searchSource()
+                .query(boolQuery)
+                .size(1);  // 仅需判断是否存在，取1条足够
+
+// 3. 构建 SearchRequest
+
         String suffix = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy.MM.dd"));
         String indexName = "wazuh-alerts-4.x-" + suffix;
         SearchRequest searchRequest = new SearchRequest(indexName);
-        searchRequest.indicesOptions().ignoreUnavailable();
-        searchRequest.indicesOptions().allowNoIndices();
-        searchRequest.source(SearchSourceBuilder.searchSource()
-                .query(QueryBuilders.termQuery("agent.id", eid))
-                .query(QueryBuilders.termQuery("data.sic_launch_id", "eda72998ba654c8d8625f61eaa918eb3"))
-                .query(QueryBuilders.existsQuery("fake")));
+        searchRequest.indicesOptions(IndicesOptions.lenientExpandOpen());  // 合并 ignoreUnavailable 和 allowNoIndices
+        searchRequest.source(sourceBuilder);
+
+// 4. 执行查询
+        RestHighLevelClient restHighLevelClient = (RestHighLevelClient) BeanCommon.getBean("logRestHighLevelClient");
         try {
             SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
-            boolean needFake = !(searchResponse.getHits().getTotalHits().value > 0);
+            boolean needFake = (searchResponse.getHits().getTotalHits().value == 0);  // 无命中则需伪造
             if (!needFake) {
                 NOT_FAKE_EID_SET.add(eid);
             }
@@ -2067,5 +2105,4 @@ public class CreateHandler extends HandlerCommon {
             private String packets;
         }
     }
-
 }

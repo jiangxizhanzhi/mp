@@ -2,23 +2,41 @@ package cn.cyberpeace.mp.base.util.snmp;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.snmp_device.huawei.HuaweiWaf5000V;
+
+import cn.cyberpeace.mp.base.snmp_device.juniper.JunosSrxFirewall;
 import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import com.alibaba.fastjson.JSONObject;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static cn.cyberpeace.mp.base.constant.BaseErrorCode.CUSTOM_ERROR;
 
 @Slf4j
 public class SnmpTaskServiceImpl {
+
+    public static List<String> walkSnmpData(SnmpAccessInfo accessInfo, String oid) {
+        SnmpAccessUtil snmpAccessUtil = null;
+
+        try {
+            log.info("尝试建立snmp链接, 参数为 {} , oid为 {}", accessInfo, oid);
+            snmpAccessUtil = SnmpAccessUtil.initSnmpAccessUtilFromTaskRequest(accessInfo);
+            List<String> value = snmpAccessUtil.exec(SnmpAccessUtil.WALK, oid).stream().map(obj -> obj.get("value").toString()).collect(Collectors.toList());
+            return value;
+        } catch (Exception e) {
+            log.error("snmp连接失败", e);
+            return Collections.emptyList();
+        } finally {
+            if (snmpAccessUtil!= null) {
+                snmpAccessUtil.close();
+            }
+        }
+
+    }
 
     public static String getSnmpData(SnmpAccessInfo accessInfo, String oid) {
         SnmpAccessUtil snmpAccessUtil = null;
@@ -154,9 +172,10 @@ public class SnmpTaskServiceImpl {
 
 
     public static void main(String[] args) {
-        HuaweiWaf5000V huaweiWaf5000V = new HuaweiWaf5000V("10.108.3.146");
-        log.info("获取镜像名称:{}, 系统信息：{}， CPU利用率：{}， 内存利用率：{}， 磁盘利用率：{}", huaweiWaf5000V.getImageName(),
-                huaweiWaf5000V.getSystemDesc(), huaweiWaf5000V.getCpuUsage(), huaweiWaf5000V.memoryUsage(), huaweiWaf5000V.diskUsage());
+        JunosSrxFirewall junosSrxFirewall = new JunosSrxFirewall("10.2.99.103");
+        log.info("image name:{}, system info：{}， CPU usage：{}， memory usage：{}， flash usage：{}", junosSrxFirewall.getImageName(),
+                junosSrxFirewall.getSystemDesc(), junosSrxFirewall.getCpuUsage(), junosSrxFirewall.memoryUsage(), junosSrxFirewall.diskUsage());
+        log.info("info");
     }
 }
 

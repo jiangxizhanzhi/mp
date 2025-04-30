@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.base.bo.IntervalSizeBO;
-import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
@@ -54,14 +53,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.unit.DataSize;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -449,7 +441,7 @@ public class HostStateService {
                 List<Port> ports = new ArrayList<>();
                 for(var l:list){
                     Port port = new Port();
-                    BeanUtils.copyProperties(l,port);
+                    BeanUtils.copyProperties(l, port);
                     port.setRemote(new Port.Remote());
                     port.setLocal(new Port.Local());
                     port.getRemote().setPort(l.getRemote().getPort());

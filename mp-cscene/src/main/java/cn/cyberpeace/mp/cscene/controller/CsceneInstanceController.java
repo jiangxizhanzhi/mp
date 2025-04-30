@@ -48,9 +48,11 @@ import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
 import cn.cyberpeace.mp.cscene.util.ReentrantLockUtils;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
-import cn.cyberpeace.mp.scene.core.event.SceneElementEventTransition;
+import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.CreateHandler;
 import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventTypeBO;
@@ -211,6 +213,19 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         setModelService(csceneInstanceService);
         setCsceneSpecialService(csceneSpecialService);
         setCsceneFileService(csceneFileService);
+    }
+
+    @ApiOperation("手动插入伪造数据")
+    @GetMapping("/insert_fake_data")
+    public ServiceResult<Boolean> insertFakeData(@RequestParam String sceneInstanceId) {
+        SceneHandler sceneHandler = new SceneHandler(sceneInstanceId, "", null);
+        CloudScenePluginHandler cloudScenePluginHandler =  sceneHandler.getPluginHandler("cpcloud");
+        cloudScenePluginHandler.getElementMap().forEach((nodeId, cloudElement) -> {
+            if (CreateHandler.needFake(cloudElement.getSrcElement().getEid(), sceneInstanceId)) {
+                CreateHandler.insertHostInfoData(cloudElement);
+            }
+        });
+        return new ServiceResult<>(Boolean.TRUE).asResult();
     }
 
     @ApiOperation("获取分页数据")

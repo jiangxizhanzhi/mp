@@ -14,8 +14,8 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class NetgearData {
 
-    //    private static final String PRE_PATH = "/root/.mp/resources/scene_plugin_collection";
-    private static final String PRE_PATH = "D:\\MJ\\code3\\test001\\netgear";
+        private static final String PRE_PATH = "/root/.mp/resources/scene_plugin_collection";
+//    private static final String PRE_PATH = "D:\\MJ\\code3\\test001\\netgear";
 
     private String host;
     private String username;
@@ -35,7 +35,8 @@ public class NetgearData {
         File tmpFile = null;
 
         try {
-            String pythonCmd = String.format("C:\\python3\\python.exe %s %s %s %s", scriptPath, host, username, password);
+
+            String pythonCmd = String.format("python3 %s %s %s %s", scriptPath, host, username, password);
             log.info("============python analyse cmd: {}", pythonCmd);
 
             Process process = Runtime.getRuntime().exec(pythonCmd);
