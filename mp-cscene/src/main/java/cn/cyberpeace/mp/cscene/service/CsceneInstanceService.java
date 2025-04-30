@@ -3217,6 +3217,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 situationAwareConfig.setPublicWazuhBaseUrl(newPublicWazuhBaseUrl);
 
                 azureEsClientManager.updateClient("publicWazuhRestHighLevelClient", situationAwareConfig.getPublicWazuhEsNodes());
+                new PublicWazuhControlCommon();
                 break;
             case BaseSceneModel.CloudType.PRIVATE:
                 // 对私有云环境执行类似的替换操作
@@ -3243,21 +3244,6 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 situationAwareConfig.setMixWazuhBaseUrl(newMixWazuhBaseUrl);
                 break;
         }
-    }
-
-    public HttpHost[] createPublicWazuHttpHost() {
-        String wazuhEsNodes = situationAwareConfig.getPublicWazuhEsNodes();
-        Asserts.check(!ObjectUtils.isEmpty(wazuhEsNodes), "ElasticSearch cluster ip address cannot empty");
-        String[] ipArray = wazuhEsNodes.split(",");
-        var httpHosts = new HttpHost[ipArray.length];
-        for (int i = 0, len = ipArray.length; i < len; i++) {
-            var ipAddress = ipArray[i];
-            String[] values = ipAddress.split(":");
-            String ip = values[0];
-            var port = Integer.parseInt(values[1]);
-            httpHosts[i] = new HttpHost(ip, port, "http");
-        }
-        return httpHosts;
     }
 
     /**

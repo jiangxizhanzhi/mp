@@ -13,7 +13,7 @@ public class PublicWazuhControlCommon {
 
     public static WazuhControl wazuhControl;
 
-    private PublicWazuhControlCommon(CollectionSingleton collectionSingleton) {
+    public PublicWazuhControlCommon() {
         var builder = WazuhControl.builder()
                 .configWazuh(
                         CollectionSingleton.collectionAppConfig.getPublicWazuhApiServer(),
