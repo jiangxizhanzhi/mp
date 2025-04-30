@@ -5,12 +5,17 @@ import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.cscene.bo.*;
+import cn.cyberpeace.mp.cscene.bo.CsceneAuthorizeBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneStat;
+import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneActionRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneAuthorizeRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneCreateInstanceRequest;
 import cn.cyberpeace.mp.cscene.model.CsceneModel;
+import cn.cyberpeace.mp.sceneplugincloud.model.CveDataModel;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
@@ -22,6 +27,8 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +40,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -275,5 +283,34 @@ public class CsceneController implements BaseModelListControllerBase {
     public ServiceResult<Map<String, List<DeviceReferCsceneStat>>> statDeviceReferCscenes(
             @RequestParam String[] images) {
         return csceneSpecialService.statDeviceReferCscenes(images).asResult();
+    }
+
+    @PostMapping("/add_data")
+    public ServiceResult<Boolean> addData(@RequestBody ListCveData request) {
+        var cveDatas = request.getCveDatas();
+        List<CveDataModel> models = new ArrayList<>();
+        for (CveData cveData : cveDatas) {
+            var cveDataModel = new CveDataModel();
+            cveDataModel.setDeviceVersion(cveData.getDeviceVersion());
+            cveDataModel.setContent(JsonCommon.stringify(cveData.getVulnerability()));
+            models.add(cveDataModel);
+        }
+        // 下面注释掉的代码可以用来添加测试数据
+//        BeanCommon.getBean(CveDataMapper.class).bulkCreate(models);
+//        CreateHandler.buildData("juniper12","7554c945ecb74641ad3587687f309ce7","aa");
+        return new ServiceResult<>(true).asResult();
+    }
+
+    @Getter
+    @Setter
+    public static class ListCveData {
+        private List<CveData> cveDatas;
+    }
+
+    @Getter
+    @Setter
+    public static class CveData {
+        private Map<String,Object> vulnerability;
+        private String deviceVersion;
     }
 }

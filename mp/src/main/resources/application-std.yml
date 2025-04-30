@@ -29,6 +29,7 @@ spring:
     #      enabled: ${MP_FLYWAY_ENABLED_VALUE:false}
     clean-disabled: true
     enabled: ${spring.flyway.ext-var.enabled}
+    ignore-ignored-migrations: true
     out-of-order: true
   application:
     name: mp

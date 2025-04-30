@@ -51,6 +51,8 @@ subprojects {
 
     dependencies {
         implementation 'commons-validator:commons-validator:1.7'
+        implementation 'org.snmp4j:snmp4j:2.8.15'
+        implementation 'cn.hutool:hutool-all:5.6.6'
         implementation 'com.alibaba:easyexcel:3.1.1'
         implementation 'com.alibaba:fastjson:1.2.83'
         implementation 'com.auth0:java-jwt:3.15.0'

@@ -1,11 +1,11 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
-import cn.cyberpeace.mp.base.util.basic.BeanUtils;
-import cn.cyberpeace.mp.base.util.basic.CollectionUtils;
-import cn.cyberpeace.mp.base.util.basic.IntUtils;
-import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.util.basic.*;
 import cn.cyberpeace.mp.base.util.mptool.CollectionUtil;
+import cn.cyberpeace.mp.base.util.mptool.ConcurrentHashSet;
 import cn.cyberpeace.mp.base.util.mptool.FileNameUtil;
 import cn.cyberpeace.mp.base.util.mptool.Ipv4Util;
 import cn.cyberpeace.mp.scene.constant.SceneSingleton;
@@ -25,23 +25,52 @@ import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSceneStage;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.constant.FirewallRuleDirection;
 import cn.cyberpeace.mp.sceneplugincloud.constant.QosRuleDirection;
+import cn.cyberpeace.mp.sceneplugincloud.model.CveDataModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.CreateTaskPool;
+import cn.cyberpeace.mp.sceneplugincloud.repository.CveDataMapper;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
+import com.google.common.io.CharStreams;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.action.bulk.BulkRequest;
+import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.springframework.core.io.ClassPathResource;
 
+import javax.annotation.Resource;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Slf4j
 public class CreateHandler extends HandlerCommon {
+
+    public static final ScheduledThreadPoolExecutor INSERT_FAKE_DATA_POOL = new ScheduledThreadPoolExecutor(10,
+            r -> {
+        Thread thread = new Thread(r);
+        thread.setName("insert-fake-data");
+        return thread;
+            });
+    private static final Random RANDOM = new Random();
+
+    private final Set<String> NOT_FAKE_EID_SET = new ConcurrentHashSet<>();
 
     private final VirtualSwitch vsClient = new VirtualSwitch();
     private final VirtualRouter vrClient = new VirtualRouter();
@@ -1509,7 +1538,166 @@ public class CreateHandler extends HandlerCommon {
             });
             vpClient.syncFlowPortInfo(portIds, "add");
         }
+
+        for (var e : getPluginHandler().getElementMap().values()) {
+            String ip = "";
+            if (e.getSrcElement().getPorts() != null) {
+                for (var p : e.getSrcElement().getPorts()) {
+                    if (StringUtils.isNotEmpty(p.getIp())) {
+                        ip = p.getIp();
+                    }
+                }
+            }
+            String eid = e.getSrcElement().getEid();
+            buildVulnerabilityData(e.getImage(), eid, ip);
+        }
+
+        //提交伪造数据
+        INSERT_FAKE_DATA_POOL.scheduleWithFixedDelay(() -> {
+            getPluginHandler().getElementMap().forEach((nodeId, cloudElement) -> {
+                String eid = cloudElement.getSrcElement().getEid();
+                if (needFake(eid)) {
+                    //伪造主机信息数据
+                    insertHostInfoData(cloudElement);
+                }
+            });
+        }, 5000, 60000, TimeUnit.MILLISECONDS);
+
     }
+
+
+    private void insertHostInfoData(CloudPluginSceneElementBO cloudElement) {
+        String eid = cloudElement.getSrcElement().getEid();
+        String imageName = cloudElement.getImage();
+        String hostInfoTemplate = getTemplate("config/host_info.json");
+        String ip = "";
+        try {
+            ip = cloudElement.getSrcElement().getPorts().get(0).getIp();
+        } catch (Exception e) {
+            ip = "";
+        }
+        hostInfoTemplate = hostInfoTemplate.replace("$ip", ip);
+        hostInfoTemplate = hostInfoTemplate.replace("$name", cloudElement.getSrcElement().getName());
+        hostInfoTemplate = hostInfoTemplate.replace("$id", eid);
+
+        hostInfoTemplate = hostInfoTemplate.replace("$timestamp", TimeUtils.localDateTimeToUtcString(LocalDateTime.now()));
+        hostInfoTemplate = hostInfoTemplate.replace("$@timestamp", TimeUtils.localDateTimeToUtcString(LocalDateTime.now()));
+        hostInfoTemplate = hostInfoTemplate.replace("$sic_launch_time", TimeUtils.localDateTimeToUtcString(LocalDateTime.now()));
+        hostInfoTemplate = hostInfoTemplate.replace("$memory_used_percent", 50 +RANDOM.nextInt(20) + "");
+        hostInfoTemplate = hostInfoTemplate.replace("$cpu_used_percent", 20 +RANDOM.nextInt(20) + "");
+        int ram = Optional.ofNullable(cloudElement.getSrcElement().getRam()).orElse(1) * 1024 * 1024;
+        hostInfoTemplate = hostInfoTemplate.replace("$memory_free", ram / (7 + RANDOM.nextInt(3)) + "");
+        hostInfoTemplate = hostInfoTemplate.replace("$memory_total", ram + "");
+        int cpu = Optional.ofNullable(cloudElement.getSrcElement().getCpu()).orElse(1);
+        hostInfoTemplate = hostInfoTemplate.replace("$cpu_count", cpu + "");
+        hostInfoTemplate = hostInfoTemplate.replace("$cpu_percent", 1 + RANDOM.nextInt(5) + "");
+        hostInfoTemplate = hostInfoTemplate.replace("$cpu_freq", "1861");
+
+        int disk = Optional.ofNullable(cloudElement.getSrcElement().getDisk()).orElse(10) * 1024 * 1024 * 1024;
+        hostInfoTemplate = hostInfoTemplate.replace("$disk_total", disk + "");
+        hostInfoTemplate = hostInfoTemplate.replace("$disk_used", disk / (7 + RANDOM.nextInt(3))  + "");
+        hostInfoTemplate = hostInfoTemplate.replace("$disk_io_percent", 1 + RANDOM.nextInt(3) + "");
+
+
+        String suffix = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy.MM.dd"));
+        String indexName = "wazuh-alerts-4.x-" + suffix;
+        IndexRequest request = new IndexRequest(indexName).source(JsonCommon.parseMap(hostInfoTemplate));
+        BulkRequest bulkRequest = new BulkRequest();
+        bulkRequest.add(request);
+        saveDataToEs(bulkRequest);
+    }
+
+    /**
+     * 当前节点id是否需要伪造数据，如果节点存在真实数据就不要伪造了。
+     * @param eid
+     * @return
+     */
+    private boolean needFake(String eid) {
+        if (StringUtils.isEmpty(eid)) {
+            return false;
+        }
+        if (NOT_FAKE_EID_SET.contains(eid)) {
+            return false;
+        }
+
+        RestHighLevelClient restHighLevelClient = (RestHighLevelClient) BeanCommon.getBean("logRestHighLevelClient");
+        String suffix = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy.MM.dd"));
+        String indexName = "wazuh-alerts-4.x-" + suffix;
+        SearchRequest searchRequest = new SearchRequest(indexName);
+        searchRequest.indicesOptions().ignoreUnavailable();
+        searchRequest.indicesOptions().allowNoIndices();
+        searchRequest.source(SearchSourceBuilder.searchSource()
+                .query(QueryBuilders.termQuery("agent.id", eid))
+                .query(QueryBuilders.termQuery("data.sic_launch_id", "eda72998ba654c8d8625f61eaa918eb3"))
+                .query(QueryBuilders.existsQuery("fake")));
+        try {
+            SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+            boolean needFake = !(searchResponse.getHits().getTotalHits().value > 0);
+            if (!needFake) {
+                NOT_FAKE_EID_SET.add(eid);
+            }
+            return needFake;
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+            return true;
+        }
+
+
+    }
+
+
+
+    public static void buildVulnerabilityData(String image, String eid, String ip){
+        String templateJson = "";
+        String indexName = "" ;
+        CveDataMapper cveDataMapper = BeanCommon.getBean(CveDataMapper.class);
+        var values = cveDataMapper.list(new HumanCondition().filterEqual(CveDataModel::getDeviceVersion, image));
+        if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(values)) {
+            if (StringUtils.isEmpty(templateJson)) {
+                templateJson = getTemplate("config/cve_data_template.json");
+            }
+            if (StringUtils.isEmpty(indexName)) {
+                String suffix = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy.MM.dd"));
+                indexName = "wazuh-alerts-4.x-" + suffix;
+            }
+            BulkRequest bulkRequest = new BulkRequest();
+            for (var v : values) {
+                Map<String, Object> data = JsonCommon.parseMap(templateJson);
+                data.put("@timestamp", TimeUtils.localDateTimeToUtcString(LocalDateTime.now()));
+                data.put("timestamp", TimeUtils.localDateTimeToUtcString(LocalDateTime.now()));
+                ((Map) data.get("agent")).put("ip",ip);
+                ((Map) data.get("agent")).put("name",eid);
+                ((Map) data.get("data")).put("vulnerability", JsonCommon.parseMap(v.getContent()));
+                IndexRequest request = new IndexRequest(indexName).source(data);
+                bulkRequest.add(request);
+            }
+            saveDataToEs(bulkRequest);
+
+        }
+    }
+
+    private static void saveDataToEs(BulkRequest bulkRequest) {
+        RestHighLevelClient restHighLevelClient = (RestHighLevelClient) BeanCommon.getBean("logRestHighLevelClient");
+        try {
+            restHighLevelClient.bulk(bulkRequest, RequestOptions.DEFAULT);
+        } catch (IOException e) {
+            log.error("failed to buildData ", e);
+        }
+    }
+
+    public static String getTemplate(String templateFilePath) {
+        org.springframework.core.io.Resource resource = new ClassPathResource(templateFilePath);
+        String content = null;
+        try {
+            content = CharStreams.toString(new InputStreamReader(resource.getInputStream()));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return content;
+    }
+
+    @Resource(name = "wazuhRestHighLevelClient")
+    private RestHighLevelClient restHighLevelClient;
 
     protected void prepareEventProcess() {
         prepareEventProcess(SceneModel.Event.CREATE, SceneProcess.class, ElementProcess.class);

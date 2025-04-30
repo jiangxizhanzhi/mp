@@ -1,0 +1,65 @@
+{
+  "agent": {
+    "ip": "$ip",
+    "name": "$name",
+    "id": "$id"
+  },
+  "manager": {
+    "name": "38ce2119aa71"
+  },
+  "data": {
+    "sic_launch_group": "server",
+    "sic_launch_seconds": "5",
+    "sic_launch_returncode": "0",
+    "sic_launch_status": "success",
+    "sic_launch_id": "eda72998ba654c8d8625f61eaa918eb3",
+    "sic_launch_milliseconds": "5237",
+    "sic_launch_output": {
+      "MemoryUsedPercent": "$memory_used_percent",
+      "DiskReadBytes": "0",
+      "MemoryFree": "$memory_free",
+      "DownLoadSpeed": "888682.10KB/s",
+      "MaxNetSpeed": "65500Mb/s",
+      "CPUFreq": "$cpu_freq",
+      "DiskWriteBytes": "4683776",
+      "CPUCount": "$cpu_count",
+      "DiskTotal": "$disk_total",
+      "DiskIOPercent": "$disk_io_percent",
+      "MaxUploadSpeed": "888608.48KB/s",
+      "DiskUsed": "$disk_used",
+      "MaxDownLoadSpeed": "888608.48KB/s",
+      "CPUPercent": "$cpu_percent",
+      "MemoryTotal": "$memory_total",
+      "UploadSpeed": "888694.11KB/s"
+    },
+    "sic_launch_time": "$sic_launch_time",
+    "sic_launch_input": {
+      "output_format": "plain",
+      "extra": "null",
+      "id": "eda72998ba654c8d8625f61eaa918eb3",
+      "matcher": "cmd",
+      "command": "/var/ossec/bin/tools/python27/python /var/ossec/bin/tools/eda72998ba654c8d8625f61eaa918eb3.py",
+      "group": "server"
+    }
+  },
+  "rule": {
+    "firedtimes": 15,
+    "mail": false,
+    "level": 7,
+    "description": "Cmd launch log",
+    "groups": [
+      "syslog"
+    ],
+    "id": "330002"
+  },
+  "decoder": {
+    "name": "json"
+  },
+  "input": {
+    "type": "log"
+  },
+  "@timestamp": "$@timestamp",
+  "location": "/var/ossec/logs/cmd-launcher.log",
+  "timestamp": "$timestamp",
+  "fake": true
+}
