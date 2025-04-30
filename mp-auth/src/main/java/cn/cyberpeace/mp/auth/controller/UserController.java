@@ -152,10 +152,10 @@ public class UserController {
         UserModel userModel = userService.modify(modifyRequest);
         return ResultCommon.success(userModel);
     }
-    @ApiOperation(value = "获取角色下拉列表", notes = "返回包含角色名称和角色ID的列表，用于用户管理页面角色下拉框展示")
-    @GetMapping("/dropdownlist")
-    public ServiceResult<List<UserBo>> getRoleDropdownList() {
-        List<UserBo> roleList = userService.getRoleDropdownList();
+    @ApiOperation(value = "下拉用户列表" , notes = "")
+    @PostMapping("/dropdownlist")
+    public ServiceResult<List<UserBo>> dropdownlist() {
+        List<UserBo> roleList =userService.getRoleDropdownlist();
         return ResultCommon.success(roleList);
     }
 }
