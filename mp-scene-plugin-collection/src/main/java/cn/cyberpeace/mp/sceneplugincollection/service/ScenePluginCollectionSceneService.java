@@ -290,24 +290,31 @@ public class ScenePluginCollectionSceneService {
 
     public ListObjServiceResult<CollectionHostStateBO> listHostStates(String sceneId, HostStateQueryParams queryParams) {
         var sceneHandler = new SceneHandler(sceneId, null, false, null);
-        // 没有采集插件
-        CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
-        if (pluginHandler == null) {
-            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
-        }
-        // 构建探针名和节点的映射
-        List<SceneElementBO> srcElements = getSrcElements(sceneHandler, queryParams.getNodeIds());
         Map<String, SceneElementBO> agentName2Element = new HashMap<>();
-        srcElements.forEach(srcElement -> {
-            var collectionElement = pluginHandler.getElement(srcElement.getId());
-            if (collectionElement == null || CollectionUtils.isEmpty(collectionElement.getProbes())) {
-                return;
-            }
-            if (collectionElement.getEnableProbeCollect() == null || !collectionElement.getEnableProbeCollect()) {
-                return;
-            }
-            agentName2Element.put(srcElement.getEid(), srcElement);
+        List<SceneElementBO> srcElements = getSrcElements(sceneHandler, queryParams.getNodeIds());
+        srcElements.forEach((element) -> {
+            agentName2Element.put(element.getEid(), element);
         });
+
+
+//        // 没有采集插件
+//        CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+//        if (pluginHandler == null) {
+//            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
+//        }
+//        // 构建探针名和节点的映射
+//        List<SceneElementBO> srcElements = getSrcElements(sceneHandler, queryParams.getNodeIds());
+//        Map<String, SceneElementBO> agentName2Element = new HashMap<>();
+//        srcElements.forEach(srcElement -> {
+//            var collectionElement = pluginHandler.getElement(srcElement.getId());
+//            if (collectionElement == null || CollectionUtils.isEmpty(collectionElement.getProbes())) {
+//                return;
+//            }
+//            if (collectionElement.getEnableProbeCollect() == null || !collectionElement.getEnableProbeCollect()) {
+//                return;
+//            }
+//            agentName2Element.put(srcElement.getEid(), srcElement);
+//        });
         // 没有探针
         if (agentName2Element.isEmpty()) {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
