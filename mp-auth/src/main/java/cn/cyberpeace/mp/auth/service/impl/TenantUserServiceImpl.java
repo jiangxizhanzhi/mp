@@ -102,8 +102,6 @@ public class TenantUserServiceImpl
 
     @Autowired
     private UserMapper userMapper;
-    @Autowired
-    private RoleModel roleModel;
     @Override
     public List<UserModel> listUsersByOrgId(String orgId) {
         ParamCheck.notBlank(orgId, AuthBasei18nCode.ORG_ID);
@@ -335,6 +333,10 @@ public class TenantUserServiceImpl
         userCondition.setIsEnabled(req.getIsEnabled());
         userCondition.setIsAudited(req.getIsAudited());
         userCondition.setIsExpired(req.getIsExpired());
+        userCondition.setRoles(new ArrayList<>());
+        RoleModel roleModel = new RoleModel();
+        roleModel.setId(req.getRoleId());
+        userCondition.getRoles().add(roleModel);
 
         UserModel selfUser = UserUtils.getLoginUser();
         String selfUserId = null;
@@ -604,6 +606,8 @@ public class TenantUserServiceImpl
             //不为空 筛选出来
             if (CollectionUtils.isNotEmpty(userIdsByRole)) {
                 humanCondition.filterIn(UserModel::getId, userIdsByRole.toArray());
+            }else{
+                humanCondition.filterIn(UserModel::getId, new String[]{"aaaaaaaaa"});
             }
         }
 

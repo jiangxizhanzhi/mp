@@ -37,6 +37,9 @@ public class OrgUserPageRequest extends PageRequest {
     @ApiModelProperty(value = "1：已过期 0：未过期")
     private Integer isExpired;
 
+    @ApiModelProperty(value = "1：已过期 0：未过期")
+    private String roleId;
+
 
     @Override
     public void ensure() {
