@@ -22,6 +22,8 @@ public interface SnmpDevice {
      */
     String getSystemDesc();
 
+    String getSystemVersion();
+
 
     /**
      * 获取设备的漏洞信息

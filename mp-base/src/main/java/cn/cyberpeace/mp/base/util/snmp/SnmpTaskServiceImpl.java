@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.base.util.snmp;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.snmp_device.cisco.CiscoRouter;
+import cn.cyberpeace.mp.base.snmp_device.cisco.CiscoFirewall;
 import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import com.alibaba.fastjson.JSONObject;
 import lombok.Getter;
@@ -154,9 +154,11 @@ public class SnmpTaskServiceImpl {
 
 
     public static void main(String[] args) {
-        CiscoRouter ciscoRouter = new CiscoRouter("10.108.3.129", "zhanzhi");
-        log.info("获取镜像名称:{}, 系统信息：{}， CPU利用率：{}， 内存利用率：{}， 磁盘利用率：{}", ciscoRouter.getImageName(),
-                ciscoRouter.getSystemDesc(), ciscoRouter.getCpuUsage(), ciscoRouter.memoryUsage(), ciscoRouter.diskUsage());
+
+
+        CiscoFirewall ciscoFirewall = new CiscoFirewall("10.108.3.131", "zhanzhi");
+        log.info("获取镜像名称:{}, 系统信息：{}， CPU利用率：{}， 内存利用率：{}， 磁盘利用率：{}", ciscoFirewall.getImageName(),
+                ciscoFirewall.getSystemDesc(), ciscoFirewall.getCpuUsage(), ciscoFirewall.memoryUsage(), ciscoFirewall.diskUsage());
     }
 }
 
