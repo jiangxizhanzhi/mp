@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.base.util.snmp;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.snmp_device.cisco.CiscoFirewall;
+import cn.cyberpeace.mp.base.snmp_device.huawei.HuaweiWaf5000V;
 import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import com.alibaba.fastjson.JSONObject;
 import lombok.Getter;
@@ -154,11 +154,9 @@ public class SnmpTaskServiceImpl {
 
 
     public static void main(String[] args) {
-
-
-        CiscoFirewall ciscoFirewall = new CiscoFirewall("10.108.3.131", "zhanzhi");
-        log.info("获取镜像名称:{}, 系统信息：{}， CPU利用率：{}， 内存利用率：{}， 磁盘利用率：{}", ciscoFirewall.getImageName(),
-                ciscoFirewall.getSystemDesc(), ciscoFirewall.getCpuUsage(), ciscoFirewall.memoryUsage(), ciscoFirewall.diskUsage());
+        HuaweiWaf5000V huaweiWaf5000V = new HuaweiWaf5000V("10.108.3.146");
+        log.info("获取镜像名称:{}, 系统信息：{}， CPU利用率：{}， 内存利用率：{}， 磁盘利用率：{}", huaweiWaf5000V.getImageName(),
+                huaweiWaf5000V.getSystemDesc(), huaweiWaf5000V.getCpuUsage(), huaweiWaf5000V.memoryUsage(), huaweiWaf5000V.diskUsage());
     }
 }
 

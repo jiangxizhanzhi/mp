@@ -4,7 +4,7 @@ import cn.cyberpeace.mp.base.util.snmp.SnmpAccessInfo;
 
 public interface SnmpDevice {
 
-    SnmpAccessInfo getSnmpAccessInfo(String host, String community);
+    SnmpAccessInfo getSnmpAccessInfo();
 
     String getHostIp();
     String getCommunity();

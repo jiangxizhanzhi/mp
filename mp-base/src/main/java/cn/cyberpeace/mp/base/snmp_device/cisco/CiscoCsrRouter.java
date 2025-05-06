@@ -1,10 +1,11 @@
 package cn.cyberpeace.mp.base.snmp_device.cisco;
 
-public class CiscoRouter extends BasicCiscoDevice {
-    public CiscoRouter(String hostIp, String community) {
-        this.hostIp = hostIp;
-        this.community = community;
-    }
+import cn.cyberpeace.mp.base.snmp_device.BasicSnmpDevice;
+
+/**
+ * cisco rsv1000 支持的MIB库https://github.com/cisco/cisco-mibs/v2
+ */
+public class CiscoCsrRouter extends BasicSnmpDevice {
 
     @Override
     public String getImageName() {

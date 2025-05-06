@@ -2,13 +2,13 @@ package cn.cyberpeace.mp.base.snmp_device.cisco;
 
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.snmp_device.BasicSnmpDevice;
 
-public class CiscoFirewall extends BasicCiscoDevice{
-
-    public CiscoFirewall(String hostIp, String community) {
-        this.hostIp = hostIp;
-        this.community = community;
-    }
+/**
+ * asa snmp配置指南：https://community.cisco.com/t5/security-knowledge-base/snmp-configuration-verification-and-troubleshooting-on-asa/ta-p/4300068#toc-hId--271430661
+ * asa支持的MIB库范围：https://github.com/cisco/cisco-mibs/blob/main/supportlists/asa/asa-supportlist.html
+ */
+public class CiscoAsaFirewall extends BasicSnmpDevice {
 
     @Override
     public String getImageName() {
