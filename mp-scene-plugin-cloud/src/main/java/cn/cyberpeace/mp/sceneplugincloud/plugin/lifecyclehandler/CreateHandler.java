@@ -1,10 +1,13 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.CollectionUtils;
 import cn.cyberpeace.mp.base.util.basic.IntUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
@@ -14,25 +17,44 @@ import cn.cyberpeace.mp.scene.util.*;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CveVulnerabilityData;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.FirewallRule;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.SnmpConfig;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.constant.FirewallRuleDirection;
 import cn.cyberpeace.mp.sceneplugincloud.constant.QosRuleDirection;
+import cn.cyberpeace.mp.sceneplugincloud.model.CveDataModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.CreateTaskPool;
+import cn.cyberpeace.mp.sceneplugincloud.repository.CveDataMapper;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.io.file.FileNameUtil;
+import com.google.common.io.CharStreams;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
+import org.elasticsearch.action.bulk.BulkRequest;
+import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.common.xcontent.XContentType;
+import org.springframework.core.io.ClassPathResource;
 
+import javax.annotation.Resource;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -1326,7 +1348,67 @@ public class CreateHandler extends HandlerCommon {
             });
             vpClient.syncFlowPortInfo(portIds, "add");
         }
+
+        for (var e : getPluginHandler().getElementMap().values()) {
+            String ip = "";
+            if (e.getSrcElement().getPorts() != null) {
+                for (var p : e.getSrcElement().getPorts()) {
+                    if (StringUtils.isNotEmpty(p.getIp())) {
+                        ip = p.getIp();
+                    }
+                }
+            }
+            String eid = e.getSrcElement().getEid();
+            buildData(e.getImage(), eid, ip);
+        }
     }
+
+    public static void buildData(String image,String eid,String ip){
+        String templateJson = "";
+        String indexName = "" ;
+        CveDataMapper cveDataMapper = BeanCommon.getBean(CveDataMapper.class);
+        var values = cveDataMapper.list(new HumanCondition().filterEqual(CveDataModel::getDeviceVersion, image));
+        if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(values)) {
+            if (StringUtils.isEmpty(templateJson)) {
+                templateJson = getTemplate();
+            }
+            if (StringUtils.isEmpty(indexName)) {
+                String suffix = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy.MM.dd"));
+                indexName = "wazuh-alerts-4.x-" + suffix;
+            }
+            BulkRequest bulkRequest = new BulkRequest();
+            for (var v : values) {
+                Map<String, Object> data = JsonCommon.parseMap(templateJson);
+                data.put("@timestamp", TimeUtils.localDateTimeToUtcString(LocalDateTime.now()));
+                data.put("timestamp", TimeUtils.localDateTimeToUtcString(LocalDateTime.now()));
+                ((Map) data.get("agent")).put("ip",ip);
+                ((Map) data.get("agent")).put("name",eid);
+                ((Map) data.get("data")).put("vulnerability", JsonCommon.parseMap(v.getContent()));
+                IndexRequest request = new IndexRequest(indexName).source(data);
+                bulkRequest.add(request);
+            }
+            RestHighLevelClient restHighLevelClient = (RestHighLevelClient) BeanCommon.getBean("logRestHighLevelClient");
+            try {
+                restHighLevelClient.bulk(bulkRequest, RequestOptions.DEFAULT);
+            } catch (IOException e) {
+                log.error("failed to buildData ", e);
+            }
+        }
+    }
+
+    public static String getTemplate() {
+        org.springframework.core.io.Resource resource = new ClassPathResource("config/cve_data_template.json");
+        String content = null;
+        try {
+            content = CharStreams.toString(new InputStreamReader(resource.getInputStream()));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return content;
+    }
+
+    @Resource(name = "wazuhRestHighLevelClient")
+    private RestHighLevelClient restHighLevelClient;
 
     protected void prepareEventProcess() {
         prepareEventProcess(SceneModel.Event.CREATE, SceneProcess.class, ElementProcess.class);

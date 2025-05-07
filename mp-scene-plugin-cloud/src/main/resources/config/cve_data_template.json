@@ -1,0 +1,16 @@
+{
+  "agent": {
+    "ip": "192.168.1.179",
+    "name": "9209fb15378f4ef1a29a8d3bde367247"
+  },
+  "data": {
+    "vulnerability": {}
+  },
+  "rule": {
+    "groups": [
+      "vulnerability-detector"
+    ]
+  },
+  "@timestamp": "2025-05-06T06:17:45.279Z",
+  "timestamp": "2025-05-06T06:17:45.279+0000"
+}
