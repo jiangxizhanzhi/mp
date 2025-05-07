@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
@@ -13,45 +14,31 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.mptool.ExceptionUtil;
-import cn.cyberpeace.mp.cscene.bo.CreateTemplateBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneAuthorizeBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneRoleBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneStat;
-import cn.cyberpeace.mp.cscene.bo.DeleteCheckResultBO;
-import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
-import cn.cyberpeace.mp.cscene.bo.ImportTemplateBO;
-import cn.cyberpeace.mp.cscene.bo.SceneAreaTreeBO;
+import cn.cyberpeace.mp.cscene.bo.*;
 import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
-import cn.cyberpeace.mp.cscene.controller.request.AreaUpdateRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneActionRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneAuthorizeRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneCreateInstanceRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneSyncRequest;
+import cn.cyberpeace.mp.cscene.controller.request.*;
 import cn.cyberpeace.mp.cscene.model.CsceneModel;
 import cn.cyberpeace.mp.cscene.model.CsceneRoleModel;
 import cn.cyberpeace.mp.cscene.model.base.BaseCsceneRoleModel;
 import cn.cyberpeace.mp.cscene.repository.CsceneRoleMapper;
+import cn.cyberpeace.mp.cscene.request.AreaChangeData;
+import cn.cyberpeace.mp.cscene.request.PositionChangeTopoRequest;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
-import cn.cyberpeace.mp.scene.core.bo.SceneConfigAreaBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneConfigAreaNodeConnectionBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortConnectionBO;
+import cn.cyberpeace.mp.scene.core.bo.*;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
 import cn.cyberpeace.mp.scene.model.SceneConfigAreaModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneAreaModel;
 import cn.cyberpeace.mp.scene.repository.SceneConfigAreaMapper;
 import cn.cyberpeace.mp.scene.service.SceneConfigService;
+import com.alibaba.fastjson.JSON;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -61,33 +48,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Api(value = "场景模板", tags = "CSCENE-场景模板")
 @Slf4j
@@ -244,6 +216,113 @@ public class CsceneController implements BaseModelListControllerBase {
         }
         return new ServiceResult<>(csceneBO).asResult();
     }
+
+    @ApiOperation(value = "处理指定变化的原始拓扑信息")
+    @PostMapping("/change_topo_info")
+    public ServiceResult<CsceneBO> changeTopoInfo(@RequestBody @Validated PositionChangeTopoRequest request) {
+        String sceneId = this.modelService.get(request.getTopoId()).getSource().getObj().getSceneConfig();
+        log.info("sceneConfigId is {}",sceneId);
+        SceneConfigHandler sceneConfigHandler = new SceneConfigHandler(sceneId, null, null);
+        if(Objects.isNull(sceneConfigHandler)){
+            log.warn("sceneConfig data is not exist!");
+            return ResultCommon.success(null);
+        }
+        List<AreaChangeData> areaDataList = request.getAreaDataList();
+        //区域信息处理
+        SceneConfigDataBO dataBO = areaHandle(sceneConfigHandler, areaDataList);
+        //独立节点信息处理,暂不处理
+        CsceneBO csceneBO = new CsceneBO();
+        csceneBO.setSceneConfig(dataBO);
+        CsceneDataModifier.correctReturnCsceneData(csceneBO);
+        return new ServiceResult<>(csceneBO).asResult();
+    }
+
+    private SceneConfigDataBO areaHandle(SceneConfigHandler sceneConfigHandler, List<AreaChangeData> areaDataList) {
+        SceneConfigDataBO sceneConfigDataBO = sceneConfigHandler.toDataFor3D();
+        SceneConfigTopologyBO topology = sceneConfigDataBO.getTopology();
+        if(CollectionUtils.isEmpty(areaDataList)){
+            return sceneConfigDataBO;
+        }
+        Map<String, AreaChangeData> areaChangeDataMap =
+            areaDataList.stream().collect(Collectors.toMap(AreaChangeData::getAreaId, Function.identity()));
+        List<SceneConfigAreaBO> areas = topology.getAreas();
+        areas.forEach(sceneConfigAreaBO -> {
+            String id = sceneConfigAreaBO.getId();
+            AreaChangeData areaChangeData = areaChangeDataMap.get(id);
+            if(Objects.nonNull(areaChangeData)){
+                //新位置
+                String newPosition2 = areaChangeData.getPosition2();
+                AreaPosition newPosition = JSON.parseObject(newPosition2, AreaPosition.class);
+                String oldPosition2 = sceneConfigAreaBO.getPosition2();
+                AreaPosition oldPosition = JSON.parseObject(oldPosition2, AreaPosition.class);
+                //对应节点改变的位置坐标
+                Integer changeX = newPosition.getOrigin().getX() - oldPosition.getOrigin().getX();
+                Integer changeY = newPosition.getOrigin().getY() - oldPosition.getOrigin().getY();
+                //处理需要改变的节点和区域
+                handlerAllAreaAndElements(topology,sceneConfigAreaBO,changeX,changeY);
+            }
+        });
+        return sceneConfigDataBO;
+    }
+
+    /**
+     * @description: 处理所有区域节点信息
+     * @param topology
+     * @param sceneConfigAreaBO
+     * @param changeX
+     * @param changeY
+     * @throws
+     * @return void
+     */
+    private void handlerAllAreaAndElements(SceneConfigTopologyBO topology,SceneConfigAreaBO sceneConfigAreaBO,Integer changeX,Integer changeY){
+        String position2 = sceneConfigAreaBO.getPosition2();
+        AreaPosition areaPosition = JSON.parseObject(position2, AreaPosition.class);
+        Position origin = areaPosition.getOrigin();
+        Integer x = origin.getX();
+        Integer y = origin.getY();
+        Integer width = areaPosition.getWidth();
+        Integer height = areaPosition.getHeight();
+        //X坐标范围在 x~xEnd
+        Integer xEnd = x + width;
+        //Y坐标范围在 y~yEnd
+        Integer yEnd = y + height;
+        //取出范围内所有节点（因为目前节点只和单个层节点相关，只能通过位置获取区域及其内部索引子区域和节点）
+        //可能存在偏差，要求topo区域准确
+        List<SceneConfigAreaBO> areas = topology.getAreas();
+        List<SceneConfigAreaBO> updateAreas = areas.stream().filter(sceneArea -> {
+            String position = sceneArea.getPosition2();
+            AreaPosition aPosition = JSON.parseObject(position, AreaPosition.class);
+            Position positionOrigin = aPosition.getOrigin();
+            return (positionOrigin.getX() >= x) && (positionOrigin.getX() <= xEnd) && (positionOrigin.getY() >= y) && (
+                positionOrigin.getY() <= yEnd);
+        }).map(configAreaBO -> {
+            String position = configAreaBO.getPosition2();
+            AreaPosition aPosition = JSON.parseObject(position, AreaPosition.class);
+            Position positionOrigin = aPosition.getOrigin();
+            positionOrigin.setX(positionOrigin.getX() + changeX);
+            positionOrigin.setY(positionOrigin.getY() + changeY);
+            configAreaBO.setPosition2(JSON.toJSONString(aPosition));
+            return configAreaBO;
+        }).collect(Collectors.toList());
+        //最终响应的为改变位置的所有区域和节点信息
+        topology.setAreas(updateAreas);
+
+        List<SceneConfigElementBO> elements = topology.getElements();
+        List<SceneConfigElementBO> updateElements = elements.stream().filter(sceneElementBO -> {
+            String elePosition = sceneElementBO.getPosition2();
+            Position position = JSON.parseObject(elePosition, Position.class);
+            return position.getX() >= x && position.getX() <= xEnd && position.getY() >= y && position.getY() <= yEnd;
+        }).map(sceneConfigElementBO -> {
+            String elePosition = sceneConfigElementBO.getPosition2();
+            Position position = JSON.parseObject(elePosition, Position.class);
+            position.setX(position.getX() + changeX);
+            position.setY(position.getY() + changeY);
+            sceneConfigElementBO.setPosition2(JSON.toJSONString(position));
+            return sceneConfigElementBO;
+        }).collect(Collectors.toList());
+        topology.setElements(updateElements);
+    }
+
     @ApiOperation("是否可删除连线等的校验")
     @GetMapping("/delete_check")
     public ServiceResult<DeleteCheckResultBO> deleteCheck( @RequestParam String areaConnectionEid) {
