@@ -3184,10 +3184,10 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                             linuxCommands.add("sleep 10");
                             linuxCommands.add("sh /opt/wazuha/start.sh");
 
-                            /*azureResourceManager
+                            azureResourceManager
                                     .getManager()
                                     .virtualMachines()
-                                    .runShellScript(groupName, vmName, linuxCommands, new ArrayList<>());*/
+                                    .runShellScript(groupName, vmName, linuxCommands, new ArrayList<>());
                             log.info("updateWazuhManagerIp linuxCommands : {}",JsonUtils.stringify(linuxCommands));
                         }
                     }
