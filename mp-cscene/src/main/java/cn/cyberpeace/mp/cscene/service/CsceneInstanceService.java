@@ -3101,7 +3101,8 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         updateWazuhManagerIpByCloudType(cloudType, wazuhManagerIp);
 
 
-        /*IAzureResourceManager azureResourceManager = IAzureResourceManager.getInstance(requestData.getCloudType());
+
+        IAzureResourceManager azureResourceManager = IAzureResourceManager.getInstance(requestData.getCloudType());
         var humanCondition = new HumanCondition()
                 .link(CsceneInstanceModel.class, SceneModel.class)
                 .filterLink(CsceneInstanceModel.class, CsceneInstanceModel::getScene, SceneModel.class,
@@ -3133,11 +3134,6 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 .orAndEnd()
                 .filterOrEnd();
 
-        ArrayList<String> linuxCommands = new ArrayList<>();
-        linuxCommands.add(String.format("export SIC_WAZUH_MANAGER_IP=%s", wazuhManagerIp));
-        linuxCommands.add("sh /opt/wazuha/config.sh");
-        linuxCommands.add("sh /opt/wazuha/start.sh");
-
         List<CsceneInstanceStat> list = instanceMapper.list(humanCondition, CsceneInstanceStat.class);
         for (CsceneInstanceStat csceneInstanceStat : list) {
             SceneHandler sceneHandler = new SceneHandler(csceneInstanceStat.getId(), null, false, null);
@@ -3153,29 +3149,51 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 if (collectionElement.getProbes() != null && !collectionElement.getProbes().isEmpty()) {
                     String vmName = HandlerUtils.genResourceName(cloudPluginSceneElementBO.getSrcElement().getEid());
                     if (BaseSceneModel.CloudType.PUBLIC == requestData.getCloudType()) {
+                        List<String> initCommands = cloudPluginSceneElementBO.getSrcElement().getInitCommands();
                         if (BaseSceneElementModel.SystemType.WINDOWS.equals(cloudPluginSceneElementBO.getVmType().toLowerCase())) {
-                            List<String> initCommands = cloudPluginSceneElementBO.getSrcElement().getInitCommands();
-                            initCommands.add(0,"rd/s/q C:\\wazuha");
-                            initCommands.add(0,"call C:\\wazuha\\uninstall.bat");
+                            initCommands = Optional.ofNullable(initCommands)
+                                    .orElse(Collections.emptyList())
+                                    .stream()
+                                    .flatMap(cmd -> Arrays.stream(cmd.split("\\n")))
+                                    .map(String::trim)
+                                    .filter(cmd -> !cmd.isEmpty())
+                                    .map(cmd -> "cmd /c "+ cmd)
+                                    .collect(Collectors.toList());
+                            initCommands.add(0,"cmd /c rd/s/q C:\\wazuha");
 //                            先卸载删除目录再执行
-                            *//*azureResourceManager
-                                    .getManager()
-                                    .virtualMachines()
-                                    .runPowerShellScript(groupName, vmName, initCommands, new ArrayList<>());*//*
-
-                            log.info("updateWazuhManagerIp initCommands : {}",JsonUtils.stringify(initCommands));
-                            System.out.println(213);
-                        } else {
                             azureResourceManager
                                     .getManager()
                                     .virtualMachines()
-                                    .runShellScript(groupName, vmName, linuxCommands, new ArrayList<>());
+                                    .runPowerShellScript(groupName, vmName, initCommands, new ArrayList<>());
+                            log.info("updateWazuhManagerIp initCommands : {}",JsonUtils.stringify(initCommands));
+                        } else {
+                            ArrayList<String> linuxCommands = new ArrayList<>();
+                            linuxCommands.add(String.format("export SIC_WAZUH_MANAGER_IP=%s", wazuhManagerIp));
+                            linuxCommands.add("sh /opt/wazuha/config.sh");
+                            initCommands.forEach(a -> {
+                                // 按行分割字符串
+                                String[] lines = a.split("\\n");
+// 遍历每一行，查找包含目标路径的行
+                                for (String line : lines) {
+                                    if (line.startsWith("/var/ossec/bin/probe-control.py")) {
+                                        linuxCommands.add(line.replace("/var/ossec/bin/probe-control.py", "/opt/wazuha/probe-control.py"));
+                                        break;
+                                    }
+                                }
+                            });
+                            linuxCommands.add("sleep 10");
+                            linuxCommands.add("sh /opt/wazuha/start.sh");
+
+                            /*azureResourceManager
+                                    .getManager()
+                                    .virtualMachines()
+                                    .runShellScript(groupName, vmName, linuxCommands, new ArrayList<>());*/
                             log.info("updateWazuhManagerIp linuxCommands : {}",JsonUtils.stringify(linuxCommands));
                         }
                     }
                 }
             }
-        }*/
+        }
 
     }
 
