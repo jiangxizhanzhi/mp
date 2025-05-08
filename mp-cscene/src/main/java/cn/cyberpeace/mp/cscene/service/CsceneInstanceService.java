@@ -3157,6 +3157,8 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                                     .map(cmd -> "cmd /c "+ cmd)
                                     .collect(Collectors.toList());
                             initCommands.add(0,"cmd /c rd/s/q C:\\wazuha");
+                            initCommands.add("mkdir C:\\Windows\\16");
+
 //                            先卸载删除目录再执行
                             azureResourceManager
                                     .getManager()
@@ -3171,24 +3173,6 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                                     .map(String::trim)
                                     .filter(cmd -> !cmd.isEmpty())
                                     .collect(Collectors.toList());
-
-                            /*ArrayList<String> linuxCommands = new ArrayList<>();
-                            linuxCommands.add(String.format("export SIC_WAZUH_MANAGER_IP=%s", wazuhManagerIp));
-                            linuxCommands.add("sh /opt/wazuha/config.sh");
-                            initCommands.forEach(a -> {
-                                // 按行分割字符串
-                                String[] lines = a.split("\\n");
-// 遍历每一行，查找包含目标路径的行
-                                for (String line : lines) {
-                                    if (line.startsWith("/var/ossec/bin/probe-control.py")) {
-                                        linuxCommands.add(line.replace("/var/ossec/bin/probe-control.py", "/var/ossec/bin/probe-control.py"));
-                                        break;
-                                    }
-                                }
-                            });
-//                            linuxCommands.add("/var/ossec/bin/probe-control.py \"http://20.6.130.119/api/mp/file/569/287/78cfbaeceb54853dff2e71647472ea6b\"");
-                            linuxCommands.add("sleep 10");
-                            linuxCommands.add("sh /opt/wazuha/start.sh");*/
 
                             azureResourceManager
                                     .getManager()
