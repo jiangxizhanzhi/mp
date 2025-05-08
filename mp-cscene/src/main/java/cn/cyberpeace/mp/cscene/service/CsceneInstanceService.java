@@ -3190,6 +3190,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                                     .virtualMachines()
                                     .runShellScript(groupName, vmName, linuxCommands, new ArrayList<>());
                             log.info("updateWazuhManagerIp linuxCommands : {}",JsonUtils.stringify(linuxCommands));
+                            log.info("updateWazuhManagerIp linux initCommands : {}",JsonUtils.stringify(initCommands));
                         }
                     }
                 }
