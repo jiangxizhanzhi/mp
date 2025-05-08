@@ -33,10 +33,7 @@ import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
-import cn.cyberpeace.mp.scene.core.bo.SceneAreaBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneTopologyBO;
+import cn.cyberpeace.mp.scene.core.bo.*;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneAreaModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
@@ -344,6 +341,13 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
 
 
 
+    /**
+     * @description: 区域等处理
+     * @param sceneHandler
+     * @param areaDataList
+     * @throws
+     * @return SceneDataBO
+     */
     private SceneDataBO areaHandle(SceneHandler sceneHandler,List<AreaChangeData> areaDataList){
         SceneDataBO sceneDataBO = sceneHandler.toDataFor3D();
         SceneTopologyBO topology = sceneDataBO.getTopology();
@@ -353,6 +357,8 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         Map<String, AreaChangeData> areaChangeDataMap =
             areaDataList.stream().collect(Collectors.toMap(AreaChangeData::getAreaId, Function.identity()));
         List<SceneAreaBO> areas = topology.getAreas();
+        //变更的数据
+        List<CsceneChangeBO> csceneChangeBOS = new ArrayList<>();
         areas.forEach(sceneAreaBO -> {
             String id = sceneAreaBO.getId();
             AreaChangeData areaChangeData = areaChangeDataMap.get(id);
@@ -366,9 +372,33 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                 Integer changeX = newPosition.getOrigin().getX() - oldPosition.getOrigin().getX();
                 Integer changeY = newPosition.getOrigin().getY() - oldPosition.getOrigin().getY();
                 //处理需要改变的节点和区域
-                handlerAllAreaAndElements(topology,sceneAreaBO,changeX,changeY);
+                CsceneChangeBO csceneChangeBO = handlerAllAreaAndElements(topology, sceneAreaBO, changeX, changeY);
+                csceneChangeBOS.add(csceneChangeBO);
             }
         });
+        //无变更返回原始数据
+        if(CollectionUtils.isEmpty(csceneChangeBOS)){
+            return sceneDataBO;
+        }
+        List<SceneAreaBO> sceneAreaBOS = new ArrayList<>();
+        List<SceneElementBO> sceneElementBOS = new ArrayList<>();
+        csceneChangeBOS.stream().forEach(csceneChangeBO -> {
+            List<SceneAreaBO> updateAreas = csceneChangeBO.getUpdateAreas();
+            if(CollectionUtils.isNotEmpty(updateAreas)){
+                sceneAreaBOS.addAll(updateAreas);
+            }
+            List<SceneElementBO> updateElements = csceneChangeBO.getUpdateElements();
+            if(CollectionUtils.isNotEmpty(updateElements)){
+                sceneElementBOS.addAll(updateElements);
+            }
+        });
+        //返回变更的数据
+        if(CollectionUtils.isNotEmpty(sceneAreaBOS)){
+            topology.setAreas(sceneAreaBOS);
+        }
+        if(CollectionUtils.isNotEmpty(sceneElementBOS)){
+            topology.setElements(sceneElementBOS);
+        }
         return sceneDataBO;
     }
 
@@ -381,7 +411,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
      * @throws
      * @return void
      */
-    private void handlerAllAreaAndElements(SceneTopologyBO topology,SceneAreaBO sceneAreaBO,Integer changeX,Integer changeY){
+    private CsceneChangeBO handlerAllAreaAndElements(SceneTopologyBO topology,SceneAreaBO sceneAreaBO,Integer changeX,Integer changeY){
         String position2 = sceneAreaBO.getPosition2();
         AreaPosition areaPosition = JSON.parseObject(position2, AreaPosition.class);
         Position origin = areaPosition.getOrigin();
@@ -412,9 +442,10 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
             return sceneArea;
         }).collect(Collectors.toList());
         //最终响应的为改变位置的所有区域和节点信息
-        topology.setAreas(updateAreas);
-
-
+        CsceneChangeBO.CsceneChangeBOBuilder builder = CsceneChangeBO.builder();
+        if(CollectionUtils.isNotEmpty(updateAreas)){
+            builder.updateAreas(updateAreas);
+        }
         List<SceneElementBO> elements = topology.getElements();
         List<SceneElementBO> updateElements = elements.stream().filter(sceneElementBO -> {
             String elePosition = sceneElementBO.getPosition2();
@@ -428,7 +459,10 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
             sceneElementBO.setPosition2(JSON.toJSONString(position));
             return sceneElementBO;
         }).collect(Collectors.toList());
-        topology.setElements(updateElements);
+        if(CollectionUtils.isNotEmpty(updateElements)){
+            builder.updateElements(updateElements);
+        }
+        return builder.build();
     }
 
 
