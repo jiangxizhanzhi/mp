@@ -1,11 +1,21 @@
 package cn.cyberpeace.mp.base.snmp_device.cisco;
 
 import cn.cyberpeace.mp.base.snmp_device.BasicSnmpDevice;
+import cn.cyberpeace.mp.base.util.snmp.SnmpAccessInfo;
 
 /**
  * cisco rsv1000 支持的MIB库https://github.com/cisco/cisco-mibs/v2
  */
+
 public class CiscoCsrRouter extends BasicSnmpDevice {
+
+    public CiscoCsrRouter(String hostIp) {
+        SnmpAccessInfo snmpAccessInfo = new SnmpAccessInfo();
+        snmpAccessInfo.setHostIp(hostIp);
+        snmpAccessInfo.setVersion("v2c");
+        snmpAccessInfo.setCommunity("public");
+        this.snmpAccessInfo = snmpAccessInfo;
+    }
 
     @Override
     public String getImageName() {

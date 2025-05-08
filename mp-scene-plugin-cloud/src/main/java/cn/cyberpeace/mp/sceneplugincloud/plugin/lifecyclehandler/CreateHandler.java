@@ -1602,7 +1602,7 @@ public class CreateHandler extends HandlerCommon {
 
         hostInfoTemplate = hostInfoTemplate.replace("$memory_free", ram - fakeRamUsed  + "");
         hostInfoTemplate = hostInfoTemplate.replace("$memory_total", ram + "");
-        hostInfoTemplate = hostInfoTemplate.replace("$memory_used_percent", (fakeRamUsed) / ram + "");
+        hostInfoTemplate = hostInfoTemplate.replace("$memory_used_percent", (fakeRamUsed * 100L) / ram + "");
 
         int cpu = Optional.ofNullable(cloudElement.getSrcElement().getCpu()).orElse(1);
         hostInfoTemplate = hostInfoTemplate.replace("$cpu_count", cpu + "");
