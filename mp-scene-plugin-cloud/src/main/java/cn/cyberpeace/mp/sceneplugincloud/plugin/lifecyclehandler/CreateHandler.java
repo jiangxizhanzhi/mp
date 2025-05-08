@@ -15,6 +15,7 @@ import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.core.event.base.SceneEventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.scene.repository.SceneMapper;
 import cn.cyberpeace.mp.scene.util.*;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
@@ -1559,7 +1560,7 @@ public class CreateHandler extends HandlerCommon {
         INSERT_FAKE_DATA_POOL.scheduleWithFixedDelay(ThreadUtils.format(() -> {
             getPluginHandler().getElementMap().forEach((nodeId, cloudElement) -> {
                 String eid = cloudElement.getSrcElement().getEid();
-                if (needFake(eid)) {
+                if (needFake(eid, getPluginHandler().getScene().getSrcScene().getEid())) {
                     //伪造主机信息数据
                     log.info("start fake eid : {}", cloudElement.getSrcElement().getEid());
                     insertHostInfoData(cloudElement);
@@ -1581,7 +1582,7 @@ public class CreateHandler extends HandlerCommon {
             ip = "";
         }
         hostInfoTemplate = hostInfoTemplate.replace("$ip", ip);
-        hostInfoTemplate = hostInfoTemplate.replace("$name", cloudElement.getSrcElement().getName());
+        hostInfoTemplate = hostInfoTemplate.replace("$name", eid);
         hostInfoTemplate = hostInfoTemplate.replace("$id", eid);
 
         hostInfoTemplate = hostInfoTemplate.replace("$timestamp", TimeUtils.localDateTimeToUtcString(LocalDateTime.now()));
@@ -1617,8 +1618,17 @@ public class CreateHandler extends HandlerCommon {
      * @param eid
      * @return
      */
-    public static boolean needFake(String eid) {
-
+    public static boolean needFake(String eid, String sceneInstanceId) {
+        //如果当前场景实例关闭了也就需要伪造数据了。
+        SceneMapper sceneMapper =  BeanCommon.getBean(SceneMapper.class);
+        SceneModel sceneModel = sceneMapper.get(sceneInstanceId);
+        if (Objects.isNull(sceneModel)) {
+            return false;
+        } else {
+            if (Objects.nonNull(sceneModel.getDeleted()) && sceneModel.getDeleted()) {
+                return false;
+            }
+        }
         // 1. 使用 BoolQuery 组合多个条件
         BoolQueryBuilder boolQuery = QueryBuilders.boolQuery()
                 .must(QueryBuilders.termQuery("agent.id", eid))  // 精确匹配 agent.id

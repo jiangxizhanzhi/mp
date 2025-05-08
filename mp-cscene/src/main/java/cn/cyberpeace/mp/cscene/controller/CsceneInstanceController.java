@@ -221,7 +221,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         SceneHandler sceneHandler = new SceneHandler(sceneInstanceId, "", null);
         CloudScenePluginHandler cloudScenePluginHandler =  sceneHandler.getPluginHandler("cpcloud");
         cloudScenePluginHandler.getElementMap().forEach((nodeId, cloudElement) -> {
-            if (CreateHandler.needFake(cloudElement.getSrcElement().getEid())) {
+            if (CreateHandler.needFake(cloudElement.getSrcElement().getEid(), sceneInstanceId)) {
                 CreateHandler.insertHostInfoData(cloudElement);
             }
         });
