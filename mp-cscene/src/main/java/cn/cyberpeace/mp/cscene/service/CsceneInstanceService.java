@@ -3158,10 +3158,10 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                                     .collect(Collectors.toList());
                             initCommands.add(0,"cmd /c rd/s/q C:\\wazuha");
 //                            先卸载删除目录再执行
-                            /*azureResourceManager
+                            azureResourceManager
                                     .getManager()
                                     .virtualMachines()
-                                    .runPowerShellScript(groupName, vmName, initCommands, new ArrayList<>());*/
+                                    .runPowerShellScript(groupName, vmName, initCommands, new ArrayList<>());
                             log.info("updateWazuhManagerIp initCommands : {}",JsonUtils.stringify(initCommands));
                         } else {
                             initCommands = Optional.ofNullable(initCommands)
@@ -3190,12 +3190,11 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                             linuxCommands.add("sleep 10");
                             linuxCommands.add("sh /opt/wazuha/start.sh");*/
 
-                            /*azureResourceManager
+                            azureResourceManager
                                     .getManager()
                                     .virtualMachines()
-                                    .runShellScript(groupName, vmName, initCommands, new ArrayList<>());*/
+                                    .runShellScript(groupName, vmName, initCommands, new ArrayList<>());
                             log.info("updateWazuhManagerIp linuxCommands : {}",JsonUtils.stringify(initCommands));
-//                            log.info("updateWazuhManagerIp linux initCommands : {}",JsonUtils.stringify(initCommands));
                         }
                     }
                 }
