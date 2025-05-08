@@ -1566,7 +1566,7 @@ public class CreateHandler extends HandlerCommon {
                     insertHostInfoData(cloudElement);
                 }
             });
-        }), 5000, 60000, TimeUnit.MILLISECONDS);
+        }), 5000, 15000, TimeUnit.MILLISECONDS);
 
     }
 
@@ -1590,7 +1590,7 @@ public class CreateHandler extends HandlerCommon {
         hostInfoTemplate = hostInfoTemplate.replace("$sic_launch_time", TimeUtils.localDateTimeToUtcString(LocalDateTime.now()));
         hostInfoTemplate = hostInfoTemplate.replace("$memory_used_percent", 50 +RANDOM.nextInt(20) + "");
         hostInfoTemplate = hostInfoTemplate.replace("$cpu_used_percent", 20 +RANDOM.nextInt(20) + "");
-        int ram = Optional.ofNullable(cloudElement.getSrcElement().getRam()).orElse(1) * 1024 * 1024;
+        long ram = Optional.ofNullable(cloudElement.getSrcElement().getRam()).orElse(1) * 1024 * 1024L;
         hostInfoTemplate = hostInfoTemplate.replace("$memory_free", ram / (7 + RANDOM.nextInt(3)) + "");
         hostInfoTemplate = hostInfoTemplate.replace("$memory_total", ram + "");
         int cpu = Optional.ofNullable(cloudElement.getSrcElement().getCpu()).orElse(1);
@@ -1598,7 +1598,10 @@ public class CreateHandler extends HandlerCommon {
         hostInfoTemplate = hostInfoTemplate.replace("$cpu_percent", 1 + RANDOM.nextInt(5) + "");
         hostInfoTemplate = hostInfoTemplate.replace("$cpu_freq", "1861");
 
-        int disk = Optional.ofNullable(cloudElement.getSrcElement().getDisk()).orElse(10) * 1024 * 1024 * 1024;
+        long disk = Optional.ofNullable(cloudElement.getSrcElement().getDisk()).orElse(10L) * 1024 * 1024 * 1024;
+        if (disk == 0) {
+            disk = 10L * 1024 * 1024 * 1024;
+        }
         hostInfoTemplate = hostInfoTemplate.replace("$disk_total", disk + "");
         hostInfoTemplate = hostInfoTemplate.replace("$disk_used", disk / (7 + RANDOM.nextInt(3))  + "");
         hostInfoTemplate = hostInfoTemplate.replace("$disk_io_percent", 1 + RANDOM.nextInt(3) + "");
