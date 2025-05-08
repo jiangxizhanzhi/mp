@@ -1558,14 +1558,19 @@ public class CreateHandler extends HandlerCommon {
 
         //提交伪造数据
         INSERT_FAKE_DATA_POOL.scheduleWithFixedDelay(ThreadUtils.format(() -> {
-            getPluginHandler().getElementMap().forEach((nodeId, cloudElement) -> {
-                String eid = cloudElement.getSrcElement().getEid();
-                if (needFake(eid, getPluginHandler().getScene().getSrcScene().getEid())) {
-                    //伪造主机信息数据
-                    log.info("start fake eid : {}", cloudElement.getSrcElement().getEid());
-                    insertHostInfoData(cloudElement);
-                }
-            });
+            try {
+                getPluginHandler().getElementMap().forEach((nodeId, cloudElement) -> {
+                    String eid = cloudElement.getSrcElement().getEid();
+                    if (needFake(eid, getPluginHandler().getScene().getSrcScene().getEid())) {
+                        //伪造主机信息数据
+                        log.info("start fake eid : {}", cloudElement.getSrcElement().getEid());
+                        insertHostInfoData(cloudElement);
+                    }
+                });
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+                log.error("fake data failed");
+            }
         }), 5000, 15000, TimeUnit.MILLISECONDS);
 
     }
@@ -1590,6 +1595,9 @@ public class CreateHandler extends HandlerCommon {
         hostInfoTemplate = hostInfoTemplate.replace("$sic_launch_time", TimeUtils.localDateTimeToUtcString(LocalDateTime.now()));
         hostInfoTemplate = hostInfoTemplate.replace("$cpu_used_percent", 20 +RANDOM.nextInt(20) + "");
         long ram = Optional.ofNullable(cloudElement.getSrcElement().getRam()).orElse(1) * 1024 * 1024L;
+        if (ram == 0) {
+            ram = (long) 1024 * 1024;
+        }
         long fakeRamUsed = (ram / (6 + RANDOM.nextInt(5)));
 
         hostInfoTemplate = hostInfoTemplate.replace("$memory_free", ram - fakeRamUsed  + "");
