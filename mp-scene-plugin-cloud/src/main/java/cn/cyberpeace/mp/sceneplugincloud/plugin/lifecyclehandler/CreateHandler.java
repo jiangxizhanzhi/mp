@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.base.util.mptool.CollectionUtil;
 import cn.cyberpeace.mp.base.util.mptool.ConcurrentHashSet;
 import cn.cyberpeace.mp.base.util.mptool.FileNameUtil;
 import cn.cyberpeace.mp.base.util.mptool.Ipv4Util;
+import cn.cyberpeace.mp.base.util.thread.ThreadUtils;
 import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
@@ -42,8 +43,10 @@ import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.support.IndicesOptions;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.core.io.ClassPathResource;
@@ -70,7 +73,7 @@ public class CreateHandler extends HandlerCommon {
             });
     private static final Random RANDOM = new Random();
 
-    private final Set<String> NOT_FAKE_EID_SET = new ConcurrentHashSet<>();
+    private static final Set<String> NOT_FAKE_EID_SET = new ConcurrentHashSet<>();
 
     private final VirtualSwitch vsClient = new VirtualSwitch();
     private final VirtualRouter vrClient = new VirtualRouter();
@@ -1553,7 +1556,7 @@ public class CreateHandler extends HandlerCommon {
         }
 
         //提交伪造数据
-        INSERT_FAKE_DATA_POOL.scheduleWithFixedDelay(() -> {
+        INSERT_FAKE_DATA_POOL.scheduleWithFixedDelay(ThreadUtils.format(() -> {
             getPluginHandler().getElementMap().forEach((nodeId, cloudElement) -> {
                 String eid = cloudElement.getSrcElement().getEid();
                 if (needFake(eid)) {
@@ -1562,12 +1565,12 @@ public class CreateHandler extends HandlerCommon {
                     insertHostInfoData(cloudElement);
                 }
             });
-        }, 5000, 60000, TimeUnit.MILLISECONDS);
+        }), 5000, 60000, TimeUnit.MILLISECONDS);
 
     }
 
 
-    private void insertHostInfoData(CloudPluginSceneElementBO cloudElement) {
+    public static void insertHostInfoData(CloudPluginSceneElementBO cloudElement) {
         String eid = cloudElement.getSrcElement().getEid();
         String imageName = cloudElement.getImage();
         String hostInfoTemplate = getTemplate("config/host_info.json");
@@ -1614,37 +1617,40 @@ public class CreateHandler extends HandlerCommon {
      * @param eid
      * @return
      */
-    private boolean needFake(String eid) {
-        if (StringUtils.isEmpty(eid)) {
-            return false;
-        }
-        if (NOT_FAKE_EID_SET.contains(eid)) {
-            return false;
-        }
+    public static boolean needFake(String eid) {
 
-        RestHighLevelClient restHighLevelClient = (RestHighLevelClient) BeanCommon.getBean("logRestHighLevelClient");
+        // 1. 使用 BoolQuery 组合多个条件
+        BoolQueryBuilder boolQuery = QueryBuilders.boolQuery()
+                .must(QueryBuilders.termQuery("agent.id", eid))  // 精确匹配 agent.id
+                .must(QueryBuilders.termQuery("data.sic_launch_id.keyword", "eda72998ba654c8d8625f61eaa918eb3"))  // 确保字段为 keyword
+                .must(QueryBuilders.existsQuery("fake"));  // 存在 fake 字段
+
+// 2. 创建 SearchSourceBuilder
+        SearchSourceBuilder sourceBuilder = SearchSourceBuilder.searchSource()
+                .query(boolQuery)
+                .size(1);  // 仅需判断是否存在，取1条足够
+
+// 3. 构建 SearchRequest
+
         String suffix = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy.MM.dd"));
         String indexName = "wazuh-alerts-4.x-" + suffix;
         SearchRequest searchRequest = new SearchRequest(indexName);
-        searchRequest.indicesOptions().ignoreUnavailable();
-        searchRequest.indicesOptions().allowNoIndices();
-        searchRequest.source(SearchSourceBuilder.searchSource()
-                .query(QueryBuilders.termQuery("agent.id", eid))
-                .query(QueryBuilders.termQuery("data.sic_launch_id", "eda72998ba654c8d8625f61eaa918eb3"))
-                .query(QueryBuilders.existsQuery("fake")));
+        searchRequest.indicesOptions(IndicesOptions.lenientExpandOpen());  // 合并 ignoreUnavailable 和 allowNoIndices
+        searchRequest.source(sourceBuilder);
+
+// 4. 执行查询
+        RestHighLevelClient restHighLevelClient = (RestHighLevelClient) BeanCommon.getBean("logRestHighLevelClient");
         try {
             SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
-            boolean needFake = !(searchResponse.getHits().getTotalHits().value > 0);
+            boolean needFake = (searchResponse.getHits().getTotalHits().value == 0);  // 无命中则需伪造
             if (!needFake) {
                 NOT_FAKE_EID_SET.add(eid);
             }
             return needFake;
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
             return true;
         }
-
-
     }
 
 
