@@ -291,7 +291,8 @@ public class ScenePluginCollectionSceneService {
     public ListObjServiceResult<CollectionHostStateBO> listHostStates(String sceneId, HostStateQueryParams queryParams) {
         var sceneHandler = new SceneHandler(sceneId, null, false, null);
         Map<String, SceneElementBO> agentName2Element = new HashMap<>();
-        sceneHandler.getElementMap().forEach((nodeId, element) -> {
+        List<SceneElementBO> srcElements = getSrcElements(sceneHandler, queryParams.getNodeIds());
+        srcElements.forEach((element) -> {
             agentName2Element.put(element.getEid(), element);
         });
 
