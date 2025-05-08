@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.cscene.controller;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
@@ -22,6 +23,7 @@ import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
+import cn.cyberpeace.mp.sceneplugincloud.repository.CveDataMapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -289,8 +291,8 @@ public class CsceneController implements BaseModelListControllerBase {
             cveDataModel.setContent(JsonCommon.stringify(cveData.getVulnerability()));
             models.add(cveDataModel);
         }
+        BeanCommon.getBean(CveDataMapper.class).bulkCreate(models);
         // 下面注释掉的代码可以用来添加测试数据
-//        BeanCommon.getBean(CveDataMapper.class).bulkCreate(models);
 //        CreateHandler.buildData("juniper12","7554c945ecb74641ad3587687f309ce7","aa");
         return new ServiceResult<>(true).asResult();
     }
