@@ -3176,11 +3176,12 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 // 遍历每一行，查找包含目标路径的行
                                 for (String line : lines) {
                                     if (line.startsWith("/var/ossec/bin/probe-control.py")) {
-                                        linuxCommands.add(line.replace("/var/ossec/bin/probe-control.py", "/opt/wazuha/probe-control.py"));
+                                        linuxCommands.add(line.replace("/var/ossec/bin/probe-control.py", "/var/ossec/bin/probe-control.py"));
                                         break;
                                     }
                                 }
                             });
+//                            linuxCommands.add("/var/ossec/bin/probe-control.py \"http://20.6.130.119/api/mp/file/569/287/78cfbaeceb54853dff2e71647472ea6b\"");
                             linuxCommands.add("sleep 10");
                             linuxCommands.add("sh /opt/wazuha/start.sh");
 
