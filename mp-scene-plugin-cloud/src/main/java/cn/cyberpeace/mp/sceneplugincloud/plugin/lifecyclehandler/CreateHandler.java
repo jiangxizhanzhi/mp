@@ -1588,11 +1588,14 @@ public class CreateHandler extends HandlerCommon {
         hostInfoTemplate = hostInfoTemplate.replace("$timestamp", TimeUtils.localDateTimeToUtcString(LocalDateTime.now()));
         hostInfoTemplate = hostInfoTemplate.replace("$@timestamp", TimeUtils.localDateTimeToUtcString(LocalDateTime.now()));
         hostInfoTemplate = hostInfoTemplate.replace("$sic_launch_time", TimeUtils.localDateTimeToUtcString(LocalDateTime.now()));
-        hostInfoTemplate = hostInfoTemplate.replace("$memory_used_percent", 50 +RANDOM.nextInt(20) + "");
         hostInfoTemplate = hostInfoTemplate.replace("$cpu_used_percent", 20 +RANDOM.nextInt(20) + "");
         long ram = Optional.ofNullable(cloudElement.getSrcElement().getRam()).orElse(1) * 1024 * 1024L;
-        hostInfoTemplate = hostInfoTemplate.replace("$memory_free", ram / (7 + RANDOM.nextInt(3)) + "");
+        long fakeRamUsed = (ram / (6 + RANDOM.nextInt(5)));
+
+        hostInfoTemplate = hostInfoTemplate.replace("$memory_free", ram - fakeRamUsed  + "");
         hostInfoTemplate = hostInfoTemplate.replace("$memory_total", ram + "");
+        hostInfoTemplate = hostInfoTemplate.replace("$memory_used_percent", (fakeRamUsed) / ram + "");
+
         int cpu = Optional.ofNullable(cloudElement.getSrcElement().getCpu()).orElse(1);
         hostInfoTemplate = hostInfoTemplate.replace("$cpu_count", cpu + "");
         hostInfoTemplate = hostInfoTemplate.replace("$cpu_percent", 1 + RANDOM.nextInt(5) + "");
