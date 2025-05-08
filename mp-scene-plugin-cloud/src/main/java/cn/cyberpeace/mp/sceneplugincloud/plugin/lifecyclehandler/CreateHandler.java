@@ -1598,7 +1598,7 @@ public class CreateHandler extends HandlerCommon {
         hostInfoTemplate = hostInfoTemplate.replace("$cpu_percent", 1 + RANDOM.nextInt(5) + "");
         hostInfoTemplate = hostInfoTemplate.replace("$cpu_freq", "1861");
 
-        long disk = Optional.ofNullable(cloudElement.getSrcElement().getDisk()).orElse(10L) * 1024 * 1024 * 1024;
+        long disk = Optional.ofNullable(cloudElement.getSrcElement().getDisk()).orElse(10) * 1024L * 1024L * 1024L;
         if (disk == 0) {
             disk = 10L * 1024 * 1024 * 1024;
         }
