@@ -147,14 +147,11 @@ import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpHost;
-import org.apache.http.util.Asserts;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.ObjectUtils;
 
 import javax.annotation.Resource;
 import java.io.File;
@@ -3137,7 +3134,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         List<CsceneInstanceStat> list = instanceMapper.list(humanCondition, CsceneInstanceStat.class);
         for (CsceneInstanceStat csceneInstanceStat : list) {
             SceneHandler sceneHandler = new SceneHandler(csceneInstanceStat.getId(), null, false, null);
-            sceneHandler.initializeProbeInstallationScripts();
+            sceneHandler.initializeProbeInstallAtionScripts();
 
             CloudScenePluginHandler cloudPlugin = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
             String groupName = cloudPlugin.getSourceSceneId();
@@ -3161,13 +3158,21 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                                     .collect(Collectors.toList());
                             initCommands.add(0,"cmd /c rd/s/q C:\\wazuha");
 //                            先卸载删除目录再执行
-                            azureResourceManager
+                            /*azureResourceManager
                                     .getManager()
                                     .virtualMachines()
-                                    .runPowerShellScript(groupName, vmName, initCommands, new ArrayList<>());
+                                    .runPowerShellScript(groupName, vmName, initCommands, new ArrayList<>());*/
                             log.info("updateWazuhManagerIp initCommands : {}",JsonUtils.stringify(initCommands));
                         } else {
-                            ArrayList<String> linuxCommands = new ArrayList<>();
+                            initCommands = Optional.ofNullable(initCommands)
+                                    .orElse(Collections.emptyList())
+                                    .stream()
+                                    .flatMap(cmd -> Arrays.stream(cmd.split("\\n")))
+                                    .map(String::trim)
+                                    .filter(cmd -> !cmd.isEmpty())
+                                    .collect(Collectors.toList());
+
+                            /*ArrayList<String> linuxCommands = new ArrayList<>();
                             linuxCommands.add(String.format("export SIC_WAZUH_MANAGER_IP=%s", wazuhManagerIp));
                             linuxCommands.add("sh /opt/wazuha/config.sh");
                             initCommands.forEach(a -> {
@@ -3183,14 +3188,14 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                             });
 //                            linuxCommands.add("/var/ossec/bin/probe-control.py \"http://20.6.130.119/api/mp/file/569/287/78cfbaeceb54853dff2e71647472ea6b\"");
                             linuxCommands.add("sleep 10");
-                            linuxCommands.add("sh /opt/wazuha/start.sh");
+                            linuxCommands.add("sh /opt/wazuha/start.sh");*/
 
-                            azureResourceManager
+                            /*azureResourceManager
                                     .getManager()
                                     .virtualMachines()
-                                    .runShellScript(groupName, vmName, linuxCommands, new ArrayList<>());
-                            log.info("updateWazuhManagerIp linuxCommands : {}",JsonUtils.stringify(linuxCommands));
-                            log.info("updateWazuhManagerIp linux initCommands : {}",JsonUtils.stringify(initCommands));
+                                    .runShellScript(groupName, vmName, initCommands, new ArrayList<>());*/
+                            log.info("updateWazuhManagerIp linuxCommands : {}",JsonUtils.stringify(initCommands));
+//                            log.info("updateWazuhManagerIp linux initCommands : {}",JsonUtils.stringify(initCommands));
                         }
                     }
                 }

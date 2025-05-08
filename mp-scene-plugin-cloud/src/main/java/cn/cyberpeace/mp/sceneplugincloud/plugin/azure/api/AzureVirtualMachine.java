@@ -225,7 +225,7 @@ public class AzureVirtualMachine {
                        List<VirtualNic> virtualNics, String userData, List<AlertRuleBO> alertRuleBOList,
                        String dataCollectionRulesId, String groupName,
                        String azureManagerUrl, MicrosoftAzureUserModel localAzurer) {
-        Integer cloudType = pluginHandler.getSceneHandler().getScene().getCloudType();
+        /*Integer cloudType = pluginHandler.getSceneHandler().getScene().getCloudType();
         if(BaseSceneModel.CloudType.PUBLIC==cloudType) {
 
             // 调用微软云api 创建虚拟机 回写虚拟机id
@@ -311,7 +311,7 @@ public class AzureVirtualMachine {
             }else {
                 throw new RuntimeException("create vm fault "+dataMap.get("message"));
             }
-        }
+        }*/
 
     }
 

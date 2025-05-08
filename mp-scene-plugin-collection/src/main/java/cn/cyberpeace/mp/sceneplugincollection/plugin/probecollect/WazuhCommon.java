@@ -113,6 +113,10 @@ public class WazuhCommon {
 
     public static List<String> generateWazuhAgentInstallScript(CloudPluginSceneElementBO cloudElement, Integer cloudType, String systemType, String agentName, String wazuhHost,
                                                                WazuhControl.ControlConfigParam controlParam, boolean isContainer, String intervalSec) {
+        return generateWazuhAgentInstallScript(cloudElement, cloudType, systemType, agentName, wazuhHost, controlParam, isContainer, intervalSec, false);
+    }
+
+    private static List<String> generateWazuhAgentInstallScript(CloudPluginSceneElementBO cloudElement, Integer cloudType, String systemType, String agentName, String wazuhHost, WazuhControl.ControlConfigParam controlParam, boolean isContainer, String intervalSec, Boolean isAtion) {
         if (wazuhProbeConfig == null) {
             wazuhProbeConfig = BeanCommon.getBean(WazuhProbeConfig.class);
         }
@@ -163,25 +167,9 @@ public class WazuhCommon {
             resource = new InstallerUtils.Installer();
             resource.setFile(StringUtils.EMPTY);
             resource.setInstallCommand(
-                    StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK,
-                            "sh /opt/wazuha/stop.sh",
-                            "sh /opt/wazuha/uninstall.sh",
-                            String.format("export SIC_WAZUH_MANAGER_IP=%s SIC_WAZUH_AGENT_NAME=%s " +
-                                            "SIC_WAZUH_MANAGER_REMOTE_PORT=%d SIC_WAZUH_MANAGER_AUTH_PORT=%d",
-                                    wazuhHost, agentName, getWazuhRemotePort(cloudType), getWazuhAuthPort(cloudType)),
-                            String.format("unzip -o -q %s/%s -d %s/agent-installer", linuxInstallDir,
-                                    WAZUH_AGENT_LINUX_FILE_NAME, linuxInstallDir),
-                            String.format("cd %s/agent-installer/agent-linux", linuxInstallDir),
-                            "sh install.sh",
-                            String.format("cd %s", linuxInstallDir),
-                            "rm -rf agent-installer",
-//                            String.format("rm -rf %s", WAZUH_AGENT_LINUX_FILE_NAME),
-                            "cd /opt/wazuha",
-                            "sh config.sh",
-                            probeCommand,
-                            "sleep 10",
-                            "sh start.sh"
-                    ));
+                    isAtion ?
+                            getLinuxInstallAtionCommand(cloudType, agentName, wazuhHost, linuxInstallDir, probeCommand):
+                            getLinuxInstallCommand(cloudType, agentName, wazuhHost, linuxInstallDir, probeCommand));
         }
         List<String> result = resource == null ? new ArrayList<>() :
                 InstallerUtils.generateInstallerInstallCommand(systemType, List.of(resource), cloudType);
@@ -240,6 +228,46 @@ public class WazuhCommon {
             result.add(addCommandIndex, addCommand);
         }
         return result;
+    }
+
+    private static String getLinuxInstallCommand(Integer cloudType, String agentName, String wazuhHost, String linuxInstallDir, String probeCommand) {
+        return StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK,
+                "sh /opt/wazuha/stop.sh",
+                "sh /opt/wazuha/uninstall.sh",
+                String.format("export SIC_WAZUH_MANAGER_IP=%s SIC_WAZUH_AGENT_NAME=%s " +
+                                "SIC_WAZUH_MANAGER_REMOTE_PORT=%d SIC_WAZUH_MANAGER_AUTH_PORT=%d",
+                        wazuhHost, agentName, getWazuhRemotePort(cloudType), getWazuhAuthPort(cloudType)),
+                String.format("unzip -o -q %s/%s -d %s/agent-installer", linuxInstallDir,
+                        WAZUH_AGENT_LINUX_FILE_NAME, linuxInstallDir),
+                String.format("cd %s/agent-installer/agent-linux", linuxInstallDir),
+                "sh install.sh",
+                String.format("cd %s", linuxInstallDir),
+                "rm -rf agent-installer",
+//                            String.format("rm -rf %s", WAZUH_AGENT_LINUX_FILE_NAME),
+                "cd /opt/wazuha",
+                "sh config.sh",
+                probeCommand,
+                "sleep 10",
+                "sh start.sh"
+        );
+    }
+
+    private static String getLinuxInstallAtionCommand(Integer cloudType, String agentName, String wazuhHost, String linuxInstallDir, String probeCommand) {
+        return StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK,
+                "sh /opt/wazuha/stop.sh",
+                "sh /opt/wazuha/uninstall.sh",
+                String.format("export SIC_WAZUH_MANAGER_IP=%s SIC_WAZUH_AGENT_NAME=%s " +
+                                "SIC_WAZUH_MANAGER_REMOTE_PORT=%d SIC_WAZUH_MANAGER_AUTH_PORT=%d",
+                        wazuhHost, agentName, getWazuhRemotePort(cloudType), getWazuhAuthPort(cloudType)),
+                String.format("unzip -o -q %s/%s -d %s/agent-installer", linuxInstallDir,
+                        WAZUH_AGENT_LINUX_FILE_NAME, linuxInstallDir),
+                String.format("sh %s/agent-installer/agent-linux/install.sh", linuxInstallDir),
+                String.format("rm -rf %s/agent-installer", linuxInstallDir),
+                "sh /opt/wazuha/config.sh",
+                probeCommand,
+                "sleep 10",
+                "sh /opt/wazuha/start.sh"
+        );
     }
 
     public static void uninstallAgent(String agentName, String systemType) {
@@ -318,4 +346,8 @@ public class WazuhCommon {
         return defaultProbeParams;
     }
 
+    public static List<String> generateWazuhAgentInstallAtionScript(CloudPluginSceneElementBO cloudElement, Integer cloudType, String systemType, String agentName, String wazuhHost,
+                                                                    WazuhControl.ControlConfigParam controlParam, boolean isContainer, String intervalSec) {
+        return generateWazuhAgentInstallScript(cloudElement, cloudType, systemType, agentName, wazuhHost, controlParam, isContainer, intervalSec, true);
+    }
 }

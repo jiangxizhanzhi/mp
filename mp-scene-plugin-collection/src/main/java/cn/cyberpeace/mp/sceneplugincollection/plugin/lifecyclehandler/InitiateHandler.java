@@ -250,7 +250,7 @@ public class InitiateHandler extends HandlerCommon {
 
     }
 
-    public void initializeProbeInstallationScripts() {
+    public void initializeProbeInstallAtionScripts() {
         var scene = getPluginHandler().getScene();
         String eid = scene.getSrcScene().getEid();
         Integer cloudType = scene.getSrcScene().getCloudType() != null ? scene.getSrcScene().getCloudType() : BaseSceneModel.CloudType.PUBLIC;
@@ -258,7 +258,7 @@ public class InitiateHandler extends HandlerCommon {
                 .stream()
                 .filter(collectionElement -> Boolean.TRUE.equals(collectionElement.getEnableProbeCollect()))
                 .collect(Collectors.toList());
-        initializeProbeInstallationScripts(probeCollectionElements, cloudType, eid);
+        initializeProbeInstallAtionScripts(probeCollectionElements, cloudType, eid);
     }
 
     /**
@@ -268,7 +268,7 @@ public class InitiateHandler extends HandlerCommon {
      * @param cloudType
      * @param eid
      */
-    public void initializeProbeInstallationScripts(List<CollectionPluginSceneElementBO> probeCollectionElements, Integer cloudType, String eid) {
+    public void initializeProbeInstallAtionScripts(List<CollectionPluginSceneElementBO> probeCollectionElements, Integer cloudType, String eid) {
         var collectionId = getPluginHandler().getScene().getProbeCollector();
         CloudScenePluginHandler cloudPluginHandler = getPluginHandler().getSceneHandler()
                 .getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
@@ -286,7 +286,7 @@ public class InitiateHandler extends HandlerCommon {
             }
             SceneBO srcScene = getPluginHandler().getScene().getSrcScene();
 
-            List<String> probeInstallScript = getProbeCollector().generateProbeInstallScript(cloudElement, cloudType, systemType,
+            List<String> probeInstallScript = getProbeCollector().generateProbeInstallAtionScript(cloudElement, cloudType, systemType,
                     srcElement.getEid(), collectionId, controlParam, isContainer, srcScene.getIntervalSec());
             List initCommands = new ArrayList<>();
             if (CollectionUtils.isNotEmpty(probeInstallScript)) {

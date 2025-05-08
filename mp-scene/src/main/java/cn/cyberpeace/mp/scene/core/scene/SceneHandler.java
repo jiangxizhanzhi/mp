@@ -1070,9 +1070,9 @@ public class SceneHandler extends BaseSceneHandler<
         overSceneEvent(sceneEvent);
     }
 
-    public void initializeProbeInstallationScripts() {
+    public void initializeProbeInstallAtionScripts() {
         for (var plugin : getPlugins()) {
-            plugin.initializeProbeInstallationScripts();
+            plugin.initializeProbeInstallAtionScripts();
         }
 
     }
