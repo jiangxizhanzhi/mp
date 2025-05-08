@@ -1,26 +1,19 @@
 package cn.cyberpeace.mp.cscene.controller;
 
-import cn.cyberpeace.mp.auth.model.UserModel;
-import cn.cyberpeace.mp.auth.service.UserService;
-import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
-import cn.cyberpeace.mp.base.service.result.ObjResult;
-import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
 import cn.cyberpeace.mp.cscene.dto.element.XmlHostState;
-import cn.cyberpeace.mp.cscene.dto.scene.SceneAttCkTypeCountInfo;
 import cn.cyberpeace.mp.cscene.request.agent.AgentNameBasedRequest;
-import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.request.hoststate.HostStateTrendRequest;
 import cn.cyberpeace.mp.cscene.service.HostStateService;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.TimeListPageInfoQueryParams;
-import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.*;
+import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Netiface;
+import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -36,9 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Random;
 
 /**
  * @Description:
@@ -101,30 +92,6 @@ public class HostStateController {
     @GetMapping("/element_trend")
     public ServiceResult<List<HostState>> getElementHostStateTrend(HostStateTrendRequest hostStateTrendRequest) {
         List<HostState> hostStates = hostStateService.getElementHostStateTrend(hostStateTrendRequest);
-
-        if (new Random().nextInt() % 2 == 0 && CollectionUtils.isNotEmpty(hostStates)) {
-            for (int i = 0; i < hostStates.size(); i++) {
-                if (hostStates.get(i).getMemoryPercent() > 0) {
-                    hostStates.get(i).setMemoryPercent(100.0 + new Random().nextInt(100));
-                }
-            }
-        }
-
-        if (new Random().nextInt() % 2 == 0 && CollectionUtils.isNotEmpty(hostStates)) {
-            for (int i = 0; i < hostStates.size(); i++) {
-                if (hostStates.get(i).getDiskPercent() > 0) {
-                    hostStates.get(i).setDiskPercent(100.0 + new Random().nextInt(100));
-                }
-            }
-        }
-
-        if (new Random().nextInt() % 2 == 0 && CollectionUtils.isNotEmpty(hostStates)) {
-            for (int i = 0; i < hostStates.size(); i++) {
-                if (hostStates.get(i).getCpuPercent() > 0) {
-                    hostStates.get(i).setCpuPercent(new Random().nextInt(100) - 100.0);
-                }
-            }
-        }
 
         return ResultCommon.success(hostStates);
     }
