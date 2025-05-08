@@ -1558,6 +1558,7 @@ public class CreateHandler extends HandlerCommon {
                 String eid = cloudElement.getSrcElement().getEid();
                 if (needFake(eid)) {
                     //伪造主机信息数据
+                    log.info("start fake eid : {}", cloudElement.getSrcElement().getEid());
                     insertHostInfoData(cloudElement);
                 }
             });
@@ -1604,6 +1605,7 @@ public class CreateHandler extends HandlerCommon {
         IndexRequest request = new IndexRequest(indexName).source(JsonCommon.parseMap(hostInfoTemplate));
         BulkRequest bulkRequest = new BulkRequest();
         bulkRequest.add(request);
+        log.info("save to es : {} {}", indexName, hostInfoTemplate);
         saveDataToEs(bulkRequest);
     }
 
