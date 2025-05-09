@@ -126,7 +126,7 @@ public class WazuhCommon {
                                     wazuhHost, agentName, getWazuhRemotePort(), getWazuhAuthPort()),
                             String.format("unzip -o -q %s/%s -d %s/agent-installer", linuxInstallDir,
                                     WAZUH_AGENT_LINUX_FILE_NAME, linuxInstallDir),
-                            String.format("cd %s/agent-installer/agent-linux", linuxInstallDir),
+                            String.format("cd %s/agent-installer/agent-linux_aarch", linuxInstallDir),
                             "sh install.sh",
                             String.format("cd %s", linuxInstallDir),
                             "rm -rf agent-installer",
