@@ -25,6 +25,9 @@ import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.request.hoststate.HostStateTrendRequest;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.cscene.util.SegmentCount2IntervalSecondsUtil;
+import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
+import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.CreateHandler;
 import cn.cyberpeace.mp.sceneplugincollection.bo.AttCkTypeCount;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostStateBO;
 import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneDataModel;
@@ -46,6 +49,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -441,6 +445,41 @@ public class HostStateService {
             }
         }
 
+        if(listPageInfoQueryParams.getNodeIds() != null && listPageInfoQueryParams.getNodeIds().size() == 1){
+            var sceneId = csceneInstanceService.getSceneId(listPageInfoQueryParams.getSceneIds().get(0));
+            var e = new SceneHandler(sceneId, null, new SceneContextBO()).getElement(listPageInfoQueryParams.getNodeIds().get(0));
+            if (CreateHandler.portDataCache.containsKey(e.getEid())) {
+                var list = CreateHandler.portDataCache.get(e.getEid());
+                List<Port> ports = new ArrayList<>();
+                for(var l:list){
+                    Port port = new Port();
+                    BeanUtils.copyProperties(l, port);
+                    port.setRemote(new Port.Remote());
+                    port.setLocal(new Port.Local());
+                    port.getRemote().setPort(l.getRemote().getPort());
+                    port.getRemote().setIp(l.getRemote().getIp());
+                    port.getLocal().setPort(l.getLocal().getPort());
+                    port.getLocal().setIp(l.getLocal().getIp());
+                    ports.add(port);
+                }
+                int page = listPageInfoQueryParams.getPage();
+                int pageSize = listPageInfoQueryParams.getPageSize();
+
+                int totalItems = ports.size();
+                int totalPages = (int) Math.ceil((double) totalItems / pageSize);
+
+                if (page < 1 || page > totalPages) {
+                    return new ListObjServiceResult(new ListObjResult()).asResult();
+                }
+
+                int startIndex = (page - 1) * pageSize;
+                int endIndex = Math.min(startIndex + pageSize, ports.size());
+
+                var ress = ports.subList(startIndex,endIndex);
+                return new ListObjServiceResult(new ListObjResult(ress,ports.size())).asResult();
+            }
+        }
+
         listPageInfoQueryParams.setSceneIds(csceneCommonService.translateSceneIds(listPageInfoQueryParams.getSceneIds()));
 
         if (listPageInfoQueryParams.getStartTime() != null || listPageInfoQueryParams.getEndTime() != null) {
@@ -471,6 +510,35 @@ public class HostStateService {
         if (Objects.isNull(listPageInfoQueryParams.getFetchIfSceneInstanceShutdown()) || !listPageInfoQueryParams.getFetchIfSceneInstanceShutdown()) {
             if (!csceneCommonService.isCsceneInstanceRunning(listPageInfoQueryParams.getSceneIds().get(0))) {
                 return new ListObjServiceResult(new ListObjResult()).asResult();
+            }
+        }
+
+        if(listPageInfoQueryParams.getNodeIds() != null && listPageInfoQueryParams.getNodeIds().size() == 1){
+            var sceneId = csceneInstanceService.getSceneId(listPageInfoQueryParams.getSceneIds().get(0));
+            var e = new SceneHandler(sceneId, null, new SceneContextBO()).getElement(listPageInfoQueryParams.getNodeIds().get(0));
+            if (CreateHandler.processDataCache.containsKey(e.getEid())) {
+                var list = CreateHandler.processDataCache.get(e.getEid());
+                List<Process> processes = new ArrayList<>();
+                for(var l:list){
+                    Process process = new Process();
+                    BeanUtils.copyProperties(l,process);
+                    processes.add(process);
+                }
+                int page = listPageInfoQueryParams.getPage();
+                int pageSize = listPageInfoQueryParams.getPageSize();
+
+                int totalItems = processes.size();
+                int totalPages = (int) Math.ceil((double) totalItems / pageSize);
+
+                if (page < 1 || page > totalPages) {
+                    return new ListObjServiceResult(new ListObjResult()).asResult();
+                }
+
+                int startIndex = (page - 1) * pageSize;
+                int endIndex = Math.min(startIndex + pageSize, processes.size());
+
+                var ress = processes.subList(startIndex,endIndex);
+                return new ListObjServiceResult(new ListObjResult(ress,processes.size())).asResult();
             }
         }
 
@@ -523,6 +591,37 @@ public class HostStateService {
                 return new ListObjServiceResult(new ListObjResult()).asResult();
             }
         }
+
+        if(listPageInfoQueryParams.getNodeIds() != null && listPageInfoQueryParams.getNodeIds().size() == 1){
+            var sceneId = csceneInstanceService.getSceneId(listPageInfoQueryParams.getSceneIds().get(0));
+            var e = new SceneHandler(sceneId, null, new SceneContextBO()).getElement(listPageInfoQueryParams.getNodeIds().get(0));
+            if (CreateHandler.inteDataCache.containsKey(e.getEid())) {
+                var list = CreateHandler.inteDataCache.get(e.getEid());
+                List<Netiface> netifaces = new ArrayList<>();
+                for(var l:list){
+                    Netiface netiface = new Netiface();
+                    BeanUtils.copyProperties(l,netiface);
+                    netifaces.add(netiface);
+                }
+
+                int page = listPageInfoQueryParams.getPage();
+                int pageSize = listPageInfoQueryParams.getPageSize();
+
+                int totalItems = netifaces.size();
+                int totalPages = (int) Math.ceil((double) totalItems / pageSize);
+
+                if (page < 1 || page > totalPages) {
+                    return new ListObjServiceResult(new ListObjResult()).asResult();
+                }
+
+                int startIndex = (page - 1) * pageSize;
+                int endIndex = Math.min(startIndex + pageSize, netifaces.size());
+
+                var ress = netifaces.subList(startIndex,endIndex);
+                return new ListObjServiceResult(new ListObjResult(ress,netifaces.size())).asResult();
+            }
+        }
+
 
         listPageInfoQueryParams.setSceneIds(csceneCommonService.translateSceneIds(listPageInfoQueryParams.getSceneIds()));
         if (listPageInfoQueryParams.getStartTime() != null || listPageInfoQueryParams.getEndTime() != null) {

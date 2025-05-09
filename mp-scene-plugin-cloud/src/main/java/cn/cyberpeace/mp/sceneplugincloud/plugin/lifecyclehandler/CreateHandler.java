@@ -3,6 +3,9 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.snmp_device.netgear.CommandTopData;
+import cn.cyberpeace.mp.base.snmp_device.netgear.JuniperData;
+import cn.cyberpeace.mp.base.snmp_device.netgear.NetgearData;
 import cn.cyberpeace.mp.base.util.basic.*;
 import cn.cyberpeace.mp.base.util.mptool.CollectionUtil;
 import cn.cyberpeace.mp.base.util.mptool.ConcurrentHashSet;
@@ -36,8 +39,13 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.common.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.CreateTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CveDataMapper;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
+import com.alibaba.fastjson.annotation.JSONField;
 import com.google.common.io.CharStreams;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.bulk.BulkRequest;
@@ -1560,6 +1568,11 @@ public class CreateHandler extends HandlerCommon {
         INSERT_FAKE_DATA_POOL.scheduleWithFixedDelay(ThreadUtils.format(() -> {
             try {
                 getPluginHandler().getElementMap().forEach((nodeId, cloudElement) -> {
+                    try {
+                        setTopData(cloudElement);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                     String eid = cloudElement.getSrcElement().getEid();
                     if (needFake(eid, getPluginHandler().getScene().getSrcScene().getEid())) {
                         //伪造主机信息数据
@@ -1573,6 +1586,132 @@ public class CreateHandler extends HandlerCommon {
             }
         }), 5000, 15000, TimeUnit.MILLISECONDS);
 
+    }
+
+    public static  Map<String, List<ProcessData>> processDataCache = new ConcurrentHashMap<>();
+
+    public static  Map<String, List<PortData>> portDataCache = new ConcurrentHashMap<>();
+
+    public static  Map<String, List<InteData>> inteDataCache = new ConcurrentHashMap<>();
+
+    public static boolean setTopData(CloudPluginSceneElementBO cloudElement) {
+        if (!cloudElement.getImage().contains("netgear") && !cloudElement.getImage().contains("juniper")) {
+            return false;
+        }
+        String ip = null;
+        String usename = null;
+        String password = null;
+        for (var p : cloudElement.getSrcElement().getPorts()) {
+            for (var a : p.getAccessModes()) {
+                if (AccessMode.Protocol.SSH.equals(a.getProtocol())) {
+                    ip = p.getIp();
+                    usename = a.getUsername();
+                    password = a.getPassword();
+                }
+            }
+        }
+        if (ip == null || usename == null || password == null) {
+            return false;
+        }
+
+        CommandTopData commandTopData = null ;
+        if (cloudElement.getImage().contains("netgear")){
+            commandTopData = new NetgearData(ip, usename, password).getData();
+        }else if(cloudElement.getImage().contains("juniper")){
+            commandTopData = new JuniperData(ip, usename, password).getData();
+        }
+        doSave(ip, commandTopData, cloudElement);
+        return false;
+    }
+
+    private static boolean doSave(String ip, CommandTopData data, CloudPluginSceneElementBO cloudElement) {
+        if (cloudElement.getImage().contains("netgear") || cloudElement.getImage().contains("juniper")) {
+            String eid = cloudElement.getSrcElement().getEid();
+            String hostInfoTemplate = getTemplate("config/host_info.json");
+            hostInfoTemplate = hostInfoTemplate.replace("$ip", ip);
+            hostInfoTemplate = hostInfoTemplate.replace("$name", cloudElement.getSrcElement().getEid());
+            hostInfoTemplate = hostInfoTemplate.replace("$id", eid);
+
+            hostInfoTemplate = hostInfoTemplate.replace("$timestamp", TimeUtils.localDateTimeToUtcString(LocalDateTime.now()));
+            hostInfoTemplate = hostInfoTemplate.replace("$@timestamp", TimeUtils.localDateTimeToUtcString(LocalDateTime.now()));
+            hostInfoTemplate = hostInfoTemplate.replace("$sic_launch_time", TimeUtils.localDateTimeToUtcString(LocalDateTime.now()));
+            hostInfoTemplate = hostInfoTemplate.replace("$memory_used_percent", (data.getAvailableMemory() / cloudElement.getSrcElement()
+                    .getRam()) + "");
+            hostInfoTemplate = hostInfoTemplate.replace("$cpu_used_percent", data.getCpuUsage() + "");
+            int ram = Optional.ofNullable(cloudElement.getSrcElement().getRam()).orElse(1);
+            hostInfoTemplate = hostInfoTemplate.replace("$memory_free", data.getAvailableMemory() + "");
+            hostInfoTemplate = hostInfoTemplate.replace("$memory_total", ram + "");
+            int cpu = Optional.ofNullable(cloudElement.getSrcElement().getCpu()).orElse(1);
+            hostInfoTemplate = hostInfoTemplate.replace("$cpu_count", cpu + "");
+            hostInfoTemplate = hostInfoTemplate.replace("$cpu_percent", data.getCpuUsage() + "");
+            hostInfoTemplate = hostInfoTemplate.replace("$cpu_freq", "1861");
+
+            long disk = Optional.ofNullable(cloudElement.getSrcElement().getDisk()).orElse(10) * 1024L * 1024 * 1024;
+            hostInfoTemplate = hostInfoTemplate.replace("$disk_total", disk + "");
+            hostInfoTemplate = hostInfoTemplate.replace("$disk_used", data.getDiskUsage() * 1024L * 1024 * 1024 + "");
+            hostInfoTemplate = hostInfoTemplate.replace("$disk_io_percent", 1 + RANDOM.nextInt(3) + "");
+
+
+            String suffix = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy.MM.dd"));
+            String indexName = "wazuh-alerts-4.x-" + suffix;
+            IndexRequest request = new IndexRequest(indexName).source(JsonCommon.parseMap(hostInfoTemplate));
+            BulkRequest bulkRequest = new BulkRequest();
+            bulkRequest.add(request);
+            saveDataToEs(bulkRequest);
+
+            if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(data.getProcessList())) {
+                List<ProcessData> list = new ArrayList<>();
+                for (var p : data.getProcessList()) {
+                    ProcessData processData = new ProcessData();
+                    processData.setCmd(p.getCommand());
+                    processData.setPid(Integer.parseInt(p.getPid()));
+                    processData.setName(p.getCommand());
+                    processData.setState(p.getState());
+                    processData.setEuser(p.getUser() == null ? p.getUsername() : p.getUser());
+                    list.add(processData);
+                }
+                processDataCache.put(cloudElement.getSrcElement().getEid(), list);
+            }
+
+            if(org.apache.commons.collections4.CollectionUtils.isNotEmpty(data.getPortList())){
+                List<PortData> list = new ArrayList<>();
+                for(var p:data.getPortList()){
+                    PortData portData = new PortData();
+                    portData.setProtocol(p.getProtocol());
+                    portData.setPid(p.getPid());
+                    portData.setLocal(new PortData.Local());
+                    portData.setRemote(new PortData.Remote());
+                    portData.setState(p.getState());
+                    if(p.getLocal() != null){
+                        portData.getLocal().setIp(p.getLocal().getIp());
+                        portData.getLocal().setPort(p.getLocal().getPort());
+                    }
+                    if(p.getRemote() != null){
+                        portData.getRemote().setIp(p.getRemote().getIp());
+                        portData.getRemote().setPort(p.getRemote().getPort());
+                    }
+                    list.add(portData);
+                }
+                portDataCache.put(cloudElement.getSrcElement().getEid(), list);
+            }
+
+            if(org.apache.commons.collections4.CollectionUtils.isNotEmpty(data.getInteList())){
+                List<InteData> list = new ArrayList<>();
+                for(var p:data.getInteList()){
+                    InteData inteData = new InteData();
+                    inteData.setIp(p.getIp());
+                    inteData.setName(p.getName());
+                    inteData.setMtu(p.getMtu());
+                    inteData.setMac(p.getMac());
+                    inteData.setState(p.getState());
+                    inteData.setType(p.getType());
+                    list.add(inteData);
+                }
+                inteDataCache.put(cloudElement.getSrcElement().getEid(), list);
+            }
+            return true;
+        }
+        return false;
     }
 
 
@@ -1930,5 +2069,221 @@ public class CreateHandler extends HandlerCommon {
         List<String> usbUuids = cloudElement.getEntityUsbs().stream().map(u -> u.getUuid()).collect(Collectors.toList());
         data.setEntityUsbUuids(usbUuids);
         vmClient.attachEntityUsbs(data);
+    }
+
+    @Getter
+    @Setter
+    public static class ProcessData{
+
+        @ApiModelProperty(value = "真实用户")
+        private String ruser;
+
+        @ApiModelProperty(value = "进程驻留大小")
+        private Integer resident;
+
+        @ApiModelProperty(value = "开始时间")
+        @JSONField(name = "start_time")
+        private String startTime;
+
+        @ApiModelProperty(value = "共享内存")
+        private Integer share;
+
+        @ApiModelProperty(value = "真实组")
+        private String rgroup;
+
+        @ApiModelProperty(value = "文件系统组名")
+        private String fgroup;
+
+        @ApiModelProperty(value = "执行的命令")
+        private String cmd;
+
+        @ApiModelProperty(value = "保存集用户")
+        private String suser;
+
+        @ApiModelProperty(value = "系统代码执行时长")
+        private Long stime;
+
+        @ApiModelProperty(value = "优先级")
+        private String priority;
+
+        @ApiModelProperty(value = "进程参数")
+        private String argvs;
+
+        @ApiModelProperty(value = "保存集组")
+        private String sgroup;
+
+        @ApiModelProperty(value = "父进程ID")
+        private Integer ppid;
+
+        @ApiModelProperty(value = "进程TTY数")
+        private Long tty;
+
+        @ApiModelProperty(value = "处理器编号")
+        private Integer processor;
+
+        @ApiModelProperty(value = "用户代码执行时长")
+        private Long utime;
+
+        @ApiModelProperty(value = "有效用户")
+        private String euser;
+
+        @ApiModelProperty(value = "虚拟内存总大小(KB)")
+        @JSONField(name = "vm_size")
+        private Long vmSize;
+
+        @ApiModelProperty(value = "线程组ID")
+        private Integer tgid;
+
+        @ApiModelProperty(value = "进程组")
+        private Integer pgrp;
+
+        @ApiModelProperty(value = "进程大小(KB)")
+        private Long size;
+
+        @ApiModelProperty(value = "名称")
+        private String name;
+
+        @ApiModelProperty(value = "父进程")
+        private Integer pid;
+
+        @ApiModelProperty(value = "会话")
+        private Integer session;
+
+        //
+        private Integer nice;
+
+        @ApiModelProperty(value = "轻量级进程数")
+        private Integer nlwp;
+
+        @ApiModelProperty(value = "线程组 ID")
+        private String egroup;
+
+        @ApiModelProperty(value = "状态")
+        private String state;
+
+        @ApiModelProperty(value = "代理ID")
+        @JSONField(name = "agent_id")
+        private String agentId;
+
+        @ApiModelProperty(value = "描述")
+        private String description;
+
+        @ApiModelProperty(value = "时间")
+        private LocalDateTime time;
+
+        @ApiModelProperty(value = "级别")
+        private int level;
+    }
+
+    @Getter
+    @Setter
+    public static class PortData{
+        @ApiModelProperty(value = "本地端口")
+        private Local local;
+
+        @ApiModelProperty(value = "远程端口")
+        private Remote remote;
+
+        @ApiModelProperty(value = "索引节点")
+        private Integer inode;
+
+        @ApiModelProperty(value = "父进程ID")
+        private Integer pid;
+
+        @ApiModelProperty(value = "接收队列中的数据包")
+        @JSONField(name = "rx_queue")
+        private Integer rxQueue;
+
+        @ApiModelProperty(value = "待传输的数据包")
+        @JSONField(name = "tx_queue")
+        private String txQueue;
+
+        @ApiModelProperty(value = "协议")
+        private String protocol;
+
+        @ApiModelProperty(value = "状态")
+        private String state;
+
+        @ApiModelProperty(value = "进程")
+        private String process;
+
+        @ApiModelProperty(value = "代理ID")
+        @JSONField(name = "agent_id")
+        private String agentId;
+
+
+        @Data
+        @ApiModel("本地端口")
+        public static class Local {
+
+            @ApiModelProperty("本地IP")
+            private String ip;
+
+            @ApiModelProperty("本地端口")
+            private Integer port;
+        }
+
+        @Data
+        @ApiModel("远程端口")
+        public static class Remote {
+
+            @ApiModelProperty("远程IP")
+            private String ip;
+
+            @ApiModelProperty("远程端口")
+            private Integer port;
+        }
+    }
+
+    @Getter
+    @Setter
+    public static class InteData{
+        @ApiModelProperty(value = "接收包")
+        private X rx;
+
+        @ApiModelProperty(value = "发送包")
+        private X tx;
+
+        @ApiModelProperty(value = "类型")
+        private String type;
+
+        @ApiModelProperty(value = "mtu")
+        private Integer mtu;
+
+        @ApiModelProperty(value = "状态")
+        private String state;
+
+        @ApiModelProperty(value = "mac地址")
+        private String mac;
+
+        @ApiModelProperty(value = "名称")
+        private String name;
+
+        @ApiModelProperty(value = "探针ID")
+        @JSONField(name = "agent_id")
+        private String agentId;
+
+        @ApiModelProperty(value = "IP地址")
+        private String ip;
+
+        /**
+         * 接收或者发送的包
+         */
+        @Data
+        @ApiModel("X")
+        public static class X {
+
+            @ApiModelProperty(value = "核心数")
+            private Integer bytes;
+
+            @ApiModelProperty(value = "丢弃")
+            private Integer dropped;
+
+            @ApiModelProperty(value = "错误")
+            private String errors;
+
+            @ApiModelProperty(value = "包数量")
+            private String packets;
+        }
     }
 }

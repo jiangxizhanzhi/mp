@@ -1,0 +1,57 @@
+package cn.cyberpeace.mp.base.snmp_device.netgear;
+
+import com.alibaba.fastjson.annotation.JSONField;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+public class CommandTopInte {
+    @ApiModelProperty(value = "接收包")
+    private X rx;
+
+    @ApiModelProperty(value = "发送包")
+    private X tx;
+
+    @ApiModelProperty(value = "类型")
+    private String type;
+
+    @ApiModelProperty(value = "mtu")
+    private Integer mtu;
+
+    @ApiModelProperty(value = "状态")
+    private String state;
+
+    @ApiModelProperty(value = "mac地址")
+    private String mac;
+
+    @ApiModelProperty(value = "名称")
+    private String name;
+
+    @ApiModelProperty(value = "探针ID")
+    @JSONField(name = "agent_id")
+    private String agentId;
+
+    @ApiModelProperty(value = "IP地址")
+    private String ip;
+
+    @Data
+    @ApiModel("X")
+    public static class X {
+
+        @ApiModelProperty(value = "核心数")
+        private Integer bytes;
+
+        @ApiModelProperty(value = "丢弃")
+        private Integer dropped;
+
+        @ApiModelProperty(value = "错误")
+        private String errors;
+
+        @ApiModelProperty(value = "包数量")
+        private String packets;
+    }
+}
