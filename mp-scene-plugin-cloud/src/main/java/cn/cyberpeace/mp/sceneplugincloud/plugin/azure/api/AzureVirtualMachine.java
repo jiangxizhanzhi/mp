@@ -226,7 +226,7 @@ public class AzureVirtualMachine {
                        String dataCollectionRulesId, String groupName,
                        String azureManagerUrl, MicrosoftAzureUserModel localAzurer) {
         Integer cloudType = pluginHandler.getSceneHandler().getScene().getCloudType();
-        if(BaseSceneModel.CloudType.PUBLIC==cloudType) {
+        if (BaseSceneModel.CloudType.PUBLIC == cloudType) {
 
             // 调用微软云api 创建虚拟机 回写虚拟机id
             VirtualMachine vm = createVirtualMachine(cloudElement, virtualNics, userData, groupName);
@@ -247,7 +247,7 @@ public class AzureVirtualMachine {
 //        createAlertRules(alertRuleBOList, vm.id(), vm.name(), groupName);
 
             AzureAlertRuleUtils.createAlertRules(resourceService, alertRuleBOList, groupName, vm.id(), vm.name());
-        }else {
+        } else {
 
             String vmName = HandlerUtils.genResourceName(cloudElement.getSrcElement().getEid());
 
@@ -288,7 +288,7 @@ public class AzureVirtualMachine {
             formMap.put("isPublicIp", cloudElement.getIsPublicIp());
             formMap.put("ip", virtualNic.getFixedIp());
             formMap.put("ipList", ipList);
-            formMap.put("ports",ports);
+            formMap.put("ports", ports);
 
             //请求头设置
             HashMap<String, String> headersMap = new HashMap<>();
@@ -308,8 +308,8 @@ public class AzureVirtualMachine {
                 if (cloudElement.getIsPublicIp()) {
                     cloudElement.setPublicIpAddress(String.valueOf(publicIp));
                 }
-            }else {
-                throw new RuntimeException("create vm fault "+dataMap.get("message"));
+            } else {
+                throw new RuntimeException("create vm fault " + dataMap.get("message"));
             }
         }
 
@@ -588,9 +588,9 @@ public class AzureVirtualMachine {
             VirtualMachine virtualMachine = azureResourceManager.virtualMachines().getById(cloudElement.getResourceId());
             VirtualMachine.Update update = virtualMachine.update().withSize(cloudElement.getVmSizeType());
             update.apply();
-        }else {
+        } else {
             String azureManagerUrl = situationAwareConfig.getMixAzureManagerUrl();
-            if(microsoftAzureUserModel.getCloudType() == BaseSceneModel.CloudType.PRIVATE){
+            if (microsoftAzureUserModel.getCloudType() == BaseSceneModel.CloudType.PRIVATE) {
                 azureManagerUrl = situationAwareConfig.getPrivateAzureManagerUrl();
             }
             String url = azureManagerUrl + "/cloud/vm_size_update";
@@ -624,9 +624,9 @@ public class AzureVirtualMachine {
                 update.withDataDiskDefaultStorageAccountType(StorageAccountTypes.fromString(cloudElement.getVmExpansionDiskType()))
                         .withNewDataDisk(expansionDisk);
                 update.apply();
-            }else {
+            } else {
                 String azureManagerUrl = situationAwareConfig.getMixAzureManagerUrl();
-                if(microsoftAzureUserModel.getCloudType() == BaseSceneModel.CloudType.PRIVATE){
+                if (microsoftAzureUserModel.getCloudType() == BaseSceneModel.CloudType.PRIVATE) {
                     azureManagerUrl = situationAwareConfig.getPrivateAzureManagerUrl();
                 }
                 String url = azureManagerUrl + "/cloud/vm_expansion_disk";
@@ -878,6 +878,7 @@ public class AzureVirtualMachine {
 
     /**
      * 准备脚本
+     *
      * @return
      */
     private static ArrayList<String> prepareScripts() {
