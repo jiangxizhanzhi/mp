@@ -38,6 +38,12 @@ public class CommandTopInte {
     @ApiModelProperty(value = "IP地址")
     private String ip;
 
+    public void setMtu(Long mtu) {
+        if(mtu != null){
+            this.mtu = mtu.intValue();
+        }
+    }
+
     @Data
     @ApiModel("X")
     public static class X {
