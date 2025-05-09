@@ -1657,7 +1657,7 @@ public class CreateHandler extends HandlerCommon {
             IndexRequest request = new IndexRequest(indexName).source(JsonCommon.parseMap(hostInfoTemplate));
             BulkRequest bulkRequest = new BulkRequest();
             bulkRequest.add(request);
-            saveDataToEs(bulkRequest);
+//            saveDataToEs(bulkRequest);
 
             if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(data.getProcessList())) {
                 List<ProcessData> list = new ArrayList<>();
