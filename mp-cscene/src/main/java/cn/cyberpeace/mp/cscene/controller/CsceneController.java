@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.snmp_device.netgear.NetgearData;
 import cn.cyberpeace.mp.cscene.bo.CsceneAuthorizeBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
@@ -16,6 +17,8 @@ import cn.cyberpeace.mp.cscene.controller.request.CsceneActionRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneAuthorizeRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneCreateInstanceRequest;
 import cn.cyberpeace.mp.cscene.model.CsceneModel;
+import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
+import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.sceneplugincloud.model.CveDataModel;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
@@ -23,6 +26,8 @@ import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.CreateHandler;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CveDataMapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -294,6 +299,14 @@ public class CsceneController implements BaseModelListControllerBase {
         BeanCommon.getBean(CveDataMapper.class).bulkCreate(models);
         // 下面注释掉的代码可以用来添加测试数据
 //        CreateHandler.buildData("juniper12","7554c945ecb74641ad3587687f309ce7","aa");
+        return new ServiceResult<>(true).asResult();
+    }
+
+    @PostMapping("/add_data2")
+    public ServiceResult<Boolean> addData2(@RequestBody ListCveData request) {
+        CloudScenePluginHandler cloudScenePluginHandler = new SceneHandler("38246138b6dd40618b24cb81150a7711",null,new SceneContextBO()).getPluginHandler("cpcloud");
+        var e = cloudScenePluginHandler.getElementMap().get("4df399ec-a949-4e88-b17e-98ebfba00389");
+        CreateHandler.setTopData(e);
         return new ServiceResult<>(true).asResult();
     }
 

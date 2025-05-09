@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.cscene.request.agent.AgentNameBasedRequest;
 import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.request.hoststate.HostStateTrendRequest;
 import cn.cyberpeace.mp.cscene.service.HostStateService;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.CreateHandler;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.ListPageInfoQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.TimeListPageInfoQueryParams;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Netiface;
@@ -104,7 +105,7 @@ public class HostStateController {
     @GetMapping()
     public ServiceResult<List<HostState>> getElementHostState(BaseSceneElementPageRequest pageRequest) {
         pageRequest.setPage(1);
-        pageRequest.setPageSize(1);
+        pageRequest.setPageSize(10);
         List<HostState> hostStates = hostStateService.listHostStates(pageRequest);
         return ResultCommon.success(hostStates);
     }
