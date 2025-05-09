@@ -1414,9 +1414,6 @@ public class CreateHandler extends HandlerCommon {
     public static  Map<String, List<InteData>> inteDataCache = new ConcurrentHashMap<>();
 
     public static boolean setTopData(CloudPluginSceneElementBO cloudElement) {
-        if (!cloudElement.getImage().contains("netgear") && !cloudElement.getImage().contains("junos")) {
-            return false;
-        }
         String ip = null;
         String usename = null;
         String password = null;
@@ -1459,7 +1456,7 @@ public class CreateHandler extends HandlerCommon {
     }
 
     private static boolean doSave(String ip, CommandTopData data, CloudPluginSceneElementBO cloudElement) {
-        if (cloudElement.getImage().contains("netgear") || cloudElement.getImage().contains("juniper")) {
+
 //            String eid = cloudElement.getSrcElement().getEid();
 //            String hostInfoTemplate = getTemplate("config/host_info.json");
 //            hostInfoTemplate = hostInfoTemplate.replace("$ip", ip);
@@ -1493,59 +1490,58 @@ public class CreateHandler extends HandlerCommon {
 //            bulkRequest.add(request);
 //            saveDataToEs(bulkRequest);
 
-            if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(data.getProcessList())) {
-                List<ProcessData> list = new ArrayList<>();
-                for (var p : data.getProcessList()) {
-                    ProcessData processData = new ProcessData();
-                    processData.setCmd(p.getCommand());
-                    processData.setPid(Integer.parseInt(p.getPid()));
-                    processData.setName(p.getCommand());
-                    processData.setState(p.getState());
-                    processData.setEuser(p.getUser() == null ? p.getUsername() : p.getUser());
-                    list.add(processData);
-                }
-                processDataCache.put(cloudElement.getSrcElement().getEid(), list);
+        if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(data.getProcessList())) {
+            List<ProcessData> list = new ArrayList<>();
+            for (var p : data.getProcessList()) {
+                ProcessData processData = new ProcessData();
+                processData.setCmd(p.getCommand());
+                processData.setPid(Integer.parseInt(p.getPid()));
+                processData.setName(p.getCommand());
+                processData.setState(p.getState());
+                processData.setEuser(p.getUser() == null ? p.getUsername() : p.getUser());
+                list.add(processData);
             }
-
-            if(org.apache.commons.collections4.CollectionUtils.isNotEmpty(data.getPortList())){
-                List<PortData> list = new ArrayList<>();
-                for(var p:data.getPortList()){
-                    PortData portData = new PortData();
-                    portData.setProtocol(p.getProtocol());
-                    portData.setPid(p.getPid());
-                    portData.setLocal(new PortData.Local());
-                    portData.setRemote(new PortData.Remote());
-                    portData.setState(p.getState());
-                    if(p.getLocal() != null){
-                        portData.getLocal().setIp(p.getLocal().getIp());
-                        portData.getLocal().setPort(p.getLocal().getPort());
-                    }
-                    if(p.getRemote() != null){
-                        portData.getRemote().setIp(p.getRemote().getIp());
-                        portData.getRemote().setPort(p.getRemote().getPort());
-                    }
-                    list.add(portData);
-                }
-                portDataCache.put(cloudElement.getSrcElement().getEid(), list);
-            }
-
-            if(org.apache.commons.collections4.CollectionUtils.isNotEmpty(data.getInteList())){
-                List<InteData> list = new ArrayList<>();
-                for(var p:data.getInteList()){
-                    InteData inteData = new InteData();
-                    inteData.setIp(p.getIp());
-                    inteData.setName(p.getName());
-                    inteData.setMtu(p.getMtu());
-                    inteData.setMac(p.getMac());
-                    inteData.setState(p.getState());
-                    inteData.setType(p.getType());
-                    list.add(inteData);
-                }
-                inteDataCache.put(cloudElement.getSrcElement().getEid(), list);
-            }
-            return true;
+            processDataCache.put(cloudElement.getSrcElement().getEid(), list);
         }
-        return false;
+
+        if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(data.getPortList())) {
+            List<PortData> list = new ArrayList<>();
+            for (var p : data.getPortList()) {
+                PortData portData = new PortData();
+                portData.setProtocol(p.getProtocol());
+                portData.setPid(p.getPid());
+                portData.setLocal(new PortData.Local());
+                portData.setRemote(new PortData.Remote());
+                portData.setState(p.getState());
+                if (p.getLocal() != null) {
+                    portData.getLocal().setIp(p.getLocal().getIp());
+                    portData.getLocal().setPort(p.getLocal().getPort());
+                }
+                if (p.getRemote() != null) {
+                    portData.getRemote().setIp(p.getRemote().getIp());
+                    portData.getRemote().setPort(p.getRemote().getPort());
+                }
+                list.add(portData);
+            }
+            portDataCache.put(cloudElement.getSrcElement().getEid(), list);
+        }
+
+        if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(data.getInteList())) {
+            List<InteData> list = new ArrayList<>();
+            for (var p : data.getInteList()) {
+                InteData inteData = new InteData();
+                inteData.setIp(p.getIp());
+                inteData.setName(p.getName());
+                inteData.setMtu(p.getMtu());
+                inteData.setMac(p.getMac());
+                inteData.setState(p.getState());
+                inteData.setType(p.getType());
+                list.add(inteData);
+            }
+            inteDataCache.put(cloudElement.getSrcElement().getEid(), list);
+        }
+        return true;
+
     }
 
 
