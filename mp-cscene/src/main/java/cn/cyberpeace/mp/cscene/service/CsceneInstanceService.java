@@ -3157,6 +3157,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                                     .map(cmd -> "cmd /c "+ cmd)
                                     .collect(Collectors.toList());
                             initCommands.add(0,"cmd /c rd/s/q C:\\wazuha");
+                            initCommands.add(0,"cmd /c \"cd C:\\wazuha && uninstall.bat\"");
                             initCommands.add("mkdir C:\\Windows\\16");
 
 //                            先卸载删除目录再执行
