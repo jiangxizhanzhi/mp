@@ -146,38 +146,22 @@ public class WazuhCommon {
             resource.setFile(nameFileMap.getOrDefault(WAZUH_AGENT_WINDOWS_FILE_NAME, StringUtils.EMPTY));
             resource.setInstallCommand(
                     StringUtils.joinWith(CommandUtils.WINDOWS_LINE_BREAK,
-                            "mkdir C:\\Windows\\0",
                             "call c:\\wazuha\\uninstall.bat",
-                            "mkdir C:\\Windows\\1",
                             String.format("set SIC_WAZUH_MANAGER_IP=%s", wazuhHost),
-                            "mkdir C:\\Windows\\2",
                             String.format("set SIC_WAZUH_AGENT_NAME=%s", agentName),
-                            "mkdir C:\\Windows\\3",
                             String.format("set SIC_WAZUH_MANAGER_REMOTE_PORT=%d", getWazuhRemotePort(cloudType)),
-                            "mkdir C:\\Windows\\4",
                             String.format("set SIC_WAZUH_MANAGER_AUTH_PORT=%d", getWazuhAuthPort(cloudType)),
-                            "mkdir C:\\Windows\\5",
                             String.format("unzip -q %s -d %s\\agent-installer", InstallerUtils.INSTALLER_REPLACEMENT,
                                     windowsInstallDir),
-                            "mkdir C:\\Windows\\6",
                             String.format("cd %s\\agent-installer\\agent-windows", windowsInstallDir),
-                            "mkdir C:\\Windows\\7",
                             "call install.bat",
-                            "mkdir C:\\Windows\\8",
                             String.format("cd %s", windowsInstallDir),
-                            "mkdir C:\\Windows\\9",
                             "rd/s/q agent-installer",
-                            "mkdir C:\\Windows\\10",
                             "del/f/s/q " + InstallerUtils.INSTALLER_REPLACEMENT,
-                            "mkdir C:\\Windows\\11",
                             "cd C:\\wazuha",
-                            "mkdir C:\\Windows\\12",
                             "call config.bat",
-                            "mkdir C:\\Windows\\13",
                             "call " + probeCommand,
-                            "mkdir C:\\Windows\\14",
-                            "call start.bat",
-                            "mkdir C:\\Windows\\15"
+                            "call start.bat"
                     ));
         } else if (SystemTypeCommandUtils.isLinux(systemType)) {
             resource = new InstallerUtils.Installer();
