@@ -1595,9 +1595,6 @@ public class CreateHandler extends HandlerCommon {
     public static  Map<String, List<InteData>> inteDataCache = new ConcurrentHashMap<>();
 
     public static boolean setTopData(CloudPluginSceneElementBO cloudElement) {
-        if (!cloudElement.getImage().contains("netgear") && !cloudElement.getImage().contains("juniper")) {
-            return false;
-        }
         String ip = null;
         String usename = null;
         String password = null;
@@ -1625,93 +1622,90 @@ public class CreateHandler extends HandlerCommon {
     }
 
     private static boolean doSave(String ip, CommandTopData data, CloudPluginSceneElementBO cloudElement) {
-        if (cloudElement.getImage().contains("netgear") || cloudElement.getImage().contains("juniper")) {
-            String eid = cloudElement.getSrcElement().getEid();
-            String hostInfoTemplate = getTemplate("config/host_info.json");
-            hostInfoTemplate = hostInfoTemplate.replace("$ip", ip);
-            hostInfoTemplate = hostInfoTemplate.replace("$name", cloudElement.getSrcElement().getEid());
-            hostInfoTemplate = hostInfoTemplate.replace("$id", eid);
+        String eid = cloudElement.getSrcElement().getEid();
+        String hostInfoTemplate = getTemplate("config/host_info.json");
+        hostInfoTemplate = hostInfoTemplate.replace("$ip", ip);
+        hostInfoTemplate = hostInfoTemplate.replace("$name", cloudElement.getSrcElement().getEid());
+        hostInfoTemplate = hostInfoTemplate.replace("$id", eid);
 
-            hostInfoTemplate = hostInfoTemplate.replace("$timestamp", TimeUtils.localDateTimeToUtcString(LocalDateTime.now()));
-            hostInfoTemplate = hostInfoTemplate.replace("$@timestamp", TimeUtils.localDateTimeToUtcString(LocalDateTime.now()));
-            hostInfoTemplate = hostInfoTemplate.replace("$sic_launch_time", TimeUtils.localDateTimeToUtcString(LocalDateTime.now()));
-            hostInfoTemplate = hostInfoTemplate.replace("$memory_used_percent", (data.getAvailableMemory() / cloudElement.getSrcElement()
-                    .getRam()) + "");
-            hostInfoTemplate = hostInfoTemplate.replace("$cpu_used_percent", data.getCpuUsage() + "");
-            int ram = Optional.ofNullable(cloudElement.getSrcElement().getRam()).orElse(1);
-            hostInfoTemplate = hostInfoTemplate.replace("$memory_free", data.getAvailableMemory() + "");
-            hostInfoTemplate = hostInfoTemplate.replace("$memory_total", ram + "");
-            int cpu = Optional.ofNullable(cloudElement.getSrcElement().getCpu()).orElse(1);
-            hostInfoTemplate = hostInfoTemplate.replace("$cpu_count", cpu + "");
-            hostInfoTemplate = hostInfoTemplate.replace("$cpu_percent", data.getCpuUsage() + "");
-            hostInfoTemplate = hostInfoTemplate.replace("$cpu_freq", "1861");
+        hostInfoTemplate = hostInfoTemplate.replace("$timestamp", TimeUtils.localDateTimeToUtcString(LocalDateTime.now()));
+        hostInfoTemplate = hostInfoTemplate.replace("$@timestamp", TimeUtils.localDateTimeToUtcString(LocalDateTime.now()));
+        hostInfoTemplate = hostInfoTemplate.replace("$sic_launch_time", TimeUtils.localDateTimeToUtcString(LocalDateTime.now()));
+        hostInfoTemplate = hostInfoTemplate.replace("$memory_used_percent", (data.getAvailableMemory() / cloudElement.getSrcElement()
+                .getRam()) + "");
+        hostInfoTemplate = hostInfoTemplate.replace("$cpu_used_percent", data.getCpuUsage() + "");
+        int ram = Optional.ofNullable(cloudElement.getSrcElement().getRam()).orElse(1);
+        hostInfoTemplate = hostInfoTemplate.replace("$memory_free", data.getAvailableMemory() + "");
+        hostInfoTemplate = hostInfoTemplate.replace("$memory_total", ram + "");
+        int cpu = Optional.ofNullable(cloudElement.getSrcElement().getCpu()).orElse(1);
+        hostInfoTemplate = hostInfoTemplate.replace("$cpu_count", cpu + "");
+        hostInfoTemplate = hostInfoTemplate.replace("$cpu_percent", data.getCpuUsage() + "");
+        hostInfoTemplate = hostInfoTemplate.replace("$cpu_freq", "1861");
 
-            long disk = Optional.ofNullable(cloudElement.getSrcElement().getDisk()).orElse(10) * 1024L * 1024 * 1024;
-            hostInfoTemplate = hostInfoTemplate.replace("$disk_total", disk + "");
-            hostInfoTemplate = hostInfoTemplate.replace("$disk_used", data.getDiskUsage() * 1024L * 1024 * 1024 + "");
-            hostInfoTemplate = hostInfoTemplate.replace("$disk_io_percent", 1 + RANDOM.nextInt(3) + "");
+        long disk = Optional.ofNullable(cloudElement.getSrcElement().getDisk()).orElse(10) * 1024L * 1024 * 1024;
+        hostInfoTemplate = hostInfoTemplate.replace("$disk_total", disk + "");
+        hostInfoTemplate = hostInfoTemplate.replace("$disk_used", data.getDiskUsage() * 1024L * 1024 * 1024 + "");
+        hostInfoTemplate = hostInfoTemplate.replace("$disk_io_percent", 1 + RANDOM.nextInt(3) + "");
 
 
-            String suffix = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy.MM.dd"));
-            String indexName = "wazuh-alerts-4.x-" + suffix;
-            IndexRequest request = new IndexRequest(indexName).source(JsonCommon.parseMap(hostInfoTemplate));
-            BulkRequest bulkRequest = new BulkRequest();
-            bulkRequest.add(request);
+        String suffix = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy.MM.dd"));
+        String indexName = "wazuh-alerts-4.x-" + suffix;
+        IndexRequest request = new IndexRequest(indexName).source(JsonCommon.parseMap(hostInfoTemplate));
+        BulkRequest bulkRequest = new BulkRequest();
+        bulkRequest.add(request);
 //            saveDataToEs(bulkRequest);
 
-            if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(data.getProcessList())) {
-                List<ProcessData> list = new ArrayList<>();
-                for (var p : data.getProcessList()) {
-                    ProcessData processData = new ProcessData();
-                    processData.setCmd(p.getCommand());
-                    processData.setPid(Integer.parseInt(p.getPid()));
-                    processData.setName(p.getCommand());
-                    processData.setState(p.getState());
-                    processData.setEuser(p.getUser() == null ? p.getUsername() : p.getUser());
-                    list.add(processData);
-                }
-                processDataCache.put(cloudElement.getSrcElement().getEid(), list);
+        if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(data.getProcessList())) {
+            List<ProcessData> list = new ArrayList<>();
+            for (var p : data.getProcessList()) {
+                ProcessData processData = new ProcessData();
+                processData.setCmd(p.getCommand());
+                processData.setPid(Integer.parseInt(p.getPid()));
+                processData.setName(p.getCommand());
+                processData.setState(p.getState());
+                processData.setEuser(p.getUser() == null ? p.getUsername() : p.getUser());
+                list.add(processData);
             }
-
-            if(org.apache.commons.collections4.CollectionUtils.isNotEmpty(data.getPortList())){
-                List<PortData> list = new ArrayList<>();
-                for(var p:data.getPortList()){
-                    PortData portData = new PortData();
-                    portData.setProtocol(p.getProtocol());
-                    portData.setPid(p.getPid());
-                    portData.setLocal(new PortData.Local());
-                    portData.setRemote(new PortData.Remote());
-                    portData.setState(p.getState());
-                    if(p.getLocal() != null){
-                        portData.getLocal().setIp(p.getLocal().getIp());
-                        portData.getLocal().setPort(p.getLocal().getPort());
-                    }
-                    if(p.getRemote() != null){
-                        portData.getRemote().setIp(p.getRemote().getIp());
-                        portData.getRemote().setPort(p.getRemote().getPort());
-                    }
-                    list.add(portData);
-                }
-                portDataCache.put(cloudElement.getSrcElement().getEid(), list);
-            }
-
-            if(org.apache.commons.collections4.CollectionUtils.isNotEmpty(data.getInteList())){
-                List<InteData> list = new ArrayList<>();
-                for(var p:data.getInteList()){
-                    InteData inteData = new InteData();
-                    inteData.setIp(p.getIp());
-                    inteData.setName(p.getName());
-                    inteData.setMtu(p.getMtu());
-                    inteData.setMac(p.getMac());
-                    inteData.setState(p.getState());
-                    inteData.setType(p.getType());
-                    list.add(inteData);
-                }
-                inteDataCache.put(cloudElement.getSrcElement().getEid(), list);
-            }
-            return true;
+            processDataCache.put(cloudElement.getSrcElement().getEid(), list);
         }
-        return false;
+
+        if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(data.getPortList())) {
+            List<PortData> list = new ArrayList<>();
+            for (var p : data.getPortList()) {
+                PortData portData = new PortData();
+                portData.setProtocol(p.getProtocol());
+                portData.setPid(p.getPid());
+                portData.setLocal(new PortData.Local());
+                portData.setRemote(new PortData.Remote());
+                portData.setState(p.getState());
+                if (p.getLocal() != null) {
+                    portData.getLocal().setIp(p.getLocal().getIp());
+                    portData.getLocal().setPort(p.getLocal().getPort());
+                }
+                if (p.getRemote() != null) {
+                    portData.getRemote().setIp(p.getRemote().getIp());
+                    portData.getRemote().setPort(p.getRemote().getPort());
+                }
+                list.add(portData);
+            }
+            portDataCache.put(cloudElement.getSrcElement().getEid(), list);
+        }
+
+        if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(data.getInteList())) {
+            List<InteData> list = new ArrayList<>();
+            for (var p : data.getInteList()) {
+                InteData inteData = new InteData();
+                inteData.setIp(p.getIp());
+                inteData.setName(p.getName());
+                inteData.setMtu(p.getMtu());
+                inteData.setMac(p.getMac());
+                inteData.setState(p.getState());
+                inteData.setType(p.getType());
+                list.add(inteData);
+            }
+            inteDataCache.put(cloudElement.getSrcElement().getEid(), list);
+        }
+        return true;
     }
 
 
