@@ -411,6 +411,12 @@ public class DeleteHandler extends HandlerCommon {
             runSceneProgress(SceneProcess.DELETE_AUXILIARY_NETWORKS, () -> runTasks(deleteAuxiliaryNetworkTasks));
         }
 
+        for (var e : getPluginHandler().getElementMap().values()) {
+            CreateHandler.portDataCache.remove(e.getSrcElement().getEid());
+            CreateHandler.processDataCache.remove(e.getSrcElement().getEid());
+            CreateHandler.inteDataCache.remove(e.getSrcElement().getEid());
+        }
+
         SceneInstanceLinkCacheUtil.clear(getPluginHandler().getSourceSceneId());
     }
 
