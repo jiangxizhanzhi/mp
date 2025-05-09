@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.snmp_device.netgear.CommandTopData;
+import cn.cyberpeace.mp.base.snmp_device.netgear.CommonData;
 import cn.cyberpeace.mp.base.snmp_device.netgear.JuniperData;
 import cn.cyberpeace.mp.base.snmp_device.netgear.NetgearData;
 import cn.cyberpeace.mp.base.util.basic.*;
@@ -1413,7 +1414,7 @@ public class CreateHandler extends HandlerCommon {
     public static  Map<String, List<InteData>> inteDataCache = new ConcurrentHashMap<>();
 
     public static boolean setTopData(CloudPluginSceneElementBO cloudElement) {
-        if (!cloudElement.getImage().contains("netgear") && !cloudElement.getImage().contains("juniper")) {
+        if (!cloudElement.getImage().contains("netgear") && !cloudElement.getImage().contains("junos")) {
             return false;
         }
         String ip = null;
@@ -1433,10 +1434,25 @@ public class CreateHandler extends HandlerCommon {
         }
 
         CommandTopData commandTopData = null ;
-        if (cloudElement.getImage().contains("netgear")){
+        if (cloudElement.getImage().contains("netgear")) {
             commandTopData = new NetgearData(ip, usename, password).getData();
-        }else if(cloudElement.getImage().contains("juniper")){
+        } else if (cloudElement.getImage().contains("junos")) {
             commandTopData = new JuniperData(ip, usename, password).getData();
+        } else if (cloudElement.getImage().contains("huawei")) {
+            commandTopData = new CommonData(ip, usename, password).getData("huawei.py");
+        } else if (cloudElement.getImage().contains("ruijie")) {
+            commandTopData = new CommonData(ip, usename, password).getData("ruijie.py");
+        } else if (cloudElement.getImage().contains("dell")) {
+            commandTopData = new CommonData(ip, usename, password).getData("dell.py");
+        } else if (cloudElement.getImage().contains("h3c")) {
+            commandTopData = new CommonData(ip, usename, password).getData("h3c.py");
+        } else if (cloudElement.getImage().contains("tplink")) {
+            commandTopData = new CommonData(ip, usename, password).getData("tplink.py");
+        } else if (cloudElement.getImage().contains("dlink")) {
+            commandTopData = new CommonData(ip, usename, password).getData("dlink.py");
+        }
+        if (commandTopData == null) {
+            return false;
         }
         doSave(ip, commandTopData, cloudElement);
         return false;
