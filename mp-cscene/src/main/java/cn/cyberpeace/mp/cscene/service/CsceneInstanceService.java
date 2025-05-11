@@ -3158,7 +3158,6 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                                     .collect(Collectors.toList());
                             initCommands.add(0,"cmd /c rd/s/q C:\\wazuha");
                             initCommands.add(0,"cmd /c \"cd C:\\wazuha && uninstall.bat\"");
-                            initCommands.add("cmd /c \"cd C:\\wazuha && stop.bat\"");
                             initCommands.add("sleep 10");
                             initCommands.add("cmd /c \"cd C:\\wazuha && start.bat\"");
 
@@ -3169,7 +3168,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                                     .runPowerShellScript(groupName, vmName, initCommands, new ArrayList<>());
                             log.info("updateWazuhManagerIp initCommands : {}",JsonUtils.stringify(initCommands));
                             try {
-                                Thread.sleep(60000);
+                                Thread.sleep(600000);
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }
