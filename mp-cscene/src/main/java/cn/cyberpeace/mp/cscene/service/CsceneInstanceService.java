@@ -3168,6 +3168,16 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                                     .virtualMachines()
                                     .runPowerShellScript(groupName, vmName, initCommands, new ArrayList<>());
                             log.info("updateWazuhManagerIp initCommands : {}",JsonUtils.stringify(initCommands));
+                            try {
+                                Thread.sleep(60000);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                            azureResourceManager
+                                    .getManager()
+                                    .virtualMachines()
+                                    .runPowerShellScript(groupName, vmName, Arrays.asList("cmd /c \"cd C:\\wazuha && start.bat\""), new ArrayList<>());
+
                         } else {
                             initCommands = Optional.ofNullable(initCommands)
                                     .orElse(Collections.emptyList())
