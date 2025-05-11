@@ -37,8 +37,6 @@ public class Application {
     @Bean
     public CommandLineRunner commandLineRunner(ApplicationContext ctx, CsceneInstanceService csceneInstanceService) {
         return args -> {
-
-//            TODO 改bug暂时停止开发0422
             csceneInstanceService.initializeAzureWazuhManagerIpConfigs();
 
             var localHost = "localhost";

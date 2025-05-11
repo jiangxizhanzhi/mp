@@ -163,6 +163,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
@@ -3094,11 +3095,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         Integer cloudType = requestData.getCloudType();
         String wazuhManagerIp = requestData.getWazuhManagerIp();
 
-//        TODO 改bug暂时停止开发0422
         updateWazuhManagerIpByCloudType(cloudType, wazuhManagerIp);
 
-
-
+//        查运行中场景
         IAzureResourceManager azureResourceManager = IAzureResourceManager.getInstance(requestData.getCloudType());
         var humanCondition = new HumanCondition()
                 .link(CsceneInstanceModel.class, SceneModel.class)
@@ -3145,58 +3144,74 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 CollectionPluginSceneElementBO collectionElement = collectPlugin.getElementMap().get(cloudPluginSceneElementBO.getSrcElement().getId());
                 if (collectionElement.getProbes() != null && !collectionElement.getProbes().isEmpty()) {
                     String vmName = HandlerUtils.genResourceName(cloudPluginSceneElementBO.getSrcElement().getEid());
-                    if (BaseSceneModel.CloudType.PUBLIC == requestData.getCloudType()) {
-                        List<String> initCommands = cloudPluginSceneElementBO.getSrcElement().getInitCommands();
-                        if (BaseSceneElementModel.SystemType.WINDOWS.equals(cloudPluginSceneElementBO.getVmType().toLowerCase())) {
-                            initCommands = Optional.ofNullable(initCommands)
-                                    .orElse(Collections.emptyList())
-                                    .stream()
-                                    .flatMap(cmd -> Arrays.stream(cmd.split("\\n")))
-                                    .map(String::trim)
-                                    .filter(cmd -> !cmd.isEmpty())
-                                    .map(cmd -> "cmd /c "+ cmd)
-                                    .collect(Collectors.toList());
-                            initCommands.add(0,"cmd /c rd/s/q C:\\wazuha");
-                            initCommands.add(0,"cmd /c \"cd C:\\wazuha && uninstall.bat\"");
-                            initCommands.add("sleep 10");
-                            initCommands.add("cmd /c \"cd C:\\wazuha && start.bat\"");
-
-//                            先卸载删除目录再执行
-                            azureResourceManager
-                                    .getManager()
-                                    .virtualMachines()
-                                    .runPowerShellScript(groupName, vmName, initCommands, new ArrayList<>());
-                            log.info("updateWazuhManagerIp initCommands : {}",JsonUtils.stringify(initCommands));
-                            try {
-                                Thread.sleep(600000);
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                            azureResourceManager
-                                    .getManager()
-                                    .virtualMachines()
-                                    .runPowerShellScript(groupName, vmName, Arrays.asList("cmd /c \"cd C:\\wazuha && start.bat\""), new ArrayList<>());
-
-                        } else {
-                            initCommands = Optional.ofNullable(initCommands)
-                                    .orElse(Collections.emptyList())
-                                    .stream()
-                                    .flatMap(cmd -> Arrays.stream(cmd.split("\\n")))
-                                    .map(String::trim)
-                                    .filter(cmd -> !cmd.isEmpty())
-                                    .collect(Collectors.toList());
-
-                            azureResourceManager
-                                    .getManager()
-                                    .virtualMachines()
-                                    .runShellScript(groupName, vmName, initCommands, new ArrayList<>());
-                            log.info("updateWazuhManagerIp linuxCommands : {}",JsonUtils.stringify(initCommands));
-                        }
-                    }
+                    executeVmCommandsAsync(requestData, cloudPluginSceneElementBO, azureResourceManager, groupName, vmName);
                 }
             }
         }
 
+    }
+
+    /**
+     * 异步执行vm命令
+     *
+     * @param requestData
+     * @param cloudPluginSceneElementBO
+     * @param azureResourceManager
+     * @param groupName
+     * @param vmName
+     */
+    private static void executeVmCommandsAsync(MicrosoftAzureUserModel requestData, CloudPluginSceneElementBO cloudPluginSceneElementBO,
+                                               IAzureResourceManager azureResourceManager, String groupName, String vmName) {
+        CompletableFuture.runAsync(() -> {
+            if (BaseSceneModel.CloudType.PUBLIC == requestData.getCloudType()) {
+                List<String> initCommands = cloudPluginSceneElementBO.getSrcElement().getInitCommands();
+                if (BaseSceneElementModel.SystemType.WINDOWS.equals(cloudPluginSceneElementBO.getVmType().toLowerCase())) {
+                    initCommands = Optional.ofNullable(initCommands)
+                            .orElse(Collections.emptyList())
+                            .stream()
+                            .flatMap(cmd -> Arrays.stream(cmd.split("\\n")))
+                            .map(String::trim)
+                            .filter(cmd -> !cmd.isEmpty())
+                            .map(cmd -> "cmd /c " + cmd)
+                            .collect(Collectors.toList());
+                    initCommands.add(0, "cmd /c rd/s/q C:\\wazuha");
+                    initCommands.add(0, "cmd /c \"cd C:\\wazuha && uninstall.bat\"");
+                    initCommands.add("sleep 10");
+                    initCommands.add("cmd /c \"cd C:\\wazuha && start.bat\"");
+
+//                            先卸载删除目录再执行
+                    azureResourceManager
+                            .getManager()
+                            .virtualMachines()
+                            .runPowerShellScript(groupName, vmName, initCommands, new ArrayList<>());
+                    log.info("updateWazuhManagerIp initCommands : {}", JsonUtils.stringify(initCommands));
+                    try {
+                        Thread.sleep(600000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    azureResourceManager
+                            .getManager()
+                            .virtualMachines()
+                            .runPowerShellScript(groupName, vmName, Arrays.asList("cmd /c \"cd C:\\wazuha && start.bat\""), new ArrayList<>());
+
+                } else {
+                    initCommands = Optional.ofNullable(initCommands)
+                            .orElse(Collections.emptyList())
+                            .stream()
+                            .flatMap(cmd -> Arrays.stream(cmd.split("\\n")))
+                            .map(String::trim)
+                            .filter(cmd -> !cmd.isEmpty())
+                            .collect(Collectors.toList());
+
+                    azureResourceManager
+                            .getManager()
+                            .virtualMachines()
+                            .runShellScript(groupName, vmName, initCommands, new ArrayList<>());
+                    log.info("updateWazuhManagerIp linuxCommands : {}", JsonUtils.stringify(initCommands));
+                }
+            }
+        });
     }
 
     @Autowired
@@ -3275,7 +3290,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         HumanCondition humanCondition = new HumanCondition();
         List<MicrosoftAzureUserModel> list = microsoftAzureLoginMapper.list(humanCondition);
         for (MicrosoftAzureUserModel microsoftAzureUserModel : list) {
-//            TODO 改bug暂时停止开发0422
+
             updateWazuhManagerIpByCloudType(microsoftAzureUserModel.getCloudType(), microsoftAzureUserModel.getWazuhManagerIp());
         }
     }
