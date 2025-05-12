@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.ReentrantLockUtils;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.common.bo.OptionBO;
 import cn.cyberpeace.mp.common.service.OptionService;
 import cn.cyberpeace.mp.cscene.bo.*;
@@ -438,8 +439,10 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
             Position positionOrigin = aPosition.getOrigin();
             positionOrigin.setX(positionOrigin.getX() + changeX);
             positionOrigin.setY(positionOrigin.getY() + changeY);
-            sceneArea.setPosition2(JSON.toJSONString(aPosition));
-            return sceneArea;
+            SceneAreaBO newSceneAreaBO = new SceneAreaBO();
+            BeanUtils.copyProperties(sceneArea,newSceneAreaBO);
+            newSceneAreaBO.setPosition2(JSON.toJSONString(aPosition));
+            return newSceneAreaBO;
         }).collect(Collectors.toList());
         //最终响应的为改变位置的所有区域和节点信息
         CsceneChangeBO.CsceneChangeBOBuilder builder = CsceneChangeBO.builder();
@@ -456,8 +459,10 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
             Position position = JSON.parseObject(elePosition, Position.class);
             position.setX(position.getX() + changeX);
             position.setY(position.getY() + changeY);
-            sceneElementBO.setPosition2(JSON.toJSONString(position));
-            return sceneElementBO;
+            SceneElementBO newSceneElementBO = new SceneElementBO();
+            BeanUtils.copyProperties(sceneElementBO,newSceneElementBO);
+            newSceneElementBO.setPosition2(JSON.toJSONString(position));
+            return newSceneElementBO;
         }).collect(Collectors.toList());
         if(CollectionUtils.isNotEmpty(updateElements)){
             builder.updateElements(updateElements);

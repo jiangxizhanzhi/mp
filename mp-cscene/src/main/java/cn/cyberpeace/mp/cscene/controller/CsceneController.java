@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.mptool.ExceptionUtil;
 import cn.cyberpeace.mp.cscene.bo.*;
@@ -334,8 +335,11 @@ public class CsceneController implements BaseModelListControllerBase {
             Position positionOrigin = aPosition.getOrigin();
             positionOrigin.setX(positionOrigin.getX() + changeX);
             positionOrigin.setY(positionOrigin.getY() + changeY);
-            configAreaBO.setPosition2(JSON.toJSONString(aPosition));
-            return configAreaBO;
+            //使用新的对象，不改变原来的数据
+            SceneConfigAreaBO newConfigAreaBO = new SceneConfigAreaBO();
+            BeanUtils.copyProperties(configAreaBO,newConfigAreaBO);
+            newConfigAreaBO.setPosition2(JSON.toJSONString(aPosition));
+            return newConfigAreaBO;
         }).collect(Collectors.toList());
         //最终响应的为改变位置的所有区域和节点信息
         CsceneConfigChangeBO.CsceneConfigChangeBOBuilder builder = CsceneConfigChangeBO.builder();
@@ -353,8 +357,11 @@ public class CsceneController implements BaseModelListControllerBase {
             Position position = JSON.parseObject(elePosition, Position.class);
             position.setX(position.getX() + changeX);
             position.setY(position.getY() + changeY);
-            sceneConfigElementBO.setPosition2(JSON.toJSONString(position));
-            return sceneConfigElementBO;
+            //使用新的对象，不改变原来的数据
+            SceneConfigElementBO newConfigElementBO = new SceneConfigElementBO();
+            BeanUtils.copyProperties(sceneConfigElementBO,newConfigElementBO);
+            newConfigElementBO.setPosition2(JSON.toJSONString(position));
+            return newConfigElementBO;
         }).collect(Collectors.toList());
         if(CollectionUtils.isNotEmpty(updateElements)){
             builder.updateElements(updateElements);
