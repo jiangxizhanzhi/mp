@@ -224,7 +224,7 @@ public class InitiateHandler extends HandlerCommon {
                 var srcPort = collectionPort.getSrcPort();
                 var srcElement = srcPort.getElement();
                 var cloudElement = cloudPluginHandler.getElement(srcElement.getId());
-                if (cloudElement != null && cloudElement.getVirtualType() != null && !StringUtils.isEmpty(cloudElement.getResourceId())) {
+                if (cloudElement != null && cloudElement.getVirtualType() != null) {
                     if (cloudElement.getVirtualType()
                             .equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
                         creatFlowCollector = true;
