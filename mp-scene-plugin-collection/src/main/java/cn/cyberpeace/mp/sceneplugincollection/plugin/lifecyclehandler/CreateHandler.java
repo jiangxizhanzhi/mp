@@ -152,8 +152,10 @@ public class CreateHandler extends HandlerCommon {
             var sceneId = getPluginHandler().getSrcScene().getEid();
             // 创建流量采集器
             runSceneProgress(SceneProcess.CREATE_FLOW_COLLECTOR, () -> {
-                var flowCollectorId = getFlowCollector().createCollector();
-                getPluginHandler().getScene().setFlowCollector(flowCollectorId);
+                if (StringUtils.isEmpty(getPluginHandler().getScene().getFlowCollector())) {
+                    var flowCollectorId = getFlowCollector().createCollector();
+                    getPluginHandler().getScene().setFlowCollector(flowCollectorId);
+                }
             });
 
             var flowCollectorId = getPluginHandler().getScene().getFlowCollector();

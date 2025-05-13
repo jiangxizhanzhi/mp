@@ -214,6 +214,32 @@ public class InitiateHandler extends HandlerCommon {
             });
         }
 
+        CloudScenePluginHandler cloudPluginHandler = getPluginHandler().getSceneHandler()
+                .getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
+        boolean creatFlowCollector = false;
+        for (Map.Entry<String, CollectionPluginSceneElementPortBO> entry : getPluginHandler().getElementPortMap()
+                .entrySet()) {
+            var collectionPort = entry.getValue();
+            if (Boolean.TRUE.equals(collectionPort.getEnableFlowCollect())) {
+                var srcPort = collectionPort.getSrcPort();
+                var srcElement = srcPort.getElement();
+                var cloudElement = cloudPluginHandler.getElement(srcElement.getId());
+                if (cloudElement != null && cloudElement.getVirtualType() != null && !StringUtils.isEmpty(cloudElement.getResourceId())) {
+                    if (cloudElement.getVirtualType()
+                            .equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
+                        creatFlowCollector = true;
+                    } else if (cloudElement.getVirtualType()
+                            .equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
+                        creatFlowCollector = true;
+                    }
+                }
+            }
+        }
+        if (creatFlowCollector) {
+            var flowCollectorId = getFlowCollector().createCollector();
+            getPluginHandler().getScene().setFlowCollector(flowCollectorId);
+        }
+
     }
 
     /**
