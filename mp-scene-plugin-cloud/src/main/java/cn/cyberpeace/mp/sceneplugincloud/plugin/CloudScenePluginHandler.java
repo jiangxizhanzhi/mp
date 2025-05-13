@@ -50,6 +50,7 @@ import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.TopoReformUtils;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -76,6 +77,7 @@ import java.util.stream.Collectors;
 @Component
 @PluginKey(value = PluginConstant.PLUGIN_KEY, priority = PluginConstant.PLUGIN_PRIORITY)
 @Data
+@Slf4j
 public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginSceneBO,
         CloudPluginSceneElementBO, CloudPluginSceneElementPortBO, CloudScenePluginContext> {
 
@@ -682,7 +684,9 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_SWITCH)) {
             srcElement.setType(BaseSceneElementModel.Type.SWITCH);
             // 简单三层虚拟交换机用虚拟默认路由实现
-            cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER);
+//            cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER);
+            log.info("role = 22 时 virutual type改为 1 ， 避免创建路由");
+            cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH);
         } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_FIREWALL)) {
             srcElement.setType(BaseSceneElementModel.Type.FIREWALL);
             // 简单三层虚拟防火墙用虚拟默认路由 + 防火墙实现
