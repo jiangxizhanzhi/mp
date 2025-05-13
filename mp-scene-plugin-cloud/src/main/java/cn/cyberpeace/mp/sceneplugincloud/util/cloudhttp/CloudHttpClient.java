@@ -34,6 +34,8 @@ public class CloudHttpClient {
             return response;
         }
 
+        log.info("resut -> {}", result.getResult());
+
 
         var objectMapper = new ObjectMapper();
         objectMapper.setPropertyNamingStrategy(new PropertyNamingStrategy.SnakeCaseStrategy());
@@ -66,6 +68,8 @@ public class CloudHttpClient {
             return null;
         }
 
+        log.info("resut -> {}", result.getResult());
+
         T response;
         var objectMapper = new ObjectMapper();
         objectMapper.setPropertyNamingStrategy(new PropertyNamingStrategy.SnakeCaseStrategy());
@@ -90,6 +94,8 @@ public class CloudHttpClient {
                     data == null ? StringUtils.EMPTY : data.toContent());
             return null;
         }
+
+        log.info("resut -> {}", result.getResult());
 
         T response;
         var objectMapper = new ObjectMapper();
