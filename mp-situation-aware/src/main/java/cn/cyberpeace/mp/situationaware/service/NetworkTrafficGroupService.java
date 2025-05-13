@@ -125,6 +125,7 @@ public class NetworkTrafficGroupService {
         paramObject.put("cpu", 4);
         paramObject.put("ram", 4096);
         paramObject.put("disk", situationAwareConfig.getArkimeDisk());
+        paramObject.put("image_driver", "docker");
 
         //设置网络
         JSONArray networks = new JSONArray();
