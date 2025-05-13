@@ -1006,7 +1006,7 @@ public class InitiateHandler extends HandlerCommon {
                 }
             } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_ROUTER)) {
                 if (BaseCloudPluginSceneElementModel.ImageType.ENTITY.equals(element.getImageType())) {
-                    coreType = CoreType.NETWORK_0;
+                    coreType = CoreType.NETWORK_L2;
                 } else if (BaseCloudPluginSceneElementModel.ImageType.SIMPLE.equals(element.getImageType())) {
                     coreType = CoreType.ROUTER;
                 } else {
@@ -1014,7 +1014,7 @@ public class InitiateHandler extends HandlerCommon {
                 }
             } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_FIREWALL)) {
                 if (BaseCloudPluginSceneElementModel.ImageType.ENTITY.equals(element.getImageType())) {
-                    coreType = CoreType.NETWORK_0;
+                    coreType = CoreType.NETWORK_L2;
                 } else {
                     coreType = CoreType.FIREWALL;
                 }
