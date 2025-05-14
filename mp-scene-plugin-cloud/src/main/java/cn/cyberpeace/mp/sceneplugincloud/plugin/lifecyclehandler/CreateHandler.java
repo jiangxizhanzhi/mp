@@ -1588,6 +1588,11 @@ public class CreateHandler extends HandlerCommon {
             return;
         }
 
+        if("simple".equals(cloudElement.getImage()) && cloudElement.getRole() == 23){
+            log.info("跳过防火墙");
+            return;
+        }
+
         Integer virtualType = cloudElement.getVirtualType();
         if (virtualType == null) {
             log.warn("Element({}) {} has no virtual type", cloudElement.getSrcElement().getEid(),
