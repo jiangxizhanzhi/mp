@@ -685,8 +685,10 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
             srcElement.setType(BaseSceneElementModel.Type.SWITCH);
             // 简单三层虚拟交换机用虚拟默认路由实现
 //            cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER);
-            log.info("role = 22 时 virutual type改为 1 ， 避免创建路由");
-            cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH);
+            if("simple".equals(cloudElement.getImageType())){
+                log.info("role = 22 时 virutual type改为 1 ， 避免创建路由");
+                cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH);
+            }
         } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_FIREWALL)) {
             srcElement.setType(BaseSceneElementModel.Type.FIREWALL);
             // 简单三层虚拟防火墙用虚拟默认路由 + 防火墙实现

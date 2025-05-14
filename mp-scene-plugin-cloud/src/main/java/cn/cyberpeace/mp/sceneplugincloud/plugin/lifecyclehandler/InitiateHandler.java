@@ -1000,7 +1000,7 @@ public class InitiateHandler extends HandlerCommon {
                 coreType = CoreType.NETWORK;
             } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_SWITCH)) {
                 if (BaseCloudPluginSceneElementModel.ImageType.ENTITY.equals(element.getImageType())) {
-                    coreType = CoreType.NETWORK_0;
+                    coreType = CoreType.NETWORK_L2;
                 } else if (BaseCloudPluginSceneElementModel.ImageType.SIMPLE.equals(element.getImageType())) {
                     coreType = CoreType.NETWORK;
                 } else {
