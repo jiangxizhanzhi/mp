@@ -1588,7 +1588,7 @@ public class CreateHandler extends HandlerCommon {
             return;
         }
 
-        if("simple".equals(cloudElement.getImage()) && cloudElement.getRole() == 23){
+        if("simple".equals(cloudElement.getImageType()) && cloudElement.getRole() == 23){
             log.info("跳过防火墙");
             return;
         }
