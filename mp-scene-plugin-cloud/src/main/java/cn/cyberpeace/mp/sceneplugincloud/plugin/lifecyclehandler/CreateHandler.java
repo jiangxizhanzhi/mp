@@ -1467,6 +1467,10 @@ public class CreateHandler extends HandlerCommon {
                 .filter(cloudElement -> getPluginHandler().getSceneHandler().isHandleNode(cloudElement.getSrcElement().getId()))
                 .filter(cloudElement -> !cloudElement.getDeriveNetworks().isEmpty())
                 .map(cloudElement -> (Runnable) () -> {
+                    if("simple".equals(cloudElement.getImageType()) && cloudElement.getRole() == 23){
+                        log.info("跳过防火墙 衍生的网络");
+                        return;
+                    }
                     createAuxiliaryNetworkProcess(cloudElement);
                     if (cloudElement.getRole() == null || cloudElement.getRole() != BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK) {
                         getPluginHandler().getSceneHandler().addProgressPercentage(stepPercentage);
