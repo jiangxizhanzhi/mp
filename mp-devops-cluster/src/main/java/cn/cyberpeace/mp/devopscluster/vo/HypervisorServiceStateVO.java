@@ -3,13 +3,13 @@ package cn.cyberpeace.mp.devopscluster.vo;
 import cn.cyberpeace.mp.devopscluster.enums.CloudPlatformEnum;
 import cn.cyberpeace.mp.devopscluster.enums.FontColorEnum;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.micrometer.core.instrument.util.StringUtils;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * 服务状态信息

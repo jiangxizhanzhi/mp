@@ -45,6 +45,12 @@ public class CloudAppConfig {
     @Value("${mp.sceneplugincloud.initiate_hold_size:200000}")
     private Integer initiateHoldSize;
 
+    @Value("${mp.sceneplugincloud.create_network_pool_size:10}")
+    private Integer createNetworkPoolSize;
+
+    @Value("${mp.sceneplugincloud.create_network_hold_size:200000}")
+    private Integer createNetworkHoldSize;
+
     @Value("${mp.sceneplugincloud.create_pool_size:10}")
     private Integer createPoolSize;
 

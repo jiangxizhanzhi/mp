@@ -44,6 +44,10 @@ public class PluginSceneEventHandlerCommon<H extends ScenePluginHandler<?, ?, ?,
     }
 
     public void runTasks(List<Runnable> tasks) {
+        runTasks(tasks, taskPool);
+    }
+
+    public void runTasks(List<Runnable> tasks, TaskPool taskPool) {
         var poolTasks = taskPool.runTasks(tasks);
         for (var poolTask : poolTasks) {
             if (poolTask.getException() != null) {

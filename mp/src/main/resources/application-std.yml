@@ -256,6 +256,8 @@ mp:
     cpcloud-http-pool-size: ${mp.sceneplugincloud.ext-var.cpcloud-http-pool-size}
     initiate-pool-size: ${mp.sceneplugincloud.ext-var.initiate-pool-size}
     initiate-hold-size: ${mp.sceneplugincloud.ext-var.initiate-hold-size}
+    create-network-pool-size: ${mp.sceneplugincloud.ext-var.create-network-pool-size}
+    create-network-hold-size: ${mp.sceneplugincloud.ext-var.create-network-hold-size}
     create-pool-size: ${mp.sceneplugincloud.ext-var.create-pool-size}
     create-hold-size: ${mp.sceneplugincloud.ext-var.create-hold-size}
     delete-pool-size: ${mp.sceneplugincloud.ext-var.delete-pool-size}

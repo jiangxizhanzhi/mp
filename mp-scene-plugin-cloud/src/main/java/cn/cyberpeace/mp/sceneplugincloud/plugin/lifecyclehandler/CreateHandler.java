@@ -29,6 +29,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.*;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.CreateNetworkTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.CreateTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.MultiCloudConfig;
@@ -1295,7 +1296,7 @@ public class CreateHandler extends HandlerCommon {
 
         if (!createAuxiliaryNetworkTasks.isEmpty()) {
             runSceneProgress(SceneProcess.CREATE_AUXILIARY_NETWORKS, () -> {
-                runTasks(createAuxiliaryNetworkTasks);
+                runTasks(createAuxiliaryNetworkTasks, CreateNetworkTaskPool.getInstance());
                 getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CloudSceneStage.CREATE_NETWORK);
             });
         } else {

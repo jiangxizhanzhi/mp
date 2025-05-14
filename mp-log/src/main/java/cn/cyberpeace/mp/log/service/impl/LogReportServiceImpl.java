@@ -7,9 +7,9 @@ import cn.cyberpeace.mp.log.enums.LogReportTypeEnum;
 import cn.cyberpeace.mp.log.po.LogReportPO;
 import cn.cyberpeace.mp.log.repository.LogReportMapper;
 import cn.cyberpeace.mp.log.service.LogReportService;
-import io.micrometer.core.instrument.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
