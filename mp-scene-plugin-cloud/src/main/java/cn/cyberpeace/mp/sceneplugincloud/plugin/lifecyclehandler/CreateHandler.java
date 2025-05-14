@@ -1588,11 +1588,6 @@ public class CreateHandler extends HandlerCommon {
             return;
         }
 
-        if("simple".equals(cloudElement.getImageType()) && cloudElement.getRole() == 23){
-            log.info("跳过防火墙");
-            return;
-        }
-
         Integer virtualType = cloudElement.getVirtualType();
         if (virtualType == null) {
             log.warn("Element({}) {} has no virtual type", cloudElement.getSrcElement().getEid(),
@@ -1613,7 +1608,13 @@ public class CreateHandler extends HandlerCommon {
 
         } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)) {
             runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.CREATE_VIRTUAL_ROUTER,
-                    () -> createVirtualRouter(cloudElement));
+                    () -> {
+                        if("simple".equals(cloudElement.getImageType()) && cloudElement.getRole() == 23){
+                            log.info("跳过防火墙");
+                            return;
+                        }
+                        createVirtualRouter(cloudElement);
+                    });
         } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_FIREWALL)) {
             runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.CREATE_VIRTUAL_FIREWALL,
                     () -> createVirtualFirewall(cloudElement));
