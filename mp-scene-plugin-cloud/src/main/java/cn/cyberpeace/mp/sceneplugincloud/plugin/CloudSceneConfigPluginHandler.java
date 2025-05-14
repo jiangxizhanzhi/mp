@@ -170,7 +170,7 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
                         cidr = auxiliaryNetworkCloudElement.getCidr();
                     }
                     if (!StringUtils.isEmpty(cidr) && !IpUtils.newIsInCidr(ip, cidr)) {
-                        throw new MpRuntimeException(CloudErrorCode.INVALID_IP_ON_CIDR.format(ip, cidr));
+//                        throw new MpRuntimeException(CloudErrorCode.INVALID_IP_ON_CIDR.format(ip, cidr));
                     }
                 }
             }
