@@ -21,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -159,6 +160,7 @@ public class ImagesService extends BaseCpService {
      * @param deviceUuid
      * @return
      */
+    @Cacheable(value = "connectionHyperV", key = "#deviceUuid")
     public JSONObject connectionHyperV(String deviceUuid){
         String targetUrl = hyperVUrl + "/status?vm_id=" + deviceUuid;
 

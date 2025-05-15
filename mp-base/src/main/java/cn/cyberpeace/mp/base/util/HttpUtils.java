@@ -102,7 +102,8 @@ public class HttpUtils {
      * @throws IOException
      */
     public static String sendGet(String url) throws IOException {
-        HttpClient client = HttpClientBuilder.create().build();
+        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(10000).setConnectTimeout(10000).build();
+        HttpClient client = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig).build();
         return doGetRequest(url, client);
     }
 
