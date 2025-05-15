@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.scene.core.bo;
 
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneAreaBO;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneAreaNodeConnectionBO;
@@ -8,6 +9,7 @@ import cn.cyberpeace.mp.scene.model.SceneConfigAreaModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +33,16 @@ public class SceneConfigAreaBO extends BaseSceneAreaBO<SceneConfigAreaModel, Sce
         sceneConfigElementBO.setIcon3(this.getIcon3());
         sceneConfigElementBO.setOuterPosition2(this.getOuterPosition2());
         sceneConfigElementBO.setType(BaseSceneElementModel.Type.LAYER);
-        sceneConfigElementBO.setPosition2(this.getPosition2());
+        if(StringUtils.isNotEmpty(this.getPosition2())){
+            var a =  JsonCommon.parseMap(this.getPosition2());
+            if(a.containsKey("origin")){
+                var x = JsonCommon.stringify(a.get("origin"));
+                sceneConfigElementBO.setPosition2(x);
+            }
+        }
+        if(StringUtils.isEmpty(sceneConfigElementBO.getPosition2())){
+            sceneConfigElementBO.setPosition2(this.getPosition2());
+        }
         sceneConfigElementBO.setPosition3(this.getPosition3());
         sceneConfigElementBO.setDescription(this.getDescription());
         sceneConfigElementBO.setDisplayContext(this.getDisplayContext());
