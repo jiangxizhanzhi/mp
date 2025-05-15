@@ -1635,14 +1635,6 @@ public class CreateHandler extends HandlerCommon {
             runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.CREATE_NPC, () -> recordNpcNode(cloudElement));
         } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS)) {
             runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.CREATE_DYNAMIC, () -> createVirtualDynamips(cloudElement));
-        }else if (cloudElement.getSrcElement().getType().equals(BaseSceneElementModel.Type.EQUIPMENT)){
-            runElementProgress(cloudElement.getSrcElement().getId(),ElementProcess.CREATE_OTHER,
-                    ()-> new Runnable() {
-                        @Override
-                        public void run() {
-
-                        }
-                    });
         }
     }
 

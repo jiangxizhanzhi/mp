@@ -33,16 +33,7 @@ public class SceneAreaBO extends BaseSceneAreaBO<SceneAreaModel, SceneAreaBO> {
         sceneElementBO.setIcon3(this.getIcon3());
         sceneElementBO.setOuterPosition2(this.getOuterPosition2());
         sceneElementBO.setType(BaseSceneElementModel.Type.LAYER);
-        if(StringUtils.isNotEmpty(this.getPosition2())){
-            var a =  JsonCommon.parseMap(this.getPosition2());
-            if(a.containsKey("origin")){
-                var x = JsonCommon.stringify(a.get("origin"));
-                sceneElementBO.setPosition2(x);
-            }
-        }
-        if(StringUtils.isEmpty(sceneElementBO.getPosition2())){
-            sceneElementBO.setPosition2(this.getPosition2());
-        }
+        sceneElementBO.setPosition2(this.getPosition2());
 
         sceneElementBO.setPosition3(this.getPosition3());
         sceneElementBO.setDescription(this.getDescription());

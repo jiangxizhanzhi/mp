@@ -627,12 +627,6 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
             csceneInstance.setReferenceMetaData(createContext.getReferenceMetaData());
             CsceneDataModifier.correctName(csceneId, createContext.getReferenceMetaData(), csceneInstance, cscene, csceneHandler.getCscene(), createContext.getName());
         }
-        List<SceneElementBO> elements = csceneInstance.getScene().getTopology().getElements();
-        for (SceneElementBO element : elements) {
-            if (element.getType().equals(BaseSceneElementModel.Type.EQUIPMENT)) {
-                element.setEvent(4);
-            }
-        }
         return new ServiceResult<>(csceneHandler.createAppInstance(unique, csceneInstance));
     }
 
