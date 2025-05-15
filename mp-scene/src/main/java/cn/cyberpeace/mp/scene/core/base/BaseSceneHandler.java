@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.scene.core.base;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.ValidationCommon;
 import cn.cyberpeace.mp.base.common.stereotype.BeanFieldNames;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
@@ -1400,6 +1401,17 @@ public abstract class BaseSceneHandler<
         topologyBO.setScene(scene);
         topologyBO.setAreaId(areaId);
         topologyBO.setAreas(new ArrayList<>(areaMap.values()));
+        if(topologyBO.getAreas() != null){
+            for (var a : topologyBO.getAreas()) {
+                if (StringUtils.isNotEmpty(a.getPosition2())) {
+                    var xx = JsonCommon.parseMap(a.getPosition2());
+                    if (xx.containsKey("origin")) {
+                        var x = JsonCommon.stringify(xx.get("origin"));
+                        a.setPosition2(x);
+                    }
+                }
+            }
+        }
         topologyBO.setPieces(new ArrayList<>(pieceMap.values()));
         topologyBO.setElements(new ArrayList<>(elementMap.values()));
         topologyBO.setConnections(new ArrayList<>(elementPortConnectionMap.values()));
