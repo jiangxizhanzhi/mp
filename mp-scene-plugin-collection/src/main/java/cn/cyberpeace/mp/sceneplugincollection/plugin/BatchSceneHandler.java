@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CategoryGroupBO;
 import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -22,6 +23,7 @@ import java.util.Set;
  * @Author maojun
  * @Date 2022/2/23
  */
+@Slf4j
 public class BatchSceneHandler {
     private List<String> sceneIds;
 
@@ -294,11 +296,28 @@ public class BatchSceneHandler {
                 }
             });
             if (cloudPlugin.getElement(srcElement.getId()) != null && cloudPlugin.getElement(srcElement.getId()).getCategory() != null) {
+                var cloudElement = cloudPlugin.getElement(srcElement.getId());
                 Integer category = cloudPlugin.getElement(srcElement.getId()).getCategory();
+                if("simple".equals(cloudElement.getImage()) && cloudElement.getRole() == 23){
+                    log.info("防火墙走特殊的统计");
+                    String name = srcElement.getName();
+                    if(name.contains("防火墙")){
+                        category = 4;
+                    }else if(name.contains("应用节点")){
+                        category = 2;
+                    }else if(name.contains("交换机") || name.contains("网络")){
+                        category = 3;
+                    }else {
+                        category = 1;
+                    }
+                }
+
                 if (!category2CountInfo.containsKey(category)) {
                     category2CountInfo.put(category, new CategoryGroupBO(category));
                 }
                 category2CountInfo.get(category).getElements().add(srcElement);
+
+
             }
         });
     }
