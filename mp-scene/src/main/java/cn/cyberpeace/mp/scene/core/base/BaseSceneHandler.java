@@ -1401,7 +1401,8 @@ public abstract class BaseSceneHandler<
         topologyBO.setScene(scene);
         topologyBO.setAreaId(areaId);
         topologyBO.setAreas(new ArrayList<>(areaMap.values()));
-        if(topologyBO.getAreas() != null){
+//        调试层节点位置问题
+        /*if(topologyBO.getAreas() != null){
             for (var a : topologyBO.getAreas()) {
                 if (StringUtils.isNotEmpty(a.getPosition2())) {
                     var xx = JsonCommon.parseMap(a.getPosition2());
@@ -1411,7 +1412,7 @@ public abstract class BaseSceneHandler<
                     }
                 }
             }
-        }
+        }*/
         topologyBO.setPieces(new ArrayList<>(pieceMap.values()));
         topologyBO.setElements(new ArrayList<>(elementMap.values()));
         topologyBO.setConnections(new ArrayList<>(elementPortConnectionMap.values()));
