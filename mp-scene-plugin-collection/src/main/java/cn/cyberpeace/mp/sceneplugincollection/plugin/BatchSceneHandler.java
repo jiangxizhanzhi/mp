@@ -298,7 +298,7 @@ public class BatchSceneHandler {
             if (cloudPlugin.getElement(srcElement.getId()) != null && cloudPlugin.getElement(srcElement.getId()).getCategory() != null) {
                 var cloudElement = cloudPlugin.getElement(srcElement.getId());
                 Integer category = cloudPlugin.getElement(srcElement.getId()).getCategory();
-                if("simple".equals(cloudElement.getImage()) && cloudElement.getRole() == 23){
+                if("simple".equals(cloudElement.getImageType()) && cloudElement.getRole() == 23){
                     log.info("防火墙走特殊的统计");
                     String name = srcElement.getName();
                     if(name.contains("防火墙")){
