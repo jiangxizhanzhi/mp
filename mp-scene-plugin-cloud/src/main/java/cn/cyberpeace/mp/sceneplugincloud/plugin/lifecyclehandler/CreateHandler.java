@@ -204,11 +204,7 @@ public class CreateHandler extends HandlerCommon {
             if (Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getDhcpControl())) {
                 subnet.setEnableDhcp(dhcp);
             } else {
-                if(Boolean.FALSE.equals(connectedNetwork.network.getDhcp())){
-                    subnet.setEnableDhcp(false);
-                }else{
-                    subnet.setEnableDhcp(true);
-                }
+                subnet.setEnableDhcp(true);
             }
 
             List<AllocationPool> srcAllocationPools = connectedNetwork.network.getAllocationPools();
