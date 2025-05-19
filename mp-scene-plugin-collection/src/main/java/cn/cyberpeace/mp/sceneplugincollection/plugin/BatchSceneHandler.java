@@ -303,7 +303,7 @@ public class BatchSceneHandler {
                     String name = srcElement.getName();
                     if(name.contains("防火墙")){
                         category = 4;
-                    }else if(name.contains("应用节点")){
+                    }else if(name.contains("应用")){
                         category = 2;
                     }else if(name.contains("交换机") || name.contains("网络")){
                         category = 3;
