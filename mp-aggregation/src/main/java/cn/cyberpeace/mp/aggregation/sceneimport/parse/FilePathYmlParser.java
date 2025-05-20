@@ -36,13 +36,16 @@ class FilePathYmlParser<T> implements YmlParse<T> {
         InputStream inputStream = null;
         try {
             File file = new File(filePath);
+            if (!file.exists()) {
+                log.error("文件" + filePath + "不存在");
+            }
             inputStream = new FileInputStream(file);
             BaseConstructor constructor = new Constructor();
             constructor.setPropertyUtils(new YamlPropertyParseUtils());
             Yaml yaml = new Yaml(constructor);
             return yaml.loadAs(inputStream, resultType);
         } catch (FileNotFoundException e) {
-            log.error("yml file not exists , file path is {}, {}", filePath, ExceptionUtils.getStackTrace(e));
+            log.error(e.getMessage(), e);
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         } catch (Exception e) {
             log.error("failed to parse yml , file path is {}, {}", filePath, ExceptionUtils.getStackTrace(e));
