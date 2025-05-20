@@ -10,6 +10,7 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.flow.enums;
 
+import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
@@ -26,10 +27,12 @@ public enum TaskStatusEnum {
 
     RUNNING("RUNNING"),
 
+    @Deprecated
     STOPING("STOPING"),
 
     STOPED("STOPED"),
 
+    @Deprecated
     FAILED("FAILED");
 
     private final String status;

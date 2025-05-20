@@ -246,6 +246,9 @@ public class FlowTaskRecordService extends BaseModelServiceImpl<FlowTaskRecordMo
             msg = jsonMessage.getString("msg");
             flowTaskTaskModel.setMsg(msg);
             flowTaskTaskModel.setErrorCount(flowTaskTaskModel.getErrorCount() + 1);
+        }else{
+            flowTaskTaskModel.setTaskStatus(TaskTaskStatusEnum.RUNNING.toValue());
+            flowTaskTaskModel.setMsg("");
         }
         flowTaskTaskMapper.update(flowTaskTaskModel);
 

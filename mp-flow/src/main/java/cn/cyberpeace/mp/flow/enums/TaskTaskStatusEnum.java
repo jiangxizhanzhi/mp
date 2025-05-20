@@ -37,7 +37,9 @@ public enum TaskTaskStatusEnum {
     /**
      * 初始化中，不能执行
      */
-    INITING("INITING");
+    INITING("INITING"),
+
+    STARTING("STARTING");
 
     private final String status;
 

@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.flow.constant.BaseConstants;
 import cn.cyberpeace.mp.flow.enums.ResourceTypeEnum;
 import cn.cyberpeace.mp.flow.enums.TaskActionEnum;
 import cn.cyberpeace.mp.flow.enums.TaskStatusEnum;
+import cn.cyberpeace.mp.flow.enums.TaskTaskStatusEnum;
 import cn.cyberpeace.mp.flow.model.FlowInfoModel;
 import cn.cyberpeace.mp.flow.model.FlowProtocolModel;
 import cn.cyberpeace.mp.flow.request.BatchStartFlowTaskRequest;
@@ -83,8 +84,8 @@ public class FlowActuator {
                 // 跟流量执行器建立ws连接，用于接收任务状态信息
                 FlowWebSocketClientUtil wsClient = FlowWebSocketClientUtil.getWebSocketClient(this.actuatorIp);
                 wsClient.sendMessage(taskId);
-                // 更新任务状态为运行中
-                flowTaskTaskService.updateTaskStatus(taskId, TaskStatusEnum.RUNNING.toValue());
+                // 更新任务状态为启动中
+                flowTaskTaskService.updateTaskStatus(taskId, TaskTaskStatusEnum.STARTING.toValue());
                 return true;
             } else if ("6008".equals(rsp.getCode())) {
                 // 更新任务状态为运行中
@@ -118,7 +119,7 @@ public class FlowActuator {
                 wsClient.sendMessage(String.join(BaseConstants.COMMA, notRunningTaskIds));
 
                 // 批量更新任务状态为运行中
-                flowTaskTaskService.batchUpdateTaskStatus(notRunningTaskIds, TaskStatusEnum.RUNNING.toValue());
+                flowTaskTaskService.batchUpdateTaskStatus(notRunningTaskIds, TaskTaskStatusEnum.STARTING.toValue());
                 return true;
             } else {
                 log.error("batch start tasks failed");
