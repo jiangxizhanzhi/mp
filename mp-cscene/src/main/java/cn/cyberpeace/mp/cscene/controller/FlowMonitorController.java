@@ -302,7 +302,7 @@ public class FlowMonitorController {
         queryParams.setPage(1);
         List<String> allNodes = new ArrayList<>();
         allNodes.addAll(testRangeApiProxy.getAllNodeIdsInCurrentCscene(id));
-        queryParams.setTargetNodeIds(allNodes);
+        queryParams.setSourceNodeIds(allNodes);
         List<FlowAttackDto> flowAttackInCurrentRange = new ArrayList<>();
 
         log.info("--------------------------------1");
