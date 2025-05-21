@@ -184,7 +184,7 @@ public class ScenePluginCollectionSceneService {
         if (CollectionUtils.isNotEmpty(queryParams.getTargetIps())) {
             request.setDestinationIps(queryParams.getTargetIps());
         } else {
-            request.setDestinationIps(batchSceneHandler.getAllIpAddrs());
+//            request.setDestinationIps(batchSceneHandler.getAllIpAddrs());
         }
 
         request.setSecondsInterval(queryParams.getInterval());
@@ -719,7 +719,7 @@ public class ScenePluginCollectionSceneService {
         } else {
             request.setSourceIps(sourceIps);
         }
-        request.setDestinationIps(batchSceneHandler.getAllIpAddrs());
+//        request.setDestinationIps(batchSceneHandler.getAllIpAddrs());
         request.setStartDateTime(Optional.ofNullable(startTime).orElse(batchSceneHandler.getEarliestStartTime()));
         request.setEndDateTime(Optional.ofNullable(endTime).orElse(LocalDateTime.now()));
         request.setSecondsInterval(intervalSeconds);
