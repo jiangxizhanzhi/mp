@@ -739,28 +739,28 @@ public class ImagesController {
             vo.setCreateUserName(v.getCreateUserName());
             vo.setImageResourceType(v.getImageResourceType());
 
-//            //hyper-v靶标处理
-//            if (this.connectionHyperV(vo.getUuid()) != null && this.connectionHyperV(vo.getUuid()).getData() != null) {
-//                JSONObject json = this.connectionHyperV(vo.getUuid()).getData();
-//                JSONObject data = json.getJSONObject("data");
-//                String status = data.getString("status");
-//                /**
-//                 * 启动条件：
-//                 * instance_state = '0'  & deviceActions中没有'e' & image_status = '2'
-//                 * 查看条件：
-//                 * instance_state = '2'  & deviceActions中没有'f'
-//                 */
-//                if ("running".equals(status)) {
-//                    vo.getExtVm().setInstanceState(2);
-//                    vo.getExtImageInfo().setDeviceActions("");
-//                }
-//                if ("deleted".equals(status)) {
-//                    vo.getExtVm().setInstanceState(0);
-//                    vo.getExtImageInfo().setDeviceActions("");
-//                    vo.setImageStatus(2);
-//                    vo.getExtImageInfo().setImageStatus(2);
-//                }
-//            }
+            //hyper-v靶标处理
+            if (this.connectionHyperV(vo.getUuid()) != null && this.connectionHyperV(vo.getUuid()).getData() != null) {
+                JSONObject json = this.connectionHyperV(vo.getUuid()).getData();
+                JSONObject data = json.getJSONObject("data");
+                String status = data.getString("status");
+                /**
+                 * 启动条件：
+                 * instance_state = '0'  & deviceActions中没有'e' & image_status = '2'
+                 * 查看条件：
+                 * instance_state = '2'  & deviceActions中没有'f'
+                 */
+                if ("running".equals(status)) {
+                    vo.getExtVm().setInstanceState(2);
+                    vo.getExtImageInfo().setDeviceActions("");
+                }
+                if ("deleted".equals(status)) {
+                    vo.getExtVm().setInstanceState(0);
+                    vo.getExtImageInfo().setDeviceActions("");
+                    vo.setImageStatus(2);
+                    vo.getExtImageInfo().setImageStatus(2);
+                }
+            }
 
             return vo;
         }).collect(Collectors.toList());
