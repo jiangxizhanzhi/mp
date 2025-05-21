@@ -57,8 +57,12 @@ public enum OpModuleEnums {
     OFFENSIVE_VS_DEFENSIVE("offensive_vs_defensive"),
     // 24:渗透赛,
     PENETRATION("penetration"),
-    // 25:战队"
+    // 25:战队
     TEAM("team"),
+    // 26:rw
+    RW("rw"),
+    // 27:ai
+    AI("ai"),
 
     DEFAULT("");
 
