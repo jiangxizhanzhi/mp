@@ -236,7 +236,8 @@ public class ScenePluginCollectionSceneService {
         var flowLogBOS = flowLogBOSResult.getObjs();
         Map<String, FlowClassificationModel> allCategoryDicMap = flowClassificationsService.findAllCategoryDicMap();
         AttackSuricata attackSuricata = new AttackSuricata();
-        attackSuricata.setCategory(Arrays.asList("Unknown Traffic"));
+        String unknownTraffic = globalizedWithAttackWay("Unknown Traffic", allCategoryDicMap);
+        attackSuricata.setCategory(Arrays.asList(unknownTraffic));
         attackSuricata.setSeverity(Arrays.asList(1));
         flowLogBOS.stream()
                 .forEach(flowLogBO -> {
