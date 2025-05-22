@@ -846,6 +846,8 @@ public class FlowAnalysisService extends AbstractBaseService {
         var boolQueryBuilder = QueryBuilders.boolQuery();
 
 //        TODO WK2025 展示所有类型流量
+        // 确保返回的数据中包含 suricata 字段
+        boolQueryBuilder.must(QueryBuilders.existsQuery("suricata"));
         /*if (Objects.nonNull(request.getAttackTypes())) {
             boolQueryBuilder.filter(QueryBuilders.termsQuery("suricata.category", request.getAttackTypes()));
         }
