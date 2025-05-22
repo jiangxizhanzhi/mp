@@ -41,6 +41,7 @@ import cn.cyberpeace.mp.sceneplugincollection.util.DatetimeUtil;
 import cn.cyberpeace.mp.sceneplugincollection.util.EsHttpUtil;
 import cn.cyberpeace.mp.sceneplugincollection.util.FlowPcapExportUtil;
 import cn.cyberpeace.mp.situationaware.bo.*;
+import cn.cyberpeace.mp.situationaware.bo.common.AttackSuricata;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
 import cn.cyberpeace.mp.situationaware.model.*;
 import cn.cyberpeace.mp.situationaware.model.enums.AggregationTypeEnum;
@@ -234,20 +235,27 @@ public class ScenePluginCollectionSceneService {
 
         var flowLogBOS = flowLogBOSResult.getObjs();
         Map<String, FlowClassificationModel> allCategoryDicMap = flowClassificationsService.findAllCategoryDicMap();
-        flowLogBOS.stream().filter(v -> Objects.nonNull(v.getSuricata())).forEach(flowLogBO -> {
-            if (MapUtils.isNotEmpty(allCategoryDicMap)){
-                List<String> categoryList;
-                if (CollectionUtils.isNotEmpty(queryParams.getAttackTypes())) {
-                    categoryList = flowLogBO.getSuricata().getCategory().stream()
-                            .map(c -> this.globalizedWithAttackWay(queryParams.getAttackTypes().get(0), allCategoryDicMap)).collect(Collectors.toList());
-                } else {
-                    categoryList = flowLogBO.getSuricata().getCategory().stream()
-                            .map(c -> this.globalizedWithAttackWay(c, allCategoryDicMap)).collect(Collectors.toList());
-                }
-
-                flowLogBO.getSuricata().setCategory(categoryList);
-            }
-        });
+        AttackSuricata attackSuricata = new AttackSuricata();
+        attackSuricata.setCategory(Arrays.asList("Unknown Traffic"));
+        attackSuricata.setSeverity(Arrays.asList(1));
+        flowLogBOS.stream()
+                .forEach(flowLogBO -> {
+                    if(Objects.nonNull(flowLogBO.getSuricata())) {
+                        if (MapUtils.isNotEmpty(allCategoryDicMap)) {
+                            List<String> categoryList;
+                            if (CollectionUtils.isNotEmpty(queryParams.getAttackTypes())) {
+                                categoryList = flowLogBO.getSuricata().getCategory().stream()
+                                        .map(c -> this.globalizedWithAttackWay(queryParams.getAttackTypes().get(0), allCategoryDicMap)).collect(Collectors.toList());
+                            } else {
+                                categoryList = flowLogBO.getSuricata().getCategory().stream()
+                                        .map(c -> this.globalizedWithAttackWay(c, allCategoryDicMap)).collect(Collectors.toList());
+                            }
+                            flowLogBO.getSuricata().setCategory(categoryList);
+                        }
+                    } else {
+                        flowLogBO.setSuricata(attackSuricata);
+                    }
+                });
 
         List<CollectionFlowBO> list = flowLogBOSResult.getObjs().stream().map(flowLogBO -> this.buildCollectionFlowBOFrom(flowLogBO, batchSceneHandler.getAllMac2ElementMapForNodes(), batchSceneHandler.getAllIp2ElementMapForScene(), batchSceneHandler.getAllMac2SceneIdMap())).collect(Collectors.toList());
         return new ListObjServiceResult<>(new ListObjResult<>(list, flowLogBOSResult.getTotal()));
