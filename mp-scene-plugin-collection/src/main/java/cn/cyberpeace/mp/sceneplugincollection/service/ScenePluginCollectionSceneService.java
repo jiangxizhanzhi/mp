@@ -185,7 +185,12 @@ public class ScenePluginCollectionSceneService {
         if (CollectionUtils.isNotEmpty(queryParams.getTargetIps())) {
             request.setDestinationIps(queryParams.getTargetIps());
         } else {
-//            request.setDestinationIps(batchSceneHandler.getAllIpAddrs());
+            request.setDestinationIps(batchSceneHandler.getAllIpAddrs());
+        }
+
+        if (StringUtils.isNotBlank(collectionAppConfig.getDestinationCidrs())){
+            String[] destinationCidrs = collectionAppConfig.getDestinationCidrs().split("、");
+            request.setDestinationCidrs(Arrays.asList(destinationCidrs));
         }
 
         request.setSecondsInterval(queryParams.getInterval());

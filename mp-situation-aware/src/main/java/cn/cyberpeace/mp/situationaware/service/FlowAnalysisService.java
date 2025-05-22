@@ -894,8 +894,15 @@ public class FlowAnalysisService extends AbstractBaseService {
         if (CollectionUtils.isNotEmpty(request.getSourceMacs())) {
             boolQueryBuilder.must(QueryBuilders.termsQuery("source.mac", request.getSourceMacs()));
         }
-
-        if (CollectionUtils.isNotEmpty(request.getDestinationIps())) {
+//        TODO WK2025 查询不存在场景但需要查询的网段流量
+        if (CollectionUtils.isNotEmpty(request.getDestinationCidrs()) && CollectionUtils.isNotEmpty(request.getDestinationIps())) {
+            boolQueryBuilder.should(QueryBuilders.termsQuery("destination.ip", request.getDestinationIps()));
+            for (String destinationCidr : request.getDestinationCidrs()) {
+                boolQueryBuilder.should(QueryBuilders.rangeQuery("destination.ip")
+                        .gte(destinationCidr)
+                        .lte(replaceLastIpNumber(destinationCidr, "255")));
+            }
+        }else if (CollectionUtils.isNotEmpty(request.getDestinationIps())) {
             boolQueryBuilder.must(QueryBuilders.termsQuery("destination.ip", request.getDestinationIps()));
         }
 
@@ -923,6 +930,14 @@ public class FlowAnalysisService extends AbstractBaseService {
         }
 
         return boolQueryBuilder;
+    }
+
+    public static String replaceLastIpNumber(String ip, String replacement) {
+        int lastDotIndex = ip.lastIndexOf('.');
+        if (lastDotIndex == -1) {
+            throw new IllegalArgumentException("Invalid IP format: " + ip);
+        }
+        return ip.substring(0, lastDotIndex + 1) + replacement;
     }
 
     /**

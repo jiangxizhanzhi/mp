@@ -85,6 +85,12 @@ public class FlowAnalysisRequest {
     private List<String> destinationIps;
 
     /**
+     * 目标网段集合
+     */
+    @ApiModelProperty("攻击名称")
+    private List<String> destinationCidrs;
+
+    /**
      * 主机IP集合
      */
     @ApiModelProperty("主机IP集合")
