@@ -735,10 +735,10 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
             if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_2_GATEWAY)
                     || role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK)
             ) {
-                coreType = CoreType.NETWORK;
+                coreType = CoreType.NETWORK_0_0;
             } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_SWITCH)) {
                 if (BaseCloudPluginSceneElementModel.ImageType.ENTITY.equals(element.getImageType())) {
-                    coreType = CoreType.NETWORK_0;
+                    coreType = CoreType.NETWORK_L2;
                 } else if (BaseCloudPluginSceneElementModel.ImageType.SIMPLE.equals(element.getImageType())) {
                     coreType = CoreType.NETWORK;
                 } else {
@@ -746,7 +746,7 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
                 }
             } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_ROUTER)) {
                 if (BaseCloudPluginSceneElementModel.ImageType.ENTITY.equals(element.getImageType())) {
-                    coreType = CoreType.NETWORK_0;
+                    coreType = CoreType.NETWORK_L2;
                 } else if (BaseCloudPluginSceneElementModel.ImageType.SIMPLE.equals(element.getImageType())) {
                     coreType = CoreType.ROUTER;
                 } else {
@@ -754,7 +754,7 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
                 }
             } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_FIREWALL)) {
                 if (BaseCloudPluginSceneElementModel.ImageType.ENTITY.equals(element.getImageType())) {
-                    coreType = CoreType.NETWORK_0;
+                    coreType = CoreType.NETWORK_L2;
                 } else {
                     coreType = CoreType.FIREWALL;
                 }
