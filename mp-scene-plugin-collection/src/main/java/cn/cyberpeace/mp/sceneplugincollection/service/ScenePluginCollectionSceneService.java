@@ -189,7 +189,7 @@ public class ScenePluginCollectionSceneService {
         }
 
         if (StringUtils.isNotBlank(collectionAppConfig.getDestinationCidrs())){
-            String[] destinationCidrs = collectionAppConfig.getDestinationCidrs().split("、");
+            String[] destinationCidrs = collectionAppConfig.getDestinationCidrs().split(",");
             request.setDestinationCidrs(Arrays.asList(destinationCidrs));
         }
 
