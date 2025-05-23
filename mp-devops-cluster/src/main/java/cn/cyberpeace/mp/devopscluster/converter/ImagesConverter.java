@@ -81,7 +81,7 @@ public class ImagesConverter implements BaseConverter{
     public BasePageBO<ImageConvertModel> page(ImagePageDTO dto) {
         long start = System.currentTimeMillis();
         Integer total = devopsTargetService.totalCount(dto);
-        log.info("查询mp数据库总条数耗时:{}", (System.currentTimeMillis() - start) / 1000);
+        log.info("查询mp数据库总条数耗时:{}", (System.currentTimeMillis() - start));
 
         BasePageBO<ImageConvertModel> imageConvertPageModel = new BasePageBO<>();
         imageConvertPageModel.setTotal(total);
@@ -92,7 +92,7 @@ public class ImagesConverter implements BaseConverter{
 
         start = System.currentTimeMillis();
         List<DeviceTargetPO> deviceTargetPOS = deviceTargetMapper.page(dto);
-        log.info("查询mp数据库列表:{}", (System.currentTimeMillis() - start) / 1000);
+        log.info("查询mp数据库列表:{}", (System.currentTimeMillis() - start));
 
         Map<String,DeviceTargetPO> supportExports = new HashMap<>();
         deviceTargetPOS.stream().forEach(d -> {
@@ -113,7 +113,7 @@ public class ImagesConverter implements BaseConverter{
 
         start = System.currentTimeMillis();
         List<Device> deviceList = this.findByIds(ids);
-        log.info("查询cloud列表:{}", (System.currentTimeMillis() - start) / 1000);
+        log.info("查询cloud列表:{}", (System.currentTimeMillis() - start));
 
         if (CollectionUtils.isNotEmpty(deviceList)) {
             deviceList = deviceList.stream().sorted((o1, o2) -> {
@@ -135,7 +135,7 @@ public class ImagesConverter implements BaseConverter{
 
         start = System.currentTimeMillis();
         List<ImageAuthTotalCount> imageAuthTotalCounts = devopsTargetAuthService.totalCount(targetUuids);
-        log.info("靶标权限:{}", (System.currentTimeMillis() - start) / 1000);
+        log.info("靶标权限:{}", (System.currentTimeMillis() - start));
 
         Map<String, Integer> imageAuthTotalCountsMap = imageAuthTotalCounts.stream().collect(Collectors.toMap(ImageAuthTotalCount::getTarget, ImageAuthTotalCount::getTotal));
 

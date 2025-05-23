@@ -137,7 +137,7 @@ public class ImagesController {
         log.info("images page request:{}",request);
         BasePageBO<ImageConvertModel> model = imagesConverter.page(new ImagePageDTO(request));
         List<ImagesPageVO> list = convertBOToPageVO(model);
-        log.info("总耗时:{}", (System.currentTimeMillis() - start) / 1000);
+        log.info("总耗时:{}", (System.currentTimeMillis() - start));
         return new PageResult<>(list, model.getTotal());
     }
 
