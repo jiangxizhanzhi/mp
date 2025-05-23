@@ -7,11 +7,17 @@ import cn.cyberpeace.mp.devopscluster.config.DevopsClusterConfig;
 import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Joiner;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static cn.cyberpeace.mp.devopscluster.cloud.platform.constants.BaseCloudPlatformConstant.CPCLOUD_DEVICE;
 import static cn.cyberpeace.mp.devopscluster.cloud.platform.constants.BaseCloudPlatformConstant.URL_VERSION;
@@ -54,12 +60,24 @@ public class DeviceService extends BaseCpService {
         return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + DEVICE + "/" + uuid, Device.class);
     }
 
+    Cache<String, Device> deviceCache = CacheBuilder.newBuilder()
+            .maximumSize(200) // 最大缓存大小
+            .expireAfterWrite(5, TimeUnit.MINUTES) // 写入后5分钟过期
+            .build();
+
     /**
      * 根据ID集合查询
      * @param ids
      * @return
      */
     public CloudPlatformPageResult<Device> findByIds(List<Integer> ids) {
+        if (ids.size() == 1) {
+            var device = deviceCache.getIfPresent(String.valueOf(ids.get(0)));
+            if (device != null) {
+                CloudPlatformPageResult<Device> res = new CloudPlatformPageResult<>(Arrays.asList(device));
+                return res;
+            }
+        }
         CloudPlatformPageResult<Device> model = new CloudPlatformPageResult<>();
         model.setList(new ArrayList<>());
         // 一次最多查询500个靶标信息
@@ -70,6 +88,9 @@ public class DeviceService extends BaseCpService {
             super.checkResult(pageResult);
             List<Device> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()), Device.class);
             model.getList().addAll(list);
+        }
+        for (var d : model.getList()) {
+            deviceCache.put(String.valueOf(d.getId()), d);
         }
         return model;
     }
