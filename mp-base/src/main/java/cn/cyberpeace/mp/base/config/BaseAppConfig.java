@@ -35,6 +35,8 @@ import java.util.List;
 @Data
 public class BaseAppConfig {
 
+    public static String API_PREFIX = "/api";
+
     @Autowired
     private ServerProperties serverProperties;
 

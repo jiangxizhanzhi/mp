@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.flow.integration.addtask;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.HttpUtils;
@@ -125,7 +126,7 @@ public class AddTaskByRemoteFlowService implements IAddTaskService {
             int resourceType = StringUtils.isNotEmpty(flow.getPcapFile()) ? 0 : 1;
             String fileKey = resourceType == 0 ? flow.getPcapFile() : flow.getFile();
             fileKey = fileKey.replace("\\", "/");
-            var bytes = HttpUtils.downloadFileToByteArray(flowConfig.getCsceneUrl() + "/api/mp/file/" + fileKey);
+            var bytes = HttpUtils.downloadFileToByteArray(flowConfig.getCsceneUrl() + BaseAppConfig.API_PREFIX + "/file/" + fileKey);
             List<FlowActuator.ProtocolRate> protocolRates = new ArrayList<>();
             if (flow.getProtocolList() != null) {
                 for (var protocol : flow.getProtocolList()) {

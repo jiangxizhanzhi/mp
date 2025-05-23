@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.flow.integration.addtask;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.flow.bo.AddFlowTaskFlowInfo;
@@ -216,7 +217,7 @@ public class AddTaskByRemoteFlowService2 implements IAddTaskService {
             int resourceType = StringUtils.isNotEmpty(flow.getPcapFile()) ? 0 : 1;
             String fileKey = resourceType == 0 ? flow.getPcapFile() : flow.getFile();
             fileKey = fileKey.replace("\\", "/");
-            String downloadUrl = flowConfig.getCsceneUrl() + "/api/file/" + fileKey;
+            String downloadUrl = flowConfig.getCsceneUrl() + BaseAppConfig.API_PREFIX + "/file/" + fileKey;
             byte[] bytes = this.downloadFileToByteArray(downloadUrl, 2);
             List<FlowActuator.ProtocolRate> protocolRates = new ArrayList<>();
             if (flow.getProtocolList() != null) {

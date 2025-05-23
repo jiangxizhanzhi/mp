@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.flow.integration.cloud.topocloud;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -37,13 +38,13 @@ import java.util.Map;
 @Slf4j
 public class TopoCloudClient implements ICloudClient {
 
-    private static final String CREATE_TOPO_URL = "/api/cscene/cscenes/app_instance";
+    private static final String CREATE_TOPO_URL = BaseAppConfig.API_PREFIX + "/cscene/cscenes/app_instance";
 
-    private static final String DELETE_TOPO_URL = "/api/cscene/cscene_instances";
+    private static final String DELETE_TOPO_URL = BaseAppConfig.API_PREFIX + "/cscene/cscene_instances";
 
-    private static final String GET_TOPO_URL = "/api/cscene/cscene_instances?id={id}";
+    private static final String GET_TOPO_URL = BaseAppConfig.API_PREFIX + "/cscene/cscene_instances?id={id}";
 
-    private static final String GET_NETWORK_TREX_IP = "/api/cscene/cscene_instances/get_trex_ip?network_id=%s";
+    private static final String GET_NETWORK_TREX_IP = BaseAppConfig.API_PREFIX + "/cscene/cscene_instances/get_trex_ip?network_id=%s";
 
     private static final String TOPO_NAME = "trex_topo";
 

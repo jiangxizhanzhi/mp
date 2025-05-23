@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.flow.integration;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.flow.bo.ProtocolBO;
@@ -20,9 +21,9 @@ import java.util.*;
 
 @Slf4j
 public class FlowClient {
-    private static String BACKGROUND_FLOW_INFO_URL = "/api/flow/info/background";
+    private static String BACKGROUND_FLOW_INFO_URL = BaseAppConfig.API_PREFIX + "/flow/info/background";
 
-    private static String ATTACK_FLOW_INFO_URL = "/api/flow/info/attack";
+    private static String ATTACK_FLOW_INFO_URL = BaseAppConfig.API_PREFIX + "/flow/info/attack";
 
     private static Map<String, String> HEADER = new HashMap<>();
 
