@@ -360,7 +360,12 @@ public class AddTaskByRemoteFlowService2 implements IAddTaskService {
             AddVirtualNicParams params = new AddVirtualNicParams();
             params.setInstanceId(actuatorResourceId);
             params.setNetworkId(networkId);
-            params.setAddr(TopoCloudClient.getTrexIp(networkId));
+            try {
+                params.setAddr(TopoCloudClient.getTrexIp(networkId));
+            } catch (Exception e) {
+                // 家里环境会报错，捕获异常方便调试
+                log.error("failed to get trex ip ", e);
+            }
             var res = cloudClient.addVirtualNic(params);
             mac = res.getMacAddress();
             portModel = new FlowTaskPortModel();
