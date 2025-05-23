@@ -37,6 +37,8 @@ public class BaseAppConfig {
 
     public static String API_PREFIX = "/api";
 
+    public static String PYTHON_CMD = "python3";
+
     @Autowired
     private ServerProperties serverProperties;
 

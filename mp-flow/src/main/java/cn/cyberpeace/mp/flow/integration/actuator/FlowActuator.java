@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.flow.integration.actuator;
 
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
@@ -190,7 +191,7 @@ public class FlowActuator {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        String pythonCmd = String.format("python3 ./editcaptopcap.py %s", fileName);
+        String pythonCmd = String.format(BaseAppConfig.PYTHON_CMD + " ./editcaptopcap.py %s", fileName);
         log.info("============python analyse cmd: {}", pythonCmd);
         try {
             Process process = Runtime.getRuntime().exec(pythonCmd);
