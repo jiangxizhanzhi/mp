@@ -10,6 +10,7 @@
 // Version 1.0.0
 package cn.cyberpeace.mp.flow.job;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.context.SysContextHolder;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
@@ -54,7 +55,7 @@ public class FlowActuatorStateJob {
 
     @Scheduled(cron = "0/5 * * * * ?")
     public void queryFlowActuator() {
-        HumanCondition condition = new HumanCondition().filterEqual(FlowActuatorModel::getStatus, 0);
+        HumanCondition condition = new HumanCondition();
         var list = flowActuatorMapper.list(condition);
         for (var m : list) {
             TaskCommon.executeTask(() -> {
@@ -64,7 +65,13 @@ public class FlowActuatorStateJob {
                     return;
                 }
                 ACTUATOR_IN_INIT_PROCESS.add(m.getId());
-                updateActuatorAndDeliverTasks(m);
+                if (m.getStatus() == 0) {
+                    // 流量执行器未处理完成
+                    updateActuatorAndDeliverTasks(m);
+                } else {
+                    // 流量执行器已处理完成，仅需添加任务
+                    this.addTaskService.addTasksToActuator(m);
+                }
                 ACTUATOR_IN_INIT_PROCESS.remove(m.getId());
 
                 SysContextHolder.setCallChainId(originCallChainId);
@@ -75,6 +82,23 @@ public class FlowActuatorStateJob {
 
     private void updateActuatorAndDeliverTasks(FlowActuatorModel m) {
         log.info("开始启动执行器剩余的流程 {} ", m.getId());
+        if (StringUtils.isEmpty(m.getResourceId())) {
+            log.info("创建虚拟机");
+            // 提交创建请求
+            ICloudClient cloudClient = BeanCommon.getBean(ICloudClient.class);
+            var instance = cloudClient.createVirtualMachine();
+            String resourceId = instance.getId();
+            log.info("更新执行器数据库信息");
+            var dbUpdate = new FlowActuatorModel();
+            dbUpdate.setId(m.getId());
+            dbUpdate.setResourceId(resourceId);
+            dbUpdate.setNetworkId(instance.getNetwork().get(0).getNetworkId());
+            dbUpdate.setIp(instance.getNetwork().get(0).getFixedIp());
+            flowActuatorMapper.update(dbUpdate);
+            m.setResourceId(dbUpdate.getResourceId());
+            m.setNetworkId(dbUpdate.getNetworkId());
+            m.setIp(dbUpdate.getIp());
+        }
         String actuatorIp = m.getIp();
         if (StringUtils.isEmpty(actuatorIp)) {
             // 没有ip先更新ip
@@ -102,10 +126,16 @@ public class FlowActuatorStateJob {
         log.info("ssh 可用 ， 更新发生器代码");
         // 更新 发生器代码
         this.updateActuatorCodesAndServer(actuatorIp);
-        // 向执行器添加任务
-        this.addTaskService.addTasksToActuator(m);
+
+        // 设置流量执行器未启动结束状态
+        this.updateFlowActuatorDbStatus(m.getId(), 1);
 
         log.info("执行器及其服务启动完成 {} ", m.getId());
+
+        // 向执行器添加任务
+        log.info("向执行器添加任务 开始");
+        this.addTaskService.addTasksToActuator(m);
+        log.info("向执行器添加任务 结束");
     }
 
     private void updateActuatorIp(FlowActuatorModel m) {
@@ -127,5 +157,12 @@ public class FlowActuatorStateJob {
         serverInfo.setPassword("111111");
 
         SshUtil.refreshDir(serverInfo, commands, "traffic_generators.zip", "/opt/project_dirs");
+    }
+
+    private void updateFlowActuatorDbStatus(String id, int status) {
+        FlowActuatorModel updateModel = new FlowActuatorModel();
+        updateModel.setId(id);
+        updateModel.setStatus(status);
+        flowActuatorMapper.update(updateModel);
     }
 }

@@ -90,7 +90,7 @@ public class FlowTaskTaskModel extends BaseModel {
 	/**
 	 * 任务状态: 0 初始化，1 正在运行，2 正在停止， 3 已停止, 4 失败
 	 */
-	@ApiModelProperty(value = "任务状态: 0 初始化，1 正在运行，2 正在停止， 3 已停止, 4 失败")
+	@ApiModelProperty(value = "任务状态: 0 初始化，1 正在运行，2 正在停止， 3 已停止, 4 失败, 5 初始化中")
 	@DefaultInt
 	private Integer taskStatus;
 

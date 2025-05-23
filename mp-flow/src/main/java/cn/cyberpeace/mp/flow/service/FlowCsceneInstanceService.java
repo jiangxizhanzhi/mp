@@ -107,6 +107,22 @@ public class FlowCsceneInstanceService {
     public ListObjServiceResult<CsceneInstanceFlowTaskResponse> add(CsceneInstanceAddFlowTaskRequest request) {
         var flowActuator = flowActuatorMapper.first(new HumanCondition().filterEqual(FlowActuatorModel::getCsceneInstanceId, request.getId()));
         log.info("查询到的执行器信息: {} ", JsonCommon.stringify(flowActuator));
+        if (flowActuator == null) {
+            log.info("执行器不存在,需要创建,先在数据库添加执行器信息，等待异步启动执行器");
+            FlowActuatorModel actuatorModel = new FlowActuatorModel();
+            actuatorModel.setStatus(0);
+//        actuatorModel.setTitle(params.getActuatorName());
+            var topo = TopoCloudClient.getCscene(request.getId());
+            actuatorModel.setCsceneId(topo.getCscene());
+            actuatorModel.setCsceneInstanceId(request.getId());
+            actuatorModel.setResourceId("");
+            actuatorModel.setNetworkId("");
+            actuatorModel.setIp("");
+            flowActuatorMapper.save(actuatorModel);
+            flowActuator = flowActuatorMapper.first(new HumanCondition().filterEqual(FlowActuatorModel::getCsceneInstanceId, request.getId()));
+            log.info("新建的执行器信息: {} ", JsonCommon.stringify(flowActuator));
+        }
+        log.info("先向数据库添加任务信息");
         String actuatorId = flowActuator.getId();
         log.info("开始处理执行器，在数据库中添加流量任务 {} ", flowActuator.getId());
 
@@ -156,38 +172,6 @@ public class FlowCsceneInstanceService {
         var result = this.handleTaskAndGetNewTasks(actuatorId, addFlowTaskParams);
         log.info("结束处理执行器 {} 在数据库中添加流量任务", flowActuator.getId());
 
-        if (CollectionUtils.isNotEmpty(result.getAddResult())) {
-            var flowTaskTaskModelList = result.getAddResult();
-            // 查流量信息
-            List<String> flowIds = new ArrayList<>();
-            flowTaskTaskModelList.forEach(t -> flowIds.add(t.getFlowId()));
-            var remote = this.getRemoteFlowInfos(flowIds);
-            Map<String, RemoteFlowInfo> flowId2RemoteFlowInfo = new HashMap<>();
-            for (RemoteFlowInfo f : remote) {
-                flowId2RemoteFlowInfo.put(f.getFlowId(), f);
-            }
-
-            // 处理每个节点的任务
-            String nodeId = flowTaskTaskModelList.get(0).getNodeId();
-            String targetIp = flowTaskTaskModelList.get(0).getNodeIp();
-            String networkId = flowTaskTaskModelList.get(0).getNodeNetworkId();
-            log.info("处理节点: {}  , 节点ip:{} , 网络id:{}", nodeId, targetIp, networkId);
-            List<RemoteFlowInfo> remoteFlowInfos = new ArrayList<>();
-            for (FlowTaskTaskModel task : flowTaskTaskModelList) {
-                if (flowId2RemoteFlowInfo.containsKey(task.getFlowId())) {
-                    remoteFlowInfos.add(flowId2RemoteFlowInfo.get(task.getFlowId()));
-                }
-            }
-            log.info("流量信息: {} ", JsonCommon.snakeStringify(remoteFlowInfos));
-            BeanCommon.getBean(AddTaskByRemoteFlowService2.class)
-                    .handleOneTask(flowActuator, targetIp, networkId, flowTaskTaskModelList, remoteFlowInfos);
-            log.info("处理节点: {} 处理结束", nodeId);
-
-            log.info("更新任务状态");
-            this.updateFlowActuatorDbStatus(actuatorId, 1);
-        }
-        log.info("完成处理执行器 {} ", flowActuator.getId());
-
         List<CsceneInstanceFlowTaskResponse> responses = new ArrayList<>();
         List<FlowTaskTaskModel> flowTaskTaskModelList = new ArrayList();
         flowTaskTaskModelList.addAll(result.getAddResult());
@@ -225,7 +209,7 @@ public class FlowCsceneInstanceService {
         return remoteFlowInfos;
     }
 
-    private void loadNetworkInfo(AddFlowTaskParams map, BusinessCSceneInstance instance) {
+    public void loadNetworkInfo(AddFlowTaskParams map, BusinessCSceneInstance instance) {
         var cloudPorts = instance.getScene().getPlugins().getCpcloud().getElementPorts();
         for (var e : instance.getScene().getTopology().getElements()) {
             if (StringUtils.equals(map.getNodeId(), e.getId())) {
@@ -240,7 +224,7 @@ public class FlowCsceneInstanceService {
         }
     }
 
-    private BusinessCSceneInstance getInstanceWithNoException(String instanceId, int tryCount) {
+    public BusinessCSceneInstance getInstanceWithNoException(String instanceId, int tryCount) {
         BusinessCSceneInstance instance = null;
         for (int i = 0; i < tryCount; i++) {
             try {
@@ -278,7 +262,7 @@ public class FlowCsceneInstanceService {
         return flowTaskTaskModelList;
     }
 
-    private FlowTaskTaskModelResult handleTaskAndGetNewTasks(String actuatorId, AddFlowTaskParams addFlowTaskParams) {
+    public FlowTaskTaskModelResult handleTaskAndGetNewTasks(String actuatorId, AddFlowTaskParams addFlowTaskParams) {
         // 先得到数据库原有的任务
         var cond = new HumanCondition().filterEqual(FlowTaskTaskModel::getSceneId, addFlowTaskParams.getCsceneInstanceId());
         var dbTasks = flowTaskTaskMapper.list(cond);
@@ -429,8 +413,8 @@ public class FlowCsceneInstanceService {
 
     @Getter
     @Setter
-    private static class FlowTaskTaskModelResult{
-        private List<FlowTaskTaskModel> addResult = new ArrayList<>();
-        private List<FlowTaskTaskModel> updateResult = new ArrayList<>();
+    public static class FlowTaskTaskModelResult{
+        public List<FlowTaskTaskModel> addResult = new ArrayList<>();
+        public List<FlowTaskTaskModel> updateResult = new ArrayList<>();
     }
 }

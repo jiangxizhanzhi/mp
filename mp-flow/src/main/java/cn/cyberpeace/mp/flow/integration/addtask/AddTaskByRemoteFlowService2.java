@@ -113,8 +113,13 @@ public class AddTaskByRemoteFlowService2 implements IAddTaskService {
         String actuatorId = flowActuator.getId();
 
         // 查询任务 ， 并按照节点id分组
-        var condition = new HumanCondition().filterEqual(FlowTaskTaskModel::getActuatorId, actuatorId);
+        var condition = new HumanCondition().filterEqual(FlowTaskTaskModel::getActuatorId, actuatorId)
+                .filterEqual(FlowTaskTaskModel::getTaskStatus, 5);
         var flowTaskTaskModelList = flowTaskTaskMapper.list(condition);
+        if (flowTaskTaskModelList.size() == 0) {
+            log.info("没有未处理的任务");
+            return;
+        }
         Map<String, List<FlowTaskTaskModel>> nodeId2TaskTaskModel = new HashMap<>();
         for (FlowTaskTaskModel flowTaskTaskModel : flowTaskTaskModelList) {
             var list = nodeId2TaskTaskModel.getOrDefault(flowTaskTaskModel.getNodeId(), new ArrayList<>());
@@ -152,7 +157,6 @@ public class AddTaskByRemoteFlowService2 implements IAddTaskService {
         }
 
         log.info("更新任务状态");
-        this.updateFlowActuatorDbStatus(actuatorId, 1);
         log.info("完成处理执行器 {} ", flowActuator.getId());
     }
 
