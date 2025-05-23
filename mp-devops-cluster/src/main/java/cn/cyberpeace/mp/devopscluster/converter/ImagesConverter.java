@@ -33,6 +33,7 @@ import cn.cyberpeace.mp.devopscluster.utils.POLogoUtils;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -43,6 +44,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ImagesConverter implements BaseConverter{
@@ -77,7 +79,9 @@ public class ImagesConverter implements BaseConverter{
      * @return
      */
     public BasePageBO<ImageConvertModel> page(ImagePageDTO dto) {
+        long start = System.currentTimeMillis();
         Integer total = devopsTargetService.totalCount(dto);
+        log.info("查询mp数据库总条数耗时:{}", (System.currentTimeMillis() - start) / 1000);
 
         BasePageBO<ImageConvertModel> imageConvertPageModel = new BasePageBO<>();
         imageConvertPageModel.setTotal(total);
@@ -85,7 +89,11 @@ public class ImagesConverter implements BaseConverter{
             imageConvertPageModel.setList(Lists.newArrayList());
             return imageConvertPageModel;
         }
+
+        start = System.currentTimeMillis();
         List<DeviceTargetPO> deviceTargetPOS = deviceTargetMapper.page(dto);
+        log.info("查询mp数据库列表:{}", (System.currentTimeMillis() - start) / 1000);
+
         Map<String,DeviceTargetPO> supportExports = new HashMap<>();
         deviceTargetPOS.stream().forEach(d -> {
             supportExports.put(d.getUuid(), d);
@@ -102,7 +110,11 @@ public class ImagesConverter implements BaseConverter{
             imageConvertPageModel.setList(Lists.newArrayList());
             return imageConvertPageModel;
         }
+
+        start = System.currentTimeMillis();
         List<Device> deviceList = this.findByIds(ids);
+        log.info("查询cloud列表:{}", (System.currentTimeMillis() - start) / 1000);
+
         if (CollectionUtils.isNotEmpty(deviceList)) {
             deviceList = deviceList.stream().sorted((o1, o2) -> {
                 if (orderMap.get(o1.getUuid()) > orderMap.get(o2.getUuid())) {
@@ -121,7 +133,9 @@ public class ImagesConverter implements BaseConverter{
 
         List<String> targetUuids = deviceTargetPOS.stream().map(DeviceTargetPO::getUuid).collect(Collectors.toList());
 
+        start = System.currentTimeMillis();
         List<ImageAuthTotalCount> imageAuthTotalCounts = devopsTargetAuthService.totalCount(targetUuids);
+        log.info("靶标权限:{}", (System.currentTimeMillis() - start) / 1000);
 
         Map<String, Integer> imageAuthTotalCountsMap = imageAuthTotalCounts.stream().collect(Collectors.toMap(ImageAuthTotalCount::getTarget, ImageAuthTotalCount::getTotal));
 

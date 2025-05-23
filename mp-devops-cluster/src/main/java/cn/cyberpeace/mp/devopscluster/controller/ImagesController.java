@@ -133,11 +133,12 @@ public class ImagesController {
     @ApiOperation("分页查询")
     @GetMapping("/page")
     public PageResult<ImagesPageVO> page(ImagePageRequest request){
+        long start = System.currentTimeMillis();
         log.info("images page request:{}",request);
         BasePageBO<ImageConvertModel> model = imagesConverter.page(new ImagePageDTO(request));
         List<ImagesPageVO> list = convertBOToPageVO(model);
-
-        return new PageResult<>(list,model.getTotal());
+        log.info("总耗时:{}", (System.currentTimeMillis() - start) / 1000);
+        return new PageResult<>(list, model.getTotal());
     }
 
     /**
