@@ -100,8 +100,8 @@ public class CollectionAppConfig {
     @Value("${mp.sceneplugincollection.default.hours-range:24}")
     private Integer hoursRange;
 
-    @Value("${mp.sceneplugincollection.destination-cidrs}")
-    private String destinationCidrs;
+    @Value("${mp.sceneplugincollection.destination-ips}")
+    private String destinationIps;
 
     @Autowired
     private BaseAppConfig baseAppConfig;

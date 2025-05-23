@@ -14,18 +14,9 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.controller.request.SceneAllElementsQueryRequest;
-import cn.cyberpeace.mp.cscene.core.CsceneInstanceHandler;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
 import cn.cyberpeace.mp.cscene.dto.element.ElementPort;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowAnalysisSummary;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackConfigInfo;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackDto;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackTime;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackTypeCount;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowPcapFileInfo;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowRiskCount;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowTrend;
-import cn.cyberpeace.mp.cscene.dto.flow.TotalFlowAttackRatio;
+import cn.cyberpeace.mp.cscene.dto.flow.*;
 import cn.cyberpeace.mp.cscene.model.SceneSwitchInfoModel;
 import cn.cyberpeace.mp.cscene.repository.SceneSwitchInfoMapper;
 import cn.cyberpeace.mp.cscene.request.common.AssetsStatisticsRequest;
@@ -48,7 +39,6 @@ import cn.cyberpeace.mp.cscene.vo.FlowGroupPortWithProtocolVO;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
-import cn.cyberpeace.mp.scene.repository.SceneMapper;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.service.CloudCommonConfigService;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CategoryGroupBO;
@@ -300,9 +290,16 @@ public class FlowMonitorController {
 
         queryParams.setPerPage(10000);
         queryParams.setPage(1);
+
+        //        TODO WK2025 查询源在层节点中 目的不在层节点中
         List<String> allNodes = new ArrayList<>();
-        allNodes.addAll(testRangeApiProxy.getAllNodeIdsInCurrentCscene(id));
+        allNodes.addAll(testRangeApiProxy.getAllNodeIdsWithAssignedArea(id));
         queryParams.setSourceNodeIds(allNodes);
+
+        ArrayList<String> emptyAreaNodeIds = new ArrayList<>();
+        emptyAreaNodeIds.addAll(testRangeApiProxy.getAllNodeIdsWithEmptyArea(id));
+        queryParams.setTargetNodeIds(emptyAreaNodeIds);
+
         List<FlowAttackDto> flowAttackInCurrentRange = new ArrayList<>();
 
         log.info("--------------------------------1");

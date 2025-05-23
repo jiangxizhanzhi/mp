@@ -894,15 +894,7 @@ public class FlowAnalysisService extends AbstractBaseService {
         if (CollectionUtils.isNotEmpty(request.getSourceMacs())) {
             boolQueryBuilder.must(QueryBuilders.termsQuery("source.mac", request.getSourceMacs()));
         }
-//        TODO WK2025 查询不存在场景但需要查询的网段流量
-        if (CollectionUtils.isNotEmpty(request.getDestinationCidrs()) && CollectionUtils.isNotEmpty(request.getDestinationIps())) {
-            boolQueryBuilder.should(QueryBuilders.termsQuery("destination.ip", request.getDestinationIps()));
-            for (String destinationCidr : request.getDestinationCidrs()) {
-                boolQueryBuilder.should(QueryBuilders.rangeQuery("destination.ip")
-                        .gte(destinationCidr)
-                        .lte(replaceLastIpNumber(destinationCidr, "255")));
-            }
-        }else if (CollectionUtils.isNotEmpty(request.getDestinationIps())) {
+        if (CollectionUtils.isNotEmpty(request.getDestinationIps())) {
             boolQueryBuilder.must(QueryBuilders.termsQuery("destination.ip", request.getDestinationIps()));
         }
 

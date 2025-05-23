@@ -74,7 +74,7 @@ mp:
       arkime-es-host: ${ARKIME_ES_IP:10.110.3.1}
       arkime-es-port: ${ARKIME_ES_PORT:9205}
       arkime-disk: ${ARKIME_DISK:50}
-      destination-cidrs: ${DESTINATION_CIDRS}
+      destination-ips: ${DESTINATION_IPS}
   # mp-log 模块
   log:
     ext-var:

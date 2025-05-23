@@ -474,6 +474,38 @@ public class TestRangeApiProxy implements SubRangeMonitorInterface {
         return sceneElements.stream().map(SceneElementModel::getNodeId).collect(Collectors.toSet());
     }
 
+    /**
+     * 查层节点内所有节点
+     * @param csceneInstanceId
+     * @return
+     */
+    public Set<String> getAllNodeIdsWithAssignedArea(String csceneInstanceId) {
+        String sceneInstanceId = csceneInstanceMapper.get(csceneInstanceId).getScene();
+        var sceneElements = sceneElementMapper.list(
+                new HumanCondition()
+                        .select(SceneElementModel::getNodeId)
+                        .filterEqual(SceneElementModel::getScene, sceneInstanceId)
+                        .filterNotEqual(SceneElementModel::getArea, "")
+        );
+        return sceneElements.stream().map(SceneElementModel::getNodeId).collect(Collectors.toSet());
+    }
+
+    /**
+     * 查非层节点内所有节点
+     * @param csceneInstanceId
+     * @return
+     */
+    public Set<String> getAllNodeIdsWithEmptyArea(String csceneInstanceId) {
+        String sceneInstanceId = csceneInstanceMapper.get(csceneInstanceId).getScene();
+        var sceneElements = sceneElementMapper.list(
+                new HumanCondition()
+                        .select(SceneElementModel::getNodeId)
+                        .filterEqual(SceneElementModel::getScene, sceneInstanceId)
+                        .filterEqual(SceneElementModel::getArea, "")
+        );
+        return sceneElements.stream().map(SceneElementModel::getNodeId).collect(Collectors.toSet());
+    }
+
     private Map<String, Map<String, NodeInfo>> IpToNodeMapCache = new ConcurrentHashMap<>();
 
     public Map<String, NodeInfo> getIpToNodeMap(String csceneInstanceId) {

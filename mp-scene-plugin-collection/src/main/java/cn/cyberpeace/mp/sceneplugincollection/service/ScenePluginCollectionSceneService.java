@@ -172,6 +172,14 @@ public class ScenePluginCollectionSceneService {
             }
         }
 
+//        TODO WK2025 查询源在层节点中 目的在最外层加不存在场景的目的ip
+        if (StringUtils.isNotBlank(collectionAppConfig.getDestinationIps())){
+//
+            String[] destinationIps = collectionAppConfig.getDestinationIps().split(",");
+//
+            queryParams.getTargetIps().addAll(Arrays.asList(destinationIps));
+        }
+
         FlowAnalysisRequest request = new FlowAnalysisRequest();
         request.setGroupList(batchSceneHandler.getFlowCollectors());
         request.setAttackTypes(queryParams.getAttackTypes());
@@ -186,11 +194,6 @@ public class ScenePluginCollectionSceneService {
             request.setDestinationIps(queryParams.getTargetIps());
         } else {
             request.setDestinationIps(batchSceneHandler.getAllIpAddrs());
-        }
-
-        if (StringUtils.isNotBlank(collectionAppConfig.getDestinationCidrs())){
-            String[] destinationCidrs = collectionAppConfig.getDestinationCidrs().split(",");
-            request.setDestinationCidrs(Arrays.asList(destinationCidrs));
         }
 
         request.setSecondsInterval(queryParams.getInterval());
