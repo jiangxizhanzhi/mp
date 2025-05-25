@@ -45,6 +45,7 @@ import cn.cyberpeace.mp.sceneplugincollection.bo.CategoryGroupBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.SceneAssetsBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.SceneConfigAssetBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.SceneConfigCategoryGroupBO;
+import cn.cyberpeace.mp.sceneplugincollection.config.CollectionAppConfig;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.util.FlowPcapExportUtil;
@@ -107,6 +108,9 @@ public class FlowMonitorController {
 
     @Resource
     private CloudCommonConfigService cloudCommonConfigService;
+
+    @Autowired
+    private CollectionAppConfig collectionAppConfig;
 
     @ApiOperation(value = "模拟流量")
     @GetMapping("/simulation")
@@ -511,9 +515,27 @@ public class FlowMonitorController {
             log.error("translateSceneIds is null");
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
+        List<AssetsStatisticsResponse> responseList = new ArrayList<>();
+
+//        TODO WK2025 手动修改资产统计
+        if(request.getSceneIds().get(0).equals(collectionAppConfig.getWkSceneId())){
+            sceneIds.forEach(id -> {
+                AssetsStatisticsResponse response = AssetsStatisticsResponse.builder()
+                        .sceneId(id)
+                        .assetsTotal(collectionAppConfig.getWkAssetsTotal())
+                        .ipTotal(collectionAppConfig.getWkIpTotal())
+                        .operationSystemCount(collectionAppConfig.getWkOperationSystemCount())
+                        .applicationSystemCount(collectionAppConfig.getWkApplicationSystemCount())
+                        .networkCount(collectionAppConfig.getWkNetworkCount())
+                        .safetySystemCount(collectionAppConfig.getWkSafetySystemCount())
+                        .build();
+                responseList.add(response);
+            });
+            return ResultCommon.success(responseList);
+        }
+
         List<SceneAssetsBO> sceneAssetsList = scenePluginCollectionSceneService.listSceneAssets(sceneIds).getSource();
 
-        List<AssetsStatisticsResponse> responseList = new ArrayList<>();
         // 统计资产数量
         sceneIds.forEach(id -> {
             SceneAssetsBO sceneAssetsBO = sceneAssetsList.stream().filter(list -> id.equals(list.getSceneId())).findFirst().get();

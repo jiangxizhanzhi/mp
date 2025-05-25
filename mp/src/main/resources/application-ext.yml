@@ -75,6 +75,13 @@ mp:
       arkime-es-port: ${ARKIME_ES_PORT:9205}
       arkime-disk: ${ARKIME_DISK:50}
       destination-ips: ${DESTINATION_IPS}
+      wk-scene-id: ${WK_SCENE_ID}
+      wk-assets-total: ${WK_ASSETS_TOTAL}
+      wk-ip-total: ${WK_IP_TOTAL}
+      wk-operation-system-count: ${WK_OPERATION_SYSTEM_COUNT}
+      wk-safety-system-count: ${WK_SAFETY_SYSTEM_COUNT}
+      wk-network-count: ${WK_NETWORK_COUNT}
+      wk-application-system-count: ${WK_APPLICATION_SYSTEM_COUNT}
   # mp-log 模块
   log:
     ext-var:

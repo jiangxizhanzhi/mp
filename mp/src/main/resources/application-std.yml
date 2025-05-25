@@ -270,6 +270,13 @@ mp:
     wazuh-godfs-outer-http-server: /mp_scene_collection_godfs
     wazuh-run-command-http-callback-url: http://mp:8080/api/mp/scene_plugin_collection/wazuh_run_command_result
     destination-ips: ${mp.situationaware.ext-var.destination-ips}
+    wk-scene-id: ${mp.situationaware.ext-var.wk-scene-id}
+    wk-assets-total: ${mp.situationaware.ext-var.wk-assets-total}
+    wk-ip-total: ${mp.situationaware.ext-var.wk-ip-total}
+    wk-operation-system-count: ${mp.situationaware.ext-var.wk-operation-system-count}
+    wk-safety-system-count: ${mp.situationaware.ext-var.wk-safety-system-count}
+    wk-network-count: ${mp.situationaware.ext-var.wk-network-count}
+    wk-application-system-count: ${mp.situationaware.ext-var.wk-application-system-count}
   sceneplugingns3:
 #    ext-var:
 #      gns3-ip: ${GNS3_IP:10.100.7.1}

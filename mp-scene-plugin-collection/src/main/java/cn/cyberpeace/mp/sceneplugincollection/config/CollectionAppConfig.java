@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.sceneplugincollection.config;
 
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.hutool.core.io.FileUtil;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -102,6 +103,24 @@ public class CollectionAppConfig {
 
     @Value("${mp.sceneplugincollection.destination-ips}")
     private String destinationIps;
+
+//    TODO WK2025 态势资产统计手动调整
+    @Value("${mp.sceneplugincollection.wk-scene-id}")
+    private String wkSceneId;
+    @Value("${mp.sceneplugincollection.wk-assets-total}")
+    private int wkAssetsTotal;
+    @ApiModelProperty("ip总数")
+    @Value("${mp.sceneplugincollection.wk-ip-total}")
+    private int wkIpTotal;
+    @Value("${mp.sceneplugincollection.wk-operation-system-count}")
+    private int wkOperationSystemCount;
+    @Value("${mp.sceneplugincollection.wk-safety-system-count}")
+    private int wkSafetySystemCount;
+    @Value("${mp.sceneplugincollection.wk-network-count}")
+    private int wkNetworkCount;
+    @Value("${mp.sceneplugincollection.wk-application-system-count}")
+    private int wkApplicationSystemCount;
+
 
     @Autowired
     private BaseAppConfig baseAppConfig;
