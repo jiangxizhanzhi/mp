@@ -718,7 +718,7 @@ public class ScenePluginCollectionSceneService {
      * @param intervalSeconds 每{intervalSeconds}秒统计一条数据
      * @return 聚合统计结果
      */
-    public ServiceResult<List<IntervalSizeBO<LocalDateTime, Long>>> timeIntervalSumFlowSize(List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime, int intervalSeconds, List<String> sourceIps, Integer type) {
+    public ServiceResult<List<IntervalSizeBO<LocalDateTime, Long>>> timeIntervalSumFlowSize(List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime, int intervalSeconds, List<String> sourceIps, Integer type, List<String> sourceElementIds, List<String> destinationElementIds) {
         BatchSceneHandler batchSceneHandler = new BatchSceneHandler(sceneIds, nodeIds);
         if (CollectionUtils.isEmpty(batchSceneHandler.getFlowCollectors())) {
             log.info("{} query time interval sum flow size,sceneId:{},no collection plugin or no flowCollector", LOG_PREFIX, JsonCommon.stringify(sceneIds));
@@ -731,6 +731,31 @@ public class ScenePluginCollectionSceneService {
         // 构造参数
         FlowAnalysisRequest request = new FlowAnalysisRequest();
         request.setGroupList(batchSceneHandler.getFlowCollectors());
+
+        if (CollectionUtils.isNotEmpty(sourceElementIds)) {
+            List<String> ips = new ArrayList<>();
+            for (String nodeId : sourceElementIds) {
+                var nodeIps = batchSceneHandler.getIpsByNodeId(nodeId);
+                if (CollectionUtils.isNotEmpty(nodeIps)) {
+                    ips.addAll(nodeIps);
+                }
+            }
+            if (CollectionUtils.isEmpty(sourceIps)) {
+                sourceIps.addAll(ips);
+            }
+        }
+        if (CollectionUtils.isNotEmpty(destinationElementIds)) {
+            List<String> ips = new ArrayList<>();
+            for (String nodeId : destinationElementIds) {
+                var nodeIps = batchSceneHandler.getIpsByNodeId(nodeId);
+                if (CollectionUtils.isNotEmpty(nodeIps)) {
+                    ips.addAll(nodeIps);
+                }
+            }
+            request.setDestinationIps(ips);
+        }
+
+
         if (CollectionUtils.isEmpty(sourceIps)) {
 //            request.setSourceMacs(batchSceneHandler.getFlowCollectedMacAddrs());
         } else {

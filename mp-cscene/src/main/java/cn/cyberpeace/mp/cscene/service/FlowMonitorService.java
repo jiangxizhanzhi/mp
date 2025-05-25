@@ -27,6 +27,7 @@ import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.request.flow.FlowCommonRequest;
 import cn.cyberpeace.mp.cscene.request.flow.FlowSceneSimulationRequest;
 import cn.cyberpeace.mp.cscene.request.flow.FlowTrendRequest;
+import cn.cyberpeace.mp.cscene.service.multirange.testrange.TestRangeApiProxy;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.cscene.util.SegmentCount2IntervalSecondsUtil;
 import cn.cyberpeace.mp.cscene.vo.FlowGroupByDestinationIpAndSeverityVO;
@@ -100,6 +101,9 @@ public class FlowMonitorService {
     @Autowired
     private CsceneFileService csceneFileService;
 
+    @Autowired
+    private TestRangeApiProxy testRangeApiProxy;
+
 
     /**
      * 查询单个节点机器流量趋势
@@ -112,7 +116,7 @@ public class FlowMonitorService {
         List<String> sceneIds = CollectionUtil.toList(trendRequest.getSceneId());
         List<String> nodeIds = CollectionUtil.toList(trendRequest.getElementIds().get(0));
 
-        return processFlowTrend(sceneIds, nodeIds, trendRequest.getStartTime(), trendRequest.getEndTime(), trendRequest.getSegmentCount(), null, trendRequest.getType());
+        return processFlowTrend(sceneIds, nodeIds, trendRequest.getStartTime(), trendRequest.getEndTime(), trendRequest.getSegmentCount(), null, trendRequest.getType(),null,null);
     }
 
 
@@ -127,7 +131,15 @@ public class FlowMonitorService {
         // 逗号分割
         List<String> sceneIds = CollectionUtil.toList(StringUtils.split(trendRequest.getSceneId(), ","));
 
-        return processFlowTrend(sceneIds, null, trendRequest.getStartTime(), trendRequest.getEndTime(), trendRequest.getSegmentCount(), trendRequest.getSourceIps(), trendRequest.getType());
+        //        TODO WK2025 查询源在层节点中 目的不在层节点中
+        List<String> allNodes = new ArrayList<>();
+        allNodes.addAll(testRangeApiProxy.getAllNodeIdsWithAssignedArea(trendRequest.getSceneId()));
+
+        ArrayList<String> emptyAreaNodeIds = new ArrayList<>();
+        emptyAreaNodeIds.addAll(testRangeApiProxy.getAllNodeIdsWithEmptyArea(trendRequest.getSceneId()));
+
+        return processFlowTrend(sceneIds, null, trendRequest.getStartTime(), trendRequest.getEndTime(), trendRequest.getSegmentCount(), trendRequest.getSourceIps(), trendRequest.getType(),
+                allNodes,emptyAreaNodeIds);
     }
 
     /**
@@ -467,7 +479,8 @@ public class FlowMonitorService {
     }
 
 
-    private List<FlowTrend> processFlowTrend(List<String> sceneIds, List<String> elementIds, LocalDateTime startTime, LocalDateTime endTime, Integer segmentCount, List<String> sourceIps, Integer type) {
+    private List<FlowTrend> processFlowTrend(List<String> sceneIds, List<String> elementIds, LocalDateTime startTime, LocalDateTime endTime, Integer segmentCount, List<String> sourceIps, Integer type,
+                                             List<String> sourceElementIds,List<String> destinationElementIds) {
         // 默认值
         if (Objects.isNull(endTime)) {
             endTime = LocalDateTime.now();
@@ -485,7 +498,7 @@ public class FlowMonitorService {
         List<String> sceneIdList = csceneCommonService.translateSceneIds(sceneIds);
         Long intervalSeconds = SegmentCount2IntervalSecondsUtil.calculateIntervalSeconds(startTime, endTime, segmentCount);
 
-        ServiceResult<List<IntervalSizeBO<LocalDateTime, Long>>> flowResult = scenePluginCollectionSceneService.timeIntervalSumFlowSize(sceneIdList, elementIds, startTime, endTime, intervalSeconds.intValue(), sourceIps, type);
+        ServiceResult<List<IntervalSizeBO<LocalDateTime, Long>>> flowResult = scenePluginCollectionSceneService.timeIntervalSumFlowSize(sceneIdList, elementIds, startTime, endTime, intervalSeconds.intValue(), sourceIps, type,  sourceElementIds, destinationElementIds);
 
         List<IntervalSizeBO<LocalDateTime, Long>> intervalFlowSizeBOs = flowResult.getSource();
         List<FlowTrend> flowTrends = new ArrayList<>();
