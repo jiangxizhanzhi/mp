@@ -741,7 +741,7 @@ public class ScenePluginCollectionSceneService {
                 }
             }
             if (CollectionUtils.isEmpty(sourceIps)) {
-                sourceIps.addAll(ips);
+                sourceIps = ips;
             }
         }
         if (CollectionUtils.isNotEmpty(destinationElementIds)) {
@@ -754,6 +754,15 @@ public class ScenePluginCollectionSceneService {
             }
             request.setDestinationIps(ips);
         }
+
+        //        TODO WK2025 查询源在层节点中 目的在最外层加不存在场景的目的ip
+        if (StringUtils.isNotBlank(collectionAppConfig.getDestinationIps())){
+//
+            String[] destinationIps = collectionAppConfig.getDestinationIps().split(",");
+//
+            request.getDestinationIps().addAll(Arrays.asList(destinationIps));
+        }
+
 
 
         if (CollectionUtils.isEmpty(sourceIps)) {
