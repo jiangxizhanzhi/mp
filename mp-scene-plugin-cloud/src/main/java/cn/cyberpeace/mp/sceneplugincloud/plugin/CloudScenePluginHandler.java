@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
@@ -17,6 +18,7 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
+import cn.cyberpeace.mp.sceneplugincloud.config.CloudAppConfig;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementNetworkModel;
@@ -556,7 +558,7 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
                 correctElementImageTypeRelated(element.getSrcElement(), element, imageType);
             });
         }
-        
+
         // 连接外部网络,而且开启公网映射,就打开端口映射
         if (CloudSingleton.cloudAppConfig.getPublicNetProxyServer()) {
             getElementMap().forEach((id, element) -> {
@@ -678,6 +680,16 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
             cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE);
         } else if (role.equals(BaseCloudPluginSceneElementModel.Role.NPC)) {
             cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.NPC);
+        }
+
+        // 根据配置，看下是否要将虚拟交换机的类型从路由改为交换机
+        if (Boolean.TRUE.equals(BeanCommon.getBean(CloudAppConfig.class).getRedundantRouterOff())) {
+            boolean virtualRouter = cloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER;
+            boolean simple = StringUtils.equals(cloudElement.getImageType(), BaseCloudPluginSceneElementModel.ImageType.SIMPLE);
+            if (virtualRouter && simple) {
+                cloudElement.setRole(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_2_GATEWAY);
+                cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH);
+            }
         }
     }
 

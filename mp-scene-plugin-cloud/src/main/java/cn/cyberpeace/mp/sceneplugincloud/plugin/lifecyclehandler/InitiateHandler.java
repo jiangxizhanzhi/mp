@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.BoolUtils;
@@ -17,6 +18,7 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.AllocationPool;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
+import cn.cyberpeace.mp.sceneplugincloud.config.CloudAppConfig;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
@@ -25,13 +27,11 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.common.CoreType;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.InitiateTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -632,6 +632,11 @@ public class InitiateHandler extends HandlerCommon {
                     }
                 }
                 connectNetwork.network.setVlan(vlan);
+            }
+
+            if (Boolean.TRUE.equals(BeanCommon.getBean(CloudAppConfig.class).getRedundantRouterOff())) {
+                // 通过配置统一关闭辅助路由
+                cloudElement.setAuxiliaryRouterOff(true);
             }
 
             // 未显式关闭

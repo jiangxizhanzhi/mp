@@ -252,6 +252,7 @@ mp:
     cloud-heavy-concurrent-delay: ${mp.sceneplugincloud.ext-var.cloud-heavy-concurrent-delay}
     scene-create-install-unzip-apk: ${mp.sceneplugincloud.ext-var.scene-create-install-unzip-apk}
     dhcp-ip-allocate: ${mp.sceneplugincloud.ext-var.dhcp-ip-allocate}
+    redundant-router-off: ${mp.sceneplugincloud.ext-var.redundant-router-off}
   sceneplugincollection:
     wazuh-server-host: ${mp.situationaware.ext-var.wazuh-ip}
     wazuh-api-server: http://${mp.situationaware.ext-var.wazuh-ip}:15500

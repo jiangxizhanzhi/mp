@@ -182,6 +182,9 @@ public class CloudAppConfig {
     @Value("${mp.sceneplugincloud.dhcp_ip_allocate:true}")
     private Boolean dhcpIpAllocate;
 
+    @Value("${mp.sceneplugincloud.redundant_router_off:true}")
+    private Boolean redundantRouterOff;
+
     @Autowired
     private BaseAppConfig baseAppConfig;
 
