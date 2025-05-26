@@ -25,19 +25,12 @@ import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.HttpUtils;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.AccessProtocol;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Device;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtDocker;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtGateway;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtImageInfo;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtSystemInfo;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtVm;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ImageMetaData;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.service.DeviceService;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.service.ImagesService;
 import cn.cyberpeace.mp.devopscluster.constant.DevopsClusterErrorCode;
-import cn.cyberpeace.mp.devopscluster.controller.ImagesController;
 import cn.cyberpeace.mp.devopscluster.converter.ImagesConverter;
 import cn.cyberpeace.mp.devopscluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
@@ -65,15 +58,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -167,6 +152,27 @@ public class ImageServerYmlImportController {
                         // 如果靶标在mp库中存在，则跳过
                         var model = existsModel(key);
                         if (model != null) {
+                            //更新systemTyp和parentSystemType
+                            if (Objects.isNull(model.getSystemType())) {
+                                model.setSystemType(value.getSystemType());
+                                model.setParentSystemType(value.getParentSystemType());
+                                DeviceTargetMapper deviceTargetMapper = BeanCommon.getBean(DeviceTargetMapper.class);
+                                //更新mp
+                                deviceTargetMapper.updateById(model);
+                                //更新cloudmanager
+                                DeviceService deviceService = BeanCommon.getBean(DeviceService.class);
+                                List<Device> devices = deviceService.findByIds(List.of(Integer.parseInt(model.getId())));
+                                if (CollectionUtils.isEmpty(devices)) {
+                                    log.error("靶标{}存在于mp但是不存在于cloudmanager, 请确认，或者删除mp靶标管理处靶标重新导入", model.getName());
+                                } else {
+                                    Device device = devices.get(0);
+                                    device.getExtSystemInfo().setParentSystemType(value.getParentSystemType());
+                                    device.getExtSystemInfo().setSystemType(value.getSystemType());
+                                    ImagesService imagesService = BeanCommon.getBean(ImagesService.class);
+                                    imagesService.update(device.getUuid(), device);
+
+                                }
+                            }
                             log.info("靶标 {} 已存在，uuid 为 {} ，跳过导入", key, model.getUuid());
                         } else {
                             if (BaseCloudPluginSceneElementModel.ImageType.VM.equals(value.getImageType())) {

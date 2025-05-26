@@ -10,17 +10,16 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.aggregation.sceneimport.parse.result.image;
 
-import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
+ import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
+ import lombok.Getter;
+ import lombok.Setter;
+ import lombok.extern.slf4j.Slf4j;
+ import org.apache.commons.lang3.StringUtils;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+ import java.util.Arrays;
+ import java.util.HashMap;
+ import java.util.List;
+ import java.util.Map;
 
 /**
  * @ClassName ImageInfoParseResult
@@ -88,13 +87,100 @@ public class ImageInfoParseResult {
         return this.系统架构;
     }
 
+    /**
+     * 97 - windowsXp
+     * 98 - windows-server2016
+     * 99 - windows8
+     * 100 - windows-server 2008
+     * 106 - windows10
+     * 107: windows7
+     *
+     * 301 centos 7
+     * 302 centos8
+     * 303 redhat7
+     * 304 redhat8
+     * 305 中标麒麟
+     * 306 银河麒麟
+     * 307 ubuntu
+     * 308 debain
+     *
+     * windowx默认是windowsXp
+     * linux默认是centos7
+     *
+     * @return
+     */
     public Integer getSystemType() {
-        if (this.系统类型 != null && NumberUtils.isNumber(this.系统类型)) {
-            return Integer.parseInt(this.系统类型);
+        //windows
+        if (getParentSystemType() == 1) {
+            if (StringUtils.isEmpty(this.系统类型)) {
+                return 97;
+            } else {
+                String lowerCaseSystemType = this.系统类型.toLowerCase();
+                if (lowerCaseSystemType.endsWith("xp")) {
+                    return 97;
+                } else if (lowerCaseSystemType.contains("2016") && lowerCaseSystemType.contains("server")) {
+                    return 98;
+                } else if (lowerCaseSystemType.contains("2008") && lowerCaseSystemType.contains("server")) {
+                    return 100;
+                } else if (lowerCaseSystemType.equals("windows7")) {
+                    return 107;
+                } else if (lowerCaseSystemType.equals("windows8")) {
+                    return 99;
+                } else if (lowerCaseSystemType.equals("windows10")) {
+                    return 106;
+                } else {
+                    return 97;
+                }
+            }
         } else {
-            return null;
+            if (StringUtils.isEmpty(this.系统类型)) {
+                return 301;
+            } else {
+                String lowerCaseSystemType = this.系统类型.toLowerCase();
+                if (lowerCaseSystemType.contains("centos") && (lowerCaseSystemType.contains("7"))) {
+                    return 301;
+                } else if (lowerCaseSystemType.contains("centos") && lowerCaseSystemType.contains("8")) {
+                    return 302;
+                } else if (lowerCaseSystemType.contains("redhat") && lowerCaseSystemType.contains("7")) {
+                    return 303;
+                } else if (lowerCaseSystemType.contains("redhat") && lowerCaseSystemType.contains("8")) {
+                    return 304;
+                } else if (lowerCaseSystemType.contains("中标")) {
+                    return 305;
+                } else if (lowerCaseSystemType.contains("银河")) {
+                    return 306;
+                } else if (lowerCaseSystemType.contains("ubuntu")) {
+                    return 307;
+                } else if (lowerCaseSystemType.contains("debain")) {
+                    return 308;
+                } else {
+                    return 301;
+                }
+
+            }
+
+        }
+
+    }
+
+    /**
+     * 1 -windows  2-linux
+     * @return
+     */
+    public Integer getParentSystemType() {
+        if (StringUtils.isEmpty(this.系统类型)) {
+            return 2;
+        } else {
+            String lowerCaseSystemType = this.系统类型.toLowerCase();
+            if (lowerCaseSystemType.contains("win")) {
+                return 1;
+            } else {
+                return 2;
+            }
         }
     }
+
+
 
     public Integer getRole() {
         String role = this.角色;
