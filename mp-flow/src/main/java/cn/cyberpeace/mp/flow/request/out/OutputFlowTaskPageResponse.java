@@ -91,9 +91,9 @@ public class OutputFlowTaskPageResponse {
 
 
     /**
-     * 任务状态: 0 初始化，1 正在运行，2 失败， 3 已停止, 4 暂停（用不到，不展示文档）, 6 初始化中, 7 启动中
+     * 任务状态: 0 初始化，1 正在运行，2 失败， 3 已停止, 4 暂停（用不到，不展示文档）, 5 初始化中, 7 启动中
      */
-    @ApiModelProperty(value = "任务状态: 0 初始化, 1 运行中, 2 失败, 3 已停止, 6 初始化中, 7 启动中")
+    @ApiModelProperty(value = "任务状态: 0 初始化, 1 运行中, 2 失败, 3 已停止, 5 初始化中, 7 启动中")
     private Integer taskStatus;
     /**
      * 错误信息
