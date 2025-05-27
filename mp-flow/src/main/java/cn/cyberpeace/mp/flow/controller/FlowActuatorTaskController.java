@@ -17,6 +17,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -87,6 +88,9 @@ public class FlowActuatorTaskController {
     @ApiOperation("启动多个流量任务")
     @PostMapping("/task/batch_start")
     public ServiceResult<Boolean> startTasks(@RequestBody FlowTaskBatchStartRequest request) {
+        if (CollectionUtils.isEmpty(request.getTaskIds())) {
+            return new ServiceResult<>(true).asResult();
+        }
         flowActuatorTaskService.startTasks(request.getTaskIds());
         return new ServiceResult<>(true).asResult();
     }
@@ -94,6 +98,9 @@ public class FlowActuatorTaskController {
     @ApiOperation("关闭多个流量任务")
     @PostMapping("/stop_tasks")
     public String stopTasks(@RequestBody FlowTaskBatchStartRequest request) {
+        if (CollectionUtils.isEmpty(request.getTaskIds())) {
+            return null;
+        }
         flowActuatorTaskService.stopTasks(request.getTaskIds());
         return null;
     }

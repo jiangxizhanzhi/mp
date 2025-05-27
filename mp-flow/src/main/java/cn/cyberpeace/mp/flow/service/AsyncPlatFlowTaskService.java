@@ -192,8 +192,8 @@ public class AsyncPlatFlowTaskService {
             }
         }
         if (CollectionUtils.isEmpty(notRunningTasks)) {
-            log.error("some tasks are already running");
-            throw new MpRuntimeException(FlowErrorCode.TASK_IS_RUNNING);
+            log.error("these tasks are already running");
+            return new ServiceResult<>(true);
         } else {
             List<String> list = new ArrayList<>();
             for (FlowTaskTaskModel notRunningTask : notRunningTasks) {
