@@ -11,6 +11,7 @@
 package cn.cyberpeace.mp.flow.service;
 
 import cn.cyberpeace.mp.base.common.FsCommon;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
@@ -186,13 +187,24 @@ public class AsyncPlatFlowTaskService {
         // 任务状态校验
         List<String> notRunningTaskIds = new ArrayList<>();
         List<FlowTaskTaskModel> notRunningTasks = new ArrayList<>();
+        int PREPARING = 0;
+        int INITING = 0 ;
         for (FlowTaskTaskModel taskTaskModel : flowTaskTaskModels) {
+            if (TaskTaskStatusEnum.INITING.toValue() == taskTaskModel.getTaskStatus()) {
+                INITING++;
+            }
+            if (TaskTaskStatusEnum.PREPARING.toValue() == taskTaskModel.getTaskStatus()) {
+                PREPARING++;
+            }
             if (TaskTaskStatusEnum.RUNNING.toValue() != taskTaskModel.getTaskStatus() && TaskTaskStatusEnum.INITING.toValue() != taskTaskModel.getTaskStatus() && TaskTaskStatusEnum.PREPARING.toValue() != taskTaskModel.getTaskStatus()) {
                 notRunningTasks.add(taskTaskModel);
             }
         }
         if (CollectionUtils.isEmpty(notRunningTasks)) {
-            log.error("these tasks are already running");
+            if (PREPARING > 0 || INITING > 0) {
+                throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("无可运行的流量任务"));
+            }
+            log.error("some tasks are already running");
             return new ServiceResult<>(true);
         } else {
             List<String> list = new ArrayList<>();
