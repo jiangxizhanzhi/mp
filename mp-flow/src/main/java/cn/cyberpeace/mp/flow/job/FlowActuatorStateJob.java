@@ -65,11 +65,14 @@ public class FlowActuatorStateJob {
                     return;
                 }
                 ACTUATOR_IN_INIT_PROCESS.add(m.getId());
+                log.info("处理执行器:{}",m.getId());
                 if (m.getStatus() == 0) {
                     // 流量执行器未处理完成
+                    log.info("执行器 {} 未启动完成，继续启动" ,m.getId());
                     updateActuatorAndDeliverTasks(m);
                 } else {
                     // 流量执行器已处理完成，仅需添加任务
+                    log.info("执行器 {} 已启动完成，查看是否有需要添加的任务" ,m.getId());
                     this.addTaskService.addTasksToActuator(m);
                 }
                 ACTUATOR_IN_INIT_PROCESS.remove(m.getId());
