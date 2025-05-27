@@ -232,10 +232,10 @@ public class FlowActuatorTaskService extends BaseModelServiceImpl<FlowTaskTaskMo
     }
 
     @Transactional
-    public void deleteTasks(List<String> ids) {
-        flowTaskTaskMapper.bulkDelete(ids.toArray(new String[]{}));
-        flowTaskConfMapper.filterDelete(new HumanCondition().filterIn(FlowTaskConfModel::getTaskId, ids.toArray(new String[]{})));
-        flowTaskRecordMapper.filterDelete(new HumanCondition().filterIn(FlowTaskRecordModel::getTaskId, ids.toArray(new String[]{})));
+    public void deleteTasks(String[] ids) {
+        flowTaskTaskMapper.bulkDelete(ids);
+        flowTaskConfMapper.filterDelete(new HumanCondition().filterIn(FlowTaskConfModel::getTaskId, ids));
+        flowTaskRecordMapper.filterDelete(new HumanCondition().filterIn(FlowTaskRecordModel::getTaskId, ids));
     }
 
     public void startTask(String taskId) {

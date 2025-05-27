@@ -34,7 +34,7 @@ import java.util.List;
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/actuator")
 @Data
 public class FlowActuatorTaskController {
-    
+
     @Resource
     private FlowActuatorTaskService flowActuatorTaskService;
 
@@ -59,21 +59,27 @@ public class FlowActuatorTaskController {
 
     @ApiOperation("删除流量任务")
     @DeleteMapping("/task/delete")
-    public ServiceResult deleteTasks(List<String> taskIds) {
+    public ServiceResult deleteTasks(@RequestParam(name = "task_ids",required = false) String[] taskIds1, @RequestParam(name = "taskIds",required = false) String[] taskIds2) {
+        String[] taskIds = taskIds1 != null ? taskIds1 : taskIds2;
+        if (taskIds == null || taskIds.length == 0) {
+            return new ServiceResult(true).asResult();
+        }
         flowActuatorTaskService.deleteTasks(taskIds);
         return new ServiceResult(true).asResult();
     }
 
     @ApiOperation("启动单个流量任务")
     @PostMapping("/task/start")
-    public ServiceResult<Boolean> startTask(String taskId) {
+    public ServiceResult<Boolean> startTask(@RequestParam(name = "task_id",required = false) String taskId1, @RequestParam(name = "taskId",required = false) String taskId2) {
+        String taskId = taskId1 != null ? taskId1 : taskId2;
         flowActuatorTaskService.startTask(taskId);
         return new ServiceResult<>(true).asResult();
     }
 
     @ApiOperation("关闭单个流量任务")
     @PostMapping("/task/stop")
-    public ServiceResult<Boolean> stopTask(String taskId) {
+    public ServiceResult<Boolean> stopTask(@RequestParam(name = "task_id",required = false) String taskId1, @RequestParam(name = "taskId",required = false) String taskId2) {
+        String taskId = taskId1 != null ? taskId1 : taskId2;
         flowActuatorTaskService.stopTask(taskId);
         return new ServiceResult<>(true).asResult();
     }
@@ -106,13 +112,14 @@ public class FlowActuatorTaskController {
 
     /**
      * 流量任务配置查询
-     * @param taskId
+     * @param
      * @return
      */
     @ApiOperation("流量任务配置查询")
     @ApiImplicitParam(name = "taskId", value = "流量任务ID", dataTypeClass = String.class)
     @GetMapping("/task/conf/detail")
-    public ServiceResult<QueryFlowTaskConfResponse> queryConfByTaskId(@RequestParam String taskId) {
+    public ServiceResult<QueryFlowTaskConfResponse> queryConfByTaskId(@RequestParam(name = "task_id",required = false) String taskId1, @RequestParam(name = "taskId",required = false) String taskId2) {
+        String taskId = taskId1 != null ? taskId1 : taskId2;
         var result = flowActuatorTaskService.queryConfByTaskId(taskId);
         return new ServiceResult<>(result).asResult();
     }
