@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.flow.controller;
 
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.flow.bo.AddFlowTaskParams;
@@ -8,6 +10,7 @@ import cn.cyberpeace.mp.flow.bo.EditFlowTaskConfRequest;
 import cn.cyberpeace.mp.flow.bo.FlowTaskBatchStartRequest;
 import cn.cyberpeace.mp.flow.bo.QueryFlowTaskConfResponse;
 import cn.cyberpeace.mp.flow.constant.ControllerConstant;
+import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
 import cn.cyberpeace.mp.flow.request.queryparam.FlowCsceneTaskParams;
 import cn.cyberpeace.mp.flow.request.queryparam.FlowTaskPageQueryParams;
 import cn.cyberpeace.mp.flow.response.FlowTaskPageResponse;
@@ -89,7 +92,7 @@ public class FlowActuatorTaskController {
     @PostMapping("/task/batch_start")
     public ServiceResult<Boolean> startTasks(@RequestBody FlowTaskBatchStartRequest request) {
         if (CollectionUtils.isEmpty(request.getTaskIds())) {
-            return new ServiceResult<>(true).asResult();
+            throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("无可运行的流量任务"));
         }
         flowActuatorTaskService.startTasks(request.getTaskIds());
         return new ServiceResult<>(true).asResult();
@@ -97,12 +100,12 @@ public class FlowActuatorTaskController {
 
     @ApiOperation("关闭多个流量任务")
     @PostMapping("/stop_tasks")
-    public String stopTasks(@RequestBody FlowTaskBatchStartRequest request) {
+    public ServiceResult<Boolean> stopTasks(@RequestBody FlowTaskBatchStartRequest request) {
         if (CollectionUtils.isEmpty(request.getTaskIds())) {
-            return null;
+            throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("无可关闭的流量任务"));
         }
         flowActuatorTaskService.stopTasks(request.getTaskIds());
-        return null;
+        return new ServiceResult<>(true).asResult();
     }
 
     /**
