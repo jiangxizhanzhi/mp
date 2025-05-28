@@ -116,7 +116,7 @@ public class FlowTaskPageResponse {
     /**
      * 任务状态: 0 初始化，1 正在运行，2 正在停止， 3 已停止, 4 失败
      */
-    @ApiModelProperty(value = "任务状态: 0 初始化，1 正在运行，2 正在停止， 3 已停止, 4 失败，5 初始化中 , 7 ")
+    @ApiModelProperty(value = "任务状态: 0 初始化, 1 运行中, 2 失败, 3 已停止, 5 初始化中, 7 启动中")
     private Integer taskStatus;
 
     /**
