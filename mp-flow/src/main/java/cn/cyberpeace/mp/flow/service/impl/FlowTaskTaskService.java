@@ -190,7 +190,7 @@ public class FlowTaskTaskService extends BaseModelServiceImpl<FlowTaskTaskModel,
                     if (!ResponseUtils.checkResponse(jsonObject)) {
                         log.error("init network fail!");
                         isSuccess = false;
-                        Thread.sleep(10);
+                        Thread.sleep(2000);
                     } else {
                         break;
                     }
