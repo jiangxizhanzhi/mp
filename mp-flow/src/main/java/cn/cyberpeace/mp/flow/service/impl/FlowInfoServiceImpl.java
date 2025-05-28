@@ -161,6 +161,11 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         if (Objects.nonNull(queryParams.getFlowIds())) {
             humanCondition.filterIn("id", queryParams.getFlowIds());
         }
+
+        if (queryParams.getTitle() != null) {
+            humanCondition.filterOrStart().orContains(FlowInfoModel::getTitle, queryParams.getTitle())
+                    .orContains(FlowInfoModel::getFlowDesc, queryParams.getTitle()).filterOrEnd();
+        }
     }
 
     /**
