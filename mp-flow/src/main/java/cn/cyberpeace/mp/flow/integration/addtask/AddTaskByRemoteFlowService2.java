@@ -22,11 +22,13 @@ import cn.cyberpeace.mp.flow.integration.cloud.topocloud.TopoCloudClient;
 import cn.cyberpeace.mp.flow.integration.cloud.topocloud.request.BusinessCSceneInstance;
 import cn.cyberpeace.mp.flow.model.FlowActuatorModel;
 import cn.cyberpeace.mp.flow.model.FlowPcapModel;
+import cn.cyberpeace.mp.flow.model.FlowProtocolModel;
 import cn.cyberpeace.mp.flow.model.FlowTaskConfModel;
 import cn.cyberpeace.mp.flow.model.FlowTaskPortModel;
 import cn.cyberpeace.mp.flow.model.FlowTaskTaskModel;
 import cn.cyberpeace.mp.flow.repository.FlowActuatorMapper;
 import cn.cyberpeace.mp.flow.repository.FlowPcapMapper;
+import cn.cyberpeace.mp.flow.repository.FlowProtocolMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskConfMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskPortMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskTaskMapper;
@@ -220,11 +222,25 @@ public class AddTaskByRemoteFlowService2 implements IAddTaskService {
             String downloadUrl = flowConfig.getCsceneUrl() + BaseAppConfig.API_PREFIX + "/file/" + fileKey;
             byte[] bytes = this.downloadFileToByteArray(downloadUrl, 2);
             List<FlowActuator.ProtocolRate> protocolRates = new ArrayList<>();
+            List<FlowProtocolModel> protocolModels = new ArrayList<>();
             if (flow.getProtocolList() != null) {
                 for (var protocol : flow.getProtocolList()) {
                     protocolRates.add(new FlowActuator.ProtocolRate(protocol.getProtocolName(), protocol.getRate()));
+                    FlowProtocolModel model = new FlowProtocolModel();
+                    model.setFlowId(flow.getFlowId());
+                    model.setRate(protocol.getRate());
+                    model.setMarked(protocol.getMarked());
+                    model.setProtocolName(protocol.getProtocolName());
+                    protocolModels.add(model);
                 }
             }
+            if (CollectionUtils.isNotEmpty(protocolModels)) {
+                FlowProtocolMapper flowProtocolMapper = BeanCommon.getBean(FlowProtocolMapper.class);
+                flowProtocolMapper.filterDelete(new HumanCondition().filterEqual(FlowProtocolModel::getFlowId, flow.getFlowId()));
+                flowProtocolMapper.bulkCreate(protocolModels);
+            }
+
+
             boolean uploadPcap = false;
             for (int i = 0; i < 2; i++) {
                 uploadPcap = flowActuatorClient.uploadPcapV2(bytes, flow.getFlowId(), flow.getTitle(), flow.getFileName(), resourceType, protocolRates);
