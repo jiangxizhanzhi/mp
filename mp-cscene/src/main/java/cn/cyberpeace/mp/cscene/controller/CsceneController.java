@@ -194,15 +194,10 @@ public class CsceneController implements BaseModelListControllerBase {
     })
     @GetMapping(params = "id")
     public ServiceResult<CsceneBO> get(@RequestParam String id, @RequestParam(value = "area_id", required = false) String areaId, @RequestParam(required = false, name = "whole") Boolean whole) {
-        log.info("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa------------------------");
-        log.error("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa------------------------");
         if (Boolean.TRUE.equals(whole)) {
             areaId = null;
         } else if (areaId == null) {
             areaId = "";
-        }
-        if (1 == 1) {
-            throw new RuntimeException("");
         }
         var result = modelService.getById(id, areaId, false, null);
         var dataBO = result.getSource().getSceneConfig();
