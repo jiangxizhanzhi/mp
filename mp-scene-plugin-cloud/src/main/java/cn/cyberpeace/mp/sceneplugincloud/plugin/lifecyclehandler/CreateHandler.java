@@ -1111,6 +1111,7 @@ public class CreateHandler extends HandlerCommon {
             var dockerParams = cloudElement.getDockerParams();
             createData.setEnvironment(dockerParams.getEnvironment());
             createData.setInteractive(dockerParams.getInteractive());
+            createData.setTty(dockerParams.getTty());
             createData.setPrivileged(dockerParams.getPrivileged());
             createData.setRun(dockerParams.getRun());
         }
