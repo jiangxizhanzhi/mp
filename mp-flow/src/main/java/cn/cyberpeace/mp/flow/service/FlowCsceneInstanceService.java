@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.flow.bo.AddFlowTaskParams;
 import cn.cyberpeace.mp.flow.bo.FlowTaskAttackConf;
 import cn.cyberpeace.mp.flow.bo.FlowTaskConf;
 import cn.cyberpeace.mp.flow.bo.FlowTaskRateConf;
+import cn.cyberpeace.mp.flow.bo.ProtocolBO;
 import cn.cyberpeace.mp.flow.constant.FlowCategory;
 import cn.cyberpeace.mp.flow.enums.ResourceTypeEnum;
 import cn.cyberpeace.mp.flow.integration.FlowClient;
@@ -18,9 +19,11 @@ import cn.cyberpeace.mp.flow.integration.addtask.AddTaskByRemoteFlowService2;
 import cn.cyberpeace.mp.flow.integration.cloud.topocloud.TopoCloudClient;
 import cn.cyberpeace.mp.flow.integration.cloud.topocloud.request.BusinessCSceneInstance;
 import cn.cyberpeace.mp.flow.model.FlowActuatorModel;
+import cn.cyberpeace.mp.flow.model.FlowPcapModel;
 import cn.cyberpeace.mp.flow.model.FlowTaskConfModel;
 import cn.cyberpeace.mp.flow.model.FlowTaskTaskModel;
 import cn.cyberpeace.mp.flow.repository.FlowActuatorMapper;
+import cn.cyberpeace.mp.flow.repository.FlowPcapMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskConfMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskTaskMapper;
 import cn.cyberpeace.mp.flow.request.CsceneInstanceAddFlowTaskRequest;
@@ -43,6 +46,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 @Slf4j
@@ -57,6 +61,9 @@ public class FlowCsceneInstanceService {
 
     @Resource
     private FlowTaskConfMapper flowTaskConfMapper;
+
+    @Resource
+    private FlowPcapMapper flowPcapMapper ;
 
     public ListObjServiceResult<CsceneInstanceFlowTaskResponse> list(CsceneInstanceFlowTaskRequest request) {
         var condition = new HumanCondition().filterEqual(FlowTaskTaskModel::getSceneId, request.getId());
@@ -375,9 +382,46 @@ public class FlowCsceneInstanceService {
             addFlowTaskFlowInfo.setCategory(remoteFlowInfo.getCategory());
             FlowTaskConfModel confModel = createTaskConfig(taskId, resourceType, addFlowTaskFlowInfo, remoteFlowInfo.getScriptParamModels());
             confModels.add(confModel);
+
+            // 更新或创建流量pcap信息
+            if (resourceType == ResourceTypeEnum.PACP.toValue()) {
+                FlowPcapModel pcapModel = new FlowPcapModel();
+                pcapModel.setFlowId(taskModel.getFlowId());
+                pcapModel.setDuration(remoteFlowInfo.getDuration());
+                pcapModel.setPcapSize(remoteFlowInfo.getPcapSize());
+                pcapModel.setPktNum(remoteFlowInfo.getPktNum());
+                List<String> protocols = new ArrayList<>();
+                if (remoteFlowInfo.getProtocolList() != null) {
+                    for (ProtocolBO p : remoteFlowInfo.getProtocolList()) {
+                        protocols.add(p.getProtocolName());
+                    }
+                }
+                pcapModel.setProtocols(JsonCommon.stringify(protocols));
+                pcapModel.setPcapFile(remoteFlowInfo.getPcapFile());
+                FlowPcapModel existedFlowPcap = getFlowPcapModelByFlowId(taskModel.getFlowId());
+                if (Objects.isNull(existedFlowPcap)) {
+                    flowPcapMapper.create(pcapModel);
+                } else {
+                    pcapModel.setId(existedFlowPcap.getId());
+                    flowPcapMapper.update(pcapModel);
+                }
+            }
         }
         flowTaskConfMapper.bulkCreate(confModels);
         return confModels;
+    }
+
+    private FlowPcapModel getFlowPcapModelByFlowId(String flowId) {
+        if (StringUtils.isEmpty(flowId)) {
+            return null;
+        } else {
+            var flowPcapModels = flowPcapMapper.list(new HumanCondition().filterEqual(FlowPcapModel::getFlowId, flowId));
+            if (CollectionUtils.isEmpty(flowPcapModels)) {
+                return null;
+            } else {
+                return flowPcapModels.get(0);
+            }
+        }
     }
 
     private FlowTaskConfModel createTaskConfig(String taskId, int resourceType, AddFlowTaskFlowInfo addFlowTaskFlowInfo, List<ScriptParamModel> defaultScriptModels) {

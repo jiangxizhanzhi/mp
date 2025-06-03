@@ -293,6 +293,22 @@ public class FlowActuatorTaskService extends BaseModelServiceImpl<FlowTaskTaskMo
             int offset = (params.getPage() - 1) * params.getPageSize();
             int limit = params.getPageSize();
             var list = flowTaskTaskMapper.listTasks(params, offset, limit);
+            List<String> flowIds = new ArrayList<>();
+            for (FlowTaskPageResponse l : list) {
+                flowIds.add(l.getFlowId());
+            }
+            var pcapInfo = this.getPcapInfo(flowIds);
+            for (var f : list) {
+                var pcapModel = pcapInfo.get(f.getFlowId());
+                if (pcapModel == null) {
+                    continue;
+                }
+//                f.setDuration(pcapModel.getDuration());
+//                f.setPcapSize(pcapModel.getPcapSize());
+//                f.setPktNum(pcapModel.getPktNum());
+                List<String> ps = JsonCommon.parseList(pcapModel.getProtocols(), String.class);
+                f.setProtocols(StringUtils.join(ps, ","));
+            }
             return new ListObjServiceResult<>(new ListObjResult<>(list, total));
         }
     }
@@ -330,5 +346,16 @@ public class FlowActuatorTaskService extends BaseModelServiceImpl<FlowTaskTaskMo
             }
             return new ListObjServiceResult<>(new ListObjResult<>(list, total));
         }
+    }
+
+    private Map<String,FlowPcapModel> getPcapInfo(List<String> flowIds){
+        Map<String,FlowPcapModel> result = new HashMap<>();
+        var pcapInfos = flowPcapMapper.list(new HumanCondition().filterIn(FlowPcapModel::getFlowId, flowIds.toArray(new String[]{})));
+        if (CollectionUtils.isNotEmpty(pcapInfos)) {
+            for (FlowPcapModel p : pcapInfos) {
+                result.put(p.getFlowId(), p);
+            }
+        }
+        return result;
     }
 }
