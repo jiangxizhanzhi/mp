@@ -127,10 +127,14 @@ public class FlowCsceneInstanceService {
         log.info("开始处理执行器，在数据库中添加流量任务 {} ", flowActuator.getId());
 
         var instance = this.getInstanceWithNoException(flowActuator.getCsceneInstanceId(), 2);
+        String nodeName = "";
         Set<String> nodeIds = new HashSet<>();
         if (null != instance && null != instance.getScene() && null != instance.getScene().getTopology()) {
             for (var p : instance.getScene().getTopology().getElements()) {
                 nodeIds.add(p.getId());
+                if (StringUtils.equals(p.getId(), request.getNodeId())) {
+                    nodeName = p.getName();
+                }
             }
         }
 
@@ -138,7 +142,7 @@ public class FlowCsceneInstanceService {
         addFlowTaskParams.setActuatorId(actuatorId);
         addFlowTaskParams.setNodeId(request.getNodeId());
         addFlowTaskParams.setCsceneInstanceId(request.getId());
-        addFlowTaskParams.setNodeName(request.getNodeName());
+        addFlowTaskParams.setNodeName(nodeName);
         addFlowTaskParams.setTasks(new ArrayList<>());
         for (var task : request.getTasks()) {
             AddFlowTaskFlowInfo flowTaskFlowInfo = new AddFlowTaskFlowInfo();

@@ -82,9 +82,11 @@ public class AddTaskByRemoteFlowService2 implements IAddTaskService {
 
         var instance = this.getInstanceWithNoException(flowActuator.getCsceneInstanceId(), 2);
         Set<String> nodeIds = new HashSet<>();
+        Map<String,String> nodeId2NodeName = new HashMap<>();
         if (null != instance && null != instance.getScene() && null != instance.getScene().getTopology()){
             for (var p : instance.getScene().getTopology().getElements()) {
                 nodeIds.add(p.getId());
+                nodeId2NodeName.put(p.getId(), p.getName());
             }
         }
         log.info("查询对应的场景实例信息: {} ", JsonCommon.snakeStringify(instance));
@@ -98,7 +100,10 @@ public class AddTaskByRemoteFlowService2 implements IAddTaskService {
         Map<String, AddFlowTaskParams> map = new HashMap<>();
         for (String nodeId : nodeIds) {
             if (mapTmp.containsKey(nodeId)) {
-                map.put(nodeId, mapTmp.get(nodeId));
+                var addFlowTaskParams = mapTmp.get(nodeId);
+                String nodeName = nodeId2NodeName.get(nodeId);
+                addFlowTaskParams.setNodeName(nodeName);
+                map.put(nodeId, addFlowTaskParams);
             }
         }
 
@@ -338,7 +343,6 @@ public class AddTaskByRemoteFlowService2 implements IAddTaskService {
                 AddFlowTaskParams params = new AddFlowTaskParams();
                 params.setActuatorId(m.getId());
                 params.setNodeId(e.getCsceneNodeId());
-                params.setNodeName(e.getCsceneNodeId());
                 params.setTasks(new ArrayList<>());
                 params.setCsceneInstanceId(m.getCsceneInstanceId());
                 map.put(e.getCsceneNodeId(), params);
