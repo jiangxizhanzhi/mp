@@ -99,53 +99,59 @@ public class FlowTaskCountController {
     @GetMapping("/top_protocols")
     public ServiceResult<FlowStatisticsProtocolsTopN> topProtocols(@RequestParam String id) {
 
-        FlowTaskTaskMapper flowTaskTaskMapper = BeanCommon.getBean(FlowTaskTaskMapper.class);
-        // 运行中的任务
-        var tasks = flowTaskTaskMapper.list(new HumanCondition().filterEqual(FlowTaskTaskModel::getActuatorId, id)
-                                                    .filterEqual(FlowTaskTaskModel::getTaskStatus, TaskTaskStatusEnum.RUNNING.toValue()));
-        if (CollectionUtils.isEmpty(tasks)) {
-            FlowStatisticsProtocolsTopN topN = new FlowStatisticsProtocolsTopN();
-            topN.setTopProtocols(JsonCommon.createArrayNode());
-            return new ServiceResult<>(topN).asResult();
-        } else {
-            List<String> flowIds = new ArrayList<>();
-            for (var f : tasks) {
-                flowIds.add(f.getFlowId());
-            }
-            FlowProtocolMapper flowProtocolMapper = BeanCommon.getBean(FlowProtocolMapper.class);
-            var protocols = flowProtocolMapper.list(new HumanCondition().filterIn(FlowProtocolModel::getFlowId, flowIds.toArray(new String[]{})));
-            if (CollectionUtils.isEmpty(protocols)) {
-                FlowStatisticsProtocolsTopN topN = new FlowStatisticsProtocolsTopN();
-                topN.setTopProtocols(JsonCommon.createArrayNode());
-                return new ServiceResult<>(topN).asResult();
-            }
-            int totalTasks = flowIds.size();
-            Map<String, FlowStatisticsRateV2> protocolRate = new HashMap<>();
-            for (var p : protocols) {
-                if (!protocolRate.containsKey(p.getProtocolName())) {
-                    var rate = new FlowStatisticsRateV2();
-                    rate.setProtocol(p.getProtocolName());
-                    rate.setRate(BigDecimal.valueOf(0));
-                    protocolRate.put(p.getProtocolName(), rate);
-                }
-                var big = protocolRate.get(p.getProtocolName());
-                big.setRate(big.getRate().add(p.getRate()));
-            }
-            List<FlowStatisticsRateV2> results = new ArrayList<>(protocolRate.values());
-            for (var r : results) {
-                r.setRate(r.getRate().divide(BigDecimal.valueOf(totalTasks), 2, RoundingMode.HALF_UP));
-            }
-            Collections.sort(results, (o1, o2) -> o2.getRate().compareTo(o1.getRate()));
-            if (results.size() > 5) {
-                results = results.subList(0, 5);
-            }
-            JsonNode rspObj = JsonCommon.parseTree(JsonCommon.stringify(results));
-            var xx = JsonCommon.createArrayNode();
-            xx.addAll((ArrayNode) rspObj);
-            FlowStatisticsProtocolsTopN topN = new FlowStatisticsProtocolsTopN();
-            topN.setTopProtocols(xx);
-            return new ServiceResult<>(topN).asResult();
-        }
+        var result = flowTaskRecordService.top5Protocols(id);
+        FlowStatisticsProtocolsTopN topN = new FlowStatisticsProtocolsTopN();
+        topN.setTopProtocols(result);
+        return new ServiceResult<>(topN).asResult();
+
+        // 下面的代码 支持从flow的数据库中统计协议 ， 不需要调用trex的接口
+//        FlowTaskTaskMapper flowTaskTaskMapper = BeanCommon.getBean(FlowTaskTaskMapper.class);
+//        // 运行中的任务
+//        var tasks = flowTaskTaskMapper.list(new HumanCondition().filterEqual(FlowTaskTaskModel::getActuatorId, id)
+//                                                    .filterEqual(FlowTaskTaskModel::getTaskStatus, TaskTaskStatusEnum.RUNNING.toValue()));
+//        if (CollectionUtils.isEmpty(tasks)) {
+//            FlowStatisticsProtocolsTopN topN = new FlowStatisticsProtocolsTopN();
+//            topN.setTopProtocols(JsonCommon.createArrayNode());
+//            return new ServiceResult<>(topN).asResult();
+//        } else {
+//            List<String> flowIds = new ArrayList<>();
+//            for (var f : tasks) {
+//                flowIds.add(f.getFlowId());
+//            }
+//            FlowProtocolMapper flowProtocolMapper = BeanCommon.getBean(FlowProtocolMapper.class);
+//            var protocols = flowProtocolMapper.list(new HumanCondition().filterIn(FlowProtocolModel::getFlowId, flowIds.toArray(new String[]{})));
+//            if (CollectionUtils.isEmpty(protocols)) {
+//                FlowStatisticsProtocolsTopN topN = new FlowStatisticsProtocolsTopN();
+//                topN.setTopProtocols(JsonCommon.createArrayNode());
+//                return new ServiceResult<>(topN).asResult();
+//            }
+//            int totalTasks = flowIds.size();
+//            Map<String, FlowStatisticsRateV2> protocolRate = new HashMap<>();
+//            for (var p : protocols) {
+//                if (!protocolRate.containsKey(p.getProtocolName())) {
+//                    var rate = new FlowStatisticsRateV2();
+//                    rate.setProtocol(p.getProtocolName());
+//                    rate.setRate(BigDecimal.valueOf(0));
+//                    protocolRate.put(p.getProtocolName(), rate);
+//                }
+//                var big = protocolRate.get(p.getProtocolName());
+//                big.setRate(big.getRate().add(p.getRate()));
+//            }
+//            List<FlowStatisticsRateV2> results = new ArrayList<>(protocolRate.values());
+//            for (var r : results) {
+//                r.setRate(r.getRate().divide(BigDecimal.valueOf(totalTasks), 2, RoundingMode.HALF_UP));
+//            }
+//            Collections.sort(results, (o1, o2) -> o2.getRate().compareTo(o1.getRate()));
+//            if (results.size() > 5) {
+//                results = results.subList(0, 5);
+//            }
+//            JsonNode rspObj = JsonCommon.parseTree(JsonCommon.stringify(results));
+//            var xx = JsonCommon.createArrayNode();
+//            xx.addAll((ArrayNode) rspObj);
+//            FlowStatisticsProtocolsTopN topN = new FlowStatisticsProtocolsTopN();
+//            topN.setTopProtocols(xx);
+//            return new ServiceResult<>(topN).asResult();
+//        }
     }
 
     @Getter
