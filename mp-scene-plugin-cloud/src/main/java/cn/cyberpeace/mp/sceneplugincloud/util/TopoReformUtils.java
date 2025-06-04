@@ -137,7 +137,7 @@ public class TopoReformUtils {
         mode.setProtocol(protocol);
         mode.setPort(AccessMode.Protocol.DEFAULT_PORT_MAP.get(protocol));
         mode.setUsername("root");
-        mode.setPassword("toor");
+        mode.setPassword("123456");
         mode.setManageMode(false);
         mode.setPrivateKeyEnable(false);
         port.getSrcPort().getAccessModes().add(mode);
