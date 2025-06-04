@@ -136,8 +136,8 @@ public class TopoReformUtils {
         mode.setProxy(true);
         mode.setProtocol(protocol);
         mode.setPort(AccessMode.Protocol.DEFAULT_PORT_MAP.get(protocol));
-        mode.setUsername("snwa");
-        mode.setPassword("NHiOJiZTD4K");
+        mode.setUsername("root");
+        mode.setPassword("toor");
         mode.setManageMode(false);
         mode.setPrivateKeyEnable(false);
         port.getSrcPort().getAccessModes().add(mode);
@@ -274,14 +274,14 @@ public class TopoReformUtils {
         sceneElementBO.setArea("");
         sceneElementBO.setName("kali");
 //        需要修改为上海靶标信息
-        sceneElementBO.setIcon2("772/139/a9f351341fd38db3003af9f0bc777fe4.png");
-        sceneElementBO.setCpu(1);
-        sceneElementBO.setRam(1024);
-        sceneElementBO.setDisk(15);
+        sceneElementBO.setIcon2("727/701/a4aade52f418bc39965d76b6b6dca305.png");
+        sceneElementBO.setCpu(2);
+        sceneElementBO.setRam(4096);
+        sceneElementBO.setDisk(40);
 
-        sceneElementBO.setSystemType("304");
+        sceneElementBO.setSystemType("309");
         sceneElementBO.setSystemArchitecture("64");
-        sceneElementBO.setSystemLanguage("cn");
+        sceneElementBO.setSystemLanguage("en");
         sceneElementBO.setPosition2("{\"x\":460,\"y\":180}");
         List<String> commands = Arrays.asList("");
         sceneElementBO.setInitCommands(commands);
@@ -299,9 +299,8 @@ public class TopoReformUtils {
         cloudPluginSceneElementBO.setWanPortNumber(0);
         cloudPluginSceneElementBO.setOpticalPortNumber(0);
 
-        cloudPluginSceneElementBO.setServiceType("1");
-        cloudPluginSceneElementBO.setCloudServiceType("1");
-
+//        cloudPluginSceneElementBO.setServiceType("1");
+//        cloudPluginSceneElementBO.setCloudServiceType("1");
         cloudPluginSceneElementBO.setSourceType(0);
         cloudPluginSceneElementBO.setExternal(false);
         cloudPluginSceneElementBO.setIsBuildIn(false);
@@ -315,12 +314,12 @@ public class TopoReformUtils {
         cloudPluginSceneElementBO.setVlan(false);
         cloudPluginSceneElementBO.setCategory(1);
         cloudPluginSceneElementBO.setCategory2(2);
-        cloudPluginSceneElementBO.setCategory3(304);
+        cloudPluginSceneElementBO.setCategory3(306);
         cloudPluginSceneElementBO.setInitSupport(true);
         //        需要修改为上海靶标信息
-        cloudPluginSceneElementBO.setImage("Kubuntu-18.10-x64-desktop");
-        cloudPluginSceneElementBO.setDefaultLaunchImageName("Kubuntu-18.10-x64-desktop");
-        cloudPluginSceneElementBO.setImageUuid("47c44495-44ba-4570-93e6-c3eb8e4c691d");
+        cloudPluginSceneElementBO.setImage("Kali_tool");
+        cloudPluginSceneElementBO.setDefaultLaunchImageName("Kali_tool");
+        cloudPluginSceneElementBO.setImageUuid("5dfe83ac-4689-478d-8257-89bb118ef105");
 
         return new ElementWrapper(sceneElementBO, cloudPluginSceneElementBO);
     }
