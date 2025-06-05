@@ -419,7 +419,9 @@ public class AzureCreateHandler extends CreateHandler {
                                 String username = collect.get(0).getUsername();
                                 String password = collect.get(0).getPassword();
                                 String resourceProtocol = collect.get(0).getProtocol();
-                                if (Boolean.valueOf(loadMap.getOrDefault("delivery",false).toString())) {
+//                                公有云需要文件上传至资源机
+                                if (Boolean.valueOf(loadMap.getOrDefault("delivery",false).toString()) &&
+                                        MicrosoftAzureUserModel.CloudType.PUBLIC == user.getCloudType()) {
                                     resourceRemoteHost = user.getWazuhManagerIp();
                                     resourcePort = 22;
                                     username = user.getWazuhManagerUser();

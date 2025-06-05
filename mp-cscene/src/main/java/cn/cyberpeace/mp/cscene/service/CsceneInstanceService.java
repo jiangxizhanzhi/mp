@@ -76,6 +76,7 @@ import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
 import cn.cyberpeace.mp.sceneplugincloud.bo.*;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
+import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConfigElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConnectionModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
@@ -182,8 +183,11 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     public static final String PROBE_COLLECTION_DATA_REQUEST_ID = "mp:probe:collection:request_id:";
 
-    private static final String WINDOWS_DELIVERY_LOAD_FILE_COMMAND = "curl -o %s \"http://%s/download/tmp/%s\"";
-    private static final String LINUX_DELIVERY_LOAD_FILE_COMMAND = "curl -o %s \"http://%s/download/tmp/%s\"";
+    private static final String PUBLIC_WINDOWS_DELIVERY_LOAD_FILE_COMMAND = "curl -o %s \"http://%s/download/tmp/%s\"";
+    private static final String PUBLUC_LINUX_DELIVERY_LOAD_FILE_COMMAND = "curl -o %s \"http://%s/download/tmp/%s\"";
+    private static final String WINDOWS_DELIVERY_LOAD_FILE_COMMAND = "curl -o %s \"http://%s/download%s\"";
+    private static final String LINUX_DELIVERY_LOAD_FILE_COMMAND = "curl -o %s \"http://%s/download%s\"";
+
     private static final String IP_PATTERN = "\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b";
 
     @Autowired
@@ -3034,15 +3038,32 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         IAzureResourceManager azureResourceManager = IAzureResourceManager.getInstance(sceneHandler.getScene().getCloudType());
         List<String> commands = new ArrayList<>();
         String wazuhManagerIp = azureResourceManager.getUser().getWazuhManagerIp();
-        if (BaseSceneElementModel.SystemType.WINDOWS.equals(vmType)) {
-            filePath = "C:\\" + scriptFile;
-            String command = String.format(WINDOWS_DELIVERY_LOAD_FILE_COMMAND, filePath, wazuhManagerIp, scriptFile);
-            commands.add(command);
-        } else {
-            filePath = "/tmp/" + scriptFile;
-            String command = String.format(LINUX_DELIVERY_LOAD_FILE_COMMAND, filePath, wazuhManagerIp, scriptFile);
-            commands.add(command);
+        if(MicrosoftAzureUserModel.CloudType.PUBLIC == sceneHandler.getScene().getCloudType()){
+            if (BaseSceneElementModel.SystemType.WINDOWS.equals(vmType)) {
+                filePath = "C:\\" + scriptFile;
+                String command = String.format(PUBLIC_WINDOWS_DELIVERY_LOAD_FILE_COMMAND, filePath, wazuhManagerIp, scriptFile);
+                commands.add(command);
+            } else {
+                filePath = "/tmp/" + scriptFile;
+                String command = String.format(PUBLUC_LINUX_DELIVERY_LOAD_FILE_COMMAND, filePath, wazuhManagerIp, scriptFile);
+                commands.add(command);
+            }
+        }else {
+            String scriptFilePath = loadMap.getOrDefault("script_file_path","").toString();
+            scriptFile = loadMap.getOrDefault("script_file", "").toString();
+            String mpIp = CloudSingleton.cloudAppConfig.getMpIp();
+            if (BaseSceneElementModel.SystemType.WINDOWS.equals(vmType)) {
+                filePath = "C:\\" + scriptFile;
+                String command = String.format(WINDOWS_DELIVERY_LOAD_FILE_COMMAND, filePath, mpIp, scriptFilePath);
+                commands.add(command);
+            } else {
+                filePath = "/tmp/" + scriptFile;
+                String command = String.format(LINUX_DELIVERY_LOAD_FILE_COMMAND, filePath, mpIp, scriptFilePath);
+                commands.add(command);
+            }
         }
+        log.info("deliveryLoadFile commands:{}", commands);
+
         if (BaseSceneModel.CloudType.PUBLIC == sceneHandler.getScene().getCloudType()) {
             if (BaseSceneElementModel.SystemType.WINDOWS.equals(vmType)) {
                 azureResourceManager
