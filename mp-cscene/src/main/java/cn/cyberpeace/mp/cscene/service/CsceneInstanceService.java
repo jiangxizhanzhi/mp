@@ -3088,7 +3088,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 formMap.put("groupName", groupName);
                 formMap.put("vmType", vmType);
                 formMap.put("vmName", vmName);
-                formMap.put("command", commands);
+                formMap.put("commands", commands);
                 //请求头设置
                 HashMap<String, String> headersMap = new HashMap<>();
                 String body = JsonUtils.stringify(formMap);
