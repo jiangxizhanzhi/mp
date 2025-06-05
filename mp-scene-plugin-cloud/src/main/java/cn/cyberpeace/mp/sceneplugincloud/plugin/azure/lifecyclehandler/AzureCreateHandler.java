@@ -38,6 +38,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ConnectedNetwor
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.CreateHandler;
 import cn.cyberpeace.mp.sceneplugincloud.repository.DevopsLoadSourceMapper;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementNetworkUtils;
+import cn.cyberpeace.mp.sceneplugincloud.util.FileDownloadUtils;
 import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -66,6 +67,8 @@ import java.util.stream.Collectors;
 
 @Slf4j
 public class AzureCreateHandler extends CreateHandler {
+
+    public static final String DOWNLOAD_URL = "http://%s/download%s";
 
     private String groupNamePrefix;
     private String mixAzureManagerUrl;
@@ -425,9 +428,13 @@ public class AzureCreateHandler extends CreateHandler {
                                 }
                                 log.info("需要添加文件的载荷信息：{}", scriptFilePath);
                                 String remoteDir = "/tmp/";
-                                String localFile = scriptFilePath;
                                 log.info("kali 主机ip:{} 端口:{} 用户名:{} 密码:{} 协议:{}", resourceRemoteHost, resourcePort, username, password, resourceProtocol);
                                 try {
+                                    String mpIp = CloudSingleton.cloudAppConfig.getMpIp();
+                                    String fileUrl = String.format(DOWNLOAD_URL, mpIp, scriptFilePath);
+                                    // 下载文件
+                                    File downloadFile = FileDownloadUtils.downloadFile(fileUrl, remoteDir);
+
                                     JSch jsch = new JSch();
                                     com.jcraft.jsch.Session session = jsch.getSession(username, resourceRemoteHost, resourcePort);
                                     session.setPassword(password);
@@ -444,13 +451,13 @@ public class AzureCreateHandler extends CreateHandler {
                                     // 切换到远程目录
                                     sftpChannel.cd(remoteDir);
                                     // 上传文件
-                                    File file = new File(localFile);
-                                    sftpChannel.put(new FileInputStream(file), scriptFile);
+                                    sftpChannel.put(new FileInputStream(downloadFile), scriptFile);
                                     session.disconnect();
                                     sftpChannel.exit();
                                     log.info("载荷文件上传成功{}", scriptFilePath);
+                                    downloadFile.deleteOnExit();
                                 } catch (Exception e) {
-                                    log.error("exception:{}", e);
+                                    log.error("载荷文件上传失败 :{}", e.getMessage());
                                     e.printStackTrace();
                                 }
                             }
