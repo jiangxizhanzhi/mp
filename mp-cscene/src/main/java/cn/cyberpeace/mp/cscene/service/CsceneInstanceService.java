@@ -187,7 +187,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     private static final String PUBLIC_WINDOWS_DELIVERY_LOAD_FILE_COMMAND = "Invoke-WebRequest -Uri \"http://%s/download/tmp/%s\" -OutFile \"%s\"";
     private static final String PUBLUC_LINUX_DELIVERY_LOAD_FILE_COMMAND = "curl -o %s \"http://%s/download/tmp/%s\"";
 //    private static final String WINDOWS_DELIVERY_LOAD_FILE_COMMAND = "curl -o %s \"http://%s/download%s\"";
-    private static final String WINDOWS_DELIVERY_LOAD_FILE_COMMAND = "Invoke-WebRequest -Uri \"http://%s/download/%s\" -OutFile \"%s\"";
+    private static final String WINDOWS_DELIVERY_LOAD_FILE_COMMAND = "Invoke-WebRequest -Uri \"http://%s/download%s\" -OutFile \"%s\"";
     private static final String LINUX_DELIVERY_LOAD_FILE_COMMAND = "curl -o %s \"http://%s/download%s\"";
 
     private static final String IP_PATTERN = "\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b";
@@ -3186,9 +3186,12 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     private static void executeVmCommandsAsync(MicrosoftAzureUserModel requestData, CloudPluginSceneElementBO cloudPluginSceneElementBO,
                                                IAzureResourceManager azureResourceManager, String groupName, String vmName) {
         CompletableFuture.runAsync(() -> {
+            log.info("updateWazuhManagerIp executeVmCommandsAsync start VM:{}", vmName);
             if (BaseSceneModel.CloudType.PUBLIC == requestData.getCloudType()) {
                 List<String> initCommands = cloudPluginSceneElementBO.getSrcElement().getInitCommands();
                 if (BaseSceneElementModel.SystemType.WINDOWS.equals(cloudPluginSceneElementBO.getVmType().toLowerCase())) {
+//                    记录包装执行命令
+                    log.info( "updateWazuhManagerIp start : {} ,VM:{}", vmName,cloudPluginSceneElementBO.getVmType().toLowerCase());
                     initCommands = Optional.ofNullable(initCommands)
                             .orElse(Collections.emptyList())
                             .stream()
@@ -3203,21 +3206,25 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     initCommands.add("cmd /c \"cd C:\\wazuha && start.bat\"");
 
 //                            先卸载删除目录再执行
+//                    记录开始执行日志
+                    log.info("updateWazuhManagerIp start : {}", vmName);
+                    log.info("updateWazuhManagerIp initCommands : {}", JsonUtils.stringify(initCommands));
                     azureResourceManager
                             .getManager()
                             .virtualMachines()
                             .runPowerShellScript(groupName, vmName, initCommands, new ArrayList<>());
-                    log.info("updateWazuhManagerIp initCommands : {}", JsonUtils.stringify(initCommands));
+                    log.info("updateWazuhManagerIp start end : {}", vmName);
                     try {
                         Thread.sleep(600000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
+                    log.info("updateWazuhManagerIp restart : {}", vmName);
                     azureResourceManager
                             .getManager()
                             .virtualMachines()
                             .runPowerShellScript(groupName, vmName, Arrays.asList("cmd /c \"cd C:\\wazuha && start.bat\""), new ArrayList<>());
-
+                    log.info("updateWazuhManagerIp restart end : {}", vmName);
                 } else {
                     initCommands = Optional.ofNullable(initCommands)
                             .orElse(Collections.emptyList())
