@@ -3043,7 +3043,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         if(MicrosoftAzureUserModel.CloudType.PUBLIC == sceneHandler.getScene().getCloudType()){
             if (BaseSceneElementModel.SystemType.WINDOWS.equals(vmType)) {
                 filePath = "C:\\" + scriptFile;
-                String command = String.format(PUBLIC_WINDOWS_DELIVERY_LOAD_FILE_COMMAND, filePath, wazuhManagerIp, scriptFile);
+                String command = String.format(PUBLIC_WINDOWS_DELIVERY_LOAD_FILE_COMMAND, wazuhManagerIp, scriptFile, filePath);
                 commands.add(command);
             } else {
                 filePath = "/tmp/" + scriptFile;
@@ -3056,7 +3056,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             String mpIp = CloudSingleton.cloudAppConfig.getMpIp();
             if (BaseSceneElementModel.SystemType.WINDOWS.equals(vmType)) {
                 filePath = "C:\\" + scriptFile;
-                String command = String.format(WINDOWS_DELIVERY_LOAD_FILE_COMMAND, filePath, mpIp, scriptFilePath);
+                String command = String.format(WINDOWS_DELIVERY_LOAD_FILE_COMMAND, mpIp, scriptFilePath, filePath);
                 commands.add(command);
             } else {
                 filePath = "/tmp/" + scriptFile;
