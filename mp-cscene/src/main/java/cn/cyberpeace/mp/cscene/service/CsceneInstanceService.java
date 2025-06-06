@@ -183,9 +183,11 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     public static final String PROBE_COLLECTION_DATA_REQUEST_ID = "mp:probe:collection:request_id:";
 
-    private static final String PUBLIC_WINDOWS_DELIVERY_LOAD_FILE_COMMAND = "curl -o %s \"http://%s/download/tmp/%s\"";
+//    private static final String PUBLIC_WINDOWS_DELIVERY_LOAD_FILE_COMMAND = "curl -o %s \"http://%s/download/tmp/%s\"";
+    private static final String PUBLIC_WINDOWS_DELIVERY_LOAD_FILE_COMMAND = "Invoke-WebRequest -Uri \"http://%s/download/tmp/%s\" -OutFile \"%s\"";
     private static final String PUBLUC_LINUX_DELIVERY_LOAD_FILE_COMMAND = "curl -o %s \"http://%s/download/tmp/%s\"";
-    private static final String WINDOWS_DELIVERY_LOAD_FILE_COMMAND = "curl -o %s \"http://%s/download%s\"";
+//    private static final String WINDOWS_DELIVERY_LOAD_FILE_COMMAND = "curl -o %s \"http://%s/download%s\"";
+    private static final String WINDOWS_DELIVERY_LOAD_FILE_COMMAND = "Invoke-WebRequest -Uri \"http://%s/download/%s\" -OutFile \"%s\"";
     private static final String LINUX_DELIVERY_LOAD_FILE_COMMAND = "curl -o %s \"http://%s/download%s\"";
 
     private static final String IP_PATTERN = "\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b";
