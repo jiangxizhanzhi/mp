@@ -1145,6 +1145,9 @@ public class CsceneSpecialService {
                     nodeInfoBO.setEvent(scene.getEvent());
                     nodeInfoBO.setEventStatus(scene.getEventStatus());
                     nodeInfoBO.setProcessMessage(scene.getProcessMessage());
+                } else {
+                    nodeInfoBO.setEvent(SceneModel.Event.DELETE);
+                    nodeInfoBO.setEventStatus(EventStatus.OVER);
                 }
                 result.add(nodeInfoBO);
             }
