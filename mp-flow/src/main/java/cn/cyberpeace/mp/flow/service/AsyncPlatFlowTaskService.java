@@ -252,7 +252,9 @@ public class AsyncPlatFlowTaskService {
                     .rateUnlimited(flowTaskConfModel.getRateUnlimited()).rateConf(flowTaskConf.getRateConf())
                     .replay(flowTaskConfModel.getReplay()).flowConf(flowTaskConf.getFlowConf())
                     .attackConfs(flowTaskConf.getAttackConfs()).build();
+            log.info("批量启动流量任务 ， 处理流量任务配置");
             if (flowTaskConf.getRateConf() != null) {
+                log.info("批量启动流量任务 ， 处理流量任务配置 ， 保持持续运行流量");
                 Integer rate = flowTaskConf.getRateConf().getRate();
                 Integer bandwidth = flowTaskConf.getRateConf().getBandwidth();
                 if (rate != null || bandwidth != null) {
