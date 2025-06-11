@@ -168,9 +168,9 @@ public class FlowActuatorTaskService extends BaseModelServiceImpl<FlowTaskTaskMo
         for (FlowTaskTaskModel flowTaskTaskModel : flowTaskTaskModelList) {
             FlowTaskConfModel flowTaskConfModel = new FlowTaskConfModel();
             flowTaskConfModel.setTaskId(flowTaskTaskModel.getId());
-            flowTaskConfModel.setKeepRunning(0);
+            flowTaskConfModel.setKeepRunning(1);
             flowTaskConfModel.setReplay(1);
-            flowTaskConfModel.setRateUnlimited(1);
+            flowTaskConfModel.setRateUnlimited(0);
             FlowTaskConf flowTaskConf = new FlowTaskConf();
             if (ResourceTypeEnum.SCRIPT.toValue() == flowTaskTaskModel.getResourceType()) {
                 List<FlowTaskAttackConf> attackConfs = addFlowTaskFlowInfoMap.get(flowTaskTaskModel.getFlowId())

@@ -198,9 +198,9 @@ public class AddTaskByRemoteFlowService implements IAddTaskService {
     private FlowTaskConfModel createTaskConfig(String taskId, int resourceType, List<FlowTaskAttackConf> inputAttackConf, List<ScriptParamModel> defaultScriptModels) {
         FlowTaskConfModel flowTaskConfModel = new FlowTaskConfModel();
         flowTaskConfModel.setTaskId(taskId);
-        flowTaskConfModel.setKeepRunning(0);
+        flowTaskConfModel.setKeepRunning(1);
         flowTaskConfModel.setReplay(1);
-        flowTaskConfModel.setRateUnlimited(1);
+        flowTaskConfModel.setRateUnlimited(0);
         FlowTaskConf flowTaskConf = new FlowTaskConf();
         if (ResourceTypeEnum.SCRIPT.toValue() == resourceType) {
             // 优先使用场景页面输入的参数

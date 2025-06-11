@@ -235,8 +235,8 @@ public class OutputFlowInfoController {
         EditFlowTaskConfRequest editFlowTaskConfRequest = new EditFlowTaskConfRequest();
         editFlowTaskConfRequest.setTaskId(request.getTaskId());
         editFlowTaskConfRequest.setConfig(1);
-        editFlowTaskConfRequest.setKeepRunning(0);
-        editFlowTaskConfRequest.setRateUnlimited(1);
+        editFlowTaskConfRequest.setKeepRunning(1);
+        editFlowTaskConfRequest.setRateUnlimited(0);
         editFlowTaskConfRequest.setReplay(1);
         editFlowTaskConfRequest.setFlowTaskConf(new FlowTaskConf());
         var flowTaskConf = new FlowTaskConf();

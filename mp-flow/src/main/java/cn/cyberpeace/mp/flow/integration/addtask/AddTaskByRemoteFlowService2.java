@@ -489,9 +489,9 @@ public class AddTaskByRemoteFlowService2 implements IAddTaskService {
         var inputAttackConf = addFlowTaskFlowInfo.getAttackConfs();
         FlowTaskConfModel flowTaskConfModel = new FlowTaskConfModel();
         flowTaskConfModel.setTaskId(taskId);
-        flowTaskConfModel.setKeepRunning(0);
+        flowTaskConfModel.setKeepRunning(1);
         flowTaskConfModel.setReplay(1);
-        flowTaskConfModel.setRateUnlimited(1);
+        flowTaskConfModel.setRateUnlimited(0);
         FlowTaskConf flowTaskConf = new FlowTaskConf();
         // 记录带宽和流速
         flowTaskConf.setRateConf(new FlowTaskRateConf());
