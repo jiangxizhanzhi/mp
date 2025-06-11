@@ -252,6 +252,34 @@ public class AsyncPlatFlowTaskService {
                     .rateUnlimited(flowTaskConfModel.getRateUnlimited()).rateConf(flowTaskConf.getRateConf())
                     .replay(flowTaskConfModel.getReplay()).flowConf(flowTaskConf.getFlowConf())
                     .attackConfs(flowTaskConf.getAttackConfs()).build();
+            if (flowTaskConf.getRateConf() != null) {
+                Integer rate = flowTaskConf.getRateConf().getRate();
+                Integer bandwidth = flowTaskConf.getRateConf().getBandwidth();
+                if (rate != null || bandwidth != null) {
+                    flowTaskStart.setRateUnlimited(0);
+                    flowTaskStart.setKeepRunning(1);
+                    // 均匀速率
+                    flowTaskStart.getRateConf().setLoadMode(0);
+                    flowTaskStart.setReplay(0);
+                    flowTaskStart.setFlowConf(new FlowTaskFlowConf());
+                    flowTaskStart.getFlowConf().setTcpConf(new FlowTaskTcpConf());
+                    flowTaskStart.getFlowConf().setIpv4Conf(new FlowTaskIpv4Conf());
+                    if (rate == null) {
+                        // 速率为空，使用带宽字段
+                        flowTaskStart.getRateConf().setRateMin(bandwidth);
+                        flowTaskStart.getRateConf().setRateMin(bandwidth);
+                    } else if (bandwidth == null) {
+                        // 带宽为空，使用速率
+                        flowTaskStart.getRateConf().setRateMin(rate);
+                        flowTaskStart.getRateConf().setRateMax(rate);
+                    } else {
+                        // 都不为空 ， 取小值
+                        var smallOne = rate < bandwidth ? rate : bandwidth;
+                        flowTaskStart.getRateConf().setRateMax(smallOne);
+                        flowTaskStart.getRateConf().setRateMin(smallOne);
+                    }
+                }
+            }
             flowTaskStartList.add(flowTaskStart);
         }
 
