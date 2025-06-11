@@ -128,6 +128,9 @@ public class AddTaskByRemoteFlowService2 implements IAddTaskService {
             log.info("没有未处理的任务");
             return;
         }
+        List<String> taskIds = new ArrayList<>();
+        flowTaskTaskModelList.forEach(f -> taskIds.add(f.getId()));
+        log.info("执行器 {} 存在 {} 个未处理的任务 ,{} ", flowActuator.getId(), JsonCommon.stringify(taskIds));
         Map<String, List<FlowTaskTaskModel>> nodeId2TaskTaskModel = new HashMap<>();
         for (FlowTaskTaskModel flowTaskTaskModel : flowTaskTaskModelList) {
             var list = nodeId2TaskTaskModel.getOrDefault(flowTaskTaskModel.getNodeId(), new ArrayList<>());
