@@ -323,8 +323,7 @@ kaptcha:
 hyperv:
   cluster:
     images-map:
-      001: 80a64817-0fe1-49e7-9e1a-95071bb0097b
-      002: c38bab41-39b0-4088-9578-cbdf4514f5ea
+      1: ${HYPERVM1_ID:80a64817-0fe1-49e7-9e1a-95071bb0097b}
   vm:
     action:
-      url: http://192.168.5.42:5000/api/hyper
+      url: http://${HYPERV_IP:192.168.5.42}:${HYPERV_PORT:5000}/api/hyper

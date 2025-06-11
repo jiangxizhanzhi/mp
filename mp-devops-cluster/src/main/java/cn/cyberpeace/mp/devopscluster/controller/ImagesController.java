@@ -1,5 +1,23 @@
 package cn.cyberpeace.mp.devopscluster.controller;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+
 import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.FsCommon;
@@ -42,7 +60,7 @@ import cn.cyberpeace.mp.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudmessageconvert.CloudMessageConvertUtil;
 import cn.hutool.core.util.URLUtil;
-import com.alibaba.fastjson.JSONObject;
+import cn.hutool.json.JSONUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -50,19 +68,6 @@ import io.swagger.annotations.ApiOperation;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * 镜像管理
@@ -542,6 +547,20 @@ public class ImagesController {
     @ApiImplicitParam(name = "uuid", value = "设备ID", dataTypeClass = String.class)
     @GetMapping("/connection")
     public Result<List<TargetConnection>> connection(@RequestParam String uuid){
+
+        if (imagesMap.containsValue(uuid)) {
+            for (Map.Entry<String, String> entry : imagesMap.entrySet()) {
+                if (entry.getValue().equals(uuid)) {
+                    String key = entry.getKey();
+                    JSONObject res = imagesService.connectionHyperV(key);
+                    JSONArray connection = res.getJSONObject("data").getJSONArray("connection");
+					List<TargetConnection> resList = JSONUtil.toList(connection.toJSONString(), TargetConnection.class);
+                    return new Result<>(resList);
+                }
+            }
+
+        }
+
         CloudPlatformPageResult<TargetConnection> connection = imagesService.connection(uuid);
         return new Result<>(connection.getList());
     }
