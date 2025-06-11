@@ -762,6 +762,7 @@ public class ImagesController {
             //hyper-v靶标处理
             if (this.connectionHyperV(vo.getUuid()) != null && this.connectionHyperV(vo.getUuid()).getData() != null) {
                 vo.getExtVm().setInstanceUuid(vo.getUuid());
+                vo.setAllowExport(false);
                 JSONObject json = this.connectionHyperV(vo.getUuid()).getData();
                 JSONObject data = json.getJSONObject("data");
                 String status = data.getString("status");
