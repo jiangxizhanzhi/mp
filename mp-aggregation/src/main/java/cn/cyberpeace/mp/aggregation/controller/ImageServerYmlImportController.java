@@ -25,6 +25,7 @@ import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
@@ -32,13 +33,19 @@ import cn.cyberpeace.mp.devopscluster.cloud.platform.service.DeviceService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.ImagesService;
 import cn.cyberpeace.mp.devopscluster.constant.DevopsClusterErrorCode;
 import cn.cyberpeace.mp.devopscluster.converter.ImagesConverter;
+import cn.cyberpeace.mp.devopscluster.converter.TargetConverter;
 import cn.cyberpeace.mp.devopscluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
 import cn.cyberpeace.mp.devopscluster.repository.DeviceTargetMapper;
 import cn.cyberpeace.mp.devopscluster.request.ImageRequest;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetService;
+import cn.cyberpeace.mp.scene.model.SceneConfigElementModel;
+import cn.cyberpeace.mp.scene.model.SceneElementModel;
+import cn.cyberpeace.mp.scene.repository.SceneConfigElementMapper;
 import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
+import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConfigElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConfigElementMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -83,12 +90,18 @@ public class ImageServerYmlImportController {
     private ImagesConverter imagesConverter;
 
     @Resource
-    private DeviceTargetMapper mapper ;
+    private TargetConverter targetConverter ;
 
     private ExecutorService singleThreadExecutor = Executors.newSingleThreadExecutor();
 
     @Resource
     private SceneImportController sceneImportController ;
+
+    @Resource
+    private SceneConfigElementMapper sceneConfigElementMapper;
+
+    @Resource
+    private CloudPluginSceneConfigElementMapper cloudPluginSceneConfigElementMapper;
 
     @ApiOperation("场景模板导入")
     @ApiImplicitParam(name = "request", value = "请求", dataTypeClass = SceneImportRequest.class)
@@ -119,6 +132,71 @@ public class ImageServerYmlImportController {
         }
         return ResultCommon.success(true);
     }
+
+    @ApiOperation("使用正常的模型cpu ram disk去补充拓扑节点缺失的cpu ram disk")
+    @PostMapping("/fix_cpu_ram_disk")
+    public ServiceResult<Boolean> fixCpuRamDisk() {
+        HumanCondition maxIdCondition = new HumanCondition().reverseOrderBy(SceneConfigElementModel::getPk);
+        maxIdCondition.setLimit(1);
+        Integer maxPk = sceneConfigElementMapper.list(maxIdCondition).get(0).getPk();
+
+
+        HumanCondition minIdCondition = new HumanCondition().orderBy(SceneConfigElementModel::getPk);
+        minIdCondition.setLimit(1);
+        Integer minPk = sceneConfigElementMapper.list(minIdCondition).get(0).getPk();
+
+        int step = 500;
+
+        for (int i = minPk; i < maxPk; i += step) {
+
+            int up = i + step;
+            if (maxPk <= (i + step)) {
+                up = maxPk + 1;
+            }
+
+            List<SceneConfigElementModel> sceneConfigElementModels = sceneConfigElementMapper.list(new HumanCondition()
+                    .filterGreaterThanOrEqual(SceneConfigElementModel::getPk, i)
+                    .filterLessThan(SceneConfigElementModel::getPk, up));
+
+            for (SceneConfigElementModel sceneConfigElementModel : sceneConfigElementModels) {
+                boolean cpuAndRamDiskIsNotValid = sceneConfigElementModel.getCpu() == null || sceneConfigElementModel.getCpu() == 0
+                        || sceneConfigElementModel.getRam() == null || sceneConfigElementModel.getRam() == 0
+                        || sceneConfigElementModel.getDisk() == null || sceneConfigElementModel.getDisk() == 0;
+                if (!cpuAndRamDiskIsNotValid) {
+                    continue;
+                }
+
+
+                List<CloudPluginSceneConfigElementModel> cloudPluginSceneConfigElementModels = cloudPluginSceneConfigElementMapper.list(new HumanCondition()
+                        .filterEqual(CloudPluginSceneConfigElementModel::getSceneElement, sceneConfigElementModel.getNodeId())
+                        .filterEqual(CloudPluginSceneConfigElementModel::getScene, sceneConfigElementModel.getScene()));
+
+                if (CollectionUtils.isEmpty(cloudPluginSceneConfigElementModels)) {
+                    continue;
+                } else {
+                    CloudPluginSceneConfigElementModel cloudPluginSceneConfigElementModel = cloudPluginSceneConfigElementModels.get(0);
+                    String imageUuid = cloudPluginSceneConfigElementModel.getImageUuid();
+                    if (StringUtils.isNotBlank(imageUuid)) {
+                        try {
+                            Device device = targetConverter.findByUuid(imageUuid);
+                            int cpu = StringUtils.isBlank(device.getCpu()) ||  Integer.parseInt(device.getCpu()) == 0 ? 1 : Integer.parseInt(device.getCpu());
+                            int ram = StringUtils.isBlank(device.getMemory()) ||  Integer.parseInt(device.getMemory()) == 0 ? 2048 : Integer.parseInt(device.getMemory());
+                            int disk = StringUtils.isBlank(device.getDisk()) ||  Integer.parseInt(device.getDisk()) == 0 ? 30 : Integer.parseInt(device.getDisk());
+                            sceneConfigElementModel.setCpu(cpu);
+                            sceneConfigElementModel.setRam(ram);
+                            sceneConfigElementModel.setDisk(disk);
+
+                            sceneConfigElementMapper.save(sceneConfigElementModel);
+                        } catch (Exception e) {
+                            log.error("通过imageUuid {}获取靶标失败", imageUuid);
+                        }
+                    }
+                }
+            }
+        }
+        return ResultCommon.success(true);
+    }
+
 
     @ApiOperation("servers.yml 导入")
     @ApiImplicitParam(name = "request", value = "请求", dataTypeClass = SceneImportRequest.class)

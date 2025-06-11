@@ -262,7 +262,7 @@ public class ImageInfoParseResult {
                 log.error("failed to parse flavor {}", flavorStr);
             }
         }
-        return null;
+        return new Flavor();
     }
 
     private Integer parseCpu(String cpuStr) {
@@ -271,7 +271,7 @@ public class ImageInfoParseResult {
         try {
             return Integer.parseInt(cpu);
         } catch (Exception e) {
-            return 0;
+            return 1;
         }
     }
 
@@ -281,7 +281,7 @@ public class ImageInfoParseResult {
         try {
             return Integer.parseInt(cpu);
         } catch (Exception e) {
-            return 0;
+            return 20;
         }
     }
 
@@ -293,7 +293,7 @@ public class ImageInfoParseResult {
                 return Integer.parseInt(cpu) * 1024;
             } catch (Exception e) {
                 log.error("failed to parse flavor-cpu {}", ramStr, e);
-                return 0;
+                return 2048;
             }
         } else {
             String cpu = StringUtils.replace(ramStr, "m", "");
@@ -302,7 +302,7 @@ public class ImageInfoParseResult {
                 return Integer.parseInt(cpu);
             } catch (Exception e) {
                 log.error("failed to parse flavor-cpu {}", ramStr, e);
-                return 0;
+                return 2048;
             }
         }
     }
@@ -433,8 +433,8 @@ public class ImageInfoParseResult {
     @Getter
     @Setter
     public static class Flavor {
-        private Integer cpu = 0;
-        private Integer ram = 0;
-        private Integer disk = 0;
+        private Integer cpu = 1;
+        private Integer ram = 2048;
+        private Integer disk = 20;
     }
 }
