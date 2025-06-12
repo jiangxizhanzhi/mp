@@ -59,7 +59,7 @@ public class ThirdSsoService {
         String clientSecret = authConfig.getThirdClientSecret();
         String getTokenUrl = authConfig.getThirdTokenUrl();
         String getUserInfoUrl = authConfig.getThirdUserInfoUrl();
-        String getCodeUrl = String.format("http://%s:%s/oauth?client_id=%s&redirect_uri=http://%s/api/mp/unauth/third-login?%s", authConfig.getThirdIp(), authConfig.getThirdPort(), clientId, authConfig.getMpIp(), url);
+        String getCodeUrl = String.format("https://%s:%s/oauth?client_id=%s&redirect_uri=https://%s/api/mp/unauth/third-login?%s", authConfig.getThirdIp(), authConfig.getThirdPort(), clientId, authConfig.getMpIp(), url);
 
         if (code == null) {
             return String.format("redirect:%s", getCodeUrl);
@@ -140,7 +140,7 @@ public class ThirdSsoService {
         try {
             result = HttpUtils.sendPost(tokenCheckUrl, params);
             log.info("check token , result is {}", result);
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.error("faild to tokenCheck ", e);
             throw new RuntimeException(e);
         }

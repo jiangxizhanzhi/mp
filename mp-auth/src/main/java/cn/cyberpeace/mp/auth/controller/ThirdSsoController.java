@@ -76,7 +76,7 @@ public class ThirdSsoController {
     @ApiOperation("赛宁第三方登录接口，重定向到赛宁个人主页")
     public String loginAndRedirectToHomePage(@RequestParam(value = "code", required = false) String code, @RequestParam(value = "url", required = false) String url, HttpServletRequest request, HttpServletResponse response) {
         if (StringUtils.isEmpty(url)) {
-            url = String.format("http://%s/page/mg/admin/knowledge-space-home", authConfig.getMpIp());
+            url = String.format("https://%s/page/mg/admin/knowledge-space-home", authConfig.getMpIp());
         }
         // 如果有 jwt 且为有效的登录状态，则直接跳转到url
         if (this.tokenCheck(request, response)) {

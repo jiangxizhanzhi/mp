@@ -96,7 +96,7 @@ public class AuthenticateController {
         TokenModel tokenModel = tokenMapper.getByJwt(token);
         if (tokenModel != null && !thirdSsoService.tokenCheck(tokenModel.getLoginToken())) {
             try {
-                response.sendRedirect(String.format("http://%s:%s", authConfig.getThirdIp(), authConfig.getThirdPort()));
+                response.sendRedirect(String.format("https://%s:%s", authConfig.getThirdIp(), authConfig.getThirdPort()));
             } catch (IOException e) {
                 log.error("sendRedirect error = ", e);
                 e.printStackTrace();
