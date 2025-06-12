@@ -136,4 +136,8 @@ public class CollectionAppConfig {
                 baseAppConfig.getResourcesDir(), "scene_plugin_collection/biz_scripts");
         return bizScriptsInstallerDir;
     }
+
+    public String getInitCustomProbeDir() {
+        return StringUtils.joinWith(FileUtil.FILE_SEPARATOR, baseAppConfig.getResourcesDir(), "scene_plugin_collection/init_custom");
+    }
 }

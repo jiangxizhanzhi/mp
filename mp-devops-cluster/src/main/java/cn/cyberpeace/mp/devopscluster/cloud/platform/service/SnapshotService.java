@@ -42,9 +42,9 @@ public class SnapshotService extends BaseCpService {
 
     private static final String DEVICE_SNAPSHOT = "/scenarios/device_snapshot";
 
+
     @Autowired
     private CsceneSpecialService csceneSpecialService;
-
     @Resource
     private CsceneSnapshotService csceneSnapshotService;
 
