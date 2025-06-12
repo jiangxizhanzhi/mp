@@ -72,7 +72,7 @@ public class LinyunCloudClient implements ICloudClient {
             } else {
                 return null;
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
