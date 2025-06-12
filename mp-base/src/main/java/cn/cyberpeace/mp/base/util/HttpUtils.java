@@ -25,6 +25,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 
@@ -51,26 +52,42 @@ public class HttpUtils {
      * @throws IOException
      */
     public static String sendPost(String url, String content) throws IOException {
-        HttpClient client = HttpClientBuilder.create().build();
-        return doPost(url, content, client);
+        //HttpClient client = HttpClientBuilder.create().build();
+        return doPost(url, content);
     }
 
-    private static String doPost(String url, String content, HttpClient client) throws IOException {
+    private static String doPost(String url, String content) throws IOException {
         log.info("请求地址================>{}", url);
         log.info("请求参数================>{}", content);
-        HttpPost httpPost = new HttpPost(url);
 
+        // 创建 HttpClient（自动跟随 301/302 重定向）
+        CloseableHttpClient client = HttpClients.custom()
+                .setDefaultRequestConfig(RequestConfig.custom()
+                        .setSocketTimeout(30000)
+                        .setConnectTimeout(30000)
+                        .build()).build();
+
+        HttpPost httpPost = new HttpPost(url);
         // 解决中文乱码问题
         StringEntity entity = new StringEntity(content, StandardCharsets.UTF_8);
         entity.setContentType(ContentType.APPLICATION_JSON.getMimeType());
         httpPost.setEntity(entity);
 
-        HttpResponse resp = client.execute(httpPost);
-        // 设置请求和传输超时时间
-        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
-        httpPost.setConfig(requestConfig);
-        // 获得返回值
-        return EntityUtils.toString(resp.getEntity(), StandardCharsets.UTF_8);
+
+        // 执行请求并返回结果
+        try {
+            HttpResponse resp = client.execute(httpPost);
+            return EntityUtils.toString(resp.getEntity(), StandardCharsets.UTF_8);
+        } finally {
+            client.close(); // 确保关闭连接
+        }
+
+        //HttpResponse resp = client.execute(httpPost);
+        //// 设置请求和传输超时时间
+        //RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
+        //httpPost.setConfig(requestConfig);
+        //// 获得返回值
+        //return EntityUtils.toString(resp.getEntity(), StandardCharsets.UTF_8);
     }
 
     /**

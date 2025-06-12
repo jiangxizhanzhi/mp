@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.cyberpeace.mp.flow.repository.FlowPortMapper">
+
+    <select id="selectByPortIds" resultType="cn.cyberpeace.mp.flow.model.FlowPortModel">
+        select f.* from mp_flow_port f
+        <where>
+            1 = 1
+            <if test="flowPortIds != null and flowPortIds.size() > 0">
+                AND f.id in
+                <foreach item="id" index="index" collection="flowPortIds" open="(" separator="," close=")">
+                    #{id}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+</mapper>
