@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.sceneplugincollection.config.WazuhProbeConfig;
 import cn.cyberpeace.mp.sceneplugincollection.event.LocalFileSyncEventPublisher;
 import cn.cyberpeace.mp.sceneplugincollection.event.LocalFileSyncSuccessEvent;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.WazuhCommon;
+import cn.cyberpeace.mp.sceneplugincollection.util.InitCustomProbe;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -40,6 +41,12 @@ public class ScenePluginCollectionInitJob {
         }
         FileUtil.mkdir(collectionAppConfig.getWazuhAgentInstallerDir());
         TaskCommon.executeTask(() -> {
+            log.info("syncDir init_custom start");
+            // 将自定义探针示例 同步到本地目录中去
+            InitCustomProbe.init();
+            LocalFileMappingCommon.syncDir("init_custom", collectionAppConfig.getInitCustomProbeDir());
+            log.info("syncDir init_custom end");
+
             log.info("syncDir do ScenePluginCollectionInit start");
             List<LocalFileMappingModel> mappings =
                     LocalFileMappingCommon.syncDir(WazuhCommon.WAZUH_AGENT_GROUP,
