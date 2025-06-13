@@ -183,18 +183,21 @@ public class ThirdPartyTopoSceneConfigHandler {
                 cpcloudElement.put("category2", 54);
                 cpcloudElement.put("category3", 0);
             } else if (BaseSceneElementModel.Type.ROUTER == element.getType()) {
+                cpcloudElement.put("image_type", "simple");
                 cpcloudElement.put("category", 3);
                 cpcloudElement.put("role", 21);
                 cpcloudElement.put("virtual_type", 2);
                 cpcloudElement.put("category2", 51);
                 cpcloudElement.put("category3", 0);
             } else if (BaseSceneElementModel.Type.FIREWALL == element.getType()) {
+                cpcloudElement.put("image_type", "simple");
                 cpcloudElement.put("category", 3);
                 cpcloudElement.put("role", 23);
                 cpcloudElement.put("virtual_type", 2);
                 cpcloudElement.put("category2", 52);
                 cpcloudElement.put("category3", 0);
             } else if (BaseSceneElementModel.Type.SWITCH == element.getType()) {
+                cpcloudElement.put("image_type", "simple");
                 cpcloudElement.put("category", 3);
                 cpcloudElement.put("role", 22);
                 cpcloudElement.put("virtual_type", 2);
