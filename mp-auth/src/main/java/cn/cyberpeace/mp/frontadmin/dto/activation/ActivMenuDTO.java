@@ -16,6 +16,8 @@ public class ActivMenuDTO {
 
     private String name;
 
+    private String enName;
+
     private String value;
 
     private String authority;

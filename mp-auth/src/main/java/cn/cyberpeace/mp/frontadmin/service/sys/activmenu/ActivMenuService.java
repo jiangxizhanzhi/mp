@@ -89,7 +89,7 @@ public class ActivMenuService {
         List<MenuExtraInfoModel> menuExtraInfoModels = new ArrayList<>();
         List<MenuTemplateModel> menuTemplateModels = new ArrayList<>();
 
-        //英文字段如果有就用原来有的，如果没有暂时置为“”
+        //从数据库里查询原有的英文字段，如果没有输入 en_name ，那么会使用数据库原有的英文名称，如果都没有暂时置为“”
         HumanCondition humanCondition = new HumanCondition();
         humanCondition.filterEqual(MenuTemplateModel::getTemplateId, "1");
         List<MenuTemplateModel> menuTemplateModelsOld = menuTemplateMapper.list(humanCondition);
@@ -300,7 +300,11 @@ public class ActivMenuService {
         menuTemplateModel.setIdentifier(menuDTO.getValue());
         menuTemplateModel.setType(TargetModel.TYPE_MENU);
         menuTemplateModel.setName(menuDTO.getName());
-        menuTemplateModel.setEnName(enNameMap.get(menuDTO.getId()) == null ? "" : enNameMap.get(menuDTO.getId()));
+        if (StringUtils.isEmpty(menuDTO.getEnName())) {
+            menuTemplateModel.setEnName(enNameMap.get(menuDTO.getId()) == null ? "" : enNameMap.get(menuDTO.getId()));
+        } else {
+            menuTemplateModel.setEnName(menuDTO.getEnName());
+        }
         menuTemplateModel.setPath(menuDTO.getPath_name());
         return menuTemplateModel;
     }
