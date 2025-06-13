@@ -92,8 +92,13 @@ public class ElementMonitorController {
     @ApiOperation(value = "节点操作系统信息")
     @GetMapping("/os")
     public ServiceResult<OS> getOS(BaseSceneElementRequest baseRequest) {
-        OS os = sceneElementMonitorService.getOSInfo(baseRequest);
-        return ResultCommon.success(os);
+        try {
+            OS os = sceneElementMonitorService.getOSInfo(baseRequest);
+            return ResultCommon.success(os);
+        } catch (Exception e) {
+            log.error("failed to exec os", e);
+            return new ServiceResult<>(new OS());
+        }
     }
 
 
