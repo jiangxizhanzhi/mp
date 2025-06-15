@@ -76,7 +76,8 @@ public class SimulateService {
 			HumanCondition humanCondition = new HumanCondition().filterEqual(SceneModel::getNodeId, nodeBo.getNodeId());
 			SceneModel sceneModel = sceneModelMapper.first(humanCondition);
 			if (sceneModel == null) {
-				break;
+				log.info("找不到对应场景的节点node_id:[{}]", nodeBo.getNodeId());
+				continue;
 			}
 			SimulateModel simulateModel = new SimulateModel();
 			BeanUtils.copyProperties(createSimulateReq, simulateModel);
@@ -97,6 +98,9 @@ public class SimulateService {
 			sceneModelList.add(newSceneModel);
 			taskModelList.addAll(createTask(JSONObject.parseArray(sceneModel.getNodeConfig(), NodeUserBehavior.class), simulateModel.getId()));
 		}
+
+		log.info("创建仪表成功, 仪表id:[{}], 场景mp_behavior_scene：[{}], task model: [{}]", simulateModelList.size(),
+				sceneModelList.size(), taskModelList.size());
 
 		transactionTemplate.execute(new TransactionCallbackWithoutResult() {
 
