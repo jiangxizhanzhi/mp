@@ -50,6 +50,7 @@ import org.apache.http.ssl.SSLContexts;
 import org.apache.http.util.EntityUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 
+import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -146,6 +147,13 @@ public class HttpUtils {
         try {
             URL urlObj = new URL(url);
             connection = (HttpURLConnection) urlObj.openConnection();
+
+            // 如果是HTTPS连接，设置SSL相关配置
+            if (connection instanceof HttpsURLConnection) {
+                ((HttpsURLConnection) connection).setHostnameVerifier((hostname, session) -> true);
+            }
+            // 允许重定向
+            connection.setInstanceFollowRedirects(true);
             connection.setRequestMethod("POST");
             connection.setConnectTimeout(DEFAULT_TIME_OUT * 1000);
             connection.setReadTimeout(DEFAULT_TIME_OUT * 1000);
@@ -363,7 +371,7 @@ public class HttpUtils {
 
         HttpResponse resp = client.execute(httpPatch);
         // 设置请求和传输超时时间
-        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
+        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(DEFAULT_TIME_OUT * 1000).setConnectTimeout(DEFAULT_TIME_OUT * 1000).build();
         httpPatch.setConfig(requestConfig);
         // 获得返回值
         return EntityUtils.toString(resp.getEntity(), StandardCharsets.UTF_8);
@@ -385,7 +393,7 @@ public class HttpUtils {
 
         HttpResponse resp = client.execute(httpPatch);
         // 设置请求和传输超时时间
-        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
+        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(DEFAULT_TIME_OUT * 1000).setConnectTimeout(DEFAULT_TIME_OUT * 1000).build();
         httpPatch.setConfig(requestConfig);
         // 获得返回值
         return EntityUtils.toString(resp.getEntity(), StandardCharsets.UTF_8);
@@ -455,7 +463,7 @@ public class HttpUtils {
         log.info("请求地址================>{}", url);
         HttpClient client = HttpClientBuilder.create().build();
         HttpDelete httpDelete = new HttpDelete(url);
-        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
+        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(DEFAULT_TIME_OUT * 1000).setConnectTimeout(DEFAULT_TIME_OUT * 1000).build();
         HttpResponse response = client.execute(httpDelete);
         httpDelete.setConfig(requestConfig);
         return EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
@@ -476,7 +484,7 @@ public class HttpUtils {
         entity.setContentType(ContentType.APPLICATION_JSON.getMimeType());
         HttpDeleteWithBody httpDelete = new HttpDeleteWithBody(url);
         httpDelete.setEntity(entity);
-        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
+        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(DEFAULT_TIME_OUT * 1000).setConnectTimeout(DEFAULT_TIME_OUT * 1000).build();
         HttpResponse response = client.execute(httpDelete);
         httpDelete.setConfig(requestConfig);
         var res = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
@@ -611,7 +619,7 @@ public class HttpUtils {
         HttpGet httpget = new HttpGet(url);
         HttpResponse resp = client.execute(httpget);
         // 设置请求和传输超时时间
-        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
+        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(DEFAULT_TIME_OUT * 1000).setConnectTimeout(DEFAULT_TIME_OUT * 1000).build();
         httpget.setConfig( requestConfig);
         // 获得返回值
         return EntityUtils.toString(resp.getEntity(), StandardCharsets.UTF_8);
@@ -637,7 +645,7 @@ public class HttpUtils {
         httpPost.setEntity(entity);
 
         // 设置请求和传输超时时间
-        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
+        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(DEFAULT_TIME_OUT * 1000).setConnectTimeout(DEFAULT_TIME_OUT * 1000).build();
         httpPost.setConfig(requestConfig);
 
         // 执行请求并确保资源释放
