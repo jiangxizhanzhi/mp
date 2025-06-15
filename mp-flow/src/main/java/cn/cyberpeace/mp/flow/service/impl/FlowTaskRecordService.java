@@ -240,7 +240,8 @@ public class FlowTaskRecordService extends BaseModelServiceImpl<FlowTaskRecordMo
         flowTaskTaskModel.setTaskStatus(status);
         //防止多次推送次数多加，防止手动停止后多加次数
         if (TaskTaskStatusEnum.STOPPED.toValue() == status && TaskTaskStatusEnum.STOPPED.toValue() != oldStatus) {
-            flowTaskTaskModel.setSuccessCount(flowTaskTaskModel.getSuccessCount() + 1);
+            //调用停止接口的时候已经添加成功次数了，这边的注释掉
+            //flowTaskTaskModel.setSuccessCount(flowTaskTaskModel.getSuccessCount() + 1);
             flowTaskTaskModel.setMsg("");
         } else if (TaskTaskStatusEnum.ERROR.toValue() == status && TaskTaskStatusEnum.ERROR.toValue() != oldStatus) {
             msg = jsonMessage.getString("msg");
