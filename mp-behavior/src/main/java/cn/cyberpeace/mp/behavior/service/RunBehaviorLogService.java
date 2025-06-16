@@ -101,6 +101,7 @@ public class RunBehaviorLogService {
 
 	public void register(String queueName) {
 		queueCache.put(queueName, queueName);
+		log.info("register queueName is {}", queueName);
 		// 动态创建队列
 		Queue queue = new Queue(queueName, false, false, true);
 		rabbitAdmin.declareQueue(queue);
