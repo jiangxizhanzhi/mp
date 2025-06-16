@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.PythonExecUtil;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.mptool.ExceptionUtil;
 import cn.cyberpeace.mp.cscene.bo.CreateTemplateBO;
@@ -194,6 +195,9 @@ public class CsceneController implements BaseModelListControllerBase {
     })
     @GetMapping(params = "id")
     public ServiceResult<CsceneBO> get(@RequestParam String id, @RequestParam(value = "area_id", required = false) String areaId, @RequestParam(required = false, name = "whole") Boolean whole) {
+        String dir = BeanCommon.getBean(BaseAppConfig.class).getResourcesDir() + "/scene_plugin_cloud/parser";
+        PythonExecUtil.exec(dir + "/devops_parser.py", "a=1;b=2", "--cap-add NET_ADMIN --device /dev/net/ --device /dev/dddd --device /dev/sda   --device-read-iops /dev/sda:100   --device-write-iops /dev/sda:50");
+
         if (Boolean.TRUE.equals(whole)) {
             areaId = null;
         } else if (areaId == null) {

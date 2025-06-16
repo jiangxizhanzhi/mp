@@ -2,9 +2,9 @@ package cn.cyberpeace.mp.job.init;
 
 import cn.cyberpeace.mp.base.common.LocalFileMappingCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
-import cn.cyberpeace.mp.job.base.init.MpInitiate;
 import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
 import cn.cyberpeace.mp.base.util.mptool.FileUtil;
+import cn.cyberpeace.mp.job.base.init.MpInitiate;
 import cn.cyberpeace.mp.sceneplugincollection.config.CollectionAppConfig;
 import cn.cyberpeace.mp.sceneplugincollection.config.WazuhLogProbeLocationConfig;
 import cn.cyberpeace.mp.sceneplugincollection.config.WazuhModifyEventConfig;
@@ -12,7 +12,6 @@ import cn.cyberpeace.mp.sceneplugincollection.config.WazuhProbeConfig;
 import cn.cyberpeace.mp.sceneplugincollection.event.LocalFileSyncEventPublisher;
 import cn.cyberpeace.mp.sceneplugincollection.event.LocalFileSyncSuccessEvent;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.WazuhCommon;
-import cn.cyberpeace.mp.sceneplugincollection.util.InitCustomProbe;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -43,7 +42,6 @@ public class ScenePluginCollectionInitJob {
         TaskCommon.executeTask(() -> {
             log.info("syncDir init_custom start");
             // 将自定义探针示例 同步到本地目录中去
-            InitCustomProbe.init();
             LocalFileMappingCommon.syncDir("init_custom", collectionAppConfig.getInitCustomProbeDir());
             log.info("syncDir init_custom end");
 

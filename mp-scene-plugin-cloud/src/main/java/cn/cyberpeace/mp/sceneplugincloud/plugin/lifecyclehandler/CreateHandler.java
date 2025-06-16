@@ -1,6 +1,9 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.config.BaseAppConfig;
+import cn.cyberpeace.mp.base.util.PythonExecUtil;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.CollectionUtils;
 import cn.cyberpeace.mp.base.util.basic.IntUtils;
@@ -39,9 +42,11 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.CreateTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.boot.jackson.JsonComponentModule;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -1120,10 +1125,40 @@ public class CreateHandler extends HandlerCommon {
         // 容器参数
         if (cloudElement.getDockerParams() != null) {
             DockerParams dockerParams = cloudElement.getDockerParams();
-            createData.setEnvironment(dockerParams.getEnvironment());
             createData.setInteractive(dockerParams.getInteractive());
             createData.setPrivileged(dockerParams.getPrivileged());
             createData.setRun(dockerParams.getRun());
+
+            String dir = BeanCommon.getBean(BaseAppConfig.class).getResourcesDir() + "/scene_plugin_cloud/parser";
+
+            String params1 = "empty";
+            if (StringUtils.isNotEmpty(dockerParams.getEnvironmentStr())) {
+                params1 = dockerParams.getEnvironmentStr();
+            }
+            String params2 = "empty";
+            if (StringUtils.isNotEmpty(dockerParams.getHostConfigExStr())) {
+                params2 = dockerParams.getHostConfigExStr();
+            }
+            String result = PythonExecUtil.exec(dir + "/devops_parser.py", params1, params2);
+            if (StringUtils.isEmpty(result)) {
+                createData.setEnvironment(new HashMap<>());
+                createData.setHostConfigEx(new HashMap<>());
+            } else {
+                Map<String, Object> map = JsonCommon.parseMap(result);
+                var hostConfigEx = map.get("host_config_ex");
+                var environment = map.get("environment");
+                if (hostConfigEx != null) {
+                    var h = JsonCommon.parse(JsonCommon.stringify(hostConfigEx), new TypeReference<Map<String, Object>>() {
+                    });
+                    createData.setHostConfigEx(h);
+                }
+                if (environment != null) {
+                    var e = JsonCommon.parse(JsonCommon.stringify(environment), new TypeReference<Map<String, String>>() {
+                    });
+                    createData.setEnvironment(e);
+                }
+            }
+
         }
 
         // 容器初始化命令通过execContainerInitCommand执行

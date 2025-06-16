@@ -31,7 +31,8 @@ public class ContainerCreateData implements CloudHttpData {
     private String command;
     private String postCommand;
     private String workdir;
-        private Map<String, String> environment;
+    private Map<String, String> environment;
+    private Map<String, Object> hostConfigEx;
     private String hostname;
 
     private String id;

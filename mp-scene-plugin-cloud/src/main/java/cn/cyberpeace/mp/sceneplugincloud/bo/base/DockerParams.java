@@ -1,5 +1,8 @@
 package cn.cyberpeace.mp.sceneplugincloud.bo.base;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.config.BaseAppConfig;
+import cn.cyberpeace.mp.base.util.PythonExecUtil;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 
@@ -13,35 +16,7 @@ public class DockerParams {
     private Boolean run;
     private Boolean interactive;
     private Boolean privileged;
-    private Map<String, String> environment;
     private String environmentStr;
     private Boolean tty;
-
-    public void setEnvironmentStr(String environmentStr) {
-        if (this.environment == null || this.environment.isEmpty()) {
-            this.environmentStr = environmentStr;
-            this.environment = new HashMap<>();
-            if (StringUtils.isNotEmpty(environmentStr)) {
-                String[] kvs = StringUtils.split(this.environmentStr, ";");
-                for (String kv : kvs) {
-                    String[] kvSplit = StringUtils.split(kv, "=");
-                    if (kvSplit.length == 2) {
-                        this.environment.put(kvSplit[0], kvSplit[1]);
-                    }
-                }
-            }
-        }
-    }
-
-    public void setEnvironment(Map<String, String> environment) {
-        this.environment = environment;
-        this.environmentStr = StringUtils.EMPTY;
-        if (this.environment != null) {
-            List<String> enStrs = new ArrayList<>();
-            for (Map.Entry<String, String> e : this.environment.entrySet()) {
-                enStrs.add(e.getKey() + "=" + e.getValue());
-            }
-            this.environmentStr = StringUtils.join(enStrs, ",");
-        }
-    }
+    private String hostConfigExStr;
 }
