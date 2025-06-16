@@ -627,6 +627,13 @@ public class ImagesController {
         return new ServiceResult<>(true).asResult();
     }
 
+    @ApiOperation("查询bios的启动选项")
+    @GetMapping(value = "/firmware_type")
+    public ServiceResult<List<String>> firmwareType() {
+        var res = imagesService.getFirmwareType();
+        return new ServiceResult<>(res).asResult();
+    }
+
     /**
      * 验证请求参数
      * @param request

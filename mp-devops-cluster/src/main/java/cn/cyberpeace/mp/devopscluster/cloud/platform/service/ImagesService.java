@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -149,5 +150,14 @@ public class ImagesService extends BaseCpService {
         CloudPlatformPageResult<TargetConnection> model = new CloudPlatformPageResult<>();
         model.setList(list);
         return model;
+    }
+
+    public List<String> getFirmwareType() {
+        CloudPlatformItemsPageResult pageResult = super.sendGet("/cpcloud/device/v1/type?type=hw_firmware_type", CloudPlatformItemsPageResult.class);
+        List<String> res = new ArrayList<>();
+        for (var item : pageResult.getItems()) {
+            res.add(item.toString());
+        }
+        return res;
     }
 }

@@ -58,6 +58,9 @@ public class ImageMetaData implements Serializable {
     @ApiModelProperty("容器tty参数")
     private Boolean tty;
 
+    @ApiModelProperty("bios启动参数")
+    private String hwFirmwareType;
+
     public void setEnvironmentStr(String environmentStr) {
         if (StringUtils.isNotEmpty(environmentStr)) {
             this.environmentStr = environmentStr;
