@@ -482,6 +482,11 @@ public class SceneExporter {
                     image.set系统语言("hasNoSystemServer");
                 }
 
+                image.setInteractive(device.getInteractive());
+                image.setTty(device.getTty());
+                image.setEnvironmentStr(device.getEnvironmentStr());
+                image.setHostConfigExStr(device.getHostConfigExStr());
+
                 ServerYml serverYml = new ServerYml();
                 Server server = new Server();
                 server.setMpYmlImageNameToChange(image);
@@ -685,6 +690,10 @@ public class SceneExporter {
         private Boolean cloudInit;
         private List<AccessModeExportResult> 接入方式;
         private List<AccessModeExportResult> 管理接入;
+        private Boolean interactive;
+        private Boolean tty ;
+        private String environmentStr;
+        private String hostConfigExStr;
     }
 
     private static String formatFlavor(String flavor) {

@@ -102,6 +102,21 @@ public class BaseSceneParseResourceCenter {
                     device.setRam(node.getSrcElement().getRam());
                     device.setDisk(node.getSrcElement().getDisk());
                 }
+                if (node.getDockerParams() != null) {
+                    var dockerParams = node.getDockerParams();
+                    if (dockerParams.getTty() != null) {
+                        device.setTty(dockerParams.getTty());
+                    }
+                    if (dockerParams.getInteractive() != null) {
+                        device.setInteractive(dockerParams.getInteractive());
+                    }
+                    if (StringUtils.isNotEmpty(dockerParams.getEnvironmentStr())) {
+                        device.setEnvironmentStr(dockerParams.getEnvironmentStr());
+                    }
+                    if (StringUtils.isNotEmpty(dockerParams.getHostConfigExStr())) {
+                        device.setHostConfigExStr(dockerParams.getHostConfigExStr());
+                    }
+                }
                 devices.add(device);
                 SceneConfigElementBO element = sceneHandler.getElement(nodeId);
                 device.setLogo(element.getIcon2());
@@ -138,6 +153,10 @@ public class BaseSceneParseResourceCenter {
         private Integer ram;
         private Integer disk;
         private List<AccessMode> accessModes;
+        private Boolean interactive;
+        private Boolean tty ;
+        private String environmentStr;
+        private String hostConfigExStr;
     }
 
     @Getter
