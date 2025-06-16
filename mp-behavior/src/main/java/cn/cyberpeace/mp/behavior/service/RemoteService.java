@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.behavior.service;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.util.http.HttpClientUtil;
+import cn.cyberpeace.mp.behavior.config.BehaviorConfig;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +19,7 @@ import java.util.Map;
 @CacheConfig(cacheNames = { "remoteService" })
 public class RemoteService {
 
-    private String SCENE_RETRIEVE = "http://172.30.102.38:8083/api/cscene/cscene_instances/";
+
 
     @Cacheable(key = "#p0")
     public Map<String, String> getIdIpMap(String sceneId) {
@@ -31,11 +33,15 @@ public class RemoteService {
             String ip = element.getJSONArray("ports").getJSONObject(0).getString("ip");
             idIpMap.put(id, ip);
         }
+        log.info("idIpMap is {}" , idIpMap);
         return idIpMap;
     }
 
     public JSONObject getById(String sceneId) {
-        String targetUrl = SCENE_RETRIEVE + "?id=" + sceneId;
+        final BehaviorConfig bean = BeanCommon.getBean(BehaviorConfig.class);
+        String apiUrl = "/api/cscene/cscene_instances/";
+        String targetUrl = bean.getMpServer30() + apiUrl + "?id=" + sceneId;
+        log.info("mp-server-30 url {}", targetUrl);
         return replaceAccessIp(HttpClientUtil.rawGet(targetUrl, JSONObject.class));
 
     }

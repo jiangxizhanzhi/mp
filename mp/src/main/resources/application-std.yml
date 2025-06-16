@@ -100,6 +100,8 @@ management:
 
 # 中台各模块相关配置
 mp:
+  behavior:
+    mp-server-30: ${mp.behavior.ext-var.mp-server-30}
   common: #公用配置
     cp-ip: ${mp.common.ext-var.cp-ip}                # 云平台适配层接口地址
     cp-port: ${mp.common.ext-var.cp-port}                # 云平台适配层接口地址

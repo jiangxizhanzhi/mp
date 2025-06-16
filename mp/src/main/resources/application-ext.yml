@@ -35,6 +35,9 @@ springfox:
 
 # 中台各模块相关配置
 mp:
+  behavior:
+    ext-var:
+      mp-server-30: ${MP_SERVER_30:http://127.0.0.1:8083}
   aggregation:
     ext-var:
       export-image-timeout: ${MP_EXPORT_IMAGE_TIMEOUT:1200000}
