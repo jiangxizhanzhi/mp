@@ -33,6 +33,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -52,6 +54,14 @@ public class SimulateService {
 
 	@Autowired
 	private TransactionTemplate transactionTemplate;
+
+	@Autowired
+	private TaskService taskService;
+
+	@Autowired
+	private SimulateService simulateService;
+
+	private ScheduledThreadPoolExecutor scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(1);
 
 	@PostConstruct
 	public void init() {
@@ -99,7 +109,7 @@ public class SimulateService {
 			taskModelList.addAll(createTask(JSONObject.parseArray(sceneModel.getNodeConfig(), NodeUserBehavior.class), simulateModel.getId()));
 		}
 
-		log.info("创建仪表成功, 仪表id:[{}], 场景mp_behavior_scene：[{}], task model: [{}]", simulateModelList.size(),
+		log.info("创建仪表统计, 仪表数量:[{}], 场景mp_behavior_scene：[{}], task model: [{}]", simulateModelList.size(),
 				sceneModelList.size(), taskModelList.size());
 
 		transactionTemplate.execute(new TransactionCallbackWithoutResult() {
@@ -113,7 +123,19 @@ public class SimulateService {
 			}
 		});
 
+		// 异步执行流量， 因为页面缺少触发流程，从而补充的逻辑
+		if(!taskModelList.isEmpty()) {
+			// 同一时间 浏览器只能执行一条行为；
+			TaskModel taskModel = taskModelList.get(0);
+			log.info("BehaviorTimer run simulate {} ing...", taskModel.getSimulateId());
+			simulateService.runSimulate(taskModel.getSimulateId(), false);
 
+			log.info("start run task delay 5min, taskId {}", taskModel.getId());
+			scheduledThreadPoolExecutor.schedule(() -> {
+				taskService.runTask(taskModel.getId());
+				log.info("end runTask, taskId {}", taskModel.getId());
+			}, 5, TimeUnit.MINUTES);
+		}
 	}
 
 	public Integer countSimulate() {
@@ -145,6 +167,7 @@ public class SimulateService {
 			behaviorTimerTask.setBehaviorDownloadUrl(taskModel.getFileUrl());
 			behaviorTimerTask.setParamList(JSONObject.parseArray(taskModel.getParams(), Param.class));
 			behaviorTimerTask.setQueueName(queueName);
+			log.info("add behaviorTimerTask id {} time is {}", taskModel.getId(), taskModel.getRunTime());
 			behaviorTimer.scheduleAtFixedRate(behaviorTimerTask, TimeUtils.getNextDate(taskModel.getRunTime()), 24 * 60 * 60 * 1000L);
 			timerMap.get(simulateId).put(taskModel.getId(), behaviorTimer);
 		}
