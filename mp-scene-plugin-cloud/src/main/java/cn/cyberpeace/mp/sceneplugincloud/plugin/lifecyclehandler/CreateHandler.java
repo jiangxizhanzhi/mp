@@ -1139,23 +1139,28 @@ public class CreateHandler extends HandlerCommon {
             if (StringUtils.isNotEmpty(dockerParams.getHostConfigExStr())) {
                 params2 = dockerParams.getHostConfigExStr();
             }
-            String result = PythonExecUtil.exec(dir + "/devops_parser.py", params1, params2);
-            if (StringUtils.isEmpty(result)) {
-                createData.setEnvironment(new HashMap<>());
-                createData.setHostConfigEx(new HashMap<>());
+            if (StringUtils.equals(params1, "empty") && StringUtils.equals(params2, "empty")) {
+                createData.setEnvironment(null);
+                createData.setHostConfigEx(null);
             } else {
-                Map<String, Object> map = JsonCommon.parseMap(result);
-                var hostConfigEx = map.get("host_config_ex");
-                var environment = map.get("environment");
-                if (hostConfigEx != null) {
-                    var h = JsonCommon.parse(JsonCommon.stringify(hostConfigEx), new TypeReference<Map<String, Object>>() {
-                    });
-                    createData.setHostConfigEx(h);
-                }
-                if (environment != null) {
-                    var e = JsonCommon.parse(JsonCommon.stringify(environment), new TypeReference<Map<String, String>>() {
-                    });
-                    createData.setEnvironment(e);
+                String result = PythonExecUtil.exec(dir + "/devops_parser.py", params1, params2);
+                if (StringUtils.isEmpty(result)) {
+                    createData.setEnvironment(null);
+                    createData.setHostConfigEx(null);
+                } else {
+                    Map<String, Object> map = JsonCommon.parseMap(result);
+                    var hostConfigEx = map.get("host_config_ex");
+                    var environment = map.get("environment");
+                    if (hostConfigEx != null) {
+                        var h = JsonCommon.parse(JsonCommon.stringify(hostConfigEx), new TypeReference<Map<String, Object>>() {
+                        });
+                        createData.setHostConfigEx(h);
+                    }
+                    if (environment != null) {
+                        var e = JsonCommon.parse(JsonCommon.stringify(environment), new TypeReference<Map<String, String>>() {
+                        });
+                        createData.setEnvironment(e);
+                    }
                 }
             }
 
