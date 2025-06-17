@@ -15,8 +15,12 @@ import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandle
 import cn.cyberpeace.mp.sceneplugincollection.service.collect.base.TimeHistogramInfo;
 import cn.cyberpeace.mp.sceneplugincollection.service.collect.base.WazuhResult;
 import cn.cyberpeace.mp.sceneplugincollection.service.collect.filemodify.WazuhFileModifyService;
+import cn.cyberpeace.mp.sceneplugincollection.service.collect.netifaces.WazuhNetifacesService;
+import cn.cyberpeace.mp.sceneplugincollection.service.collect.port.WazuhPortService;
 import cn.cyberpeace.mp.sceneplugincollection.service.collect.registrymodify.WazuhRegistryModifyService;
 import cn.cyberpeace.mp.situationaware.model.FileEventModel;
+import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Netiface;
+import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -43,6 +47,12 @@ public class CsceneHostCollectQueryService {
 
     @Resource
     private WazuhRegistryModifyService wazuhRegistryModifyService;
+
+    @Resource
+    private WazuhPortService wazuhPortService;
+
+    @Resource
+    private WazuhNetifacesService wazuhNetifacesService ;
 
     public ListObjServiceResult<CollectionHostEventBO> getFileModifyData(int from, int size, String csceneId, List<String> nodeIds, LocalDateTime queryStartAt, LocalDateTime queryEndAt, List<Integer> levels, String filePath) {
         CheckResult checkResult = this.checkAndGetInfo(csceneId, nodeIds);
@@ -162,6 +172,73 @@ public class CsceneHostCollectQueryService {
             result.add(histogramInfo);
         }
         return result;
+    }
+
+    public ListObjServiceResult<Port> getPortData(int from, int size, String csceneId, List<String> nodeIds, LocalDateTime queryStartAt, LocalDateTime queryEndAt) {
+        CheckResult checkResult = this.checkAndGetInfo(csceneId, nodeIds);
+        if (checkResult.getCheckEnum() != CheckEnum.SUCCESS) {
+            return new ListObjServiceResult<>(new ArrayList<>(), 0);
+        }
+        var startTime = queryStartAt != null ? queryStartAt : checkResult.getSceneStartTime();
+        var enTime = queryEndAt != null ? queryEndAt : checkResult.getLatestSceneRunningTime();
+        List<String> agentNames = checkResult.getAgentNames();
+        var result = wazuhPortService.queryPortData(from, size, agentNames, startTime, enTime);
+        List<Port> ports = new ArrayList<>();
+        for (var m : result.getList()) {
+            Port.Remote remote = new Port.Remote();
+            remote.setPort(m.getRaddrPort());
+            remote.setIp(m.getRaddrIp());
+            Port.Local local = new Port.Local();
+            local.setPort(m.getLaddrPort());
+            local.setIp(m.getLaddrIp());
+
+            Port p = new Port();
+            p.setState(m.getStatus());
+            p.setRemote(remote);
+            p.setLocal(local);
+            p.setAgentId(m.getAgentId());
+            p.setPid(m.getPid());
+            p.setProcess(m.getProcess());
+            p.setProtocol(m.getProto());
+            ports.add(p);
+        }
+        return new ListObjServiceResult<>(ports, (int) result.getTotal());
+    }
+
+    public ListObjServiceResult<Netiface> getNetifacesData(int from, int size, String csceneId, List<String> nodeIds, LocalDateTime queryStartAt, LocalDateTime queryEndAt) {
+        CheckResult checkResult = this.checkAndGetInfo(csceneId, nodeIds);
+        if (checkResult.getCheckEnum() != CheckEnum.SUCCESS) {
+            return new ListObjServiceResult<>(new ArrayList<>(), 0);
+        }
+        var startTime = queryStartAt != null ? queryStartAt : checkResult.getSceneStartTime();
+        var enTime = queryEndAt != null ? queryEndAt : checkResult.getLatestSceneRunningTime();
+        List<String> agentNames = checkResult.getAgentNames();
+        var result = wazuhNetifacesService.queryNetifacesData(from, size, agentNames, startTime, enTime);
+        List<Netiface> netifaces = new ArrayList<>();
+        for (var m : result.getList()) {
+            Netiface netiface = new Netiface();
+            netiface.setType(m.getType());
+            netiface.setState(m.getStatus());
+            netiface.setMtu(m.getMtu() == null ? null : Integer.parseInt(m.getMtu()));
+            netiface.setMac(m.getMac());
+            netiface.setName(m.getName());
+            if (m.getIpAddresses() == null || m.getIpAddresses().length == 0) {
+                netiface.setIp("");
+            } else {
+                netiface.setIp(m.getIpAddresses()[0]);
+            }
+            netiface.setAgentId(m.getAgentId());
+
+            netiface.setTx(new Netiface.X());
+            netiface.getTx().setBytes(m.getTxBytes() == null ? null : Integer.parseInt(m.getTxBytes()));
+            netiface.getTx().setPackets(m.getTxPackets());
+
+            netiface.setRx(new Netiface.X());
+            netiface.getRx().setBytes(m.getRxBytes() == null ? null : Integer.parseInt(m.getRxBytes()));
+            netiface.getRx().setPackets(m.getRxPackets());
+            netifaces.add(netiface);
+        }
+        return new ListObjServiceResult<>(netifaces, (int) result.getTotal());
     }
 
     private void writeNodeInfo(String nodeEid, BatchSceneHandler sceneHandler, CloudScenePluginHandler cloudScenePluginHandler, CollectionHostEventBO hostEvent) {

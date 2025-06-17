@@ -30,6 +30,12 @@
       "id": "4894f48375ee4dd5b7a7bad7c1a78376",
       "interval": "180s",
       "output_format": "json"
+    },
+    {
+      "probe_name": "get_netifaces.py",
+      "id": "35u041es14alp5j6ua2r6jsu2k220o7i",
+      "interval": "180s",
+      "output_format": "json"
     }
   ]
 }

@@ -23,6 +23,9 @@ public class SicLaunchConfig {
     // 系统用户
     public static final String LAUNCH_ID_SYSTEM_USERS = "4894f48375ee4dd5b7a7bad7c1a78376";
 
+    // 网卡信息
+    public static final String LAUNCH_ID_INTERFACE = "35u041es14alp5j6ua2r6jsu2k220o7i";
+
     // 进程
     public static final String LAUNCH_ID_PROCESSES = "38949dcf3829489d8dd9e0e63cc66541";
 

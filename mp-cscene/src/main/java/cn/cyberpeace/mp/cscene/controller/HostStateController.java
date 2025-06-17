@@ -1,11 +1,13 @@
 package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneAttCkTypeCountInfo;
@@ -13,7 +15,9 @@ import cn.cyberpeace.mp.cscene.request.agent.AgentNameBasedRequest;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.request.hoststate.HostStateTrendRequest;
+import cn.cyberpeace.mp.cscene.service.CsceneHostCollectQueryService;
 import cn.cyberpeace.mp.cscene.service.HostStateService;
+import cn.cyberpeace.mp.sceneplugincollection.config.CollectionAppConfig;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.TimeListPageInfoQueryParams;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Netiface;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
@@ -28,6 +32,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,6 +50,9 @@ public class HostStateController {
 
     @Autowired
     private HostStateService hostStateService;
+
+    @Autowired
+    private CsceneHostCollectQueryService csceneHostCollectQueryService ;
 
     /**
      * 默认查询场景所有节点
@@ -131,11 +139,28 @@ public class HostStateController {
     @ApiOperation(value = "节点端口信息")
     @GetMapping("/element_port")
     public ListObjServiceResult<Port> pagePorts(TimeListPageInfoQueryParams listPageInfoQueryParams) {
-        try {
-            return hostStateService.pagePorts(listPageInfoQueryParams).asResult();
-        } catch (Exception e) {
-            log.error("failed to exec element_port", e);
-            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
+        CollectionAppConfig collectionAppConfig = BeanCommon.getBean(CollectionAppConfig.class);
+        listPageInfoQueryParams.ensure();
+        if (Boolean.TRUE.equals(collectionAppConfig.getQueryByEsData())) {
+            int from = (listPageInfoQueryParams.getPage() - 1) * listPageInfoQueryParams.getPageSize();
+            int size = listPageInfoQueryParams.getPageSize();
+            String csceneId = listPageInfoQueryParams.getSceneIds().get(0);
+            LocalDateTime startTime = null;
+            LocalDateTime endTime = null;
+            if (StringUtils.isNotEmpty(listPageInfoQueryParams.getStartTime())) {
+                startTime = TimeUtils.stringToLocalDateTime(listPageInfoQueryParams.getStartTime());
+            }
+            if (StringUtils.isNotEmpty(listPageInfoQueryParams.getEndTime())) {
+                endTime = TimeUtils.stringToLocalDateTime(listPageInfoQueryParams.getEndTime());
+            }
+            return csceneHostCollectQueryService.getPortData(from, size, csceneId, listPageInfoQueryParams.getNodeIds(), startTime, endTime).asResult();
+        } else {
+            try {
+                return hostStateService.pagePorts(listPageInfoQueryParams).asResult();
+            } catch (Exception e) {
+                log.error("failed to exec element_port", e);
+                return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
+            }
         }
     }
 
@@ -153,11 +178,28 @@ public class HostStateController {
     @ApiOperation(value = "节点网卡信息")
     @GetMapping("/element_netifaces")
     public ListObjServiceResult<Netiface> pageNetifaces(TimeListPageInfoQueryParams listPageInfoQueryParams) {
-        try {
-            return hostStateService.pageNetifaces(listPageInfoQueryParams).asResult();
-        } catch (Exception e) {
-            log.error("failed to exec element_netifaces", e);
-            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
+        CollectionAppConfig collectionAppConfig = BeanCommon.getBean(CollectionAppConfig.class);
+        listPageInfoQueryParams.ensure();
+        if (Boolean.TRUE.equals(collectionAppConfig.getQueryByEsData())) {
+            int from = (listPageInfoQueryParams.getPage() - 1) * listPageInfoQueryParams.getPageSize();
+            int size = listPageInfoQueryParams.getPageSize();
+            String csceneId = listPageInfoQueryParams.getSceneIds().get(0);
+            LocalDateTime startTime = null;
+            LocalDateTime endTime = null;
+            if (StringUtils.isNotEmpty(listPageInfoQueryParams.getStartTime())) {
+                startTime = TimeUtils.stringToLocalDateTime(listPageInfoQueryParams.getStartTime());
+            }
+            if (StringUtils.isNotEmpty(listPageInfoQueryParams.getEndTime())) {
+                endTime = TimeUtils.stringToLocalDateTime(listPageInfoQueryParams.getEndTime());
+            }
+            return csceneHostCollectQueryService.getNetifacesData(from, size, csceneId, listPageInfoQueryParams.getNodeIds(), startTime, endTime).asResult();
+        } else {
+            try {
+                return hostStateService.pageNetifaces(listPageInfoQueryParams).asResult();
+            } catch (Exception e) {
+                log.error("failed to exec element_netifaces", e);
+                return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
+            }
         }
     }
 
