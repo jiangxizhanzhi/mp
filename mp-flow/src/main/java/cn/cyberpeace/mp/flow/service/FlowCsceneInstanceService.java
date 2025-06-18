@@ -275,7 +275,8 @@ public class FlowCsceneInstanceService {
 
     public FlowTaskTaskModelResult handleTaskAndGetNewTasks(String actuatorId, AddFlowTaskParams addFlowTaskParams) {
         // 先得到数据库原有的任务
-        var cond = new HumanCondition().filterEqual(FlowTaskTaskModel::getSceneId, addFlowTaskParams.getCsceneInstanceId());
+        var cond = new HumanCondition().filterEqual(FlowTaskTaskModel::getSceneId, addFlowTaskParams.getCsceneInstanceId())
+                .filterEqual(FlowTaskTaskModel::getNodeId, addFlowTaskParams.getNodeId());
         var dbTasks = flowTaskTaskMapper.list(cond);
 
         // 区分新增、更新的流量任务
