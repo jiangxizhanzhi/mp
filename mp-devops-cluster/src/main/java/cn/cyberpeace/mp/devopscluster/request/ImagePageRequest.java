@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 import java.util.Objects;
 
 
@@ -41,6 +42,12 @@ public class ImagePageRequest extends BasePageRequest {
      */
     @ApiModelProperty(value = "三级分类")
     private Integer thirdCategory;
+
+    /**
+     * 三级分类集合
+     */
+    @ApiModelProperty(value = "三级分类集合")
+    private List<Integer> thirdCategories;
 
     /**
      * 镜像类型

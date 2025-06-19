@@ -47,6 +47,11 @@ public class ImagePageDTO extends BasePageDTO{
     private Integer thirdCategory;
 
     /**
+     * 三级分类集合
+     */
+    private List<Integer> thirdCategories;
+
+    /**
      * 搜索类型，0：全部; 1：'vm','container','simple'; 2: entity
      */
     private Integer searchType;
@@ -184,6 +189,7 @@ public class ImagePageDTO extends BasePageDTO{
         this.setMainCategory(request.getMainCategory());
         this.setSubCategory(request.getSubCategory());
         this.setThirdCategory(request.getThirdCategory());
+        this.setThirdCategories(request.getThirdCategories());
         this.setQuickCreateSupport(request.getQuickCreateSupport());
         if (Objects.isNull(request.getImageType())){
             this.setSearchType(1);
