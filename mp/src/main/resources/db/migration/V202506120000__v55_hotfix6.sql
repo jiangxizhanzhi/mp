@@ -1,7 +1,3 @@
-
--- 更新版本号为5.6
-update mp_sys_model_version set model_version = 'v5.6' ;
-
 -- 添加自定义探针示例
 INSERT IGNORE INTO `mp_situation_probe`( `id`, `name`, `description`, `probe_category`, `type`, `creator`, `interval_sec`, `output_format`, `engine`, `is_deleted`, `OS_type`, `create_time`, `update_time`) VALUES ( 'bbdf4dcbf298428c9186e13801f8f263', 'python获取主机名称', '获取主机名称', 0, 1, 'admin', 60, 'none', '', 0, '0,2', now(), now());
 INSERT IGNORE INTO `mp_situation_probe`( `id`, `name`, `description`, `probe_category`, `type`, `creator`, `interval_sec`, `output_format`, `engine`, `is_deleted`, `OS_type`, `create_time`, `update_time`) VALUES ( 'd5c4d3abdf38402e9c78aa53de77bb47', '使用shell获取主机名称', '获取主机名称', 0, 1, 'admin', 60, 'none', '', 0, '2', now(), now());
