@@ -59,7 +59,7 @@ public class ThirdSsoService {
         String clientSecret = authConfig.getThirdClientSecret();
         String getTokenUrl = authConfig.getThirdTokenUrl();
         String getUserInfoUrl = authConfig.getThirdUserInfoUrl();
-        String getCodeUrl = String.format("https://%s:%s/oauth?client_id=%s&redirect_uri=https://%s/api/mp/unauth/third-login?%s", authConfig.getThirdIp(), authConfig.getThirdPort(), clientId, authConfig.getMpIp(), url);
+        String getCodeUrl = String.format("%s/oauth?client_id=%s&redirect_uri=%s/api/mp/unauth/third-login?%s", authConfig.getThirdIp(), clientId, authConfig.getMpIp(), url);
 
         if (code == null) {
             return String.format("redirect:%s", getCodeUrl);
@@ -86,7 +86,6 @@ public class ThirdSsoService {
                 log.info("query user info , url is {} , params is {}", getUserInfoUrl, params);
                 result = HttpUtils.sendPost(getUserInfoUrl, params);
                 log.info("query user info , result is {}", result);
-
                 ThirdResponse<ThirdUserInfo> userResponse = JsonCommon.snakeParse(result, new TypeReference<ThirdResponse<ThirdUserInfo>>() {
                 });
                 var userInfo = userResponse.getData();
@@ -157,6 +156,29 @@ public class ThirdSsoService {
         } else {
             return true;
         }
+    }
+
+    public void updateMenus(String accessToken) throws Exception {
+
+        // 查询用户信息
+        GetUserinfoParams getUserinfoParams = new GetUserinfoParams();
+        getUserinfoParams.setAccessToken(accessToken);
+        getUserinfoParams.setClientId(authConfig.getThirdClientId());
+        String params = JsonCommon.snakeStringify(getUserinfoParams);
+        log.info("query user info , url is {} , params is {}", authConfig.getThirdUserInfoUrl(), params);
+        String result = HttpUtils.sendPost(authConfig.getThirdUserInfoUrl(), params);
+        log.info("query user info , result is {}", result);
+        ThirdResponse<ThirdUserInfo> userResponse = JsonCommon.snakeParse(result, new TypeReference<ThirdResponse<ThirdUserInfo>>() {
+        });
+        var userInfo = userResponse.getData();
+        UserModel userModel = userService.getByUserName(userInfo.getUserAccount());
+
+        // 更新下菜单
+        UserModel updateModel = new UserModel();
+        updateModel.setId(userModel.getId());
+        updateModel.setMenusContent(JsonCommon.stringify(userInfo.getRoleMenu()));
+        userService.update(updateModel);
+
     }
 
     @Getter
