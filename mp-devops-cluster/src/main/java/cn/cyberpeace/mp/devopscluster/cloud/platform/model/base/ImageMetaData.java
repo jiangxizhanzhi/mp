@@ -61,6 +61,9 @@ public class ImageMetaData implements Serializable {
     @ApiModelProperty("bios启动参数")
     private String hwFirmwareType;
 
+    @ApiModelProperty("界面展示的高级选项开关")
+    private Boolean options;
+
     public void setEnvironmentStr(String environmentStr) {
         if (StringUtils.isNotEmpty(environmentStr)) {
             this.environmentStr = environmentStr;
