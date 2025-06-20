@@ -161,6 +161,12 @@ public class ImagesController {
         if (StringUtils.isBlank(request.getUuid())){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
+
+        ImageConvertModel model = imagesConverter.findByUuid(request.getUuid());
+        if (request.getExtImageInfo() != null && model.getExtImageInfo() != null) {
+            request.getExtImageInfo().setImageSource(model.getExtImageInfo().getImageSource());
+        }
+
         imagesConverter.update(request);
         return ResultCommon.success();
     }
