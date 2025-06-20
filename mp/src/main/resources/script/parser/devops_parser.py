@@ -132,8 +132,6 @@ if __name__ == '__main__':
         environment_str=""
     if host_config_ex_str == 'empty':
         host_config_ex_str=""
-    environment_str = sys.argv[1]
-    host_config_ex_str = sys.argv[2]
     meta_data = {
         'environment_str': environment_str,
         "host_config_ex_str": host_config_ex_str
