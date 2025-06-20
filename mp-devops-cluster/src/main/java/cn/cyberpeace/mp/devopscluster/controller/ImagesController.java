@@ -209,6 +209,7 @@ public class ImagesController {
             var meta = imagesByIdVO.getExtImageInfo().getMetaData();
             if (StringUtils.isNotEmpty(meta.getEnvironmentStr()) && StringUtils.isNotEmpty(meta.getHostConfigExStr())) {
                 imagesByIdVO.getExtImageInfo().setImageSource(3);
+                imagesByIdVO.getExtImageInfo().getMetaData().setOptions(true);
             }
         }
 
