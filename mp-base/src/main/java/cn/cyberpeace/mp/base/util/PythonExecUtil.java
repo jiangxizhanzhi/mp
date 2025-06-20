@@ -11,7 +11,7 @@ public final class PythonExecUtil {
 
     private static String windowsPythonPath = "C:\\python3\\python.exe";
 
-    private static String linuxPythonPath = "python" ;
+    private static String linuxPythonPath = "python3" ;
 
     public static String exec(String scriptPath, String... params) {
         String paramsStr = "";
