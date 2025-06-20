@@ -845,9 +845,8 @@ public class FlowAnalysisService extends AbstractBaseService {
     protected BoolQueryBuilder buildBoolQueryBuilder(FlowAnalysisRequest request){
         var boolQueryBuilder = QueryBuilders.boolQuery();
 
-//        TODO WK2025 展示所有类型流量
         // 确保返回的数据中包含 suricata 字段
-        /*if (Objects.nonNull(request.getAttackTypes())) {
+        if (Objects.nonNull(request.getAttackTypes())) {
             boolQueryBuilder.filter(QueryBuilders.termsQuery("suricata.category", request.getAttackTypes()));
         }
 
@@ -860,7 +859,7 @@ public class FlowAnalysisService extends AbstractBaseService {
                         allSeverityList.stream().filter(v -> v <= request.getSeverityEnum().ordinal()).collect(Collectors.toList());
                 boolQueryBuilder.filter(QueryBuilders.termsQuery("suricata.severity", severityList));
             }
-        }*/
+        }
 
         if (StringUtils.isNotEmpty(request.getPort())) {
             BoolQueryBuilder bq = QueryBuilders.boolQuery();
