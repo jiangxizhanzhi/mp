@@ -106,7 +106,7 @@ public class BaseSceneParseResourceCenter {
                 if (BaseCloudPluginSceneElementModel.ImageType.CONTAINER.equals(node.getImageType())) {
                     device.setCpu((node.getSrcElement().getCpu() == null || node.getSrcElement()
                             .getCpu() == 0) ? 1 : node.getSrcElement().getCpu());
-                    device.setRam(node.getSrcElement().getRam() == null ? 1024 : node.getSrcElement().getRam());
+                    device.setRam(node.getSrcElement().getRam() == null || node.getSrcElement().getRam() < 1024 ? 1024 : node.getSrcElement().getRam());
                     device.setDisk(node.getSrcElement().getDisk() == null ? 10 : node.getSrcElement().getDisk());
                 }
                 if (node.getDockerParams() != null) {
