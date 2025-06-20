@@ -204,10 +204,11 @@ public class ImagesController {
             imagesByIdVO.setAllowChangeIso(true);
         }
 
+        // 先导出 后导入的靶标会变成云平台类型的  这里特殊处理下
         if (imagesByIdVO.getExtImageInfo() != null && imagesByIdVO.getExtImageInfo().getMetaData() != null) {
             var meta = imagesByIdVO.getExtImageInfo().getMetaData();
             if (StringUtils.isNotEmpty(meta.getEnvironmentStr()) && StringUtils.isNotEmpty(meta.getHostConfigExStr())) {
-                imagesByIdVO.getExtImageInfo().setImageSource(2);
+                imagesByIdVO.getExtImageInfo().setImageSource(3);
             }
         }
 
