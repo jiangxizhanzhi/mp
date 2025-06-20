@@ -2,6 +2,8 @@ package cn.cyberpeace.mp.frontbusiness.controller;
 
 import cn.cyberpeace.mp.auth.bo.target.TargetBo;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
+import cn.cyberpeace.mp.auth.model.MenuDifferenceModel;
+import cn.cyberpeace.mp.auth.repository.MenuDifferenceMapper;
 import cn.cyberpeace.mp.auth.service.MenuConfigService;
 import cn.cyberpeace.mp.auth.service.TargetService;
 import cn.cyberpeace.mp.auth.service.UserPermissionService;
@@ -24,7 +26,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @Description: 权限管理接口
@@ -47,6 +51,9 @@ public class TargetController {
 
     @Autowired
     private UserPermissionService userPermissionService;
+
+    @Autowired
+    private MenuDifferenceMapper menuDifferenceMapper;
 
     @AuthTarget(TargetEnum.USER_MANAGE)
     @ApiOperation(value = "查询权限树", notes = "")
@@ -83,6 +90,17 @@ public class TargetController {
             menuIdents.remove("intelligence-center");
         }
         List<TargetBo> result = menuConfigService.getUserTreeMenuBy(UserUtils.getLoginUser().getId(), menuIdents);
+        return ServiceResult.builder().source(result).build().asResult();
+    }
+
+    @ApiOperation(value = "查询当前用户菜单")
+    @GetMapping("/current_user/tree_diff")
+    public ServiceResult getTreeDiff(@RequestParam String Type) {
+        MenuDifferenceModel menuDifferenceModel = menuDifferenceMapper.get(Type);
+        List<String> ids = Arrays.stream(menuDifferenceModel.getDifference().split("，")).collect(Collectors.toList());
+
+//        List<String> menuIdents = userPermissionService.listMenuIdentsByLoginUser();
+        var result = menuConfigService.getUserTreeMenuBy(UserUtils.getLoginUser().getId(), ids);
         return ServiceResult.builder().source(result).build().asResult();
     }
 }
