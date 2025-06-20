@@ -501,6 +501,8 @@ public class SceneExporter {
                 content = StringUtils.replace(content, "privateKey", "private-key");
                 content = StringUtils.replace(content, "hasNoSystemServer", "");
                 content = StringUtils.replace(content, "timeFormatSplit", "-");
+                content = StringUtils.replace(content, "environmentStr", "environment_str");
+                content = StringUtils.replace(content, "hostConfigExStr", "host_config_ex_str");
                 this.createFile(content, currentImageDir + "/servers.yml");
 
                 if (StringUtils.isNotEmpty(singleImagePath)) {
