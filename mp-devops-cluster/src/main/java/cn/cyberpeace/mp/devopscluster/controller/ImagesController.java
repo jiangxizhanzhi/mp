@@ -203,6 +203,14 @@ public class ImagesController {
         } else {
             imagesByIdVO.setAllowChangeIso(true);
         }
+
+        if (imagesByIdVO.getExtImageInfo() != null && imagesByIdVO.getExtImageInfo().getMetaData() != null) {
+            var meta = imagesByIdVO.getExtImageInfo().getMetaData();
+            if (StringUtils.isNotEmpty(meta.getEnvironmentStr()) && StringUtils.isNotEmpty(meta.getHostConfigExStr())) {
+                imagesByIdVO.getExtImageInfo().setImageSource(2);
+            }
+        }
+
         return new Result<>(imagesByIdVO);
     }
 
