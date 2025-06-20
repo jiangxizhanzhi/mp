@@ -43,14 +43,8 @@ public class ImageMetaData implements Serializable {
     @ApiModelProperty("环境变量字符串格式")
     private String environmentStr;
 
-    @ApiModelProperty("环境变量k-v格式")
-    private Map<String, Object> environment;
-
     @ApiModelProperty("容器其他参数的字符串格式")
     private String hostConfigExStr;
-
-    @ApiModelProperty("容器其他参数的字符串k-v格式")
-    private Map<String, Object> hostConfigEx;
 
     @ApiModelProperty("容器interactive参数")
     private Boolean interactive;
@@ -63,33 +57,4 @@ public class ImageMetaData implements Serializable {
 
     @ApiModelProperty("界面展示的高级选项开关")
     private Boolean options;
-
-    public void setEnvironmentStr(String environmentStr) {
-        if (StringUtils.isNotEmpty(environmentStr)) {
-            this.environmentStr = environmentStr;
-            this.environment = new HashMap<>();
-            if (StringUtils.isNotEmpty(environmentStr)) {
-                String[] kvs = StringUtils.split(this.environmentStr, ";");
-                for (String kv : kvs) {
-                    String[] kvSplit = StringUtils.split(kv, "=");
-                    if (kvSplit.length == 2) {
-                        this.environment.put(kvSplit[0], kvSplit[1]);
-                    }
-                }
-            }
-        }
-    }
-
-    public void setEnvironment(Map<String, Object> environment) {
-        if (StringUtils.isEmpty(this.environmentStr)) {
-            this.environment = environment;
-            this.environmentStr = StringUtils.EMPTY;
-            if (this.environment != null) {
-                for (Map.Entry<String, Object> e : this.environment.entrySet()) {
-                    this.environmentStr += String.join(e.getKey(), e.getValue().toString());
-                }
-            }
-        }
-    }
-
 }
