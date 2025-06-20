@@ -102,6 +102,12 @@ public class BaseSceneParseResourceCenter {
                     device.setRam(node.getSrcElement().getRam());
                     device.setDisk(node.getSrcElement().getDisk());
                 }
+                // 容器导出也有自定义的flavor信息
+                if (BaseCloudPluginSceneElementModel.ImageType.CONTAINER.equals(node.getImageType())) {
+                    device.setCpu(node.getSrcElement().getCpu() == null ? 1 : node.getSrcElement().getCpu());
+                    device.setRam(node.getSrcElement().getRam() == null ? 512 : node.getSrcElement().getRam());
+                    device.setDisk(node.getSrcElement().getDisk() == null ? 10 : node.getSrcElement().getDisk());
+                }
                 if (node.getDockerParams() != null) {
                     var dockerParams = node.getDockerParams();
                     if (dockerParams.getTty() != null) {
