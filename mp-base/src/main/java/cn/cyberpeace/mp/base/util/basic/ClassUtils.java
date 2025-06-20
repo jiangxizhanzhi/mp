@@ -20,9 +20,7 @@ import org.springframework.beans.BeanWrapperImpl;
 
 import java.beans.PropertyDescriptor;
 import java.lang.invoke.SerializedLambda;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -432,7 +430,11 @@ public class ClassUtils {
      */
     public static <T> T createInstance(Class<T> clazz) {
         try {
-            return clazz.getDeclaredConstructor().newInstance();
+            Constructor<T> constructor = clazz.getDeclaredConstructor();
+            if (!Modifier.isPublic(constructor.getModifiers()) || !Modifier.isPublic(clazz.getModifiers())) {
+                throw new SecurityException("Non-public constructor access denied: " + clazz.getName());
+            }
+            return constructor.newInstance();
         } catch (Exception e) {
             throw new MpRuntimeException(clazz.getName() + " create simple instance failed: " + e.getMessage());
         }
