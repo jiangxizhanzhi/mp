@@ -433,10 +433,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         if (StringUtils.isNotBlank(modifyRequest.getPassword())) {
             String decryptedPwd = PasswordUtils.desDecrypt(modifyRequest.getPassword());
             userModel.setPassword(decryptedPwd);
+            userModel.setTokenSecret(null);
+            userModel.initDefault(UserModel::getTokenSecret);
         } else {
             userModel.setPassword(null);
+            userModel.setTokenSecret(null);
         }
-        userModel.setTokenSecret(null);
 
         updateCheckService.check(userModel);
         if (StringUtils.isNotBlank(userModel.getAvatar())) {
@@ -539,6 +541,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         }
 
         UserModel userUpdate = UserModel.builder().id(currentUser.getId()).password(newPwd).initCheck(UserModel.INT_CHECK_NO).build();
+        userUpdate.initDefault(UserModel::getTokenSecret);
         update(userUpdate);
         userCacheService.evictAllUserCache();
         return true;
@@ -560,6 +563,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         }
 
         UserModel userUpdate = UserModel.builder().id(userId).password(newPwd).initCheck(UserModel.INT_CHECK_NO).build();
+        userUpdate.initDefault(UserModel::getTokenSecret);
         update(userUpdate);
         userCacheService.evictAllUserCache();
         return true;
