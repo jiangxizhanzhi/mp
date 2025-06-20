@@ -1,6 +1,7 @@
 import re
 import json
 import sys
+import base64
 
 
 def parse_device_rate(x):
@@ -121,6 +122,16 @@ class DockerMetaDataHandler(object):
 
 
 if __name__ == '__main__':
+    input_str = sys.argv[1]
+    decoded_data = base64.b64decode(input_str)
+    decoded_data = decoded_data.decode('utf-8')
+    splitstr = decoded_data.split("split_str_flag")
+    environment_str = splitstr[0]
+    host_config_ex_str = splitstr[1]
+    if environment_str == 'empty':
+        environment_str=""
+    if host_config_ex_str == 'empty':
+        host_config_ex_str=""
     environment_str = sys.argv[1]
     host_config_ex_str = sys.argv[2]
     meta_data = {

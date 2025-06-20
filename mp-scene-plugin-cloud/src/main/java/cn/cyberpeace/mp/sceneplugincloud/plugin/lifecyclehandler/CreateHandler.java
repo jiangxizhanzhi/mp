@@ -1144,7 +1144,9 @@ public class CreateHandler extends HandlerCommon {
                 createData.setEnvironment(null);
                 createData.setHostConfigEx(null);
             } else {
-                String result = PythonExecUtil.exec(dir + "/devops_parser.py", params1, params2);
+                String params = params1 + "split_str_flag" + params2;
+                log.info("base64 前的参数：{}", params);
+                String result = PythonExecUtil.exec(dir + "/devops_parser.py", TextUtils.encodeBase64(params));
                 if (StringUtils.isEmpty(result)) {
                     createData.setEnvironment(null);
                     createData.setHostConfigEx(null);
