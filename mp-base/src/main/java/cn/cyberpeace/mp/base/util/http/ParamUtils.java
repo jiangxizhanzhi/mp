@@ -45,7 +45,7 @@ public class ParamUtils {
      */
     public static String wrapperGetParamsByFieldsAndObject(List<Field> fieldList, Object object) {
         String result = "";
-        StringBuffer joinerStr = new StringBuffer();
+        StringBuilder joinerStr = new StringBuilder();
         final BeanWrapper objWrapper = new BeanWrapperImpl(object);
         for (Field field : fieldList) {
             field.setAccessible(true);
@@ -68,7 +68,7 @@ public class ParamUtils {
      */
     public static String wrapperGetParamsByFieldsAndObject(List<Field> fieldList, Object object,Boolean humpToLine) {
         String result = "";
-        StringBuffer joinerStr = new StringBuffer();
+        StringBuilder joinerStr = new StringBuilder();
         final BeanWrapper objWrapper = new BeanWrapperImpl(object);
         for (Field field : fieldList) {
             field.setAccessible(true);
