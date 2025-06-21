@@ -65,7 +65,7 @@ public class SshUtil {
             }
 
             String fileName = "";
-            int lastIndexOfSlash = srcFilePath.lastIndexOf("/");
+            int lastIndexOfSlash = srcFilePath.lastIndexOf('/');
             if (lastIndexOfSlash == -1) {
                 fileName = srcFilePath;
             } else {
