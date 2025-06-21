@@ -463,7 +463,7 @@ public class FlowCsceneInstanceService {
     @Getter
     @Setter
     public static class FlowTaskTaskModelResult{
-        public List<FlowTaskTaskModel> addResult = new ArrayList<>();
-        public List<FlowTaskTaskModel> updateResult = new ArrayList<>();
+        private List<FlowTaskTaskModel> addResult = new ArrayList<>();
+        private List<FlowTaskTaskModel> updateResult = new ArrayList<>();
     }
 }
