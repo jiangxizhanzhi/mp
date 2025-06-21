@@ -18,6 +18,7 @@ import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -152,17 +153,14 @@ public class TaskPool {
      * @param tasks 任务
      * @param independent 任务间是否独立，false情况下任意一个任务的异常会取消掉所有队列任务
      * @param format 是否格式化标准任务
-     * @param poolTaskClass 任务类型
      * @return 任务执行结果
      */
     private <C, T, R, T1 extends BasePoolTask<C, T, R>> List<T1> invokeTasks(List<T> tasks, boolean independent,
-                                                                             boolean format, Class<T1> poolTaskClass) {
+                                                                             boolean format, Function<T, T1> taskFactory) {
         List<T1> poolTasks = new ArrayList<>();
         for (T t : tasks) {
-            T1 poolTask = ClassUtils.createInstance(poolTaskClass);
-            poolTask.setTask(t);
-            T1 apply = poolTask;
-            poolTasks.add(apply);
+            T1 poolTask = taskFactory.apply(t);
+            poolTasks.add(poolTask);
         }
         return invokePoolTasks(poolTasks, independent, format);
     }
@@ -265,74 +263,11 @@ public class TaskPool {
      * @return
      */
     public List<DefaultPoolTask> runTasks(List<Runnable> tasks, boolean independent, boolean format) {
-        return invokeTasks(tasks, independent, format, DefaultPoolTask.class);
-    }
-
-    /**
-     * runPoolTasks
-     *
-     * @param poolTasks
-     * @return
-     */
-    public <C, T extends PoolTask<C>> List<T> runPoolTasks(List<T> poolTasks) {
-        return runPoolTasks(poolTasks, false, true);
-    }
-
-    /**
-     * runPoolTasks
-     *
-     * @param poolTasks
-     * @param independent
-     * @param format
-     * @return
-     */
-    public <C, T extends PoolTask<C>> List<T> runPoolTasks(List<T> poolTasks, boolean independent, boolean format) {
-        return invokePoolTasks(poolTasks, independent, format);
-    }
-
-    /**
-     * callTasks
-     *
-     * @param tasks
-     * @return
-     */
-    public <R> List<DefaultResultPoolTask<R>> callTasks(List<Callable<R>> tasks) {
-        return callTasks(tasks, false, true);
-    }
-
-    /**
-     * callTasks
-     *
-     * @param tasks
-     * @param independent
-     * @param format
-     * @return
-     */
-    public <R> List<DefaultResultPoolTask<R>> callTasks(List<Callable<R>> tasks, boolean independent, boolean format) {
-        return invokeTasks(tasks, independent, format, new DefaultResultPoolTask<R>().getClass());
-    }
-
-    /**
-     * callPoolTasks
-     *
-     * @param poolTasks
-     * @return
-     */
-    public <C, R, T extends ResultPoolTask<C, R>> List<T> callPoolTasks(List<T> poolTasks) {
-        return callPoolTasks(poolTasks, false, true);
-    }
-
-    /**
-     * callPoolTasks
-     *
-     * @param poolTasks
-     * @param independent
-     * @param format
-     * @return
-     */
-    public <C, R, T extends ResultPoolTask<C, R>> List<T> callPoolTasks(List<T> poolTasks, boolean independent,
-                                                                        boolean format) {
-        return invokePoolTasks(poolTasks, independent, format);
+        return invokeTasks(tasks, independent, format,  t -> {
+            DefaultPoolTask task = new DefaultPoolTask();
+            task.setTask(t);
+            return task;
+        });
     }
 
 

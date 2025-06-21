@@ -423,24 +423,6 @@ public class ClassUtils {
     }
 
     /**
-     * createInstance
-     *
-     * @param clazz
-     * @return
-     */
-    public static <T> T createInstance(Class<T> clazz) {
-        try {
-            Constructor<T> constructor = clazz.getDeclaredConstructor();
-            if (!Modifier.isPublic(constructor.getModifiers()) || !Modifier.isPublic(clazz.getModifiers())) {
-                throw new SecurityException("Non-public constructor access denied: " + clazz.getName());
-            }
-            return constructor.newInstance();
-        } catch (Exception e) {
-            throw new MpRuntimeException(clazz.getName() + " create simple instance failed: " + e.getMessage());
-        }
-    }
-
-    /**
      * getFuncName
      *
      * @param func
