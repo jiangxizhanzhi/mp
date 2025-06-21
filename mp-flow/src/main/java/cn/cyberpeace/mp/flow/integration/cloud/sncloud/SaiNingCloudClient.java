@@ -39,7 +39,7 @@ public class SaiNingCloudClient implements ICloudClient {
         snParams.setId(id);
         try {
             String url = this.cloudHost + VIRTUAL_MACHINE_GET_URL;
-            url.replace("{instance_id}", snParams.getId());
+            url = url.replace("{instance_id}", snParams.getId());
             var resp = HttpUtils.sendGet(url);
             var rsp = JsonCommon.snakeParse(resp, new TypeReference<CloudResponse<GetVirtualMachineResult>>() {
             });

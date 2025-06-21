@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.flow.bo.FlowActuatorQueryParams;
 import cn.cyberpeace.mp.flow.bo.StartFlowActuatorParams;
 import cn.cyberpeace.mp.flow.integration.addtask.AddTaskByLocalFlowFacade;
+import cn.cyberpeace.mp.flow.integration.cloud.base.DeleteVirtualMachineResult;
 import cn.cyberpeace.mp.flow.integration.cloud.base.ICloudClient;
 import cn.cyberpeace.mp.flow.model.FlowActuatorModel;
 import cn.cyberpeace.mp.flow.repository.FlowActuatorMapper;
@@ -78,10 +79,10 @@ public class FlowActuatorService extends BaseModelServiceImpl<FlowActuatorModel,
     @Override
     public void loadListFilterCondition(HumanCondition humanCondition, FlowActuatorQueryParams queryParams) {
         if (StringUtils.isNotEmpty(queryParams.getCsceneInstanceId())) {
-            humanCondition.filterEqual(FlowActuatorModel::getCsceneInstanceId, queryParams.getCsceneInstanceId());
+            humanCondition = humanCondition.filterEqual(FlowActuatorModel::getCsceneInstanceId, queryParams.getCsceneInstanceId());
         }
         if (queryParams.getStatus() != null) {
-            humanCondition.filterEqual(FlowActuatorModel::getStatus, queryParams.getStatus());
+            humanCondition = humanCondition.filterEqual(FlowActuatorModel::getStatus, queryParams.getStatus());
         }
     }
 
@@ -125,8 +126,8 @@ public class FlowActuatorService extends BaseModelServiceImpl<FlowActuatorModel,
 
     public void deleteFlowActuator(String actuatorId) {
         FlowActuatorModel model = flowActuatorMapper.get(actuatorId);
-        cloudClient.deleteVirtualMachine(model.getResourceId());
-        flowActuatorMapper.delete(actuatorId);
+        final DeleteVirtualMachineResult deleteVirtualMachineResult = cloudClient.deleteVirtualMachine(model.getResourceId());
+        final boolean delete = flowActuatorMapper.delete(actuatorId);
     }
 
     private FlowActuatorResponse convert2FlowActuatorResponse(FlowActuatorModel model) {

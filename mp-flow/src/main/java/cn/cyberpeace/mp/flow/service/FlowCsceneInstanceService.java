@@ -340,7 +340,7 @@ public class FlowCsceneInstanceService {
         // 创建流量任务
         var flowTaskTaskModelList = this.createFlowTasks(actuatorId, addFlowTaskParams.getCsceneInstanceId(), addFlowTaskParams.getNodeId(), addFlowTaskParams.getNodeName(), "", addFlowTaskParams.getTargetIp(), addFlowTaskParams.getNetworkId(), remoteFlowInfos);
         // 创建任务配置
-        this.createTaskConfigs(flowTaskTaskModelList, addFlowTaskParams.getTasks(), remoteFlowInfos);
+        final List<FlowTaskConfModel> taskConfigs = this.createTaskConfigs(flowTaskTaskModelList, addFlowTaskParams.getTasks(), remoteFlowInfos);
         return flowTaskTaskModelList;
     }
 
@@ -358,7 +358,7 @@ public class FlowCsceneInstanceService {
         // 删除旧配置
         flowTaskConfMapper.filterDelete(new HumanCondition().filterIn(FlowTaskConfModel::getTaskId, taskIds.toArray(new String[]{})));
         // 加新配置
-        this.createTaskConfigs(updateModels, addFlowTaskParams.getTasks(), remoteFlowInfos);
+        final List<FlowTaskConfModel> taskConfigs = this.createTaskConfigs(updateModels, addFlowTaskParams.getTasks(), remoteFlowInfos);
         return updateModels;
     }
 

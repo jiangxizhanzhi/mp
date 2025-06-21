@@ -280,7 +280,7 @@ public class TextResourceBase {
                 String fieldValue = entry.getValue();
                 Class<? extends TextResourceConverter> converterClass = fieldConverterMap.getOrDefault(fieldName, null);
                 Object convertValue = converterClass == null ? fieldValue : BeanCommon.getBean(converterClass).convert(fieldValue);
-                ClassUtils.setObjFieldValue(obj, fieldName, convertValue);
+                final boolean b = ClassUtils.setObjFieldValue(obj, fieldName, convertValue);
             }
             objs.add(obj);
         }

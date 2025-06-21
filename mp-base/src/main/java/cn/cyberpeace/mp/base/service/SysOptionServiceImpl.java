@@ -75,16 +75,16 @@ public class SysOptionServiceImpl extends BaseModelServiceImpl<OptionModel, Opti
     @Override
     public void loadListFilterCondition(HumanCondition humanCondition, OptionQueryParams queryParams) {
         if (StringUtils.isNotEmpty(queryParams.getType())) {
-            humanCondition.filterEqual("type", queryParams.getType());
+            humanCondition = humanCondition.filterEqual("type", queryParams.getType());
         }
 
         if (LocaleUtil.chineseLocalFlag()) {
             if (StringUtils.isNotEmpty(queryParams.getZhName())) {
-                humanCondition.filterContains("zhName", queryParams.getZhName());
+                humanCondition = humanCondition.filterContains("zhName", queryParams.getZhName());
             }
         } else {
             if (StringUtils.isNotEmpty(queryParams.getEnName())) {
-                humanCondition.filterContains("enName", queryParams.getEnName());
+                humanCondition = humanCondition.filterContains("enName", queryParams.getEnName());
             }
         }
     }
@@ -271,9 +271,9 @@ public class SysOptionServiceImpl extends BaseModelServiceImpl<OptionModel, Opti
     @Override
     public List<OptionModel> findByIds(List<String> ids) {
         log.info("SysOptionServiceImpl.findByIds begin. ids:{}", ids);
-        HumanCondition condition = new HumanCondition();
-        condition.filterIn(OptionModel::getId, ids.toArray(new String[ids.size()]));
-        condition.orderBy(OptionModel::getSort);
+        HumanCondition condition = new HumanCondition()
+        .filterIn(OptionModel::getId, ids.toArray(new String[ids.size()]))
+        .orderBy(OptionModel::getSort);
         List<OptionModel> optionModels = getModelMapper().list(condition);
         log.info("SysOptionServiceImpl.findByIds end. optionModels:{}", optionModels);
         return optionModels;

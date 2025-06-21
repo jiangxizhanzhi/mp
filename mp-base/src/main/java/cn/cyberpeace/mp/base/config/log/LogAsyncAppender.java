@@ -44,7 +44,7 @@ public class LogAsyncAppender extends AsyncAppender {
         if (eventObject instanceof LoggingEvent) {
             // 需要先置空 mdcPropertyMap 字段,然后重新生成一次,否则获取不到上一步设置的CALL_CHAIN_ID
             LoggingEvent loggingEvent = (LoggingEvent) eventObject;
-            ClassUtils.setFieldValue(mdcPropertyMapField, loggingEvent, null);
+            final boolean b = ClassUtils.setFieldValue(mdcPropertyMapField, loggingEvent, null);
             loggingEvent.getMDCPropertyMap();
         }
         super.preprocess(eventObject);

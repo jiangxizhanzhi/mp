@@ -18,6 +18,7 @@ import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.filelistener.FileModifyListener;
 import cn.cyberpeace.mp.base.util.mptool.FileUtil;
+import cn.cyberpeace.mp.base.util.thread.taskpool.DefaultPoolTask;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -138,7 +139,7 @@ public class LocalCallServerListener extends FileModifyListener {
             tasks.add(() -> call(taskMethodName, taskMethodArgs));
         }
 
-        TaskCommon.runTasks(tasks, true, true);
+        final List<DefaultPoolTask> defaultPoolTasks = TaskCommon.runTasks(tasks, true, true);
     }
 
     /**

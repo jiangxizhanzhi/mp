@@ -139,10 +139,10 @@ public class StatCommon {
     public static <T> Map<String, Map<T, Object>> groupCalc(
             BaseModelMapper<?> mapper, HumanCondition condition, String groupFieldName,
             Map<String, Function<List<Object>, Object>> fieldCalcMap) {
-        condition.selectAs(groupFieldName, groupFieldName).groupBy(groupFieldName);
+        condition = condition.selectAs(groupFieldName, groupFieldName).groupBy(groupFieldName);
         Set<String> fieldNames = fieldCalcMap.keySet();
         for (String string : fieldNames) {
-            condition.selectAs(string, string);
+            condition = condition.selectAs(string, string);
         }
 
         List<Map<String, Object>> result = mapper.originList(condition);
@@ -268,7 +268,7 @@ public class StatCommon {
                                            Map<String, Function<List<Object>, Object>> fieldCalcMap) {
         Set<String> fieldNames = fieldCalcMap.keySet();
         for (String string : fieldNames) {
-            condition.selectAs(string, string);
+            condition = condition.selectAs(string, string);
         }
         List<Map<String, Object>> result = mapper.originList(condition);
         Map<String, List<Object>> fieldValuesMap = new HashMap<>();

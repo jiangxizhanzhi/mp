@@ -166,7 +166,7 @@ public class TopoCloudClient implements ICloudClient {
     public DeleteVirtualMachineResult deleteVirtualMachine(String id) {
         Map<String, String> data = Map.of("id", id);
         try {
-            HttpUtils.sendHttpDelete(DELETE_TOPO_URL, JsonCommon.snakeStringify(data), HEADER);
+            final String s = HttpUtils.sendHttpDelete(DELETE_TOPO_URL, JsonCommon.snakeStringify(data), HEADER);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

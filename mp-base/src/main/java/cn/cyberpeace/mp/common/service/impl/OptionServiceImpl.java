@@ -70,10 +70,10 @@ public class OptionServiceImpl extends BaseModelServiceImpl<OptionModel, OptionM
     @Override
     public void loadListFilterCondition(HumanCondition humanCondition, OptionQueryParams queryParams) {
         if (StringUtils.isNotEmpty(queryParams.getType())) {
-            humanCondition.filterEqual("type", queryParams.getType());
+            humanCondition = humanCondition.filterEqual("type", queryParams.getType());
         }
         if (StringUtils.isNotEmpty(queryParams.getZhName())) {
-            humanCondition.filterContains("zhName", queryParams.getZhName());
+            humanCondition = humanCondition.filterContains("zhName", queryParams.getZhName());
         }
     }
 
@@ -98,9 +98,9 @@ public class OptionServiceImpl extends BaseModelServiceImpl<OptionModel, OptionM
 
     @Override
     public List<OptionModel> findByType(String type) {
-        HumanCondition condition = new HumanCondition();
-        condition.filterEqual(OptionModel::getType, type);
-        condition.orderBy(OptionModel::getSort);
+        HumanCondition condition = new HumanCondition()
+        .filterEqual(OptionModel::getType, type)
+        .orderBy(OptionModel::getSort);
         List<OptionModel> optionModels = getModelMapper().list(condition);
         return optionModels;
     }

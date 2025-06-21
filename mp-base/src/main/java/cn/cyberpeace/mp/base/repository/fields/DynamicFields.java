@@ -148,14 +148,14 @@ public class DynamicFields {
 
         if (obj instanceof Object[]) {
             for (Object objItem: (Object[]) obj) {
-                applyWithNull(objItem);
+                final Object o = applyWithNull(objItem);
             }
             return obj;
         }
 
         if (obj instanceof List<?>) {
             for (Object o : ((List<?>) obj)) {
-                applyWithNull(o);
+                final Object o1 = applyWithNull(o);
             }
             return obj;
         }
@@ -169,7 +169,7 @@ public class DynamicFields {
                 if (fieldFlag == null || (fieldFlag instanceof Boolean && !(boolean) fieldFlag)) {
                     actualObj.put(fieldName, null);
                 } else if (fieldFlag instanceof DynamicFields) {
-                    ((DynamicFields) fieldFlag).applyWithNull(fieldValue);
+                    final Object o = ((DynamicFields) fieldFlag).applyWithNull(fieldValue);
                 }
             }
         } else {
@@ -222,7 +222,7 @@ public class DynamicFields {
      */
     public void setFields(String[] fields) {
         this.resetFieldsMap();
-        this.merge(fields);
+        final DynamicFields merge = this.merge(fields);
     }
 
     /**
@@ -232,7 +232,7 @@ public class DynamicFields {
      */
     public void setFields(List<String> fields) {
         this.resetFieldsMap();
-        this.merge(fields);
+        final DynamicFields merge = this.merge(fields);
     }
 
     /**
@@ -251,7 +251,7 @@ public class DynamicFields {
      */
     public void setFieldsMap(Map<String, Object> fieldsMap) {
         this.resetFieldsMap();
-        this.merge(fieldsMap);
+        final DynamicFields merge = this.merge(fieldsMap);
     }
 
     /**
@@ -296,7 +296,7 @@ public class DynamicFields {
     public void merge(String field, String[] value) {
         Object originSubFields = this.fieldsMap.getOrDefault(field, null);
         if (originSubFields instanceof DynamicFields) {
-            ((DynamicFields) originSubFields).merge(value);
+            final DynamicFields merge = ((DynamicFields) originSubFields).merge(value);
         } else {
             this.fieldsMap.put(field, new DynamicFields(value));
         }
@@ -311,7 +311,7 @@ public class DynamicFields {
     public void merge(String field, List<String> value) {
         Object originSubFields = this.fieldsMap.getOrDefault(field, null);
         if (originSubFields instanceof DynamicFields) {
-            ((DynamicFields) originSubFields).merge(value);
+            final DynamicFields merge = ((DynamicFields) originSubFields).merge(value);
         } else {
             this.fieldsMap.put(field, new DynamicFields(value));
         }
@@ -326,7 +326,7 @@ public class DynamicFields {
     public void merge(String field, Map<String, Object> value) {
         Object originSubFields = this.fieldsMap.getOrDefault(field, null);
         if (originSubFields instanceof DynamicFields) {
-            ((DynamicFields) originSubFields).merge(value);
+            final DynamicFields merge = ((DynamicFields) originSubFields).merge(value);
         } else {
             this.fieldsMap.put(field, new DynamicFields(value));
         }
@@ -341,7 +341,7 @@ public class DynamicFields {
     public void merge(String field, DynamicFields value) {
         Object originSubFields = this.fieldsMap.getOrDefault(field, null);
         if (originSubFields instanceof DynamicFields) {
-            ((DynamicFields) originSubFields).merge(value);
+            final DynamicFields merge = ((DynamicFields) originSubFields).merge(value);
         } else {
             this.fieldsMap.put(field, new DynamicFields(value));
         }
@@ -437,7 +437,7 @@ public class DynamicFields {
             return this;
         }
 
-        merge(targetDynamicFields.getFieldsMap());
+        final DynamicFields merge = merge(targetDynamicFields.getFieldsMap());
         return this;
     }
 

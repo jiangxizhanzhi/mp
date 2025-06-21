@@ -23,6 +23,7 @@ import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.base.util.basic.CollectionUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.base.util.thread.taskpool.DefaultPoolTask;
 import lombok.Data;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -432,7 +433,7 @@ public interface BaseModelMapper<M extends BaseModel> {
      */
     @Recommendation
     default M first(HumanCondition humanCondition) {
-        humanCondition.slice(0, 1);
+        humanCondition = humanCondition.slice(0, 1);
         List<M> objs = list(humanCondition);
         if (objs.isEmpty()) {
             return null;
@@ -446,7 +447,7 @@ public interface BaseModelMapper<M extends BaseModel> {
      */
     @Recommendation
     default Map<String, Object> originFirst(HumanCondition humanCondition) {
-        humanCondition.slice(0, 1);
+        humanCondition = humanCondition.slice(0, 1);
         List<Map<String, Object>> objs = originList(humanCondition);
         if (objs.isEmpty()) {
             return null;
@@ -578,7 +579,7 @@ public interface BaseModelMapper<M extends BaseModel> {
             });
         });
         if (concurrent) {
-            TaskCommon.runTasks(tasks);
+            final List<DefaultPoolTask> defaultPoolTasks = TaskCommon.runTasks(tasks);
         } else {
             for (Runnable task : tasks) {
                 task.run();
@@ -636,7 +637,7 @@ public interface BaseModelMapper<M extends BaseModel> {
             });
         });
         if (concurrent) {
-            TaskCommon.runTasks(tasks);
+            final List<DefaultPoolTask> defaultPoolTasks = TaskCommon.runTasks(tasks);
         } else {
             for (Runnable task : tasks) {
                 task.run();
@@ -857,7 +858,7 @@ public interface BaseModelMapper<M extends BaseModel> {
             });
         });
         if (concurrent) {
-            TaskCommon.runTasks(tasks);
+            final List<DefaultPoolTask> defaultPoolTasks = TaskCommon.runTasks(tasks);
         } else {
             for (Runnable task : tasks) {
                 task.run();
@@ -945,7 +946,7 @@ public interface BaseModelMapper<M extends BaseModel> {
             });
         });
         if (concurrent) {
-            TaskCommon.runTasks(tasks);
+            final List<DefaultPoolTask> defaultPoolTasks = TaskCommon.runTasks(tasks);
         } else {
             for (Runnable task : tasks) {
                 task.run();

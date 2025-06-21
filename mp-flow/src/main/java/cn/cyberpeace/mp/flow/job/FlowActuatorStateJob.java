@@ -113,7 +113,7 @@ public class FlowActuatorStateJob {
             }
         }
         if (StringUtils.isEmpty(m.getIp())) {
-            log.error("更新ip失败 , actuator id is {}");
+            log.error("更新ip失败 , actuator id is {}", m.getId());
             return;
         }
         log.info("执行器更新ip结束 {} , {} ", m.getId(), m.getIp());

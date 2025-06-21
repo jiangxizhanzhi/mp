@@ -138,8 +138,8 @@ package cn.cyberpeace.mp.common.util;
                          DefaultImgDirEnum.SAFETY_EQUIPMENT.getGroup(), DefaultImgDirEnum.COMMON_TARGET.getGroup());
              }
 
-             HumanCondition humanCondition = new HumanCondition();
-             humanCondition.filterIn(LocalFileMappingModel::getGroup, groupList.toArray());
+             HumanCondition humanCondition = new HumanCondition()
+             .filterIn(LocalFileMappingModel::getGroup, groupList.toArray());
              List<LocalFileMappingModel> fileMappingModels = localFileMappingMapper.list(humanCondition);
              if (CollectionUtils.isNotEmpty(fileMappingModels)) {
                  modelList = fileMappingModels;

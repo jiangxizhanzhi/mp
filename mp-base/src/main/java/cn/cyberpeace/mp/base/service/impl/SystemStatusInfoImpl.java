@@ -95,7 +95,7 @@ public class SystemStatusInfoImpl implements ISystemStatusInfo {
      */
     @PostConstruct
     public void print(){
-        getThreadPoolInfos();
+        final List<ThreadPoolInfo> threadPoolInfos = getThreadPoolInfos();
     }
 
 }

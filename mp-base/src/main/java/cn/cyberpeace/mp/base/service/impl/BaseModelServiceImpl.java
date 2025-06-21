@@ -78,7 +78,7 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
         if (lastSearchFields != null) {
             HumanCondition.OrConditionProxy orCondition = humanCondition.filterOrStart();
             for (String searchField : lastSearchFields) {
-                orCondition.orIContains(searchField, search);
+                orCondition = orCondition.orIContains(searchField, search);
             }
             final HumanCondition humanCondition1 = orCondition.filterOrEnd();
         }
@@ -93,7 +93,7 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
     public HumanCondition getHumanCondition(String[] selectFields) {
         HumanCondition humanCondition = new HumanCondition();
         if (selectFields != null) {
-            humanCondition.select(selectFields);
+            humanCondition = humanCondition.select(selectFields);
         }
         return humanCondition;
     }
@@ -120,9 +120,9 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
             humanCondition = humanCondition.filterIn(BaseModel::getId, ids);
         }
         if (exclude != null && exclude.length > 0) {
-            humanCondition.filterNotIn(BaseModel::getId, exclude);
+            humanCondition = humanCondition.filterNotIn(BaseModel::getId, exclude);
         }
-        humanCondition.pagination(page, pageSize);
+        final HumanCondition pagination = humanCondition.pagination(page, pageSize);
         handleSearchCondition(humanCondition, search, searchFields);
         F actualModelFields = getModelFields();
         if (actualModelFields != null) {

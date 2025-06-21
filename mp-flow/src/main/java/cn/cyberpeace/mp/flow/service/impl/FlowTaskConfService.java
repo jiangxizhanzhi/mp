@@ -47,8 +47,8 @@ public class FlowTaskConfService extends BaseModelServiceImpl<FlowTaskConfModel,
      */
     public FlowTaskConfModel findByTaskId(String taskId) {
         log.info("FlowTaskConfServiceImpl.findByTaskId begin. taskId:{}", taskId);
-        HumanCondition condition = new HumanCondition();
-        condition.filterEqual(FlowTaskConfModel::getTaskId, taskId);
+        HumanCondition condition = new HumanCondition()
+        .filterEqual(FlowTaskConfModel::getTaskId, taskId);
         List<FlowTaskConfModel> flowTaskConfModelList = getModelMapper().list(condition);
         if (CollectionUtils.isNotEmpty(flowTaskConfModelList)) {
             FlowTaskConfModel result = flowTaskConfModelList.get(0);
@@ -60,8 +60,8 @@ public class FlowTaskConfService extends BaseModelServiceImpl<FlowTaskConfModel,
     }
 
     public List<FlowTaskConfModel> listByTaskIds(List<String> taskIds) {
-        HumanCondition condition = new HumanCondition();
-        condition.filterIn(FlowTaskConfModel::getTaskId, taskIds.toArray());
+        HumanCondition condition = new HumanCondition()
+        .filterIn(FlowTaskConfModel::getTaskId, taskIds.toArray());
 
         return getModelMapper().list(condition);
     }

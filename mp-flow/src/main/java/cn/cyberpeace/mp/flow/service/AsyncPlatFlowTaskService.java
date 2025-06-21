@@ -285,7 +285,7 @@ public class AsyncPlatFlowTaskService {
             flowTaskStartList.add(flowTaskStart);
         }
 
-        new FlowActuator(flowActuatorModel.getIp(), flowTaskTaskService).startTasks(runType, flowTaskStartList, notRunningTaskIds);
+        final boolean b = new FlowActuator(flowActuatorModel.getIp(), flowTaskTaskService).startTasks(runType, flowTaskStartList, notRunningTaskIds);
         return new ServiceResult<>(true);
     }
 

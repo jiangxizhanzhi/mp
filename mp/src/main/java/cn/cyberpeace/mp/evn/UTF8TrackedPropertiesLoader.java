@@ -123,7 +123,7 @@ public class UTF8TrackedPropertiesLoader {
         boolean previousWhitespace = false;
         while (!reader.isEndOfLine()) {
             if (reader.isPropertyDelimiter()) {
-                reader.read();
+                final boolean read = reader.read();
                 return buffer.toString();
             }
             if (!reader.isWhiteSpace() && previousWhitespace) {
@@ -131,7 +131,7 @@ public class UTF8TrackedPropertiesLoader {
             }
             previousWhitespace = reader.isWhiteSpace();
             buffer.append(reader.getCharacter());
-            reader.read();
+            final boolean read = reader.read();
         }
         return buffer.toString();
     }
@@ -140,12 +140,12 @@ public class UTF8TrackedPropertiesLoader {
             throws IOException {
         buffer.setLength(0);
         while (reader.isWhiteSpace() && !reader.isEndOfLine()) {
-            reader.read();
+            final boolean read = reader.read();
         }
         TextResourceOrigin.Location location = reader.getLocation();
         while (!reader.isEndOfLine() && !(splitLists && reader.isListDelimiter())) {
             buffer.append(reader.getCharacter());
-            reader.read();
+            final boolean read = reader.read();
         }
         Origin origin = new TextResourceOrigin(this.resource, location);
         return OriginTrackedValue.of(buffer.toString(), origin);
@@ -160,14 +160,14 @@ public class UTF8TrackedPropertiesLoader {
         result = result && readAndExpect(reader, reader::isHyphenCharacter);
         result = result && readAndExpect(reader, reader::isHyphenCharacter);
         if (!reader.isEndOfLine()) {
-            reader.read();
+            final boolean read = reader.read();
             reader.skipWhitespace();
         }
         return result && reader.isEndOfLine();
     }
 
     private boolean readAndExpect(UTF8TrackedPropertiesLoader.CharacterReader reader, BooleanSupplier check) throws IOException {
-        reader.read();
+        final boolean read = reader.read();
         return check.getAsBoolean();
     }
 
@@ -255,7 +255,7 @@ public class UTF8TrackedPropertiesLoader {
             }
             else if (this.character == '\n') {
                 this.columnNumber = -1;
-                read(true);
+                final boolean readBoolean = read(true);
             }
             else if (this.character == 'u') {
                 readUnicode();

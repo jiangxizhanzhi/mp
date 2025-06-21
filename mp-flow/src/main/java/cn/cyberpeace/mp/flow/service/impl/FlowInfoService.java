@@ -203,7 +203,7 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
                 DelFlowCollectionRelRequest delRelRequest = new DelFlowCollectionRelRequest();
                 delRelRequest.setCollectionId(rel.getCollectionId());
                 delRelRequest.setFlowIds(Collections.singletonList(id));
-                flowCollectionService.delCollectionRel(delRelRequest);
+                final ServiceResult<Integer> integerServiceResult = flowCollectionService.delCollectionRel(delRelRequest);
             }
         }
 
@@ -263,7 +263,7 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
                 DelFlowCollectionRelRequest delRelRequest = new DelFlowCollectionRelRequest();
                 delRelRequest.setCollectionId(collectionId);
                 delRelRequest.setFlowIds(flowIds);
-                flowCollectionService.delCollectionRel(delRelRequest);
+                final ServiceResult<Integer> integerServiceResult = flowCollectionService.delCollectionRel(delRelRequest);
             }
         }
 
@@ -286,7 +286,7 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
                     attackFlowIds.add(id);
                 }
                 // 根据流量id批量删除对应的脚本参数信息
-                flowScriptParamService.deleteByFlowIds(attackFlowIds);
+                final int i = flowScriptParamService.deleteByFlowIds(attackFlowIds);
             }
 
             // 批量删除流量信息
@@ -895,7 +895,7 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
             // 更新脚本参数时，先删除旧参数，再重新保存新参数
             List<FlowScriptParamModel> scriptParamModels = modifyRequest.getScriptParamModels();
             if (CollectionUtils.isNotEmpty(scriptParamModels)) {
-                flowScriptParamService.deleteByFlowId(modifyRequest.getId());
+                final int i = flowScriptParamService.deleteByFlowId(modifyRequest.getId());
                 for (FlowScriptParamModel model : scriptParamModels) {
                     model.setFlowId(modifyRequest.getId());
                 }
@@ -1221,7 +1221,7 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
             FlowInfoModel existFlowInfoModel = getModelMapper().selectByTitle(fileName);
             if (Objects.nonNull(existFlowInfoModel)) {
                 // 删除重名流量文件
-                this.deleteFlowInfo(existFlowInfoModel.getId(), false);
+                final ServiceResult<Boolean> booleanServiceResult = this.deleteFlowInfo(existFlowInfoModel.getId(), false);
             }
 
             flowInfoModel.setFileName(pcapFile.getName());
@@ -1350,7 +1350,7 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
                     }
 
                     // 降序排列
-                    this.sortProtocol(protocolList);
+                    final List<ProtocolBO> protocolBOS = this.sortProtocol(protocolList);
                     return protocolList;
                 }
             }
@@ -1411,7 +1411,7 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
         } catch (Exception e) {
             log.error("exec error:", e);
         } finally {
-            if (tmpFile != null && tmpFile.exists()) {
+            if (tmpFile.exists()) {
                 if (!tmpFile.delete()) {
                     log.error(pcapPath + " delete error");
                 }
@@ -1419,7 +1419,7 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
         }
 
         // 降序排列
-        this.sortProtocol(protocolList);
+        final List<ProtocolBO> protocolBOS = this.sortProtocol(protocolList);
         return protocolList;
     }
 
@@ -1483,7 +1483,7 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
 
             if (Objects.nonNull(srcFile) && srcFile.exists()) {
                 try {
-                    srcFile.delete();
+                    final boolean delete = srcFile.delete();
                 } catch (Exception e) {
                     log.error("tmp pcap file delete error");
                 }
@@ -1491,7 +1491,7 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
         }
 
         // 降序排列
-        this.sortProtocol(protocolList);
+        final List<ProtocolBO> protocolBOS = this.sortProtocol(protocolList);
 
         // 初始化保存流量协议
         this.initSaveProtcols(protocolList, flowInfoModel.getId(), flowInfoModel.getPcapFile());
@@ -1591,14 +1591,14 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
         if (CollectionUtils.isEmpty(categoryList)) {
             return false;
         }
-        HumanCondition condition = new HumanCondition();
-        condition.filterIn(FlowInfoModel::getCategory, categoryList.toArray(new String[categoryList.size()]));
+        HumanCondition condition = new HumanCondition()
+        .filterIn(FlowInfoModel::getCategory, categoryList.toArray(new String[categoryList.size()]));
         List<FlowInfoModel> flowInfoModelList = getModelMapper().list(condition);
         if (CollectionUtils.isNotEmpty(flowInfoModelList)) {
             return true;
         }
         HumanCondition conditionCollection = new HumanCondition();
-        conditionCollection.filterIn(FlowCollectionModel::getCategory, categoryList.toArray(new String[categoryList.size()]));
+        final HumanCondition humanCondition = conditionCollection.filterIn(FlowCollectionModel::getCategory, categoryList.toArray(new String[categoryList.size()]));
         List<FlowCollectionModel> flowCollectionModelList = flowCollectionMapper.list(conditionCollection);
         if (CollectionUtils.isNotEmpty(flowCollectionModelList)) {
             return true;
@@ -1693,7 +1693,7 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
         } finally {
             if (Objects.nonNull(srcFile) && srcFile.exists()) {
                 try {
-                    srcFile.delete();
+                    final boolean delete = srcFile.delete();
                 } catch (Exception e) {
                     log.error("pcap src file delete error");
                 }
@@ -1701,7 +1701,7 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
 
             if (Objects.nonNull(dstFile) && dstFile.exists()) {
                 try {
-                    dstFile.delete();
+                    final boolean delete = dstFile.delete();
                 } catch (Exception e) {
                     log.error("pcap dst file delete error");
                 }

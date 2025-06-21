@@ -50,7 +50,7 @@ public class FlowCollectionRelService extends BaseModelServiceImpl<FlowCollectio
     @Override
     public void loadListFilterCondition(HumanCondition humanCondition, FlowCollectionRelQueryParams queryParams) {
         if (StringUtils.isNotBlank(queryParams.getCollectionId())) {
-            humanCondition.filterEqual("collectionId", queryParams.getCollectionId());
+            humanCondition = humanCondition.filterEqual("collectionId", queryParams.getCollectionId());
         }
     }
 
@@ -69,9 +69,9 @@ public class FlowCollectionRelService extends BaseModelServiceImpl<FlowCollectio
      * @return
      */
     public ServiceResult<Integer> delCollectionRel(DelFlowCollectionRelRequest delRequest) {
-        HumanCondition condition = new HumanCondition();
-        condition.filterEqual("collectionId", delRequest.getCollectionId());
-        condition.filterIn("flowId", delRequest.getFlowIds().toArray(new String[0]));
+        HumanCondition condition = new HumanCondition()
+        .filterEqual("collectionId", delRequest.getCollectionId())
+        .filterIn("flowId", delRequest.getFlowIds().toArray(new String[0]));
         int count = getModelMapper().filterDelete(condition);
         return ResultCommon.success(count);
     }
@@ -82,8 +82,7 @@ public class FlowCollectionRelService extends BaseModelServiceImpl<FlowCollectio
      * @return
      */
     public Integer delByCollectionId(String collectionId) {
-        HumanCondition condition = new HumanCondition();
-        condition.filterEqual(FlowCollectionRelModel::getCollectionId, collectionId);
+        HumanCondition condition = new HumanCondition().filterEqual(FlowCollectionRelModel::getCollectionId, collectionId);
         return getModelMapper().filterDelete(condition);
     }
 

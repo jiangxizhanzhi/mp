@@ -74,7 +74,7 @@ public class FlowCollectionService extends BaseModelServiceImpl<FlowCollectionMo
     @Override
     public void loadListFilterCondition(HumanCondition humanCondition, FlowCollectionQueryParams queryParams) {
         if (Objects.nonNull(queryParams.getCategory())) {
-            humanCondition.filterEqual("category", queryParams.getCategory());
+            humanCondition = humanCondition.filterEqual("category", queryParams.getCategory());
         }
     }
 
@@ -274,7 +274,7 @@ public class FlowCollectionService extends BaseModelServiceImpl<FlowCollectionMo
             }
             relRequest.setFlowIds(flowIds);
         }
-        this.addCollectionRel(relRequest);
+        final ServiceResult<Integer> integerServiceResult = this.addCollectionRel(relRequest);
         return ResultCommon.success(flowCollectionModel);
     }
 
@@ -308,7 +308,7 @@ public class FlowCollectionService extends BaseModelServiceImpl<FlowCollectionMo
                 flowIds.add(id);
             }
             relRequest.setFlowIds(flowIds);
-            this.addCollectionRel(relRequest);
+            final ServiceResult<Integer> integerServiceResult = this.addCollectionRel(relRequest);
         }
         return ResultCommon.success(flowCollectionModel);
     }

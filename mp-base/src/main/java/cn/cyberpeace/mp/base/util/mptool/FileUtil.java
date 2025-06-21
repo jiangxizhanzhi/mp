@@ -272,7 +272,7 @@ public class FileUtil {
      * fullFileOrDirPath – 文件或者目录的路径
      */
     public static void del(String filePath) {
-        del(file(filePath));
+        final boolean del = del(file(filePath));
     }
 
     public static boolean del(File file) {
@@ -472,7 +472,7 @@ public class FileUtil {
      * isOverride – 是否覆盖目标文件
      */
     public static void move(File src, File target, boolean isOverride) {
-        move(src.toPath(), target.toPath(), isOverride);
+        final Path move = move(src.toPath(), target.toPath(), isOverride);
     }
 
     public static Path move(Path src, Path target, boolean isOverride) {
@@ -481,7 +481,7 @@ public class FileUtil {
             target = target.resolve(src.getFileName());
         }
         // 自动创建目标的父目录
-        mkParentDirs(target);
+        final Path path = mkParentDirs(target);
         try {
             return Files.move(src, target, options);
         } catch (IOException e) {

@@ -87,9 +87,9 @@ public class BaseModel {
                 log.error("Invoke initDefaultMethod on instance {} for {} failed: {}", this, fieldName, e.getMessage());
             }
         } else if (defaultValue instanceof Generator) {
-            ClassUtils.setFieldValue(field, this, ((Generator) defaultValue).generate());
+            final boolean b = ClassUtils.setFieldValue(field, this, ((Generator) defaultValue).generate());
         } else {
-            ClassUtils.setFieldValue(field, this, defaultValue);
+            final boolean b = ClassUtils.setFieldValue(field, this, defaultValue);
         }
     }
 

@@ -114,7 +114,7 @@ public class ControllerCommon {
         response.setHeader("Content-Disposition", String.format("attachment;filename=\"%s\"", encodedFilename));
         response.setContentType("application/octet-stream;charset=utf-8");
         ServletOutputStream os = response.getOutputStream();
-        service.exportExcel(queryParams, os, textResourceClass);
+        final ServiceResult<Boolean> booleanServiceResult = service.exportExcel(queryParams, os, textResourceClass);
     }
 
     /**

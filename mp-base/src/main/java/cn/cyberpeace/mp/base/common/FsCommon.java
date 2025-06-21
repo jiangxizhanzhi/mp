@@ -297,13 +297,13 @@ public class FsCommon {
         String baseTmpDir = FileUtil.getTmpDirPath();
         String tmpFileDir = StringUtils.joinWith(FileUtil.FILE_SEPARATOR, baseTmpDir, TMP_DIR_NAME);
         if (!FileUtil.exist(tmpFileDir)) {
-            FileUtil.mkdir(tmpFileDir);
+            final File mkdir = FileUtil.mkdir(tmpFileDir);
         }
         if (StringUtils.isEmpty(filename)) {
             filename = FileUtil.getName(fileKey);
         }
         String tmpFilepath = StringUtils.joinWith(FileUtil.FILE_SEPARATOR, tmpFileDir, filename);
-        download(fileKey, tmpFilepath);
+        final boolean downloadBoolean = download(fileKey, tmpFilepath);
         return tmpFilepath;
     }
 
@@ -452,7 +452,7 @@ public class FsCommon {
      */
     private static String genGroupDir(String storeDir, String group) {
         String groupDir = StringUtils.joinWith(FileUtil.FILE_SEPARATOR, storeDir, group);
-        FileUtil.mkdir(groupDir);
+        final File mkdir = FileUtil.mkdir(groupDir);
         return groupDir;
     }
 

@@ -214,7 +214,7 @@ public class HumanCondition {
     public HumanCondition link(Class<?>... models) {
         for (Class<?> model: models) {
             String linkName = "m" + linkedModels.size();
-            linkAs(model, linkName);
+            final HumanCondition humanCondition = linkAs(model, linkName);
         }
         return this;
     }
@@ -1217,7 +1217,7 @@ public class HumanCondition {
             }
 
             public AndConditionProxy currentLink(Class<?> model) {
-                humanCondition.currentLink(model);
+                final HumanCondition humanCondition1 = humanCondition.currentLink(model);
                 return this;
             }
 

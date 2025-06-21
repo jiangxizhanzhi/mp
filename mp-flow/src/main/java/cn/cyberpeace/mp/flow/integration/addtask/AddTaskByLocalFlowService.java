@@ -122,8 +122,8 @@ public class AddTaskByLocalFlowService implements IAddTaskService {
             flowIds.add(t.getFlowId());
         }
 
-        HumanCondition condition = new HumanCondition();
-        condition.filterIn(FlowInfoModel::getId, flowIds.toArray());
+        HumanCondition condition = new HumanCondition()
+        .filterIn(FlowInfoModel::getId, flowIds.toArray());
         List<FlowInfoModel> flowInfoModelList = flowInfoMapper.list(condition);
 
         // 存任务

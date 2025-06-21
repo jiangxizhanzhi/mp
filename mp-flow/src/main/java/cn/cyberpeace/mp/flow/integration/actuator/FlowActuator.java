@@ -86,7 +86,7 @@ public class FlowActuator {
                 FlowWebSocketClientUtil wsClient = FlowWebSocketClientUtil.getWebSocketClient(this.actuatorIp);
                 wsClient.sendMessage(taskId);
                 // 更新任务状态为启动中
-                flowTaskTaskService.updateTaskStatus(taskId, TaskTaskStatusEnum.STARTING.toValue());
+                final int i = flowTaskTaskService.updateTaskStatus(taskId, TaskTaskStatusEnum.STARTING.toValue());
                 return true;
             } else if ("6008".equals(rsp.getCode())) {
                 // 更新任务状态为运行中

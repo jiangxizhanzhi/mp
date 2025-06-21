@@ -37,8 +37,8 @@ public class FlowPcapService extends BaseModelServiceImpl<FlowPcapModel, FlowPca
     }
 
     public FlowPcapModel getByFlowId(String flowId) {
-        HumanCondition humanCondition = new HumanCondition();
-        humanCondition.filterEqual(FlowPcapModel::getFlowId, flowId);
+        HumanCondition humanCondition = new HumanCondition()
+        .filterEqual(FlowPcapModel::getFlowId, flowId);
         return getModelMapper().first(humanCondition);
     }
 
