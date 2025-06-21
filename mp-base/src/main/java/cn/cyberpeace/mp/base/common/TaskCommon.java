@@ -27,7 +27,7 @@ import java.util.concurrent.Callable;
 @Component
 public class TaskCommon {
 
-    public static TaskCommonPool taskCommonPool;
+    private static TaskCommonPool taskCommonPool;
 
     /**
      * TaskCommon

@@ -31,11 +31,11 @@ import java.time.format.DateTimeFormatter;
 @Slf4j
 public class TimeCommon {
 
-    public static DateTimeFormatter dateTimeFormatter;
+    private static DateTimeFormatter dateTimeFormatter;
 
-    public static DateTimeFormatter dateFormatter;
+    private static DateTimeFormatter dateFormatter;
 
-    public static DateTimeFormatter timeFormatter;
+    private static DateTimeFormatter timeFormatter;
 
     /**
      * TimeCommon
@@ -106,26 +106,6 @@ public class TimeCommon {
      */
     public static LocalTime stringToLocalTime(String localTimeStr) {
         return TimeUtils.stringToLocalTime(localTimeStr, timeFormatter);
-    }
-
-    /**
-     * utcStringToLocalDateTimeString
-     *
-     * @param utcDateTimeStr
-     * @return
-     */
-    public static String utcStringToLocalDateTimeString(String utcDateTimeStr) {
-        return localDateTimeToString(TimeUtils.utcStringToLocalDateTime(utcDateTimeStr));
-    }
-
-    /**
-     * localDateTimeStringToUtcString
-     *
-     * @param localDateTimeStr
-     * @return
-     */
-    public static String localDateTimeStringToUtcString(String localDateTimeStr) {
-        return TimeUtils.localDateTimeToUtcString(stringToLocalDateTime(localDateTimeStr));
     }
 
 }

@@ -22,7 +22,7 @@ public class FlowCacheUtil {
     /**
      * pcap包解析缓存
      */
-    public static Cache<String, String> pcapAnalyseCache = CacheBuilder.newBuilder()
+    public static final Cache<String, String> pcapAnalyseCache = CacheBuilder.newBuilder()
             .maximumSize(1000)
             .build();
 

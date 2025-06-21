@@ -35,9 +35,9 @@ import java.util.List;
 @Data
 public class BaseAppConfig {
 
-    public static String API_PREFIX = "/api";
+    public static final String API_PREFIX = "/api";
 
-    public static String PYTHON_CMD = "python3";
+    public static final String PYTHON_CMD = "python3";
 
     @Autowired
     private ServerProperties serverProperties;

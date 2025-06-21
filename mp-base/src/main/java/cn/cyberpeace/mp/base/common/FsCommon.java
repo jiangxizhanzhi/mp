@@ -38,7 +38,7 @@ import java.util.regex.Pattern;
 @Component
 public class FsCommon {
 
-    public static BaseAppConfig baseAppConfig;
+    private static BaseAppConfig baseAppConfig;
 
     private static final Pattern FILE_KEY_PATTERN = Pattern.compile("^[A-Za-z0-9/_\\-\\\\]+(\\.[A-Za-z0-9]+)?$");
 

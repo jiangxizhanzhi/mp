@@ -33,9 +33,9 @@ public class FlowWebSocketClientUtil {
 
     private Session session;
 
-    public static Map<String, FlowWebSocketClientUtil> webSocketClientMap = new HashMap<>();
+    public static final Map<String, FlowWebSocketClientUtil> webSocketClientMap = new HashMap<>();
 
-    private static FlowTaskRecordService flowTaskRecordService = BeanCommon.getBean(FlowTaskRecordService.class);
+    private static final FlowTaskRecordService flowTaskRecordService = BeanCommon.getBean(FlowTaskRecordService.class);
 
     /**
      * 获取客户端

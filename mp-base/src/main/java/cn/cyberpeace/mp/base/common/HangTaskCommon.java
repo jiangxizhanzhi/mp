@@ -24,7 +24,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class HangTaskCommon {
 
-    public static HangTaskCommonPool taskCommonPool;
+    private static HangTaskCommonPool taskCommonPool;
 
     /**
      * HangTaskCommon

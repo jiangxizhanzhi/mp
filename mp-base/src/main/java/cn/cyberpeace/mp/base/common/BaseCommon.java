@@ -23,6 +23,7 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalTimeSerializer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -40,26 +41,22 @@ import java.time.format.DateTimeFormatter;
 @Component
 public class BaseCommon {
 
-    public static DateTimeFormatter dateTimeFormatter;
+    private static DateTimeFormatter dateTimeFormatter;
 
-    public static DateTimeFormatter dateFormatter;
+    private static DateTimeFormatter dateFormatter;
 
-    public static DateTimeFormatter timeFormatter;
+    private static DateTimeFormatter timeFormatter;
 
-    public static BaseAppConfig baseAppConfig;
 
     /**
      * BaseCommon
      *
-     * @param baseAppConfig
      */
     private BaseCommon(BaseAppConfig baseAppConfig) {
-        BaseCommon.baseAppConfig = baseAppConfig;
         BaseCommon.dateTimeFormatter = DateTimeFormatter.ofPattern(baseAppConfig.getDateTimePattern());
         BaseCommon.dateFormatter = DateTimeFormatter.ofPattern(baseAppConfig.getDatePattern());
         BaseCommon.timeFormatter = DateTimeFormatter.ofPattern(baseAppConfig.getTimePattern());
     }
-
     /**
      * 创建通用的object mapper对象 （设定了项目默认值）
      * @return 通用的object mapper对象

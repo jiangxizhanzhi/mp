@@ -32,7 +32,7 @@ import java.util.jar.JarFile;
 @Slf4j
 public class FileUtil {
 
-    public static String FILE_SEPARATOR = File.separator;
+    public static final String FILE_SEPARATOR = File.separator;
     public static final String JAR_PATH_EXT = ".jar!";
     public static final String JAR_FILE_EXT = FileNameUtil.EXT_JAR;
 

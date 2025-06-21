@@ -25,9 +25,9 @@ import java.util.Map;
 @Component
 public class FlowCategory {
 
-    public static Map<String, Integer> flowCategoryMap = new HashMap<>();
+    public static final Map<String, Integer> flowCategoryMap = new HashMap<>();
 
-    public static Map<String, Integer> paramTypeMap = new HashMap<>();
+    public static final Map<String, Integer> paramTypeMap = new HashMap<>();
 
     public FlowCategory() {
         init();
