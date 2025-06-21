@@ -459,6 +459,7 @@ public class ClassUtils {
                     break;
                 }
             } catch (NoSuchMethodException ignored) {
+                log.info("writeReplace not found");
             } catch (IllegalAccessException | InvocationTargetException | SecurityException e) {
                 throw new MpRuntimeException(e.getMessage());
             }
