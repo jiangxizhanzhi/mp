@@ -74,7 +74,7 @@ public abstract class FileModifyListener {
         try {
             Thread.sleep(10000);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            log.error("File({}) watch stop failed:", filepath, e);
         }
         startListen();
     }

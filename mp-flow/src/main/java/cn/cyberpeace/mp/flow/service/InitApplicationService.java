@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.flow.service;
 
-import cn.cyberpeace.mp.flow.integration.cloud.lincloud.LinyunCloudClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -59,7 +58,7 @@ public class InitApplicationService implements ApplicationRunner {
             log.info("文件写入成功！");
 
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("文件写入失败！", e);
         } finally {
             try {
                 // 关闭流
@@ -67,7 +66,7 @@ public class InitApplicationService implements ApplicationRunner {
                     inputStream.close();
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error("文件写入失败！", e);
             }
         }
     }

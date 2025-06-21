@@ -15,7 +15,6 @@ import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.context.SysContextHolder;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.mptool.ConcurrentHashSet;
-import cn.cyberpeace.mp.base.util.mptool.ExceptionUtil;
 import cn.cyberpeace.mp.base.util.protocolprobe.ProtocolProbe;
 import cn.cyberpeace.mp.base.util.protocolprobe.SSHProbe;
 import cn.cyberpeace.mp.flow.integration.addtask.AddTaskByLocalFlowFacade;
@@ -109,7 +108,7 @@ public class FlowActuatorStateJob {
             try {
                 this.updateActuatorIp(m);
             } catch (Exception e) {
-                log.error(ExceptionUtil.stacktraceToString(e));
+                log.error("更新失败", e);
             }
         }
         if (StringUtils.isEmpty(m.getIp())) {
