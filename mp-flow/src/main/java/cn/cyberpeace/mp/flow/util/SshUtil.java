@@ -93,9 +93,13 @@ public class SshUtil {
                     log.error("exec shell task failed", e);
                 } finally {
                     log.info("exec shell end and close thread pool");
-                    executorService.shutdown();
-                    close(finalSession);
-                    IOUtils.closeQuietly(finalOutputStream);
+                    try {
+                        executorService.shutdown();
+                        close(finalSession);
+                        IOUtils.closeQuietly(finalOutputStream);
+                    } catch (Exception e) {
+                        log.error("close ssh channel error", e);
+                    }
                 }
 
                 // 执行失败时execResult返回null
@@ -109,8 +113,13 @@ public class SshUtil {
             //设置执行失败的响应内容
             log.error("refresh dir error , serverInfo is {},exception is {}", JsonCommon.stringify(serverInfo), ExceptionUtils.getStackTrace(e));
         } finally {
-            close(sftpChannel);
-            close(session);
+            try {
+                close(sftpChannel);
+                close(session);
+            } catch (Exception e) {
+                log.error("close ssh channel error", e);
+            }
+
         }
     }
 
@@ -148,9 +157,13 @@ public class SshUtil {
                     log.error("exec shell commands failed", e);
                 } finally {
                     log.info("exec shell commands end and close thread pool");
-                    executorService.shutdown();
-                    close(finalSession);
-                    IOUtils.closeQuietly(finalOutputStream);
+                    try{
+                        executorService.shutdown();
+                        close(finalSession);
+                        IOUtils.closeQuietly(finalOutputStream);
+                    } catch (Exception e) {
+                        log.error("close ssh channel error", e);
+                    }
                 }
 
                 // 执行失败时execResult返回null
@@ -164,8 +177,12 @@ public class SshUtil {
             //设置执行失败的响应内容
             log.error("exec shell commands error", e);
         } finally {
-            close(sftpChannel);
-            close(session);
+            try {
+                close(sftpChannel);
+                close(session);
+            } catch (Exception e) {
+                log.error("close ssh channel error", e);
+            }
         }
     }
 
@@ -226,8 +243,12 @@ public class SshUtil {
             log.error("exec remote command error", e);
             throw new MpRuntimeException("exec remote command error");
         } finally {
-            IOUtils.closeQuietly(in);
-            close(channel);
+            try {
+                IOUtils.closeQuietly(in);
+                close(channel);
+            } catch (Exception e) {
+                log.error("close ssh channel error", e);
+            }
         }
     }
 
