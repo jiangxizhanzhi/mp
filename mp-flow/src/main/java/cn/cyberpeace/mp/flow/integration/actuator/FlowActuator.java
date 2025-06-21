@@ -90,7 +90,7 @@ public class FlowActuator {
                 return true;
             } else if ("6008".equals(rsp.getCode())) {
                 // 更新任务状态为运行中
-                flowTaskTaskService.updateTaskStatus(taskId, TaskStatusEnum.RUNNING.toValue());
+                final int i = flowTaskTaskService.updateTaskStatus(taskId, TaskStatusEnum.RUNNING.toValue());
                 return true;
             } else {
                 log.error("start task failed for {}", taskId);
@@ -120,7 +120,7 @@ public class FlowActuator {
                 wsClient.sendMessage(String.join(BaseConstants.COMMA, notRunningTaskIds));
 
                 // 批量更新任务状态为运行中
-                flowTaskTaskService.batchUpdateTaskStatus(notRunningTaskIds, TaskTaskStatusEnum.STARTING.toValue());
+                final int i = flowTaskTaskService.batchUpdateTaskStatus(notRunningTaskIds, TaskTaskStatusEnum.STARTING.toValue());
                 return true;
             } else {
                 log.error("batch start tasks failed");

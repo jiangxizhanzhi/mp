@@ -296,7 +296,7 @@ public class FlowCollectionService extends BaseModelServiceImpl<FlowCollectionMo
         flowCollectionModel.setBackgroundFlowCount(0);
         this.getModelMapper().update(flowCollectionModel);
         // 删除原有关联信息
-        flowCollectionRelService.delByCollectionId(request.getId());
+        final Integer i = flowCollectionRelService.delByCollectionId(request.getId());
 
         // 更新集合关联信息
         AddFlowCollectionRelRequest relRequest = new AddFlowCollectionRelRequest();

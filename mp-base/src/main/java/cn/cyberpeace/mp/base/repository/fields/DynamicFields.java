@@ -180,7 +180,7 @@ public class DynamicFields {
                     objWrapper.setPropertyValue(fieldName, null);
                 } else if (fieldFlag instanceof DynamicFields) {
                     Object fieldValue = objWrapper.getPropertyValue(fieldName);
-                    ((DynamicFields) fieldFlag).applyWithNull(fieldValue);
+                    final Object o = ((DynamicFields) fieldFlag).applyWithNull(fieldValue);
                 }
             }
         }

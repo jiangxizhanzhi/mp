@@ -3,10 +3,13 @@ package cn.cyberpeace.mp.flow.service;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.flow.bo.AddFlowTaskFlowInfo;
 import cn.cyberpeace.mp.flow.bo.EditFlowTaskConfRequest;
@@ -233,25 +236,25 @@ public class FlowActuatorTaskService extends BaseModelServiceImpl<FlowTaskTaskMo
 
     @Transactional
     public void deleteTasks(String[] ids) {
-        flowTaskTaskMapper.bulkDelete(ids);
-        flowTaskConfMapper.filterDelete(new HumanCondition().filterIn(FlowTaskConfModel::getTaskId, ids));
-        flowTaskRecordMapper.filterDelete(new HumanCondition().filterIn(FlowTaskRecordModel::getTaskId, ids));
+        final BaseModelMapper.BulkResult<String> stringBulkResult = flowTaskTaskMapper.bulkDelete(ids);
+        final int i = flowTaskConfMapper.filterDelete(new HumanCondition().filterIn(FlowTaskConfModel::getTaskId, ids));
+        final int i1 = flowTaskRecordMapper.filterDelete(new HumanCondition().filterIn(FlowTaskRecordModel::getTaskId, ids));
     }
 
     public void startTask(String taskId) {
-        asyncPlatFlowTaskService.startTask(taskId);
+        final ServiceResult<Boolean> booleanServiceResult = asyncPlatFlowTaskService.startTask(taskId);
     }
 
     public void stopTask(String taskId) {
-        asyncPlatFlowTaskService.stopTask(taskId);
+        final ServiceResult<Boolean> booleanServiceResult = asyncPlatFlowTaskService.stopTask(taskId);
     }
 
     public void startTasks(List<String> taskIds) {
-        asyncPlatFlowTaskService.batchStartTasks(taskIds);
+        final ServiceResult<Boolean> booleanServiceResult = asyncPlatFlowTaskService.batchStartTasks(taskIds);
     }
 
     public void stopTasks(List<String> taskIds) {
-        asyncPlatFlowTaskService.batchStopTasks(taskIds);
+        final ServiceResult<Boolean> booleanServiceResult = asyncPlatFlowTaskService.batchStopTasks(taskIds);
     }
 
     public void editTaskConf(EditFlowTaskConfRequest request) {
@@ -273,7 +276,7 @@ public class FlowActuatorTaskService extends BaseModelServiceImpl<FlowTaskTaskMo
         flowTaskConfModel.setRateUnlimited(request.getRateUnlimited());
         flowTaskConfModel.setConf(JsonCommon.stringify(flowTaskConf));
         flowTaskConfModel.setConfig(request.getConfig());
-        flowTaskConfService.update(flowTaskConfModel);
+        final ObjServiceResult<FlowTaskConfModel> update = flowTaskConfService.update(flowTaskConfModel);
     }
 
     public QueryFlowTaskConfResponse queryConfByTaskId(String taskId) {

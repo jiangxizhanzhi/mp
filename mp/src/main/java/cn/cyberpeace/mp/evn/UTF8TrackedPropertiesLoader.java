@@ -107,7 +107,7 @@ public class UTF8TrackedPropertiesLoader {
                 OriginTrackedValue value = loadValue(buffer, reader, true);
                 document.put(key + "[" + (index++) + "]", value);
                 if (!reader.isEndOfLine()) {
-                    reader.read();
+                    final boolean read = reader.read();
                 }
             }
             while (!reader.isEndOfLine());

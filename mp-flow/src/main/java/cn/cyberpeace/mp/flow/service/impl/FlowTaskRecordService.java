@@ -302,9 +302,9 @@ public class FlowTaskRecordService extends BaseModelServiceImpl<FlowTaskRecordMo
         String nodeId = flowTaskTaskModel.getNodeId();
         log.info("batch tasks run for sceneId: {}", sceneId);
         // 判断任务是否都结束
-        HumanCondition condition = new HumanCondition();
-        condition.filterEqual(FlowTaskTaskModel::getSceneId, sceneId);
-        condition.filterEqual(FlowTaskTaskModel::getNodeId, nodeId);
+        HumanCondition condition = new HumanCondition()
+                                    .filterEqual(FlowTaskTaskModel::getSceneId, sceneId)
+                                    .filterEqual(FlowTaskTaskModel::getNodeId, nodeId);
         List<FlowTaskTaskModel> taskTaskModels = flowTaskTaskMapper.list(condition);
         if (CollectionUtils.isNotEmpty(taskTaskModels)) {
             long count = 0L;

@@ -64,8 +64,7 @@ public class FlowTaskTaskService extends BaseModelServiceImpl<FlowTaskTaskModel,
     }
 
     public int updateTaskStatus(String taskId, int taskStatus) {
-        HumanCondition condition = new HumanCondition();
-        condition.filterEqual(FlowTaskTaskModel::getId, taskId);
+        HumanCondition condition = new HumanCondition().filterEqual(FlowTaskTaskModel::getId, taskId);
         FlowTaskTaskModel flowTaskTaskModel = new FlowTaskTaskModel();
         flowTaskTaskModel.setTaskStatus(taskStatus);
 
@@ -73,8 +72,7 @@ public class FlowTaskTaskService extends BaseModelServiceImpl<FlowTaskTaskModel,
     }
 
     public int batchUpdateTaskStatus(List<String> taskIds, int taskStatus) {
-        HumanCondition condition = new HumanCondition();
-        condition.filterIn(FlowTaskTaskModel::getId, taskIds.toArray());
+        HumanCondition condition = new HumanCondition().filterIn(FlowTaskTaskModel::getId, taskIds.toArray());
         FlowTaskTaskModel flowTaskTaskModel = new FlowTaskTaskModel();
         flowTaskTaskModel.setTaskStatus(taskStatus);
 
@@ -82,22 +80,9 @@ public class FlowTaskTaskService extends BaseModelServiceImpl<FlowTaskTaskModel,
     }
 
     public List<FlowTaskTaskModel> listByTaskIds(List<String> taskIds) {
-        HumanCondition condition = new HumanCondition();
-        condition.filterIn(FlowTaskTaskModel::getId, taskIds.toArray());
+        HumanCondition condition = new HumanCondition().filterIn(FlowTaskTaskModel::getId, taskIds.toArray());
 
         return getModelMapper().list(condition);
-    }
-
-    /**
-     * 根据场景id查询节点列表
-     * @param sceneId
-     * @return
-     */
-    public List<FlowTaskNode> nodeList(String sceneId) {
-        log.info("FlowTaskTaskServiceImpl.nodeList start. sceneId:{}", sceneId);
-        List<FlowTaskNode> nodeList = getModelMapper().nodeList(sceneId);
-        log.info("FlowTaskTaskServiceImpl.nodeList end. nodeList:{}", nodeList);
-        return nodeList;
     }
 
 
@@ -205,64 +190,5 @@ public class FlowTaskTaskService extends BaseModelServiceImpl<FlowTaskTaskModel,
         }
         log.info("FlowTaskTaskServiceImpl.initNetwork end. isSuccess:{}", isSuccess);
         return isSuccess;
-    }
-
-    public List<FlowTaskTaskModel> listByNodeIdAndFlowId(String nodeId, String flowId) {
-        HumanCondition condition = new HumanCondition();
-        condition.filterEqual(FlowTaskTaskModel::getNodeId, nodeId);
-        condition.filterEqual(FlowTaskTaskModel::getFlowId, flowId);
-        condition.orderBy("-createTime");
-        List<FlowTaskTaskModel> flowTaskTaskModels = getModelMapper().list(condition);
-        return flowTaskTaskModels;
-    }
-
-    public List<FlowTaskTaskModel> listByNodeIdAndSceneId(String nodeId, String sceneId) {
-        HumanCondition condition = new HumanCondition();
-        condition.filterEqual(FlowTaskTaskModel::getNodeId, nodeId);
-        condition.filterEqual(FlowTaskTaskModel::getSceneId, sceneId);
-        List<FlowTaskTaskModel> flowTaskTaskModels = getModelMapper().list(condition);
-        return flowTaskTaskModels;
-    }
-
-    /**
-     * 根据节点id、scendId删除任务
-     * @param nodeId
-     * @param sceneId
-     * @return
-     */
-
-    public void deleteByNodeIdAndSceneId(String nodeId, String sceneId) {
-        HumanCondition condition = new HumanCondition();
-        condition.filterEqual(FlowTaskTaskModel::getNodeId, nodeId);
-        condition.filterEqual(FlowTaskTaskModel::getSceneId, sceneId);
-        getModelMapper().filterDelete(condition);
-    }
-
-    public List<FlowTaskTaskModel> listBySceneIdAndStatus(String sceneId, int taskStatus) {
-        HumanCondition condition = new HumanCondition();
-        condition.filterEqual(FlowTaskTaskModel::getSceneId, sceneId);
-        condition.filterEqual(FlowTaskTaskModel::getTaskStatus, taskStatus);
-        List<FlowTaskTaskModel> flowTaskTaskModels = getModelMapper().list(condition);
-        return flowTaskTaskModels;
-    }
-
-    public List<FlowTaskTaskModel> listBySceneId(String sceneId) {
-        HumanCondition condition = new HumanCondition();
-        condition.filterEqual(FlowTaskTaskModel::getSceneId, sceneId);
-        List<FlowTaskTaskModel> flowTaskTaskModels = getModelMapper().list(condition);
-        return flowTaskTaskModels;
-    }
-
-    public List<FlowTaskTaskModel> listByActuatorIds(List<String> sceneId) {
-        HumanCondition condition = new HumanCondition();
-        if (CollectionUtils.isNotEmpty(sceneId)) {
-            condition.filterIn(FlowTaskTaskModel::getActuatorId, sceneId.toArray());
-            condition.distinct();
-        }
-        return getModelMapper().list(condition);
-    }
-
-    public List<FlowTaskTaskModel> listByCondition(FlowTaskPageQueryParams request) {
-        return null;
     }
 }

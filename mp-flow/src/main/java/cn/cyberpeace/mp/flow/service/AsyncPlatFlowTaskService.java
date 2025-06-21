@@ -445,7 +445,7 @@ public class AsyncPlatFlowTaskService {
             if (CollectionUtils.isNotEmpty(infoModelList)) {
                 for (FlowInfoModel infoModel : infoModelList) {
                     String filePath = ResourceTypeEnum.SCRIPT.toValue() == infoModel.getResourceType() ? infoModel.getScriptFile() : infoModel.getPcapFile();
-                    FsCommon.delete(filePath);
+                    final boolean delete = FsCommon.delete(filePath);
                 }
             }
         } catch (Exception e) {

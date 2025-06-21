@@ -216,7 +216,7 @@ public class AddTaskByRemoteFlowService2 implements IAddTaskService {
         }
         FlowActuator flowActuatorClient = new FlowActuator(flowActuator.getIp(), flowTaskTaskService);
         log.info("mac参数:{} , 目标ip:{} , 任务id列表: {} ", portModel.getMac(), targetIp, taskIdList);
-        this.initNetwork(flowActuatorClient, portModel.getMac(), targetIp, taskIdList, 10);
+        final boolean b = this.initNetwork(flowActuatorClient, portModel.getMac(), targetIp, taskIdList, 10);
         log.info("初始化网口结束");
 
         log.info("上传流量资源包(pcap或者脚本)");

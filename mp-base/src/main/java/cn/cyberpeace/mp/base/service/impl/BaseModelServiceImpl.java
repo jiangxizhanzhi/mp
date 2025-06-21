@@ -80,7 +80,7 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
             for (String searchField : lastSearchFields) {
                 orCondition.orIContains(searchField, search);
             }
-            orCondition.filterOrEnd();
+            final HumanCondition humanCondition1 = orCondition.filterOrEnd();
         }
     }
 
@@ -117,7 +117,7 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
                                             String[] orders, Integer page, Integer pageSize) {
         HumanCondition humanCondition = getHumanCondition(selectFields);
         if (ids != null && ids.length > 0) {
-            humanCondition.filterIn(BaseModel::getId, ids);
+            humanCondition = humanCondition.filterIn(BaseModel::getId, ids);
         }
         if (exclude != null && exclude.length > 0) {
             humanCondition.filterNotIn(BaseModel::getId, exclude);
@@ -128,10 +128,10 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
         if (actualModelFields != null) {
             String[] lastOrders = actualModelFields.getValidOrders(orders);
             if (lastOrders != null) {
-                humanCondition.orderBy(lastOrders);
+                humanCondition = humanCondition.orderBy(lastOrders);
             }
         } else if (orders != null && orders.length > 0) {
-            humanCondition.orderBy(orders);
+            humanCondition = humanCondition.orderBy(orders);
         }
         return humanCondition;
     }

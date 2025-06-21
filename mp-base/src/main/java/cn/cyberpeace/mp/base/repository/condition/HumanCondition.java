@@ -476,7 +476,7 @@ public class HumanCondition {
      */
     public HumanCondition filterLink(Class<?> sourceModel, String sourceFieldName,
                                      Class<?> targetModel, String targetFieldName) {
-        andCondition.addLink(genLinkFieldName(sourceModel, TextUtils.humpToLine(sourceFieldName)),
+        final BaseConnectorCondition baseConnectorCondition = andCondition.addLink(genLinkFieldName(sourceModel, TextUtils.humpToLine(sourceFieldName)),
                 genLinkFieldName(targetModel, TextUtils.humpToLine(targetFieldName)));
         return this;
     }
@@ -507,7 +507,7 @@ public class HumanCondition {
      */
     public HumanCondition filterLink(String sourceLinkName, String sourceFieldName,
                                      String targetLinkName, String targetFieldName) {
-        andCondition.addLink(genLinkFieldName(sourceLinkName, TextUtils.humpToLine(sourceFieldName)),
+        final BaseConnectorCondition baseConnectorCondition = andCondition.addLink(genLinkFieldName(sourceLinkName, TextUtils.humpToLine(sourceFieldName)),
                 genLinkFieldName(targetLinkName, TextUtils.humpToLine(targetFieldName)));
         return this;
     }
@@ -533,7 +533,7 @@ public class HumanCondition {
      * @return this
      */
     public HumanCondition filterIn(String fieldName, Object[] fieldValue) {
-        andCondition.addIn(currentColumnName(fieldName), fieldValue);
+        final BaseConnectorCondition baseConnectorCondition = andCondition.addIn(currentColumnName(fieldName), fieldValue);
         return this;
     }
 
@@ -554,7 +554,7 @@ public class HumanCondition {
      * @return this
      */
     public HumanCondition filterNotIn(String fieldName, Object[] fieldValue) {
-        andCondition.addNotIn(currentColumnName(fieldName), fieldValue);
+        final BaseConnectorCondition baseConnectorCondition = andCondition.addNotIn(currentColumnName(fieldName), fieldValue);
         return this;
     }
 
@@ -575,7 +575,7 @@ public class HumanCondition {
      * @return this
      */
     public HumanCondition filterEqual(String fieldName, Object fieldValue) {
-        andCondition.addEqual(currentColumnName(fieldName), fieldValue);
+        final BaseConnectorCondition baseConnectorCondition = andCondition.addEqual(currentColumnName(fieldName), fieldValue);
         return this;
     }
 
@@ -596,7 +596,7 @@ public class HumanCondition {
      * @return this
      */
     public HumanCondition filterNotEqual(String fieldName, Object fieldValue) {
-        andCondition.addNotEqual(currentColumnName(fieldName), fieldValue);
+        final BaseConnectorCondition baseConnectorCondition = andCondition.addNotEqual(currentColumnName(fieldName), fieldValue);
         return this;
     }
 
@@ -617,7 +617,7 @@ public class HumanCondition {
      * @return this
      */
     public HumanCondition filterGreaterThan(String fieldName, Object fieldValue) {
-        andCondition.addGreaterThan(currentColumnName(fieldName), fieldValue);
+        final BaseConnectorCondition baseConnectorCondition = andCondition.addGreaterThan(currentColumnName(fieldName), fieldValue);
         return this;
     }
 
@@ -638,7 +638,7 @@ public class HumanCondition {
      * @return this
      */
     public HumanCondition filterGreaterThanOrEqual(String fieldName, Object fieldValue) {
-        andCondition.addGreaterThanOrEqual(currentColumnName(fieldName), fieldValue);
+        final BaseConnectorCondition baseConnectorCondition = andCondition.addGreaterThanOrEqual(currentColumnName(fieldName), fieldValue);
         return this;
     }
 
@@ -659,7 +659,7 @@ public class HumanCondition {
      * @return this
      */
     public HumanCondition filterLessThan(String fieldName, Object fieldValue) {
-        andCondition.addLessThan(currentColumnName(fieldName), fieldValue);
+        final BaseConnectorCondition baseConnectorCondition = andCondition.addLessThan(currentColumnName(fieldName), fieldValue);
         return this;
     }
 
@@ -680,7 +680,7 @@ public class HumanCondition {
      * @return this
      */
     public HumanCondition filterLessThanOrEqual(String fieldName, Object fieldValue) {
-        andCondition.addLessThanOrEqual(currentColumnName(fieldName), fieldValue);
+        final BaseConnectorCondition baseConnectorCondition = andCondition.addLessThanOrEqual(currentColumnName(fieldName), fieldValue);
         return this;
     }
 
@@ -701,7 +701,7 @@ public class HumanCondition {
      * @return this
      */
     public HumanCondition filterContains(String fieldName, Object fieldValue) {
-        andCondition.addContains(currentColumnName(fieldName), fieldValue);
+        final BaseConnectorCondition baseConnectorCondition = andCondition.addContains(currentColumnName(fieldName), fieldValue);
         return this;
     }
 
@@ -722,7 +722,7 @@ public class HumanCondition {
      * @return this
      */
     public HumanCondition filterIContains(String fieldName, Object fieldValue) {
-        andCondition.addIContains(currentColumnName(fieldName), fieldValue);
+        final BaseConnectorCondition baseConnectorCondition = andCondition.addIContains(currentColumnName(fieldName), fieldValue);
         return this;
     }
 
@@ -743,7 +743,7 @@ public class HumanCondition {
      * @return this
      */
     public HumanCondition filterStartsWith(String fieldName, Object fieldValue) {
-        andCondition.addStartsWith(currentColumnName(fieldName), fieldValue);
+        final BaseConnectorCondition baseConnectorCondition = andCondition.addStartsWith(currentColumnName(fieldName), fieldValue);
         return this;
     }
 
@@ -764,7 +764,7 @@ public class HumanCondition {
      * @return this
      */
     public HumanCondition filterIStartsWith(String fieldName, Object fieldValue) {
-        andCondition.addIStartsWith(currentColumnName(fieldName), fieldValue);
+        final BaseConnectorCondition baseConnectorCondition = andCondition.addIStartsWith(currentColumnName(fieldName), fieldValue);
         return this;
     }
 
@@ -785,7 +785,7 @@ public class HumanCondition {
      * @return this
      */
     public HumanCondition filterEndsWith(String fieldName, Object fieldValue) {
-        andCondition.addEndsWith(currentColumnName(fieldName), fieldValue);
+        final BaseConnectorCondition baseConnectorCondition = andCondition.addEndsWith(currentColumnName(fieldName), fieldValue);
         return this;
     }
 
@@ -806,7 +806,7 @@ public class HumanCondition {
      * @return this
      */
     public HumanCondition filterIEndsWith(String fieldName, Object fieldValue) {
-        andCondition.addIEndsWith(currentColumnName(fieldName), fieldValue);
+        final BaseConnectorCondition baseConnectorCondition = andCondition.addIEndsWith(currentColumnName(fieldName), fieldValue);
         return this;
     }
 
@@ -827,7 +827,7 @@ public class HumanCondition {
      * @return this
      */
     public HumanCondition filterNotContains(String fieldName, Object fieldValue) {
-        andCondition.addNotContains(currentColumnName(fieldName), fieldValue);
+        final BaseConnectorCondition baseConnectorCondition = andCondition.addNotContains(currentColumnName(fieldName), fieldValue);
         return this;
     }
 
@@ -848,7 +848,7 @@ public class HumanCondition {
      * @return this
      */
     public HumanCondition filterNotIContains(String fieldName, Object fieldValue) {
-        andCondition.addNotIContains(currentColumnName(fieldName), fieldValue);
+        final BaseConnectorCondition baseConnectorCondition = andCondition.addNotIContains(currentColumnName(fieldName), fieldValue);
         return this;
     }
 
@@ -869,7 +869,7 @@ public class HumanCondition {
      * @return this
      */
     public HumanCondition filterNotStartsWith(String fieldName, Object fieldValue) {
-        andCondition.addNotStartsWith(currentColumnName(fieldName), fieldValue);
+        final BaseConnectorCondition baseConnectorCondition = andCondition.addNotStartsWith(currentColumnName(fieldName), fieldValue);
         return this;
     }
 
@@ -890,7 +890,7 @@ public class HumanCondition {
      * @return this
      */
     public HumanCondition filterNotIStartsWith(String fieldName, Object fieldValue) {
-        andCondition.addNotIStartsWith(currentColumnName(fieldName), fieldValue);
+        final BaseConnectorCondition baseConnectorCondition = andCondition.addNotIStartsWith(currentColumnName(fieldName), fieldValue);
         return this;
     }
 
@@ -911,7 +911,7 @@ public class HumanCondition {
      * @return this
      */
     public HumanCondition filterNotEndsWith(String fieldName, Object fieldValue) {
-        andCondition.addNotEndsWith(currentColumnName(fieldName), fieldValue);
+        final BaseConnectorCondition baseConnectorCondition = andCondition.addNotEndsWith(currentColumnName(fieldName), fieldValue);
         return this;
     }
 
@@ -932,7 +932,7 @@ public class HumanCondition {
      * @return this
      */
     public HumanCondition filterNotIEndsWith(String fieldName, Object fieldValue) {
-        andCondition.addNotIEndsWith(currentColumnName(fieldName), fieldValue);
+        final BaseConnectorCondition baseConnectorCondition = andCondition.addNotIEndsWith(currentColumnName(fieldName), fieldValue);
         return this;
     }
 
@@ -955,13 +955,13 @@ public class HumanCondition {
         private final OrCondition orCondition = new OrCondition();
 
         public OrConditionProxy currentLink(Class<?> model) {
-            humanCondition.currentLink(model);
+            final HumanCondition humanCondition1 = humanCondition.currentLink(model);
             return this;
         }
 
         public OrConditionProxy orLink(Class<?> sourceModel, String sourceFieldName,
                                        Class<?> targetModel, String targetFieldName) {
-            orCondition.addLink(humanCondition.genLinkFieldName(sourceModel, TextUtils.humpToLine(sourceFieldName)),
+            final BaseConnectorCondition baseConnectorCondition = orCondition.addLink(humanCondition.genLinkFieldName(sourceModel, TextUtils.humpToLine(sourceFieldName)),
                     humanCondition.genLinkFieldName(targetModel, TextUtils.humpToLine(targetFieldName)));
             return this;
         }
@@ -974,7 +974,7 @@ public class HumanCondition {
 
         public OrConditionProxy orLink(String sourceLinkName, String sourceFieldName,
                                        String targetLinkName, String targetFieldName) {
-            orCondition.addLink(humanCondition.genLinkFieldName(sourceLinkName, TextUtils.humpToLine(sourceFieldName)),
+            final BaseConnectorCondition baseConnectorCondition = orCondition.addLink(humanCondition.genLinkFieldName(sourceLinkName, TextUtils.humpToLine(sourceFieldName)),
                     humanCondition.genLinkFieldName(targetLinkName, TextUtils.humpToLine(targetFieldName)));
             return this;
         }
@@ -986,7 +986,7 @@ public class HumanCondition {
         }
 
         public OrConditionProxy orIn(String fieldName, Object[] fieldValue) {
-            orCondition.addIn(humanCondition.currentColumnName(fieldName), fieldValue);
+            final BaseConnectorCondition baseConnectorCondition = orCondition.addIn(humanCondition.currentColumnName(fieldName), fieldValue);
             return this;
         }
 
@@ -995,7 +995,7 @@ public class HumanCondition {
         }
 
         public OrConditionProxy orNotIn(String fieldName, Object[] fieldValue) {
-            orCondition.addNotIn(humanCondition.currentColumnName(fieldName), fieldValue);
+            final BaseConnectorCondition baseConnectorCondition = orCondition.addNotIn(humanCondition.currentColumnName(fieldName), fieldValue);
             return this;
         }
 
@@ -1004,7 +1004,7 @@ public class HumanCondition {
         }
 
         public OrConditionProxy orEqual(String fieldName, Object fieldValue) {
-            orCondition.addEqual(humanCondition.currentColumnName(fieldName), fieldValue);
+            final BaseConnectorCondition baseConnectorCondition = orCondition.addEqual(humanCondition.currentColumnName(fieldName), fieldValue);
             return this;
         }
 
@@ -1013,7 +1013,7 @@ public class HumanCondition {
         }
 
         public OrConditionProxy orNotEqual(String fieldName, Object fieldValue) {
-            orCondition.addNotEqual(humanCondition.currentColumnName(fieldName), fieldValue);
+            final BaseConnectorCondition baseConnectorCondition = orCondition.addNotEqual(humanCondition.currentColumnName(fieldName), fieldValue);
             return this;
         }
 
@@ -1022,7 +1022,7 @@ public class HumanCondition {
         }
 
         public OrConditionProxy orGreaterThan(String fieldName, Object fieldValue) {
-            orCondition.addGreaterThan(humanCondition.currentColumnName(fieldName), fieldValue);
+            final BaseConnectorCondition baseConnectorCondition = orCondition.addGreaterThan(humanCondition.currentColumnName(fieldName), fieldValue);
             return this;
         }
 
@@ -1031,7 +1031,7 @@ public class HumanCondition {
         }
 
         public OrConditionProxy orGreaterThanOrEqual(String fieldName, Object fieldValue) {
-            orCondition.addGreaterThanOrEqual(humanCondition.currentColumnName(fieldName), fieldValue);
+            final BaseConnectorCondition baseConnectorCondition = orCondition.addGreaterThanOrEqual(humanCondition.currentColumnName(fieldName), fieldValue);
             return this;
         }
 
@@ -1040,7 +1040,7 @@ public class HumanCondition {
         }
 
         public OrConditionProxy orLessThan(String fieldName, Object fieldValue) {
-            orCondition.addLessThan(humanCondition.currentColumnName(fieldName), fieldValue);
+            final BaseConnectorCondition baseConnectorCondition = orCondition.addLessThan(humanCondition.currentColumnName(fieldName), fieldValue);
             return this;
         }
 
@@ -1049,7 +1049,7 @@ public class HumanCondition {
         }
 
         public OrConditionProxy orLessThanOrEqual(String fieldName, Object fieldValue) {
-            orCondition.addLessThanOrEqual(humanCondition.currentColumnName(fieldName), fieldValue);
+            final BaseConnectorCondition baseConnectorCondition = orCondition.addLessThanOrEqual(humanCondition.currentColumnName(fieldName), fieldValue);
             return this;
         }
 
@@ -1058,7 +1058,7 @@ public class HumanCondition {
         }
 
         public OrConditionProxy orContains(String fieldName, Object fieldValue) {
-            orCondition.addContains(humanCondition.currentColumnName(fieldName), fieldValue);
+            final BaseConnectorCondition baseConnectorCondition = orCondition.addContains(humanCondition.currentColumnName(fieldName), fieldValue);
             return this;
         }
 
@@ -1067,7 +1067,7 @@ public class HumanCondition {
         }
 
         public OrConditionProxy orIContains(String fieldName, Object fieldValue) {
-            orCondition.addIContains(humanCondition.currentColumnName(fieldName), fieldValue);
+            final BaseConnectorCondition baseConnectorCondition = orCondition.addIContains(humanCondition.currentColumnName(fieldName), fieldValue);
             return this;
         }
 
@@ -1076,7 +1076,7 @@ public class HumanCondition {
         }
 
         public OrConditionProxy orStartsWith(String fieldName, Object fieldValue) {
-            orCondition.addStartsWith(humanCondition.currentColumnName(fieldName), fieldValue);
+            final BaseConnectorCondition baseConnectorCondition = orCondition.addStartsWith(humanCondition.currentColumnName(fieldName), fieldValue);
             return this;
         }
 
@@ -1085,7 +1085,7 @@ public class HumanCondition {
         }
 
         public OrConditionProxy orIStartsWith(String fieldName, Object fieldValue) {
-            orCondition.addIStartsWith(humanCondition.currentColumnName(fieldName), fieldValue);
+            final BaseConnectorCondition baseConnectorCondition = orCondition.addIStartsWith(humanCondition.currentColumnName(fieldName), fieldValue);
             return this;
         }
 
@@ -1094,7 +1094,7 @@ public class HumanCondition {
         }
 
         public OrConditionProxy orEndsWith(String fieldName, Object fieldValue) {
-            orCondition.addEndsWith(humanCondition.currentColumnName(fieldName), fieldValue);
+            final BaseConnectorCondition baseConnectorCondition = orCondition.addEndsWith(humanCondition.currentColumnName(fieldName), fieldValue);
             return this;
         }
 
@@ -1103,7 +1103,7 @@ public class HumanCondition {
         }
 
         public OrConditionProxy orIEndsWith(String fieldName, Object fieldValue) {
-            orCondition.addIEndsWith(humanCondition.currentColumnName(fieldName), fieldValue);
+            final BaseConnectorCondition baseConnectorCondition = orCondition.addIEndsWith(humanCondition.currentColumnName(fieldName), fieldValue);
             return this;
         }
 
@@ -1112,7 +1112,7 @@ public class HumanCondition {
         }
 
         public OrConditionProxy orNotContains(String fieldName, Object fieldValue) {
-            orCondition.addNotContains(humanCondition.currentColumnName(fieldName), fieldValue);
+            final BaseConnectorCondition baseConnectorCondition = orCondition.addNotContains(humanCondition.currentColumnName(fieldName), fieldValue);
             return this;
         }
 
@@ -1121,7 +1121,7 @@ public class HumanCondition {
         }
 
         public OrConditionProxy orNotIContains(String fieldName, Object fieldValue) {
-            orCondition.addNotIContains(humanCondition.currentColumnName(fieldName), fieldValue);
+            final BaseConnectorCondition baseConnectorCondition = orCondition.addNotIContains(humanCondition.currentColumnName(fieldName), fieldValue);
             return this;
         }
 
@@ -1130,7 +1130,7 @@ public class HumanCondition {
         }
 
         public OrConditionProxy orNotStartsWith(String fieldName, Object fieldValue) {
-            orCondition.addNotStartsWith(humanCondition.currentColumnName(fieldName), fieldValue);
+            final BaseConnectorCondition baseConnectorCondition = orCondition.addNotStartsWith(humanCondition.currentColumnName(fieldName), fieldValue);
             return this;
         }
 
@@ -1139,7 +1139,7 @@ public class HumanCondition {
         }
 
         public OrConditionProxy orNotIStartsWith(String fieldName, Object fieldValue) {
-            orCondition.addNotIStartsWith(humanCondition.currentColumnName(fieldName), fieldValue);
+            final BaseConnectorCondition baseConnectorCondition = orCondition.addNotIStartsWith(humanCondition.currentColumnName(fieldName), fieldValue);
             return this;
         }
 
@@ -1148,7 +1148,7 @@ public class HumanCondition {
         }
 
         public OrConditionProxy orNotEndsWith(String fieldName, Object fieldValue) {
-            orCondition.addNotEndsWith(humanCondition.currentColumnName(fieldName), fieldValue);
+            final BaseConnectorCondition baseConnectorCondition = orCondition.addNotEndsWith(humanCondition.currentColumnName(fieldName), fieldValue);
             return this;
         }
 
@@ -1157,7 +1157,7 @@ public class HumanCondition {
         }
 
         public OrConditionProxy orNotIEndsWith(String fieldName, Object fieldValue) {
-            orCondition.addNotIEndsWith(humanCondition.currentColumnName(fieldName), fieldValue);
+            final BaseConnectorCondition baseConnectorCondition = orCondition.addNotIEndsWith(humanCondition.currentColumnName(fieldName), fieldValue);
             return this;
         }
 
@@ -1175,7 +1175,7 @@ public class HumanCondition {
          * @return HumanCondition
          */
         public HumanCondition filterOrEnd() {
-            humanCondition.getAndCondition().addCondition(orCondition);
+            final BaseConnectorCondition baseConnectorCondition = humanCondition.getAndCondition().addCondition(orCondition);
             return humanCondition;
         }
 
@@ -1223,7 +1223,7 @@ public class HumanCondition {
 
             public AndConditionProxy andLink(Class<?> sourceModel, String sourceFieldName,
                                             Class<?> targetModel, String targetFieldName) {
-                this.andCondition.addLink(humanCondition.genLinkFieldName(sourceModel, TextUtils.humpToLine(sourceFieldName)),
+                final BaseConnectorCondition baseConnectorCondition = this.andCondition.addLink(humanCondition.genLinkFieldName(sourceModel, TextUtils.humpToLine(sourceFieldName)),
                         humanCondition.genLinkFieldName(targetModel, TextUtils.humpToLine(targetFieldName)));
                 return this;
             }
@@ -1236,7 +1236,7 @@ public class HumanCondition {
 
             public AndConditionProxy andLink(String sourceLinkName, String sourceFieldName,
                                             String targetLinkName, String targetFieldName) {
-                this.andCondition.addLink(humanCondition.genLinkFieldName(sourceLinkName, TextUtils.humpToLine(sourceFieldName)),
+                final BaseConnectorCondition baseConnectorCondition = this.andCondition.addLink(humanCondition.genLinkFieldName(sourceLinkName, TextUtils.humpToLine(sourceFieldName)),
                         humanCondition.genLinkFieldName(targetLinkName, TextUtils.humpToLine(targetFieldName)));
                 return this;
             }
@@ -1248,7 +1248,7 @@ public class HumanCondition {
             }
 
             public AndConditionProxy andIn(String fieldName, Object[] fieldValue) {
-                this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.IN, fieldValue);
+                final BaseConnectorCondition baseConnectorCondition = this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.IN, fieldValue);
                 return this;
             }
 
@@ -1257,7 +1257,7 @@ public class HumanCondition {
             }
 
             public AndConditionProxy andNotIn(String fieldName, Object[] fieldValue) {
-                this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.NOT_IN, fieldValue);
+                final BaseConnectorCondition baseConnectorCondition = this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.NOT_IN, fieldValue);
                 return this;
             }
 
@@ -1266,7 +1266,7 @@ public class HumanCondition {
             }
 
             public AndConditionProxy andEqual(String fieldName, Object fieldValue) {
-                this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.EQUAL, fieldValue);
+                final BaseConnectorCondition baseConnectorCondition = this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.EQUAL, fieldValue);
                 return this;
             }
 
@@ -1275,7 +1275,7 @@ public class HumanCondition {
             }
 
             public AndConditionProxy andNotEqual(String fieldName, Object fieldValue) {
-                this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.NOT_EQUAL, fieldValue);
+                final BaseConnectorCondition baseConnectorCondition = this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.NOT_EQUAL, fieldValue);
                 return this;
             }
 
@@ -1284,7 +1284,7 @@ public class HumanCondition {
             }
 
             public AndConditionProxy andGreaterThan(String fieldName, Object fieldValue) {
-                this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.GREATER_THAN, fieldValue);
+                final BaseConnectorCondition baseConnectorCondition = this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.GREATER_THAN, fieldValue);
                 return this;
             }
 
@@ -1293,7 +1293,7 @@ public class HumanCondition {
             }
 
             public AndConditionProxy andGreaterThanOrEqual(String fieldName, Object fieldValue) {
-                this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.GREATER_THAN_OR_EQUAL, fieldValue);
+                final BaseConnectorCondition baseConnectorCondition = this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.GREATER_THAN_OR_EQUAL, fieldValue);
                 return this;
             }
 
@@ -1302,7 +1302,7 @@ public class HumanCondition {
             }
 
             public AndConditionProxy andLessThan(String fieldName, Object fieldValue) {
-                this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.LESS_THAN, fieldValue);
+                final BaseConnectorCondition baseConnectorCondition = this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.LESS_THAN, fieldValue);
                 return this;
             }
 
@@ -1311,7 +1311,7 @@ public class HumanCondition {
             }
 
             public AndConditionProxy andLessThanOrEqual(String fieldName, Object fieldValue) {
-                this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.LESS_THAN_OR_EQUAL, fieldValue);
+                final BaseConnectorCondition baseConnectorCondition = this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.LESS_THAN_OR_EQUAL, fieldValue);
                 return this;
             }
 
@@ -1320,7 +1320,7 @@ public class HumanCondition {
             }
 
             public AndConditionProxy andContains(String fieldName, Object fieldValue) {
-                this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.CONTAINS, fieldValue);
+                final BaseConnectorCondition baseConnectorCondition = this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.CONTAINS, fieldValue);
                 return this;
             }
 
@@ -1329,7 +1329,7 @@ public class HumanCondition {
             }
 
             public AndConditionProxy andIContains(String fieldName, Object fieldValue) {
-                this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.I_CONTAINS, fieldValue);
+                final BaseConnectorCondition baseConnectorCondition = this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.I_CONTAINS, fieldValue);
                 return this;
             }
 
@@ -1338,7 +1338,7 @@ public class HumanCondition {
             }
 
             public AndConditionProxy andStartsWith(String fieldName, Object fieldValue) {
-                this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.STARTS_WITH, fieldValue);
+                final BaseConnectorCondition baseConnectorCondition = this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.STARTS_WITH, fieldValue);
                 return this;
             }
 
@@ -1348,7 +1348,7 @@ public class HumanCondition {
 
 
             public AndConditionProxy andIStartsWith(String fieldName, Object fieldValue) {
-                this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.I_STARTS_WITH, fieldValue);
+                final BaseConnectorCondition baseConnectorCondition = this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.I_STARTS_WITH, fieldValue);
                 return this;
             }
 
@@ -1357,7 +1357,7 @@ public class HumanCondition {
             }
 
             public AndConditionProxy andEndsWith(String fieldName, Object fieldValue) {
-                this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.ENDS_WITH, fieldValue);
+                final BaseConnectorCondition baseConnectorCondition = this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.ENDS_WITH, fieldValue);
                 return this;
             }
 
@@ -1366,7 +1366,7 @@ public class HumanCondition {
             }
 
             public AndConditionProxy andIEndsWith(String fieldName, Object fieldValue) {
-                this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.I_ENDS_WITH, fieldValue);
+                final BaseConnectorCondition baseConnectorCondition = this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.I_ENDS_WITH, fieldValue);
                 return this;
             }
 
@@ -1375,7 +1375,7 @@ public class HumanCondition {
             }
 
             public AndConditionProxy andNotContains(String fieldName, Object fieldValue) {
-                this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.NOT_CONTAINS, fieldValue);
+                final BaseConnectorCondition baseConnectorCondition = this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.NOT_CONTAINS, fieldValue);
                 return this;
             }
 
@@ -1384,7 +1384,7 @@ public class HumanCondition {
             }
 
             public AndConditionProxy andNotIContains(String fieldName, Object fieldValue) {
-                this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.NOT_I_CONTAINS, fieldValue);
+                final BaseConnectorCondition baseConnectorCondition = this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.NOT_I_CONTAINS, fieldValue);
                 return this;
             }
 
@@ -1393,7 +1393,7 @@ public class HumanCondition {
             }
 
             public AndConditionProxy andNotStartsWith(String fieldName, Object fieldValue) {
-                this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.NOT_STARTS_WITH, fieldValue);
+                final BaseConnectorCondition baseConnectorCondition = this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.NOT_STARTS_WITH, fieldValue);
                 return this;
             }
 
@@ -1402,7 +1402,7 @@ public class HumanCondition {
             }
 
             public AndConditionProxy andNotIStartsWith(String fieldName, Object fieldValue) {
-                this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.NOT_I_STARTS_WITH, fieldValue);
+                final BaseConnectorCondition baseConnectorCondition = this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.NOT_I_STARTS_WITH, fieldValue);
                 return this;
             }
 
@@ -1411,7 +1411,7 @@ public class HumanCondition {
             }
 
             public AndConditionProxy andNotEndsWith(String fieldName, Object fieldValue) {
-                this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.NOT_ENDS_WITH, fieldValue);
+                final BaseConnectorCondition baseConnectorCondition = this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.NOT_ENDS_WITH, fieldValue);
                 return this;
             }
 
@@ -1420,7 +1420,7 @@ public class HumanCondition {
             }
 
             public AndConditionProxy andNotIEndsWith(String fieldName, Object fieldValue) {
-                this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.NOT_I_ENDS_WITH, fieldValue);
+                final BaseConnectorCondition baseConnectorCondition = this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.NOT_I_ENDS_WITH, fieldValue);
                 return this;
             }
 

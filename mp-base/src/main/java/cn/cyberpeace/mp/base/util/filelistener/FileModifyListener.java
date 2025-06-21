@@ -51,7 +51,7 @@ public abstract class FileModifyListener {
         stopped = false;
 
         if (!FileUtil.exist(filepath)) {
-            FileUtil.mkParentDirs(filepath);
+            final File file1 = FileUtil.mkParentDirs(filepath);
             File file = new File(filepath);
             try {
                 if (!file.createNewFile()) {

@@ -163,19 +163,19 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
     @Override
     public void loadListFilterCondition(HumanCondition humanCondition, FlowInfoQueryParams queryParams) {
         if (Objects.nonNull(queryParams.getCategory())) {
-            humanCondition.filterEqual("category", queryParams.getCategory());
+            humanCondition = humanCondition.filterEqual("category", queryParams.getCategory());
         }
 
         if (Objects.nonNull(queryParams.getInteractiveType())) {
-            humanCondition.filterEqual("interactiveType", queryParams.getInteractiveType());
+            humanCondition = humanCondition.filterEqual("interactiveType", queryParams.getInteractiveType());
         }
 
         if (Objects.nonNull(queryParams.getAttackFlowType())) {
-            humanCondition.filterEqual("attack_flow_type", queryParams.getAttackFlowType());
+            humanCondition = humanCondition.filterEqual("attack_flow_type", queryParams.getAttackFlowType());
         }
 
         if (Objects.nonNull(queryParams.getFlowIds())) {
-            humanCondition.filterIn("id", queryParams.getFlowIds());
+            humanCondition = humanCondition.filterIn("id", queryParams.getFlowIds());
         }
     }
 
@@ -216,7 +216,7 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
 
             // 攻击流量，根据流量id删除对应的脚本参数信息
             if (InteractiveTypeEnum.ATTACK.toValue() == flowInfoModel.getInteractiveType()) {
-                flowScriptParamService.deleteByFlowId(id);
+                final int i = flowScriptParamService.deleteByFlowId(id);
             }
 
             // 删除流量信息

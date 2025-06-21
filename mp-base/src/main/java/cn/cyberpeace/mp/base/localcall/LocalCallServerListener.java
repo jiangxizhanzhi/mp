@@ -222,9 +222,9 @@ public class LocalCallServerListener extends FileModifyListener {
 
         List<Runnable> tasks = new ArrayList<>();
         for (String line : lines) {
-            line = line.trim();
+            String lineTrim = line.trim();
             List<String> lineParts = new ArrayList<>(Arrays.asList(
-                    TextUtils.coupleStrip(line, "\"").split("\" \"")));
+                    TextUtils.coupleStrip(lineTrim, "\"").split("\" \"")));
             String methodName = null;
             List<String> methodArgs = new ArrayList<>();
             for (int i = 0; i < lineParts.size(); i++) {

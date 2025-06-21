@@ -122,9 +122,9 @@ public class SysOptionServiceImpl extends BaseModelServiceImpl<OptionModel, Opti
      */
     @Override
     public List<OptionModel> findByType(String type) {
-        HumanCondition condition = new HumanCondition();
-        condition.filterEqual(OptionModel::getType, type);
-        condition.orderBy(OptionModel::getSort);
+        HumanCondition condition = new HumanCondition()
+                                    .filterEqual(OptionModel::getType, type)
+                                    .orderBy(OptionModel::getSort);
         List<OptionModel> optionModels = getModelMapper().list(condition);
         filterByVisibility(optionModels);
         return optionModels;
@@ -368,16 +368,15 @@ public class SysOptionServiceImpl extends BaseModelServiceImpl<OptionModel, Opti
         if (StringUtils.isEmpty(optionModelBO.getType()) || StringUtils.isEmpty(optionModelBO.getName())) {
             return false;
         }
-        HumanCondition condition = new HumanCondition();
-        condition.filterEqual(OptionModel::getType, optionModelBO.getType());
+        HumanCondition condition = new HumanCondition().filterEqual(OptionModel::getType, optionModelBO.getType());
         Locale locale = LocaleContextHolder.getLocale();
         if (Objects.equals(Locale.US, locale)) {
-            condition.filterEqual(OptionModel::getEnName, optionModelBO.getName());
+            condition = condition.filterEqual(OptionModel::getEnName, optionModelBO.getName());
         } else {
-            condition.filterEqual(OptionModel::getZhName, optionModelBO.getName());
+            condition = condition.filterEqual(OptionModel::getZhName, optionModelBO.getName());
         }
         if (exceptOwn) {
-            condition.filterNotEqual(OptionModel::getId, optionModelBO.getId());
+            condition = condition.filterNotEqual(OptionModel::getId, optionModelBO.getId());
         }
         List<OptionModel> optionModels = getModelMapper().list(condition);
         boolean result = CollectionUtils.isNotEmpty(optionModels);

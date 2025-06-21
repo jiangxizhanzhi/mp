@@ -44,8 +44,7 @@ public class FlowProtocolService extends BaseModelServiceImpl<FlowProtocolModel,
      * @return
      */
     public List<FlowProtocolModel> selectByFlowId(String flowId) {
-        HumanCondition condition = new HumanCondition();
-        condition.filterEqual("flowId", flowId);
+        HumanCondition condition = new HumanCondition().filterEqual("flowId", flowId);
         return getModelMapper().list(condition);
     }
 
@@ -59,8 +58,7 @@ public class FlowProtocolService extends BaseModelServiceImpl<FlowProtocolModel,
      * @return
      */
     public void deleteByFlowId(String flowId) {
-        HumanCondition condition = new HumanCondition();
-        condition.filterEqual("flowId", flowId);
+        HumanCondition condition = new HumanCondition().filterEqual("flowId", flowId);
         getModelMapper().filterDelete(condition);
     }
 

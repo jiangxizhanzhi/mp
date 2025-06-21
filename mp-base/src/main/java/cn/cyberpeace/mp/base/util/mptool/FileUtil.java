@@ -630,7 +630,7 @@ public class FileUtil {
 
         // Optionally delete the file after download
         if (delete.equals(Boolean.TRUE) && file != null && file.exists()) {
-            file.delete();
+            final boolean delete1 = file.delete();
         }
     }
 

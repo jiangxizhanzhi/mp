@@ -335,9 +335,9 @@ public class StatCommon {
         @Override
         public void loadToCondition(HumanCondition condition) {
             if (Boolean.TRUE.equals(getDistinct())) {
-                condition.selectAs(Count.f(getName()).calcEmptyNull().distinct(), getQueryKey());
+                condition = condition.selectAs(Count.f(getName()).calcEmptyNull().distinct(), getQueryKey());
             } else {
-                condition.selectAs(Count.f(getName()).calcEmptyNull(), getQueryKey());
+                condition = condition.selectAs(Count.f(getName()).calcEmptyNull(), getQueryKey());
             }
         }
     }
@@ -357,7 +357,7 @@ public class StatCommon {
          */
         @Override
         public void loadToCondition(HumanCondition condition) {
-            condition.selectAs(Sum.f(getName()), getQueryKey());
+            condition = condition.selectAs(Sum.f(getName()), getQueryKey());
         }
     }
 
