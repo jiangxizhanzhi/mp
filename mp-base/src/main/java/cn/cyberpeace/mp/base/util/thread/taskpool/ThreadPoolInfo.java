@@ -30,7 +30,7 @@ import lombok.ToString;
 public class ThreadPoolInfo {
 
     @ApiModelProperty(value = "线程池名前缀")
-    public String threadPoolName;
+    private String threadPoolName;
 
     @ApiModelProperty(value = "核心线程数")
     private int coreThreadSize;

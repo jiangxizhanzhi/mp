@@ -148,7 +148,7 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
     private FlowPcapService flowPcapService;
 
     @Autowired
-    public BaseAppConfig baseAppConfig;
+    private BaseAppConfig baseAppConfig;
 
     /**
      * 预制流量文件目录

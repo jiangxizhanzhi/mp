@@ -47,7 +47,7 @@ import java.util.stream.Collectors;
 public class Swagger2Config implements ModelPropertyBuilderPlugin {
 
     @Autowired
-    public BaseAppConfig baseAppConfig;
+    private BaseAppConfig baseAppConfig;
 
     /**
      * apiInfo
