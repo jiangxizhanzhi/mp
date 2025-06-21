@@ -70,7 +70,7 @@ public class LinyunCreateVirtualMachineParams extends AbstractCreateVirtualMachi
     }
 
     public static String generateRandomIP(String cidr){
-        String[] parts = cidr.split("/");
+        String[] parts = cidr.split("\\/");
         if (parts.length != 2) {
             throw new IllegalArgumentException("CIDR格式错误！");
         }
