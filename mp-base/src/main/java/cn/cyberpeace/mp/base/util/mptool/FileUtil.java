@@ -290,7 +290,11 @@ public class FileUtil {
         }
 
         // 删除文件或清空后的目录
-        return file.delete();
+        final boolean delete = file.delete();
+        if (!delete) {
+            log.warn("Failed to delete existing file: {}", file.getAbsolutePath());
+        }
+        return delete;
     }
 
     /**
@@ -584,7 +588,7 @@ public class FileUtil {
 
             // 设置返回
             response.setContentType("application/octet-stream;charset=UTF-8");
-            response.setHeader("Content-disposition", "attachment;filename=" + URLEncoder.encode(file.getName(),"UTF-8").replaceAll("\\+","%20"));
+            response.setHeader("Content-disposition", "attachment;filename=" + URLEncoder.encode(file.getName(), StandardCharsets.UTF_8).replaceAll("\\+","%20"));
 
             outputStream.write(buffer);
             outputStream.flush();
@@ -593,8 +597,11 @@ public class FileUtil {
         }
 
         // Optionally delete the file after download
-        if (delete.equals(Boolean.TRUE) && file != null && file.exists()) {
-            final boolean delete1 = file.delete();
+        if (delete.equals(Boolean.TRUE) && file.exists()) {
+            final boolean deleted = file.delete();
+            if (!deleted) {
+                log.warn("Failed to delete existing file: {}", file.getAbsolutePath());
+            }
         }
     }
 

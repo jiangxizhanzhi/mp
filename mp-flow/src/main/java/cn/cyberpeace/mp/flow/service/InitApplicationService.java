@@ -26,7 +26,11 @@ public class InitApplicationService implements ApplicationRunner {
     public void saveFile(String fileName) {
         File file = new File(fileName);
         if (file.exists()) {
-            final boolean delete = file.delete();
+            final boolean deleted = file.delete();
+            if (!deleted) {
+                log.warn("Failed to delete existing file: {}", file.getAbsolutePath());
+                return;
+            }
         }
         InputStream inputStream = this.getClass().getClassLoader()
                 .getResourceAsStream(fileName);
