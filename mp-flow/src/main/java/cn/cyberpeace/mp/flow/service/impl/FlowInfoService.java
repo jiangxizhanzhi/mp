@@ -1093,143 +1093,154 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
     public ServiceResult<Boolean> flowImport(ImportFlowInfoRequest request) {
         String filePath = request.getPath();
         File fileFolder = new File(filePath);
-        if (fileFolder.exists()) {
-            File[] flowFiles = fileFolder.listFiles();
-            if (ArrayUtils.isEmpty(flowFiles)) {
-                log.error("file folder is empty");
-                return ResultCommon.fail("file folder is empty");
-            }
 
-            // readme文本集合
-            List<String> readmeList = new ArrayList<>();
-            // pcap文件
-            File pcapFile = null;
-            for (File flowFile : flowFiles) {
-                if (flowFile.isDirectory()) {
-                    File[] pcapFiles = flowFile.listFiles();
-                    if (ArrayUtils.isEmpty(pcapFiles)) {
-                        log.error("flow info folder is empty");
-                        return ResultCommon.fail("flow info folder is empty");
-                    }
-                    pcapFile = pcapFiles[0];
-                } else {
-                    if (flowFile.getName().contains("README.md")) {
-                        // 解析README.md
-                        File readmeFile = flowFile;
-                        try (FileReader fileReader = new FileReader(readmeFile); BufferedReader bufferedReader = new BufferedReader(fileReader)) {
-                            String s;
-                            while ((s = bufferedReader.readLine()) != null) {
-                                readmeList.add(s);
-                            }
-                            // 过滤空行数据
-                            List<String> list = new ArrayList<>();
-                            for (String text : readmeList) {
-                                if (StringUtils.isNotBlank(text)) {
-                                    list.add(text);
-                                }
-                            }
-                            readmeList = list;
-                        } catch (FileNotFoundException e) {
-                            log.error("flow info import error for FileNotFoundException, {}", ExceptionUtils.getStackTrace(e));
-                            return ResultCommon.fail("flow file import error");
-                        } catch (IOException e) {
-                            log.error("flow info import error for IOException, {}", ExceptionUtils.getStackTrace(e));
-                            return ResultCommon.fail("flow file import error");
-                        }
-                    }
+        if (!fileFolder.exists()) {
+            log.error("File folder does not exist: {}", filePath);
+            return ResultCommon.fail("File folder does not exist");
+        }
+
+        File[] flowFiles = fileFolder.listFiles();
+        if (ArrayUtils.isEmpty(flowFiles)) {
+            log.error("File folder is empty");
+            return ResultCommon.fail("File folder is empty");
+        }
+
+        // Readme text collection
+        List<String> readmeList = new ArrayList<>();
+        File pcapFile = null;
+
+        for (File flowFile : flowFiles) {
+            if (flowFile.isDirectory()) {
+                pcapFile = handleFlowInfoFolder(flowFile);
+                if (pcapFile == null) {
+                    return ResultCommon.fail("Flow info folder is empty");
+                }
+            } else if (flowFile.getName().contains("README.md")) {
+                // Process README.md
+                if (!processReadmeFile(flowFile, readmeList)) {
+                    return ResultCommon.fail("Flow file import error");
                 }
             }
+        }
 
-            if (Objects.isNull(pcapFile)) {
-                log.error("flow info file is empty");
-                return ResultCommon.fail("flow info file is empty");
-            }
+        if (Objects.isNull(pcapFile)) {
+            log.error("Flow info file is empty");
+            return ResultCommon.fail("Flow info file is empty");
+        }
 
-            FlowInfoModel flowInfoModel = new FlowInfoModel();
-            String fileName = readmeList.get(1);
-            flowInfoModel.setTitle(fileName.split(BaseConstants.SPOT)[0]);
+        FlowInfoModel flowInfoModel = new FlowInfoModel();
+        String fileName = readmeList.get(1);
+        flowInfoModel.setTitle(fileName.split(BaseConstants.SPOT)[0]);
 
-            // 重名校验
-            FlowInfoModel existFlowInfoModel = getModelMapper().selectByTitle(fileName);
-            if (Objects.nonNull(existFlowInfoModel)) {
-                // 删除重名流量文件
-                final ServiceResult<Boolean> booleanServiceResult = this.deleteFlowInfo(existFlowInfoModel.getId(), false);
-            }
+        // Duplicate check
+        FlowInfoModel existFlowInfoModel = getModelMapper().selectByTitle(fileName);
+        if (Objects.nonNull(existFlowInfoModel)) {
+            // Delete duplicate flow file
+            this.deleteFlowInfo(existFlowInfoModel.getId(), false);
+        }
 
-            flowInfoModel.setFileName(pcapFile.getName());
-            String fdfsPath = FsCommon.upload(pcapFile.getAbsolutePath());
-            flowInfoModel.setFlowDesc(readmeList.get(3));
-            boolean isContainType = readmeList.get(10).contains("类型");
-            int diffCount = 0;
-            if (!isContainType) {
-                diffCount = 2;
-                // 默认类型：网络管理
-                flowInfoModel.setCategory(2);
-            } else {
-                String categoryName = readmeList.get(11);
-                flowInfoModel.setCategory(FlowCategory.flowCategoryMap.get(categoryName));
-            }
+        flowInfoModel.setFileName(pcapFile.getName());
+        String fdfsPath = FsCommon.upload(pcapFile.getAbsolutePath());
+        flowInfoModel.setFlowDesc(readmeList.get(3));
 
-            // 是否pcap
-            boolean isPcap = pcapFile.getName().endsWith("pcap");
-            if (isPcap) {
-                flowInfoModel.setResourceType(ResourceTypeEnum.PACP.toValue());
-                flowInfoModel.setPcapFile(fdfsPath);
-            } else {
-                flowInfoModel.setResourceType(ResourceTypeEnum.SCRIPT.toValue());
-                flowInfoModel.setScriptFile(fdfsPath);
-            }
-            boolean isBackFlow = readmeList.get(13 - diffCount).contains("背景流量");
-            if (isBackFlow) {
-                // 背景流量
-                flowInfoModel.setInteractiveType(InteractiveTypeEnum.BACKGROUND.toValue());
-            } else {
-                // 攻击流量
-                flowInfoModel.setInteractiveType(InteractiveTypeEnum.ATTACK.toValue());
-            }
-            this.create(flowInfoModel);
+        // Set category and resource type
+        int diffCount = setFlowCategoryAndType(readmeList, flowInfoModel);
 
-            if (!isPcap) {
-                // 脚本流量，要添加默认脚本参数信息
-                List<FlowScriptParamModel> scriptParamModelList = new ArrayList<>();
-                // 参数数量
-                int countParam = readmeList.size() - (15 - diffCount);
-                for (int i = 0; i < countParam; i++) {
-                    FlowScriptParamModel scriptParam = new FlowScriptParamModel();
-                    // 解析攻击流量参数：- port | Number | 参数说明描述 | 90
-                    String strParam = readmeList.get((15 - diffCount) + i);
-                    if (StringUtils.isNotBlank(strParam)) {
-                        // 去除"-"号
-                        strParam = strParam.substring(1);
-                        String[] parmaArray = strParam.split("\\s\\|\\s");
-                        if (parmaArray.length != 4) {
-                            log.error("script param parse error");
-                            return ResultCommon.fail("script param parse error");
-                        }
-                        scriptParam.setFlowId(flowInfoModel.getId());
-                        scriptParam.setParamKey(parmaArray[0].trim());
-                        scriptParam.setParamType(FlowCategory.paramTypeMap.get(parmaArray[1].trim()));
-                        scriptParam.setParamDesc(parmaArray[2].trim());
-                        if (!ParamTypeEnum.IP.toString().equalsIgnoreCase(parmaArray[0].trim())) {
-                            scriptParam.setParamValue(parmaArray[3].trim());
-                        }
-                        scriptParamModelList.add(scriptParam);
-                    }
-                }
+        // Set flow type (background or attack)
+        setFlowType(readmeList, diffCount, flowInfoModel);
 
-                if (CollectionUtils.isNotEmpty(scriptParamModelList)) {
-                    flowScriptParamService.bulkCreate(scriptParamModelList);
-                }
-            } else {
-                FlowTaskPool.getInstance().executeTask(() -> this.initPcapProtocols(flowInfoModel));
-            }
+        // Create flow info model
+        this.create(flowInfoModel);
+
+        // Handle script params for script type flows
+        if (isScriptFlow(pcapFile)) {
+            handleScriptParams(readmeList, diffCount, flowInfoModel);
         } else {
-            log.error("file floder is not exist");
-            return ResultCommon.fail("file folder is not exist");
+            FlowTaskPool.getInstance().executeTask(() -> this.initPcapProtocols(flowInfoModel));
         }
 
         return ResultCommon.success(true);
     }
+
+    private File handleFlowInfoFolder(File flowFile) {
+        File[] pcapFiles = flowFile.listFiles();
+        if (ArrayUtils.isEmpty(pcapFiles)) {
+            log.error("Flow info folder is empty");
+            return null;
+        }
+        return pcapFiles[0]; // Assuming the first file is the pcap file
+    }
+
+    private boolean processReadmeFile(File readmeFile, List<String> readmeList) {
+        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(readmeFile))) {
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                if (StringUtils.isNotBlank(line)) {
+                    readmeList.add(line);
+                }
+            }
+            return true;
+        } catch (IOException e) {
+            log.error("Error reading README file: {}", ExceptionUtils.getStackTrace(e));
+            return false;
+        }
+    }
+
+    private int setFlowCategoryAndType(List<String> readmeList, FlowInfoModel flowInfoModel) {
+        boolean isContainType = readmeList.get(10).contains("类型");
+        int diffCount = 0;
+        if (!isContainType) {
+            diffCount = 2;
+            flowInfoModel.setCategory(2); // Default category: Network Management
+        } else {
+            String categoryName = readmeList.get(11);
+            flowInfoModel.setCategory(FlowCategory.flowCategoryMap.get(categoryName));
+        }
+        return diffCount;
+    }
+
+    private void setFlowType(List<String> readmeList, int diffCount, FlowInfoModel flowInfoModel) {
+        boolean isBackFlow = readmeList.get(13 - diffCount).contains("背景流量");
+        if (isBackFlow) {
+            flowInfoModel.setInteractiveType(InteractiveTypeEnum.BACKGROUND.toValue());
+        } else {
+            flowInfoModel.setInteractiveType(InteractiveTypeEnum.ATTACK.toValue());
+        }
+    }
+
+    private boolean isScriptFlow(File pcapFile) {
+        return !pcapFile.getName().endsWith("pcap");
+    }
+
+    private void handleScriptParams(List<String> readmeList, int diffCount, FlowInfoModel flowInfoModel) {
+        List<FlowScriptParamModel> scriptParamModelList = new ArrayList<>();
+        int countParam = readmeList.size() - (15 - diffCount);
+        for (int i = 0; i < countParam; i++) {
+            FlowScriptParamModel scriptParam = new FlowScriptParamModel();
+            String strParam = readmeList.get((15 - diffCount) + i);
+            if (StringUtils.isNotBlank(strParam)) {
+                strParam = strParam.substring(1); // Remove "-"
+                String[] paramArray = strParam.split("\\s\\|\\s");
+                if (paramArray.length != 4) {
+                    log.error("Script param parse error");
+                    throw new RuntimeException("Script param parse error");
+                }
+                scriptParam.setFlowId(flowInfoModel.getId());
+                scriptParam.setParamKey(paramArray[0].trim());
+                scriptParam.setParamType(FlowCategory.paramTypeMap.get(paramArray[1].trim()));
+                scriptParam.setParamDesc(paramArray[2].trim());
+                if (!ParamTypeEnum.IP.toString().equalsIgnoreCase(paramArray[0].trim())) {
+                    scriptParam.setParamValue(paramArray[3].trim());
+                }
+                scriptParamModelList.add(scriptParam);
+            }
+        }
+
+        if (CollectionUtils.isNotEmpty(scriptParamModelList)) {
+            flowScriptParamService.bulkCreate(scriptParamModelList);
+        }
+    }
+
 
 
     /**
