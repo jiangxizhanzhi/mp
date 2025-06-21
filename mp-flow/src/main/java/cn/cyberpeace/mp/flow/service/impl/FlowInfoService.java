@@ -1438,29 +1438,39 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
      */
     private String executePython(String command, String title) {
         String result = "";
+        Process process = null;
         try {
-            Process process = Runtime.getRuntime().exec(command);
+            process = Runtime.getRuntime().exec(command);
             int exitCode = process.waitFor();
-            if (exitCode == 0) {
-                // 脚本执行成功
-                BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    result = line;
-                    log.info("{} execute python success: {}", title, line);
+
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+                 BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
+
+                if (exitCode == 0) {
+                    // 脚本执行成功
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        result = line;
+                        log.info("{} execute python success: {}", title, line);
+                    }
+                } else {
+                    // 脚本执行失败
+                    String errorLine;
+                    StringBuilder errorBuilder = new StringBuilder();
+                    while ((errorLine = errorReader.readLine()) != null) {
+                        errorBuilder.append(errorLine).append("  ");
+                    }
+                    log.error("{} execute python error: {}", title, errorBuilder.toString());
                 }
-            } else {
-                // 脚本执行失败
-                BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-                String errorLine;
-                StringBuilder errorBuilder = new StringBuilder();
-                while ((errorLine = errorReader.readLine()) != null) {
-                    errorBuilder.append(errorLine + "  ");
-                }
-                log.error("{} execute python error: {}", title, errorBuilder);
+            } catch (IOException e) {
+                log.error("{} error while reading streams", title, e);
             }
         } catch (Exception e) {
             log.error("{} execute python error", title, e);
+        } finally {
+            if (process != null) {
+                process.destroy(); // 显式销毁 Process，释放相关资源
+            }
         }
         return result;
     }
