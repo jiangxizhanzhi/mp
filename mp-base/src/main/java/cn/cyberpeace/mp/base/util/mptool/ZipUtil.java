@@ -66,34 +66,6 @@ public class ZipUtil {
     }
 
     /**
-     * toZip
-     *
-     * @param srcDir
-     * @return
-     */
-    public static String toZip(String srcDir) throws RuntimeException {
-
-        File src = new File(srcDir);
-        String zipPath = srcDir + File.separator + src.getName() + SUFFIX;
-        try (ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(zipPath))){
-
-            File[] listFiles = new File(srcDir).listFiles();
-            assert listFiles != null;
-            for (File file : listFiles) {
-                // 跳过生成的zip文件本身
-                if (file.getName().equals(src.getName() + SUFFIX)) {
-                    continue;
-                }
-                compress(file, zos, file.getName());
-            }
-        } catch (Exception e) {
-            log.error("failed to Zip Directory {}", srcDir);
-            e.printStackTrace();
-        }
-        return zipPath;
-    }
-
-    /**
      * compress
      *
      * @param sourceFile
