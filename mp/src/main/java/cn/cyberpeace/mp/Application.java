@@ -55,7 +55,7 @@ public class Application {
     public CommandLineRunner commandLineRunner(ApplicationContext ctx) {
         return args -> {
             String localHost = "localhost";
-            ServerProperties serverProperties = BaseSingleton.baseAppConfig.getServerProperties();
+            ServerProperties serverProperties = BaseSingleton.getBaseAppConfig().getServerProperties();
             String protocol = (serverProperties.getSsl() != null && serverProperties.getSsl().isEnabled()) ? "https" : "http";
             String hostAddress = serverProperties.getAddress() == null ? InetAddress.getLocalHost().getHostAddress() : serverProperties.getAddress().getHostAddress();
             Integer port= serverProperties.getPort();

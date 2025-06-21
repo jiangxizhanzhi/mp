@@ -11,6 +11,8 @@
 package cn.cyberpeace.mp.base.constant;
 
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
+import lombok.Getter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -23,16 +25,19 @@ import org.springframework.stereotype.Component;
 @Component
 public class BaseSingleton {
 
+    // ✅ 只读访问方法
     /** 模块配置bean的引用, 需要在bean初始化完成之后调用 TODO: 适配配置热更新场景 */
-    public static BaseAppConfig baseAppConfig;
+    @Getter
+    private static BaseAppConfig baseAppConfig;
 
-    /**
-     * BaseSingleton
-     *
-     * @param baseAppConfig
-     */
-    private BaseSingleton(BaseAppConfig baseAppConfig) {
-        BaseSingleton.baseAppConfig = baseAppConfig;
+
+
+    @Autowired
+    public BaseSingleton(BaseAppConfig baseAppConfig) {
+        // 只初始化一次
+        if (BaseSingleton.baseAppConfig == null) {
+            BaseSingleton.baseAppConfig = baseAppConfig;
+        }
     }
 
 }

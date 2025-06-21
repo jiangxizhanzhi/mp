@@ -49,7 +49,7 @@ public class ControllerCommon {
             return null;
         }
 
-        if (Boolean.TRUE.equals(BaseSingleton.baseAppConfig.getSnakeApiMode())) {
+        if (Boolean.TRUE.equals(BaseSingleton.getBaseAppConfig().getSnakeApiMode())) {
             return TextUtils.lineToHump(fields);
         }
 
@@ -83,9 +83,9 @@ public class ControllerCommon {
             int page = ((PageQueryParams) queryParams).getPage() == null ? 1 : ((PageQueryParams) queryParams).getPage();
             int pageSize = ((PageQueryParams) queryParams).getPageSize() == null ? 0 : ((PageQueryParams) queryParams).getPageSize();
             if (pageSize <= 0) {
-                pageSize = BaseSingleton.baseAppConfig.getDefaultPageSize();
-            } else if (pageSize > BaseSingleton.baseAppConfig.getMaxPageSize() && !unlimitPagination) {
-                pageSize = BaseSingleton.baseAppConfig.getMaxPageSize();
+                pageSize = BaseSingleton.getBaseAppConfig().getDefaultPageSize();
+            } else if (pageSize > BaseSingleton.getBaseAppConfig().getMaxPageSize() && !unlimitPagination) {
+                pageSize = BaseSingleton.getBaseAppConfig().getMaxPageSize();
             }
             ((PageQueryParams) queryParams).setPage(page);
             ((PageQueryParams) queryParams).setPageSize(pageSize);

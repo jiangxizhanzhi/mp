@@ -360,7 +360,7 @@ public class FsCommon {
      * @return boolean
      */
     public static boolean isFileServerOuterUrl(String path) {
-        String prefix = String.format(BaseSingleton.baseAppConfig.getLfsOuterHttpUrlTemplate(), StringUtils.EMPTY);
+        String prefix = String.format(BaseSingleton.getBaseAppConfig().getLfsOuterHttpUrlTemplate(), StringUtils.EMPTY);
         return StringUtils.startsWith(path, prefix);
     }
 
@@ -374,7 +374,7 @@ public class FsCommon {
         if (StringUtils.isEmpty(path)) {
             return path;
         }
-        String prefix = String.format(BaseSingleton.baseAppConfig.getLfsOuterHttpUrlTemplate(), StringUtils.EMPTY);
+        String prefix = String.format(BaseSingleton.getBaseAppConfig().getLfsOuterHttpUrlTemplate(), StringUtils.EMPTY);
         return StringUtils.replaceOnce(path, prefix, StringUtils.EMPTY);
     }
 
