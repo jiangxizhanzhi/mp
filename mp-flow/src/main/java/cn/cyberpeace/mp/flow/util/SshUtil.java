@@ -305,8 +305,12 @@ public class SshUtil {
      * @since 4.0.3
      */
     private static void close(Channel channel) {
-        if (channel != null && channel.isConnected()) {
-            channel.disconnect();
+        try {
+            if (channel != null && channel.isConnected()) {
+                channel.disconnect();
+            }
+        } catch (Exception e) {
+            log.error("close channel error:", e);
         }
     }
 
