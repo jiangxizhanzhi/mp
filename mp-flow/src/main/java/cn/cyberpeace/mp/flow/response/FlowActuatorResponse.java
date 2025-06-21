@@ -33,6 +33,8 @@ import java.io.Serializable;
 @ApiModel(value = "流量发生器返回信息")
 @Builder
 public class FlowActuatorResponse implements Serializable {
+     // 显式声明 serialVersionUID
+     private static final long serialVersionUID = 1L;
 
     /**
      * id

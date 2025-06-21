@@ -33,6 +33,9 @@ import java.util.List;
 @AllArgsConstructor
 public class FlowActuatorRequest implements Serializable {
 
+    // 显式声明 serialVersionUID
+    private static final long serialVersionUID = 1L;
+
     /**
      * 镜像发生器ID
      */

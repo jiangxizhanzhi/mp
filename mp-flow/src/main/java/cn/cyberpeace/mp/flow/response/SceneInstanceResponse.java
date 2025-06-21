@@ -33,6 +33,8 @@ import java.io.Serializable;
 @ApiModel(value = "场景实例信息")
 @Builder
 public class SceneInstanceResponse implements Serializable {
+    // 显式声明 serialVersionUID
+    private static final long serialVersionUID = 1L;
 
     @ApiModelProperty(value = "ID")
     private String id;

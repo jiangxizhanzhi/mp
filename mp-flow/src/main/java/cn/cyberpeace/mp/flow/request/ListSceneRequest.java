@@ -30,6 +30,8 @@ import java.io.Serializable;
 @NoArgsConstructor
 @Builder
 public class ListSceneRequest implements Serializable {
+    // 显式声明 serialVersionUID
+    private static final long serialVersionUID = 1L;
 
     // 场景名称
     private String name;
