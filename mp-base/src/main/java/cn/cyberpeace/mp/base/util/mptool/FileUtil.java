@@ -118,42 +118,6 @@ public class FileUtil {
 
 
     /**
-     * 获得指定目录下所有文件 不会扫描子目录
-     * Params:
-     * path – 相对ClassPath的目录或者绝对路径目录
-     */
-    public static List<String> listFileNames(String path) {
-        if (path == null) {
-            return new ArrayList<>(0);
-        }
-        int index = path.lastIndexOf(FileUtil.JAR_PATH_EXT);
-        if (index < 0) {
-            // 普通目录
-            final List<String> paths = new ArrayList<>();
-            final File[] files = ls(path);
-            for (File file : files) {
-                if (file.isFile()) {
-                    paths.add(file.getName());
-                }
-            }
-            return paths;
-        }
-
-        // jar文件
-        path = getAbsolutePath(path);
-        // jar文件中的路径
-        index = index + FileUtil.JAR_FILE_EXT.length();
-
-        try(JarFile jarFile = new JarFile(path.substring(0, index))) {
-            // 防止出现jar!/cn/hutool/这类路径导致文件找不到
-            return ZipUtil.listFileNames(jarFile, StrUtil.removePrefix(path.substring(index + 1), "/"));
-        } catch (IOException e) {
-            log.error(e.getMessage());
-            return null;
-        }
-    }
-
-    /**
      * ls
      *
      * @param path
