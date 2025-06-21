@@ -30,6 +30,7 @@ import org.springframework.core.io.Resource;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -54,16 +55,16 @@ public class TopoCloudClient implements ICloudClient {
 
     private static final String NET_NODE_ID = "a0018ce7-9646-4386-bd9b-52518670e469";
 
-    private static BusinessCscene BUSINESS_CSCENE;
+    private static final BusinessCscene BUSINESS_CSCENE;
 
-    private static Map<String, String> HEADER = new HashMap<>();
+    private static final Map<String, String> HEADER = new HashMap<>();
 
     static {
         HEADER.put("clientId", "84261d495c414e");
         HEADER.put("clientSecret", "2112f4b855264ad7b1a4209737fc7836");
 
         try {
-            Resource resource = new ClassPathResource(URLDecoder.decode("flow_actuator_scene.json", "UTF-8"));
+            Resource resource = new ClassPathResource(URLDecoder.decode("flow_actuator_scene.json", StandardCharsets.UTF_8));
             String content = CharStreams.toString(new InputStreamReader(resource.getInputStream()));
             BUSINESS_CSCENE = JsonCommon.snakeParse(content, BusinessCscene.class);
         } catch (Exception e) {
