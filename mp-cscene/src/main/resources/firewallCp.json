@@ -1,0 +1,42 @@
+{
+  "role": 23,
+  "image_type": "simple",
+  "image_uuid": "c12b7b53-e232-40f4-b7c3-d3dfac8e1b31",
+  "is_build_in": true,
+  "image": "Firewall",
+  "electric_port_number": 4,
+  "electric_port_type": "E",
+  "optical_port_number": 0,
+  "optical_port_type": "sfp",
+  "firewall_rules": [
+
+  ],
+  "static_routes": [
+
+  ],
+  "category": 3,
+  "category2": 52,
+  "cidr": "",
+  "gateway": "",
+  "dns_nameservers": [
+
+  ],
+  "dhcp": true,
+  "allocation_pools": [
+
+  ],
+  "wan_port_number": 0,
+  "wan_port_type": "E",
+  "lan_port_number": 0,
+  "lan_port_type": "E",
+  "quick_create_params": [ ],
+  "ospf_router_id": "",
+  "rip_loopback": "",
+  "virtual_usbs": [
+
+  ],
+  "entity_usbs": [ ],
+  "docker_params": {
+
+  }
+}

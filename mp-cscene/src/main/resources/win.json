@@ -1,0 +1,48 @@
+{
+
+  "display_context": "{\"size\":40,\"zIndex\":2,\"text\":{\"fontSize\":12,\"fill\":\"var(--neutral9)\",\"refY\":53,\"transform\":\"rotate(0)\",\"fontWeight\":400,\"text\":\"Win10-Pro-1903-x86-cn\",\"opacity\":1,\"class\":\"node-label original\"}}",
+  "id": "3a546783-dad5-42b8-8356-bfe9e72cfab7",
+  "name": "Win10-Pro-1903-x86-cn",
+  "type": 4,
+  "icon2": "/api/mp/file/037/491/2596cec9cd276e4e782974740c654348.png",
+  "icon3": "",
+  "system_language": "cn",
+  "system_architecture": "64",
+  "system_type": 106,
+  "max_port_number": 1,
+  "cpu": 1,
+  "ram": 2048,
+  "disk": 20,
+  "init_commands": [
+      ""
+  ],
+  "ports": [
+    {
+      "id": "port_3a546783-dad5-42b8-8356-bfe9e72cfab7_1",
+      "nat": false,
+      "name": "eth0/1",
+      "ip": "",
+      "access_modes": [
+        {
+          "protocol": "console",
+          "username": "Administrator",
+          "password": "123456",
+          "proxy": true,
+          "desc": ""
+        },
+        {
+          "protocol": "rdp",
+          "port": 3389,
+          "username": "Administrator",
+          "password": "123456",
+          "proxy": true,
+          "desc": ""
+        }
+      ]
+    }
+  ],
+  "file": "",
+  "node_command": "",
+  "position2": "{\"x\":700,\"y\":580}"
+
+}

@@ -1,0 +1,65 @@
+
+{
+  "display_context": "{\"size\":40,\"zIndex\":2,\"text\":{\"fontSize\":12,\"fill\":\"var(--neutral9)\",\"refY\":53,\"transform\":\"rotate(0)\",\"fontWeight\":400,\"text\":\"交换机\",\"opacity\":1,\"class\":\"node-label original\"}}",
+  "id": "18b24f73-dc14-41fe-91ab-3512185c9667",
+  "name": "交换机",
+  "type": 1,
+  "icon2": "/api/mp/file/639/162/85ce8f4bcad3948c390f774d2916fee2.png",
+  "icon3": "",
+  "max_port_number": 0,
+  "cpu": 0,
+  "ram": 0,
+  "disk": 0,
+  "init_commands": [
+      ""
+  ],
+  "ports": [
+    {
+      "id": "port_18b24f73-dc14-41fe-91ab-3512185c9667_electrical_1",
+      "nat": false,
+      "name": "E0/1",
+      "access_modes": [
+
+      ],
+      "firewall_rules": [
+
+      ]
+    },
+    {
+      "id": "port_18b24f73-dc14-41fe-91ab-3512185c9667_electrical_2",
+      "nat": false,
+      "name": "E0/2",
+      "access_modes": [
+
+      ],
+      "firewall_rules": [
+
+      ]
+    },
+    {
+      "id": "port_18b24f73-dc14-41fe-91ab-3512185c9667_electrical_3",
+      "nat": false,
+      "name": "E0/3",
+      "access_modes": [
+
+      ],
+      "firewall_rules": [
+
+      ]
+    },
+    {
+      "id": "port_18b24f73-dc14-41fe-91ab-3512185c9667_electrical_4",
+      "nat": false,
+      "name": "E0/4",
+      "access_modes": [
+
+      ],
+      "firewall_rules": [
+
+      ]
+    }
+  ],
+  "file": "",
+  "node_command": "",
+  "position2": "{\"x\":760,\"y\":200}"
+}

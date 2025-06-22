@@ -1,0 +1,64 @@
+{
+  "display_context": "{\"size\":40,\"zIndex\":2,\"text\":{\"fontSize\":12,\"fill\":\"var(--neutral9)\",\"refY\":53,\"transform\":\"rotate(0)\",\"fontWeight\":400,\"text\":\"路由器\",\"opacity\":1,\"class\":\"node-label original\"}}",
+  "id": "ca03e056-a5c5-498a-b563-25f84fb94b9b",
+  "name": "路由器",
+  "type": 2,
+  "icon2": "/api/mp/file/067/985/d89cb7563a86d509593fa17d01c87fe2.png",
+  "icon3": "",
+  "max_port_number": 0,
+  "cpu": 0,
+  "ram": 0,
+  "disk": 0,
+  "init_commands": [
+      ""
+  ],
+  "ports": [
+    {
+      "id": "port_ca03e056-a5c5-498a-b563-25f84fb94b9b_electrical_1",
+      "nat": false,
+      "name": "E0/1",
+      "access_modes": [
+
+      ],
+      "firewall_rules": [
+
+      ]
+    },
+    {
+      "id": "port_ca03e056-a5c5-498a-b563-25f84fb94b9b_electrical_2",
+      "nat": false,
+      "name": "E0/2",
+      "access_modes": [
+
+      ],
+      "firewall_rules": [
+
+      ]
+    },
+    {
+      "id": "port_ca03e056-a5c5-498a-b563-25f84fb94b9b_electrical_3",
+      "nat": false,
+      "name": "E0/3",
+      "access_modes": [
+
+      ],
+      "firewall_rules": [
+
+      ]
+    },
+    {
+      "id": "port_ca03e056-a5c5-498a-b563-25f84fb94b9b_electrical_4",
+      "nat": false,
+      "name": "E0/4",
+      "access_modes": [
+
+      ],
+      "firewall_rules": [
+
+      ]
+    }
+  ],
+  "file": "",
+  "node_command": "",
+  "position2": "{\"x\":600,\"y\":200}"
+}

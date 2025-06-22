@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devopscluster.request;
 
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
+import cn.cyberpeace.mp.devopscluster.model.DeviceToolModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -124,4 +125,7 @@ public class ImageRequest extends BaseRequest {
 
     @ApiModelProperty(value = "是否隐藏")
     private Boolean isHide = Boolean.FALSE;
+
+    @ApiModelProperty(value = "工具列表")
+    private List<DeviceToolModel> tools;
 }

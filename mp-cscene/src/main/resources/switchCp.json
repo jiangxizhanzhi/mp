@@ -1,0 +1,45 @@
+{
+  "role": 22,
+  "image_type": "simple",
+  "image_uuid": "66e6244c-90d1-48d6-a615-0762af79e4f2",
+  "is_build_in": true,
+  "image": "Switch Simple",
+  "electric_port_number": 4,
+  "electric_port_type": "E",
+  "optical_port_number": 0,
+  "optical_port_type": "sfp",
+  "firewall_rules": [
+
+  ],
+  "static_routes": [
+
+  ],
+  "category": 3,
+  "category2": 50,
+  "cidr": "192.168.1.0/24",
+  "gateway": "192.168.1.254",
+  "dns_nameservers": [
+      "8.8.8.8",
+      "114.114.114.114"
+  ],
+  "dhcp": true,
+  "allocation_pools": [
+
+  ],
+  "wan_port_number": 0,
+  "wan_port_type": "E",
+  "lan_port_number": 0,
+  "lan_port_type": "E",
+  "quick_create_params": [
+
+  ],
+  "ospf_router_id": "",
+  "rip_loopback": "",
+  "virtual_usbs": [ ],
+  "entity_usbs": [
+
+  ],
+  "docker_params": {
+
+  }
+}

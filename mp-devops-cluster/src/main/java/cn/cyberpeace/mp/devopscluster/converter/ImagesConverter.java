@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.*;
@@ -27,6 +28,7 @@ import cn.cyberpeace.mp.devopscluster.po.DeviceTargetAuthPO;
 import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
 import cn.cyberpeace.mp.devopscluster.repository.DeviceTargetMapper;
 import cn.cyberpeace.mp.devopscluster.request.*;
+import cn.cyberpeace.mp.devopscluster.service.DeviceToolService;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetAuthService;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetService;
 import cn.cyberpeace.mp.devopscluster.utils.POLogoUtils;
@@ -37,6 +39,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -70,6 +73,9 @@ public class ImagesConverter implements BaseConverter{
     private final TargetConverter targetConverter;
 
     private final SnapshotConverter snapshotConverter;
+
+    @Autowired
+    private DeviceToolService deviceToolService;
 
     /**
      * 分页查询镜像列表
@@ -198,6 +204,8 @@ public class ImagesConverter implements BaseConverter{
         Device device = imagesService.add(convertRequest(request));
         device.setIsHide(Objects.nonNull(request.getIsHide()) ? request.getIsHide() : Boolean.FALSE);
         devopsTargetService.insert(Collections.singletonList(device));
+        //        增加工具
+        deviceToolService.updateByDeviceUuid(request.getTools(), device.getUuid());
     }
 
     /**
@@ -240,7 +248,12 @@ public class ImagesConverter implements BaseConverter{
     @Transactional
     public void update(ImageRequest request) {
         Device device = imagesService.update(request.getUuid(),convertRequest(request));
+        HumanCondition humanCondition = new HumanCondition();
+        humanCondition.filterEqual(DeviceToolModel::getDeviceUuid, device.getUuid());
         devopsTargetService.updateById(device);
+//        增加工具
+        deviceToolService.updateByDeviceUuid(request.getTools(),device.getUuid());
+
     }
 
     /**

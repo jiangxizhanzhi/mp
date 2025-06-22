@@ -1,0 +1,41 @@
+
+{
+  "display_context": "{\"size\":40,\"zIndex\":2,\"text\":{\"fontSize\":12,\"fill\":\"var(--neutral9)\",\"refY\":53,\"transform\":\"rotate(0)\",\"fontWeight\":400,\"text\":\"CentOS-8.0.1905-x64-server\",\"opacity\":1,\"class\":\"node-label original\"}}",
+  "cpu": 1,
+  "icon3": "",
+  "type": 4,
+  "ports": [
+    {
+      "id": "port_86a51248-1bf6-4a1d-a232-a714b1ab2b39_1",
+      "nat": false,
+      "name": "eth0/1",
+      "ip": "",
+      "access_modes": [
+        {
+          "protocol": "ssh",
+          "port": 22,
+          "username": "root",
+          "password": "NHiOJiZTD4K ",
+          "proxy": true,
+          "desc": ""
+        }
+      ],
+      "order": 1
+    }
+  ],
+  "icon2": "/api/mp/file/727/701/a4aade52f418bc39965d76b6b6dca305.png",
+  "max_port_number": 1,
+  "disk": 10,
+  "file": "",
+  "system_architecture": "64",
+  "system_type": "306",
+  "init_commands": [
+    ""
+  ],
+  "name": "CentOS-8.0.1905-x64-server",
+  "id": "86a51248-1bf6-4a1d-a232-a714b1ab2b39",
+  "system_language": "cn",
+  "ram": 1024,
+  "node_command": "",
+  "position2": "{\"x\":800,\"y\":380}"
+}

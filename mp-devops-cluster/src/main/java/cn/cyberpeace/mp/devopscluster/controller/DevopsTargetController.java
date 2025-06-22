@@ -5,8 +5,10 @@ import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.FileTypeUtils;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.mptool.FileUtil;
 import cn.cyberpeace.mp.common.deprecated.FileResponseData;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Device;
@@ -20,17 +22,16 @@ import cn.cyberpeace.mp.devopscluster.converter.model.TypeAllConvertModel;
 import cn.cyberpeace.mp.devopscluster.converter.model.TypeConvertModel;
 import cn.cyberpeace.mp.devopscluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devopscluster.enums.CommonTargetNameEnum;
+import cn.cyberpeace.mp.devopscluster.model.DeviceToolModel;
 import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
+import cn.cyberpeace.mp.devopscluster.repository.DeviceToolMapper;
 import cn.cyberpeace.mp.devopscluster.request.TargetMultiAsyncRequest;
 import cn.cyberpeace.mp.devopscluster.request.TargetSceneRequest;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetService;
 import cn.cyberpeace.mp.devopscluster.service.upload.TargetIconUploadService;
 import cn.cyberpeace.mp.devopscluster.thread.ITask;
 import cn.cyberpeace.mp.devopscluster.utils.MultiThreadUtils;
-import cn.cyberpeace.mp.devopscluster.vo.DeviceTargetByTypeVO;
-import cn.cyberpeace.mp.devopscluster.vo.DeviceTargetVO;
-import cn.cyberpeace.mp.devopscluster.vo.DeviceVO;
-import cn.cyberpeace.mp.devopscluster.vo.TargetSceneVO;
+import cn.cyberpeace.mp.devopscluster.vo.*;
 import cn.cyberpeace.mp.devopscluster.vo.common.ListResult;
 import cn.cyberpeace.mp.devopscluster.vo.common.PageResult;
 import cn.cyberpeace.mp.devopscluster.vo.common.Result;
@@ -44,11 +45,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 靶标管理类
@@ -76,6 +79,9 @@ public class DevopsTargetController {
     private final TargetIconUploadService targetIconUploadService;
 
     private final DevopsTargetService devopsTargetService;
+
+    @Autowired
+    private DeviceToolMapper deviceToolMapper;
 
     /**
      * 查询FTP信息
@@ -180,7 +186,7 @@ public class DevopsTargetController {
     @AuthTarget(TargetEnum.DEVOPS_TARGET_GROUP)
     @ApiOperation("查询所有靶标信息(带过滤条件)")
     @GetMapping("/listAll")
-    public ServiceResult<Device> listAll(TargetSceneRequest request){
+    public ServiceResult<DeviceToolVO> listAll(TargetSceneRequest request){
         TypeAllConvertModel l1AndL2AndL3Type = typeConverter.findL1AndL2AndL3Type();
         List<TypeConvertModel> firstTypeList = l1AndL2AndL3Type.getFirstTypeList();
         List<TypeConvertModel> secondTypeList = l1AndL2AndL3Type.getSecondTypeList();
@@ -231,6 +237,19 @@ public class DevopsTargetController {
             List<Device> secondDeviceList = targetSceneConvertModel.getList();
             deviceList.addAll(secondDeviceList);
         }
+        //        工具数据
+        HumanCondition human = new HumanCondition();
+        human.filterIn(DeviceToolModel::getDeviceUuid, deviceList.stream().map(Device::getUuid).toArray(String[]::new));
+        List<DeviceToolModel> list = deviceToolMapper.list(human);
+        Map<String, List<DeviceToolModel>> deviceToolList = list.stream().collect(Collectors.groupingBy(DeviceToolModel::getDeviceUuid, Collectors.toList()));
+        List<DeviceToolVO> deviceToolVOList = deviceList.stream().map(device -> {
+            DeviceToolVO deviceToolVO = new DeviceToolVO();
+            BeanUtils.copyProperties(device, deviceToolVO);
+            deviceToolVO.setTools(deviceToolList.getOrDefault(device.getUuid(), new ArrayList<>()));
+            return deviceToolVO;
+        }).collect(Collectors.toList());
+
+
         return new Result(new ListResult<>(deviceList));
     }
 

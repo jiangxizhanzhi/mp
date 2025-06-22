@@ -13,16 +13,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.mptool.ExceptionUtil;
-import cn.cyberpeace.mp.cscene.bo.CreateTemplateBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneAuthorizeBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneRoleBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneStat;
-import cn.cyberpeace.mp.cscene.bo.DeleteCheckResultBO;
-import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
-import cn.cyberpeace.mp.cscene.bo.ImportTemplateBO;
-import cn.cyberpeace.mp.cscene.bo.SceneAreaTreeBO;
+import cn.cyberpeace.mp.cscene.bo.*;
 import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
@@ -40,6 +31,7 @@ import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
+import cn.cyberpeace.mp.cscene.util.RegionLayoutCalculator;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigAreaBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigAreaNodeConnectionBO;
@@ -52,6 +44,12 @@ import cn.cyberpeace.mp.scene.model.SceneConfigAreaModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneAreaModel;
 import cn.cyberpeace.mp.scene.repository.SceneConfigAreaMapper;
 import cn.cyberpeace.mp.scene.service.SceneConfigService;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -61,6 +59,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -80,12 +79,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -160,6 +154,313 @@ public class CsceneController implements BaseModelListControllerBase {
         setCsceneSpecialService(csceneSpecialService);
         this.baseAppConfig = baseAppConfig;
     }
+
+    private Map<Integer, String> deviceTypeMap = new HashMap<>() {{
+        put(1, "router");
+        put(2, "firewall");
+        put(3, "switch");
+        put(4, "win");
+        put(5, "centos");
+    }};
+
+    private Map<Integer, String> deviceTypeMap2 = new HashMap<>() {{
+        put(1, "routerCp");
+        put(2, "firewallCp");
+        put(3, "switchCp");
+        put(4, "winCp");
+        put(5, "centosCp");
+    }};
+
+    @ApiOperation(value = "保存下发指令场景模板", notes = "请忽略test_scenes和app_scenes字段")
+    @PostMapping("/release")
+    public ServiceResult<CsceneBO> saveReleaseTopo(@RequestBody ReleaseCsceneBO releaseCsceneBO) {
+        log.info("save release scene topo ,params is {}", JsonCommon.stringify(releaseCsceneBO));
+        CsceneBO csceneBO = new CsceneBO();
+        csceneBO.setType(1);
+
+        List<ReleaseCsceneNodeBO> nodes = releaseCsceneBO.getNodes();
+        List<ReleaseCsceneLinkBO> links = releaseCsceneBO.getLinks();
+
+        Map<String, JSONObject> elementIdMap = new HashMap<>();
+        Map<String, JSONObject> cpElementIdMap = new HashMap<>();
+
+        JSONObject sceneObj = new JSONObject();
+        JSONObject topology = new JSONObject();
+        JSONObject plugins = new JSONObject();
+        JSONObject cpcloud = new JSONObject();
+        Map<String, JSONObject> cpElements = new HashMap<>();
+        JSONObject cpElements_ports = new JSONObject();
+        JSONArray areas = new JSONArray();
+        JSONArray elements = new JSONArray();
+        JSONArray connections = new JSONArray();
+        Map<String, Integer> elementPortCountMap = new HashMap<>();
+        Map<String, List<String>> areaPositionMap = new HashMap<>();
+        Map<String, JSONObject> areaMap = new HashMap<>();
+
+        for(ReleaseCsceneNodeBO node:nodes){
+            //根据设备类型 获取对应默认的设备信息 默认设备信息从常用节点中拿取 win centos 的数据可根据现场镜像信息适配修改
+            Integer nodeType = node.getNodeType();
+            String pathname = deviceTypeMap.get(nodeType) +".json";
+            String pathname2 = deviceTypeMap2.get(nodeType) +".json";
+
+            JSONObject jsonObject = new JSONObject();
+            JSONObject object = new JSONObject();
+            try {
+
+                InputStream inputStream = new ClassPathResource(pathname).getInputStream();
+                object = JSONObject.parseObject(new String(inputStream.readAllBytes(), StandardCharsets.UTF_8));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try {
+                InputStream inputStream2 = new ClassPathResource(pathname2).getInputStream();
+                jsonObject = JSONObject.parseObject(new String(inputStream2.readAllBytes(), StandardCharsets.UTF_8));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            String areaName = node.getAreaName();
+            String numberId = node.getNumberId();
+            String nodeName = node.getNumberName();
+            object.put("name", nodeName);
+//            elementBO.setName(nodeName);
+            // 根据name获取到镜像名称 从map中匹配出对应镜像
+            cpElements.put(numberId ,jsonObject);
+            cpElementIdMap.put(numberId, jsonObject);
+//            TODO 区域
+            if(!areaMap.containsKey(areaName)){
+                JSONObject area = new JSONObject();
+                String areaId = UUID.randomUUID().toString().replaceAll("-", "");
+                object.put("area", areaId);
+                area.put("id", areaId);
+                area.put("name", areaName);
+                area.put("display_context", "{\"body\":{\"fill\":\"var(--neutral0)\",\"stroke\":\"var(--neutral1)\",\"strokeWidth\":\"1px\",\"rx\":0,\"strokeDasharray\":0},\"label\":{\"fontSize\":14,\"refY\":15,\"refX\":10,\"fill\":\"var(--neutral9)\",\"transform\":\"rotate(0)\",\"transformOrigin\":\"-10px -15px\",\"fontWeight\":400},\"zIndex\":0,\"animation\":\"\",\"fillPic\":\"\"}");
+                areas.add(area);
+                if(areaPositionMap.containsKey(areaId)){
+                    List<String> numbers = areaPositionMap.get(areaId);
+                    numbers.add(numberId);
+                    areaPositionMap.put(areaId, numbers);
+                } else {
+                    List<String> numbers = new ArrayList<>();
+                    numbers.add(numberId);
+                    areaPositionMap.put(areaId, numbers);
+                }
+                areaMap.put(areaName, area);
+            } else {
+                JSONObject areaObj = areaMap.get(areaName);
+                object.put("area", areaObj.getString("id"));
+            }
+            elementIdMap.put(numberId, object);
+            elements.add(object);
+        }
+
+        for(ReleaseCsceneLinkBO link:links){
+
+            int targetPortCount = 1;
+            int sourcePortCount = 1;
+            JSONObject connect = new JSONObject();
+            JSONObject linkName = new JSONObject();
+
+            String sourceNumberId = link.getSourceNumberId();
+            String targetNumberId = link.getTargetNumberId();
+
+            JSONObject cpTarget = cpElementIdMap.get(targetNumberId);
+            JSONObject cpSource = cpElementIdMap.get(sourceNumberId);
+            JSONObject sourceObj = elementIdMap.get(sourceNumberId);
+            JSONObject targetObj = elementIdMap.get(targetNumberId);
+            Integer targetRole = cpTarget.getInteger("role");
+            Integer sourceRole = cpSource.getInteger("role");
+
+            // role =4 端口名称取eth 否则取E
+            String portName = "E";
+            int defaultSourcePortCount = 1;
+            int defaultTargetPortCount = 1;
+            if(targetRole == 4){
+                portName = "eth";
+                defaultTargetPortCount = 4;
+            }
+
+            String sourcePortType = "E";
+            if(sourceRole == 4){
+                sourcePortType = "eth";
+                defaultSourcePortCount = 4;
+            }
+
+            Integer bandWidth = link.getBandWidth();
+
+            connect.put("id", link.getLinkId());
+            connect.put("unidirectional", false);
+            connect.put("vertices", new JSONArray());
+            connect.put("type", "straight");
+            connect.put("display_context", "{\"line\":{\"stroke\":\"var(--neutral7)\",\"zIndex\":1,\"strokeWidth\":1,\"strokeDasharray\":0,\"opacity\":1},\"labels\":{\"body\":{\"fill\":\"rgba(255,255,255,1)\",\"refWidth\":\"100%\",\"rx\":0,\"ry\":0,\"refHeight\":\"100%\",\"refX\":\"0%\",\"refY\":\"0%\",\"opacity\":1},\"text\":{\"fill\":\"rgba(0,0,0,1)\",\"fontSize\":12,\"fontWeight\":400,\"opacity\":1}}}");
+
+            if(elementPortCountMap.containsKey(targetNumberId)){
+                targetPortCount = elementPortCountMap.get(targetNumberId) + 1;
+                elementPortCountMap.put(targetNumberId, targetPortCount);
+            } else {
+                elementPortCountMap.put(targetNumberId ,targetPortCount);
+            }
+            String targetPortName = "port_" + targetNumberId + "_" + targetPortCount;
+
+
+            if(elementPortCountMap.containsKey(sourceNumberId)){
+                sourcePortCount = elementPortCountMap.get(sourceNumberId) + 1;
+                elementPortCountMap.put(sourceNumberId, sourcePortCount);
+            } else {
+                elementPortCountMap.put(sourceNumberId ,sourcePortCount);
+            }
+            String sourcePortName = "port_" + sourceNumberId + "_" + sourcePortCount;
+            connect.put("source", sourcePortName);
+            connect.put("target", targetPortName);
+            JSONObject cpPort1 = new JSONObject();
+            cpPort1.put("access_modes", new JSONArray());
+            cpPort1.put("firewall_rules", new JSONArray());
+            cpPort1.put("resource_id", new JSONArray());
+            JSONObject cpPort2 = new JSONObject();
+            cpPort2.put("access_modes", new JSONArray());
+            cpPort2.put("firewall_rules", new JSONArray());
+            cpPort2.put("resource_id", new JSONArray());
+            cpElements_ports.put(targetPortName, cpPort2);
+            cpElements_ports.put(sourcePortName, cpPort1);
+
+            // 设置端口的name规则 topology中的端口信息
+            JSONObject tarPort = new JSONObject();
+            tarPort.put("id", targetPortName);
+            String value1 = portName + "0/" + targetPortCount;
+            tarPort.put("name", value1);
+            tarPort.put("access_modes", new JSONArray());
+            tarPort.put("egress", bandWidth);
+            tarPort.put("ingress", bandWidth);
+            JSONObject sourPort = new JSONObject();
+            sourPort.put("id", sourcePortName);
+
+
+
+            String value = sourcePortType + "0/" + sourcePortCount;
+            sourPort.put("name", value);
+            sourPort.put("access_modes", new JSONArray());
+            sourPort.put("egress", bandWidth);
+            sourPort.put("ingress", bandWidth);
+
+            int targetIndex = elements.indexOf(targetObj);
+            int sourceIndex = elements.indexOf(sourceObj);
+
+            updatePort(sourPort, sourceObj, defaultSourcePortCount, sourcePortCount);
+
+            updatePort(tarPort, targetObj, defaultTargetPortCount, targetPortCount);
+            elements.set(targetIndex, targetObj);
+            elements.set(sourceIndex, sourceObj);
+
+            targetObj.put("nat",false);
+            targetObj.put("access_modes",new JSONArray());
+            targetObj.put("firewall_rules",new JSONArray());
+            linkName.put("source", value);
+            linkName.put("target", value1);
+            connect.put("name", linkName.toJSONString());
+            connections.add(connect);
+
+        }
+
+        // TODO 默认值测试 可根据画布大小调整 给节点设置x、y地址
+        generateUniformNodes(elements, 800, 200);
+
+        String jsonArrayStr = elements.toJSONString(); // 你的 JSON 数据
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode jsonArray = null;
+        try {
+            jsonArray = mapper.readTree(jsonArrayStr);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+
+        // 使用 Stream 分组 TODO 去除区域后报错 待测
+        Map<String, List<JsonNode>> groupedData = new HashMap<>();
+        jsonArray.forEach(item -> {
+            String key = item.get("area").asText();
+            groupedData.computeIfAbsent(key, k -> new ArrayList<>()).add(item);
+        });
+        List<Integer> nodeCounts = new ArrayList<>();
+
+        for(int i =0;i<areas.size();i++){
+            JSONObject area = areas.getJSONObject(i);
+            List<JsonNode> nodeList = groupedData.get(area.getString("id"));
+            nodeCounts.add(nodeList.size());
+//            area.put("position2", RegionGenerator.generateRegionJson(nodeList));
+        }
+        List<ObjectNode> objectNodes = RegionLayoutCalculator.calculateLayout(areas.size(), nodeCounts);
+
+        for(int i =0;i<objectNodes.size();i++){
+            ObjectNode objectNode = objectNodes.get(i);
+            JSONObject area = areas.getJSONObject(i);
+            area.put("position2",objectNode.toString());
+        }
+
+        topology.put("areas", areas);
+        topology.put("connections", connections);
+        topology.put("elements", elements);
+        topology.put("pieces", new JSONArray());
+        JSONObject scene = new JSONObject();
+        scene.put("display_context", "{\"active\":\"background\",\"enable_flow_collect\":false,\"enable_flow_mirror\":false,\"showLineLabels\":false,\"backgroundList\":[{\"key\":\"background\",\"value\":\"\"},{\"key\":\"background2\",\"value\":\"\"},{\"key\":\"background3\",\"value\":\"\"}],\"simpleModeToEdge\":true,\"graphTranslate\":{\"tx\":47,\"ty\":-14},\"graphZoom\":1}");
+        scene.put("description", "");
+        scene.put("name", releaseCsceneBO.getTaskId());
+        scene.put("file", "");
+        topology.put("scene", scene);
+        sceneObj.put("topology", topology);
+
+
+        cpcloud.put("elements", cpElements);
+        cpcloud.put("elements_ports", cpElements_ports);
+        cpcloud.put("scene", new JSONObject());
+        plugins.put("cpcloud", cpcloud);
+        sceneObj.put("plugins", plugins);
+        SceneConfigDataBO sceneConfig = sceneObj.toJavaObject(SceneConfigDataBO.class);
+        csceneBO.setSceneConfig(sceneConfig);
+//        correctRequestCsceneParamsForReleaseSync(csceneBO);
+        var result = modelService.sync(csceneBO, null, true).asResult();
+        return result;
+    }
+
+    private void generateUniformNodes(JSONArray cpElements, int canvasWidth, int canvasHeight) {
+        int count = cpElements.size();
+        int gridSize = (int) Math.ceil(Math.sqrt(count));
+        int cellWidth = canvasWidth / gridSize;
+        int cellHeight = canvasHeight / gridSize;
+
+        Random random = new Random();
+        for (int i = 0; i < count; i++) {
+            JSONObject position2 = new JSONObject();
+            int gridX = i % gridSize;
+            int gridY = i / gridSize;
+            // 在网格单元内随机偏移
+            int x = gridX * cellWidth + random.nextInt(cellWidth / 2);
+            int y = gridY * cellHeight + random.nextInt(cellHeight / 2);
+            position2.put("x", x);
+            position2.put("y", y);
+            JSONObject cpElement = cpElements.getJSONObject(i);
+            cpElement.put("position2", position2.toJSONString());
+            cpElements.set(i, cpElement);
+        }
+    }
+
+    private void updatePort(JSONObject sourPort, JSONObject sourceObj, int defaultPortCount, int currentPortCount) {
+        JSONArray sourcePorts = sourceObj.getJSONArray("ports");
+        if(defaultPortCount > currentPortCount){
+            JSONArray ports = sourceObj.getJSONArray("ports");
+            ports.add(sourPort);
+            sourceObj.put("ports", ports);
+        } else {
+            JSONObject currentPort = sourcePorts.getJSONObject(currentPortCount -1);
+            String id = currentPort.getString("id");
+            String[] s = id.split("_");
+            String defaultId = s[1];
+            id = id.replace(defaultId,sourceObj.getString("id"));
+            currentPort.put("id", id);
+            currentPort.put("name", sourPort);
+            sourcePorts.set(currentPortCount, currentPort);
+            sourceObj.put("ports", sourcePorts);
+        }
+    }
+
 
     @AuthTarget(TargetEnum.NO_AUTH)
     @ApiOperation("授权场景模板")
