@@ -169,7 +169,7 @@ public abstract class BaseServer {
             try {
                 session.close(closeReason);
             } catch (IOException ioException) {
-                ioException.printStackTrace();
+                log.error("error on open", ioException);
             }
             throw e;
         }
