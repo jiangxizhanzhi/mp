@@ -1366,9 +1366,8 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
 
         try {
             byte[] flowBytes = FsCommon.downloadRawContent(pcapPath);
-            String fileName = FilenameUtils.getName(pcapPath);
 
-            String srcPcapPath = PRE_PATH.concat("/" + title + "_" + fileName);
+            String srcPcapPath = PRE_PATH.concat("/" + title + "_" + ".pcap");
             log.info("===========srcPcapPath: {}", srcPcapPath);
             srcFile = new File(srcPcapPath);
             try (FileOutputStream fs = new FileOutputStream(srcFile)) {
@@ -1563,8 +1562,8 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
         try {
             // 下载原pcap文件
             byte[] pcapByte = FsCommon.downloadRawContent(pcapPath);
-            String fileName = FilenameUtils.getName(pcapPath);
-            String srcPcapPath = PRE_PATH.concat("/" + System.currentTimeMillis() + "_" + fileName);
+
+            String srcPcapPath = PRE_PATH.concat("/" + System.currentTimeMillis() + "_" + ".pcap");
             srcFile = new File(srcPcapPath);
             try (FileOutputStream fs = new FileOutputStream(srcFile)) {
                 fs.write(pcapByte);
