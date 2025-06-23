@@ -43,6 +43,15 @@ public class ImagePageRequest extends BasePageRequest {
     @ApiModelProperty(value = "三级分类")
     private Integer thirdCategory;
 
+    @ApiModelProperty(value = "一级分类集合")
+    private List<Integer> cat1;
+
+    /**
+     * 子分类
+     */
+    @ApiModelProperty(value = "二级分类集合")
+    private List<Integer> cat2;
+
     /**
      * 三级分类集合
      */

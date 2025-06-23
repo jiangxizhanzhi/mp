@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.devopscluster.enums.PublicEnum;
 import cn.cyberpeace.mp.devopscluster.request.ImagePageRequest;
 import cn.cyberpeace.mp.devopscluster.request.RealEquipmentPageRequest;
 import cn.cyberpeace.mp.devopscluster.request.TargetSceneRequest;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -45,6 +46,15 @@ public class ImagePageDTO extends BasePageDTO{
      * 三级分类
      */
     private Integer thirdCategory;
+
+    @ApiModelProperty(value = "一级分类集合")
+    private List<Integer> cat1;
+
+    /**
+     * 子分类
+     */
+    @ApiModelProperty(value = "二级分类集合")
+    private List<Integer> cat2;
 
     /**
      * 三级分类集合
@@ -190,6 +200,8 @@ public class ImagePageDTO extends BasePageDTO{
         this.setSubCategory(request.getSubCategory());
         this.setThirdCategory(request.getThirdCategory());
         this.setThirdCategories(request.getThirdCategories());
+        this.setCat1(request.getCat1());
+        this.setCat2(request.getCat2());
         this.setQuickCreateSupport(request.getQuickCreateSupport());
         if (Objects.isNull(request.getImageType())){
             this.setSearchType(1);
