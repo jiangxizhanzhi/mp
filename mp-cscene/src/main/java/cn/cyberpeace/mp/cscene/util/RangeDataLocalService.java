@@ -158,7 +158,7 @@ public class RangeDataLocalService {
         request.setPageSize(100);
 
         HostStateTrendRequest hostStateTrendRequest = new HostStateTrendRequest();
-        hostStateTrendRequest.setStartTime(LocalDateTime.now().minusMinutes(1));
+        hostStateTrendRequest.setStartTime(LocalDateTime.now().minusMinutes(5));
         hostStateTrendRequest.setEndTime(LocalDateTime.now());
         hostStateTrendRequest.setSceneId(sceneId);
         var result = hostStateService.getSceneHostStateTrend(hostStateTrendRequest);
