@@ -4,10 +4,10 @@
  // Description:
  // Author:
  // File name RandomUtils.java.
- // File size 913.
- // File create date Tue Sep 24 15:29:08 CST 2024.
- // File update date Fri Jan 17 11:23:12 CST 2025.
- // @Version 1.0.0
+ // File size 1162.
+ // File create date Fri Jul 12 12:55:20 CST 2024.
+ // File update date Fri Jul 12 12:55:20 CST 2024.
+ // Version 1.0.0
 package cn.cyberpeace.mp.base.util.basic;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -16,12 +16,29 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * @ClassName RandomUtils
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 public class RandomUtils {
 
     private static final Random RANDOM = new Random();
 
+    /**
+     * RandomUtils
+     */
     private RandomUtils() {}
 
+    /**
+     * sample
+     *
+     * @param pool
+     * @param count
+     * @return
+     */
     public static <T> List<T> sample(List<T> pool, int count) {
         int poolSize = pool.size();
         if (poolSize < count) {
@@ -34,8 +51,8 @@ public class RandomUtils {
         }
 
         List<T> sample = new ArrayList<>();
-        for (var i = 0; i < count; i++) {
-            var nextIndex = RANDOM.nextInt(tmpPool.size());
+        for (int i = 0; i < count; i++) {
+            int nextIndex = RANDOM.nextInt(tmpPool.size());
             sample.add(tmpPool.remove(nextIndex));
         }
 

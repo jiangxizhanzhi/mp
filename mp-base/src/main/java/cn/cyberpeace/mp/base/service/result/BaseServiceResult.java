@@ -4,10 +4,10 @@
  // Description:
  // Author:
  // File name BaseServiceResult.java.
- // File size 2968.
- // File create date Tue Sep 24 15:29:08 CST 2024.
- // File update date Fri Jan 17 11:23:11 CST 2025.
- // @Version 1.0.0
+ // File size 3517.
+ // File create date Fri Jul 12 12:55:31 CST 2024.
+ // File update date Fri Jul 12 12:55:31 CST 2024.
+ // Version 1.0.0
 package cn.cyberpeace.mp.base.service.result;
 
 import cn.cyberpeace.mp.base.common.MessageCommon;
@@ -21,8 +21,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
+ * @ClassName BaseServiceResult
+ * @Description
  * 统一服务返回结果
  * @param <T> 返回结果数据源对象类型
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 @AllArgsConstructor
@@ -50,21 +55,44 @@ public class BaseServiceResult<T, R> {
     @JsonIgnore
     private T source;
 
+    /**
+     * BaseServiceResult
+     *
+     * @param source
+     */
     public BaseServiceResult(T source) {
         this();
         setSource(source);
     }
 
+    /**
+     * BaseServiceResult
+     *
+     * @param source
+     * @param code
+     */
     public BaseServiceResult(T source, ServiceCode code) {
         this(source);
         setServiceCode(code);
     }
 
+    /**
+     * BaseServiceResult
+     *
+     * @param source
+     * @param code
+     * @param detail
+     */
     public BaseServiceResult(T source, ServiceCode code, String detail) {
         this(source, code);
         setDetail(detail);
     }
 
+    /**
+     * judgeSuccess
+     *
+     * @return boolean
+     */
     public boolean judgeSuccess() {
         return BaseErrorCode.SUCCESS.getCode().equals(getServiceCode().getCode());
     }
@@ -76,6 +104,12 @@ public class BaseServiceResult<T, R> {
         return BaseErrorCode.SUCCESS.getCode().equals(getServiceCode().getCode());
     }
 
+    /**
+     * sourceToData
+     *
+     * @param source
+     * @return
+     */
     public R sourceToData(T source) {
         if (source == null) {
             return null;

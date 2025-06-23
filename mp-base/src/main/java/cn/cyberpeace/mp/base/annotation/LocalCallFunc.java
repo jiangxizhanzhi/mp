@@ -4,16 +4,21 @@
  // Description:
  // Author:
  // File name LocalCallFunc.java.
- // File size 258.
- // File create date Tue Sep 24 15:29:08 CST 2024.
- // File update date Fri Jan 17 11:23:11 CST 2025.
- // @Version 1.0.0
+ // File size 379.
+ // File create date Fri Jul 12 12:55:31 CST 2024.
+ // File update date Fri Jul 12 12:55:31 CST 2024.
+ // Version 1.0.0
 package cn.cyberpeace.mp.base.annotation;
 
 import java.lang.annotation.*;
 
 /**
- * 当前类定义下标记为本地调用方法
+ * @ClassName LocalCallFunc
+ * @Description 当前类定义下标记为本地调用方法
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see Annotation
  */
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)

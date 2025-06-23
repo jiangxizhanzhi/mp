@@ -4,10 +4,10 @@
  // Description:
  // Author:
  // File name MessagesConfig.java.
- // File size 1246.
- // File create date Tue Sep 24 15:29:08 CST 2024.
- // File update date Fri Jan 17 11:23:15 CST 2025.
- // @Version 1.0.0
+ // File size 1396.
+ // File create date Fri Jul 12 12:55:30 CST 2024.
+ // File update date Fri Jul 12 12:55:30 CST 2024.
+ // Version 1.0.0
 package cn.cyberpeace.mp.base.config.messages;
 
 import cn.cyberpeace.mp.base.util.ModuleUtils;
@@ -19,6 +19,13 @@ import org.springframework.context.support.ReloadableResourceBundleMessageSource
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @ClassName MessagesConfig
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Configuration
 public class MessagesConfig {
 
@@ -29,7 +36,7 @@ public class MessagesConfig {
      */
     @Bean
     public MessageSource messageSource() {
-        var messageSource = new ReloadableResourceBundleMessageSource();
+        ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
         List<String> basenames = new ArrayList<>();
         for (String moduleName: ModuleUtils.MODULE_NAMES) {
             basenames.add("classpath:i18n/" + moduleName);

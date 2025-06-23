@@ -4,10 +4,10 @@
  // Description:
  // Author:
  // File name ProtocolProbe.java.
- // File size 2796.
- // File create date Tue Sep 24 15:29:08 CST 2024.
- // File update date Fri Jan 17 11:23:13 CST 2025.
- // @Version 1.0.0
+ // File size 3020.
+ // File create date Fri Jul 12 12:55:24 CST 2024.
+ // File update date Fri Jul 12 12:55:24 CST 2024.
+ // Version 1.0.0
 package cn.cyberpeace.mp.base.util.protocolprobe;
 
 import lombok.extern.slf4j.Slf4j;
@@ -23,9 +23,11 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 
 /**
+ * @ClassName ProtocolProbe
  * @Description
  * @Author maojun
  * @Date 2022/1/14
+ * @Version 1.0.0
  */
 @Slf4j
 public abstract class ProtocolProbe {
@@ -33,12 +35,24 @@ public abstract class ProtocolProbe {
     private String host;
     private int port;
 
+    /**
+     * ProtocolProbe
+     *
+     * @param protocol
+     * @param host
+     * @param port
+     */
     public ProtocolProbe(String protocol, String host, int port) {
         this.protocol = protocol;
         this.host = host;
         this.port = port;
     }
 
+    /**
+     * probe
+     *
+     * @return boolean
+     */
     public boolean probe() {
         // 建立socket连接
         Socket socket = null;

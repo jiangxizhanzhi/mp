@@ -4,10 +4,10 @@
  // Description:
  // Author:
  // File name BaseSimpleMessageReceiver.java.
- // File size 2105.
- // File create date Tue Sep 24 15:29:08 CST 2024.
- // File update date Fri Jan 17 11:23:11 CST 2025.
- // @Version 1.0.0
+ // File size 2720.
+ // File create date Fri Jul 12 12:55:30 CST 2024.
+ // File update date Fri Jul 12 12:55:30 CST 2024.
+ // Version 1.0.0
 package cn.cyberpeace.mp.base.message.rabbitmq;
 
 
@@ -20,29 +20,58 @@ import org.springframework.amqp.core.Message;
 
 import java.util.Map;
 
+/**
+ * @ClassName BaseSimpleMessageReceiver
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseMessageReceiver
+ */
 @Slf4j
 public abstract class BaseSimpleMessageReceiver extends BaseMessageReceiver {
 
+    /**
+     * BaseSimpleMessageReceiver
+     *
+     * @param messageConverter
+     */
     protected BaseSimpleMessageReceiver(MessageConverter messageConverter) {
         setMessageConverter(messageConverter);
     }
 
+    /**
+     * receive
+     *
+     * @param message
+     */
     @Override
     public void receive(Message message) {
-        var formatMessage = parseMessage(message, FormatMessage.class);
+        FormatMessage formatMessage = parseMessage(message, FormatMessage.class);
         if (formatMessage == null) {
             return;
         }
 
-        var context = formatMessage.getContext();
+        Map context = formatMessage.getContext();
         if (context != null) {
             TransferContext.setContextMap(context);
         }
         handleMessage(formatMessage);
     }
 
+    /**
+     * handleMessage
+     *
+     * @param formatMessage
+     */
     public abstract void handleMessage(FormatMessage<?> formatMessage);
 
+    /**
+     * toFormatMessage
+     *
+     * @param formatMessage
+     * @return
+     */
     public <T> FormatMessage<T> toFormatMessage(FormatMessage<?> formatMessage) {
         T data = null;
         try {
@@ -54,6 +83,13 @@ public abstract class BaseSimpleMessageReceiver extends BaseMessageReceiver {
         return new FormatMessage<>(data, formatMessage.getType(), formatMessage.getContext());
     }
 
+    /**
+     * toFormatMessage
+     *
+     * @param formatMessage
+     * @param dataClass
+     * @return
+     */
     public <T> FormatMessage<T> toFormatMessage(FormatMessage<?> formatMessage, Class<T> dataClass) {
         Map<String, Object> rawData = null;
         try {

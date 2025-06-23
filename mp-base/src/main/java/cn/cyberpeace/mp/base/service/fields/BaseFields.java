@@ -4,10 +4,10 @@
  // Description:
  // Author:
  // File name BaseFields.java.
- // File size 5231.
- // File create date Tue Sep 24 15:29:08 CST 2024.
- // File update date Fri Jan 17 11:23:11 CST 2025.
- // @Version 1.0.0
+ // File size 6075.
+ // File create date Fri Jul 12 12:55:31 CST 2024.
+ // File update date Fri Jul 12 12:55:31 CST 2024.
+ // Version 1.0.0
 package cn.cyberpeace.mp.base.service.fields;
 
 import cn.cyberpeace.mp.base.repository.fields.DynamicFields;
@@ -21,7 +21,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 定义对model业务处理字段，实现类只需要具体定义对应的静态字段
+ * @ClassName BaseFields
+ * @Description 定义对model业务处理字段，实现类只需要具体定义对应的静态字段
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 public abstract class BaseFields {
     /** 全部字段 */
@@ -37,11 +41,24 @@ public abstract class BaseFields {
     /** 业务可排序字段 */
     public static final DynamicFields orderFields = null;
 
+    /**
+     * getDefinedFields
+     *
+     * @param fieldName
+     * @return
+     */
     private DynamicFields getDefinedFields(String fieldName) {
         return ClassUtils.getStaticFieldValue(getClass(), fieldName,
                 DynamicFields.class);
     }
 
+    /**
+     * getIntersectionFields
+     *
+     * @param fieldName
+     * @param uncertainFields
+     * @return
+     */
     private DynamicFields getIntersectionFields(String fieldName, String[] uncertainFields) {
         DynamicFields intersectionFields = null;
         if (uncertainFields != null) {
@@ -57,26 +74,56 @@ public abstract class BaseFields {
         return intersectionFields;
     }
 
+    /**
+     * getAllFields
+     *
+     * @return
+     */
     public DynamicFields getAllFields() {
         return getDefinedFields("allFields");
     }
 
+    /**
+     * getAvailableFields
+     *
+     * @return
+     */
     public DynamicFields getAvailableFields() {
         return getDefinedFields("availableFields");
     }
 
+    /**
+     * getHiddenFields
+     *
+     * @return
+     */
     public DynamicFields getHiddenFields() {
         return getDefinedFields("hiddenFields");
     }
 
+    /**
+     * getReadonlyFields
+     *
+     * @return
+     */
     public DynamicFields getReadonlyFields() {
         return getDefinedFields("readonlyFields");
     }
 
+    /**
+     * getSearchFields
+     *
+     * @return
+     */
     public DynamicFields getSearchFields() {
         return getDefinedFields("searchFields");
     }
 
+    /**
+     * getOrderFields
+     *
+     * @return
+     */
     public DynamicFields getOrderFields() {
         return getDefinedFields("orderFields");
     }
@@ -128,11 +175,13 @@ public abstract class BaseFields {
             DynamicFields validOrderFields = getValidOrderFields(uncertainOrderFields);
             if (validOrderFields != null) {
                 List<String> validOrderList = new ArrayList<>();
-                fieldNameOrderMap.forEach((fieldName, order) -> {
+                for (Map.Entry<String, String> entry : fieldNameOrderMap.entrySet()) {
+                    String fieldName = entry.getKey();
+                    String order = entry.getValue();
                     if (validOrderFields.hasField(fieldName)) {
                         validOrderList.add(order);
                     }
-                });
+                }
                 validOrders = validOrderList.toArray(new String[0]);
             }
 

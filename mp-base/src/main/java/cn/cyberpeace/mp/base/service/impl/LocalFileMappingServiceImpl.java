@@ -4,10 +4,10 @@
  // Description:
  // Author:
  // File name LocalFileMappingServiceImpl.java.
- // File size 3744.
- // File create date Tue Sep 24 15:29:08 CST 2024.
- // File update date Fri Jan 17 11:23:11 CST 2025.
- // @Version 1.0.0
+ // File size 4308.
+ // File create date Fri Jul 12 12:55:31 CST 2024.
+ // File update date Fri Jul 12 12:55:31 CST 2024.
+ // Version 1.0.0
 package cn.cyberpeace.mp.base.service.impl;
 
 import cn.cyberpeace.mp.base.bo.DiffTargets;
@@ -26,27 +26,53 @@ import java.util.ArrayList;
 import java.util.List;
 
 
+/**
+ * @ClassName LocalFileMappingServiceImpl
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseObjMappingServiceImpl
+ * @see LocalFileMappingService
+ */
 @Slf4j
 @Service
 public class LocalFileMappingServiceImpl
         extends BaseObjMappingServiceImpl<LocalFileMappingModel, LocalFileMappingMapper>
         implements LocalFileMappingService {
 
+    /**
+     * LocalFileMappingServiceImpl
+     *
+     * @param modelMapper
+     */
     @Autowired
     public LocalFileMappingServiceImpl(LocalFileMappingMapper modelMapper) {
         setModelMapper(modelMapper);
     }
 
+    /**
+     * removeRemoteFiles
+     *
+     * @param remoteFiles
+     */
     private void removeRemoteFiles(List<String> remoteFiles) {
-        for (var remoteFile : remoteFiles) {
+        for (String remoteFile : remoteFiles) {
             try {
-                FsCommon.delete(remoteFile);
+                final boolean delete = FsCommon.delete(remoteFile);
             } catch (Exception e) {
                 log.error("Remove remote file error: ", e);
             }
         }
     }
 
+    /**
+     * judgeKeepObjMapping
+     *
+     * @param newObjMapping
+     * @param existObjMapping
+     * @return boolean
+     */
     protected boolean judgeKeepObjMapping(LocalFileMappingModel newObjMapping, LocalFileMappingModel existObjMapping) {
         return super.judgeKeepObjMapping(newObjMapping, existObjMapping)
                 && existObjMapping.getLocalFile().equals(newObjMapping.getLocalFile())
@@ -61,16 +87,16 @@ public class LocalFileMappingServiceImpl
      */
     @Override
     public ServiceResult<List<LocalFileMappingModel>> syncMappings(String group, List<LocalFileMappingModel> mappings) {
-        for (var mapping : mappings) {
-            var localFile = mapping.getLocalFile();
-            var modifiedTime = new File(localFile).lastModified();
+        for (LocalFileMappingModel mapping : mappings) {
+            String localFile = mapping.getLocalFile();
+            long modifiedTime = new File(localFile).lastModified();
             mapping.setLocalFileModifiedTime(modifiedTime);
         }
 
         DiffTargets<LocalFileMappingModel> diff = diffObjMappings(group, mappings);
         List<String> savedRemoteFiles = new ArrayList<>();
-        for (var mapping : ListUtils.union(diff.getAddingTargets(), diff.getUpdatingTargets())) {
-            var existMapping = diff.getExistTargetMap().getOrDefault(mapping.getName(), null);
+        for (LocalFileMappingModel mapping : ListUtils.union(diff.getAddingTargets(), diff.getUpdatingTargets())) {
+            LocalFileMappingModel existMapping = diff.getExistTargetMap().getOrDefault(mapping.getName(), null);
             if (existMapping != null && existMapping.getLocalFile().equals(mapping.getLocalFile())
                     && existMapping.getLocalFileModifiedTime().equals(mapping.getLocalFileModifiedTime())) {
                 continue;

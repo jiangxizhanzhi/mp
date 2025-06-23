@@ -4,10 +4,10 @@
  // Description:
  // Author:
  // File name CustomServletRequestDataBinder.java.
- // File size 1717.
- // File create date Tue Sep 24 15:29:08 CST 2024.
- // File update date Fri Jan 17 11:23:15 CST 2025.
- // @Version 1.0.0
+ // File size 2069.
+ // File create date Fri Jul 12 12:55:30 CST 2024.
+ // File update date Fri Jul 12 12:55:30 CST 2024.
+ // Version 1.0.0
 package cn.cyberpeace.mp.base.config.webmvc;
 
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
@@ -21,14 +21,30 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * 自定义请求数据绑定处理类，主要解决将前端传递的下划线格式的字段自动转为驼峰格式
+ * @ClassName CustomServletRequestDataBinder
+ * @Description 自定义请求数据绑定处理类，主要解决将前端传递的下划线格式的字段自动转为驼峰格式
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see ServletRequestDataBinder
  */
 public class CustomServletRequestDataBinder extends ServletRequestDataBinder {
 
+    /**
+     * CustomServletRequestDataBinder
+     *
+     * @param target
+     */
     public CustomServletRequestDataBinder(@Nullable Object target) {
         super(target);
     }
 
+    /**
+     * CustomServletRequestDataBinder
+     *
+     * @param target
+     * @param objectName
+     */
     public CustomServletRequestDataBinder(@Nullable Object target, String objectName) {
         super(target, objectName);
     }

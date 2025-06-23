@@ -4,10 +4,10 @@
  // Description:
  // Author:
  // File name CustomCondition.java.
- // File size 2294.
- // File create date Tue Sep 24 15:29:08 CST 2024.
- // File update date Fri Jan 17 11:23:12 CST 2025.
- // @Version 1.0.0
+ // File size 2486.
+ // File create date Fri Jul 12 12:55:31 CST 2024.
+ // File update date Fri Jul 12 12:55:31 CST 2024.
+ // Version 1.0.0
 package cn.cyberpeace.mp.base.repository.condition;
 
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
@@ -21,7 +21,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 自定义业务条件
+ * @ClassName CustomCondition
+ * @Description 自定义业务条件
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseCondition
  */
 @Data
 @AllArgsConstructor
@@ -56,6 +61,11 @@ public class CustomCondition implements BaseCondition {
         return this;
     }
 
+    /**
+     * isEmpty
+     *
+     * @return boolean
+     */
     @Override
     public boolean isEmpty() {
         String[] fieldNames = ClassUtils.getBeanClassFields(this.getClass());

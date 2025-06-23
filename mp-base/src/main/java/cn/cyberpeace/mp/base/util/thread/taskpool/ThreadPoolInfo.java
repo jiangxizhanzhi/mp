@@ -4,10 +4,10 @@
  // Description:
  // Author:
  // File name ThreadPoolInfo.java.
- // File size 1104.
- // File create date Tue Sep 24 15:29:08 CST 2024.
- // File update date Fri Jan 17 11:23:13 CST 2025.
- // @Version 1.0.0
+ // File size 1133.
+ // File create date Fri Jul 12 12:55:23 CST 2024.
+ // File update date Fri Jul 12 12:55:23 CST 2024.
+ // Version 1.0.0
 package cn.cyberpeace.mp.base.util.thread.taskpool;
 
 import io.swagger.annotations.ApiModelProperty;
@@ -17,11 +17,12 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 /**
- * @author wangssh
- * @version 1.0
- * @description 线程池信息
- * @date 2023/6/29
- **/
+ * @ClassName ThreadPoolInfo
+ * @Description 线程池信息
+ * @Author wangssh
+ * @Date 2023/6/29
+ * @Version 1.0
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -29,7 +30,7 @@ import lombok.ToString;
 public class ThreadPoolInfo {
 
     @ApiModelProperty(value = "线程池名前缀")
-    public String threadPoolName;
+    private String threadPoolName;
 
     @ApiModelProperty(value = "核心线程数")
     private int coreThreadSize;

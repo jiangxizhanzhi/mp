@@ -4,15 +4,15 @@
  // Description:
  // Author:
  // File name CidrValidator.java.
- // File size 886.
- // File create date Tue Sep 24 15:29:08 CST 2024.
- // File update date Fri Jan 17 11:23:12 CST 2025.
- // @Version 1.0.0
+ // File size 1173.
+ // File create date Fri Jul 12 12:55:31 CST 2024.
+ // File update date Fri Jul 12 12:55:31 CST 2024.
+ // Version 1.0.0
 package cn.cyberpeace.mp.base.validation.validator;
 
 
+import cn.cyberpeace.mp.base.util.mptool.Validator;
 import cn.cyberpeace.mp.base.validation.stereotype.Cidr;
-import cn.hutool.core.lang.Validator;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.validation.ConstraintValidator;
@@ -20,10 +20,25 @@ import javax.validation.ConstraintValidatorContext;
 import java.util.regex.Pattern;
 
 
+/**
+ * @ClassName CidrValidator
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see ConstraintValidator
+ */
 public class CidrValidator implements ConstraintValidator<Cidr, CharSequence> {
 
     public static final Pattern CIDR = Pattern.compile("^(?:(?:[0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}(?:[0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\/([0-9]|[1-2]\\d|3[0-2])$");
 
+    /**
+     * isValid
+     *
+     * @param value
+     * @param constraintValidatorContext
+     * @return boolean
+     */
     @Override
     public boolean isValid(CharSequence value, ConstraintValidatorContext constraintValidatorContext) {
         if (StringUtils.isEmpty(value)) {

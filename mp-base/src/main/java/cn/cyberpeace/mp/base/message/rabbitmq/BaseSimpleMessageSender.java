@@ -4,10 +4,10 @@
  // Description:
  // Author:
  // File name BaseSimpleMessageSender.java.
- // File size 2433.
- // File create date Tue Sep 24 15:29:08 CST 2024.
- // File update date Fri Jan 17 11:23:11 CST 2025.
- // @Version 1.0.0
+ // File size 3186.
+ // File create date Fri Jul 12 12:55:30 CST 2024.
+ // File update date Fri Jul 12 12:55:30 CST 2024.
+ // Version 1.0.0
 package cn.cyberpeace.mp.base.message.rabbitmq;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
@@ -22,6 +22,13 @@ import org.springframework.amqp.core.MessagePostProcessor;
 
 import java.util.Map;
 
+/**
+ * @ClassName BaseSimpleMessageSender
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Slf4j
 @Data
 public abstract class BaseSimpleMessageSender {
@@ -32,6 +39,13 @@ public abstract class BaseSimpleMessageSender {
 
     private SimpleMessageConfig messageConfig;
 
+    /**
+     * BaseSimpleMessageSender
+     *
+     * @param amqpTemplate
+     * @param messageConverter
+     * @param messageConfig
+     */
     protected BaseSimpleMessageSender(AmqpTemplate amqpTemplate, MessageConverter messageConverter,
                                       SimpleMessageConfig messageConfig) {
         setAmqpTemplate(amqpTemplate);
@@ -39,18 +53,44 @@ public abstract class BaseSimpleMessageSender {
         setMessageConfig(messageConfig);
     }
 
+    /**
+     * send
+     *
+     * @param data
+     */
     public <T> void send(T data) {
         send(data, null);
     }
 
+    /**
+     * send
+     *
+     * @param data
+     * @param type
+     */
     public <T> void send(T data, String type) {
         send(data, type, null);
     }
 
+    /**
+     * send
+     *
+     * @param data
+     * @param type
+     * @param context
+     */
     public <T> void send(T data, String type, Map<String, Object> context) {
         send(data, type, context, null);
     }
 
+    /**
+     * send
+     *
+     * @param data
+     * @param type
+     * @param context
+     * @param timeout
+     */
     public <T> void send(T data, String type, Map<String, Object> context, Long timeout) {
         FormatMessage<T> formatMessage = new FormatMessage<>(data, type, context);
         log.debug("mq content:{}", JsonCommon.stringify(formatMessage));
@@ -69,6 +109,12 @@ public abstract class BaseSimpleMessageSender {
 
         private Long timeout;
 
+        /**
+         * postProcessMessage
+         *
+         * @param message
+         * @return
+         */
         @Override
         public Message postProcessMessage(Message message) throws AmqpException {
             if (timeout != null) {

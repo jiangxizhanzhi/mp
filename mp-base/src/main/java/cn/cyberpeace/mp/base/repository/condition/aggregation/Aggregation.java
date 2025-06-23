@@ -4,10 +4,10 @@
  // Description:
  // Author:
  // File name Aggregation.java.
- // File size 1666.
- // File create date Tue Sep 24 15:29:08 CST 2024.
- // File update date Fri Jan 17 11:23:12 CST 2025.
- // @Version 1.0.0
+ // File size 2161.
+ // File create date Fri Jul 12 12:55:31 CST 2024.
+ // File update date Fri Jul 12 12:55:31 CST 2024.
+ // Version 1.0.0
 package cn.cyberpeace.mp.base.repository.condition.aggregation;
 
 import lombok.Data;
@@ -16,8 +16,12 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.function.Function;
 
 /**
- * 标记聚合函数
+ * @ClassName Aggregation
+ * @Description  标记聚合函数
  * 约定：子类通过静态方法f载入聚合字段
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 public abstract class Aggregation<T extends Aggregation<T>> {
@@ -26,16 +30,33 @@ public abstract class Aggregation<T extends Aggregation<T>> {
 
     private Function<String, String> calc;
 
+    /**
+     * genCalcEqual
+     *
+     * @param value
+     * @return
+     */
     public static Function<String, String> genCalcEqual(Object value) {
         return column -> String.format("case when %s = %s then 1 else null end", column, value.toString());
     }
 
+    /**
+     * genCalcEmptyNull
+     *
+     * @return
+     */
     public static Function<String, String> genCalcEmptyNull() {
         return column -> String.format("case when %s <> '' then %s else null end", column, column);
     }
 
+    /**
+     * addCalc
+     *
+     * @param calc
+     * @return
+     */
     public T addCalc(Function<String, String> calc) {
-        var rawCalc = this.calc;
+        Function<String, String> rawCalc = this.calc;
         if (rawCalc == null) {
             this.calc = calc;
         } else {
@@ -44,11 +65,22 @@ public abstract class Aggregation<T extends Aggregation<T>> {
         return (T) this;
     }
 
+    /**
+     * calcEqual
+     *
+     * @param value
+     * @return
+     */
     public T calcEqual(Object value) {
         this.addCalc(genCalcEqual(value));
         return (T) this;
     }
 
+    /**
+     * calcEmptyNull
+     *
+     * @return
+     */
     public T calcEmptyNull() {
         this.addCalc(genCalcEmptyNull());
         return (T) this;

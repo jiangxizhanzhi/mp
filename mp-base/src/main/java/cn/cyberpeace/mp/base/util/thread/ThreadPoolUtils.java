@@ -4,10 +4,10 @@
  // Description:
  // Author:
  // File name ThreadPoolUtils.java.
- // File size 950.
- // File create date Tue Sep 24 15:29:08 CST 2024.
- // File update date Fri Jan 17 11:23:12 CST 2025.
- // @Version 1.0.0
+ // File size 1117.
+ // File create date Fri Jul 12 12:55:23 CST 2024.
+ // File update date Fri Jul 12 12:55:23 CST 2024.
+ // Version 1.0.0
 package cn.cyberpeace.mp.base.util.thread;
 
 import cn.cyberpeace.mp.base.constant.BaseSingleton;
@@ -17,9 +17,11 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 /**
- * @Description: 全局ScheduledThreadPool工具类
+ * @ClassName ThreadPoolUtils
+ * @Description 全局ScheduledThreadPool工具类
  * @Author qiaokang
- * @Date：2021/8/9 11:29
+ * @Date 2021/8/9 11:29
+ * @Version 1.0.0
  */
 public class ThreadPoolUtils {
 
@@ -29,8 +31,16 @@ public class ThreadPoolUtils {
                 new ThreadFactoryBuilder().setNameFormat("scheduled-thread-pool-%d").build());
     }
 
+    /**
+     * ThreadPoolUtils
+     */
     private ThreadPoolUtils(){}
 
+    /**
+     * getScheduledExecutorService
+     *
+     * @return
+     */
     public static ScheduledExecutorService getScheduledExecutorService() {
         return SingletonHolder.scheduledExecutorService;
     }

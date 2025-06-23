@@ -4,10 +4,10 @@
  // Description:
  // Author:
  // File name HttpData.java.
- // File size 971.
- // File create date Tue Sep 24 15:29:08 CST 2024.
- // File update date Fri Jan 17 11:23:12 CST 2025.
- // @Version 1.0.0
+ // File size 1299.
+ // File create date Fri Jul 12 12:55:20 CST 2024.
+ // File update date Fri Jul 12 12:55:20 CST 2024.
+ // Version 1.0.0
 package cn.cyberpeace.mp.base.util.http;
 
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
@@ -16,14 +16,30 @@ import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import java.util.Map;
 
 /**
- * http请求体数据，实现该接口定义对应bean
+ * @ClassName HttpData
+ * @Description http请求体数据，实现该接口定义对应bean
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 public interface HttpData {
 
+    /**
+     * toContent
+     *
+     * @param httpData
+     * @return
+     */
     static String toContent(Object httpData) {
         return JsonUtils.stringify(httpData);
     }
 
+    /**
+     * toMultipart
+     *
+     * @param httpData
+     * @return
+     */
     static Map<String, Object> toMultipart(Object httpData) {
         return BeanUtils.getMap(httpData);
     }
@@ -49,6 +65,11 @@ public interface HttpData {
         return toMultipart(this);
     }
 
+    /**
+     * contentType
+     *
+     * @return
+     */
     default String contentType() {
         return null;
     }

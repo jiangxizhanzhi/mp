@@ -4,10 +4,10 @@
  // Description:
  // Author:
  // File name DiffTargets.java.
- // File size 2676.
- // File create date Tue Sep 24 15:29:08 CST 2024.
- // File update date Fri Jan 17 11:23:12 CST 2025.
- // @Version 1.0.0
+ // File size 2848.
+ // File create date Fri Jul 12 12:55:32 CST 2024.
+ // File update date Fri Jul 12 12:55:32 CST 2024.
+ // Version 1.0.0
 package cn.cyberpeace.mp.base.bo;
 
 import lombok.Data;
@@ -19,8 +19,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 差异比较结果
- * @param <T> 目标类型
+ * @ClassName DiffTargets
+ * @Description 差异比较结果
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 @NoArgsConstructor
@@ -68,9 +71,11 @@ public class DiffTargets<T> {
         Map<String, T> existTargetMapCopy = new HashMap<>(existTargetMap);
         DiffTargets<T> diff = new DiffTargets<>();
         diff.getExistTargetMap().putAll(existTargetMap);
-        targetMap.forEach((key, target) -> {
+        for (Map.Entry<String, T> entry : targetMap.entrySet()) {
+            String key = entry.getKey();
+            T target = entry.getValue();
             if (existTargetMapCopy.containsKey(key)) {
-                var existTarget = existTargetMapCopy.remove(key);
+                T existTarget = existTargetMapCopy.remove(key);
                 if (judgeKeepTarget == null) {
                     diff.getUpdatingTargets().add(target);
                 } else {
@@ -83,7 +88,7 @@ public class DiffTargets<T> {
             } else {
                 diff.getAddingTargets().add(target);
             }
-        });
+        }
         diff.getRemovingTargets().addAll(existTargetMapCopy.values());
         return diff;
     }

@@ -4,10 +4,10 @@
  // Description:
  // Author:
  // File name SysContextHolder.java.
- // File size 1248.
- // File create date Tue Sep 24 15:29:08 CST 2024.
- // File update date Fri Jan 17 11:23:16 CST 2025.
- // @Version 1.0.0
+ // File size 1802.
+ // File create date Fri Jul 12 12:55:30 CST 2024.
+ // File update date Fri Jul 12 12:55:30 CST 2024.
+ // Version 1.0.0
 package cn.cyberpeace.mp.base.context;
 
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
@@ -15,19 +15,37 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
 
+/**
+ * @ClassName SysContextHolder
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Slf4j
 public class SysContextHolder {
 
     private static final ThreadLocal<SysContext> localSysContextHolder = new ThreadLocal<>();
 
+    /**
+     * SysContextHolder
+     */
     private SysContextHolder() {}
 
+    /**
+     * resetSysContext
+     */
     public static void resetSysContext() {
         localSysContextHolder.remove();
     }
 
+    /**
+     * getSysContext
+     *
+     * @return
+     */
     public static SysContext getSysContext() {
-        var sysContext = localSysContextHolder.get();
+        SysContext sysContext = localSysContextHolder.get();
         if (sysContext == null) {
             sysContext = new SysContext();
             sysContext.setCallChainId(TextUtils.uuid());
@@ -36,18 +54,38 @@ public class SysContextHolder {
         return sysContext;
     }
 
+    /**
+     * getCallChainId
+     *
+     * @return
+     */
     public static String getCallChainId() {
         return getSysContext().getCallChainId();
     }
 
+    /**
+     * setCallChainId
+     *
+     * @param callChainId
+     */
     public static void setCallChainId(String callChainId) {
         getSysContext().setCallChainId(callChainId);
     }
 
+    /**
+     * setPassThroughMap
+     *
+     * @param map
+     */
     public static void setPassThroughMap(Map<String, Object> map) {
         getSysContext().setPassThroughMap(map);
     }
 
+    /**
+     * getPassThroughMap
+     *
+     * @return
+     */
     public static Map<String, Object> getPassThroughMap() {
         return getSysContext().getPassThroughMap();
     }

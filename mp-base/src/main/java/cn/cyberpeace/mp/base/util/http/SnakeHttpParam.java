@@ -4,33 +4,54 @@
  // Description:
  // Author:
  // File name SnakeHttpParam.java.
- // File size 861.
- // File create date Tue Sep 24 15:29:08 CST 2024.
- // File update date Fri Jan 17 11:23:12 CST 2025.
- // @Version 1.0.0
+ // File size 1276.
+ // File create date Fri Jul 12 12:55:20 CST 2024.
+ // File update date Fri Jul 12 12:55:20 CST 2024.
+ // Version 1.0.0
 package cn.cyberpeace.mp.base.util.http;
 
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
-import cn.hutool.core.util.URLUtil;
+import cn.cyberpeace.mp.base.util.mptool.URLUtil;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * @ClassName SnakeHttpParam
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see HttpParam
+ */
 public interface SnakeHttpParam extends HttpParam {
 
+    /**
+     * toPathString
+     *
+     * @param httpParam
+     * @return
+     */
     static String toPathString(Object httpParam) {
         Map<String, Object> map = new HashMap<>();
-        BeanUtils.getMap(httpParam).forEach((fieldName, fieldValue) -> {
-            if(!Objects.isNull(fieldValue)){
+        for (Map.Entry<String, Object> entry : BeanUtils.getMap(httpParam).entrySet()) {
+            String fieldName = entry.getKey();
+            Object fieldValue = entry.getValue();
+            if (!Objects.isNull(fieldValue)) {
                 map.put(TextUtils.humpToLine(fieldName), fieldValue);
             }
-        });
+        }
         return URLUtil.buildQuery(map, StandardCharsets.UTF_8);
     }
 
+    /**
+     * toPathString
+     *
+     * @return
+     */
     @Override
     default String toPathString() {
         return toPathString(this);

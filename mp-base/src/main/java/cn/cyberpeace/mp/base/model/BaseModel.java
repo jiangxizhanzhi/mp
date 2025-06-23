@@ -4,10 +4,10 @@
  // Description:
  // Author:
  // File name BaseModel.java.
- // File size 3371.
- // File create date Tue Sep 24 15:29:08 CST 2024.
- // File update date Fri Jan 17 11:23:13 CST 2025.
- // @Version 1.0.0
+ // File size 3628.
+ // File create date Fri Jul 12 12:55:31 CST 2024.
+ // File update date Fri Jul 12 12:55:31 CST 2024.
+ // Version 1.0.0
 package cn.cyberpeace.mp.base.model;
 
 import cn.cyberpeace.mp.base.model.common.ModelUtils;
@@ -30,6 +30,13 @@ import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.util.Map;
 
+/**
+ * @ClassName BaseModel
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Slf4j
 @Data
 @AllArgsConstructor
@@ -67,7 +74,7 @@ public class BaseModel {
             return;
         }
 
-        var field = (Field) value[0];
+        Field field = (Field) value[0];
         if (ClassUtils.getFieldValue(field, this) != null) {
             return;
         }
@@ -80,15 +87,19 @@ public class BaseModel {
                 log.error("Invoke initDefaultMethod on instance {} for {} failed: {}", this, fieldName, e.getMessage());
             }
         } else if (defaultValue instanceof Generator) {
-            ClassUtils.setFieldValue(field, this, ((Generator) defaultValue).generate());
+            final boolean b = ClassUtils.setFieldValue(field, this, ((Generator) defaultValue).generate());
         } else {
-            ClassUtils.setFieldValue(field, this, defaultValue);
+            final boolean b = ClassUtils.setFieldValue(field, this, defaultValue);
         }
     }
 
     public void initDefault() {
         Map<String, Object[]> initDefaultFields = ModelUtils.getInitDefaultFields(getClass());
-        initDefaultFields.forEach((fieldName, value) -> initDefault(fieldName));
+        for (Map.Entry<String, Object[]> entry : initDefaultFields.entrySet()) {
+            String fieldName = entry.getKey();
+            Object[] value = entry.getValue();
+            initDefault(fieldName);
+        }
     }
 
     public void initDefault(String fieldName) {

@@ -4,39 +4,82 @@
  // Description:
  // Author:
  // File name ObjServiceResult.java.
- // File size 1302.
- // File create date Tue Sep 24 15:29:08 CST 2024.
- // File update date Fri Jan 17 11:23:11 CST 2025.
- // @Version 1.0.0
+ // File size 2103.
+ // File create date Fri Jul 12 12:55:31 CST 2024.
+ // File update date Fri Jul 12 12:55:31 CST 2024.
+ // Version 1.0.0
 package cn.cyberpeace.mp.base.service.result;
 
 import cn.cyberpeace.mp.base.repository.fields.DynamicFields;
 import cn.cyberpeace.mp.base.service.code.ServiceCode;
 import lombok.NoArgsConstructor;
 
+/**
+ * @ClassName ObjServiceResult
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseServiceResult
+ */
 @NoArgsConstructor
 public class ObjServiceResult<T> extends BaseServiceResult<ObjResult<T>, T> {
 
+    /**
+     * ObjServiceResult
+     *
+     * @param source
+     */
     public ObjServiceResult(ObjResult<T> source) {
         super(source);
     }
 
+    /**
+     * ObjServiceResult
+     *
+     * @param source
+     * @param code
+     */
     public ObjServiceResult(ObjResult<T> source, ServiceCode code) {
         super(source, code);
     }
 
+    /**
+     * ObjServiceResult
+     *
+     * @param source
+     * @param code
+     * @param detail
+     */
     public ObjServiceResult(ObjResult<T> source, ServiceCode code, String detail) {
         super(source, code, detail);
     }
 
+    /**
+     * ObjServiceResult
+     *
+     * @param obj
+     */
     public ObjServiceResult(T obj) {
         this(new ObjResult<>(obj));
     }
 
+    /**
+     * ObjServiceResult
+     *
+     * @param obj
+     * @param fields
+     */
     public ObjServiceResult(T obj, DynamicFields fields) {
         this(new ObjResult<>(obj, fields));
     }
 
+    /**
+     * sourceToData
+     *
+     * @param source
+     * @return
+     */
     @Override
     public T sourceToData(ObjResult<T> source) {
         if (source == null) {
@@ -46,14 +89,24 @@ public class ObjServiceResult<T> extends BaseServiceResult<ObjResult<T>, T> {
         return source.asResult();
     }
 
+    /**
+     * asResult
+     *
+     * @return
+     */
     @Override
     public ObjServiceResult<T> asResult() {
         super.asResult();
         return this;
     }
 
+    /**
+     * sourceObj
+     *
+     * @return
+     */
     public T sourceObj() {
-        var source = getSource();
+        ObjResult<T> source = getSource();
         if (source == null) {
             return null;
         }

@@ -4,10 +4,10 @@
  // Description:
  // Author:
  // File name LogAsyncAppender.java.
- // File size 1319.
- // File create date Tue Sep 24 15:29:08 CST 2024.
- // File update date Fri Jan 17 11:23:15 CST 2025.
- // @Version 1.0.0
+ // File size 1541.
+ // File create date Fri Jul 12 12:55:30 CST 2024.
+ // File update date Fri Jul 12 12:55:30 CST 2024.
+ // Version 1.0.0
 package cn.cyberpeace.mp.base.config.log;
 
 import ch.qos.logback.classic.AsyncAppender;
@@ -19,10 +19,23 @@ import org.slf4j.MDC;
 
 import java.lang.reflect.Field;
 
+/**
+ * @ClassName LogAsyncAppender
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see AsyncAppender
+ */
 public class LogAsyncAppender extends AsyncAppender {
 
     private static final Field mdcPropertyMapField = ClassUtils.getField(LoggingEvent.class, "mdcPropertyMap", false, false);
 
+    /**
+     * preprocess
+     *
+     * @param eventObject
+     */
     @Override
     protected void preprocess(ILoggingEvent eventObject) {
         // 每次打印日志前设置 追踪id
@@ -30,8 +43,8 @@ public class LogAsyncAppender extends AsyncAppender {
         MDC.put("CALL_CHAIN_ID", SysContextHolder.getCallChainId());
         if (eventObject instanceof LoggingEvent) {
             // 需要先置空 mdcPropertyMap 字段,然后重新生成一次,否则获取不到上一步设置的CALL_CHAIN_ID
-            var loggingEvent = (LoggingEvent) eventObject;
-            ClassUtils.setFieldValue(mdcPropertyMapField, loggingEvent, null);
+            LoggingEvent loggingEvent = (LoggingEvent) eventObject;
+            final boolean b = ClassUtils.setFieldValue(mdcPropertyMapField, loggingEvent, null);
             loggingEvent.getMDCPropertyMap();
         }
         super.preprocess(eventObject);

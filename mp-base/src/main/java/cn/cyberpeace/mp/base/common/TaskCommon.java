@@ -4,10 +4,10 @@
  // Description:
  // Author:
  // File name TaskCommon.java.
- // File size 2473.
- // File create date Tue Sep 24 15:29:08 CST 2024.
- // File update date Fri Jan 17 11:23:15 CST 2025.
- // @Version 1.0.0
+ // File size 3696.
+ // File create date Fri Jul 12 12:55:30 CST 2024.
+ // File update date Fri Jul 12 12:55:30 CST 2024.
+ // Version 1.0.0
 package cn.cyberpeace.mp.base.common;
 
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
@@ -17,56 +17,66 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+/**
+ * @ClassName TaskCommon
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Component
 public class TaskCommon {
 
-    public static TaskCommonPool taskCommonPool;
+    private static TaskCommonPool taskCommonPool;
 
+    /**
+     * TaskCommon
+     *
+     * @param taskCommonPool
+     */
     private TaskCommon(TaskCommonPool taskCommonPool) {
         TaskCommon.taskCommonPool = taskCommonPool;
     }
 
+    /**
+     * executeTask
+     *
+     * @param task
+     */
     public static void executeTask(Runnable task) {
         taskCommonPool.executeTask(task);
     }
 
+    /**
+     * runTasks
+     *
+     * @param tasks
+     * @return
+     */
     public static List<DefaultPoolTask> runTasks(List<Runnable> tasks) {
         return taskCommonPool.runTasks(tasks);
     }
 
+    /**
+     * runTasks
+     *
+     * @param tasks
+     * @param independent
+     * @param format
+     * @return
+     */
     public static List<DefaultPoolTask> runTasks(List<Runnable> tasks, boolean independent, boolean format) {
         return taskCommonPool.runTasks(tasks, independent, format);
     }
 
-    public static <C, T extends PoolTask<C>> List<T> runPoolTasks(List<T> poolTasks) {
-        return taskCommonPool.runPoolTasks(poolTasks);
-    }
-
-    public static <C, T extends PoolTask<C>> List<T> runPoolTasks(List<T> poolTasks, boolean independent,
-                                                                  boolean format) {
-        return taskCommonPool.runPoolTasks(poolTasks, independent, format);
-    }
-
-    public static <R> List<DefaultResultPoolTask<R>> callTasks(List<Callable<R>> tasks) {
-        return taskCommonPool.callTasks(tasks);
-    }
-
-    public static <R> List<DefaultResultPoolTask<R>> callTasks(List<Callable<R>> tasks, boolean independent,
-                                                               boolean format) {
-        return taskCommonPool.callTasks(tasks, independent, format);
-    }
-
-    public static <C, R, T extends ResultPoolTask<C, R>> List<T> callPoolTasks(List<T> poolTasks) {
-        return taskCommonPool.callPoolTasks(poolTasks);
-    }
-
-    public static <C, R, T extends ResultPoolTask<C, R>> List<T> callPoolTasks(List<T> poolTasks, boolean independent,
-                                                                               boolean format) {
-        return taskCommonPool.callPoolTasks(poolTasks, independent, format);
-    }
 
     @Component
     public static class TaskCommonPool extends TaskPool {
+        /**
+         * TaskCommonPool
+         *
+         * @param baseAppConfig
+         */
         public TaskCommonPool(BaseAppConfig baseAppConfig) {
             super(baseAppConfig.getTaskPoolSize(), baseAppConfig.getTaskHoldSize(), 60L);
         }

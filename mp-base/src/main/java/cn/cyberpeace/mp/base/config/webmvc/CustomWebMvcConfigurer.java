@@ -4,33 +4,42 @@
  // Description:
  // Author:
  // File name CustomWebMvcConfigurer.java.
- // File size 1749.
- // File create date Tue Sep 24 15:29:08 CST 2024.
- // File update date Fri Jan 17 11:23:15 CST 2025.
- // @Version 1.0.0
+ // File size 1935.
+ // File create date Fri Jul 12 12:55:30 CST 2024.
+ // File update date Fri Jul 12 12:55:30 CST 2024.
+ // Version 1.0.0
 package cn.cyberpeace.mp.base.config.webmvc;
 
-import cn.cyberpeace.mp.base.common.LfsCommon;
+import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
-import cn.hutool.core.io.FileUtil;
+import cn.cyberpeace.mp.base.util.mptool.FileUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.List;
 
+/**
+ * @ClassName CustomWebMvcConfigurer
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see WebMvcConfigurer
+ */
 @Configuration
 public class CustomWebMvcConfigurer implements WebMvcConfigurer {
 
     @Autowired
     private BaseAppConfig baseAppConfig;
 
-    @Autowired
-    private LfsCommon lfsCommon;
-
+    /**
+     * addArgumentResolvers
+     *
+     * @param argumentResolvers
+     */
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
         if (Boolean.TRUE.equals(baseAppConfig.getSnakeApiMode())) {
@@ -38,10 +47,15 @@ public class CustomWebMvcConfigurer implements WebMvcConfigurer {
         }
     }
 
+    /**
+     * addResourceHandlers
+     *
+     * @param registry
+     */
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler(baseAppConfig.getLfsUrlPattern())
-                .addResourceLocations(String.format("file:%s%s", LfsCommon.lfsClient.getGroupDir(), FileUtil.FILE_SEPARATOR));
+                .addResourceLocations(String.format("file:%s%s", FsCommon.getGroupDir(), FileUtil.FILE_SEPARATOR));
 
         //W:add swagger resource mapping
         registry.addResourceHandler("doc.html")

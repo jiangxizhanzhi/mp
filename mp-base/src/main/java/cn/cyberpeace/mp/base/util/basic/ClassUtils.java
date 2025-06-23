@@ -4,29 +4,37 @@
  // Description:
  // Author:
  // File name ClassUtils.java.
- // File size 11830.
- // File create date Tue Sep 24 15:29:08 CST 2024.
- // File update date Fri Jan 17 11:23:12 CST 2025.
- // @Version 1.0.0
+ // File size 13766.
+ // File create date Fri Jul 12 12:55:20 CST 2024.
+ // File update date Fri Jul 12 12:55:20 CST 2024.
+ // Version 1.0.0
 package cn.cyberpeace.mp.base.util.basic;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
-import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldNames;
 import cn.cyberpeace.mp.base.util.define.SerializableFunction;
-import cn.hutool.core.util.StrUtil;
+import cn.cyberpeace.mp.base.util.mptool.StrUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 
+import java.beans.PropertyDescriptor;
 import java.lang.invoke.SerializedLambda;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.*;
+import java.lang.reflect.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * @ClassName ClassUtils
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Slf4j
 public class ClassUtils {
 
@@ -34,8 +42,20 @@ public class ClassUtils {
 
     private static final Map<Class<?>, Map<String, Class<?>>> beanClassFieldTypesCache = new ConcurrentHashMap<>();
 
+    /**
+     * ClassUtils
+     */
     private ClassUtils() {}
 
+    /**
+     * getField
+     *
+     * @param clazz
+     * @param fieldName
+     * @param findSuper
+     * @param ignoreNotFound
+     * @return
+     */
     public static Field getField(Class<?> clazz, String fieldName, boolean findSuper, boolean ignoreNotFound) {
         Field field;
         try {
@@ -54,6 +74,13 @@ public class ClassUtils {
         return field;
     }
 
+    /**
+     * getFieldValue
+     *
+     * @param field
+     * @param obj
+     * @return
+     */
     @SuppressWarnings("java:S3011")
     public static Object getFieldValue(Field field, Object obj) {
         Object value = null;
@@ -77,9 +104,17 @@ public class ClassUtils {
         return value;
     }
 
+    /**
+     * setFieldValue
+     *
+     * @param field
+     * @param obj
+     * @param value
+     * @return boolean
+     */
     @SuppressWarnings("java:S3011")
     public static boolean setFieldValue(Field field, Object obj, Object value) {
-        var flag = true;
+        boolean flag = true;
         synchronized (field) {
             boolean canAccess = field.canAccess(obj);
             if (!canAccess) {
@@ -101,6 +136,13 @@ public class ClassUtils {
         return flag;
     }
 
+    /**
+     * castFieldType
+     *
+     * @param value
+     * @param expectedFieldType
+     * @return
+     */
     public static <T> T castFieldType(Object value, Class<T> expectedFieldType) {
         T fieldValue = null;
         if (value != null) {
@@ -114,8 +156,16 @@ public class ClassUtils {
         return fieldValue;
     }
 
+    /**
+     * getFieldValue
+     *
+     * @param clazz
+     * @param fieldName
+     * @param obj
+     * @return
+     */
     public static Object getFieldValue(Class<?> clazz, String fieldName, Object obj) {
-        var field = getField(clazz, fieldName, true, false);
+        Field field = getField(clazz, fieldName, true, false);
         if (field == null) {
             return null;
         }
@@ -123,43 +173,115 @@ public class ClassUtils {
         return getFieldValue(field, obj);
     }
 
+    /**
+     * getFieldValue
+     *
+     * @param clazz
+     * @param fieldName
+     * @param obj
+     * @param expectedFieldType
+     * @return
+     */
     public static <T> T getFieldValue(Class<?> clazz, String fieldName, Object obj, Class<T> expectedFieldType) {
         Object value = getFieldValue(clazz, fieldName, obj);
         return castFieldType(value, expectedFieldType);
     }
 
+    /**
+     * setFieldValue
+     *
+     * @param clazz
+     * @param fieldName
+     * @param obj
+     * @param value
+     * @return boolean
+     */
     public static boolean setFieldValue(Class<?> clazz, String fieldName, Object obj, Object value) {
-        var field = getField(clazz, fieldName, true, false);
+        Field field = getField(clazz, fieldName, true, false);
         if (field == null) {
             return false;
         }
         return setFieldValue(field, obj, value);
     }
 
+    /**
+     * getStaticFieldValue
+     *
+     * @param clazz
+     * @param fieldName
+     * @return
+     */
     public static Object getStaticFieldValue(Class<?> clazz, String fieldName) {
         return getFieldValue(clazz, fieldName, null);
     }
 
+    /**
+     * getStaticFieldValue
+     *
+     * @param clazz
+     * @param fieldName
+     * @param expectedFieldType
+     * @return
+     */
     public static <T> T getStaticFieldValue(Class<?> clazz, String fieldName, Class<T> expectedFieldType) {
         return getFieldValue(clazz, fieldName, null, expectedFieldType);
     }
 
+    /**
+     * setStaticFieldValue
+     *
+     * @param clazz
+     * @param fieldName
+     * @param value
+     * @return boolean
+     */
     public static boolean setStaticFieldValue(Class<?> clazz, String fieldName, Object value) {
         return setFieldValue(clazz, fieldName, null, value);
     }
 
+    /**
+     * getObjFieldValue
+     *
+     * @param obj
+     * @param fieldName
+     * @return
+     */
     public static Object getObjFieldValue(Object obj, String fieldName) {
         return getFieldValue(obj.getClass(), fieldName, obj);
     }
 
+    /**
+     * getObjFieldValue
+     *
+     * @param obj
+     * @param fieldName
+     * @param expectedFieldType
+     * @return
+     */
     public static <T> T getObjFieldValue(Object obj, String fieldName, Class<T> expectedFieldType) {
         return getFieldValue(obj.getClass(), fieldName, obj, expectedFieldType);
     }
 
+    /**
+     * setObjFieldValue
+     *
+     * @param obj
+     * @param fieldName
+     * @param value
+     * @return boolean
+     */
     public static boolean setObjFieldValue(Object obj, String fieldName, Object value) {
         return setFieldValue(obj.getClass(), fieldName, obj, value);
     }
 
+    /**
+     * getMethod
+     *
+     * @param clazz
+     * @param methodName
+     * @param parameterTypes
+     * @return
+     */
     public static Method getMethod(Class<?> clazz, String methodName, Class<?>... parameterTypes) {
         Method method;
         try {
@@ -171,10 +293,23 @@ public class ClassUtils {
         return method;
     }
 
+    /**
+     * getClassConstantFieldMap
+     *
+     * @param clazz
+     * @return
+     */
     public static Map<String, Object> getClassConstantFieldMap(Class<?> clazz) {
         return getClassConstantFieldMap(clazz, Object.class);
     }
 
+    /**
+     * getClassConstantFieldMap
+     *
+     * @param clazz
+     * @param expectedFieldType
+     * @return
+     */
     public static <T> Map<String, T> getClassConstantFieldMap(Class<?> clazz, Class<T> expectedFieldType) {
         Map<String, T> constantFieldMap = new HashMap<>();
         Field[] fields = clazz.getDeclaredFields();
@@ -187,14 +322,27 @@ public class ClassUtils {
         return constantFieldMap;
     }
 
+    /**
+     * getBeanClassFields
+     *
+     * @param clazz
+     * @return
+     */
     public static String[] getBeanClassFields(Class<?> clazz) {
         return getBeanClassFields(clazz, true);
     }
 
+    /**
+     * getClassDeclaredFields
+     *
+     * @param clazz
+     * @param findSuper
+     * @return
+     */
     private static List<Field> getClassDeclaredFields(Class<?> clazz, boolean findSuper) {
         List<Field> fields = new ArrayList<>();
         if (findSuper) {
-            var superClass = clazz.getSuperclass();
+            Class<?> superClass = clazz.getSuperclass();
             if (superClass != null) {
                 fields.addAll(getClassDeclaredFields(superClass, true));
             }
@@ -203,6 +351,13 @@ public class ClassUtils {
         return fields;
     }
 
+    /**
+     * getBeanClassFields
+     *
+     * @param clazz
+     * @param tryOrder
+     * @return
+     */
     public static String[] getBeanClassFields(Class<?> clazz, boolean tryOrder) {
         String[] fields = beanClassFieldsCache.getOrDefault(clazz, null);
         if (fields != null) {
@@ -210,7 +365,7 @@ public class ClassUtils {
         }
 
         final BeanWrapper clazzWrapper = new BeanWrapperImpl(clazz);
-        var propertyDescriptors = clazzWrapper.getPropertyDescriptors();
+        PropertyDescriptor[] propertyDescriptors = clazzWrapper.getPropertyDescriptors();
         Map<String, String> fieldPool = new HashMap<>();
         for (java.beans.PropertyDescriptor propertyDescriptor : propertyDescriptors) {
             String fieldName = propertyDescriptor.getName();
@@ -220,15 +375,15 @@ public class ClassUtils {
         }
 
         if (tryOrder) {
-            var allFields = getClassDeclaredFields(clazz, true);
+            List<Field> allFields = getClassDeclaredFields(clazz, true);
             List<String> orderedFields = new ArrayList<>();
-            allFields.forEach(field -> {
-                var fieldName = field.getName();
+            for (Field field : allFields) {
+                String fieldName = field.getName();
                 if (fieldPool.containsKey(fieldName)) {
                     fieldPool.remove(fieldName);
                     orderedFields.add(fieldName);
                 }
-            });
+            }
             orderedFields.addAll(fieldPool.keySet());
             fields = orderedFields.toArray(new String[0]);
         } else {
@@ -240,6 +395,12 @@ public class ClassUtils {
         return fields;
     }
 
+    /**
+     * getBeanClassFieldTypes
+     *
+     * @param clazz
+     * @return
+     */
     public static Map<String, Class<?>> getBeanClassFieldTypes(Class<?> clazz) {
         Map<String, Class<?>> fieldTypes = beanClassFieldTypesCache.getOrDefault(clazz, null);
         if (fieldTypes != null) {
@@ -247,7 +408,7 @@ public class ClassUtils {
         }
 
         final BeanWrapper clazzWrapper = new BeanWrapperImpl(clazz);
-        var propertyDescriptors = clazzWrapper.getPropertyDescriptors();
+        PropertyDescriptor[] propertyDescriptors = clazzWrapper.getPropertyDescriptors();
         fieldTypes = new HashMap<>();
         for (java.beans.PropertyDescriptor propertyDescriptor : propertyDescriptors) {
             String fieldName = propertyDescriptor.getName();
@@ -261,48 +422,18 @@ public class ClassUtils {
         return fieldTypes;
     }
 
-    public static <T> T createInstance(Class<T> clazz) {
-        try {
-            return clazz.getDeclaredConstructor().newInstance();
-        } catch (Exception e) {
-            throw new MpRuntimeException(clazz.getName() + " create simple instance failed: " + e.getMessage());
-        }
-    }
-
-    public static void loadClassFields(Object obj) {
-        Class<?> clazz = obj.getClass();
-        var classFieldNamesAnnotation = clazz.getAnnotation(ClassFieldNames.class);
-        if (classFieldNamesAnnotation == null) {
-            return;
-        }
-        var classFieldClassesAnnotation = clazz.getAnnotation(ClassFieldClasses.class);
-        if (classFieldClassesAnnotation == null) {
-            return;
-        }
-
-        String[] fieldNames = classFieldNamesAnnotation.value();
-        Class<?>[] fieldClasses = classFieldClassesAnnotation.value();
-        if (fieldNames.length != fieldClasses.length) {
-            return;
-        }
-
-        for (var i = 0; i < fieldNames.length; i++) {
-            String fieldName = fieldNames[i];
-            var field = ClassUtils.getField(clazz, fieldName, true, false);
-            if (field == null) {
-                continue;
-            }
-
-            ClassUtils.setFieldValue(field, obj, fieldClasses[i]);
-        }
-    }
-
+    /**
+     * getFuncName
+     *
+     * @param func
+     * @return
+     */
     @SuppressWarnings("java:S3011")
     public static <T> String getFuncName(SerializableFunction<T> func) {
         SerializedLambda serializedLambda = null;
         for (Class<?> cl = func.getClass(); cl != null; cl = cl.getSuperclass()) {
             try {
-                var method = cl.getDeclaredMethod("writeReplace");
+                Method method = cl.getDeclaredMethod("writeReplace");
                 method.setAccessible(true);
                 Object replacement = method.invoke(func);
                 if (replacement instanceof SerializedLambda) {
@@ -310,6 +441,7 @@ public class ClassUtils {
                     break;
                 }
             } catch (NoSuchMethodException ignored) {
+                log.info("writeReplace not found");
             } catch (IllegalAccessException | InvocationTargetException | SecurityException e) {
                 throw new MpRuntimeException(e.getMessage());
             }

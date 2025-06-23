@@ -4,17 +4,28 @@
  // Description:
  // Author:
  // File name CompatiblePageQueryParams.java.
- // File size 568.
- // File create date Tue Sep 24 15:29:08 CST 2024.
- // File update date Fri Jan 17 11:23:11 CST 2025.
- // @Version 1.0.0
+ // File size 977.
+ // File create date Fri Jul 12 12:55:31 CST 2024.
+ // File update date Fri Jul 12 12:55:31 CST 2024.
+ // Version 1.0.0
 package cn.cyberpeace.mp.base.service.param;
 
 /**
- * 分页兼容查询参数
+ * @ClassName CompatiblePageQueryParams
+ * @Description 分页兼容查询参数
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see PageQueryParams
+ * @see CompatibleQueryParams
  */
 public interface CompatiblePageQueryParams extends PageQueryParams, CompatibleQueryParams {
 
+    /**
+     * ensureCompatible
+     *
+     * @param queryParams
+     */
     static void ensureCompatible(CompatiblePageQueryParams queryParams) {
         Integer perPage = queryParams.getPerPage();
         if (perPage != null) {
@@ -22,10 +33,23 @@ public interface CompatiblePageQueryParams extends PageQueryParams, CompatibleQu
         }
     }
 
+    /**
+     * getPerPage
+     *
+     * @return
+     */
     Integer getPerPage();
 
+    /**
+     * setPerPage
+     *
+     * @param perPage
+     */
     void setPerPage(Integer perPage);
 
+    /**
+     * ensure
+     */
     @Override
     default void ensure() {
         ensureCompatible(this);

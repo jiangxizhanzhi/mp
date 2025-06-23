@@ -4,30 +4,55 @@
  // Description:
  // Author:
  // File name Min.java.
- // File size 712.
- // File create date Tue Sep 24 15:29:08 CST 2024.
- // File update date Fri Jan 17 11:23:12 CST 2025.
- // @Version 1.0.0
+ // File size 1051.
+ // File create date Fri Jul 12 12:55:31 CST 2024.
+ // File update date Fri Jul 12 12:55:31 CST 2024.
+ // Version 1.0.0
 package cn.cyberpeace.mp.base.repository.condition.aggregation;
 
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.define.SerializableFunction;
 import lombok.AllArgsConstructor;
 
+/**
+ * @ClassName Min
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see Aggregation
+ */
 @AllArgsConstructor
 public class Min extends Aggregation<Min> {
 
+    /**
+     * f
+     *
+     * @param fieldName
+     * @return
+     */
     public static Min f(String fieldName) {
-        var aggregation = new Min();
+        Min aggregation = new Min();
         aggregation.setFieldName(fieldName);
         return aggregation;
     }
 
+    /**
+     * f
+     *
+     * @param getter
+     * @return
+     */
     public static <T> Min f(SerializableFunction<T> getter) {
         String fieldName = BeanUtils.getBeanGetterFieldName(getter);
         return f(fieldName);
     }
 
+    /**
+     * getFuncName
+     *
+     * @return
+     */
     @Override
     public String getFuncName() {
         return "min";

@@ -4,10 +4,10 @@
  // Description:
  // Author:
  // File name BaseModelServiceImpl.java.
- // File size 13730.
- // File create date Tue Sep 24 15:29:08 CST 2024.
- // File update date Fri Jan 17 11:23:11 CST 2025.
- // @Version 1.0.0
+ // File size 15526.
+ // File create date Fri Jul 12 12:55:31 CST 2024.
+ // File update date Fri Jul 12 12:55:31 CST 2024.
+ // Version 1.0.0
 package cn.cyberpeace.mp.base.service.impl;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
@@ -32,11 +32,17 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * @ClassName BaseModelServiceImpl
+ * @Description
  * 单表通用服务实现类，包含通用的增删改查能力
  *
  * @param <M> 数据model
  * @param <P> 数据mapper接口
  * @param <F> 业务处理字段
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseModelService
  */
 @Slf4j
 @Data
@@ -47,6 +53,13 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
 
     private F modelFields;
 
+    /**
+     * handleSearchCondition
+     *
+     * @param humanCondition
+     * @param search
+     * @param searchFields
+     */
     private void handleSearchCondition(HumanCondition humanCondition, String search, String[] searchFields) {
         F actualModelFields = getModelFields();
         if (StringUtils.isEmpty(search) || actualModelFields == null) {
@@ -63,45 +76,73 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
         }
 
         if (lastSearchFields != null) {
-            var orCondition = humanCondition.filterOrStart();
-            for (var searchField : lastSearchFields) {
-                orCondition.orIContains(searchField, search);
+            HumanCondition.OrConditionProxy orCondition = humanCondition.filterOrStart();
+            for (String searchField : lastSearchFields) {
+                orCondition = orCondition.orIContains(searchField, search);
             }
-            orCondition.filterOrEnd();
+            final HumanCondition humanCondition1 = orCondition.filterOrEnd();
         }
     }
 
+    /**
+     * getHumanCondition
+     *
+     * @param selectFields
+     * @return 查询条件构造器
+     */
     public HumanCondition getHumanCondition(String[] selectFields) {
-        var humanCondition = new HumanCondition();
+        HumanCondition humanCondition = new HumanCondition();
         if (selectFields != null) {
-            humanCondition.select(selectFields);
+            humanCondition = humanCondition.select(selectFields);
         }
         return humanCondition;
     }
 
 
+    /**
+     * getHumanCondition
+     *
+     * @param selectFields
+     * @param ids
+     * @param exclude
+     * @param search
+     * @param searchFields
+     * @param orders
+     * @param page
+     * @param pageSize
+     * @return 查询条件构造器
+     */
     public HumanCondition getHumanCondition(String[] selectFields, String[] ids, String[] exclude,
                                             String search, String[] searchFields,
                                             String[] orders, Integer page, Integer pageSize) {
-        var humanCondition = getHumanCondition(selectFields);
+        HumanCondition humanCondition = getHumanCondition(selectFields);
         if (ids != null && ids.length > 0) {
-            humanCondition.filterIn(BaseModel::getId, ids);
+            humanCondition = humanCondition.filterIn(BaseModel::getId, ids);
         }
         if (exclude != null && exclude.length > 0) {
-            humanCondition.filterNotIn(BaseModel::getId, exclude);
+            humanCondition = humanCondition.filterNotIn(BaseModel::getId, exclude);
         }
-        humanCondition.pagination(page, pageSize);
+        final HumanCondition pagination = humanCondition.pagination(page, pageSize);
         handleSearchCondition(humanCondition, search, searchFields);
         F actualModelFields = getModelFields();
         if (actualModelFields != null) {
             String[] lastOrders = actualModelFields.getValidOrders(orders);
             if (lastOrders != null) {
-                humanCondition.orderBy(lastOrders);
+                humanCondition = humanCondition.orderBy(lastOrders);
             }
+        } else if (orders != null && orders.length > 0) {
+            humanCondition = humanCondition.orderBy(orders);
         }
         return humanCondition;
     }
 
+    /**
+     * getCustomCondition
+     *
+     * @param params
+     * @param customConditionClass
+     * @return 自定义业务条件
+     */
     public CustomCondition getCustomCondition(Map<String, Object> params,
                                               Class<? extends CustomConditionClass> customConditionClass) {
         Class<?> actualCustomConditionClass;
@@ -123,16 +164,29 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
         return customCondition.loadFromParams(params);
     }
 
+    /**
+     * loadListFilterCondition
+     *
+     * @param humanCondition
+     * @param queryParams
+     */
     public void loadListFilterCondition(HumanCondition humanCondition, Q queryParams) {
     }
 
+    /**
+     * list
+     *
+     * @param queryParams
+     * @param withTotal
+     * @return
+     */
     @Override
     public ListObjServiceResult<M> list(Q queryParams, boolean withTotal) {
         F actualModelFields = getModelFields();
         DynamicFields validModelFields = actualModelFields != null ?
                 actualModelFields.getValidFields(queryParams.getFields()) : null;
         String[] selectFields = validModelFields != null ? validModelFields.getFields() : null;
-        var humanCondition = getHumanCondition(selectFields, queryParams.getIds(), queryParams.getExclude(),
+        HumanCondition humanCondition = getHumanCondition(selectFields, queryParams.getIds(), queryParams.getExclude(),
                 queryParams.getSearch(), queryParams.getSearchFields(), queryParams.getOrders(), queryParams.getPage(),
                 queryParams.getPageSize());
         loadListFilterCondition(humanCondition, queryParams);
@@ -140,7 +194,7 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
                 CustomConditionClass.class));
 
         List<M> data;
-        var total = 0;
+        int total = 0;
         try {
             data = getModelMapper().list(humanCondition);
             if (withTotal) {
@@ -156,12 +210,19 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
         return new ListObjServiceResult<>(new ListObjResult<>(data, total, resultFields));
     }
 
+    /**
+     * get
+     *
+     * @param id
+     * @param fields
+     * @return
+     */
     @Override
     public ObjServiceResult<M> get(String id, String[] fields) {
         F actualModelFields = getModelFields();
         DynamicFields validModelFields = actualModelFields != null ? actualModelFields.getValidFields(fields) : null;
         String[] selectFields = validModelFields != null ? validModelFields.getFields() : null;
-        var humanCondition = getHumanCondition(selectFields);
+        HumanCondition humanCondition = getHumanCondition(selectFields);
         M obj;
         try {
             obj = getModelMapper().get(id, humanCondition);
@@ -178,6 +239,13 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
         return new ObjServiceResult<>(new ObjResult<>(obj, resultFields));
     }
 
+    /**
+     * create
+     *
+     * @param obj
+     * @param fields
+     * @return
+     */
     @Override
     public ObjServiceResult<M> create(M obj, String[] fields) {
         F actualModelFields = getModelFields();
@@ -207,6 +275,13 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
         }
     }
 
+    /**
+     * update
+     *
+     * @param obj
+     * @param fields
+     * @return
+     */
     @Override
     public ObjServiceResult<M> update(M obj, String[] fields) {
         F actualModelFields = getModelFields();
@@ -236,6 +311,12 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
         }
     }
 
+    /**
+     * delete
+     *
+     * @param id
+     * @return
+     */
     @Override
     public ServiceResult<Boolean> delete(String id) {
         boolean result;
@@ -254,11 +335,19 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
         }
     }
 
+    /**
+     * bulkCreate
+     *
+     * @param objs
+     * @return
+     */
     @Override
     public ServiceResult<Integer> bulkCreate(List<M> objs) {
         F actualModelFields = getModelFields();
         if (actualModelFields != null) {
-            objs.forEach(actualModelFields::clearNotWritableFields);
+            for (M obj : objs) {
+                actualModelFields.clearNotWritableFields(obj);
+            }
         }
 
         int result;
@@ -280,11 +369,19 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
         }
     }
 
+    /**
+     * bulkUpdate
+     *
+     * @param objs
+     * @return
+     */
     @Override
     public ServiceResult<Integer> bulkUpdate(List<M> objs) {
         F actualModelFields = getModelFields();
         if (actualModelFields != null) {
-            objs.forEach(obj -> actualModelFields.clearNotWritableFields(obj, true));
+            for (M obj : objs) {
+                actualModelFields.clearNotWritableFields(obj, true);
+            }
         }
 
         int result;
@@ -306,6 +403,12 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
         }
     }
 
+    /**
+     * bulkDelete
+     *
+     * @param ids
+     * @return
+     */
     @Override
     public ServiceResult<Integer> bulkDelete(String[] ids) {
         int result;

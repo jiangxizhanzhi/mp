@@ -4,13 +4,13 @@
  // Description:
  // Author:
  // File name ServerEndpointExporter.java.
- // File size 5937.
- // File create date Tue Sep 24 15:29:08 CST 2024.
- // File update date Fri Jan 17 11:23:15 CST 2025.
- // @Version 1.0.0
+ // File size 6170.
+ // File create date Fri Jul 12 12:55:30 CST 2024.
+ // File update date Fri Jul 12 12:55:30 CST 2024.
+ // Version 1.0.0
 package cn.cyberpeace.mp.base.config.websocket;
 
-import cn.hutool.core.annotation.AnnotationUtil;
+import cn.cyberpeace.mp.base.util.mptool.AnnotationUtil;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.context.ApplicationContext;
@@ -26,7 +26,14 @@ import javax.websocket.server.ServerEndpointConfig;
 import java.util.*;
 
 /**
- * from org.springframework.web.socket.server.standard.ServerEndpointExporter
+ * @ClassName ServerEndpointExporter
+ * @Description from org.springframework.web.socket.server.standard.ServerEndpointExporter
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see WebApplicationObjectSupport
+ * @see InitializingBean
+ * @see SmartInitializingSingleton
  */
 public class ServerEndpointExporter extends WebApplicationObjectSupport
         implements InitializingBean, SmartInitializingSingleton {
@@ -101,8 +108,8 @@ public class ServerEndpointExporter extends WebApplicationObjectSupport
         if (context != null) {
             String[] customEndpointBeanNames = context.getBeanNamesForAnnotation(ServerEndpoint.class);
             for (String beanName : customEndpointBeanNames) {
-                var endpointClass = context.getType(beanName);
-                var serverEndpoint = endpointClass.getAnnotation(ServerEndpoint.class);
+                Class<?> endpointClass = context.getType(beanName);
+                ServerEndpoint serverEndpoint = endpointClass.getAnnotation(ServerEndpoint.class);
                 if (ServerEndpointConfig.Configurator.class.equals(serverEndpoint.configurator())) {
                     AnnotationUtil.setValue(serverEndpoint, "configurator", WebSocketConfig.Configurator.class);
                 }

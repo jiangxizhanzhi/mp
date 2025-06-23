@@ -4,19 +4,22 @@
  // Description:
  // Author:
  // File name MpRuntimeExceptionHandler.java.
- // File size 3044.
- // File create date Tue Sep 24 15:29:08 CST 2024.
- // File update date Fri Jan 17 11:23:11 CST 2025.
- // @Version 1.0.0
+ // File size 3666.
+ // File create date Fri Jul 12 12:55:31 CST 2024.
+ // File update date Fri Jul 12 12:55:31 CST 2024.
+ // Version 1.0.0
 package cn.cyberpeace.mp.base.exception;
 
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.service.code.ServiceCode;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindException;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -24,7 +27,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.client.HttpServerErrorException;
 
 /**
- * 业务异常统一处理
+ * @ClassName MpRuntimeExceptionHandler
+ * @Description 业务异常统一处理
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @ControllerAdvice
 @Slf4j
@@ -32,31 +39,43 @@ public class MpRuntimeExceptionHandler {
 
     private static final String LOGGER_FORMAT = "System error: {}, detail: {}";
 
+    /**
+     * b2bRuntimeExceptionHandler
+     *
+     * @param ex
+     * @return
+     */
     @ExceptionHandler(MpRuntimeException.class)
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public ServiceResult<Object> b2bRuntimeExceptionHandler(MpRuntimeException ex) {
-        log.error(LOGGER_FORMAT, ex.getMessage(), ex.getDetail());
-        var serviceCode = ex.getServiceCode();
+        log.error(ex.getMessage(), ex);
+        ServiceCode serviceCode = ex.getServiceCode();
         if (serviceCode == null) {
             serviceCode = BaseErrorCode.ERROR;
         }
-        var detail = StringUtils.isEmpty(ex.getDetail()) ? ex.getMessage() : ex.getDetail();
+        String detail = StringUtils.isEmpty(ex.getDetail()) ? ex.getMessage() : ex.getDetail();
         return new ServiceResult<>(null, serviceCode, detail).asResult();
     }
 
+    /**
+     * validationExceptionHandle
+     *
+     * @param ex
+     * @return
+     */
     @ExceptionHandler({BindException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
     public ServiceResult<Object> validationExceptionHandle(BindException ex) {
-        log.error(ex.getMessage());
-        var objectError = ex.getBindingResult().getAllErrors().get(0);
-        var bindingResult = ex.getBindingResult();
+        log.error(ex.getMessage(), ex);
+        ObjectError objectError = ex.getBindingResult().getAllErrors().get(0);
+        BindingResult bindingResult = ex.getBindingResult();
         String detail = objectError.getDefaultMessage();
         if (bindingResult.hasErrors()) {
-            var fieldError = bindingResult.getFieldError();
+            FieldError fieldError = bindingResult.getFieldError();
             if (fieldError != null) {
-                var field = fieldError.getField();
+                String field = fieldError.getField();
                 String defaultMessage = fieldError.getDefaultMessage();
                 detail = field + ": " + defaultMessage;
             }
@@ -64,19 +83,31 @@ public class MpRuntimeExceptionHandler {
         return new ServiceResult<>(null, BaseErrorCode.PARAMS_INVALID, detail).asResult();
     }
 
+    /**
+     * handException
+     *
+     * @param ex
+     * @return 统一服务返回结果
+     */
     @ExceptionHandler(HttpServerErrorException.GatewayTimeout.class)
     @ResponseStatus(HttpStatus.GATEWAY_TIMEOUT)
     @ResponseBody
     public ServiceResult handException(Exception ex) {
-        log.error(ex.getMessage());
+        log.error(ex.getMessage(), ex);
         return new ServiceResult(null,BaseErrorCode.GATEWAY_TIME_OUT).asResult();
     }
 
+    /**
+     * handleException
+     *
+     * @param ex
+     * @return
+     */
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ResponseBody
     public ServiceResult<Object> handleException(Exception ex){
-        log.error(LOGGER_FORMAT, ex.getMessage(), ExceptionUtils.getStackTrace(ex));
+        log.error(ex.getMessage(), ex);
         return new ServiceResult<>(null, BaseErrorCode.ERROR, ex.getMessage()).asResult();
     }
 }

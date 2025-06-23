@@ -4,10 +4,10 @@
  // Description:
  // Author:
  // File name JacksonConfig.java.
- // File size 3108.
- // File create date Tue Sep 24 15:29:08 CST 2024.
- // File update date Fri Jan 17 11:23:15 CST 2025.
- // @Version 1.0.0
+ // File size 3306.
+ // File create date Fri Jul 12 12:55:30 CST 2024.
+ // File update date Fri Jul 12 12:55:30 CST 2024.
+ // Version 1.0.0
 package cn.cyberpeace.mp.base.config.jackson;
 
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
@@ -33,6 +33,13 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * @ClassName JacksonConfig
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Configuration
 @ConfigurationProperties(prefix = "spring.jackson")
 public class JacksonConfig {
@@ -40,10 +47,15 @@ public class JacksonConfig {
     @Autowired
     private BaseAppConfig baseAppConfig;
 
+    /**
+     * objectMapper
+     *
+     * @return
+     */
     @Bean
     public ObjectMapper objectMapper() {
-        var objectMapper = new ObjectMapper();
-        var javaTimeModule = new JavaTimeModule();
+        ObjectMapper objectMapper = new ObjectMapper();
+        JavaTimeModule javaTimeModule = new JavaTimeModule();
         javaTimeModule.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(DateTimeFormatter.ofPattern(baseAppConfig.getDateTimePattern())));
         javaTimeModule.addSerializer(LocalDate.class, new LocalDateSerializer(DateTimeFormatter.ofPattern(baseAppConfig.getDatePattern())));
         javaTimeModule.addSerializer(LocalTime.class, new LocalTimeSerializer(DateTimeFormatter.ofPattern(baseAppConfig.getTimePattern())));

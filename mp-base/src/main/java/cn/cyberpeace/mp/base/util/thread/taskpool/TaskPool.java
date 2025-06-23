@@ -4,24 +4,30 @@
  // Description:
  // Author:
  // File name TaskPool.java.
- // File size 8019.
- // File create date Tue Sep 24 15:29:08 CST 2024.
- // File update date Fri Jan 17 11:23:13 CST 2025.
- // @Version 1.0.0
+ // File size 10043.
+ // File create date Fri Jul 12 12:55:24 CST 2024.
+ // File update date Fri Jul 12 12:55:24 CST 2024.
+ // Version 1.0.0
 package cn.cyberpeace.mp.base.util.thread.taskpool;
 
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.base.util.thread.ThreadUtils;
-import cn.hutool.cron.task.Task;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 
-import javax.annotation.concurrent.Immutable;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * @ClassName TaskPool
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Slf4j
 public class TaskPool {
 
@@ -29,10 +35,20 @@ public class TaskPool {
 
     public static final Set<TaskPool> TASK_POOL_INSTANCE_CACHE = new CopyOnWriteArraySet();
 
+    /**
+     * getTaskPoolInstanceCache
+     *
+     * @return
+     */
     public static Set<TaskPool> getTaskPoolInstanceCache(){
         return Collections.unmodifiableSet(TASK_POOL_INSTANCE_CACHE);
     }
 
+    /**
+     * getExecutorService
+     *
+     * @return
+     */
     public ThreadPoolExecutor getExecutorService(){
         return (ThreadPoolExecutor)executor;
     }
@@ -54,6 +70,11 @@ public class TaskPool {
         return new CustomizableThreadFactory(threadName);
     }
 
+    /**
+     * invokeTask
+     *
+     * @param poolTask
+     */
     public static <C, T, R> void invokeTask(BasePoolTask<C, T, R> poolTask) {
         if (poolTask.getStatus() == null) {
             return;
@@ -74,6 +95,12 @@ public class TaskPool {
         }
     }
 
+    /**
+     * interruptTask
+     *
+     * @param poolTask
+     * @param e
+     */
     public static void interruptTask(BasePoolTask<?, ?, ?> poolTask, Exception e) {
         if (TaskStatus.WAITING.equals(poolTask.getStatus())) {
             poolTask.setStatus(TaskStatus.INTERRUPTED);
@@ -90,27 +117,31 @@ public class TaskPool {
      */
     private  <C, T, R, T1 extends BasePoolTask<C, T, R>> List<T1> invokePoolTasks(List<T1> poolTasks,
                                                                                   boolean independent, boolean format) {
-        var latch = new CountDownLatch(poolTasks.size());
-        poolTasks.forEach(poolTask -> {
+        CountDownLatch latch = new CountDownLatch(poolTasks.size());
+        for (T1 t1 : poolTasks) {
             Runnable command = () -> {
-                invokeTask(poolTask);
+                invokeTask(t1);
                 latch.countDown();
 
-                if (!independent && TaskStatus.ERROR.equals(poolTask.getStatus())) {
-                    poolTasks.forEach(itemTask -> interruptTask(itemTask, poolTask.getException()));
+                if (!independent && TaskStatus.ERROR.equals(t1.getStatus())) {
+                    for (T1 itemTask : poolTasks) {
+                        interruptTask(itemTask, t1.getException());
+                    }
                 }
             };
             if (format) {
                 command = ThreadUtils.format(command);
             }
             executor.execute(command);
-        });
+        }
 
         try {
             latch.await();
         } catch (InterruptedException e) {
             log.error("Interruption occurs, up to {} tasks will be cancelled", latch.getCount());
-            poolTasks.forEach(poolTask -> interruptTask(poolTask, e));
+            for (T1 poolTask : poolTasks) {
+                interruptTask(poolTask, e);
+            }
             Thread.currentThread().interrupt();
         }
 
@@ -122,51 +153,90 @@ public class TaskPool {
      * @param tasks 任务
      * @param independent 任务间是否独立，false情况下任意一个任务的异常会取消掉所有队列任务
      * @param format 是否格式化标准任务
-     * @param poolTaskClass 任务类型
      * @return 任务执行结果
      */
     private <C, T, R, T1 extends BasePoolTask<C, T, R>> List<T1> invokeTasks(List<T> tasks, boolean independent,
-                                                                             boolean format, Class<T1> poolTaskClass) {
-        List<T1> poolTasks = tasks.stream()
-                .map(task -> {
-                    var poolTask = ClassUtils.createInstance(poolTaskClass);
-                    poolTask.setTask(task);
-                    return poolTask;
-                })
-                .collect(Collectors.toList());
+                                                                             boolean format, Function<T, T1> taskFactory) {
+        List<T1> poolTasks = new ArrayList<>();
+        for (T t : tasks) {
+            T1 poolTask = taskFactory.apply(t);
+            poolTasks.add(poolTask);
+        }
         return invokePoolTasks(poolTasks, independent, format);
     }
 
+    /**
+     * TaskPool
+     *
+     * @param poolSize
+     */
     public TaskPool(int poolSize) {
         this(poolSize, Integer.MAX_VALUE);
     }
 
+    /**
+     * TaskPool
+     *
+     * @param poolSize
+     * @param holdSize
+     */
     public TaskPool(int poolSize, int holdSize) {
         this(poolSize, holdSize, 0L);
     }
 
+    /**
+     * TaskPool
+     *
+     * @param poolSize
+     * @param holdSize
+     * @param keepAliveTime
+     * @param factory
+     */
     public TaskPool(int poolSize, int holdSize, long keepAliveTime, ThreadFactory factory) {
         executor = new ThreadPoolExecutor(poolSize, poolSize, keepAliveTime, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>(holdSize - poolSize), factory);
         TASK_POOL_INSTANCE_CACHE.add(this);
     }
 
+    /**
+     * TaskPool
+     *
+     * @param poolSize
+     * @param holdSize
+     * @param keepAliveTime
+     */
     public TaskPool(int poolSize, int holdSize, long keepAliveTime) {
         executor = new ThreadPoolExecutor(poolSize, poolSize, keepAliveTime, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>(holdSize - poolSize), createNameThreadFactory(""));
         TASK_POOL_INSTANCE_CACHE.add(this);
     }
 
+    /**
+     * TaskPool
+     *
+     * @param executor
+     */
     public TaskPool(ExecutorService executor) {
         this.executor = executor;
     }
 
+    /**
+     * executeTask
+     *
+     * @param task
+     */
     public void executeTask(Runnable task) {
         executeTask(task, true);
     }
 
+    /**
+     * executeTask
+     *
+     * @param task
+     * @param format
+     */
     public void executeTask(Runnable task, boolean format) {
-        var poolTask = new DefaultPoolTask(task);
+        DefaultPoolTask poolTask = new DefaultPoolTask(task);
         Runnable command = () -> invokeTask(poolTask);
         if (format) {
             command = ThreadUtils.format(command);
@@ -174,40 +244,39 @@ public class TaskPool {
         executor.execute(command);
     }
 
+    /**
+     * runTasks
+     *
+     * @param tasks
+     * @return
+     */
     public List<DefaultPoolTask> runTasks(List<Runnable> tasks) {
         return runTasks(tasks, false, true);
     }
 
+    /**
+     * runTasks
+     *
+     * @param tasks
+     * @param independent
+     * @param format
+     * @return
+     */
     public List<DefaultPoolTask> runTasks(List<Runnable> tasks, boolean independent, boolean format) {
-        return invokeTasks(tasks, independent, format, DefaultPoolTask.class);
-    }
-
-    public <C, T extends PoolTask<C>> List<T> runPoolTasks(List<T> poolTasks) {
-        return runPoolTasks(poolTasks, false, true);
-    }
-
-    public <C, T extends PoolTask<C>> List<T> runPoolTasks(List<T> poolTasks, boolean independent, boolean format) {
-        return invokePoolTasks(poolTasks, independent, format);
-    }
-
-    public <R> List<DefaultResultPoolTask<R>> callTasks(List<Callable<R>> tasks) {
-        return callTasks(tasks, false, true);
-    }
-
-    public <R> List<DefaultResultPoolTask<R>> callTasks(List<Callable<R>> tasks, boolean independent, boolean format) {
-        return invokeTasks(tasks, independent, format, new DefaultResultPoolTask<R>().getClass());
-    }
-
-    public <C, R, T extends ResultPoolTask<C, R>> List<T> callPoolTasks(List<T> poolTasks) {
-        return callPoolTasks(poolTasks, false, true);
-    }
-
-    public <C, R, T extends ResultPoolTask<C, R>> List<T> callPoolTasks(List<T> poolTasks, boolean independent,
-                                                                        boolean format) {
-        return invokePoolTasks(poolTasks, independent, format);
+        return invokeTasks(tasks, independent, format,  t -> {
+            DefaultPoolTask task = new DefaultPoolTask();
+            task.setTask(t);
+            return task;
+        });
     }
 
 
+    /**
+     * equals
+     *
+     * @param o
+     * @return boolean
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -220,6 +289,11 @@ public class TaskPool {
         return executor.equals(taskPool.executor);
     }
 
+    /**
+     * hashCode
+     *
+     * @return int
+     */
     @Override
     public int hashCode() {
         return Objects.hash(executor);

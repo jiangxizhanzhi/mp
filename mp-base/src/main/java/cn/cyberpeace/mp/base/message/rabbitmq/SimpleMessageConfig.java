@@ -4,10 +4,10 @@
  // Description:
  // Author:
  // File name SimpleMessageConfig.java.
- // File size 1585.
- // File create date Tue Sep 24 15:29:08 CST 2024.
- // File update date Fri Jan 17 11:23:11 CST 2025.
- // @Version 1.0.0
+ // File size 2147.
+ // File create date Fri Jul 12 12:55:30 CST 2024.
+ // File update date Fri Jul 12 12:55:30 CST 2024.
+ // Version 1.0.0
 package cn.cyberpeace.mp.base.message.rabbitmq;
 
 import cn.cyberpeace.mp.base.util.ModuleUtils;
@@ -16,6 +16,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.amqp.core.*;
 
+/**
+ * @ClassName SimpleMessageConfig
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -35,30 +42,65 @@ public class SimpleMessageConfig {
 
     private String queueName = DEFAULT_MP_QUEUE;
 
+    /**
+     * directExchange
+     *
+     * @return
+     */
     public DirectExchange directExchange() {
         return new DirectExchange(getExchangeName());
     }
 
+    /**
+     * topicExchange
+     *
+     * @return
+     */
     public TopicExchange topicExchange() {
         return new TopicExchange(getExchangeName());
     }
 
+    /**
+     * fanoutExchange
+     *
+     * @return
+     */
     public FanoutExchange fanoutExchange() {
         return new FanoutExchange(getExchangeName());
     }
 
+    /**
+     * queue
+     *
+     * @return
+     */
     public Queue queue() {
         return new Queue(getQueueName());
     }
 
+    /**
+     * directBinding
+     *
+     * @return
+     */
     public Binding directBinding() {
         return BindingBuilder.bind(queue()).to(directExchange()).with(getRoutingKey());
     }
 
+    /**
+     * topicBinding
+     *
+     * @return
+     */
     public Binding topicBinding() {
         return BindingBuilder.bind(queue()).to(topicExchange()).with(getRoutingKey());
     }
 
+    /**
+     * fanoutBinding
+     *
+     * @return
+     */
     public Binding fanoutBinding() {
         return BindingBuilder.bind(queue()).to(fanoutExchange());
     }

@@ -4,10 +4,10 @@
  // Description:
  // Author:
  // File name Swagger2Config.java.
- // File size 4708.
- // File create date Tue Sep 24 15:29:08 CST 2024.
- // File update date Fri Jan 17 11:23:15 CST 2025.
- // @Version 1.0.0
+ // File size 5107.
+ // File create date Fri Jul 12 12:55:30 CST 2024.
+ // File update date Fri Jul 12 12:55:30 CST 2024.
+ // Version 1.0.0
 package cn.cyberpeace.mp.base.config;
 
 import cn.cyberpeace.mp.base.annotation.SwaggerDisplayEnum;
@@ -29,12 +29,17 @@ import springfox.documentation.swagger.schema.ApiModelProperties;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * @ClassName Swagger2Config
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see ModelPropertyBuilderPlugin
+ */
 @Slf4j
 @Configuration
 @EnableKnife4j
@@ -42,8 +47,13 @@ import java.util.stream.Collectors;
 public class Swagger2Config implements ModelPropertyBuilderPlugin {
 
     @Autowired
-    public BaseAppConfig baseAppConfig;
+    private BaseAppConfig baseAppConfig;
 
+    /**
+     * apiInfo
+     *
+     * @return
+     */
     public ApiInfo apiInfo() {
         return new ApiInfoBuilder()
                 .title(baseAppConfig.getSwaggerDocTitle())
@@ -53,6 +63,11 @@ public class Swagger2Config implements ModelPropertyBuilderPlugin {
                 .build();
     }
 
+    /**
+     * apply
+     *
+     * @param context
+     */
     @Override
     public void apply(ModelPropertyContext context) {
         // 为枚举字段设置注释
@@ -89,7 +104,7 @@ public class Swagger2Config implements ModelPropertyBuilderPlugin {
         }
 
         Object[] subItemRecords = null;
-        var swaggerDisplayEnum = AnnotationUtils.findAnnotation(rawPrimaryType, SwaggerDisplayEnum.class);
+        SwaggerDisplayEnum swaggerDisplayEnum = AnnotationUtils.findAnnotation(rawPrimaryType, SwaggerDisplayEnum.class);
         // 判断是否存在 @SwaggerDisplayEnum 注解，并且 rawPrimaryType 是枚举
         if (null != swaggerDisplayEnum && Enum.class.isAssignableFrom(rawPrimaryType)) {
             // 拿到枚举的所有的值
@@ -99,12 +114,16 @@ public class Swagger2Config implements ModelPropertyBuilderPlugin {
             return;
         }
 
-        final List<String> displayValues = Arrays.stream(subItemRecords)
-                .filter(Objects::nonNull)
-                // 调用枚举类的 toString 方法
-                .map(Object::toString)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+        // 调用枚举类的 toString 方法
+        final List<String> displayValues = new ArrayList<>();
+        for (Object subItemRecord : subItemRecords) {
+            if (subItemRecord != null) {
+                String string = subItemRecord.toString();
+                if (string != null) {
+                    displayValues.add(string);
+                }
+            }
+        }
 
         String joinText = " (" + String.join("; ", displayValues) + ")";
         try {
@@ -121,6 +140,12 @@ public class Swagger2Config implements ModelPropertyBuilderPlugin {
         context.getSpecificationBuilder().description(joinText).build();
     }
 
+    /**
+     * supports
+     *
+     * @param documentationType
+     * @return boolean
+     */
     @Override
     public boolean supports(DocumentationType documentationType) {
         return true;

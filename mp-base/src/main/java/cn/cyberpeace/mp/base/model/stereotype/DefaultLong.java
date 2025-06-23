@@ -4,19 +4,32 @@
  // Description:
  // Author:
  // File name DefaultLong.java.
- // File size 235.
- // File create date Tue Sep 24 15:29:08 CST 2024.
- // File update date Fri Jan 17 11:23:14 CST 2025.
- // @Version 1.0.0
+ // File size 429.
+ // File create date Fri Jul 12 12:55:24 CST 2024.
+ // File update date Fri Jul 12 12:55:24 CST 2024.
+ // Version 1.0.0
 package cn.cyberpeace.mp.base.model.stereotype;
 
 import java.lang.annotation.*;
 
+/**
+ * @ClassName DefaultLong
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see Annotation
+ */
 @Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface DefaultLong {
 
+    /**
+     * value
+     *
+     * @return long
+     */
     long value() default 0L;
 
 }

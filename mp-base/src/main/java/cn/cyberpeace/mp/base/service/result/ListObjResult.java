@@ -4,10 +4,10 @@
  // Description:
  // Author:
  // File name ListObjResult.java.
- // File size 1283.
- // File create date Tue Sep 24 15:29:08 CST 2024.
- // File update date Fri Jan 17 11:23:11 CST 2025.
- // @Version 1.0.0
+ // File size 1704.
+ // File create date Fri Jul 12 12:55:31 CST 2024.
+ // File update date Fri Jul 12 12:55:31 CST 2024.
+ // Version 1.0.0
 package cn.cyberpeace.mp.base.service.result;
 
 import cn.cyberpeace.mp.base.repository.fields.DynamicFields;
@@ -21,6 +21,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * @ClassName ListObjResult
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseObjResult
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -35,12 +43,25 @@ public class ListObjResult<T> extends BaseObjResult<T, ListObjResult<T>> {
     @JsonIgnore
     private List<T> objs = new ArrayList<>();
 
+    /**
+     * ListObjResult
+     *
+     * @param objs
+     * @param total
+     */
     public ListObjResult(List<T> objs, int total) {
         this();
         setObjs(objs);
         setTotal(total);
     }
 
+    /**
+     * ListObjResult
+     *
+     * @param objs
+     * @param total
+     * @param fields
+     */
     public ListObjResult(List<T> objs, Integer total, DynamicFields fields) {
         this();
         setObjs(objs);
@@ -48,10 +69,17 @@ public class ListObjResult<T> extends BaseObjResult<T, ListObjResult<T>> {
         setFields(fields);
     }
 
+    /**
+     * asResult
+     *
+     * @return
+     */
     @Override
     public ListObjResult<T> asResult() {
         list.clear();
-        objs.forEach(obj -> list.add(objToResultWithNull(obj, getFields())));
+        for (T obj : objs) {
+            list.add(objToResultWithNull(obj, getFields()));
+        }
         return this;
     }
 }

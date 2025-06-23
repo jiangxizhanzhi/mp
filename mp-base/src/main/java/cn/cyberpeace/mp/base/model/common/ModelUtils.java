@@ -4,13 +4,14 @@
  // Description:
  // Author:
  // File name ModelUtils.java.
- // File size 3080.
- // File create date Tue Sep 24 15:29:08 CST 2024.
- // File update date Fri Jan 17 11:23:13 CST 2025.
- // @Version 1.0.0
+ // File size 3636.
+ // File create date Fri Jul 12 12:55:24 CST 2024.
+ // File update date Fri Jul 12 12:55:24 CST 2024.
+ // Version 1.0.0
 package cn.cyberpeace.mp.base.model.common;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.model.generator.Generator;
 import cn.cyberpeace.mp.base.model.stereotype.*;
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 
@@ -18,12 +19,29 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * @ClassName ModelUtils
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 public class ModelUtils {
 
     private static final Map<Class<?>, Map<String, Object[]>> initDefaultFieldsCache = new HashMap<>();
 
+    /**
+     * ModelUtils
+     */
     private ModelUtils() {}
 
+    /**
+     * parseDefaultValue
+     *
+     * @param clazz
+     * @param field
+     * @return
+     */
     private static Object parseDefaultValue(Class<?> clazz, Field field) {
         String fieldName = field.getName();
         String methodName = "initDefault" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
@@ -31,29 +49,29 @@ public class ModelUtils {
         try {
             defaultValue = clazz.getMethod(methodName);
         } catch (NoSuchMethodException e) {
-            var defaultBoolAnnotation = field.getAnnotation(DefaultBool.class);
+            DefaultBool defaultBoolAnnotation = field.getAnnotation(DefaultBool.class);
             if (defaultBoolAnnotation != null) {
                 defaultValue = defaultBoolAnnotation.value();
             }
 
-            var defaultIntAnnotation = field.getAnnotation(DefaultInt.class);
+            DefaultInt defaultIntAnnotation = field.getAnnotation(DefaultInt.class);
             if (defaultIntAnnotation != null) {
                 defaultValue = defaultIntAnnotation.value();
             }
 
-            var defaultLongAnnotation = field.getAnnotation(DefaultLong.class);
+            DefaultLong defaultLongAnnotation = field.getAnnotation(DefaultLong.class);
             if (defaultLongAnnotation != null) {
                 defaultValue = defaultLongAnnotation.value();
             }
 
-            var defaultStrAnnotation = field.getAnnotation(DefaultStr.class);
+            DefaultStr defaultStrAnnotation = field.getAnnotation(DefaultStr.class);
             if (defaultStrAnnotation != null) {
                 defaultValue = defaultStrAnnotation.value();
             }
 
-            var defaultGenAnnotation = field.getAnnotation(DefaultGen.class);
+            DefaultGen defaultGenAnnotation = field.getAnnotation(DefaultGen.class);
             if (defaultGenAnnotation != null) {
-                var generatorClass = defaultGenAnnotation.value();
+                Class<? extends Generator> generatorClass = defaultGenAnnotation.value();
                 defaultValue = BeanCommon.getBean(generatorClass);
             }
         }
@@ -61,11 +79,23 @@ public class ModelUtils {
         return defaultValue;
     }
 
+    /**
+     * getTableName
+     *
+     * @param clazz
+     * @return
+     */
     public static <M> String getTableName(Class<M> clazz) {
-        var table = clazz.getAnnotation(Table.class);
+        Table table = clazz.getAnnotation(Table.class);
         return table != null ? table.value() : null;
     }
 
+    /**
+     * getInitDefaultFields
+     *
+     * @param clazz
+     * @return
+     */
     public static <M> Map<String, Object[]> getInitDefaultFields(Class<M> clazz) {
         Map<String, Object[]> fieldValues = initDefaultFieldsCache.getOrDefault(clazz, null);
         if (fieldValues != null) {
@@ -76,7 +106,7 @@ public class ModelUtils {
         String[] fieldNames = ClassUtils.getBeanClassFields(clazz);
         for (String fieldName: fieldNames) {
             Object defaultValue = null;
-            var field = ClassUtils.getField(clazz, fieldName, true, false);
+            Field field = ClassUtils.getField(clazz, fieldName, true, false);
             if (field != null) {
                 defaultValue = parseDefaultValue(clazz, field);
             }

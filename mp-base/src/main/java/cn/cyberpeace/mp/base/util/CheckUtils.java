@@ -4,16 +4,23 @@
  // Description:
  // Author:
  // File name CheckUtils.java.
- // File size 3385.
- // File create date Tue Sep 24 15:29:08 CST 2024.
- // File update date Fri Jan 17 11:23:12 CST 2025.
- // @Version 1.0.0
+ // File size 3163.
+ // File create date Fri Jul 12 12:55:34 CST 2024.
+ // File update date Fri Jul 12 12:55:34 CST 2024.
+ // Version 1.0.0
 package cn.cyberpeace.mp.base.util;
 
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.Callable;
 
+/**
+ * @ClassName CheckUtils
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Slf4j
 public class CheckUtils {
 
@@ -26,23 +33,20 @@ public class CheckUtils {
      * @param timeout 超时时间
      * @param stopCheck 停止检查方法
      * @param stopCheckIntervalCount 停止检查间隔次数：每隔一定次数进行一次停止检查
-     * @param callback 检查成功回调
-     * @param timeoutCallback 检查超时回调
      */
-    public static void loopCheck(Callable<Boolean> check, int stepTime, int timeout,
-                                 Callable<Boolean> stopCheck, int stopCheckIntervalCount,
-                                 Runnable callback, Runnable timeoutCallback, String targetName) {
+    public static boolean loopCheck(Callable<Boolean> check, int stepTime, int timeout,
+                                    Callable<Boolean> stopCheck, int stopCheckIntervalCount, String targetName) {
         stepTime = stepTime <= 0 ? 2000 : stepTime;
         timeout = timeout <= 0 ? DEFAULT_LOOP_CHECK_TIMEOUT : timeout;
         stopCheckIntervalCount = stopCheckIntervalCount <= 0 ? 1 : stopCheckIntervalCount;
 
-        var stopCheckCount = 0;
-        var allTime = 0;
+        int stopCheckCount = 0;
+        int allTime = 0;
         while (true) {
-            var enterMoment = System.currentTimeMillis();
+            long enterMoment = System.currentTimeMillis();
             log.info("Loop check {} - {}s", targetName, allTime / 1000);
 
-            var checkFlag = false;
+            boolean checkFlag = false;
             try {
                 checkFlag = check.call();
             } catch (Exception e) {
@@ -51,15 +55,12 @@ public class CheckUtils {
             // 探测成功
             if (Boolean.TRUE.equals(checkFlag)) {
                 log.info("Loop check {} ok", targetName);
-                if (callback != null) {
-                    callback.run();
-                }
-                break;
+                return true;
             }
 
             // 限制探测频率
-            var checkConsumeTime = System.currentTimeMillis() - enterMoment;
-            var remainStepTime = stepTime - checkConsumeTime;
+            long checkConsumeTime = System.currentTimeMillis() - enterMoment;
+            long remainStepTime = stepTime - checkConsumeTime;
             if (remainStepTime > 0) {
                 try {
                     Thread.sleep(remainStepTime);
@@ -74,15 +75,12 @@ public class CheckUtils {
             // 超时不再检查
             if (allTime >= timeout) {
                 log.info("Loop check {} timout", targetName);
-                if (timeoutCallback != null) {
-                    timeoutCallback.run();
-                }
                 break;
             } else if (stopCheck != null) {
                 // 每隔一定次数进行停止检查
                 stopCheckCount += 1;
                 if (stopCheckCount == stopCheckIntervalCount) {
-                    var stopCheckFlag = false;
+                    boolean stopCheckFlag = false;
                     try {
                         stopCheckFlag = stopCheck.call();
                     } catch (Exception e) {
@@ -96,6 +94,7 @@ public class CheckUtils {
                 }
             }
         }
+        return false;
     }
 
 }

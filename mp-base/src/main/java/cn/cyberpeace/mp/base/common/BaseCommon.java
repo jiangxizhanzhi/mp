@@ -4,10 +4,10 @@
  // Description:
  // Author:
  // File name BaseCommon.java.
- // File size 3488.
- // File create date Tue Sep 24 15:29:08 CST 2024.
- // File update date Fri Jan 17 11:23:15 CST 2025.
- // @Version 1.0.0
+ // File size 3703.
+ // File create date Fri Jul 12 12:55:30 CST 2024.
+ // File update date Fri Jul 12 12:55:30 CST 2024.
+ // Version 1.0.0
 package cn.cyberpeace.mp.base.common;
 
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
@@ -23,6 +23,7 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalTimeSerializer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -30,31 +31,39 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * @ClassName BaseCommon
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Component
 public class BaseCommon {
 
-    public static DateTimeFormatter dateTimeFormatter;
+    private static DateTimeFormatter dateTimeFormatter;
 
-    public static DateTimeFormatter dateFormatter;
+    private static DateTimeFormatter dateFormatter;
 
-    public static DateTimeFormatter timeFormatter;
+    private static DateTimeFormatter timeFormatter;
 
-    public static BaseAppConfig baseAppConfig;
 
+    /**
+     * BaseCommon
+     *
+     */
     private BaseCommon(BaseAppConfig baseAppConfig) {
-        BaseCommon.baseAppConfig = baseAppConfig;
         BaseCommon.dateTimeFormatter = DateTimeFormatter.ofPattern(baseAppConfig.getDateTimePattern());
         BaseCommon.dateFormatter = DateTimeFormatter.ofPattern(baseAppConfig.getDatePattern());
         BaseCommon.timeFormatter = DateTimeFormatter.ofPattern(baseAppConfig.getTimePattern());
     }
-
     /**
      * 创建通用的object mapper对象 （设定了项目默认值）
      * @return 通用的object mapper对象
      */
     public static ObjectMapper createCommonObjectMapper() {
-        var objectMapper = new ObjectMapper();
-        var javaTimeModule = new JavaTimeModule();
+        ObjectMapper objectMapper = new ObjectMapper();
+        JavaTimeModule javaTimeModule = new JavaTimeModule();
         javaTimeModule.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(dateTimeFormatter));
         javaTimeModule.addSerializer(LocalDate.class, new LocalDateSerializer(dateFormatter));
         javaTimeModule.addSerializer(LocalTime.class, new LocalTimeSerializer(timeFormatter));
@@ -64,9 +73,7 @@ public class BaseCommon {
         objectMapper.registerModule(javaTimeModule);
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
-        if (Boolean.FALSE.equals(baseAppConfig.getJsonStringifyIncludeNull())) {
-            objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        }
+        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         return objectMapper;
     }
 
@@ -75,7 +82,7 @@ public class BaseCommon {
      * @return 通用的object mapper对象
      */
     public static ObjectMapper createSnakeObjectMapper() {
-        var objectMapper = createCommonObjectMapper();
+        ObjectMapper objectMapper = createCommonObjectMapper();
         objectMapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
         return objectMapper;
     }

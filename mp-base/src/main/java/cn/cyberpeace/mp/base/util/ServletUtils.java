@@ -4,10 +4,10 @@
  // Description:
  // Author:
  // File name ServletUtils.java.
- // File size 1551.
- // File create date Tue Sep 24 15:29:08 CST 2024.
- // File update date Fri Jan 17 11:23:12 CST 2025.
- // @Version 1.0.0
+ // File size 1833.
+ // File create date Fri Jul 12 12:55:34 CST 2024.
+ // File update date Fri Jul 12 12:55:34 CST 2024.
+ // Version 1.0.0
 package cn.cyberpeace.mp.base.util;
 
 import org.springframework.web.context.request.RequestAttributes;
@@ -18,9 +18,21 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Objects;
 
+/**
+ * @ClassName ServletUtils
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 public class ServletUtils {
 
 
+    /**
+     * getResponse
+     *
+     * @return
+     */
     public static HttpServletResponse getResponse() {
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
         if (Objects.isNull(requestAttributes)) {
@@ -30,6 +42,11 @@ public class ServletUtils {
         return servletRequestAttributes.getResponse();
     }
 
+    /**
+     * getRequest
+     *
+     * @return
+     */
     public static HttpServletRequest getRequest() {
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
         if (Objects.isNull(requestAttributes)) {
@@ -43,12 +60,13 @@ public class ServletUtils {
      * 获取请求语言
      * @return
      */
-    public static String getAcceptLanguage(){
+    public static String getAcceptLanguage() {
         HttpServletRequest httpServletRequest = getRequest();
-        if (Objects.isNull(httpServletRequest)){
+        if (Objects.isNull(httpServletRequest)) {
             return "";
         }
-        return httpServletRequest.getHeader("Accept-Language");
+        String al = httpServletRequest.getHeader("Accept-Language");
+        return al == null ? "" : al;
     }
 
 }

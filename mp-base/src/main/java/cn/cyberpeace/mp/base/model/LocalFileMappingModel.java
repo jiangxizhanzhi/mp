@@ -4,10 +4,10 @@
  // Description:
  // Author:
  // File name LocalFileMappingModel.java.
- // File size 788.
- // File create date Tue Sep 24 15:29:08 CST 2024.
- // File update date Fri Jan 17 11:23:13 CST 2025.
- // @Version 1.0.0
+ // File size 926.
+ // File create date Fri Jul 12 12:55:24 CST 2024.
+ // File update date Fri Jul 12 12:55:24 CST 2024.
+ // Version 1.0.0
 package cn.cyberpeace.mp.base.model;
 
 import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
@@ -17,7 +17,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * 本地文件和远程文件映射模型
+ * @ClassName LocalFileMappingModel
+ * @Description 本地文件和远程文件映射模型
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseObjMappingModel
  */
 @Data
 @AllArgsConstructor

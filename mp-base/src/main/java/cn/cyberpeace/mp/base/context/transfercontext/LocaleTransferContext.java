@@ -4,10 +4,10 @@
  // Description:
  // Author:
  // File name LocaleTransferContext.java.
- // File size 1203.
- // File create date Tue Sep 24 15:29:08 CST 2024.
- // File update date Fri Jan 17 11:23:16 CST 2025.
- // @Version 1.0.0
+ // File size 1534.
+ // File create date Fri Jul 12 12:55:30 CST 2024.
+ // File update date Fri Jul 12 12:55:30 CST 2024.
+ // Version 1.0.0
 package cn.cyberpeace.mp.base.context.transfercontext;
 
 import org.apache.commons.lang3.StringUtils;
@@ -17,6 +17,14 @@ import org.springframework.stereotype.Component;
 import java.util.Locale;
 import java.util.Map;
 
+/**
+ * @ClassName LocaleTransferContext
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see TransferContext
+ */
 @Component
 public class LocaleTransferContext implements TransferContext<Map<String, String>> {
 
@@ -26,18 +34,33 @@ public class LocaleTransferContext implements TransferContext<Map<String, String
 
     public static final String VARIANT_KEY = "VARIANT";
 
+    /**
+     * getKey
+     *
+     * @return
+     */
     @Override
     public String getKey() {
         return "LOCALE";
     }
 
+    /**
+     * getValue
+     *
+     * @return
+     */
     @Override
     public Map<String, String> getValue() {
-        var locale = LocaleContextHolder.getLocale();
+        Locale locale = LocaleContextHolder.getLocale();
         return Map.of(LANGUAGE_KEY, locale.getLanguage(), COUNTRY_KEY, locale.getCountry(), VARIANT_KEY,
                 locale.getVariant());
     }
 
+    /**
+     * setValue
+     *
+     * @param value
+     */
     @Override
     public void setValue(Map<String, String> value) {
         LocaleContextHolder.setLocale(new Locale(value.getOrDefault(LANGUAGE_KEY, StringUtils.EMPTY),

@@ -4,10 +4,10 @@
  // Description:
  // Author:
  // File name BaseGroupServer.java.
- // File size 10372.
- // File create date Tue Sep 24 15:29:08 CST 2024.
- // File update date Fri Jan 17 11:23:11 CST 2025.
- // @Version 1.0.0
+ // File size 13131.
+ // File create date Fri Jul 12 12:55:31 CST 2024.
+ // File update date Fri Jul 12 12:55:31 CST 2024.
+ // Version 1.0.0
 package cn.cyberpeace.mp.base.websocket;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
@@ -133,85 +133,186 @@ public abstract class BaseGroupServer extends BaseServer {
 
     private static final Map<Class<?>, List<ConcurrentHashMap<String, ConcurrentHashMap<String, Session>>>> serverGroupSessionsListMap = new HashMap<>();
 
+    /**
+     * initServerGroupSessionsListMap
+     */
     public static void initServerGroupSessionsListMap() {
-        BeanCommon.getBeanType(BaseGroupServer.class).forEach((name, groupServer) -> {
+        for (Map.Entry<String, BaseGroupServer> entry : BeanCommon.getBeanType(BaseGroupServer.class).entrySet()) {
+            String name = entry.getKey();
+            BaseGroupServer groupServer = entry.getValue();
             int groupIndexSize = ClassUtils.getStaticFieldValue(groupServer.getClass(), "groupIndexSize", Integer.class);
             List<ConcurrentHashMap<String, ConcurrentHashMap<String, Session>>> groupSessionsList = new ArrayList<>();
-            for (var i = 0; i < groupIndexSize; i++) {
+            for (int i = 0; i < groupIndexSize; i++) {
                 groupSessionsList.add(new ConcurrentHashMap<>());
             }
             serverGroupSessionsListMap.put(groupServer.getClass(), groupSessionsList);
-        });
+        }
     }
 
+    /**
+     * sendToGroup
+     *
+     * @param serverClass
+     * @param groupKey
+     * @param data
+     * @param type
+     * @param context
+     */
     public static <T> void sendToGroup(Class<?> serverClass, String groupKey,
                                        T data, String type, Map<String, Object> context) {
         sendToGroup(serverClass, 0, groupKey, data, type, context);
     }
 
+    /**
+     * sendToGroup
+     *
+     * @param serverClass
+     * @param groupIndex
+     * @param groupKey
+     * @param data
+     * @param type
+     * @param context
+     */
     public static <T> void sendToGroup(Class<?> serverClass, int groupIndex, String groupKey,
                                        T data, String type, Map<String, Object> context) {
-        var groupSessionsList = serverGroupSessionsListMap.get(serverClass);
+        List<ConcurrentHashMap<String, ConcurrentHashMap<String, Session>>> groupSessionsList = serverGroupSessionsListMap.get(serverClass);
         if (groupSessionsList.size() < groupIndex + 1) {
             return;
         }
-        var groupSessionsMap = groupSessionsList.get(groupIndex);
-        var sessions = groupSessionsMap.getOrDefault(groupKey, null);
+        ConcurrentHashMap<String, ConcurrentHashMap<String, Session>> groupSessionsMap = groupSessionsList.get(groupIndex);
+        ConcurrentHashMap<String, Session> sessions = groupSessionsMap.getOrDefault(groupKey, null);
         if (sessions == null) {
             return;
         }
 
-        sessions.forEach((sessionKey, session) -> BaseServer.sendToSession(serverClass, sessionKey, data, type, context));
+        for (Map.Entry<String, Session> entry : sessions.entrySet()) {
+            String sessionKey = entry.getKey();
+            Session session = entry.getValue();
+            BaseServer.sendToSession(serverClass, sessionKey, data, type, context);
+        }
     }
 
+    /**
+     * sendToGroupIndex
+     *
+     * @param serverClass
+     * @param groupIndex
+     * @param data
+     * @param type
+     * @param context
+     */
     public static <T> void sendToGroupIndex(Class<?> serverClass, int groupIndex,
                                             T data, String type, Map<String, Object> context) {
-        var groupSessionsList = serverGroupSessionsListMap.get(serverClass);
+        List<ConcurrentHashMap<String, ConcurrentHashMap<String, Session>>> groupSessionsList = serverGroupSessionsListMap.get(serverClass);
         if (groupSessionsList.size() < groupIndex + 1) {
             return;
         }
-        var groupSessionsMap = groupSessionsList.get(groupIndex);
-        groupSessionsMap.forEach((groupKey, sessions) -> {
-            sessions.forEach((sessionKey, session) -> BaseServer.sendToSession(serverClass, sessionKey, data, type, context));
-        });
+        ConcurrentHashMap<String, ConcurrentHashMap<String, Session>> groupSessionsMap = groupSessionsList.get(groupIndex);
+        for (Map.Entry<String, ConcurrentHashMap<String, Session>> e : groupSessionsMap.entrySet()) {
+            String groupKey = e.getKey();
+            ConcurrentHashMap<String, Session> sessions = e.getValue();
+            for (Map.Entry<String, Session> entry : sessions.entrySet()) {
+                String sessionKey = entry.getKey();
+                Session session = entry.getValue();
+                BaseServer.sendToSession(serverClass, sessionKey, data, type, context);
+            }
+        }
     }
 
+    /**
+     * sendToSession
+     *
+     * @param serverClass
+     * @param sessionKey
+     * @param data
+     * @param type
+     * @param context
+     */
     public static <T> void sendToSession(Class<?> serverClass, String sessionKey,
                                          T data, String type, Map<String, Object> context) {
         BaseServer.sendToSession(serverClass, sessionKey, data, type, context);
     }
 
+    /**
+     * sendToAllSessions
+     *
+     * @param serverClass
+     * @param data
+     * @param type
+     * @param context
+     */
     public static <T> void sendToAllSessions(Class<?> serverClass,
                                              T data, String type, Map<String, Object> context) {
         BaseServer.sendToAllSessions(serverClass, data, type, context);
     }
 
+    /**
+     * sendCloseToGroup
+     *
+     * @param serverClass
+     * @param groupKey
+     */
     public static void sendCloseToGroup(Class<?> serverClass, String groupKey) {
         sendToGroup(serverClass, groupKey, null, BaseServer.CLOSE_TYPE, null);
     }
 
+    /**
+     * sendCloseToGroup
+     *
+     * @param serverClass
+     * @param groupIndex
+     * @param groupKey
+     */
     public static void sendCloseToGroup(Class<?> serverClass, int groupIndex, String groupKey) {
         sendToGroup(serverClass, groupIndex, groupKey, null, BaseServer.CLOSE_TYPE, null);
     }
 
+    /**
+     * sendCloseToGroupIndex
+     *
+     * @param serverClass
+     * @param groupIndex
+     */
     public static void sendCloseToGroupIndex(Class<?> serverClass, int groupIndex) {
         sendToGroupIndex(serverClass, groupIndex, null, BaseServer.CLOSE_TYPE, null);
     }
 
+    /**
+     * sendCloseToSession
+     *
+     * @param serverClass
+     * @param sessionKey
+     */
     public static void sendCloseToSession(Class<?> serverClass, String sessionKey) {
         sendToSession(serverClass, sessionKey, null, CLOSE_TYPE, null);
     }
 
+    /**
+     * sendCloseToAllSessions
+     *
+     * @param serverClass
+     */
     public static void sendCloseToAllSessions(Class<?> serverClass) {
         sendToAllSessions(serverClass, null, CLOSE_TYPE, null);
     }
 
+    /**
+     * getGroupSessionsList
+     *
+     * @return
+     */
     protected List<ConcurrentHashMap<String, ConcurrentHashMap<String, Session>>> getGroupSessionsList() {
         return serverGroupSessionsListMap.get(this.getClass());
     }
 
+    /**
+     * getGroupSessionsMap
+     *
+     * @param groupIndex
+     * @return
+     */
     protected ConcurrentHashMap<String, ConcurrentHashMap<String, Session>> getGroupSessionsMap(int groupIndex) {
-        var groupSessionsList = getGroupSessionsList();
+        List<ConcurrentHashMap<String, ConcurrentHashMap<String, Session>>> groupSessionsList = getGroupSessionsList();
         if (groupSessionsList.size() < groupIndex + 1) {
             return null;
         }
@@ -229,7 +330,7 @@ public abstract class BaseGroupServer extends BaseServer {
     @Override
     protected void validateSession(Session session) throws ValidateException {
         super.validateSession(session);
-        var groupKeys = retrieveGroupKeys(session);
+        List<String> groupKeys = retrieveGroupKeys(session);
         if (groupKeys == null || groupKeys.isEmpty()) {
             throw new ValidateException("Group key not found");
         }
@@ -237,6 +338,11 @@ public abstract class BaseGroupServer extends BaseServer {
         this.groupKeys = groupKeys;
     }
 
+    /**
+     * onOpen
+     *
+     * @param session
+     */
     @Override
     @OnOpen
     public void onOpen(Session session) throws ValidateException {
@@ -245,9 +351,9 @@ public abstract class BaseGroupServer extends BaseServer {
         if (groupKeys == null || groupKeys.isEmpty()) {
             groupKeys = retrieveGroupKeys(session);
         }
-        for (var i = 0; i < groupKeys.size(); i++) {
-            var groupKey = groupKeys.get(i);
-            var groupSessionsMap = getGroupSessionsMap(i);
+        for (int i = 0; i < groupKeys.size(); i++) {
+            String groupKey = groupKeys.get(i);
+            ConcurrentHashMap<String, ConcurrentHashMap<String, Session>> groupSessionsMap = getGroupSessionsMap(i);
             if (groupSessionsMap == null) {
                 continue;
             }
@@ -255,18 +361,21 @@ public abstract class BaseGroupServer extends BaseServer {
         }
     }
 
+    /**
+     * onClose
+     */
     @Override
     @OnClose
     public void onClose() {
         if (groupKeys != null && !groupKeys.isEmpty()) {
-            for (var i = 0; i < groupKeys.size(); i++) {
-                var groupKey = groupKeys.get(i);
-                var groupSessionsMap = getGroupSessionsMap(i);
+            for (int i = 0; i < groupKeys.size(); i++) {
+                String groupKey = groupKeys.get(i);
+                ConcurrentHashMap<String, ConcurrentHashMap<String, Session>> groupSessionsMap = getGroupSessionsMap(i);
                 if (groupSessionsMap == null) {
                     continue;
                 }
 
-                var sessions = groupSessionsMap.getOrDefault(groupKey, null);
+                ConcurrentHashMap<String, Session> sessions = groupSessionsMap.getOrDefault(groupKey, null);
                 if (sessions == null) {
                     continue;
                 }

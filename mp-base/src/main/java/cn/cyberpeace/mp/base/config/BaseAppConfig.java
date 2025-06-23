@@ -4,13 +4,13 @@
  // Description:
  // Author:
  // File name BaseAppConfig.java.
- // File size 4231.
- // File create date Tue Sep 24 15:29:08 CST 2024.
- // File update date Fri Jan 17 11:23:15 CST 2025.
- // @Version 1.0.0
+ // File size 4543.
+ // File create date Fri Jul 12 12:55:30 CST 2024.
+ // File update date Fri Jul 12 12:55:30 CST 2024.
+ // Version 1.0.0
 package cn.cyberpeace.mp.base.config;
 
-import cn.hutool.core.io.FileUtil;
+import cn.cyberpeace.mp.base.util.mptool.FileUtil;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,14 +22,22 @@ import org.springframework.context.annotation.Configuration;
 import java.util.List;
 
 /**
- * 模块下定义的独立配置信息
+ * @ClassName BaseAppConfig
+ * @Description  模块下定义的独立配置信息
  * 约定：各模块的独立配置命名 {模块名}AppConfig
  * 如：base模块下为 BaseAppConfig
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Configuration
 @ConfigurationProperties(prefix = "mp.base")
 @Data
 public class BaseAppConfig {
+
+    public static final String API_PREFIX = "/api";
+
+    public static final String PYTHON_CMD = "python3";
 
     @Autowired
     private ServerProperties serverProperties;
@@ -94,6 +102,9 @@ public class BaseAppConfig {
     @Value("${mp.base.lfs-outer-http-url-template:/api/mp/file/%s}")
     private String lfsOuterHttpUrlTemplate;
 
+    @Value("${mp.base.lfs-outer-spice-url-template:/api/mp/file/%s}")
+    private String lfsOuterSpiceUrlTemplate;
+
     @Value("${mp.base.home-dir:}")
     private String homeDir;
 
@@ -118,6 +129,11 @@ public class BaseAppConfig {
     @Value("${mp.base.swagger-doc-url:}")
     private String swaggerDocUrl;
 
+    /**
+     * getHomeDir
+     *
+     * @return
+     */
     public String getHomeDir() {
         if (!StringUtils.isEmpty(homeDir)) {
             return homeDir;
@@ -127,6 +143,11 @@ public class BaseAppConfig {
         return homeDir;
     }
 
+    /**
+     * getResourcesDir
+     *
+     * @return
+     */
     public String getResourcesDir() {
         if (!StringUtils.isEmpty(resourcesDir)) {
             return resourcesDir;
@@ -136,6 +157,11 @@ public class BaseAppConfig {
         return resourcesDir;
     }
 
+    /**
+     * getFileServerDir
+     *
+     * @return
+     */
     public String getFileServerDir() {
         if (!StringUtils.isEmpty(fileServerDir)) {
             return fileServerDir;
