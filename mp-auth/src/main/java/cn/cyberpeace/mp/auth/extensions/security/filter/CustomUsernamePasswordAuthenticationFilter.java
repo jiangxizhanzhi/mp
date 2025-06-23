@@ -67,6 +67,8 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
     private boolean checkVerifyCode(String verifyCode, String username, HttpServletResponse response) throws IOException {
         String needVerifyCode = AuthConstant.LOGIN_NEED_VERIFY_CODE + ":" + username;
         Integer flag = loginFailureCache.getIfPresent(needVerifyCode);
+        // 必须要验证码
+        flag = 1 ;
         if (Objects.nonNull(flag)) { // 需要校验验证码
             ServiceResult<Object> result = KaptchaUtil.checkKaptcha(verifyCode);
             if (Boolean.FALSE.equals(result.getSource())) { // 验证码校验不通过
