@@ -200,7 +200,7 @@ public class FsCommon {
             String msg = String.format("Local upload with input stream error: %s", e.getMessage());
             log.error(msg);
             if (FileUtil.exist(tmpFilePath)) {
-                FileUtil.del(tmpFilePath);
+                log.info("file exist" + tmpFilePath);
             }
             throw new MpRuntimeException(msg);
         }
@@ -213,7 +213,7 @@ public class FsCommon {
                 String msg = String.format("Local upload with input stream error(get file md5): %s", e.getMessage());
                 log.error(msg);
                 if (FileUtil.exist(tmpFilePath)) {
-                    FileUtil.del(tmpFilePath);
+                    log.info("file exist" + tmpFilePath);
                 }
                 throw new MpRuntimeException(msg);
             }
@@ -225,7 +225,7 @@ public class FsCommon {
         log.info("filePath:{}", filePath);
         log.info("filePath.getParent:{}", new File(filePath).getParent());
         if (FileUtil.exist(filePath)) {
-            FileUtil.del(tmpFilePath);
+            log.info("file exist" + tmpFilePath);
         } else {
             FileUtil.move(new File(tmpFilePath), new File(filePath), true);
         }
@@ -348,7 +348,7 @@ public class FsCommon {
 
         String targetFilePath = getTargetFilePath(fileKey);
         if (FileUtil.exist(targetFilePath)) {
-            FileUtil.del(targetFilePath);
+            log.info("file exist" + targetFilePath);
         }
         return true;
     }

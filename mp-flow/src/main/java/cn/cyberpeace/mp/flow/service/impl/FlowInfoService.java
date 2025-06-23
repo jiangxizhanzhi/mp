@@ -1117,9 +1117,7 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
                 }
             } else if (flowFile.getName().contains("README.md")) {
                 // Process README.md
-                if (!processReadmeFile(flowFile, readmeList)) {
-                    return ResultCommon.fail("Flow file import error");
-                }
+                log.info("Processing README.md");
             }
         }
 
@@ -1136,7 +1134,7 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
         FlowInfoModel existFlowInfoModel = getModelMapper().selectByTitle(fileName);
         if (Objects.nonNull(existFlowInfoModel)) {
             // Delete duplicate flow file
-            this.deleteFlowInfo(existFlowInfoModel.getId(), false);
+            final ServiceResult<Boolean> booleanServiceResult = this.deleteFlowInfo(existFlowInfoModel.getId(), false);
         }
 
         flowInfoModel.setFileName(pcapFile.getName());
@@ -1169,21 +1167,6 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
             return null;
         }
         return pcapFiles[0]; // Assuming the first file is the pcap file
-    }
-
-    private boolean processReadmeFile(File readmeFile, List<String> readmeList) {
-        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(readmeFile))) {
-            String line;
-            while ((line = bufferedReader.readLine()) != null) {
-                if (StringUtils.isNotBlank(line)) {
-                    readmeList.add(line);
-                }
-            }
-            return true;
-        } catch (IOException e) {
-            log.error("Error reading README file: {}", ExceptionUtils.getStackTrace(e));
-            return false;
-        }
     }
 
     private int setFlowCategoryAndType(List<String> readmeList, FlowInfoModel flowInfoModel) {
@@ -1384,7 +1367,7 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
         try {
             byte[] flowBytes = FsCommon.downloadRawContent(pcapPath);
             String fileName = FilenameUtils.getName(pcapPath);
-            ;
+
             String srcPcapPath = PRE_PATH.concat("/" + title + "_" + fileName);
             log.info("===========srcPcapPath: {}", srcPcapPath);
             srcFile = new File(srcPcapPath);

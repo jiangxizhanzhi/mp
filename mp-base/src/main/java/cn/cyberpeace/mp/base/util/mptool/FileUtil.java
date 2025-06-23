@@ -267,63 +267,6 @@ public class FileUtil {
     }
 
     /**
-     * 删除文件或者文件夹 路径如果为相对路径，会转换为ClassPath路径！ 注意：删除文件夹时不会判断文件夹是否为空，如果不空则递归删除子文件或文件夹 某个文件删除失败会终止删除操作
-     * Params:
-     * fullFileOrDirPath – 文件或者目录的路径
-     */
-    public static void del(String filePath) {
-        final boolean del = del(file(filePath));
-    }
-
-    public static boolean del(File file) {
-        if (file == null || false == file.exists()) {
-            // 如果文件不存在或已被删除，此处返回true表示删除成功
-            return true;
-        }
-
-        if (file.isDirectory()) {
-            // 清空目录下所有文件和目录
-            boolean isOk = clean(file);
-            if (false == isOk) {
-                return false;
-            }
-        }
-
-        // 删除文件或清空后的目录
-        final boolean delete = file.delete();
-        if (!delete) {
-            log.warn("Failed to delete existing file: {}", file.getAbsolutePath());
-        }
-        return delete;
-    }
-
-    /**
-     * clean
-     *
-     * @param directory
-     * @return boolean
-     */
-    public static boolean clean(File directory) {
-        if (directory == null || directory.exists() == false || false == directory.isDirectory()) {
-            return true;
-        }
-
-        final File[] files = directory.listFiles();
-        if (null != files) {
-            boolean isOk;
-            for (File childFile : files) {
-                isOk = del(childFile);
-                if (isOk == false) {
-                    // 删除一个出错则本次删除任务失败
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
-
-    /**
      * 创建文件夹，如果存在直接返回此文件夹 此方法不对File对象类型做判断，如果File不存在，无法判断其类型
      * Params:
      * dirPath – 文件夹路径，使用POSIX格式，无论哪个平台
@@ -566,44 +509,5 @@ public class FileUtil {
     public static boolean exist(String path) {
         return (null != path) && file(path).exists();
     }
-
-
-    /**
-     * setResponse
-     *
-     * @param file
-     * @param delete
-     * @param response
-     */
-    public static void setResponse(File file, Boolean delete, HttpServletResponse response) {
-        // 以流的形式下载文件。
-        try (InputStream fis = new FileInputStream(file);
-             OutputStream outputStream = response.getOutputStream()) {
-
-            byte[] buffer = new byte[fis.available()];
-            fis.read(buffer);
-
-            // 清空response
-            response.reset();
-
-            // 设置返回
-            response.setContentType("application/octet-stream;charset=UTF-8");
-            response.setHeader("Content-disposition", "attachment;filename=" + URLEncoder.encode(file.getName(), StandardCharsets.UTF_8).replaceAll("\\+","%20"));
-
-            outputStream.write(buffer);
-            outputStream.flush();
-        } catch (IOException e) {
-            log.error("setResponse error:", e);
-        }
-
-        // Optionally delete the file after download
-        if (delete.equals(Boolean.TRUE) && file.exists()) {
-            final boolean deleted = file.delete();
-            if (!deleted) {
-                log.warn("Failed to delete existing file: {}", file.getAbsolutePath());
-            }
-        }
-    }
-
 
 }
