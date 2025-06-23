@@ -1498,6 +1498,7 @@ public class CreateHandler extends HandlerCommon {
             // http 和 https 协议需要替换access ip
             if (AccessMode.Protocol.HTTP.equals(accessMode.getProtocol()) || AccessMode.Protocol.HTTPS.equals(accessMode.getProtocol())) {
                 accessMode.setAccessIp(ip);
+                accessMode.setAvailable(true);
             }
 
         } else {
