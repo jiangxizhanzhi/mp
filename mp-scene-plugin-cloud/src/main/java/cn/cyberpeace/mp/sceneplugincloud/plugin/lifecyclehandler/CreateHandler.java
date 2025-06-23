@@ -1494,6 +1494,12 @@ public class CreateHandler extends HandlerCommon {
             accessMode.setPublicNetProxy(true);
             accessMode.setPublicNetProxyIp(ip);
             accessMode.setPublicNetProxyPort(port);
+
+            // http 和 https 协议需要替换access ip
+            if (AccessMode.Protocol.HTTP.equals(accessMode.getProtocol()) || AccessMode.Protocol.HTTPS.equals(accessMode.getProtocol())) {
+                accessMode.setAccessIp(ip);
+            }
+
         } else {
             accessMode.setPublicNetProxy(false);
             accessMode.setPublicNetProxyIp(null);
