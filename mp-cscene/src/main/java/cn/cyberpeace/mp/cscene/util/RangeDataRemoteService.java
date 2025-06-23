@@ -267,7 +267,7 @@ public class RangeDataRemoteService {
     public void saveHostInfo(String sceneId) {
         HostStateTrendRequest hostStateTrendRequest = new HostStateTrendRequest();
         hostStateTrendRequest.setSceneId(sceneId);
-        hostStateTrendRequest.setStartTime(LocalDateTime.now().minusMinutes(1));
+        hostStateTrendRequest.setStartTime(LocalDateTime.now().minusMinutes(5));
         hostStateTrendRequest.setEndTime(LocalDateTime.now());
         var result = testRangeApiProxy.getSceneHostStateTrend(hostStateTrendRequest);
         if (CollectionUtils.isNotEmpty(result)) {
