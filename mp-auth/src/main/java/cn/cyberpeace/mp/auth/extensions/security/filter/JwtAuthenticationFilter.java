@@ -184,7 +184,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         } catch (UnsupportedEncodingException e) {
             log.error("error {}", name);
         }
-        response.addCookie(cookie);
     }
 
      /**
@@ -198,7 +197,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // httponly = false
         cookie.setHttpOnly(false);
          cookie.setValue(URLEncoder.encode(newJwt, StandardCharsets.UTF_8));
-         response.addCookie(cookie);
 
     }
 
@@ -213,7 +211,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // httponly = false
         cookie.setHttpOnly(false);
          cookie.setValue(URLEncoder.encode(token, StandardCharsets.UTF_8));
-         response.addCookie(cookie);
 
     }
 }
