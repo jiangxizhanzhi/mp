@@ -88,17 +88,7 @@ public class LoadAuthoritiesFilter extends OncePerRequestFilter {
         }
 
         if (Objects.equals(userType, LogConstant.USER_TYPE_CLIENT)) {
-            // 客户端认证
-            String clientId = request.getHeader(ClientAuthenticationFilter.CLIENT_ID_HEADER);
-            String clientSecret = request.getHeader(ClientAuthenticationFilter.CLIENT_SECRET_HEADER);
-            ClientDetailsModel clientDetails = clientDetailsService.getByClientId(clientId);
-            if (Objects.nonNull(clientDetails)) {
-                // client认证, 赋有超级用户的所有角色，权限
-                Set<GrantedAuthority> authoritySet = authUserDetailsService.loadAuthorities(AuthConstant.ROOT_USER_ID);
-                var clientAuthenticationToken = new ClientAuthenticationToken(clientDetails, clientSecret, authoritySet);
-                clientAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(clientAuthenticationToken);
-            }
+            log.info("user type is {}", userType);
         }
 
         filterChain.doFilter(request, response);
