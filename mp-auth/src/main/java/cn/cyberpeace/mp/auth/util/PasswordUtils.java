@@ -49,16 +49,7 @@ public class PasswordUtils {
         if (Objects.isNull(iterations) && Objects.isNull(hashWidth)) {
             PasswordUtils.passwordEncoder = new Pbkdf2PasswordEncoder(AuthConstant.PASSWORD_SECRET);
         } else {
-            if (Objects.isNull(iterations)) {
-                Field field = ReflectUtil.getField(Pbkdf2PasswordEncoder.class, "DEFAULT_ITERATIONS");
-                Object value = ReflectUtil.getStaticFieldValue(field);
-                iterations = (Integer) value;
-            }
-            if (Objects.isNull(hashWidth)) {
-                Field field = ReflectUtil.getField(Pbkdf2PasswordEncoder.class, "DEFAULT_HASH_WIDTH");
-                Object value = ReflectUtil.getStaticFieldValue(field);
-                hashWidth = (Integer) value;
-            }
+
             PasswordUtils.passwordEncoder = new Pbkdf2PasswordEncoder(AuthConstant.PASSWORD_SECRET, iterations, hashWidth);
         }
     }

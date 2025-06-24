@@ -64,9 +64,6 @@ public class UserUtils {
         if (Objects.isNull(request)) {
             return;
         }
-        request.setAttribute(LogConstant.USER_ID_KEY, id);
-        request.setAttribute(LogConstant.USER_NAME_KEY, username);
-        request.setAttribute(LogConstant.USER_TYPE_KEY, userType);
     }
 
     /**
