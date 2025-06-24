@@ -35,7 +35,7 @@ public class ExcelCheck {
     public static void check(InputStream inputStream, String fileName) {
         String type = null;
         if (StringUtils.isNotEmpty(fileName)){
-            type = fileName.substring(fileName.lastIndexOf(".") + 1);
+            type = fileName.substring(fileName.lastIndexOf('.') + 1);
         }
         boolean typeMatch = false;
         if (StringUtils.isNotBlank(type)) {

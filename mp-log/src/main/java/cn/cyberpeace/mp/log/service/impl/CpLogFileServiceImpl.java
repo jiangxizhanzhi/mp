@@ -122,7 +122,6 @@ public class CpLogFileServiceImpl extends BaseCpHttpService implements LogFileSe
     public LogFileDownloadBO download(LogDownloadDTO downloadDTO) throws IOException {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("filename",downloadDTO.getFileName());
-        jsonObject.put("path",downloadDTO.getPath());
         jsonObject.put("hostname",downloadDTO.getHostname());
         String downLoadFileName = null;
         ByteArrayOutputStream bos = null;
@@ -135,7 +134,7 @@ public class CpLogFileServiceImpl extends BaseCpHttpService implements LogFileSe
                 fileName = ReUtil.get("filename=\"(.*?)\"", disposition, 1);
                 if (StrUtil.isBlank(fileName)) {
                     fileName = StrUtil.subAfter(disposition, "filename=", true);
-                    final int lastIndexOf = fileName.lastIndexOf(";");
+                    final int lastIndexOf = fileName.lastIndexOf(';');
                     if (lastIndexOf > 0) {
                         fileName = fileName.substring(0, lastIndexOf);
                     }

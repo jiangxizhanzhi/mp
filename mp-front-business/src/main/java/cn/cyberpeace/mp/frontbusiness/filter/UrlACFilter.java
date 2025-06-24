@@ -120,7 +120,7 @@ public class UrlACFilter extends OncePerRequestFilter {
             String requestUrl = request.getRequestURI();
             if (StringUtils.isNotBlank(requestUrl)) {
                 // 去除url中最后一个'/'
-                if (requestUrl.length() == requestUrl.lastIndexOf("/") + 1) {
+                if (requestUrl.length() == requestUrl.lastIndexOf('/') + 1) {
                     requestUrl = requestUrl.substring(0, requestUrl.length() - 1);
                 }
             }
