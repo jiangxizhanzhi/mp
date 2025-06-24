@@ -73,7 +73,11 @@ public class VerifyCodeController {
         try {
             out.flush();
         } finally {
-            out.close();
+            try {
+                out.close();
+            } catch (IOException e) {
+                log.error("out close error", e);
+            }
         }
     }
 }

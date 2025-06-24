@@ -34,7 +34,7 @@ public class JsonUtils {
       * json跑龙套
       */
      private JsonUtils(){
-        throw new IllegalStateException("Utility class");
+
     }
 
      /**
