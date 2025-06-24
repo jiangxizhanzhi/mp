@@ -39,6 +39,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
@@ -181,7 +182,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             cookie.setValue(URLEncoder.encode(value, "utf-8"));
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            log.error("error {}", name);
         }
         response.addCookie(cookie);
     }
@@ -196,12 +197,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         cookie.setMaxAge(Integer.MAX_VALUE);
         // httponly = false
         cookie.setHttpOnly(false);
-        try {
-            cookie.setValue(URLEncoder.encode(newJwt, "utf-8"));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        response.addCookie(cookie);
+         cookie.setValue(URLEncoder.encode(newJwt, StandardCharsets.UTF_8));
+         response.addCookie(cookie);
 
     }
 
@@ -215,12 +212,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         cookie.setMaxAge(Integer.MAX_VALUE);
         // httponly = false
         cookie.setHttpOnly(false);
-        try {
-            cookie.setValue(URLEncoder.encode(token, "utf-8"));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        response.addCookie(cookie);
+         cookie.setValue(URLEncoder.encode(token, StandardCharsets.UTF_8));
+         response.addCookie(cookie);
 
     }
 }

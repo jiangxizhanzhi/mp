@@ -378,7 +378,7 @@ public class ActivMenuService {
             jsonStr = sb.toString();
             return jsonStr;
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("error", e);
             return null;
         }
     }
@@ -401,7 +401,7 @@ public class ActivMenuService {
             jsonStr = sb.toString();
             return jsonStr;
         } catch (IOException e) {
-            e.printStackTrace();
+            log.info("读取文件失败");
             return null;
         }
     }

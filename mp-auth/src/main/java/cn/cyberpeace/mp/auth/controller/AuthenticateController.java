@@ -99,7 +99,6 @@ public class AuthenticateController {
                 response.sendRedirect(String.format("%s", authConfig.getThirdIp()));
             } catch (IOException e) {
                 log.error("sendRedirect error = ", e);
-                e.printStackTrace();
             }
         }
         JwtUtils.UserInfo user = verifyToken(token);

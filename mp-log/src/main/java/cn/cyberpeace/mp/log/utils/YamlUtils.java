@@ -84,7 +84,7 @@ public class YamlUtils {
             }
 
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("buildComment error = ", e);
         }
     }
 
@@ -100,7 +100,7 @@ public class YamlUtils {
             }
             FileUtils.writeStringToFile(new File(path), content, CHARSET);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("addComment error = ", e);
         } finally {
             THREAD_LOCAL.remove();
         }

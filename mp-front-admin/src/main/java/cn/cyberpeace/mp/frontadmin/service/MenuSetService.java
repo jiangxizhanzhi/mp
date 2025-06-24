@@ -483,7 +483,7 @@ public class MenuSetService {
             jsonStr = sb.toString();
             return jsonStr;
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("error", e);
             return null;
         }
     }
