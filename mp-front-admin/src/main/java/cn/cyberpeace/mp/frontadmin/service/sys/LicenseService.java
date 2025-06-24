@@ -121,11 +121,11 @@ public class LicenseService {
         }
         Awesome.GoString.ByValue str = new Awesome.GoString.ByValue();
         str.setP(verifyStr);
-        str.setN(str.getP().length());
+//        str.setN(str.getP().length());
 
         Awesome.GoString.ByValue code = new Awesome.GoString.ByValue();
         code.setP(verifyCode);
-        code.setN(code.getP().length());
+//        code.setN(code.getP().length());
 
         if (Objects.isNull(INSTANCE)) {
             log.info("init INSTANCE...");
