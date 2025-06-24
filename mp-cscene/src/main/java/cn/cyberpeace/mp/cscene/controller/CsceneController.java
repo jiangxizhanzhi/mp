@@ -218,17 +218,31 @@ public class CsceneController implements BaseModelListControllerBase {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+//            替换id
+            String originalId = object.getString("id");
+            JSONArray ports = object.getJSONArray("ports");
+            ports.toJavaList(JSONObject.class).forEach(port -> {
+                String portId = port.getString("id");
+                // 使用replace方法替换原始id为新的node.getNumberId()
+                String newPortId = portId.replace(originalId, node.getNumberId());
+                // 更新端口的id
+                port.put("id", newPortId);
+            });
+            object.put("id", node.getNumberId());
 
-            String areaName = node.getAreaName();
+//            测试代码/
+            String areaName = StringUtils.isEmpty(node.getAreaName()) ? "area" + node.getNumberName() : node.getAreaName();
+//            String areaName = node.getAreaName();
             String numberId = node.getNumberId();
             String nodeName = node.getNumberName();
             object.put("name", nodeName);
+            object.put("uniteNumberId", numberId);
 //            elementBO.setName(nodeName);
             // 根据name获取到镜像名称 从map中匹配出对应镜像
             cpElements.put(numberId ,jsonObject);
             cpElementIdMap.put(numberId, jsonObject);
 //            TODO 区域
-            if(!areaMap.containsKey(areaName)){
+            /*if(!areaMap.containsKey(areaName)){
                 JSONObject area = new JSONObject();
                 String areaId = UUID.randomUUID().toString().replaceAll("-", "");
                 object.put("area", areaId);
@@ -249,7 +263,7 @@ public class CsceneController implements BaseModelListControllerBase {
             } else {
                 JSONObject areaObj = areaMap.get(areaName);
                 object.put("area", areaObj.getString("id"));
-            }
+            }*/
             elementIdMap.put(numberId, object);
             elements.add(object);
         }
@@ -363,7 +377,7 @@ public class CsceneController implements BaseModelListControllerBase {
 
         // TODO 默认值测试 可根据画布大小调整 给节点设置x、y地址
         generateUniformNodes(elements, 800, 200);
-
+/*
         String jsonArrayStr = elements.toJSONString(); // 你的 JSON 数据
         ObjectMapper mapper = new ObjectMapper();
         JsonNode jsonArray = null;
@@ -373,7 +387,7 @@ public class CsceneController implements BaseModelListControllerBase {
             e.printStackTrace();
         }
 
-        // 使用 Stream 分组 TODO 去除区域后报错 待测
+        // 使用 Stream 分组
         Map<String, List<JsonNode>> groupedData = new HashMap<>();
         jsonArray.forEach(item -> {
             String key = item.get("area").asText();
@@ -393,7 +407,7 @@ public class CsceneController implements BaseModelListControllerBase {
             ObjectNode objectNode = objectNodes.get(i);
             JSONObject area = areas.getJSONObject(i);
             area.put("position2",objectNode.toString());
-        }
+        }*/
 
         topology.put("areas", areas);
         topology.put("connections", connections);
