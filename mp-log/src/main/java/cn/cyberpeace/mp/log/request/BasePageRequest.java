@@ -29,6 +29,7 @@ import java.util.Objects;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BasePageRequest extends BaseRequest implements Serializable {
+    private static final long serialVersionUID = 1L;
 //
 //    /**
 //     * 每页条数

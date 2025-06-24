@@ -121,6 +121,7 @@ public class ThirdSsoController {
 
     @Data
     private class TokenCheckResult implements Serializable {
+        private static final long serialVersionUID = 1L;
         Boolean isSuccess;
         String accessToken;
     }

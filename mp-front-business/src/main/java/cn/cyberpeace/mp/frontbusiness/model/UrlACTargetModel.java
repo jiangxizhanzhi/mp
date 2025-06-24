@@ -33,6 +33,7 @@ import java.io.Serializable;
 @Table("mp_auth_url_ac_target")
 @ApiModel("接口权限关系表")
 public class UrlACTargetModel extends BaseModel implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     private String urlacId;
 

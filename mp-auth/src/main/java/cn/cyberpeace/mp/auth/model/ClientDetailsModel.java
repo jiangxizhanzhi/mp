@@ -32,6 +32,7 @@ import java.io.Serializable;
 @ApiModel
 @Table("mp_auth_client_details")
 public class ClientDetailsModel extends BaseModel implements Serializable {
+     private static final long serialVersionUID = 1L;
     // Oauth2渠道
     public static final Integer CLIENT_TYPE_OAUTH2 = 1;
     // 免认证渠道
