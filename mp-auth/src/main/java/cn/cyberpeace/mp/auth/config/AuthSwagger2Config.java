@@ -35,7 +35,7 @@ public class AuthSwagger2Config {
      /**
       * 身份验证参数
       */
-     public static RequestParameter authParameter = new RequestParameterBuilder()
+     public static final RequestParameter authParameter = new RequestParameterBuilder()
             .name("Authorization")
             .description("认证")
             .in(ParameterType.HEADER)

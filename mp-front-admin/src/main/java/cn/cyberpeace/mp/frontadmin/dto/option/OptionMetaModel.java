@@ -20,9 +20,9 @@ import lombok.Data;
 @Data
 public class OptionMetaModel {
 
-    public static Integer OPTION_VISIBLE_YES = 1;
+    public static final Integer OPTION_VISIBLE_YES = 1;
 
-    public static Integer OPTION_VISIBLE_NO = 0;
+    public static final Integer OPTION_VISIBLE_NO = 0;
 
     private String activKeys;
 

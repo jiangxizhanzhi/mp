@@ -27,6 +27,7 @@ import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -58,7 +59,8 @@ import static cn.cyberpeace.mp.auth.constant.AuthConstant.FAIL_VERIFY_JWT_TOKEN;
 @Component
 public class JwtUtils {
 
-    public static JwtUtils jwtUtils;
+    @Getter
+    private static JwtUtils jwtUtils;
 
     @Autowired
     private AuthConfig authConfig;

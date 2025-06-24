@@ -2,7 +2,6 @@ package cn.cyberpeace.mp.aggregation.init;
 
 import cn.cyberpeace.mp.aggregation.constant.AggregationSingleton;
 import cn.cyberpeace.mp.auth.constant.DefaultImgDirEnum;
-import cn.cyberpeace.mp.base.common.LocalFileMappingCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.hutool.core.io.FileUtil;
@@ -44,7 +43,7 @@ public class DefaultImageInit implements ApplicationRunner {
 
         TaskCommon.executeTask(() -> {
             String startWithFile = "file:";
-            String staticLocation = AggregationSingleton.aggregationConfig.getStaticLocation();
+            String staticLocation = AggregationSingleton.getAggregationConfig().getStaticLocation();
             log.info("DefaultImageInit staticLocation value is {}", staticLocation);
             if (staticLocation.startsWith(startWithFile)) {
                 staticLocation = staticLocation.substring(5).trim();
@@ -56,7 +55,7 @@ public class DefaultImageInit implements ApplicationRunner {
                     String path = staticLocation.concat(imgDirEnum.getEndPathName());
                     log.info("DefaultImageInit path value is {}", path);
                     if (FileUtil.isDirectory(path)) {
-                        LocalFileMappingCommon.syncDir(imgDirEnum.getGroup(), path);
+                        log.info("path is {}", path);
                     }
                 }
             }

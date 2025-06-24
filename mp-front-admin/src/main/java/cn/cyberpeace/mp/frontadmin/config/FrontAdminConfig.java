@@ -24,7 +24,7 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "mp.frontadmin")
 public class FrontAdminConfig {
 
-    public static String DEFAULT_LICENSE_DIR = "/home/mp/config/license";
+    public static final String DEFAULT_LICENSE_DIR = "/home/mp/config/license";
 
     private boolean activEnable = false;
 

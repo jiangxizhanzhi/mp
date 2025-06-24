@@ -34,7 +34,7 @@ public class DefaultImgService {
     public List<String> getFileByDefaultImgDirEnum(DefaultImgDirEnum defaultImgDirEnum) {
         String endPathName = defaultImgDirEnum.getEndPathName();
         String startWithFile = "file:";
-        String pathName = AggregationSingleton.aggregationConfig.getStaticLocation();
+        String pathName = AggregationSingleton.getAggregationConfig().getStaticLocation();
         if (StringUtils.isBlank(pathName)) {
             log.error("default img config error, pathName[{}] is blank", pathName);
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
@@ -65,7 +65,7 @@ public class DefaultImgService {
      */
     public String getDefaultImgFilePath(String relativePath) {
         String startWithFile = "file:";
-        String pathName = AggregationSingleton.aggregationConfig.getStaticLocation();
+        String pathName = AggregationSingleton.getAggregationConfig().getStaticLocation();
         if (StringUtils.isBlank(pathName)) {
             log.error("default img config error, pathName is blank");
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);

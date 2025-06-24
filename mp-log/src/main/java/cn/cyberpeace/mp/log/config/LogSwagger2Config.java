@@ -26,7 +26,7 @@ import springfox.documentation.spring.web.plugins.Docket;
 @Configuration
 public class LogSwagger2Config {
 
-    public static RequestParameter authParameter = new RequestParameterBuilder()
+    public static final RequestParameter authParameter = new RequestParameterBuilder()
             .name("Authorization")
             .description("认证")
             .in(ParameterType.HEADER)

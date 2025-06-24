@@ -54,7 +54,7 @@ public class DefaultImgController {
     @ApiOperation("获取默认图片")
     @GetMapping("/get-default-img")
     public ServiceResult<List<String>> getDefaultImg(DefaultImgRequest request){
-        if (StringUtils.isBlank(AggregationSingleton.aggregationConfig.getStaticLocation())){
+        if (StringUtils.isBlank(AggregationSingleton.getAggregationConfig().getStaticLocation())){
             throw new MpRuntimeException(BaseErrorCode.DATA_NOT_EXIST);
         }
         DefaultImgDirEnum defaultImgDirEnum = request.getDefaultImgDirEnum();
@@ -74,7 +74,7 @@ public class DefaultImgController {
     @ApiOperation("获取系统图片")
     @GetMapping("/get-sys-logo-img")
     public ServiceResult<Map<String, String>> getSysLogoImg(){
-        if (StringUtils.isBlank(AggregationSingleton.aggregationConfig.getStaticLocation())){
+        if (StringUtils.isBlank(AggregationSingleton.getAggregationConfig().getStaticLocation())){
             throw new MpRuntimeException(BaseErrorCode.DATA_NOT_EXIST);
         }
         List<String> groupList = Collections.singletonList(DefaultImgDirEnum.SYS_LOGO.getGroup());

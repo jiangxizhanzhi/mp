@@ -40,12 +40,12 @@ import java.util.Objects;
 @Builder
 public class TargetModel extends BaseModel {
 
-    public static Integer TYPE_MENU = 1;
-    public static Integer TYPE_API = 2;
-    public static Integer TYPE_DATA = 3;
+    public static final Integer TYPE_MENU = 1;
+    public static final Integer TYPE_API = 2;
+    public static final Integer TYPE_DATA = 3;
 
-    public static Integer VISIBILITY_NO = 0;
-    public static Integer VISIBILITY_YES = 1;
+    public static final Integer VISIBILITY_NO = 0;
+    public static final Integer VISIBILITY_YES = 1;
 
     @ApiModelProperty(value = "上级权限")
     private String parent;
