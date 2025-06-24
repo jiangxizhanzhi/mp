@@ -17,6 +17,8 @@ import com.sun.jna.Library;
 import com.sun.jna.Native;
 import com.sun.jna.Structure;
 import io.micrometer.core.instrument.util.StringUtils;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,11 +77,15 @@ public class LicenseService {
              /**
               * p
               */
-             public String p;
+             @Setter
+             @Getter
+             private String p;
              /**
               * n
               */
-             public long n;
+             @Setter
+             @Getter
+             private long n;
 
              /**
               * @return {@link List }
@@ -114,12 +120,12 @@ public class LicenseService {
             throw new MpRuntimeException(AdminErrorCode.PARAMS_ERROR);
         }
         Awesome.GoString.ByValue str = new Awesome.GoString.ByValue();
-        str.p = verifyStr;
-        str.n = str.p.length();
+        str.setP(verifyStr);
+        str.setN(str.getP().length());
 
         Awesome.GoString.ByValue code = new Awesome.GoString.ByValue();
-        code.p = verifyCode;
-        code.n = code.p.length();
+        code.setP(verifyCode);
+        code.setN(code.getP().length());
 
         if (Objects.isNull(INSTANCE)) {
             log.info("init INSTANCE...");
