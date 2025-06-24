@@ -248,12 +248,12 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
                         String parentId = orgModel.getParent();
                         Optional<OrgModel> orgModelOptional =
                                 allOrgModelList.stream().filter(org -> org.getId().equals(parentId)).findFirst();
-                        if (orgModelOptional.isPresent()) {
-                            orgModel = orgModelOptional.get();
-                            pathList.add(0, orgModel.getName());
-                        } else {
-                            orgModel = new OrgModel();
-                        }
+//                        if (orgModelOptional.isPresent()) {
+//                            orgModel = orgModelOptional.get();
+//                            pathList.add(0, orgModelOptional.get().getName());
+//                        } else {
+//                            orgModel = new OrgModel();
+//                        }
                     }
                 }
                 resultList.add(pathList);
@@ -377,7 +377,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         }
         OrgDto orgDto = new OrgDto();
         BeanUtils.copyProperties(pOrgBO, orgDto);
-        orgDto.execute(queryChildOrgDtoOperation);
+        final OrgDto execute = orgDto.execute(queryChildOrgDtoOperation);
 
         return CollectionUtil.toList(orgDto);
     }
@@ -396,7 +396,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         OrgDto orgDto = new OrgDto();
         BeanUtils.copyProperties(orgBO, orgDto);
         log.warn("queryParentOrgDtoOperation:{}", queryParentOrgDtoOperation);
-        orgDto.execute(queryParentOrgDtoOperation);
+        final OrgDto execute = orgDto.execute(queryParentOrgDtoOperation);
 
         return orgDto;
     }
@@ -476,7 +476,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
             OrgDto parentOrgDto = new OrgDto();
             BeanUtils.copyProperties(parentOrg, parentOrgDto);
             queryChildOrgDtoOperation.setOrgDtoList(new ArrayList<>());
-            parentOrgDto.execute(queryChildOrgDtoOperation);
+            final OrgDto execute = parentOrgDto.execute(queryChildOrgDtoOperation);
 
             List<OrgDto> orgDtos = queryChildOrgDtoOperation.getOrgDtoList();
 
@@ -586,8 +586,8 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     }
 
     private List<OrgModel> listByParentId(String parentId) {
-        HumanCondition humanCondition = new HumanCondition();
-        humanCondition.filterEqual(OrgModel::getParent, parentId);
+        HumanCondition humanCondition = new HumanCondition()
+        .filterEqual(OrgModel::getParent, parentId);
         List<OrgModel> list = getModelMapper().list(humanCondition);
         return list;
     }
