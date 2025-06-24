@@ -396,39 +396,6 @@ public class LogSettingServiceImpl implements ILogSettingService {
         List<String> linkedList = new LinkedList<>();
         String logLevel = "";
         int rootLineNum = -1;
-        try (BufferedReader reader = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8))) {
-            int emptyLineCnt = 0;
-            String line = "";
-            //最大空行连续允许10，如果超过10个认为文件结束
-            while (emptyLineCnt < 10) {
-                line = reader.readLine();
-                if (StringUtils.isEmpty(line)) {
-                    emptyLineCnt++;
-                    //如果出现连续空行保留，只保留一个
-                    if (emptyLineCnt == 1) {
-                        linkedList.add(line);
-                    }
-                    continue;
-                }
-                emptyLineCnt = 0;
-                linkedList.add(line);
-                rootKey = getRootKey(line, rootKey);
-                if (line.trim().startsWith(rootKey)) {
-                    String[] rootStrs = line.split(EQUAL_SIGN);
-                    if (rootKey.equalsIgnoreCase(rootStrs[0].trim()) && StringUtils.isNotEmpty(rootStrs[1].trim())) {
-                        rootLineNum = linkedList.size() - 1;
-                        logLevel = rootStrs[1].trim();
-                    }
-                }
-            }
-            //最后一行如果为空行，移除
-            if (!CollectionUtils.isEmpty(linkedList) && StringUtils.isEmpty(linkedList.get(linkedList.size() - 1))) {
-                linkedList.remove(linkedList.size() - 1);
-            }
-            log.info("current ROOT log level :{}", logLevel);
-        } catch (Exception ex) {
-            log.warn(ex.getMessage(), ex);
-        }
         updateLogLevel2ExtPropConfig(rootKey, rootLevel, file, logLevel, linkedList, rootLineNum);
     }
 
@@ -497,19 +464,6 @@ public class LogSettingServiceImpl implements ILogSettingService {
         DumperOptions options = new DumperOptions();
         options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
         Yaml yaml = new Yaml(options);
-        if (StringUtils.isNotEmpty(file) && (file.endsWith(YML) || file.endsWith(YAML)) && FileUtil.exist(file)) {
-            try (BufferedReader reader = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8))) {
-                map = yaml.loadAs(reader, Map.class);
-                YamlUtils.buildComment(file);
-                if (updateLogLevel2ExtYamlConfig(rootLevel, file, map, yaml)) {
-                    return true;
-                }
-            } catch (FileNotFoundException ex) {
-                log.warn(ex.getMessage(), ex);
-            } catch (IOException ex) {
-                log.warn(ex.getMessage(), ex);
-            }
-        }
         return false;
     }
 
