@@ -53,23 +53,27 @@
             <if test=" thirdCategory != null">
                 and i.third_category = #{thirdCategory}
             </if>
-            <if test="cat1 != null and cat1.size > 0">
-                and i.main_category in
-                <foreach collection="cat1" item="item" index="index" open="(" separator="," close=")">
-                    #{item}
-                </foreach>
-            </if>
-            <if test="cat2 != null and cat2.size > 0">
-                and i.sub_category in
-                <foreach collection="cat2" item="item" index="index" open="(" separator="," close=")">
-                    #{item}
-                </foreach>
-            </if>
-            <if test=" thirdCategories != null">
-                and i.third_category in
-                <foreach collection="thirdCategories" item="item" index="index" open="(" separator="," close=")">
-                    #{item}
-                </foreach>
+            <if test="cat1 != null or cat2 != null or thirdCategories != null ">
+                and ( 1>2
+                <if test="cat1 != null">
+                    or i.main_category in
+                    <foreach collection="cat1" item="item" index="index" open="(" separator="," close=")">
+                        #{item}
+                    </foreach>
+                </if>
+                <if test="cat2 != null">
+                    or i.sub_category in
+                    <foreach collection="cat2" item="item" index="index" open="(" separator="," close=")">
+                        #{item}
+                    </foreach>
+                </if>
+                <if test="thirdCategories != null">
+                    or i.third_category in
+                    <foreach collection="thirdCategories" item="item" index="index" open="(" separator="," close=")">
+                        #{item}
+                    </foreach>
+                </if>
+                )
             </if>
             <if test=" imageType != null and imageType != '' ">
                 and i.image_type = #{imageType}

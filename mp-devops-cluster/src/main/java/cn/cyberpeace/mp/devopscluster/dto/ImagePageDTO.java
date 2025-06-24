@@ -11,6 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
@@ -199,9 +200,15 @@ public class ImagePageDTO extends BasePageDTO{
         this.setMainCategory(request.getMainCategory());
         this.setSubCategory(request.getSubCategory());
         this.setThirdCategory(request.getThirdCategory());
-        this.setThirdCategories(request.getThirdCategories());
-        this.setCat1(request.getCat1());
-        this.setCat2(request.getCat2());
+        if (CollectionUtils.isNotEmpty(request.getThirdCategories())) {
+            this.setThirdCategories(request.getThirdCategories());
+        }
+        if (CollectionUtils.isNotEmpty(request.getCat1())) {
+            this.setCat1(request.getCat1());
+        }
+        if (CollectionUtils.isNotEmpty(request.getCat2())) {
+            this.setCat2(request.getCat2());
+        }
         this.setQuickCreateSupport(request.getQuickCreateSupport());
         if (Objects.isNull(request.getImageType())){
             this.setSearchType(1);
