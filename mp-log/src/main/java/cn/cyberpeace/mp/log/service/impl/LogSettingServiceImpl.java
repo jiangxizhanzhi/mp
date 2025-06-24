@@ -399,24 +399,6 @@ public class LogSettingServiceImpl implements ILogSettingService {
         updateLogLevel2ExtPropConfig(rootKey, rootLevel, file, logLevel, linkedList, rootLineNum);
     }
 
-     /**
-      * @param line
-      * @param rootKey 根键
-      * @return {@link String }
-      */
-     private String getRootKey(String line, String rootKey) {
-        if (StringUtils.isEmpty(line)) {
-            return rootKey;
-        }
-        if (line.trim().startsWith(ROOT_KEY_FOR_PROP)) {
-            //对应于application-prop.properties.template中 ROOT_LEVEL 变量
-            return ROOT_KEY_FOR_PROP;
-        } else if (line.trim().startsWith(LOGGING_LEVEL_EXT_VAR_ROOT)) {
-            //对应于application-prop.properties.yml-template中 logging.level.ext-var.root 变量
-            return LOGGING_LEVEL_EXT_VAR_ROOT;
-        }
-        return rootKey;
-    }
 
      /**
       * 更新日志二级ext道具配置
@@ -433,24 +415,6 @@ public class LogSettingServiceImpl implements ILogSettingService {
             if(rootLineNum >= 0 && rootLineNum < linkedList.size()){
                 linkedList.set(rootLineNum, rootKey.concat("=").concat(rootLevel.toUpperCase()));
             }
-            try (OutputStream outputStream = new FileOutputStream(new File(file))) {
-                IOUtils.writeLines(linkedList, null, outputStream, StandardCharsets.UTF_8);
-                log.info("set new ROOT log level :{}", rootLevel);
-
-                //MP_ENV_PATH模式下，mp.properties每次启动时都从mp_default.properties复制参数
-                if(file.endsWith("mp.properties")){
-                    String defFileStr = new File(file).getParent().concat(File.separator).concat("mp_default.properties");
-                    log.info("mp_default.properties path:{}", defFileStr);
-                    File defFile = new File(defFileStr);
-                    if(defFile.exists() && defFile.isFile()){
-                        FileUtils.copyFile(new File(file), defFile);
-                    }
-                }
-            } catch (FileNotFoundException ex) {
-                log.warn(ex.getMessage(), ex);
-            } catch (IOException ex) {
-                log.warn(ex.getMessage(), ex);
-            }
         }
     }
 
@@ -466,55 +430,4 @@ public class LogSettingServiceImpl implements ILogSettingService {
         Yaml yaml = new Yaml(options);
         return false;
     }
-
-     /**
-      * 更新日志二级extyaml配置
-      *
-      * @param rootLevel 根级别
-      * @param file      文件
-      * @param map
-      * @param yaml
-      * @return boolean
-      */
-     private synchronized boolean updateLogLevel2ExtYamlConfig(String rootLevel, String file, Map<String, Object> map, Yaml yaml) {
-        String configLogLevel = setMapObjLogLevelAndGet(rootLevel, map);
-        if (!rootLevel.equalsIgnoreCase(configLogLevel)) {
-            try (FileWriter writer = new FileWriter(file, StandardCharsets.UTF_8)) {
-                yaml.dump(map, writer);
-                YamlUtils.addComment(file);
-                log.info("set new ROOT log level :{}", rootLevel);
-                return true;
-            } catch (FileNotFoundException ex) {
-                log.warn(ex.getMessage(), ex);
-            } catch (IOException ex) {
-                log.warn(ex.getMessage(), ex);
-            }
-        }
-        return false;
-    }
-
-     /**
-      * @param rootLevel 根级别
-      * @param map
-      * @return {@link String }
-      */
-     private String setMapObjLogLevelAndGet(String rootLevel, Map<String, Object> map) {
-        String logLevel = "";
-        Map<String, Object> subMap = (Map<String, Object>) map.get(LOGGING);
-        if (subMap != null && subMap.containsKey(LEVEL)) {
-            subMap = (Map<String, Object>) subMap.get(LEVEL);
-            if (subMap != null && subMap.containsKey(EXT_VAR)) {
-                subMap = (Map<String, Object>) subMap.get(EXT_VAR);
-                if (subMap != null && subMap.containsKey(ROOT_KEY)) {
-                    logLevel = (String) subMap.get(ROOT_KEY);
-                    if (!rootLevel.equalsIgnoreCase(logLevel)) {
-                        log.info("current ROOT log level :{}", logLevel);
-                        subMap.put(ROOT_KEY, rootLevel.toUpperCase());
-                    }
-                }
-            }
-        }
-        return logLevel;
-    }
-
 }
