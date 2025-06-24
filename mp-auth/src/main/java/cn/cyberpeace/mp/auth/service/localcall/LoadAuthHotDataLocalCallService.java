@@ -26,13 +26,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
-@Slf4j
+ @Slf4j
 @Service
 @LocalCallServer
 public class LoadAuthHotDataLocalCallService {
@@ -67,7 +69,7 @@ public class LoadAuthHotDataLocalCallService {
             }
 
             // 加载权限
-            authUserDetailsService.loadAuthorities(userModel.getId());
+            final Set<GrantedAuthority> grantedAuthorities = authUserDetailsService.loadAuthorities(userModel.getId());
         }
         log.info("local-call loadHotData success!");
     }

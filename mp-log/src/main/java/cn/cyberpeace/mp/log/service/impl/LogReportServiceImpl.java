@@ -50,8 +50,8 @@ public class LogReportServiceImpl implements LogReportService {
      @Transactional
     @Override
     public int report(LogReportTypeEnum logReportTypeEnum, List<LogReportDTO> list) {
-        HumanCondition condition = new HumanCondition();
-        condition.filterEqual("type", logReportTypeEnum.toValue());
+        HumanCondition condition = new HumanCondition()
+        .filterEqual("type", logReportTypeEnum.toValue());
         int delete = logReportMapper.filterDelete(condition);
         log.info("delete history log report type:{}, num：{}",logReportTypeEnum,delete);
         List<LogReportPO> logReportPOS = logReportDTOConverter.sourceToTarget(list);
@@ -69,7 +69,7 @@ public class LogReportServiceImpl implements LogReportService {
     public List<LogReportDTO> list(String type){
         HumanCondition humanCondition = new HumanCondition();
         if (StringUtils.isNotBlank(type)) {
-            humanCondition.filterEqual("type", type);
+            humanCondition = humanCondition.filterEqual("type", type);
         }
         List<LogReportPO> list = logReportMapper.list(humanCondition);
         list.forEach(logReportPO -> {

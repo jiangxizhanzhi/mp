@@ -105,8 +105,8 @@ public class DefaultImgUtil {
         if (StringUtils.isNotBlank(url) && url.startsWith(AuthConstant.FDFS_PREFIX)) {
             String tmpUrl = url.substring(6);
 
-            HumanCondition humanCondition = new HumanCondition();
-            humanCondition.filterEqual(LocalFileMappingModel::getRemoteFile, tmpUrl);
+            HumanCondition humanCondition = new HumanCondition()
+            .filterEqual(LocalFileMappingModel::getRemoteFile, tmpUrl);
             List<LocalFileMappingModel> mappingModels = localFileMappingMapper.list(humanCondition);
             if (CollectionUtils.isNotEmpty(mappingModels)) {
                 url = getPathByGroup(mappingModels.get(0).getGroup()).concat(FileUtil.FILE_SEPARATOR).concat(mappingModels.get(0).getName());
@@ -130,8 +130,8 @@ public class DefaultImgUtil {
                         DefaultImgDirEnum.SAFETY_EQUIPMENT.getGroup(), DefaultImgDirEnum.COMMON_TARGET.getGroup());
             }
 
-            HumanCondition humanCondition = new HumanCondition();
-            humanCondition.filterIn(LocalFileMappingModel::getGroup, groupList.toArray());
+            HumanCondition humanCondition = new HumanCondition()
+            .filterIn(LocalFileMappingModel::getGroup, groupList.toArray());
             List<LocalFileMappingModel> fileMappingModels = localFileMappingMapper.list(humanCondition);
             if (CollectionUtils.isNotEmpty(fileMappingModels)) {
                 modelList = fileMappingModels;

@@ -57,54 +57,16 @@ public class FastDfsFileServiceImpl implements FileService {
 
     }
 
-    /**
-     * 文件下载
-     * @param filePath
-     * @param response
-     * @throws MpRuntimeException
-     */
     @Override
     public void downloadFile(String filePath, HttpServletResponse response) throws MpRuntimeException {
-        InputStream is = null;
-        OutputStream os = null;
-        try {
-            byte[] fileByte = FsCommon.downloadRawContent(filePath);
-            if (ArrayUtils.isEmpty(fileByte)) {
-                log.error("downloadFile not exist");
-                throw new MpRuntimeException(CommonErrorCode.FILE_DOWNLOAD_FAILED);
-            }
-            is = new ByteArrayInputStream(fileByte);
-            os = response.getOutputStream();
-            byte[] buffer = new byte[1024 * 5];
-            int len = 0;
-            while ((len = is.read(buffer)) > 0) {
-                os.write(buffer, 0, len);
-            }
-            os.flush();
-        } catch (Exception e) {
-            log.error("downloadFile error", e);
-            throw new MpRuntimeException(CommonErrorCode.FILE_DOWNLOAD_FAILED);
-        } finally {
-            IOUtils.closeQuietly(is);
-            IOUtils.closeQuietly(os);
-        }
+
     }
 
-    /**
-     * 文件删除
-     * @param filePath
-     * @return
-     */
     @Override
-    public ServiceResult<Void> deleteFile(String filePath) {
-        try {
-            FsCommon.delete(filePath);
-        } catch (MpRuntimeException e) {
-            log.error("deleteFile error", e);
-            return ResultCommon.fail(e.getMessage());
-        }
-        return ResultCommon.success();
+    public ServiceResult deleteFile(String filePath) {
+        return null;
     }
+
 
     /**
      * 上传通用方法，只上传到服务器，不保存记录到数据库

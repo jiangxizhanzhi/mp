@@ -68,8 +68,8 @@ public class ActivMenuController {
     @OperateLog(module = OpModuleEnums.SYSTEM, type = OpTypeEnums.UPDATE, title = "更新菜单列表", target = OpTargetEnums.MENU)
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ServiceResult activMenu(MultipartFile file) {
-        activMenuService.reImportMenus(file);
-        return ResultCommon.success();
+         final boolean b = activMenuService.reImportMenus(file);
+         return ResultCommon.success();
     }
 
      /**

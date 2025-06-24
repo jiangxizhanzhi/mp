@@ -258,7 +258,7 @@ public class LogSettingServiceImpl implements ILogSettingService {
     public ServiceResult<List<LogLevelResponse>> resetDefualtLogLevel() {
         if (LoggerFactory.getILoggerFactory() instanceof LoggerContext) {
             //删除所有日志级别记录
-            mpLogLevelMapper.deleteAll();
+            final int i = mpLogLevelMapper.deleteAll();
             setRootDefaultAndOtherNull();
         }
         return this.getLogLevel(null);
@@ -383,7 +383,7 @@ public class LogSettingServiceImpl implements ILogSettingService {
             }
         } else if (StringUtils.isNotEmpty(EnvConfig.getApplicationExt())) {
             //如果前两者都不存在，配置application-ext.yml日志级别
-            setYamlRootLevel(rootLevel,  EnvConfig.getApplicationExt());
+            final boolean b = setYamlRootLevel(rootLevel, EnvConfig.getApplicationExt());
         }
     }
 

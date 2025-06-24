@@ -56,10 +56,10 @@ public class SysNoticeReadServiceImpl extends BaseModelServiceImpl<SysNoticeRead
     public SysNoticeReadModel selectByUserIdAndNoticeId(String user, String noticeId) {
         HumanCondition condition = new HumanCondition();
         if (StringUtils.isNotBlank(user)) {
-            condition.filterEqual(SysNoticeReadModel::getUser, user);
+            condition = condition.filterEqual(SysNoticeReadModel::getUser, user);
         }
         if (StringUtils.isNotBlank(noticeId)) {
-            condition.filterEqual(SysNoticeReadModel::getNoticeId, noticeId);
+            condition = condition.filterEqual(SysNoticeReadModel::getNoticeId, noticeId);
         }
         SysNoticeReadModel model = getModelMapper().first(condition);
         return model;
@@ -93,13 +93,13 @@ public class SysNoticeReadServiceImpl extends BaseModelServiceImpl<SysNoticeRead
       */
      @Override
     public int countIsReadedOrIsUnPush(String user) {
-        HumanCondition condition = new HumanCondition();
-        condition.filterEqual(SysNoticeReadModel::getUser, user);
-        condition.filterOrStart()
+        HumanCondition condition = new HumanCondition()
+        .filterEqual(SysNoticeReadModel::getUser, user)
+        .filterOrStart()
                 .orEqual(SysNoticeReadModel::getIsReaded, SysNoticeReadModel.NOTICE_READED)
                 .orEqual(SysNoticeReadModel::getIsNeedPush, SysNoticeReadModel.NOTICE_NEED_PUSH)
-                .filterOrEnd();
-        condition.selectAs(Count.f(SysNoticeReadModel::getNoticeId).distinct(), AdminConstant.SYS_NOTICE_READ_COUNT_DISTINCT_NOTICEID);
+                .filterOrEnd()
+        .selectAs(Count.f(SysNoticeReadModel::getNoticeId).distinct(), AdminConstant.SYS_NOTICE_READ_COUNT_DISTINCT_NOTICEID);
         Map<String, Object> stringObjectMap = getModelMapper().originFirst(condition);
         return ((Long) stringObjectMap.get(AdminConstant.SYS_NOTICE_READ_COUNT_DISTINCT_NOTICEID)).intValue();
     }

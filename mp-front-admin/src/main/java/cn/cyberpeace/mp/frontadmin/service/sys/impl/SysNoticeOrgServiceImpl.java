@@ -62,12 +62,12 @@ public class SysNoticeOrgServiceImpl extends BaseModelServiceImpl<SysNoticeOrgMo
     public List<OrgModel> listByNoticeIds(List<String> noticeIds) {
         HumanCondition humanCondition = new HumanCondition();
         if (CollUtil.isNotEmpty(noticeIds)) {
-            humanCondition.link(OrgModel.class, SysNoticeOrgModel.class)
+            humanCondition = humanCondition.link(OrgModel.class, SysNoticeOrgModel.class)
                     .filterLink(OrgModel.class, OrgModel::getId, SysNoticeOrgModel.class, SysNoticeOrgModel::getOrg)
                     .currentLink(SysNoticeOrgModel.class)
                     .filterIn(SysNoticeOrgModel::getNoticeId, noticeIds.toArray());
         }
-        humanCondition.distinct();
+        humanCondition = humanCondition.distinct();
         List<OrgModel> orgModels = orgMapper.list(humanCondition);
         return orgModels;
     }
@@ -82,7 +82,7 @@ public class SysNoticeOrgServiceImpl extends BaseModelServiceImpl<SysNoticeOrgMo
     public int deleteByNoticeIds(List<String> noticeIds) {
         HumanCondition condition = new HumanCondition();
         if (CollectionUtil.isNotEmpty(noticeIds)) {
-            condition.filterIn(SysNoticeOrgModel::getNoticeId, noticeIds.toArray());
+            condition = condition.filterIn(SysNoticeOrgModel::getNoticeId, noticeIds.toArray());
         }
         int rows = getModelMapper().filterDelete(condition);
         return rows;

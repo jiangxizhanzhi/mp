@@ -305,13 +305,13 @@ public class MenuSetService {
      private List<MenuTemplateModel> listAll(String tenant, Integer type, String templateId) {
         HumanCondition humanCondition = new HumanCondition();
         if (Objects.nonNull(type)) {
-            humanCondition.filterEqual(MenuTemplateModel::getType, type);
+            humanCondition = humanCondition.filterEqual(MenuTemplateModel::getType, type);
         }
         if (StringUtils.isNotBlank(tenant)) {
-            humanCondition.filterEqual(MenuTemplateModel::getTenant, tenant);
+            humanCondition = humanCondition.filterEqual(MenuTemplateModel::getTenant, tenant);
         }
-        humanCondition.filterEqual(MenuTemplateModel::getTemplateId, templateId);
-        humanCondition.filterEqual(MenuTemplateModel::getVisible, AuthConstant.TARGET_FIELD_VALUE_VISIBLE_1);
+        humanCondition = humanCondition.filterEqual(MenuTemplateModel::getTemplateId, templateId);
+        humanCondition = humanCondition.filterEqual(MenuTemplateModel::getVisible, AuthConstant.TARGET_FIELD_VALUE_VISIBLE_1);
         List<MenuTemplateModel> targets = menuTemplateMapper.list(humanCondition);
         return targets;
     }

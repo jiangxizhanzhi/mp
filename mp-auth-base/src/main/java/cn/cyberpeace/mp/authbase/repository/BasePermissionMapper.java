@@ -88,8 +88,8 @@ public interface BasePermissionMapper<P extends BasePermissionModel, T extends B
 
     @Recommendation
     default int deleteByOwner(String owner) {
-        HumanCondition humanCondition = new HumanCondition();
-        humanCondition.filterEqual("owner", owner);
+        HumanCondition humanCondition = new HumanCondition()
+        .filterEqual("owner", owner);
 
         return filterDelete(humanCondition);
     }
@@ -97,8 +97,8 @@ public interface BasePermissionMapper<P extends BasePermissionModel, T extends B
 
     @Recommendation
     default int deleteByTarget(String target) {
-        HumanCondition humanCondition = new HumanCondition();
-        humanCondition.filterEqual("target", target);
+        HumanCondition humanCondition = new HumanCondition()
+        .filterEqual("target", target);
 
         return filterDelete(humanCondition);
     }

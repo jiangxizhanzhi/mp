@@ -210,8 +210,8 @@ public class UrlACService {
             throw new MpRuntimeException("update urlac failed!");
         }
 
-        urlACTargetService.deleteByUrlACId(ArrayUtils.toArray(urlacId));
-        if (CollUtil.isNotEmpty(updateReq.getTargetIds())) {
+         final int i = urlACTargetService.deleteByUrlACId(ArrayUtils.toArray(urlacId));
+         if (CollUtil.isNotEmpty(updateReq.getTargetIds())) {
             List<UrlACTargetModel> acTargetModels =
                     updateReq.getTargetIds().stream().map(tid ->
                         UrlACTargetModel.builder()

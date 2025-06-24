@@ -50,7 +50,7 @@ public class QueryParentTargetOperation implements TargetOperation<TargetBo> {
                 TargetBo parentTargetBo = new TargetBo();
                 BeanUtils.copyProperties(parentTarget, parentTargetBo);
                 targetBo.setParentTarget(parentTargetBo);
-                parentTargetBo.execute(this);
+                final TargetBo execute = parentTargetBo.execute(this);
             }
         }
 

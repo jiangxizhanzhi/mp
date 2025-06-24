@@ -185,8 +185,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         if (CollectionUtils.isEmpty(ids)) {
             return Collections.emptyList();
         }
-        HumanCondition condition = new HumanCondition();
-        condition.filterIn(UserModel::getId, ids.toArray());
+        HumanCondition condition = new HumanCondition()
+        .filterIn(UserModel::getId, ids.toArray());
         List<UserModel> userModels = getModelMapper().list(condition);
         userModels.forEach(this::setDefaultIfNoAvatar);
         return userModels;
@@ -453,7 +453,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         // 保存组织-用户关系
         if (CollectionUtil.isNotEmpty(modifyRequest.getOrgIds())) {
             // 清除原来所有用户关联的组织
-            tenantUserService.deleteByUserId(userId);
+            final boolean b = tenantUserService.deleteByUserId(userId);
 
             modifyRequest.getOrgIds().forEach(id -> {
                 boolean isOrgExist = orgService.exists(id);
@@ -471,7 +471,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         // 保存角色-用户关系
         if (CollectionUtil.isNotEmpty(modifyRequest.getRoleIds())) {
             // 清除原来所有用户关联的角色
-            userRoleService.deleteByUserId(userId);
+            final boolean b = userRoleService.deleteByUserId(userId);
 
             modifyRequest.getRoleIds().forEach(id -> {
                 boolean isRoleExist = roleService.exists(id);
@@ -607,7 +607,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         StringBuilder errMsg = new StringBuilder();
         for (String userId : userIds) {
             try {
-                disable(userId);
+                final boolean disabled = disable(userId);
             } catch (Exception e) {
                 errMsg.append(e.getMessage());
             }
@@ -652,7 +652,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         StringBuilder errMsg = new StringBuilder();
         for (String userId : userIds) {
             try {
-                enable(userId);
+                final boolean enableBoolean = enable(userId);
             } catch (Exception e) {
                 errMsg.append(e.getMessage());
             }
@@ -697,7 +697,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         StringBuilder errMsg = new StringBuilder();
         for (String userId : userIds) {
             try {
-                approve(userId);
+                final boolean approved = approve(userId);
             } catch (Exception e) {
                 errMsg.append(e.getMessage());
             }
@@ -710,22 +710,22 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     public void loadListFilterCondition(HumanCondition humanCondition, UserQueryParams queryParams) {
         String tenant = queryParams.getTenant();
         if (tenant != null) {
-            humanCondition.filterEqual("tenant", tenant);
+            humanCondition = humanCondition.filterEqual("tenant", tenant);
         }
 
         String username = queryParams.getUsername();
         if (username != null) {
-            humanCondition.filterContains("username", username);
+            humanCondition = humanCondition.filterContains("username", username);
         }
 
         String name = queryParams.getName();
         if (name != null) {
-            humanCondition.filterContains("name", name);
+            humanCondition = humanCondition.filterContains("name", name);
         }
 
         Integer status = queryParams.getStatus();
         if (Objects.nonNull(status)) {
-            humanCondition.filterEqual("status", status);
+            humanCondition = humanCondition.filterEqual("status", status);
         }
     }
 

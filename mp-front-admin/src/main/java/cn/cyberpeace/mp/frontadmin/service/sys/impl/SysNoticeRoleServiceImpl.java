@@ -62,12 +62,12 @@ public class SysNoticeRoleServiceImpl extends BaseModelServiceImpl<SysNoticeRole
     public List<RoleModel> listByNoticeIds(List<String> noticeIds) {
         HumanCondition humanCondition = new HumanCondition();
         if (CollUtil.isNotEmpty(noticeIds)) {
-            humanCondition.link(RoleModel.class, SysNoticeRoleModel.class)
+            humanCondition = humanCondition.link(RoleModel.class, SysNoticeRoleModel.class)
                     .filterLink(RoleModel.class, RoleModel::getId, SysNoticeRoleModel.class, SysNoticeRoleModel::getRole)
                     .currentLink(SysNoticeRoleModel.class)
                     .filterIn(SysNoticeRoleModel::getNoticeId, noticeIds.toArray());
         }
-        humanCondition.distinct();
+        humanCondition = humanCondition.distinct();
         List<RoleModel> models = roleMapper.list(humanCondition);
         return models;
     }
@@ -82,7 +82,7 @@ public class SysNoticeRoleServiceImpl extends BaseModelServiceImpl<SysNoticeRole
     public int deleteByNoticeIds(List<String> noticeIds) {
         HumanCondition condition = new HumanCondition();
         if (CollectionUtil.isNotEmpty(noticeIds)) {
-            condition.filterIn(SysNoticeRoleModel::getNoticeId, noticeIds.toArray());
+            condition = condition.filterIn(SysNoticeRoleModel::getNoticeId, noticeIds.toArray());
         }
         int rows = getModelMapper().filterDelete(condition);
         return rows;

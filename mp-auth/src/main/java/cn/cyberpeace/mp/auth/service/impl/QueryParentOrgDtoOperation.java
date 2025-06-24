@@ -50,7 +50,7 @@ public class QueryParentOrgDtoOperation implements OrgDtoOperation<OrgDto> {
                 OrgDto parentOrgDto = new OrgDto();
                 BeanUtils.copyProperties(parentOrgBO, parentOrgDto);
                 orgDto.setParentOrg(parentOrgDto);
-                parentOrgDto.execute(this);
+                final OrgDto execute = parentOrgDto.execute(this);
             }
         }
 

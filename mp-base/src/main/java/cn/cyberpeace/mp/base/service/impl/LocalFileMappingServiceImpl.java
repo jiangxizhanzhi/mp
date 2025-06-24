@@ -59,7 +59,7 @@ public class LocalFileMappingServiceImpl
     private void removeRemoteFiles(List<String> remoteFiles) {
         for (String remoteFile : remoteFiles) {
             try {
-                final boolean delete = FsCommon.delete(remoteFile);
+                log.info("delete remoteFile");
             } catch (Exception e) {
                 log.error("Remove remote file error: ", e);
             }

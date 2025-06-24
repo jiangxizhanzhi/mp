@@ -39,12 +39,12 @@ public class TenantServiceImpl extends BaseModelServiceImpl<TenantModel, TenantM
     public void loadListFilterCondition(HumanCondition humanCondition, TenantQueryParams queryParams) {
         String name = queryParams.getName();
         if (name != null) {
-            humanCondition.filterEqual("name", name);
+            humanCondition = humanCondition.filterEqual("name", name);
         }
 
         String identifier = queryParams.getIdentifier();
         if (identifier != null) {
-            humanCondition.filterEqual("identifier", identifier);
+            humanCondition = humanCondition.filterEqual("identifier", identifier);
         }
     }
 

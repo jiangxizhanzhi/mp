@@ -319,10 +319,10 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
         }
 
         // 删除用户角色
-        HumanCondition humanCondition = new HumanCondition();
-        humanCondition.filterEqual(UserRoleModel::getRole, roleId);
+        HumanCondition humanCondition = new HumanCondition()
+        .filterEqual(UserRoleModel::getRole, roleId);
         if (CollectionUtil.isNotEmpty(userIds)) {
-            humanCondition.filterIn(UserRoleModel::getUser, userIds.toArray());
+            humanCondition = humanCondition.filterIn(UserRoleModel::getUser, userIds.toArray());
         }
         getModelMapper().filterDelete(humanCondition);
 
@@ -363,7 +363,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
                 .filterIn(RoleModel::getId, roles.toArray())
                 .distinct();
         int total = roleMapper.total(roleCondition);
-        roleCondition.pagination(page, pageSize);
+        roleCondition = roleCondition.pagination(page, pageSize);
         List<RoleModel> models = roleMapper.list(roleCondition);
         ListObjServiceResult<RoleModel> result = new ListObjServiceResult(new ListObjResult(models, total).asResult()).asResult();
         return result;
@@ -441,7 +441,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
                 .orderBy(UserModel::getUsername)
                 .distinct();
         int total = userMapper.total(userCondition);
-        userCondition.pagination(page, pageSize);
+        userCondition = userCondition.pagination(page, pageSize);
         List<UserModel> userModels = userMapper.list(userCondition);
 
         HumanCondition orgCondition = new HumanCondition()

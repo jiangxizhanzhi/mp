@@ -162,7 +162,7 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
 
         TargetBo targetBo = new TargetBo();
         BeanUtils.copyProperties(parentTarget, targetBo);
-        targetBo.execute(queryChildTargetOperation);
+        final TargetBo execute = targetBo.execute(queryChildTargetOperation);
 
         return CollectionUtil.toList(targetBo);
     }
@@ -172,12 +172,12 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
     public List<TargetModel> listAll(String tenant, Integer type) {
         HumanCondition humanCondition = new HumanCondition();
         if (Objects.nonNull(type)) {
-            humanCondition.filterEqual(TargetModel::getType, type);
+            humanCondition = humanCondition.filterEqual(TargetModel::getType, type);
         }
         if (StringUtils.isNotBlank(tenant)) {
-            humanCondition.filterEqual(TargetModel::getTenant, tenant);
+            humanCondition = humanCondition.filterEqual(TargetModel::getTenant, tenant);
         }
-        humanCondition.filterEqual(TargetModel::getVisible, AuthConstant.TARGET_FIELD_VALUE_VISIBLE_1);
+        humanCondition = humanCondition.filterEqual(TargetModel::getVisible, AuthConstant.TARGET_FIELD_VALUE_VISIBLE_1);
         List<TargetModel> targets = getModelMapper().list(humanCondition);
         return targets;
     }
@@ -186,10 +186,10 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
     public List<TargetModel> listAllIgnoreVisible(String tenant, Integer type) {
         HumanCondition humanCondition = new HumanCondition();
         if (Objects.nonNull(type)) {
-            humanCondition.filterEqual(TargetModel::getType, type);
+            humanCondition = humanCondition.filterEqual(TargetModel::getType, type);
         }
         if (StringUtils.isNotBlank(tenant)) {
-            humanCondition.filterEqual(TargetModel::getTenant, tenant);
+            humanCondition = humanCondition.filterEqual(TargetModel::getTenant, tenant);
         }
         List<TargetModel> targets = getModelMapper().list(humanCondition);
         return targets;
@@ -199,12 +199,12 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
     public List<TargetModel> listByMultiTypes(String tenant, Integer[] types) {
         HumanCondition humanCondition = new HumanCondition();
         if (Objects.nonNull(types) && types.length > 0) {
-            humanCondition.filterIn(TargetModel::getType, types);
+            humanCondition = humanCondition.filterIn(TargetModel::getType, types);
         }
         if (StringUtils.isNotBlank(tenant)) {
-            humanCondition.filterEqual(TargetModel::getTenant, tenant);
+            humanCondition = humanCondition.filterEqual(TargetModel::getTenant, tenant);
         }
-        humanCondition.filterEqual(TargetModel::getVisible, AuthConstant.TARGET_FIELD_VALUE_VISIBLE_1);
+        humanCondition = humanCondition.filterEqual(TargetModel::getVisible, AuthConstant.TARGET_FIELD_VALUE_VISIBLE_1);
         List<TargetModel> targets = getModelMapper().list(humanCondition);
         return targets;
     }

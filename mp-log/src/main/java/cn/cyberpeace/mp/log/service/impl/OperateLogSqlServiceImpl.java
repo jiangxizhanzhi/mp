@@ -165,41 +165,41 @@ public class OperateLogSqlServiceImpl extends BaseModelServiceImpl<OperateLogSql
 
 
         if (StringUtils.isNotBlank(request.getUserId())) {
-            humanCondition.filterEqual(OperateLogSqlModel::getUserId, request.getUserId());
+            humanCondition = humanCondition.filterEqual(OperateLogSqlModel::getUserId, request.getUserId());
         }
 
         if (Objects.nonNull(request.getModule())) {
-            humanCondition.filterEqual(OperateLogSqlModel::getOpModuleId, request.getModule());
+            humanCondition = humanCondition.filterEqual(OperateLogSqlModel::getOpModuleId, request.getModule());
         } else {
             List<Integer> moduleOrdinals = Arrays.stream(OpModuleEnums.values()).map(m -> m.ordinal()).collect(Collectors.toList());
             moduleOrdinals.add(-1);
-            humanCondition.filterIn(OperateLogSqlModel::getOpModuleId, moduleOrdinals.toArray(new Integer[0]));
+            humanCondition = humanCondition.filterIn(OperateLogSqlModel::getOpModuleId, moduleOrdinals.toArray(new Integer[0]));
         }
 
         if (Objects.nonNull(request.getOpType())) {
-            humanCondition.filterEqual(OperateLogSqlModel::getOpTypeId, request.getOpType());
+            humanCondition = humanCondition.filterEqual(OperateLogSqlModel::getOpTypeId, request.getOpType());
         } else {
             List<Integer> opTypeOrdinals = Arrays.stream(OpTypeEnums.values()).map(m -> m.ordinal()).collect(Collectors.toList());
             opTypeOrdinals.add(-1);
-            humanCondition.filterIn(OperateLogSqlModel::getOpTypeId, opTypeOrdinals.toArray(new Integer[0]));
+            humanCondition = humanCondition.filterIn(OperateLogSqlModel::getOpTypeId, opTypeOrdinals.toArray(new Integer[0]));
         }
 
         if (Objects.nonNull(request.getUserNameOrOpTarget())) {
-            humanCondition.filterOrStart()
+            humanCondition = humanCondition.filterOrStart()
                     .orContains(OperateLogSqlModel::getUserName, request.getUserNameOrOpTarget())
                     .orContains(OperateLogSqlModel::getOpTarget, request.getUserNameOrOpTarget())
                     .filterOrEnd();
         }
         String createTime = BeanUtils.getBeanGetterFieldName(OperateLogSqlModel::getCreateTime);
         if (Objects.nonNull(request.getStartDate())) {
-            humanCondition.filterGreaterThanOrEqual(createTime, request.getStartDate());
+            humanCondition = humanCondition.filterGreaterThanOrEqual(createTime, request.getStartDate());
         }
         if (Objects.nonNull(request.getEndDate())) {
-            humanCondition.filterLessThanOrEqual(createTime, request.getEndDate());
+            humanCondition = humanCondition.filterLessThanOrEqual(createTime, request.getEndDate());
         }
         // 查询符合条件的条数
         int total = getModelMapper().total(humanCondition);
-        humanCondition.orderBy("-" + createTime);
+        humanCondition = humanCondition.orderBy("-" + createTime);
 
         // 设置分页条件、查询
         humanCondition.setLimit(request.getPerPage());

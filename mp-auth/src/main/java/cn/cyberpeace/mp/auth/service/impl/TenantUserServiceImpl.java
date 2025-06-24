@@ -199,9 +199,9 @@ public class TenantUserServiceImpl
                 .currentLink(TenantUserModel.class)
                 .filterNotEqual(TenantUserModel::getUser, "");
         if (CollectionUtil.isNotEmpty(userIds)) {
-            humanCondition.filterIn(TenantUserModel::getUser, userIds.toArray());
+            humanCondition = humanCondition.filterIn(TenantUserModel::getUser, userIds.toArray());
         }
-        humanCondition.currentLink(TenantUserModel.class)
+        humanCondition = humanCondition.currentLink(TenantUserModel.class)
                 .selectAs(TenantUserModel::getUser, "userId")
                 .currentLink(OrgModel.class)
                 .selectAs(GroupConcat.f(OrgModel::getId).distinct(), "orgIds")
@@ -221,9 +221,9 @@ public class TenantUserServiceImpl
                 .currentLink(TenantUserModel.class)
                 .filterNotEqual(TenantUserModel::getUser, "");
         if (CollectionUtil.isNotEmpty(userIds)) {
-            humanCondition.filterIn(TenantUserModel::getUser, userIds.toArray());
+            humanCondition = humanCondition.filterIn(TenantUserModel::getUser, userIds.toArray());
         }
-        humanCondition.currentLink(OrgModel.class)
+        humanCondition = humanCondition.currentLink(OrgModel.class)
                 .select(OrgFields.allFields.getFields())
                 .distinct()
                 .currentLink(TenantUserModel.class)
@@ -433,25 +433,25 @@ public class TenantUserServiceImpl
         if (CollectionUtil.isEmpty(tenantUserIds)) {
             return new ArrayList<>();
         }
-        humanCondition.filterIn(UserModel::getId, tenantUserIds.toArray());
+        humanCondition = humanCondition.filterIn(UserModel::getId, tenantUserIds.toArray());
         if (CollectionUtil.isNotEmpty(excludeRoleIds)) {
             HumanCondition userRoleCondition = new HumanCondition()
                     .filterIn(UserRoleModel::getRole, excludeRoleIds.toArray());
             if (StringUtils.isNotBlank(selfUserId)) {
-                userRoleCondition.filterNotEqual(UserRoleModel::getUser, selfUserId);
+                userRoleCondition = userRoleCondition.filterNotEqual(UserRoleModel::getUser, selfUserId);
             }
             userRoleCondition.select(UserRoleModel::getUser).distinct();
             List<UserRoleModel> userRoleModels = userRoleMapper.list(userRoleCondition);
             List<String> roleUserIds = userRoleModels.stream().map(UserRoleModel::getUser).collect(Collectors.toList());
             if (CollectionUtil.isNotEmpty(roleUserIds)) {
-                humanCondition.filterNotIn(UserModel::getId, roleUserIds.toArray());
+                humanCondition = humanCondition.filterNotIn(UserModel::getId, roleUserIds.toArray());
             }
         }
 
         if (CollectionUtil.isNotEmpty(excludeUserIds)) {
-            humanCondition.filterNotIn(UserModel::getId, excludeUserIds.toArray());
+            humanCondition = humanCondition.filterNotIn(UserModel::getId, excludeUserIds.toArray());
         }
-        humanCondition.orderBy(UserModel::getUpdateTime, true).orderBy(UserModel::getUsername);
+        humanCondition = humanCondition.orderBy(UserModel::getUpdateTime, true).orderBy(UserModel::getUsername);
         List<UserModel> userModels = userMapper.list(humanCondition);
         return userModels;
     }
@@ -540,59 +540,59 @@ public class TenantUserServiceImpl
             if (CollectionUtil.isEmpty(ids)) {
                 return null;
             }
-            humanCondition.filterIn(UserModel::getId, ids.toArray());
+            humanCondition = humanCondition.filterIn(UserModel::getId, ids.toArray());
         }
 
         if (CollectionUtil.isNotEmpty(userIds)) {
-            humanCondition.filterIn(UserModel::getId, userIds.toArray());
+            humanCondition = humanCondition.filterIn(UserModel::getId, userIds.toArray());
         }
 
         if (CollectionUtil.isNotEmpty(excludeRoleIds)) {
             HumanCondition excludeRoleCondition = new HumanCondition()
                     .filterIn(UserRoleModel::getRole, excludeRoleIds.toArray());
             if (StringUtils.isNotBlank(selfUserId)) {
-                excludeRoleCondition.filterNotEqual(UserRoleModel::getUser, selfUserId);
+                excludeRoleCondition = excludeRoleCondition.filterNotEqual(UserRoleModel::getUser, selfUserId);
             }
-            excludeRoleCondition.select(UserRoleModel::getUser);
+            excludeRoleCondition = excludeRoleCondition.select(UserRoleModel::getUser);
             List<UserRoleModel> userRoleModels = userRoleMapper.list(excludeRoleCondition);
             List<String> ids = userRoleModels.stream().map(UserRoleModel::getUser).collect(Collectors.toList());
             if (CollectionUtil.isNotEmpty(ids)) {
-                humanCondition.filterNotIn(UserModel::getId, ids.toArray());
+                humanCondition = humanCondition.filterNotIn(UserModel::getId, ids.toArray());
             }
         }
 
         if (CollectionUtil.isNotEmpty(excludeUserIds)) {
-            humanCondition.filterNotIn(UserModel::getId, excludeUserIds.toArray());
+            humanCondition = humanCondition.filterNotIn(UserModel::getId, excludeUserIds.toArray());
         }
 
         if (CollectionUtil.isNotEmpty(excludeRoleIds)) {
-            humanCondition.filterNotIn(UserModel::getId, excludeRoleIds.toArray());
+            humanCondition = humanCondition.filterNotIn(UserModel::getId, excludeRoleIds.toArray());
         }
 
         if (Objects.nonNull(userBo)) {
             if (Objects.nonNull(userBo.getIsEnabled())) {
-                humanCondition.filterEqual(UserModel::getIsEnabled, userBo.getIsEnabled());
+                humanCondition = humanCondition.filterEqual(UserModel::getIsEnabled, userBo.getIsEnabled());
             }
             if (Objects.nonNull(userBo.getIsAudited())) {
-                humanCondition.filterEqual(UserModel::getIsAudited, userBo.getIsAudited());
+                humanCondition = humanCondition.filterEqual(UserModel::getIsAudited, userBo.getIsAudited());
             }
             if (Objects.nonNull(userBo.getIsExpired()) && Objects.equals(userBo.getIsExpired(), 0)) {
-                humanCondition.filterGreaterThan(UserModel::getExpiredTime, currentDateTime);
+                humanCondition = humanCondition.filterGreaterThan(UserModel::getExpiredTime, currentDateTime);
             }
             if (Objects.nonNull(userBo.getIsExpired()) && !Objects.equals(userBo.getIsExpired(), 0)) {
-                humanCondition.filterLessThan(UserModel::getExpiredTime, currentDateTime);
+                humanCondition = humanCondition.filterLessThan(UserModel::getExpiredTime, currentDateTime);
             }
             if (StringUtils.isNotBlank((userBo.getUsername()))) {
-                humanCondition.filterOrStart()
+                humanCondition = humanCondition.filterOrStart()
                         .orContains(UserModel::getUsername, userBo.getUsername())
                         .orContains(UserModel::getName, userBo.getUsername())
                         .filterOrEnd();
             }
         }
-        humanCondition.groupBy(UserModel::getId);
+        humanCondition = humanCondition.groupBy(UserModel::getId);
         if (CollectionUtil.isNotEmpty(orders)) {
             for (String order : orders) {
-                humanCondition.orderBy(order);
+                humanCondition = humanCondition.orderBy(order);
             }
         }
         return humanCondition;

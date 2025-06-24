@@ -244,8 +244,8 @@ public class SysActivationService {
       */
      public void resetMenuVisibility() {
         ACTIVATION_CONTENT = status();
-        activMenuService.resetMenusVisibility(ACTIVATION_CONTENT);
-    }
+         final boolean b = activMenuService.resetMenusVisibility(ACTIVATION_CONTENT);
+     }
 
      /**
       * 查询系统激活状态
@@ -302,8 +302,8 @@ public class SysActivationService {
       * @return
       */
      public String querySysUUID() {
-        status();
-        SysActivCtlModel sysActivCtlModel = null;
+         final ActivationResponse statusResponse = status();
+         SysActivCtlModel sysActivCtlModel = null;
         if (Objects.isNull(ACTIVATION_CONTENT) || Objects.equals(AdminConstant.STATUS_NOT_ACTIVITED, ACTIVATION_CONTENT.getIsActived())) {
             sysActivCtlModel = sysCtlService.generateOrGetUnusedActivCtlModel();
         } else {

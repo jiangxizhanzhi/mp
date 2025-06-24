@@ -132,12 +132,12 @@ public class TemplateTargetServiceImpl implements TargetService {
     public List<MenuTemplateModel> listAll(String tenant, Integer type) {
         HumanCondition humanCondition = new HumanCondition();
         if (Objects.nonNull(type)) {
-            humanCondition.filterEqual(MenuTemplateModel::getType, type);
+            humanCondition = humanCondition.filterEqual(MenuTemplateModel::getType, type);
         }
         if (StringUtils.isNotBlank(tenant)) {
-            humanCondition.filterEqual(MenuTemplateModel::getTenant, tenant);
+            humanCondition = humanCondition.filterEqual(MenuTemplateModel::getTenant, tenant);
         }
-        humanCondition.filterEqual(MenuTemplateModel::getTemplateId, getUserTemplateId()).filterEqual(MenuTemplateModel::getVisible, AuthConstant.TARGET_FIELD_VALUE_VISIBLE_1);
+        humanCondition = humanCondition.filterEqual(MenuTemplateModel::getTemplateId, getUserTemplateId()).filterEqual(MenuTemplateModel::getVisible, AuthConstant.TARGET_FIELD_VALUE_VISIBLE_1);
         List<MenuTemplateModel> targets = getModelMapper().list(humanCondition);
         return targets;
     }
@@ -146,10 +146,10 @@ public class TemplateTargetServiceImpl implements TargetService {
     public List<MenuTemplateModel> listAllIgnoreVisible(String tenant, Integer type) {
         HumanCondition humanCondition = new HumanCondition();
         if (Objects.nonNull(type)) {
-            humanCondition.filterEqual(MenuTemplateModel::getType, type);
+            humanCondition = humanCondition.filterEqual(MenuTemplateModel::getType, type);
         }
         if (StringUtils.isNotBlank(tenant)) {
-            humanCondition.filterEqual(MenuTemplateModel::getTenant, tenant);
+            humanCondition = humanCondition.filterEqual(MenuTemplateModel::getTenant, tenant);
         }
         List<MenuTemplateModel> targets = getModelMapper().list(humanCondition);
         return targets;
@@ -159,12 +159,12 @@ public class TemplateTargetServiceImpl implements TargetService {
     public List<MenuTemplateModel> listByMultiTypes(String tenant, Integer[] types) {
         HumanCondition humanCondition = new HumanCondition();
         if (Objects.nonNull(types) && types.length > 0) {
-            humanCondition.filterIn(MenuTemplateModel::getType, types);
+            humanCondition= humanCondition.filterIn(MenuTemplateModel::getType, types);
         }
         if (StringUtils.isNotBlank(tenant)) {
-            humanCondition.filterEqual(MenuTemplateModel::getTenant, tenant);
+            humanCondition= humanCondition.filterEqual(MenuTemplateModel::getTenant, tenant);
         }
-        humanCondition.filterEqual(MenuTemplateModel::getTemplateId, getUserTemplateId()).filterEqual(MenuTemplateModel::getVisible, AuthConstant.TARGET_FIELD_VALUE_VISIBLE_1);
+        humanCondition = humanCondition.filterEqual(MenuTemplateModel::getTemplateId, getUserTemplateId()).filterEqual(MenuTemplateModel::getVisible, AuthConstant.TARGET_FIELD_VALUE_VISIBLE_1);
         List<MenuTemplateModel> targets = getModelMapper().list(humanCondition);
         return targets;
     }

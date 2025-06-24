@@ -48,7 +48,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.base.util.IdUtils;
+//import cn.cyberpeace.mp.base.util.IdUtils;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.hutool.core.collection.CollUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -171,16 +171,16 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     public List<RoleModel> listAll(RolePageRequest rolePageRequest) {
         List<String> excludeRoleIds = opRolePermCheckService.getExcludeRoleIdsByLoginUserForSearchingRoles();
         HumanCondition humanCondition = new HumanCondition();
-        humanCondition.filterEqual(RoleModel::getVisible, true);
+        humanCondition = humanCondition.filterEqual(RoleModel::getVisible, true);
         if (CollUtil.isNotEmpty(excludeRoleIds)) {
-            humanCondition.filterNotIn(RoleModel::getId, excludeRoleIds.toArray());
+            humanCondition = humanCondition.filterNotIn(RoleModel::getId, excludeRoleIds.toArray());
         }
 
         if (rolePageRequest.getOrders() != null && rolePageRequest.getOrders().length > 0) {
             var orders = CollUtil.newArrayList(rolePageRequest.getOrders());
             if (CollUtil.isNotEmpty(orders)) {
                 for (String order : orders) {
-                    humanCondition.orderBy(order);
+                    humanCondition = humanCondition.orderBy(order);
                 }
             }
         }
@@ -287,7 +287,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
 
         if (StringUtils.isBlank(roleModel.getIdentifier())) {
             // 如果ident为空，则随机生成一个
-            roleModel.setIdentifier(IdUtils.globalId());
+//            roleModel.setIdentifier(IdUtils.globalId());
         }
 
         ObjServiceResult<RoleModel> result = create(roleModel);
@@ -477,20 +477,20 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
 
     public ListObjServiceResult listWithUserCnt(String roleName, List<String> orders, List<String> excludeRoleIds, int page, int pageSize) {
         HumanCondition roleCondition = new HumanCondition();
-        roleCondition.filterEqual(RoleModel::getVisible, true);
+        roleCondition = roleCondition.filterEqual(RoleModel::getVisible, true);
         if (CollUtil.isNotEmpty(excludeRoleIds)) {
-            roleCondition.filterNotIn(RoleModel::getId, excludeRoleIds.toArray());
+            roleCondition = roleCondition.filterNotIn(RoleModel::getId, excludeRoleIds.toArray());
         }
         if (StringUtils.isNotBlank(roleName)) {
-            roleCondition.filterContains(RoleModel::getName, roleName);
+            roleCondition = roleCondition.filterContains(RoleModel::getName, roleName);
         }
         if (CollUtil.isNotEmpty(orders)) {
             for (String order : orders) {
-                roleCondition.orderBy(order);
+                roleCondition = roleCondition.orderBy(order);
             }
         }
         int total = getModelMapper().total(roleCondition);
-        roleCondition.pagination(page, pageSize);
+        roleCondition = roleCondition.pagination(page, pageSize);
         List<RoleModel> roleModels = getModelMapper().list(roleCondition);
         List<String> roleIds = roleModels.stream().map(RoleModel::getId).collect(Collectors.toList());
 

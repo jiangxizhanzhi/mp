@@ -173,10 +173,10 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
         LocalDateTime fromTime = LocalDateTime.now().minusMinutes(DEFAULT_MINUTES);
         HumanCondition humanCondition = new HumanCondition();
         if (CollectionUtil.isNotEmpty(userIds)) {
-            humanCondition.filterIn(UserOnlineRecordModel::getUser, userIds.toArray());
+            humanCondition = humanCondition.filterIn(UserOnlineRecordModel::getUser, userIds.toArray());
         }
-        humanCondition.filterGreaterThan(UserOnlineRecordModel::getEndTime, fromTime);
-        humanCondition.filterEqual(UserOnlineRecordModel::getStatus, AuthConstant.USER_ONLINE_RECORD_FIELD_VALUE_STATUS_0);
+        humanCondition = humanCondition.filterGreaterThan(UserOnlineRecordModel::getEndTime, fromTime);
+        humanCondition = humanCondition.filterEqual(UserOnlineRecordModel::getStatus, AuthConstant.USER_ONLINE_RECORD_FIELD_VALUE_STATUS_0);
         List<UserOnlineRecordModel> onlineList = getModelMapper().list(humanCondition);
         return onlineList;
     }
@@ -187,10 +187,10 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
         LocalDateTime fromTime = LocalDateTime.now().minusMinutes(DEFAULT_MINUTES);
         HumanCondition humanCondition = new HumanCondition();
         if (CollectionUtil.isNotEmpty(userIds)) {
-            humanCondition.filterIn(UserOnlineRecordModel::getUser, userIds.toArray());
+            humanCondition = humanCondition.filterIn(UserOnlineRecordModel::getUser, userIds.toArray());
         }
-        humanCondition.filterLessThan(UserOnlineRecordModel::getEndTime, fromTime);
-        humanCondition.filterEqual(UserOnlineRecordModel::getStatus, AuthConstant.USER_ONLINE_RECORD_FIELD_VALUE_STATUS_0);
+        humanCondition = humanCondition.filterLessThan(UserOnlineRecordModel::getEndTime, fromTime);
+        humanCondition = humanCondition.filterEqual(UserOnlineRecordModel::getStatus, AuthConstant.USER_ONLINE_RECORD_FIELD_VALUE_STATUS_0);
         List<UserOnlineRecordModel> onlineList = getModelMapper().list(humanCondition);
         return onlineList;
     }
