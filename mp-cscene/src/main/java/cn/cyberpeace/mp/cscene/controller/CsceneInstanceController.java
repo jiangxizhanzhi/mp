@@ -85,11 +85,10 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Api(value = "场景实例", tags = "CSCENE-场景实例")
 @Slf4j
@@ -916,16 +915,48 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @PostMapping("/exec_action")
     @ApiOperation(value="测试时执行python脚本并给出报告")
     public ServiceResult<Boolean> execAcation(String id) {
-        SceneHandler sceneHandler = new SceneHandler(id,null,false,null);
-       // json数据
-        ArrayList<String> jsonData = new ArrayList<>();
-        for(var e : sceneHandler.getElementMap().values()){
-            //类型是List<String>
-            jsonData.addAll(e.getJsonContext());
+        SceneHandler sceneHandler = new SceneHandler(id, null, false, null);
+
+        // 创建JSON数据
+        Map<String, Object> jsonData = new HashMap<>();
+        for (var e : sceneHandler.getElementMap().values()) {
+            jsonData.putAll(e.getJsonContext());
         }
-        // 请将json数据写入脚本之中
-        // 调用python脚本
-        flowInfoService.executePython("/demo_apls_basis.py", "脚本执行");
-        return new ServiceResult<>(true);
+
+        // Python脚本路径
+        String pythonScriptPath = "resources/scene_plugin_cloud/container_installer";
+
+        try {
+            // 获取脚本所在目录
+            File scriptFile = new File(pythonScriptPath);
+            String scriptDir = scriptFile.getParent();
+
+            // 将JSON数据写入脚本所在目录
+            String jsonFilePath = writeJsonToFile(jsonData, scriptDir);
+            log.info("json路径:{}",jsonFilePath);
+            // 调用Python脚本，并传递JSON文件路径
+            String comand = "python3 " + pythonScriptPath +"/name.py";
+            flowInfoService.executePython(comand,"脚本执行");
+            return new ServiceResult<>(true);
+        } catch (IOException e) {
+            log.error("Error writing JSON file: ", e);
+            return new ServiceResult<>(false);
+        }
     }
+    // 将JSON数据写入文件
+    private String writeJsonToFile(Map<String, Object> jsonData, String scriptDir) throws IOException {
+        // 创建JSON文件名
+        String jsonFileName = "data.json";
+        // 创建JSON文件路径
+        String jsonFilePath = scriptDir + File.separator + jsonFileName;
+        // 将JSON数据写入文件
+        try (FileWriter fileWriter = new FileWriter(jsonFilePath)) {
+            fileWriter.write(JsonCommon.stringify(jsonData));
+        }
+        // 返回JSON文件路径
+        return jsonFilePath;
+    }
+
+
+
 }

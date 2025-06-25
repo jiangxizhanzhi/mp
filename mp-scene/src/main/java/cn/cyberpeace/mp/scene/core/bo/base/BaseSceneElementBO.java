@@ -12,7 +12,9 @@ import org.apache.commons.lang3.StringUtils;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Data
@@ -46,7 +48,7 @@ public abstract class BaseSceneElementBO<M extends BaseSceneElementModel, P exte
     @ApiModelProperty(value = "是否辅助节点")
     private Boolean isAuxiliary;
     @ApiModelProperty(value = "json内容")
-    private List<String> jsonContext;
+    private Map<String,Object> jsonContext;
     @Override
     public void fromModel(M obj, String... ignoreFields) {
         super.fromModel(obj, ArrayUtils.addAll(ignoreFields,
@@ -54,6 +56,8 @@ public abstract class BaseSceneElementBO<M extends BaseSceneElementModel, P exte
                 BeanUtils.getBeanGetterFieldName(BaseSceneElementModel::getJsonContext)));
         initCommands = StringUtils.isEmpty(obj.getInitCommands()) ? new ArrayList<>()
                 : JsonCommon.parse(obj.getInitCommands(), new TypeReference<List<String>>(){});
+        jsonContext = StringUtils.isEmpty(obj.getJsonContext()) ? new HashMap<>()
+                : JsonCommon.parse(obj.getJsonContext(), new TypeReference<Map<String, Object>>(){});
     }
 
     @Override
