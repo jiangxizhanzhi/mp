@@ -169,7 +169,7 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
     public boolean batchUpdateByKeyname(List<SysConfigModel> configs) {
         try {
             for (SysConfigModel config : configs) {
-                updateByKeyName(config);
+                final boolean b = updateByKeyName(config);
             }
         } catch (Exception e) {
             log.error(ExceptionUtil.stacktraceToString(e));

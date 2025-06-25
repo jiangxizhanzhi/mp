@@ -235,8 +235,8 @@ public class UrlACService {
      @Transactional(rollbackFor = Exception.class)
     public int delete(String[] ids) {
         int cnt = urlACMapper.bulkDelete(ids).getSuccessCount();
-        urlACTargetService.deleteByUrlACId(ArrayUtils.toArray(ids));
-        return cnt;
+         final int i = urlACTargetService.deleteByUrlACId(ArrayUtils.toArray(ids));
+         return cnt;
     }
 
      /**

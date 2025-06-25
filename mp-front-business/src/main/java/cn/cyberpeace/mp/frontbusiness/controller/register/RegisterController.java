@@ -81,7 +81,7 @@ public class RegisterController {
 
         if (result.getSource() != null) {
             UserModel userModel = result.getSource().getObj();
-            JwtUtils.addResponseHeaderWithJWT(userModel);
+            final boolean b = JwtUtils.addResponseHeaderWithJWT(userModel);
             HttpServletRequest request = ServletUtils.getRequest();
             request.setAttribute(LogConstant.USER_ID_KEY, userModel.getId());
             request.setAttribute(LogConstant.USER_NAME_KEY, userModel.getUsername());

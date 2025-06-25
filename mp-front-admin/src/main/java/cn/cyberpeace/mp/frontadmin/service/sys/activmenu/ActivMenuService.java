@@ -121,8 +121,8 @@ public class ActivMenuService {
         List<MenuTemplateModel> menuTemplateModels = new ArrayList<>();
 
         //英文字段如果有就用原来有的，如果没有暂时置为“”
-        HumanCondition humanCondition = new HumanCondition();
-        humanCondition.filterEqual(MenuTemplateModel::getTemplateId, "1");
+        HumanCondition humanCondition = new HumanCondition()
+        .filterEqual(MenuTemplateModel::getTemplateId, "1");
         List<MenuTemplateModel> menuTemplateModelsOld = menuTemplateMapper.list(humanCondition);
         Map<String, String> enNameMap = new HashMap<>();
         if (CollectionUtils.isNotEmpty(menuTemplateModelsOld)) {

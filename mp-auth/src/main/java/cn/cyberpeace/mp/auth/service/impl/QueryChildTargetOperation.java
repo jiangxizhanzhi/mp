@@ -47,7 +47,7 @@ public class QueryChildTargetOperation implements TargetOperation<TargetBo> {
         for (TargetModel target : list) {
             TargetBo childDto = new TargetBo();
             BeanUtils.copyProperties(target, childDto);
-            childDto.execute(this);
+            final TargetBo execute = childDto.execute(this);
             childList.add(childDto);
         }
         targetBo.setChildren(childList);
