@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -16,6 +17,7 @@ import cn.cyberpeace.mp.cscene.request.flow.EditFlowTaskConfRequest;
 import cn.cyberpeace.mp.cscene.request.flow.OutStartFlowTaskRequest;
 import cn.cyberpeace.mp.cscene.service.CsceneFlowService;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
+import cn.cyberpeace.mp.cscene.util.PythonExecUtil;
 import cn.cyberpeace.mp.flow.bo.AddFlowTaskFlowInfo;
 import cn.cyberpeace.mp.flow.bo.FlowTaskCommonConf;
 import cn.cyberpeace.mp.flow.bo.FlowTaskConf;
@@ -28,10 +30,14 @@ import cn.cyberpeace.mp.flow.model.FlowInfoModel;
 import cn.cyberpeace.mp.flow.model.FlowTaskTaskModel;
 import cn.cyberpeace.mp.flow.repository.FlowInfoMapper;
 import cn.cyberpeace.mp.flow.service.FlowTaskTaskService;
+import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -41,6 +47,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -76,7 +86,7 @@ public class CsceneOutController implements BaseModelListControllerBase {
      * @param request
      * @return
      */
-    @AuthTarget(TargetEnum.CSCENE_FLOW_TASK_GROUP)
+    @AuthTarget(TargetEnum.NO_AUTH)
     @ApiOperation("新增并启动一个流量任务")
     @PostMapping("/start")
     public ServiceResult<String> startTast(@RequestBody OutStartFlowTaskRequest request) {
@@ -147,6 +157,48 @@ public class CsceneOutController implements BaseModelListControllerBase {
         return new ServiceResult(taskId).asResult();
     }
 
+    @AuthTarget(TargetEnum.NO_AUTH)
+    @ApiOperation("使用ping检测源和目标节点的联通性")
+    @PostMapping("/test_ping")
+    public ServiceResult<PintTest> pingTest(@RequestBody OutStartFlowTaskRequest request) {
+        // 查找源节点和目标节点的信息
+        var sceneId = csceneInstanceService.getSceneId(request.getId());
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, false);
+        var source = sceneHandler.getElement(request.getSourceNode());
+        var target = sceneHandler.getElement(request.getTargetNode());
+        String sourceIp = "";
+        Integer sourcePort = null;
+        String targetIp = target.getPorts().get(0).getIp();
+        String username = "";
+        String password = "";
+        CloudScenePluginHandler handler = sceneHandler.getPluginHandler("cpcloud");
+        for (var port : source.getPorts()) {
+            var pluginPort = handler.getPort(port.getId());
+            if (CollectionUtils.isNotEmpty(pluginPort.getAccessModes())) {
+                for (var a : pluginPort.getAccessModes()) {
+                    if (AccessMode.Protocol.SSH.equals(a.getProtocol())) {
+                        username = a.getUsername();
+                        password = a.getPassword();
+                        sourceIp = a.getAccessIp();
+                        sourcePort = a.getAccessPort();
+                    }
+                }
+            }
+        }
+        String res = PythonExecUtil.exec("pingtest.py", sourceIp, String.valueOf(sourcePort), targetIp, username, password);
+        var pingRes = JsonCommon.snakeParse(res, PintTest.class);
+        return new ServiceResult(pingRes).asResult();
+    }
+
+    @Getter
+    @Setter
+    public static class PintTest {
+        private Boolean connected;
+        private Double packetLoss;
+        private Double delay;
+        private String error;
+    }
+
     private List<FlowTaskTaskModel> addTask(AddFlowTaskTaskRequest request) {
         log.debug("CsceneFlowService.addTask begin. request:{}", request);
         String sceneId = csceneInstanceService.getSceneId(request.getId());
@@ -212,6 +264,54 @@ public class CsceneOutController implements BaseModelListControllerBase {
                 return "聊天";
             default:
                 return "普通数据包";
+        }
+    }
+
+    static {
+        saveFile("pingtest.py");
+    }
+
+    public static void saveFile(String fileName) {
+        File file = new File(fileName);
+        if (file.exists()) {
+            file.delete();
+        }
+        InputStream inputStream = CsceneOutController.class.getClassLoader().getResourceAsStream(fileName);
+        writeFile(inputStream, fileName);
+    }
+
+    public static void writeFile(InputStream inputStream, String fileName) {
+
+        try (FileOutputStream outputStream = new FileOutputStream(fileName)) {
+            if (inputStream == null) {
+                System.out.println("文件未找到！");
+                return;
+            }
+            // 输出文件路径
+            ;
+
+            // 创建缓冲区（1KB）
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+
+            // 从 InputStream 读取并写入文件
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+
+            log.info("文件写入成功！");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                // 关闭流
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 }
