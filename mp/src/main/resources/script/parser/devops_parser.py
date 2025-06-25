@@ -61,6 +61,8 @@ class DockerMetaDataHandler(object):
         """校验容器靶标扩展的自定义参数"""
         host_config_ex = {}
         if host_config_ex_str not in (None, ''):
+            if '=' in host_config_ex_str:
+                print('Not Support Docker Host Config Ex =')
             host_config_ex_str += ' ' # 加空格解析正则
             host_config_ex_str = host_config_ex_str.lstrip()
             if not cls.host_config_ex_match_patten.match(host_config_ex_str):
