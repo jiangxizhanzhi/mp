@@ -196,6 +196,7 @@ public class CsceneController implements BaseModelListControllerBase {
         Map<String, Integer> elementPortCountMap = new HashMap<>();
         Map<String, List<String>> areaPositionMap = new HashMap<>();
         Map<String, JSONObject> areaMap = new HashMap<>();
+        HashMap<String, JSONArray> portAccessModesMap = new HashMap<>();
 
         for(ReleaseCsceneNodeBO node:nodes){
             //根据设备类型 获取对应默认的设备信息 默认设备信息从常用节点中拿取 win centos 的数据可根据现场镜像信息适配修改
@@ -227,6 +228,7 @@ public class CsceneController implements BaseModelListControllerBase {
                 String newPortId = portId.replace(originalId, node.getNumberId());
                 // 更新端口的id
                 port.put("id", newPortId);
+                portAccessModesMap.put(newPortId, port.getJSONArray("access_modes"));
             });
             object.put("id", node.getNumberId());
 
@@ -287,17 +289,21 @@ public class CsceneController implements BaseModelListControllerBase {
 
             // role =4 端口名称取eth 否则取E
             String portName = "E";
+            String portLastName = "_electrical";
             int defaultSourcePortCount = 1;
             int defaultTargetPortCount = 1;
             if(targetRole == 4){
                 portName = "eth";
                 defaultTargetPortCount = 4;
+                portLastName = "";
             }
 
             String sourcePortType = "E";
+            String sourcePortLastName = "_electrical";
             if(sourceRole == 4){
                 sourcePortType = "eth";
                 defaultSourcePortCount = 4;
+                sourcePortLastName = "";
             }
 
             Integer bandWidth = link.getBandWidth();
@@ -314,7 +320,7 @@ public class CsceneController implements BaseModelListControllerBase {
             } else {
                 elementPortCountMap.put(targetNumberId ,targetPortCount);
             }
-            String targetPortName = "port_" + targetNumberId + "_" + targetPortCount;
+            String targetPortName = "port_" + targetNumberId + portLastName + "_" + targetPortCount;
 
 
             if(elementPortCountMap.containsKey(sourceNumberId)){
@@ -323,17 +329,19 @@ public class CsceneController implements BaseModelListControllerBase {
             } else {
                 elementPortCountMap.put(sourceNumberId ,sourcePortCount);
             }
-            String sourcePortName = "port_" + sourceNumberId + "_" + sourcePortCount;
+            String sourcePortName = "port_" + sourceNumberId + sourcePortLastName + "_" + sourcePortCount;
             connect.put("source", sourcePortName);
             connect.put("target", targetPortName);
             JSONObject cpPort1 = new JSONObject();
-            cpPort1.put("access_modes", new JSONArray());
+            cpPort1.put("access_modes", portAccessModesMap.getOrDefault(sourcePortName,new JSONArray()));
+//            cpPort1.put("access_modes", new JSONArray());
             cpPort1.put("firewall_rules", new JSONArray());
-            cpPort1.put("resource_id", new JSONArray());
+            cpPort1.put("connect_mode", null);
             JSONObject cpPort2 = new JSONObject();
-            cpPort2.put("access_modes", new JSONArray());
+            cpPort2.put("access_modes", portAccessModesMap.getOrDefault(targetPortName,new JSONArray()));
+//            cpPort2.put("access_modes", new JSONArray());
             cpPort2.put("firewall_rules", new JSONArray());
-            cpPort2.put("resource_id", new JSONArray());
+            cpPort2.put("connect_mode", null);
             cpElements_ports.put(targetPortName, cpPort2);
             cpElements_ports.put(sourcePortName, cpPort1);
 
@@ -423,7 +431,7 @@ public class CsceneController implements BaseModelListControllerBase {
 
 
         cpcloud.put("elements", cpElements);
-        cpcloud.put("elements_ports", cpElements_ports);
+        cpcloud.put("element_ports", cpElements_ports);
         cpcloud.put("scene", new JSONObject());
         plugins.put("cpcloud", cpcloud);
         sceneObj.put("plugins", plugins);
