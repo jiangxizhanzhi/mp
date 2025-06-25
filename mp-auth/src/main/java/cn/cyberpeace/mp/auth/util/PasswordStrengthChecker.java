@@ -73,15 +73,7 @@ public class PasswordStrengthChecker {
      * @return
      */
     private static int countLetter(String passwd, int type) {
-        int count = 0;
-        if (null != passwd && passwd.length() > 0) {
-            for (char c : passwd.toCharArray()) {
-                if (checkCharacterType(c) == type) {
-                    count++;
-                }
-            }
-        }
-        return count;
+        return type;
     }
 
     /**

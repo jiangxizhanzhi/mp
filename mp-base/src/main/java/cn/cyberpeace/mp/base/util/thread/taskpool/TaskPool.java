@@ -170,8 +170,8 @@ public class TaskPool {
      *
      * @param poolSize
      */
-    public TaskPool(int poolSize) {
-        this(poolSize, Integer.MAX_VALUE);
+    public TaskPool(int poolSize, ExecutorService executor) {
+        this(poolSize, Integer.MAX_VALUE, executor);
     }
 
     /**
@@ -180,22 +180,8 @@ public class TaskPool {
      * @param poolSize
      * @param holdSize
      */
-    public TaskPool(int poolSize, int holdSize) {
-        this(poolSize, holdSize, 0L);
-    }
-
-    /**
-     * TaskPool
-     *
-     * @param poolSize
-     * @param holdSize
-     * @param keepAliveTime
-     * @param factory
-     */
-    public TaskPool(int poolSize, int holdSize, long keepAliveTime, ThreadFactory factory) {
-        executor = new ThreadPoolExecutor(poolSize, poolSize, keepAliveTime, TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>(holdSize - poolSize), factory);
-        TASK_POOL_INSTANCE_CACHE.add(this);
+    public TaskPool(int poolSize, int holdSize, ExecutorService executor) {
+        this(poolSize, holdSize, 0L, executor);
     }
 
     /**
@@ -205,20 +191,11 @@ public class TaskPool {
      * @param holdSize
      * @param keepAliveTime
      */
-    public TaskPool(int poolSize, int holdSize, long keepAliveTime) {
-        executor = new ThreadPoolExecutor(poolSize, poolSize, keepAliveTime, TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>(holdSize - poolSize), createNameThreadFactory(""));
-        TASK_POOL_INSTANCE_CACHE.add(this);
-    }
-
-    /**
-     * TaskPool
-     *
-     * @param executor
-     */
-    public TaskPool(ExecutorService executor) {
+    public TaskPool(int poolSize, int holdSize, long keepAliveTime, ExecutorService executor) {
         this.executor = executor;
+        TASK_POOL_INSTANCE_CACHE.add(this);
     }
+
 
     /**
      * executeTask
