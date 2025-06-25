@@ -1530,7 +1530,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
      * @param title
      * @return
      */
-    private String executePython(String command, String title) {
+    public String executePython(String command, String title) {
         String result = "";
         try {
             Process process = Runtime.getRuntime().exec(command);

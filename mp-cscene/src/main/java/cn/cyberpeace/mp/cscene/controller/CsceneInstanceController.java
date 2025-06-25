@@ -46,9 +46,11 @@ import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceStatQueryParams;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
 import cn.cyberpeace.mp.cscene.util.ReentrantLockUtils;
+import cn.cyberpeace.mp.flow.service.impl.FlowInfoServiceImpl;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
 import cn.cyberpeace.mp.scene.core.event.SceneElementEventTransition;
+import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
 import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
@@ -104,6 +106,10 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
 
     @Resource(name = "sysOptionServiceImpl")
     private OptionService optionService;
+
+    private FlowInfoServiceImpl flowInfoService;
+
+
 
     private CsceneInstanceActionRequest formatActionRequest(CsceneInstanceActionRequest request, String paramId) {
         if (request == null) {
@@ -906,5 +912,20 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                 throw new MpRuntimeException(AuthErrorCode.DEMO_ACCESS_ERROR);
             }
         }
+    }
+    @PostMapping("/exec_action")
+    @ApiOperation(value="测试时执行python脚本并给出报告")
+    public ServiceResult<Boolean> execAcation(String id) {
+        SceneHandler sceneHandler = new SceneHandler(id,null,false,null);
+       // json数据
+        ArrayList<String> jsonData = new ArrayList<>();
+        for(var e : sceneHandler.getElementMap().values()){
+            //类型是List<String>
+            jsonData.addAll(e.getJsonContext());
+        }
+        // 请将json数据写入脚本之中
+        // 调用python脚本
+        flowInfoService.executePython("/demo_apls_basis.py", "脚本执行");
+        return new ServiceResult<>(true);
     }
 }

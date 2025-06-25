@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.cscene.controller.request.CsceneActionRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneAuthorizeRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneCreateInstanceRequest;
 import cn.cyberpeace.mp.cscene.model.CsceneModel;
+import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
@@ -49,6 +50,8 @@ public class CsceneController implements BaseModelListControllerBase {
     private CsceneSpecialService csceneSpecialService;
 
     private BaseAppConfig baseAppConfig;
+
+
 
     private CsceneActionRequest formatActionRequest(CsceneActionRequest request, String paramId) {
         if (request == null) {
