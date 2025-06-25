@@ -74,6 +74,7 @@ public class CreateHandler extends HandlerCommon {
 
         CloudScenePluginHandler cloudPluginHandler = getPluginHandler().getSceneHandler()
                 .getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
+        Set<String> existCidrs = new HashSet<>();
         routerPorts.forEach(routerPort -> {
             var cloudElement = cloudPluginHandler.getElement(routerPort.getSceneElement());
             String networkId = null;
@@ -81,6 +82,12 @@ public class CreateHandler extends HandlerCommon {
                 for (var deriveNet : cloudElement.getDeriveNetworks()) {
                     if (deriveNet.getNetwork().getExcloudIps().contains(routerPort.getIp())) {
                         networkId = deriveNet.getNetwork().getResourceId();
+                        if (existCidrs.contains(deriveNet.getNetwork().getCidr())) {
+                            log.info("cidr {} 已存在，跳过", deriveNet.getNetwork().getCidr());
+                            return;
+                        } else {
+                            existCidrs.add(deriveNet.getNetwork().getCidr());
+                        }
                     }
                 }
             }
