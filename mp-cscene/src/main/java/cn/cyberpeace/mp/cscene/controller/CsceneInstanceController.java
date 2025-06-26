@@ -90,13 +90,12 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
-//import javax.annotation.Resource;
+import javax.annotation.Resource;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-import org.springframework.core.io.Resource;
 
 @Api(value = "场景实例", tags = "CSCENE-场景实例")
 @Slf4j
@@ -111,7 +110,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
 
     private CsceneFileService csceneFileService;
 
-    //@Resource(name = "sysOptionServiceImpl")
+    @Resource(name = "sysOptionServiceImpl")
     private OptionService optionService;
 
     private FlowInfoServiceImpl flowInfoService;
@@ -990,7 +989,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
 
     @GetMapping("/download_report")
     @ApiOperation(value = "下载报告")
-    public ResponseEntity<Resource> downloadHtmls() {
+    public ResponseEntity<org.springframework.core.io.Resource> downloadHtmls() {
         String htmlDirPath = "D:/test";
         File htmlDir = new File(htmlDirPath);
         // 获取所有HTML文件
@@ -998,7 +997,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
 
         // 检查是否有HTML文件
         if (htmlFiles == null || htmlFiles.length == 0) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body((Resource) new ByteArrayResource(new byte[0]));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body((org.springframework.core.io.Resource) new ByteArrayResource(new byte[0]));
         }
 
         try {
@@ -1028,12 +1027,12 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
             headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
             headers.setContentDispositionFormData("attachment", "html_files.zip");
 
-            return ResponseEntity.ok().headers(headers).body((Resource) new ByteArrayResource(baos.toByteArray()));
+            return ResponseEntity.ok().headers(headers).body((org.springframework.core.io.Resource) new ByteArrayResource(baos.toByteArray()));
 
         } catch (IOException e) {
             // 记录错误日志
             log.error("打包HTML文件失败", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body((Resource) new ByteArrayResource(new byte[0]));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body((org.springframework.core.io.Resource) new ByteArrayResource(new byte[0]));
         }
     }
 
