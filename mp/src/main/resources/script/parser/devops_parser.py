@@ -3,6 +3,22 @@ import json
 import sys
 import base64
 
+class NotSupportDockerHostConfigException(Exception):
+    """异常类用于表示不支持的 Docker 主机配置"""
+    def __init__(self, message="不支持的 Docker 主机配置"):
+        self.message = message
+        super().__init__(self.message)
+
+def _(message):
+    return message
+
+# 拷贝云平台的 apps/device/utils/docker_metadata.py 开始 ---------------------------------
+
+def parse_device(x):
+    if x and x != '/dev/net/tun':
+        raise NotSupportDockerHostConfigException(message=_("--device only support /dev/net/tun"))
+    return x
+
 
 def parse_device_rate(x):
     path, rate = x.split(":")
@@ -20,7 +36,7 @@ def parse_device_request(request_str):
 SUPPORT_DOCKER_HOST_CONFIG_EX = {
     'cap-add': {"rename": "cap_add", "type": list},
     'cap-drop':  {"rename": "cap_drop", "type": list},
-    'device': {"rename": "devices", "type": list},
+    'device': {"rename": "devices", "type": list, 'parse_func': parse_device},
     'device-read-bps': {"rename": "device_read_bps", "type": list, 'parse_func': parse_device_rate},
     'device-write-bps': {"rename": "device_write_bps", "type": list, 'parse_func': parse_device_rate},
     'device-read-iops': {"rename": "device_read_iops", "type": list, 'parse_func': parse_device_rate},
@@ -45,15 +61,16 @@ class DockerMetaDataHandler(object):
         if environment_str:
             environment_str = environment_str.strip()
             env_list = environment_str.split(';')
+            error_message = _('Not Support Docker Environment {}').format(environment_str)
             for item in env_list:
                 try:
                     k, v = item.split('=')
                     k, v = k.strip(), v.strip()
                     if k in environment:
-                        print(f'Not Support Docker Environment {environment_str}')
+                        raise NotSupportDockerHostConfigException(message=_("Exist Duplicate Environment Item"))
                     environment[k] = v
                 except Exception:
-                    print(f'Not Support Docker Environment {environment_str}')
+                    raise NotSupportDockerHostConfigException(message=error_message)
         return environment
 
     @classmethod
@@ -62,31 +79,36 @@ class DockerMetaDataHandler(object):
         host_config_ex = {}
         if host_config_ex_str not in (None, ''):
             if '=' in host_config_ex_str:
-                print('Not Support Docker Host Config Ex =')
+                raise NotSupportDockerHostConfigException(message=_('Not Support Docker Host Config Ex ='))
             host_config_ex_str += ' ' # 加空格解析正则
             host_config_ex_str = host_config_ex_str.lstrip()
             if not cls.host_config_ex_match_patten.match(host_config_ex_str):
-                print(f'Not Support Docker Host Config Ex {host_config_ex_str}')
+                error_msg = _('Not Support Docker Host Config Ex {}').format(host_config_ex_str)
+                raise NotSupportDockerHostConfigException(message=error_msg)
 
             results = cls.host_config_ex_findall_patten.findall(host_config_ex_str)
             for result in results:
                 key, value = result
                 if key not in SUPPORT_DOCKER_HOST_CONFIG_EX:
-                    print(f'Not Support Docker Host Config Ex: {key}')
+                    error_msg = _('Not Support Docker Host Config Ex {}').format(key)
+                    raise NotSupportDockerHostConfigException(message=error_msg)
                 key_type = SUPPORT_DOCKER_HOST_CONFIG_EX[key]["type"]
                 parse_func = SUPPORT_DOCKER_HOST_CONFIG_EX[key].get('parse_func')
                 key = SUPPORT_DOCKER_HOST_CONFIG_EX[key]["rename"]
                 if key_type != list:
                     if key in host_config_ex:
-                        print(f'Docker Host Config Duplicate Key: {key}')
+                        error_msg = _('Not Support Docker Host Config Duplicate Key {}').format(key)
+                        raise NotSupportDockerHostConfigException(message=error_msg)
                     host_config_ex[key] = key_type(value)
                 else:
                     value_list = host_config_ex.setdefault(key, [])
                     if value in value_list:
-                        print(f'Docker Host Config Duplicate Value: {value}')
+                        error_msg = _('Not Support Docker Host Config Duplicate Value {}').format(value)
+                        raise NotSupportDockerHostConfigException(message=error_msg)
                     if parse_func:
                         value = parse_func(value)
-                    value_list.append(value)
+                    if value:
+                        value_list.append(value)
 
         return host_config_ex
 
@@ -122,6 +144,7 @@ class DockerMetaDataHandler(object):
             meta_data['host_config_ex'] = cls._valid_host_config_ex(host_config_ex_str)
         return meta_data
 
+# 拷贝云平台的 apps/device/utils/docker_metadata.py 结束 ---------------------------------
 
 if __name__ == '__main__':
     input_str = sys.argv[1]
@@ -138,5 +161,9 @@ if __name__ == '__main__':
         'environment_str': environment_str,
         "host_config_ex_str": host_config_ex_str
     }
-    m  = DockerMetaDataHandler.parse_metadata(meta_data)
-    print(m)
+    try:
+        m = DockerMetaDataHandler.parse_metadata(meta_data)
+        print(m)
+    except NotSupportDockerHostConfigException as e:
+        print(e.message)
+

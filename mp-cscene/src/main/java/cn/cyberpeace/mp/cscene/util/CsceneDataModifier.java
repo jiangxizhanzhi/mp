@@ -5,8 +5,11 @@ import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
+import cn.cyberpeace.mp.base.util.PythonExecUtil;
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneRoleBO;
@@ -36,10 +39,12 @@ import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneTopologyBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.base.DockerParams;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.EntityUsb;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.VirtualUsb;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -1131,6 +1136,50 @@ public class CsceneDataModifier {
                             }
                             if (p.getLoss() == null) {
                                 p.setLoss(-1);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public static void checkDockerParams(CsceneBO csceneBO) {
+        if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig()
+                .getPlugins() != null && csceneBO.getSceneConfig().getPlugins().get("cpcloud") != null) {
+            ScenePluginDataBO elements = csceneBO.getSceneConfig().getPlugins().get("cpcloud");
+            if (elements.getElements() != null) {
+                for (Map.Entry<String,Map<String, Object>> entry : elements.getElements().entrySet()) {// 有软件需要安装的 quick_create_support 设置为true
+                    Map<String, Object> e = entry.getValue();
+                    String nodeId = entry.getKey();
+                    if (e.get("docker_params") != null) {
+                        DockerParams dockerParams = JsonCommon.snakeParse(JsonCommon.snakeStringify(e.get("docker_params")), DockerParams.class);
+
+                        String params1 = "empty";
+                        if (StringUtils.isNotEmpty(dockerParams.getEnvironmentStr())) {
+                            params1 = dockerParams.getEnvironmentStr();
+                        }
+                        String params2 = "empty";
+                        if (StringUtils.isNotEmpty(dockerParams.getHostConfigExStr())) {
+                            params2 = dockerParams.getHostConfigExStr();
+                        }
+                        if (StringUtils.equals(params1, "empty") && StringUtils.equals(params2, "empty")) {
+                            continue;
+                        } else {
+                            String params = params1 + "split_str_flag" + params2;
+                            log.info("base64 前的参数：{}", params);
+                            String dir = BeanCommon.getBean(BaseAppConfig.class)
+                                    .getResourcesDir() + "/scene_plugin_cloud/parser";
+                            String result = PythonExecUtil.exec(dir + "/devops_parser.py", TextUtils.encodeBase64(params));
+                            if (StringUtils.isNotEmpty(result) && !StringUtils.startsWith(result, "{")) {
+                                String nodeName = "";
+                                for (var srcE : csceneBO.getSceneConfig().getTopology().getElements()) {
+                                    if (StringUtils.equals(srcE.getId(), nodeId)) {
+                                        nodeName = srcE.getName();
+                                        break;
+                                    }
+                                }
+                                throw new MpRuntimeException(CsceneErrorCode.DOCKER_PARAMS_ERROR.format(nodeName, result));
                             }
                         }
                     }
