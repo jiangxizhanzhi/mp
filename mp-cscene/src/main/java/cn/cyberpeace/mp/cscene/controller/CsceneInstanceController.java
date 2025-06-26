@@ -64,6 +64,7 @@ import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams
 import cn.cyberpeace.mp.sceneplugincollection.service.param.QueryCollectionDataCountParams;
 import cn.cyberpeace.mp.scenepluginflow.service.response.SceneFlowRecordsResponse;
 import cn.cyberpeace.mp.situationaware.model.enums.FileEventType;
+import cn.hutool.core.io.FileUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -73,6 +74,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -84,11 +90,13 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.annotation.Resource;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+//import javax.annotation.Resource;
+import java.io.*;
+import java.nio.charset.Charset;
 import java.util.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
+import org.springframework.core.io.Resource;
 
 @Api(value = "场景实例", tags = "CSCENE-场景实例")
 @Slf4j
@@ -103,7 +111,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
 
     private CsceneFileService csceneFileService;
 
-    @Resource(name = "sysOptionServiceImpl")
+    //@Resource(name = "sysOptionServiceImpl")
     private OptionService optionService;
 
     private FlowInfoServiceImpl flowInfoService;
@@ -916,16 +924,13 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @ApiOperation(value="测试时执行python脚本并给出报告")
     public ServiceResult<Boolean> execAcation(String id) {
         SceneHandler sceneHandler = new SceneHandler(id, null, false, null);
-
         // 创建JSON数据
         Map<String, Object> jsonData = new HashMap<>();
         for (var e : sceneHandler.getElementMap().values()) {
             jsonData.putAll(e.getJsonContext());
         }
-
         // Python脚本路径
-        String pythonScriptPath = "resources/scene_plugin_cloud/container_installer";
-
+        String pythonScriptPath = "/root/.mp/resources/scene_plugin_cloud/container_installer";
         try {
             // 获取脚本所在目录
             File scriptFile = new File(pythonScriptPath);
@@ -934,9 +939,6 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
             // 将JSON数据写入脚本所在目录
             String jsonFilePath = writeJsonToFile(jsonData, scriptDir);
             log.info("json路径:{}",jsonFilePath);
-            // 调用Python脚本，并传递JSON文件路径
-            String comand = "python3 " + pythonScriptPath +"/name.py";
-            flowInfoService.executePython(comand,"脚本执行");
             return new ServiceResult<>(true);
         } catch (IOException e) {
             log.error("Error writing JSON file: ", e);
@@ -945,10 +947,10 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     }
     // 将JSON数据写入文件
     private String writeJsonToFile(Map<String, Object> jsonData, String scriptDir) throws IOException {
-        // 创建JSON文件名
-        String jsonFileName = "data.json";
-        // 创建JSON文件路径
+        String baseName = "data_" + System.currentTimeMillis();
+        String jsonFileName = baseName + ".json";
         String jsonFilePath = scriptDir + File.separator + jsonFileName;
+        File jsonFile = new File(jsonFilePath);
         // 将JSON数据写入文件
         try (FileWriter fileWriter = new FileWriter(jsonFilePath)) {
             fileWriter.write(JsonCommon.stringify(jsonData));
@@ -956,7 +958,83 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         // 返回JSON文件路径
         return jsonFilePath;
     }
+    @GetMapping("/exec_python")
+    @ApiOperation(value="执行脚本")
+    public ServiceResult<Boolean> execPython() {
+        String command = "python \"D:/test/demo alps basis.py\"";
+        flowInfoService.executePython(command,"脚本执行");
+        return new ServiceResult<>(true);
+    }
+    @GetMapping("/get_json")
+    @ApiOperation(value="获取json")
+    public ServiceResult<String> getJson() {
+        //读取json文件
+        String jsonFilePath = "D:/test0626.json";
+        File file =new File(jsonFilePath);
+        if (!file.exists()) {
+            log.error("文件不存在");
+        }
+        String data = FileUtil.readUtf8String(jsonFilePath);
+        //将读取的内容返回
+        return new ServiceResult<>(data).asResult();
+    }
+    @PostMapping("/update_json")
+    @ApiOperation(value="更新json")
+    public ServiceResult<String> updateJson(@RequestBody String json) {
+        //json文件目录
+        String jsonFilePath = "D:/test0626.json";
+        //将更新的字符串写入json文件之中
+        File update_json = FileUtil.writeString(json, jsonFilePath, Charset.defaultCharset());
+        return new ServiceResult<>(update_json.toString());
+    }
 
+    @GetMapping("/download_report")
+    @ApiOperation(value = "下载报告")
+    public ResponseEntity<Resource> downloadHtmls() {
+        String htmlDirPath = "D:/test";
+        File htmlDir = new File(htmlDirPath);
+        // 获取所有HTML文件
+        File[] htmlFiles = htmlDir.listFiles((dir, name) -> name.endsWith(".html"));
 
+        // 检查是否有HTML文件
+        if (htmlFiles == null || htmlFiles.length == 0) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body((Resource) new ByteArrayResource(new byte[0]));
+        }
+
+        try {
+            // 创建临时输出流
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            try (ZipOutputStream zos = new ZipOutputStream(baos)) {
+                // 将每个HTML文件添加到ZIP包中
+                for (File htmlFile : htmlFiles) {
+                    if (htmlFile.isFile()) {
+                        ZipEntry zipEntry = new ZipEntry(htmlFile.getName());
+                        zos.putNextEntry(zipEntry);
+
+                        try (FileInputStream fis = new FileInputStream(htmlFile)) {
+                            byte[] buffer = new byte[4096];
+                            int bytesRead;
+                            while ((bytesRead = fis.read(buffer)) != -1) {
+                                zos.write(buffer, 0, bytesRead);
+                            }
+                        }
+                        zos.closeEntry();
+                    }
+                }
+            }
+
+            // 设置响应头
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            headers.setContentDispositionFormData("attachment", "html_files.zip");
+
+            return ResponseEntity.ok().headers(headers).body((Resource) new ByteArrayResource(baos.toByteArray()));
+
+        } catch (IOException e) {
+            // 记录错误日志
+            log.error("打包HTML文件失败", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body((Resource) new ByteArrayResource(new byte[0]));
+        }
+    }
 
 }
