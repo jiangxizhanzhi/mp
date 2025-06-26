@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.model.BlacklistModel;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
@@ -112,7 +113,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
 
     @Resource(name = "sysOptionServiceImpl")
     private OptionService optionService;
-
+    @Autowired
     private FlowInfoServiceImpl flowInfoService;
 
 
@@ -919,48 +920,10 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
             }
         }
     }
-    @PostMapping("/exec_action")
-    @ApiOperation(value="测试时执行python脚本并给出报告")
-    public ServiceResult<Boolean> execAcation(String id) {
-        SceneHandler sceneHandler = new SceneHandler(id, null, false, null);
-        // 创建JSON数据
-        Map<String, Object> jsonData = new HashMap<>();
-        for (var e : sceneHandler.getElementMap().values()) {
-            jsonData.putAll(e.getJsonContext());
-        }
-        // Python脚本路径
-        String pythonScriptPath = "/root/.mp/resources/scene_plugin_cloud/container_installer";
-        try {
-            // 获取脚本所在目录
-            File scriptFile = new File(pythonScriptPath);
-            String scriptDir = scriptFile.getParent();
-
-            // 将JSON数据写入脚本所在目录
-            String jsonFilePath = writeJsonToFile(jsonData, scriptDir);
-            log.info("json路径:{}",jsonFilePath);
-            return new ServiceResult<>(true);
-        } catch (IOException e) {
-            log.error("Error writing JSON file: ", e);
-            return new ServiceResult<>(false);
-        }
-    }
-    // 将JSON数据写入文件
-    private String writeJsonToFile(Map<String, Object> jsonData, String scriptDir) throws IOException {
-        String baseName = "data_" + System.currentTimeMillis();
-        String jsonFileName = baseName + ".json";
-        String jsonFilePath = scriptDir + File.separator + jsonFileName;
-        File jsonFile = new File(jsonFilePath);
-        // 将JSON数据写入文件
-        try (FileWriter fileWriter = new FileWriter(jsonFilePath)) {
-            fileWriter.write(JsonCommon.stringify(jsonData));
-        }
-        // 返回JSON文件路径
-        return jsonFilePath;
-    }
     @GetMapping("/exec_python")
     @ApiOperation(value="执行脚本")
     public ServiceResult<Boolean> execPython() {
-        String command = "python \"D:/test/demo alps basis.py\"";
+        String command = "python \"D:/test/demo_alps_basis.py\"";
         flowInfoService.executePython(command,"脚本执行");
         return new ServiceResult<>(true);
     }
@@ -968,7 +931,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @ApiOperation(value="获取json")
     public ServiceResult<String> getJson() {
         //读取json文件
-        String jsonFilePath = "D:/test0626.json";
+        String jsonFilePath = BeanCommon.getBean(BaseAppConfig.class).getJsondir()+"TestSuite.json";
         File file =new File(jsonFilePath);
         if (!file.exists()) {
             log.error("文件不存在");
@@ -981,7 +944,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @ApiOperation(value="更新json")
     public ServiceResult<String> updateJson(@RequestBody String json) {
         //json文件目录
-        String jsonFilePath = "D:/test0626.json";
+        String jsonFilePath = BeanCommon.getBean(BaseAppConfig.class).getJsondir()+"TestSuite.json";
         //将更新的字符串写入json文件之中
         File update_json = FileUtil.writeString(json, jsonFilePath, Charset.defaultCharset());
         return new ServiceResult<>(update_json.toString());
@@ -990,13 +953,14 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @GetMapping("/download_report")
     @ApiOperation(value = "下载报告")
     public ResponseEntity<org.springframework.core.io.Resource> downloadHtmls() {
-        String htmlDirPath = "D:/test";
+        String htmlDirPath = BeanCommon.getBean(BaseAppConfig.class).getHtmlidr();
         File htmlDir = new File(htmlDirPath);
         // 获取所有HTML文件
         File[] htmlFiles = htmlDir.listFiles((dir, name) -> name.endsWith(".html"));
 
         // 检查是否有HTML文件
         if (htmlFiles == null || htmlFiles.length == 0) {
+            log.error("没有找到HTML文件");
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body((org.springframework.core.io.Resource) new ByteArrayResource(new byte[0]));
         }
 

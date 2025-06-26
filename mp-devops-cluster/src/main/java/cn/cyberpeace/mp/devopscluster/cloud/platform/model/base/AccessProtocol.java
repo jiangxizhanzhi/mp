@@ -72,5 +72,9 @@ public class AccessProtocol implements Serializable {
 
     @ApiModelProperty("是否管理接入")
     private Boolean manageMode;
-
+    private String ipv4;
+    private String ipv6;
+    private String userPrompt;
+    private String passwordPrompt;
+    private String loginPrompt;
 }

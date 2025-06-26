@@ -40,4 +40,10 @@ public class CloudAccessMode extends AccessMode {
 
     @ApiModelProperty(value = "创建端口映射的id")
     private String fwdId;
+
+    private String ipv4;
+    private String ipv6;
+    private String userPrompt;
+    private String passwordPrompt;
+    private String loginPrompt;
 }

@@ -108,6 +108,11 @@ public class BaseAppConfig {
     @Value("${mp.base.swagger-doc-url:}")
     private String swaggerDocUrl;
 
+    @Value("${mp.base.ext-var.jsondir:}")
+    private String jsondir;
+    @Value("${mp.base.ext-var.htmldir:}")
+    private String htmlidr;
+
     public String getHomeDir() {
         if (!StringUtils.isEmpty(homeDir)) {
             return homeDir;

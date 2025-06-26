@@ -15,7 +15,7 @@
 
         <!--数据库基本信息-->
         <jdbcConnection driverClass="org.mariadb.jdbc.Driver"
-                        connectionURL="jdbc:mysql://10.100.7.1:9306/mp"
+                        connectionURL="jdbc:mysql://10.100.27.1:9306/mp"
                         userId="root"
                         password="cyberpeace@2020">
         </jdbcConnection>
