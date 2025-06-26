@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincloud.bo.base;
 
+import cn.cyberpeace.mp.base.bo.ImageToolRequest;
+import cn.cyberpeace.mp.base.bo.OutAttackToolRequest;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementBO;
@@ -217,6 +219,9 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     @ApiModelProperty(value = "宿主机名称")
     private String host;
 
+    @ApiModelProperty(value = "攻击工具")
+    private List<ImageToolRequest> attackTools;
+
     @Override
     public void fromModel(M obj, String... ignoreFields) {
         //忽略直接赋值处理的字段，需要定制处理
@@ -233,7 +238,8 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getDockerParams),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getAuxiliaryNetworkAllocationPools),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getSnmpConfig),
-                BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getMibData)
+                BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getMibData),
+                BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getAttackTools)
         ));
         dnsNameservers = StringUtils.isEmpty(obj.getDnsNameservers()) ? new ArrayList<>()
                 : JsonCommon.parse(obj.getDnsNameservers(), new TypeReference<List<String>>(){});
@@ -265,6 +271,8 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
             : JsonCommon.parse(obj.getSnmpConfig(), new TypeReference<SnmpConfig>() {});
         mibData = StringUtils.isEmpty(obj.getMibData()) ? new ArrayList<>()
             : JsonCommon.parse(obj.getMibData(), new TypeReference<List<MibData>>() {});
+        attackTools = StringUtils.isEmpty(obj.getAttackTools()) ? new ArrayList<>()
+                : JsonCommon.parse(obj.getAttackTools(), new TypeReference<List<ImageToolRequest>>() {});
     }
 
     @Override
@@ -281,6 +289,7 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getEntityUsbs),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getAuxiliaryNetworkAllocationPools),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getSnmpConfig),
+                BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getAttackTools),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getMibData)
             ));
         if (dnsNameservers != null) {
@@ -327,6 +336,9 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
         }
         if(mibData != null){
             obj.setMibData(JsonCommon.stringify(mibData));
+        }
+        if(attackTools != null){
+            obj.setAttackTools(JsonCommon.stringify(attackTools));
         }
         return obj;
     }

@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devopscluster.request;
 
+import cn.cyberpeace.mp.base.bo.ImageToolRequest;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devopscluster.model.DeviceToolModel;
 import io.swagger.annotations.ApiModelProperty;

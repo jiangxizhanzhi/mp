@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.devopscluster.converter.model;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devopscluster.enums.PublicEnum;
 import cn.cyberpeace.mp.devopscluster.enums.StatusEnum;
+import cn.cyberpeace.mp.base.bo.ImageToolRequest;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

@@ -1,6 +1,10 @@
 package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.bo.AttackDataType;
+import cn.cyberpeace.mp.base.bo.AttackType;
+import cn.cyberpeace.mp.base.bo.ImageToolRequest;
+import cn.cyberpeace.mp.base.bo.OutAttackToolRequest;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
@@ -8,6 +12,7 @@ import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.common.model.OptionModel;
 import cn.cyberpeace.mp.common.repository.OptionMapper;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
@@ -17,6 +22,7 @@ import cn.cyberpeace.mp.cscene.request.flow.EditFlowTaskConfRequest;
 import cn.cyberpeace.mp.cscene.request.flow.OutStartFlowTaskRequest;
 import cn.cyberpeace.mp.cscene.service.CsceneFlowService;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
+import cn.cyberpeace.mp.cscene.util.AttackDataOutputUtil;
 import cn.cyberpeace.mp.cscene.util.PythonExecUtil;
 import cn.cyberpeace.mp.flow.bo.AddFlowTaskFlowInfo;
 import cn.cyberpeace.mp.flow.bo.FlowTaskCommonConf;
@@ -30,9 +36,11 @@ import cn.cyberpeace.mp.flow.model.FlowInfoModel;
 import cn.cyberpeace.mp.flow.model.FlowTaskTaskModel;
 import cn.cyberpeace.mp.flow.repository.FlowInfoMapper;
 import cn.cyberpeace.mp.flow.service.FlowTaskTaskService;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.Data;
@@ -47,11 +55,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -80,6 +85,9 @@ public class CsceneOutController implements BaseModelListControllerBase {
 
     @Resource
     private FlowTaskTaskService flowTaskTaskService;
+
+    @Resource
+    private AttackDataOutputUtil attackDataOutputUtil;
 
     /**
      * 新增流量任务
@@ -190,13 +198,46 @@ public class CsceneOutController implements BaseModelListControllerBase {
         return new ServiceResult(pingRes).asResult();
     }
 
-    @Getter
-    @Setter
-    public static class PintTest {
-        private Boolean connected;
-        private Double packetLoss;
-        private Double delay;
-        private String error;
+    @AuthTarget(TargetEnum.NO_AUTH)
+    @ApiOperation("启动攻击工具")
+    @PostMapping("/attack")
+    public void attack(@RequestBody OutAttackToolRequest request) {
+        var sceneId = csceneInstanceService.getSceneId(request.getId());
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, false);
+        CloudScenePluginHandler handler = sceneHandler.getPluginHandler("cpcloud");
+        var source = sceneHandler.getElement(request.getSourceNode());
+        var target = sceneHandler.getElement(request.getTargetNode());
+        var pluginSource = handler.getElement(source.getId());
+        var pluginTarget = handler.getElement(target.getId());
+        // 取源节点上的ssh信息
+        SshInfo sshInfo = this.getSshInfo(source.getPorts(), handler);
+
+        // 取到指定工具
+        ImageToolRequest tool = new ImageToolRequest();
+        tool.setAttackType(AttackType.JIANGXIAO.getType());
+        tool.setParams(new ArrayList<>());
+        tool.setAttackDataTypes(Arrays.asList(AttackDataType.HOSTINFO.getType(), AttackDataType.PROCESS.getType(),AttackDataType.FLOW.getType(),AttackDataType.NETIFACE.getType()));
+        tool.setParams(request.getParams());
+        for (var t : pluginSource.getAttackTools()) {
+            if (StringUtils.equals(t.getId(), request.getToolId())) {
+                tool = t;
+            }
+        }
+
+        // 构建执行参数
+        String cmd = AttackType.getFormatCmd(tool.getAttackType(), tool.getParams());
+        Map<String, Object> p = new HashMap<>();
+        p.put("ip", sshInfo.getIp());
+        p.put("port", sshInfo.getPort());
+        p.put("username", sshInfo.getUsername());
+        p.put("password", sshInfo.getPassword());
+        p.put("cmd", cmd);
+        // 执行参数使用base64编码 然后执行
+        var encodeParams = TextUtils.encodeBase64(JsonCommon.stringify(p));
+        PythonExecUtil.exec("ssh_exec.py", encodeParams);
+        // 启动一个线程 查询攻击结果 每隔5秒查询一次es数据 ， 查最新的一条数据
+        CollectionScenePluginHandler collectionScenePluginHandler = sceneHandler.getPluginHandler("cpcollection");
+        attackDataOutputUtil.startOneAttackDataOutputTask(collectionScenePluginHandler,source , target, tool);
     }
 
     private List<FlowTaskTaskModel> addTask(AddFlowTaskTaskRequest request) {
@@ -250,7 +291,7 @@ public class CsceneOutController implements BaseModelListControllerBase {
     }
 
     // 1 视频/2 音频/3 普通数据包/4 邮件/5 聊天
-    public String getTypeName(String type) {
+    private String getTypeName(String type) {
         switch (type) {
             case "1":
                 return "视频";
@@ -267,51 +308,47 @@ public class CsceneOutController implements BaseModelListControllerBase {
         }
     }
 
-    static {
-        saveFile("pingtest.py");
-    }
-
-    public static void saveFile(String fileName) {
-        File file = new File(fileName);
-        if (file.exists()) {
-            file.delete();
-        }
-        InputStream inputStream = CsceneOutController.class.getClassLoader().getResourceAsStream(fileName);
-        writeFile(inputStream, fileName);
-    }
-
-    public static void writeFile(InputStream inputStream, String fileName) {
-
-        try (FileOutputStream outputStream = new FileOutputStream(fileName)) {
-            if (inputStream == null) {
-                System.out.println("文件未找到！");
-                return;
-            }
-            // 输出文件路径
-            ;
-
-            // 创建缓冲区（1KB）
-            byte[] buffer = new byte[1024];
-            int bytesRead;
-
-            // 从 InputStream 读取并写入文件
-            while ((bytesRead = inputStream.read(buffer)) != -1) {
-                outputStream.write(buffer, 0, bytesRead);
-            }
-
-            log.info("文件写入成功！");
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                // 关闭流
-                if (inputStream != null) {
-                    inputStream.close();
+    private SshInfo getSshInfo(List<SceneElementPortBO> portBOS, CloudScenePluginHandler handler) {
+        String sourceIp = "";
+        Integer sourcePort = null;
+        String username = "";
+        String password = "";
+        for (var port : portBOS) {
+            var pluginPort = handler.getPort(port.getId());
+            if (CollectionUtils.isNotEmpty(pluginPort.getAccessModes())) {
+                for (var a : pluginPort.getAccessModes()) {
+                    if (AccessMode.Protocol.SSH.equals(a.getProtocol())) {
+                        username = a.getUsername();
+                        password = a.getPassword();
+                        sourceIp = a.getAccessIp();
+                        sourcePort = a.getAccessPort();
+                    }
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
             }
         }
+        SshInfo sshInfo = new SshInfo();
+        sshInfo.setIp(sourceIp);
+        sshInfo.setPort(sourcePort.toString());
+        sshInfo.setUsername(username);
+        sshInfo.setPassword(password);
+        return sshInfo;
+    }
+
+    @Getter
+    @Setter
+    public static class PintTest {
+        private Boolean connected;
+        private Double packetLoss;
+        private Double delay;
+        private String error;
+    }
+
+    @Getter
+    @Setter
+    private static class SshInfo {
+        private String ip;
+        private String port;
+        private String username;
+        private String password;
     }
 }
