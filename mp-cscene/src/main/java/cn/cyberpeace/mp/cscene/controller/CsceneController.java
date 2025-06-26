@@ -334,12 +334,10 @@ public class CsceneController implements BaseModelListControllerBase {
             connect.put("target", targetPortName);
             JSONObject cpPort1 = new JSONObject();
             cpPort1.put("access_modes", portAccessModesMap.getOrDefault(sourcePortName,new JSONArray()));
-//            cpPort1.put("access_modes", new JSONArray());
             cpPort1.put("firewall_rules", new JSONArray());
             cpPort1.put("connect_mode", null);
             JSONObject cpPort2 = new JSONObject();
             cpPort2.put("access_modes", portAccessModesMap.getOrDefault(targetPortName,new JSONArray()));
-//            cpPort2.put("access_modes", new JSONArray());
             cpPort2.put("firewall_rules", new JSONArray());
             cpPort2.put("connect_mode", null);
             cpElements_ports.put(targetPortName, cpPort2);
@@ -416,6 +414,16 @@ public class CsceneController implements BaseModelListControllerBase {
             JSONObject area = areas.getJSONObject(i);
             area.put("position2",objectNode.toString());
         }*/
+//        topology plugins port不一致启动失败
+        for (Map.Entry<String, JSONArray> port : portAccessModesMap.entrySet()) {
+            if(!cpElements_ports.containsKey(port.getKey())){
+                JSONObject cpPort = new JSONObject();
+                cpPort.put("access_modes", port.getValue() != null ? port.getValue() : new ArrayList<>());
+                cpPort.put("firewall_rules", new JSONArray());
+                cpPort.put("connect_mode", null);
+                cpElements_ports.put(port.getKey(), cpPort);
+            }
+        }
 
         topology.put("areas", areas);
         topology.put("connections", connections);
@@ -477,8 +485,8 @@ public class CsceneController implements BaseModelListControllerBase {
             String defaultId = s[1];
             id = id.replace(defaultId,sourceObj.getString("id"));
             currentPort.put("id", id);
-            currentPort.put("name", sourPort);
-            sourcePorts.set(currentPortCount, currentPort);
+//            currentPort.put("name", sourPort);
+            sourcePorts.set(currentPortCount - 1, currentPort);
             sourceObj.put("ports", sourcePorts);
         }
     }
