@@ -41,7 +41,12 @@ subprojects {
     }
 
     repositories {
-        maven { url 'https://repo.spring.io/release' }
+        maven {
+            url 'http://10.100.3.3:8081/repository/maven-public/'
+        }
+        maven {
+            url 'https://maven.aliyun.com/repository/public/'
+        }
         mavenCentral()
     }
 
