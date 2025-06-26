@@ -138,4 +138,7 @@ public class ImagesByIdVO extends BaseVO {
      */
     @ApiModelProperty(value = "容器信息")
     private ExtDocker extDocker;
+
+    @ApiModelProperty(value = "攻击工具")
+    private List<ImageToolRequest> attackTools;
 }

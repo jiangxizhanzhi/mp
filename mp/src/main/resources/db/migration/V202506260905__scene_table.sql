@@ -1,0 +1,1 @@
+alter table mp_devops_target add column attack_tools longtext comment '工具id';

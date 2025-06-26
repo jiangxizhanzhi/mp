@@ -2,12 +2,15 @@ package cn.cyberpeace.mp.devopscluster.controller;
 
 import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.bo.ImageToolRequest;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.FsCommon;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.common.deprecated.FileResponseData;
@@ -32,6 +35,8 @@ import cn.cyberpeace.mp.devopscluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devopscluster.model.DeviceInjectFileCreate;
 import cn.cyberpeace.mp.devopscluster.model.common.TargetConnection;
+import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
+import cn.cyberpeace.mp.devopscluster.repository.DeviceTargetMapper;
 import cn.cyberpeace.mp.devopscluster.request.*;
 import cn.cyberpeace.mp.devopscluster.service.upload.CustomImageUploadService;
 import cn.cyberpeace.mp.devopscluster.service.upload.ISOUploadService;
@@ -46,6 +51,7 @@ import cn.cyberpeace.mp.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudmessageconvert.CloudMessageConvertUtil;
+import com.fasterxml.jackson.core.type.TypeReference;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -162,6 +168,16 @@ public class ImagesController {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
         imagesConverter.update(request);
+
+        DeviceTargetMapper deviceTargetMapper = BeanCommon.getBean(DeviceTargetMapper.class);
+        DeviceTargetPO po = new DeviceTargetPO();
+        if (request.getAttackTools() == null) {
+            po.setAttackTools(JsonCommon.stringify(new ArrayList<>()));
+        } else {
+            po.setAttackTools(JsonCommon.stringify(request.getAttackTools()));
+        }
+        deviceTargetMapper.filterUpdate(po, new HumanCondition().filterEqual(DeviceTargetPO::getUuid, request.getUuid()));
+
         return ResultCommon.success();
     }
 
@@ -174,6 +190,7 @@ public class ImagesController {
     public Result<ImagesByIdVO> findByUuid(@PathVariable("uuid") String uuid) {
         ImageConvertModel model = imagesConverter.findByUuid(uuid);
         ImagesByIdVO imagesByIdVO = new ImagesByIdVO();
+        imagesByIdVO.setAttackTools(model.getAttackTools());
         imagesByIdVO.setUuid(model.getUuid());
         imagesByIdVO.setName(model.getName());
         imagesByIdVO.setCategory(model.getMainCategory());
@@ -184,6 +201,7 @@ public class ImagesController {
         imagesByIdVO.setIsInternal(model.getIsInternal());
         imagesByIdVO.setIsInit(model.getIsInit());
         imagesByIdVO.setIsImport(model.getIsImport());
+
         ExtVm extVm = model.getExtVm();
         imagesByIdVO.setAccessProtocolList(Objects.nonNull(extVm) ? extVm.getAccessProtocols() : null);
         ExtDocker extDocker = model.getExtDocker();
@@ -203,6 +221,16 @@ public class ImagesController {
         } else {
             imagesByIdVO.setAllowChangeIso(true);
         }
+
+        DeviceTargetMapper deviceTargetMapper = BeanCommon.getBean(DeviceTargetMapper.class);
+        var x = deviceTargetMapper.findByUuid(uuid);
+        if (StringUtils.isNotEmpty(x.getAttackTools())) {
+            var ac = JsonCommon.parse(x.getAttackTools(), new TypeReference<List<ImageToolRequest>>() {
+            });
+            imagesByIdVO.setAttackTools(ac);
+        }
+
+
         return new Result<>(imagesByIdVO);
     }
 

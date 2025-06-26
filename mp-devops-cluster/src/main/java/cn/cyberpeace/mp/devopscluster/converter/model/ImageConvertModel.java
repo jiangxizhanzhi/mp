@@ -147,4 +147,6 @@ public class ImageConvertModel extends BasePageConvertModel{
      */
     private String createUserName;
 
+    private List<ImageToolRequest> attackTools;
+
 }

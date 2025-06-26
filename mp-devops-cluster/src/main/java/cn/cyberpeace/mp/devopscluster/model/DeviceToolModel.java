@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table("mp_devops_tool")
+//@Table("mp_devops_tool")
 public class DeviceToolModel extends BaseModel {
 
     /**

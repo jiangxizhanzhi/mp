@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.bo.ImageToolRequest;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -35,6 +36,7 @@ import cn.cyberpeace.mp.devopscluster.service.DevopsTargetAuthService;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetService;
 import cn.cyberpeace.mp.devopscluster.utils.POLogoUtils;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
@@ -42,6 +44,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -204,9 +207,14 @@ public class ImagesConverter implements BaseConverter{
     public void add(ImageRequest request) {
         Device device = imagesService.add(convertRequest(request));
         device.setIsHide(Objects.nonNull(request.getIsHide()) ? request.getIsHide() : Boolean.FALSE);
+        device.setAttackTools(JsonCommon.stringify(request.getAttackTools()));
         devopsTargetService.insert(Collections.singletonList(device));
         //        增加工具
-        deviceToolService.updateByDeviceUuid(request.getTools(), device.getUuid());
+//        deviceToolService.updateByDeviceUuid(request.getTools(), device.getUuid());
+        DeviceTargetMapper deviceTargetMapper = BeanCommon.getBean(DeviceTargetMapper.class);
+        DeviceTargetPO po = new DeviceTargetPO();
+        po.setAttackTools(JsonCommon.stringify(request.getAttackTools()));
+        deviceTargetMapper.filterUpdate(po, new HumanCondition().filterEqual(DeviceTargetPO::getUuid, device.getUuid()));
     }
 
     /**
@@ -216,7 +224,8 @@ public class ImagesConverter implements BaseConverter{
      */
     public ImageConvertModel findByUuid(String id) {
         Device device = deviceService.findByUuid(id);
-        return wrapperImageConvertModel(device);
+        var target = deviceTargetMapper.findByUuid(id);
+        return wrapperImageConvertModelV2(device, target.getAttackTools());
     }
 
     /**
@@ -249,11 +258,12 @@ public class ImagesConverter implements BaseConverter{
     @Transactional
     public void update(ImageRequest request) {
         Device device = imagesService.update(request.getUuid(),convertRequest(request));
+        device.setAttackTools(JsonCommon.stringify(request.getAttackTools()));
         HumanCondition humanCondition = new HumanCondition();
         humanCondition.filterEqual(DeviceToolModel::getDeviceUuid, device.getUuid());
         devopsTargetService.updateById(device);
 //        增加工具
-        deviceToolService.updateByDeviceUuid(request.getTools(),device.getUuid());
+//        deviceToolService.updateByDeviceUuid(request.getTools(),device.getUuid());
 
     }
 
@@ -544,6 +554,38 @@ public class ImagesConverter implements BaseConverter{
      */
     protected ImageConvertModel wrapperImageConvertModel(Device device){
         ImageConvertModel imageModel = new ImageConvertModel();
+        imageModel.setUuid(device.getUuid());
+        imageModel.setName(device.getName());
+        imageModel.setLogo(DefaultImgUtil.pathToFdfsUrl(device.getLogo()));
+        imageModel.setMainCategory(device.getCategory());
+        imageModel.setSubCategory(device.getSecondCategory());
+        imageModel.setRole(device.getRole());
+        imageModel.setThirdCategory(device.getL3Category());
+        imageModel.setImageType(device.getImageType());
+        imageModel.setIsImport(device.getIsImport());
+        imageModel.setIsInternal(device.getIsInternal());
+        imageModel.setIsInit(device.getIsInit());
+        imageModel.setDescription(device.getDescription());
+        imageModel.setExtSystemInfo(device.getExtSystemInfo());
+        ExtImageInfo extImageInfo = device.getExtImageInfo();
+        if (Objects.nonNull(extImageInfo) && StringUtils.isNotBlank(extImageInfo.getUploadType())
+                && extImageInfo.getUploadType().equals(UploadTypeEnum.FTP.getDesc())){
+            extImageInfo.setFtpFilename(extImageInfo.getUserFilename());
+        }
+        imageModel.setExtImageInfo(extImageInfo);
+        imageModel.setExtVm(device.getExtVm());
+        imageModel.setExtGateway(device.getExtGateway());
+        imageModel.setExtDocker(device.getExtDocker());
+        return imageModel;
+    }
+
+    protected ImageConvertModel wrapperImageConvertModelV2(Device device,String attackTools){
+        ImageConvertModel imageModel = new ImageConvertModel();
+        if (StringUtils.isNotEmpty(attackTools)) {
+            var d = JsonCommon.parse(attackTools, new TypeReference<List<ImageToolRequest>>() {
+            });
+            imageModel.setAttackTools(d);
+        }
         imageModel.setUuid(device.getUuid());
         imageModel.setName(device.getName());
         imageModel.setLogo(DefaultImgUtil.pathToFdfsUrl(device.getLogo()));

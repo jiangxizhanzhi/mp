@@ -25,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -105,7 +106,11 @@ public class DevopsTargetService {
             d.setCreateUser(user != null ? user.getId() : StringUtils.EMPTY);
             d.setCreateUserName(user != null ? user.getName() : StringUtils.EMPTY);
         }
-        return deviceTargetMapper.batchInsert(deviceTargetPOS);
+        try {
+            return deviceTargetMapper.batchInsert(deviceTargetPOS);
+        }catch (DuplicateKeyException e){
+            return 1;
+        }
     }
 
     public void updateInPosition(List<Device> deviceList) {
@@ -184,6 +189,7 @@ public class DevopsTargetService {
      */
     protected DeviceTargetPO convertDevice(Device device) {
         DeviceTargetPO deviceTargetPO = new DeviceTargetPO();
+        deviceTargetPO.setAttackTools(device.getAttackTools());
         deviceTargetPO.setId(device.getId().toString());
         deviceTargetPO.setUuid(device.getUuid());
         deviceTargetPO.setName(device.getName());

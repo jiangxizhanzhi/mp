@@ -129,4 +129,7 @@ public class ImageRequest extends BaseRequest {
 
     @ApiModelProperty(value = "工具列表")
     private List<DeviceToolModel> tools;
+
+    @ApiModelProperty(value = "攻击工具")
+    private List<ImageToolRequest> attackTools;
 }

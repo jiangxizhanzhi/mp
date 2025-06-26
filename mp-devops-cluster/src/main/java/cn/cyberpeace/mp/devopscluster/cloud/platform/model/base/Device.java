@@ -186,6 +186,8 @@ public class Device extends BaseCloudPlatformResult {
      */
     private String defaultLaunchImageName;
 
+    private String attackTools;
+
     public Boolean getIsBuildIn() {
         boolean tmpImport = !Objects.isNull(isImport) && isImport;
         boolean tmpInternal = !Objects.isNull(isInternal) && isInternal;
