@@ -1,7 +1,10 @@
 package cn.cyberpeace.mp.devopscluster.converter;
 
 import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
+import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
@@ -20,6 +23,7 @@ import cn.cyberpeace.mp.devopscluster.enums.ImageTypeEnum;
 import cn.cyberpeace.mp.devopscluster.enums.StatusEnum;
 import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
+import cn.cyberpeace.mp.devopscluster.repository.DeviceTargetMapper;
 import cn.cyberpeace.mp.devopscluster.request.RealEquipmentDeleteRequest;
 import cn.cyberpeace.mp.devopscluster.request.RealEquipmentPageRequest;
 import cn.cyberpeace.mp.devopscluster.request.RealEquipmentRequest;
@@ -156,6 +160,10 @@ public class RealEquipmentConverter implements BaseConverter{
             return result;
         }
         devopsTargetService.insert(Arrays.asList(result));
+        DeviceTargetMapper deviceTargetMapper = BeanCommon.getBean(DeviceTargetMapper.class);
+        DeviceTargetPO po = new DeviceTargetPO();
+        po.setExtEntityAccess(JsonCommon.stringify(request.getExtEntityAccess()));
+        deviceTargetMapper.filterUpdate(po, new HumanCondition().filterEqual(DeviceTargetPO::getUuid, result.getUuid()));
         return result;
     }
 
@@ -170,6 +178,10 @@ public class RealEquipmentConverter implements BaseConverter{
         Device device = convertRequest(request);
         Device result = realEquipmentService.update(request.getUuid(),device);
         devopsTargetService.updateById(result);
+        DeviceTargetMapper deviceTargetMapper = BeanCommon.getBean(DeviceTargetMapper.class);
+        DeviceTargetPO po = new DeviceTargetPO();
+        po.setExtEntityAccess(JsonCommon.stringify(request.getExtEntityAccess()));
+        deviceTargetMapper.filterUpdate(po, new HumanCondition().filterEqual(DeviceTargetPO::getUuid, result.getUuid()));
         return result;
     }
 

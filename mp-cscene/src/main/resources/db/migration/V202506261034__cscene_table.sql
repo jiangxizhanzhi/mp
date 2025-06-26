@@ -1,0 +1,1 @@
+﻿alter table mp_devops_target add column `ext_entity_access` LONGTEXT ;
