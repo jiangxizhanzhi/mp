@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 /*CREATE TABLE mp_devops_tool (
     id VARCHAR(32) NOT NULL COMMENT '靶标id',
     tool_name VARCHAR(128) NOT NULL COMMENT '工具名称',
@@ -43,6 +45,6 @@ public class DeviceToolModel extends BaseModel {
     /**
      * 攻击返回类型
      */
-    private String returnType;
+    private List<String> returnType;
 
 }
