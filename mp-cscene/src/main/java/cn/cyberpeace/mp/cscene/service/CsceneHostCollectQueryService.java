@@ -201,6 +201,8 @@ public class CsceneHostCollectQueryService {
             p.setPid(m.getPid());
             p.setProcess(m.getProcess());
             p.setProtocol(m.getProto());
+            p.setScan(new Scan());
+            p.getScan().setTime(LocalDateTime.now());
             ports.add(p);
         }
         return new ListObjServiceResult<>(ports, (int) result.getTotal());
