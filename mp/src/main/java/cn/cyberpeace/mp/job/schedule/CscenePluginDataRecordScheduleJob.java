@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.job.schedule;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.job.base.schedule.MpScheduled;
 import cn.cyberpeace.mp.cscene.dto.logfile.LogFileVO;
@@ -10,6 +11,7 @@ import cn.cyberpeace.mp.cscene.service.CsceneService;
 import cn.cyberpeace.mp.cscene.service.LogFileService;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementBO;
+import cn.cyberpeace.mp.sceneplugincollection.config.CollectionAppConfig;
 import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneDataModel;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
@@ -61,26 +63,32 @@ public class CscenePluginDataRecordScheduleJob {
                 List<CollectionPluginSceneDataModel> result = new ArrayList<>();
                 for (CollectionPluginSceneElementBO element : collectPlugin.getElementMap()
                         .values()) {
-                    List<Port> ports = collectionSceneService.listPagePorts(element.getSrcElement()
-                                                                                    .getEid());
-                    if (CollectionUtils.isNotEmpty(ports)) {
-                        List<CollectionPluginSceneDataModel> models = new ArrayList<>();
-                        for (Port p : ports) {
-                            CollectionPluginSceneDataModel collectionPluginSceneDataModel = getCollectionPluginSceneDataModel(instance, element, p);
-                            models.add(collectionPluginSceneDataModel);
+                    if (!Boolean.TRUE.equals(BeanCommon.getBean(CollectionAppConfig.class).getQueryByEsData())) {
+                        // 回放使用es中的数据 则不需要这个任务
+                        log.debug("回放未使用es中的数据 需要启动记录任务 ， 记录端口、网卡");
+
+                        List<Port> ports = collectionSceneService.listPagePorts(element.getSrcElement().getEid());
+                        if (CollectionUtils.isNotEmpty(ports)) {
+                            List<CollectionPluginSceneDataModel> models = new ArrayList<>();
+                            for (Port p : ports) {
+                                CollectionPluginSceneDataModel collectionPluginSceneDataModel = getCollectionPluginSceneDataModel(instance, element, p);
+                                models.add(collectionPluginSceneDataModel);
+                            }
+                            result.addAll(models);
                         }
-                        result.addAll(models);
-                    }
-                    List<Netiface> netifaces = collectionSceneService.listNetifaces(element.getSrcElement()
-                                                                                            .getEid());
-                    if (CollectionUtils.isNotEmpty(netifaces)) {
-                        List<CollectionPluginSceneDataModel> models = new ArrayList<>();
-                        for (Netiface n : netifaces) {
-                            CollectionPluginSceneDataModel collectionPluginSceneDataModel = getCollectionPluginSceneDataModel(instance, element, n);
-                            models.add(collectionPluginSceneDataModel);
+
+                        List<Netiface> netifaces = collectionSceneService.listNetifaces(element.getSrcElement().getEid());
+                        if (CollectionUtils.isNotEmpty(netifaces)) {
+                            List<CollectionPluginSceneDataModel> models = new ArrayList<>();
+                            for (Netiface n : netifaces) {
+                                CollectionPluginSceneDataModel collectionPluginSceneDataModel = getCollectionPluginSceneDataModel(instance, element, n);
+                                models.add(collectionPluginSceneDataModel);
+                            }
+                            result.addAll(models);
                         }
-                        result.addAll(models);
                     }
+
+
                     BaseSceneElementPageRequest request = new BaseSceneElementPageRequest();
                     request.setSceneId(instance.getId());
                     request.setElementIds(List.of(element.getSrcElement()

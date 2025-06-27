@@ -136,6 +136,7 @@ mp:
       es-date-pattern: ${ES_DATE_PATTERN:yyyy-MM-dd'T'HH:mm:ss.SSSZ}
       self-port: ${MP_SELF_PORT:8001}
       max-index-num: ${MP_MAX_INDEX_NUM:30}
+      query-by-es-data: ${MP_QUERY_BY_ES_DATA:true}
   # mp-log 模块
   log:
     ext-var:

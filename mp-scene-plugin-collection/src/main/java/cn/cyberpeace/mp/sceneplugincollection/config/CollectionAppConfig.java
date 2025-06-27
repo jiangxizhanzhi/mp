@@ -103,7 +103,7 @@ public class CollectionAppConfig {
     @Value(("${mp.sceneplugincollection.suricata_rule_dir:}"))
     private String suricataRuleDir;
 
-    @Value("${mp.cscene.query-by-es-data:true}")
+    @Value("${mp.sceneplugincollection.query-by-es-data:true}")
     private Boolean queryByEsData;
 
     @Autowired
