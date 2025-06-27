@@ -21,6 +21,7 @@ import cn.cyberpeace.mp.sceneplugincollection.service.collect.registrymodify.Waz
 import cn.cyberpeace.mp.situationaware.model.FileEventModel;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Netiface;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
+import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Scan;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -236,6 +237,8 @@ public class CsceneHostCollectQueryService {
             netiface.setRx(new Netiface.X());
             netiface.getRx().setBytes(m.getRxBytes() == null ? null : Integer.parseInt(m.getRxBytes()));
             netiface.getRx().setPackets(m.getRxPackets());
+            netiface.setScan(new Scan());
+            netiface.getScan().setTime(LocalDateTime.now());
             netifaces.add(netiface);
         }
         return new ListObjServiceResult<>(netifaces, (int) result.getTotal());

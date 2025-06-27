@@ -468,8 +468,6 @@ public class HostStateService {
             }
         }
 
-        listPageInfoQueryParams.setSceneIds(csceneCommonService.translateSceneIds(listPageInfoQueryParams.getSceneIds()));
-
         CollectionAppConfig collectionAppConfig = BeanCommon.getBean(CollectionAppConfig.class);
         if (Boolean.TRUE.equals(collectionAppConfig.getQueryByEsData())) {
             log.debug("端口信息使用es的数据");
@@ -488,6 +486,8 @@ public class HostStateService {
             return csceneHostCollectQueryService.getPortData(from, size, csceneId, listPageInfoQueryParams.getNodeIds(), startTime, endTime)
                     .asResult();
         }
+
+        listPageInfoQueryParams.setSceneIds(csceneCommonService.translateSceneIds(listPageInfoQueryParams.getSceneIds()));
 
         if (listPageInfoQueryParams.getStartTime() != null || listPageInfoQueryParams.getEndTime() != null) {
             BatchSceneHandler batchSceneHandler = new BatchSceneHandler(listPageInfoQueryParams.getSceneIds(), null);
@@ -574,8 +574,6 @@ public class HostStateService {
             }
         }
 
-        listPageInfoQueryParams.setSceneIds(csceneCommonService.translateSceneIds(listPageInfoQueryParams.getSceneIds()));
-
         CollectionAppConfig collectionAppConfig = BeanCommon.getBean(CollectionAppConfig.class);
         if (Boolean.TRUE.equals(collectionAppConfig.getQueryByEsData())) {
             log.debug("网卡信息使用es的数据");
@@ -594,6 +592,9 @@ public class HostStateService {
             return csceneHostCollectQueryService.getNetifacesData(from, size, csceneId, listPageInfoQueryParams.getNodeIds(), startTime, endTime)
                     .asResult();
         }
+
+
+        listPageInfoQueryParams.setSceneIds(csceneCommonService.translateSceneIds(listPageInfoQueryParams.getSceneIds()));
 
         if (listPageInfoQueryParams.getStartTime() != null || listPageInfoQueryParams.getEndTime() != null) {
             BatchSceneHandler batchSceneHandler = new BatchSceneHandler(listPageInfoQueryParams.getSceneIds(), null);
