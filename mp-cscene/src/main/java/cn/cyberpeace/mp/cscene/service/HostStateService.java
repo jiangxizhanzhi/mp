@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.base.bo.IntervalSizeBO;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
@@ -27,6 +28,7 @@ import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.cscene.util.SegmentCount2IntervalSecondsUtil;
 import cn.cyberpeace.mp.sceneplugincollection.bo.AttCkTypeCount;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostStateBO;
+import cn.cyberpeace.mp.sceneplugincollection.config.CollectionAppConfig;
 import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneDataModel;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.BatchSceneHandler;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
@@ -459,6 +461,7 @@ public class HostStateService {
     public ListObjServiceResult<Port> pagePorts(TimeListPageInfoQueryParams listPageInfoQueryParams) {
         listPageInfoQueryParams.ensure();
         checkListPageParams(listPageInfoQueryParams);
+
         if (Objects.isNull(listPageInfoQueryParams.getFetchIfSceneInstanceShutdown()) || !listPageInfoQueryParams.getFetchIfSceneInstanceShutdown()) {
             if (!csceneCommonService.isCsceneInstanceRunning(listPageInfoQueryParams.getSceneIds().get(0))) {
                 return new ListObjServiceResult(new ListObjResult()).asResult();
@@ -466,6 +469,25 @@ public class HostStateService {
         }
 
         listPageInfoQueryParams.setSceneIds(csceneCommonService.translateSceneIds(listPageInfoQueryParams.getSceneIds()));
+
+        CollectionAppConfig collectionAppConfig = BeanCommon.getBean(CollectionAppConfig.class);
+        if (Boolean.TRUE.equals(collectionAppConfig.getQueryByEsData())) {
+            log.debug("端口信息使用es的数据");
+            int from = (listPageInfoQueryParams.getPage() - 1) * listPageInfoQueryParams.getPageSize();
+            int size = listPageInfoQueryParams.getPageSize();
+            String csceneId = listPageInfoQueryParams.getSceneIds().get(0);
+            LocalDateTime startTime = null;
+            LocalDateTime endTime = null;
+            if (StringUtils.isNotEmpty(listPageInfoQueryParams.getStartTime())) {
+                startTime = TimeUtils.stringToLocalDateTime(listPageInfoQueryParams.getStartTime());
+            }
+            if (StringUtils.isNotEmpty(listPageInfoQueryParams.getEndTime())) {
+                endTime = TimeUtils.stringToLocalDateTime(listPageInfoQueryParams.getEndTime());
+            }
+            var csceneHostCollectQueryService = BeanCommon.getBean(CsceneHostCollectQueryService.class);
+            return csceneHostCollectQueryService.getPortData(from, size, csceneId, listPageInfoQueryParams.getNodeIds(), startTime, endTime)
+                    .asResult();
+        }
 
         if (listPageInfoQueryParams.getStartTime() != null || listPageInfoQueryParams.getEndTime() != null) {
             BatchSceneHandler batchSceneHandler = new BatchSceneHandler(listPageInfoQueryParams.getSceneIds(), null);
@@ -553,6 +575,26 @@ public class HostStateService {
         }
 
         listPageInfoQueryParams.setSceneIds(csceneCommonService.translateSceneIds(listPageInfoQueryParams.getSceneIds()));
+
+        CollectionAppConfig collectionAppConfig = BeanCommon.getBean(CollectionAppConfig.class);
+        if (Boolean.TRUE.equals(collectionAppConfig.getQueryByEsData())) {
+            log.debug("网卡信息使用es的数据");
+            int from = (listPageInfoQueryParams.getPage() - 1) * listPageInfoQueryParams.getPageSize();
+            int size = listPageInfoQueryParams.getPageSize();
+            String csceneId = listPageInfoQueryParams.getSceneIds().get(0);
+            LocalDateTime startTime = null;
+            LocalDateTime endTime = null;
+            if (StringUtils.isNotEmpty(listPageInfoQueryParams.getStartTime())) {
+                startTime = TimeUtils.stringToLocalDateTime(listPageInfoQueryParams.getStartTime());
+            }
+            if (StringUtils.isNotEmpty(listPageInfoQueryParams.getEndTime())) {
+                endTime = TimeUtils.stringToLocalDateTime(listPageInfoQueryParams.getEndTime());
+            }
+            var csceneHostCollectQueryService = BeanCommon.getBean(CsceneHostCollectQueryService.class);
+            return csceneHostCollectQueryService.getNetifacesData(from, size, csceneId, listPageInfoQueryParams.getNodeIds(), startTime, endTime)
+                    .asResult();
+        }
+
         if (listPageInfoQueryParams.getStartTime() != null || listPageInfoQueryParams.getEndTime() != null) {
             BatchSceneHandler batchSceneHandler = new BatchSceneHandler(listPageInfoQueryParams.getSceneIds(), null);
             LocalDateTime startTime = null;

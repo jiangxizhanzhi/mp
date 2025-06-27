@@ -140,25 +140,8 @@ public class HostStateController {
     @GetMapping("/element_port")
     public ListObjServiceResult<Port> pagePorts(TimeListPageInfoQueryParams listPageInfoQueryParams) {
         try {
-            CollectionAppConfig collectionAppConfig = BeanCommon.getBean(CollectionAppConfig.class);
             listPageInfoQueryParams.ensure();
-            if (Boolean.TRUE.equals(collectionAppConfig.getQueryByEsData())) {
-                log.debug("端口信息使用es的数据");
-                int from = (listPageInfoQueryParams.getPage() - 1) * listPageInfoQueryParams.getPageSize();
-                int size = listPageInfoQueryParams.getPageSize();
-                String csceneId = listPageInfoQueryParams.getSceneIds().get(0);
-                LocalDateTime startTime = null;
-                LocalDateTime endTime = null;
-                if (StringUtils.isNotEmpty(listPageInfoQueryParams.getStartTime())) {
-                    startTime = TimeUtils.stringToLocalDateTime(listPageInfoQueryParams.getStartTime());
-                }
-                if (StringUtils.isNotEmpty(listPageInfoQueryParams.getEndTime())) {
-                    endTime = TimeUtils.stringToLocalDateTime(listPageInfoQueryParams.getEndTime());
-                }
-                return csceneHostCollectQueryService.getPortData(from, size, csceneId, listPageInfoQueryParams.getNodeIds(), startTime, endTime).asResult();
-            } else {
-                return hostStateService.pagePorts(listPageInfoQueryParams).asResult();
-            }
+            return hostStateService.pagePorts(listPageInfoQueryParams).asResult();
         } catch (Exception e) {
             log.error("failed to exec element_port", e);
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
@@ -180,26 +163,8 @@ public class HostStateController {
     @GetMapping("/element_netifaces")
     public ListObjServiceResult<Netiface> pageNetifaces(TimeListPageInfoQueryParams listPageInfoQueryParams) {
         try {
-            CollectionAppConfig collectionAppConfig = BeanCommon.getBean(CollectionAppConfig.class);
             listPageInfoQueryParams.ensure();
-            if (Boolean.TRUE.equals(collectionAppConfig.getQueryByEsData())) {
-                log.debug("网卡信息使用es的数据");
-                int from = (listPageInfoQueryParams.getPage() - 1) * listPageInfoQueryParams.getPageSize();
-                int size = listPageInfoQueryParams.getPageSize();
-                String csceneId = listPageInfoQueryParams.getSceneIds().get(0);
-                LocalDateTime startTime = null;
-                LocalDateTime endTime = null;
-                if (StringUtils.isNotEmpty(listPageInfoQueryParams.getStartTime())) {
-                    startTime = TimeUtils.stringToLocalDateTime(listPageInfoQueryParams.getStartTime());
-                }
-                if (StringUtils.isNotEmpty(listPageInfoQueryParams.getEndTime())) {
-                    endTime = TimeUtils.stringToLocalDateTime(listPageInfoQueryParams.getEndTime());
-                }
-                return csceneHostCollectQueryService.getNetifacesData(from, size, csceneId, listPageInfoQueryParams.getNodeIds(), startTime, endTime)
-                        .asResult();
-            } else {
-                return hostStateService.pageNetifaces(listPageInfoQueryParams).asResult();
-            }
+            return hostStateService.pageNetifaces(listPageInfoQueryParams).asResult();
         } catch (Exception e) {
             log.error("failed to exec element_netifaces", e);
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
