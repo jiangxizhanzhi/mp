@@ -33,6 +33,7 @@ import cn.cyberpeace.mp.devopscluster.utils.POLogoUtils;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -43,6 +44,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ImagesConverter implements BaseConverter{
@@ -138,6 +140,9 @@ public class ImagesConverter implements BaseConverter{
                 }
                 if (MapUtils.isNotEmpty(deviceTargetPOMap) && deviceTargetPOMap.containsKey(imageConvertModel.getUuid())) {
                     imageConvertModel.setCreateUserName(deviceTargetPOMap.get(imageConvertModel.getUuid()).getCreateUserName());
+                    imageConvertModel.setComputeNode(deviceTargetPOMap.get(imageConvertModel.getUuid()).getComputeNode());
+                    imageConvertModel.setVlanId(deviceTargetPOMap.get(imageConvertModel.getUuid()).getVlanId());
+                    imageConvertModel.setCidr(deviceTargetPOMap.get(imageConvertModel.getUuid()).getCidr());
                 }
                 imageConvertModel.setAuthTotal(imageAuthTotalCountsMap.get(imageConvertModel.getUuid()));
                 if (supportExports.containsKey(imageConvertModel.getUuid())) {
@@ -335,15 +340,36 @@ public class ImagesConverter implements BaseConverter{
      * 创建镜像机器
      * @param uuid
      */
-    public void create(String uuid) {
-        if (StringUtils.isBlank(uuid)) {
+//    public void create(String uuid) {
+//        if (StringUtils.isBlank(uuid)) {
+//            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+//        }
+//        String insctanceCreateUser = Objects.nonNull(UserUtils.getLoginUser()) ? UserUtils.getLoginUser().getId() : StringUtils.EMPTY;
+//        scenariosService.create(new ImagesCreateInstanceCloudPlatform(uuid, insctanceCreateUser,""));
+//        var updateTargetModel = new DeviceTargetPO();
+//        updateTargetModel.setUuid(uuid);
+//        updateTargetModel.setInstanceCreateUser(insctanceCreateUser);
+//        deviceTargetMapper.updateById(updateTargetModel);
+//    }
+
+    /**
+     * 创建镜像机器
+     * @param uuid
+     */
+    public void createForBJYD(String uuid,String host,ImageCreateRequest im) {
+        if (StringUtils.isBlank(uuid) || StringUtils.isBlank(host)
+                || StringUtils.isEmpty(im.getCidr()) || im.getVlanId() == null) {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
         String insctanceCreateUser = Objects.nonNull(UserUtils.getLoginUser()) ? UserUtils.getLoginUser().getId() : StringUtils.EMPTY;
-        scenariosService.create(new ImagesCreateInstanceCloudPlatform(uuid, insctanceCreateUser));
+        log.info("do createForBJYD : {},{},{}",uuid,insctanceCreateUser,host);
+        scenariosService.create(new ImagesCreateInstanceCloudPlatform(uuid, insctanceCreateUser,host,im.getVlanId(),im.getCidr()));
         var updateTargetModel = new DeviceTargetPO();
         updateTargetModel.setUuid(uuid);
         updateTargetModel.setInstanceCreateUser(insctanceCreateUser);
+        updateTargetModel.setComputeNode(host);
+        updateTargetModel.setVlanId(im.getVlanId());
+        updateTargetModel.setCidr(im.getCidr());
         deviceTargetMapper.updateById(updateTargetModel);
     }
 

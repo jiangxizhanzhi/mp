@@ -13,6 +13,8 @@ import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.AllocationPool;
+import cn.cyberpeace.mp.sceneplugincloud.bo.base.VlanInfo;
+import cn.cyberpeace.mp.sceneplugincloud.bo.base.VlanPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
@@ -791,6 +793,44 @@ public class InitiateHandler extends HandlerCommon {
                 connectNetwork.addPort(port, connectPort, true);
             }
             cloudElement.getDeriveNetworks().add(connectNetwork);
+        } else if(ElementTypeUtils.isVlanVirtualSwitch(cloudElement)){
+            //内置的多vlan交换机，需要对应多个vlan创建多个网络
+            List<VlanInfo> vlanInfos = cloudElement.getVlanInfos();
+            //cidr，gateway,vlanId形成一组
+            if(CollectionUtils.isNotEmpty(vlanInfos)){
+                for (VlanInfo vlanInfo: vlanInfos) {
+                    if(CollectionUtils.isEmpty(vlanInfo.getPorts())){
+                        continue;
+                    }
+                    CloudPluginSceneElementNetworkBO network = new CloudPluginSceneElementNetworkBO(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
+                    network.setGateway(vlanInfo.getGateway());
+                    network.setGatewayOff(cloudElement.getGatewayOff());
+                    network.setCidr(vlanInfo.getCidr());
+                    network.setVlan(Boolean.TRUE);
+                    network.setVlanId(vlanInfo.getVlanId());
+                    var connectNetwork = new ConnectedNetworkBO(network, getHandlerUtils());
+                    var ports = Optional
+                        .ofNullable(cloudElement.getSrcElement().getPorts())
+                        .orElse(new ArrayList<>());
+                    //vlan关联的端口id
+                    List<String> portIds =
+                        vlanInfo.getPorts().stream().map(VlanPortBO::getId).collect(Collectors.toList());
+                    for (var port : ports) {
+                        //多vlan端口配置不包含不加入到网络中
+                        if(!portIds.contains(port.getId())){
+                            continue;
+                        }
+                        var connectPort = getHandlerUtils().getPortConnectedOpaqueSrcPort(port.getId());
+                        //对端端口为空也不加入到网络
+                        if(Objects.isNull(connectPort)){
+                            continue;
+                        }
+                        connectNetwork.addPort(port, connectPort, true);
+                    }
+                    cloudElement.getDeriveNetworks().add(connectNetwork);
+                }
+            }
+            return;
         }
 
         if (Boolean.TRUE.equals(cloudElement.getExternal()) && !ElementTypeUtils.isExternalTerminal(cloudElement)) {

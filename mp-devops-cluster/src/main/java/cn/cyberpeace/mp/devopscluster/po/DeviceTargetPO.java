@@ -168,4 +168,18 @@ public class DeviceTargetPO extends BaseModel {
 
     @DefaultStr
     private String extEntityAccess;
+    /**
+     * 计算节点
+     */
+    private String computeNode;
+
+    /**
+     * VLAN ID
+     */
+    private Integer vlanId;
+
+    /**
+     * cidr地址
+     */
+    private String cidr;
 }

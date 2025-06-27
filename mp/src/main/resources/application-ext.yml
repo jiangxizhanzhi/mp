@@ -58,6 +58,7 @@ mp:
       lfs-outer-http-url: ${LFS_OUTER_HTTP_URL:/api/mp/file/%s}
       jsondir: ${MP_TEST_DIR:D:/test/}
       htmldir: ${MP_HTML_DIR:D:/test/}
+      vlan-switch-default-url: ${VLAN_SWITCH_DEFAULT_URL:http://127.0.0.1/guacamole/xx}
   # mp-situationaware 模块配置
   situationaware:
     ext-var:

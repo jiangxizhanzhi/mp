@@ -39,6 +39,9 @@ import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.dto.scene.ElementCommandExecResult;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneLinkStatusInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
+import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
+import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
+import cn.cyberpeace.mp.cscene.request.ScenceAccessReq;
 import cn.cyberpeace.mp.cscene.service.CsceneFileService;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
@@ -66,6 +69,7 @@ import cn.cyberpeace.mp.sceneplugincollection.service.param.QueryCollectionDataC
 import cn.cyberpeace.mp.scenepluginflow.service.response.SceneFlowRecordsResponse;
 import cn.cyberpeace.mp.situationaware.model.enums.FileEventType;
 import cn.hutool.core.io.FileUtil;
+import com.alibaba.fastjson.JSONArray;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -110,6 +114,9 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     private CsceneSpecialService csceneSpecialService;
 
     private CsceneFileService csceneFileService;
+
+    @Autowired
+    private CsceneInstanceMapper csceneInstanceMapper;
 
     @Resource(name = "sysOptionServiceImpl")
     private OptionService optionService;
@@ -431,6 +438,53 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         request = formatNodeAccessModeActionRequest(request, id, nodeId, accessModeId);
         return modelService.getRemoteConnection(request.getId(), request.getNodeId(), request.getAccessModeId(),
                 request.getContext()).asResult();
+    }
+
+//    @ApiOperation("计算机实力管理-场景实例获取远程连接")
+//    @ApiImplicitParams({
+//            @ApiImplicitParam(name = "node", value = "节点名称", dataTypeClass = String.class)
+//    })
+    @PostMapping(value = "/getAccessModeInfo")
+    public ServiceResult<JSONArray> getAccessModeInfo(@RequestBody(required = false) ScenceAccessReq request) {
+        String node = request.getNode();
+        log.info("do get_jsj_connection : node->{}",node);
+        node = node.substring(9);
+        CsceneInstanceModel csceneInstanceModel = csceneInstanceMapper.getNodeInfoForConnect(node);
+        log.info("do getNodeInfoForConnect : csceneInstanceModel->{}",csceneInstanceModel);
+        if(csceneInstanceModel != null ) {
+            CsceneInstanceModel accessMode = csceneInstanceMapper.getAccessModeIdForJsj(csceneInstanceModel.getCscene(),csceneInstanceModel.getScene());
+            log.info("do getAccessModeIdForJsj : accessMode->{}",accessMode);
+            JSONArray jsonArray = JSONArray.parseArray(accessMode.getCscene());
+            log.info("do parseArray : jsonArray->{}",jsonArray);
+            return new ServiceResult<>(jsonArray).asResult();
+        } else {
+            log.info("do get_jsj_connection error : node is illegal ->{}",node);
+            return null;
+        }
+
+    }
+
+    @PostMapping(value = "/get_jsj_connection")
+    public ServiceResult<NodeConnectionBO> getRemoteConnectionForJSJ(@RequestBody(required = false) ScenceAccessReq req) {
+        log.info("do get_jsj_connection : node->{}",req);
+        String node = req.getNode();
+        node = node.substring(9);
+        CsceneInstanceModel csceneInstanceModel = csceneInstanceMapper.getNodeInfoForConnect(node);
+        if(csceneInstanceModel != null) {
+            CsceneInstanceNodeAccessModeActionRequest request = new CsceneInstanceNodeAccessModeActionRequest();
+            CsceneContextBO bo = new CsceneContextBO();
+            bo.setAccessUserId(req.getAccessUserId());
+            request.setContext(bo);
+            request = formatNodeAccessModeActionRequest(request, csceneInstanceModel.getLogo(), csceneInstanceModel.getCscene(), req.getAccessModeId());
+            ServiceResult<NodeConnectionBO> result = modelService.getRemoteConnection(request.getId(), request.getNodeId(), request.getAccessModeId(),
+                    request.getContext()).asResult();
+            result.getData().setConnectionRecordingName(req.getAccessModeId());
+            return result;
+        } else {
+            log.info("do get_jsj_connection error : node is illegal ->{}",node);
+            return null;
+        }
+
     }
 
     @ApiOperation("获取容器console连接,仅支持非neutron网络的容器")

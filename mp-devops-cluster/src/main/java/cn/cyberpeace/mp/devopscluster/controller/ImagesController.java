@@ -21,6 +21,7 @@ import cn.cyberpeace.mp.devopscluster.cloud.platform.service.ScenariosService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.SnapshotService;
 import cn.cyberpeace.mp.devopscluster.config.DevopsClusterConfig;
 import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
+import cn.cyberpeace.mp.devopscluster.constant.DevopsClusterConstant;
 import cn.cyberpeace.mp.devopscluster.constant.DevopsClusterErrorCode;
 import cn.cyberpeace.mp.devopscluster.converter.ImagesConverter;
 import cn.cyberpeace.mp.devopscluster.converter.InjectFileConverter;
@@ -42,6 +43,7 @@ import cn.cyberpeace.mp.devopscluster.request.ISOFileRequest;
 import cn.cyberpeace.mp.devopscluster.request.ImageAsyncRequest;
 import cn.cyberpeace.mp.devopscluster.request.ImageByUuidsRequest;
 import cn.cyberpeace.mp.devopscluster.request.ImageInjectFileDeleteRequest;
+import cn.cyberpeace.mp.devopscluster.request.ImageCreateRequest;
 import cn.cyberpeace.mp.devopscluster.request.ImageInjectFilePageRequest;
 import cn.cyberpeace.mp.devopscluster.request.ImageInjectFileRequest;
 import cn.cyberpeace.mp.devopscluster.request.ImagePageRequest;
@@ -178,6 +180,7 @@ public class ImagesController {
     public ServiceResult add(@RequestBody ImageRequest request){
         request.setLogo(FsCommon.getFileKey(request.getLogo()));
         validImageRequest(request);
+        preHandleImageRequest(request);
         imagesConverter.add(request);
         return ResultCommon.success();
     }
@@ -195,6 +198,7 @@ public class ImagesController {
         if (StringUtils.isBlank(request.getUuid())){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
+        preHandleImageRequest(request);
         imagesConverter.update(request);
         return ResultCommon.success();
     }
@@ -363,10 +367,12 @@ public class ImagesController {
      * 创建虚拟机/容器
      */
     @ApiOperation("编辑镜像")
-    @PostMapping("/{id}/create")
+    @PostMapping("/{id}/{host}/create")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.START, title = "创建虚拟机/容器", target = OpTargetEnums.IMAGE)
-    public ServiceResult create(@PathVariable("id") String uuid){
-        imagesConverter.create(uuid);
+    public ServiceResult create(@PathVariable("id") String uuid,@PathVariable("host") String host,
+                                @RequestBody ImageCreateRequest imageCreateRequest){
+        log.info(" do create image bjyd : {},{},{}",uuid,host,imageCreateRequest.toString());
+        imagesConverter.createForBJYD(uuid,host,imageCreateRequest);
         return ResultCommon.success();
     }
 
@@ -673,6 +679,44 @@ public class ImagesController {
         }
     }
 
+
+    /**
+     * @description: 参数提前处理
+     * @param request
+     * @throws
+     * @return void
+     */
+    private void preHandleImageRequest(ImageRequest request){
+        //现场界面只使用单独cpu,ram,disk，给底层拼接对应flavor
+        //虚拟机
+        if(Objects.nonNull(request.getExtVm())){
+            ExtVm extVm = request.getExtVm();
+            String flavor = concatFlavor(extVm.getCpu(), extVm.getRam(), extVm.getDisk());
+            extVm.setFlavor(flavor);
+        }else if(Objects.nonNull(request.getExtDocker())){
+            //容器
+            ExtDocker extDocker = request.getExtDocker();
+            String flavor = concatFlavor(extDocker.getCpu(), extDocker.getRam(), extDocker.getDisk());
+            extDocker.setFlavor(flavor);
+        }else {
+            //do nothing
+        }
+
+    }
+
+    /**
+     * @description: 转换为flavor
+     * @param cpu
+     * @param ram
+     * @param disk
+     * @throws
+     * @return String
+     */
+    private String concatFlavor(Integer cpu,Integer ram,Integer disk){
+        return String.format(DevopsClusterConstant.CONCAT_FLAVOR_FORMAT,cpu,ram,disk);
+    }
+
+
     /**
      * 转换BO to VO
      * @param model
@@ -738,6 +782,9 @@ public class ImagesController {
                 }
             }
             vo.setCreateUserName(v.getCreateUserName());
+            vo.setComputeNode(v.getComputeNode());
+            vo.setVlanId(v.getVlanId());
+            vo.setCidr(v.getCidr());
             return vo;
         }).collect(Collectors.toList());
     }

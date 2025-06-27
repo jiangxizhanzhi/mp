@@ -15,4 +15,9 @@ public class DevopsClusterConstant {
      * 后台系统管理-系统运维-实装设备管理-实装设备-使用状态
      */
     public static final String MP_COMMON_OPTION_TYPE_DEVOPS_CLUSTER_USE = "cluster_use";
+
+    /**
+     * 拼接flavor格式
+     */
+    public static final String CONCAT_FLAVOR_FORMAT = "mx.%dc-%dm-%dg";
 }

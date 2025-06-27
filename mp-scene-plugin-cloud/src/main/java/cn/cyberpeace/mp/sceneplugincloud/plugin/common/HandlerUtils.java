@@ -31,6 +31,12 @@ public class HandlerUtils {
 
     private CloudScenePluginHandler pluginHandler;
 
+    private String probeCommand;
+
+    public void setProbeCommand(String probeCommand) {
+        this.probeCommand = probeCommand;
+    }
+
     private final List<String> cidrPool = CloudSingleton.cloudAppConfig.getCidrPool();
 
     private final Map<String, CloudPluginSceneElementBO> portIdAuxiliaryNetworkCloudElementMap = new ConcurrentHashMap<>();

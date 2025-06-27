@@ -137,4 +137,13 @@ public class ImagesPageVO extends BaseVO {
 
     @ApiModelProperty("靶标创建用户名称")
     private String createUserName;
+
+    @ApiModelProperty("计算节点")
+    private String computeNode;
+
+    @ApiModelProperty("VLAN ID")
+    private Integer vlanId;
+
+    @ApiModelProperty("cidr地址")
+    private String cidr;
 }

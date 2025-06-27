@@ -23,6 +23,9 @@ public class InstancePageDTO extends BasePageDTO {
     @ApiModelProperty(value = "IP地址")
     private String addr;
 
+    @ApiModelProperty(value = "节点名称")
+    private String node;
+
     public InstancePageDTO(String host) {
         this.host = host;
     }
@@ -35,6 +38,7 @@ public class InstancePageDTO extends BasePageDTO {
     public InstancePageDTO(InstancePageRequest request){
         this.host = request.getHost();
         this.addr = request.getAddr();
+        this.node = request.getNode();
         super.setLimit(request.getLimit());
         super.setOffset(request.getOffset());
     }

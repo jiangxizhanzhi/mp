@@ -84,6 +84,9 @@ public class BaseAppConfig {
     @Value("${mp.base.lfs-outer-http-url-template:/api/mp/file/%s}")
     private String lfsOuterHttpUrlTemplate;
 
+    @Value("${mp.base.vlan-switch-default-url:http://127.0.0.1/guacamole/xx}")
+    private String vlanSwitchDefaultUrl;
+
     @Value("${mp.base.home-dir:}")
     private String homeDir;
 

@@ -738,11 +738,11 @@ public class CreateHandler extends HandlerCommon {
 
                         try {
                             // 安装探针失败要重试
-                            List<String> checks = new ArrayList<>(){{
-                                this.add("sleep 180 ;");
+                            List<String> checks = new ArrayList<>() {{
+                                this.add("sleep 120 ;");
                                 this.add("if [ -e /var/ossec/bin/tools/09ffcc4a67ef4accb407a1555629d0f8.py ] ;");
                                 this.add("then echo \"wazuh ok\"");
-                                this.add("else sh install_wazuh.sh ;");
+                                this.add("else " + getHandlerUtils().getProbeCommand()+" ;" +"sh /opt/wazuha/start.sh"+ " ;");
                                 this.add("fi");
                             }};
                             containerClient.executeCommand(containerId, "echo \"" + StringUtils.join(checks,"\n") + "\" >>" + " " + "/tmp/tmp_installers" + "/check_wazuh.sh");
@@ -1028,6 +1028,9 @@ public class CreateHandler extends HandlerCommon {
         createData.setCpu(IntUtils.zeroNull(srcElement.getCpu()));
         createData.setRam(IntUtils.zeroNull(srcElement.getRam()));
         createData.setDisk(IntUtils.zeroNull(srcElement.getDisk()));
+        if(StringUtils.isNotEmpty(cloudElement.getHost())){
+            createData.setHost(cloudElement.getHost());
+        }
         if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(cloudElement.getEntityUsbs()) && StringUtils.isNotEmpty(cloudElement.getEntityUsbs().get(0).getHost())) {
             createData.setHost(cloudElement.getEntityUsbs().get(0).getHost());
         }
@@ -1074,6 +1077,9 @@ public class CreateHandler extends HandlerCommon {
         }
         var srcElement = cloudElement.getSrcElement();
         var createData = new ContainerCreateData();
+        if(StringUtils.isNotEmpty(cloudElement.getHost())){
+            createData.setHost(cloudElement.getHost());
+        }
         createData.setRequestUser(TextUtils.emptyNull(getHandlerUtils().getRequestUser()));
 //        createData.setDepartment(Optional.ofNullable(getHandlerUtils().getRequestUserOrg()).orElse(StringUtils.EMPTY));
 //        createData.setScene(Optional.ofNullable(getPluginHandler().getSrcScene().getName()).orElse(StringUtils.EMPTY));

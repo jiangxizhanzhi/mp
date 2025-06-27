@@ -4,6 +4,8 @@ import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 
+import java.util.Objects;
+
 /**
  * @Description 用于节点类型的判断
  * @Author maojun
@@ -29,6 +31,15 @@ public class ElementTypeUtils {
      */
     public static boolean isCoreRouter(CloudPluginSceneElementBO element) {
         return isCoreRouter(element.getImage());
+    }
+
+    /**
+     * 是否是多vlan交换机
+     * @param element
+     * @return
+     */
+    public static boolean isVlanVirtualSwitch(CloudPluginSceneElementBO element) {
+        return Objects.nonNull(element.getRole()) && element.getRole() == BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_VLAN_SWITCH;
     }
 
     public static boolean isExternal(CloudPluginSceneElementBO element) {

@@ -453,6 +453,7 @@ public class FlowMonitorService {
                 FlowAttackDto flowAttackDto = new FlowAttackDto();
                 BeanUtils.copyProperties(flowBO, flowAttackDto);
 //                flowAttackDto.setAttackInfo(new AttackInfo(4, "Abnormal links"));
+                flowAttackDto.setAttackInfo(new AttackInfo(3, "Misc activity"));
                 flowAttackDtos.add(flowAttackDto);
             }
         }

@@ -103,7 +103,11 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     @DefaultStr
     private String entityUsbs;
     @DefaultStr
+    private String vlanInfos;
+    @DefaultStr
     private String dockerParams;
+    @DefaultStr
+    private String vlanSwitchUrl;
     @DefaultStr
     private String platform;
 
@@ -198,6 +202,10 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
         public static final int VIRTUAL_LAYER_3_SIMPLE_ROUTER = 21;
         public static final int VIRTUAL_LAYER_3_SIMPLE_SWITCH = 22;
         public static final int VIRTUAL_LAYER_3_SIMPLE_FIREWALL = 23;
+        /**
+         * 内置的多vlan交换机
+         */
+        public static final int VIRTUAL_LAYER_3_SIMPLE_VLAN_SWITCH = 24;
         public static final int ENTITY_GATEWAY = 50;
         public static final int ENTITY_TERMINAL = 51;
 

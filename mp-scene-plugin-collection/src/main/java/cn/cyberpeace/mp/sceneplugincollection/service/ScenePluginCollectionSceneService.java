@@ -141,10 +141,10 @@ public class ScenePluginCollectionSceneService {
             log.info("{} query time interval sum flow size,sceneIds:{},no collection plugin or no flowCollector", LOG_PREFIX, JsonCommon.stringify(sceneIds));
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
-        if (CollectionUtils.isEmpty(batchSceneHandler.getFlowCollectedMacAddrs())) {
-            log.info("{} query time interval sum flow size,sceneIds:{},no collection plugin or no flowCollector", LOG_PREFIX, JsonCommon.stringify(sceneIds));
-            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
-        }
+//        if (CollectionUtils.isEmpty(batchSceneHandler.getFlowCollectedMacAddrs())) {
+//            log.info("{} query time interval sum flow size,sceneIds:{},no collection plugin or no flowCollector", LOG_PREFIX, JsonCommon.stringify(sceneIds));
+//            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
+//        }
 
         if (CollectionUtils.isNotEmpty(queryParams.getSourceNodeIds())) {
             List<String> ips = new ArrayList<>();
@@ -179,18 +179,19 @@ public class ScenePluginCollectionSceneService {
 
         FlowAnalysisRequest request = new FlowAnalysisRequest();
         request.setGroupList(batchSceneHandler.getFlowCollectors());
-        request.setAttackTypes(queryParams.getAttackTypes());
-        request.setAttackSeverities(queryParams.getSeverity());
+        // 展示所有的流量
+//        request.setAttackTypes(queryParams.getAttackTypes());
+//        request.setAttackSeverities(queryParams.getSeverity());
         if (CollectionUtils.isNotEmpty(queryParams.getSourceIps())) {
             request.setSourceIps(queryParams.getSourceIps());
         } else {
-//            request.setSourceMacs(batchSceneHandler.getFlowCollectedMacAddrs());
+            request.setSourceIps(batchSceneHandler.getAllIpAddrs());
         }
 
         if (CollectionUtils.isNotEmpty(queryParams.getTargetIps())) {
             request.setDestinationIps(queryParams.getTargetIps());
         } else {
-            request.setDestinationIps(batchSceneHandler.getAllIpAddrs());
+//            request.setDestinationIps(batchSceneHandler.getAllIpAddrs());
         }
 
         request.setSecondsInterval(queryParams.getInterval());
@@ -227,8 +228,8 @@ public class ScenePluginCollectionSceneService {
             request.setPort(queryParams.getPort());
         }
 
-
-        request.setSeverityEnum(SeverityEnum.ALL);
+// 展示所有的流量
+//        request.setSeverityEnum(SeverityEnum.ALL);
         request.setFilterDestinationIps(queryParams.getFilterDestinationIps());
         ListObjResult<FlowLogBO> flowLogBOSResult = flowAnalysisService.flowLogWithTotal(request);
         if (CollectionUtils.isEmpty(flowLogBOSResult.getObjs())) {
@@ -713,10 +714,10 @@ public class ScenePluginCollectionSceneService {
             log.info("{} query time interval sum flow size,sceneId:{},no collection plugin or no flowCollector", LOG_PREFIX, JsonCommon.stringify(sceneIds));
             return new ServiceResult<>(new ArrayList<>());
         }
-        if (CollectionUtils.isEmpty(batchSceneHandler.getFlowCollectedMacAddrs())) {
-            log.info("{} query time interval sum flow size,sceneIds:{},nodeIds:{},no enabled macAddr", LOG_PREFIX, JsonCommon.stringify(sceneIds), JsonCommon.stringify(nodeIds));
-            return new ServiceResult<>(new ArrayList<>());
-        }
+//        if (CollectionUtils.isEmpty(batchSceneHandler.getFlowCollectedMacAddrs())) {
+//            log.info("{} query time interval sum flow size,sceneIds:{},nodeIds:{},no enabled macAddr", LOG_PREFIX, JsonCommon.stringify(sceneIds), JsonCommon.stringify(nodeIds));
+//            return new ServiceResult<>(new ArrayList<>());
+//        }
         // 构造参数
         FlowAnalysisRequest request = new FlowAnalysisRequest();
         request.setGroupList(batchSceneHandler.getFlowCollectors());
@@ -827,10 +828,10 @@ public class ScenePluginCollectionSceneService {
             log.info("{} query time interval sum flow size,sceneId:{},no collection plugin or no flowCollector", LOG_PREFIX, JsonCommon.stringify(sceneIds));
             return new ServiceResult<>(new ArrayList<>());
         }
-        if (CollectionUtils.isEmpty(batchSceneHandler.getFlowCollectedMacAddrs())) {
-            log.info("{} query time interval sum flow size,sceneIds:{},nodeIds:{},no enabled macAddr", LOG_PREFIX, JsonCommon.stringify(sceneIds), JsonCommon.stringify(nodeIds));
-            return new ServiceResult<>(new ArrayList<>());
-        }
+//        if (CollectionUtils.isEmpty(batchSceneHandler.getFlowCollectedMacAddrs())) {
+//            log.info("{} query time interval sum flow size,sceneIds:{},nodeIds:{},no enabled macAddr", LOG_PREFIX, JsonCommon.stringify(sceneIds), JsonCommon.stringify(nodeIds));
+//            return new ServiceResult<>(new ArrayList<>());
+//        }
         // 构造参数
         FlowAnalysisRequest request = new FlowAnalysisRequest();
         request.setGroupList(batchSceneHandler.getFlowCollectors());
@@ -880,10 +881,10 @@ public class ScenePluginCollectionSceneService {
             log.info("{} query time interval sum flow size,sceneId:{},no collection plugin or no flowCollector", LOG_PREFIX, JsonCommon.stringify(sceneIds));
             return new ServiceResult<>(new ArrayList<>());
         }
-        if (CollectionUtils.isEmpty(batchSceneHandler.getFlowCollectedMacAddrs())) {
-            log.info("{} query time interval sum flow size,sceneIds:{},nodeIds:{},no enabled macAddr", LOG_PREFIX, JsonCommon.stringify(sceneIds), JsonCommon.stringify(nodeIds));
-            return new ServiceResult<>(new ArrayList<>());
-        }
+//        if (CollectionUtils.isEmpty(batchSceneHandler.getFlowCollectedMacAddrs())) {
+//            log.info("{} query time interval sum flow size,sceneIds:{},nodeIds:{},no enabled macAddr", LOG_PREFIX, JsonCommon.stringify(sceneIds), JsonCommon.stringify(nodeIds));
+//            return new ServiceResult<>(new ArrayList<>());
+//        }
         // 构造参数
         FlowAnalysisRequest request = new FlowAnalysisRequest();
         request.setGroupList(batchSceneHandler.getFlowCollectors());

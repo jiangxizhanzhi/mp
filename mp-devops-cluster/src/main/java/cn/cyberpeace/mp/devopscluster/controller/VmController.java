@@ -138,6 +138,7 @@ public class VmController {
     @ApiOperation("分页查询虚拟机信息")
     @GetMapping("/page")
     public PageResult<InstancePageVO> page(InstancePageRequest request) {
+        log.info(" do query node page :{}",request.getNode());
         BasePageBO<InstanceBO> model = vmConverter.page(new InstancePageDTO(request));
         List<InstancePageVO> list = convertBOToPageVO(model);
         return new PageResult<>(list, model.getTotal());
