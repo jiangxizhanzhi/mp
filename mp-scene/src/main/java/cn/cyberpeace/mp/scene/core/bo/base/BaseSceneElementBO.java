@@ -53,7 +53,7 @@ public abstract class BaseSceneElementBO<M extends BaseSceneElementModel, P exte
     public void fromModel(M obj, String... ignoreFields) {
         super.fromModel(obj, ArrayUtils.addAll(ignoreFields,
                 BeanUtils.getBeanGetterFieldName(BaseSceneElementModel::getInitCommands),
-                BeanUtils.getBeanGetterFieldName(BaseSceneElementModel::getJsonContext)));
+              BeanUtils.getBeanGetterFieldName(BaseSceneElementModel::getJsonContext)));
         initCommands = StringUtils.isEmpty(obj.getInitCommands()) ? new ArrayList<>()
                 : JsonCommon.parse(obj.getInitCommands(), new TypeReference<List<String>>(){});
         jsonContext = StringUtils.isEmpty(obj.getJsonContext()) ? new HashMap<>()

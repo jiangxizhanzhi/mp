@@ -942,11 +942,12 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     }
     @PostMapping("/update_json")
     @ApiOperation(value="更新json")
-    public ServiceResult<String> updateJson(@RequestBody String json) {
+    public ServiceResult<String> updateJson(@RequestBody Map<String,String> json) {
         //json文件目录
+        String content = json.get("json").toString();
         String jsonFilePath = BeanCommon.getBean(BaseAppConfig.class).getJsondir()+"TestSuite.json";
         //将更新的字符串写入json文件之中
-        File update_json = FileUtil.writeString(json, jsonFilePath, Charset.defaultCharset());
+        File update_json = FileUtil.writeString(content, jsonFilePath, Charset.defaultCharset());
         return new ServiceResult<>(update_json.toString());
     }
 
