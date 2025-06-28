@@ -24,6 +24,7 @@ import cn.cyberpeace.mp.devopscluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devopscluster.enums.CommonTargetNameEnum;
 import cn.cyberpeace.mp.devopscluster.model.DeviceToolModel;
 import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
+import cn.cyberpeace.mp.devopscluster.repository.DeviceTargetMapper;
 import cn.cyberpeace.mp.devopscluster.repository.DeviceToolMapper;
 import cn.cyberpeace.mp.devopscluster.request.TargetMultiAsyncRequest;
 import cn.cyberpeace.mp.devopscluster.request.TargetSceneRequest;
@@ -238,18 +239,16 @@ public class DevopsTargetController {
             deviceList.addAll(secondDeviceList);
         }
         //        工具数据
-        HumanCondition human = new HumanCondition();
-        human.filterIn(DeviceToolModel::getDeviceUuid, deviceList.stream().map(Device::getUuid).toArray(String[]::new));
-        List<DeviceToolModel> list = deviceToolMapper.list(human);
-        Map<String, List<DeviceToolModel>> deviceToolList = list.stream().collect(Collectors.groupingBy(DeviceToolModel::getDeviceUuid, Collectors.toList()));
-        List<DeviceToolVO> deviceToolVOList = deviceList.stream().map(device -> {
-            DeviceToolVO deviceToolVO = new DeviceToolVO();
-            BeanUtils.copyProperties(device, deviceToolVO);
-            deviceToolVO.setTools(deviceToolList.getOrDefault(device.getUuid(), new ArrayList<>()));
-            return deviceToolVO;
-        }).collect(Collectors.toList());
+        DeviceTargetMapper deviceTargetMapper = BeanCommon.getBean(DeviceTargetMapper.class);
+//       HumanCondition human = new HumanCondition();
+//        human.filterIn(DeviceTargetPO::getUuid, deviceList.stream().map(Device::getUuid).toArray(String[]::new));
+        List<String> uuids = deviceList.stream().map(Device::getUuid).collect(Collectors.toList());
 
-
+        List<DeviceTargetPO> list = deviceTargetMapper.findByUuids(uuids);
+        Map<String, String> targetPOMap = list.stream().collect(Collectors.toMap(DeviceTargetPO::getUuid, po -> po.getAttackTools(), (existing, replacement) -> existing));
+        for (Device device : deviceList) {
+            device.setAttackTools(targetPOMap.getOrDefault(device.getUuid(), null));
+        }
         return new Result(new ListResult<>(deviceList));
     }
 
