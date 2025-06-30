@@ -260,7 +260,12 @@
                 mp_devops_target i
             <include refid="commonTargetWhere"/>
 
-            <if test=" owner != null">
+        <if test="imageResourceType != null and imageResourceType != ''">
+            and i.image_resource_type = #{imageResourceType}
+        </if>
+
+
+        <if test=" owner != null">
                 UNION
 
                 SELECT

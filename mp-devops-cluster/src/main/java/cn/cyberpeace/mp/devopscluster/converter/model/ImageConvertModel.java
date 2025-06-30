@@ -149,6 +149,6 @@ public class ImageConvertModel extends BasePageConvertModel{
     /**
      * 镜像资源类型
      */
-    private String imageResourceType;
+    private Integer imageResourceType;
 
 }

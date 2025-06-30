@@ -105,8 +105,8 @@ public class ImagePageRequest extends BasePageRequest {
     @ApiModelProperty(value = "排序字段")
     private String orders;
 
-    @ApiModelProperty("资源类型 '1':'操作系统', '2':'数据库', '3':'中间件', '4':'办公软件', '5':'专用业务软件'")
-    private String imageResourceType;
+    @ApiModelProperty("资源类型 '1':'操作系统', '2':'数据库', '3':'中间件', '4':'办公软件', '5':'专用业务软件' , '6':'漏洞及弱点'")
+    private Integer imageResourceType;
 
     public Boolean getLikeName() {
         return Objects.isNull(likeName) ? Boolean.TRUE : likeName;

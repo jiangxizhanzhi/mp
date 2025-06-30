@@ -170,5 +170,5 @@ public class DeviceTargetPO extends BaseModel {
      * 靶标创建用户名
      */
     @DefaultStr
-    private String imageResourceType;
+    private Integer imageResourceType;
 }
