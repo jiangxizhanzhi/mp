@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.base.annotation.AuthTarget;
-import cn.cyberpeace.mp.base.bo.AttackDataType;
 import cn.cyberpeace.mp.base.bo.AttackType;
 import cn.cyberpeace.mp.base.bo.ImageToolRequest;
 import cn.cyberpeace.mp.base.bo.OutAttackToolRequest;
@@ -36,6 +35,7 @@ import cn.cyberpeace.mp.flow.model.FlowInfoModel;
 import cn.cyberpeace.mp.flow.model.FlowTaskTaskModel;
 import cn.cyberpeace.mp.flow.repository.FlowInfoMapper;
 import cn.cyberpeace.mp.flow.service.FlowTaskTaskService;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
@@ -56,7 +56,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -101,68 +100,36 @@ public class CsceneOutController implements BaseModelListControllerBase {
         // 查找源节点和目标节点的信息
         var sceneId = csceneInstanceService.getSceneId(request.getId());
         SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, false);
+        CloudScenePluginHandler cloudScenePluginHandler = sceneHandler.getPluginHandler("cpcloud");
         var source = sceneHandler.getElement(request.getSourceNode());
         var target = sceneHandler.getElement(request.getTargetNode());
         String sourceIp = source.getPorts().get(0).getIp();
         String targetIp = target.getPorts().get(0).getIp();
 
-        // 查找流量
-        String typeName = getTypeName(String.valueOf(request.getType()));
-        var optionMapper = BeanCommon.getBean(OptionMapper.class);
-        var optionModel = optionMapper.first(new HumanCondition().filterEqual(OptionModel::getZhName, typeName)
-                                                     .filterEqual(OptionModel::getType, "flow_category"));
-        int category = Integer.parseInt(optionModel.getCode());
-        var list = flowInfoMapper.list(new HumanCondition().filterEqual(FlowInfoModel::getCategory, category));
-        Collections.shuffle(list);
-        var chooseFlow = list.get(0);
+        // 测试该流量任务中 源节点和目标节点的联通性
+        PintTest pintTest = this.getPingTest(source, target, cloudScenePluginHandler);
+        if (!Boolean.TRUE.equals(pintTest.getConnected())) {
+            // 如果不联通 返回错误？ todo
+            return null;
+        } else {
+            // 如果联通 则选择流量并发送流量
+            // 根据流量类型从流量中选择一个
+            var chooseFlow = this.chooseFlow(String.valueOf(request.getType()));
 
-        AddFlowTaskFlowInfo flowTaskFlowInfo = new AddFlowTaskFlowInfo();
-        flowTaskFlowInfo.setFlowId(chooseFlow.getId());
-        List<AddFlowTaskFlowInfo> flowInfos = new ArrayList<>();
-        flowInfos.add(flowTaskFlowInfo);
-        AddFlowTaskTaskDetail detail = new AddFlowTaskTaskDetail();
-        detail.setNodeId(request.getTargetNode());
-        detail.setFlowInfos(flowInfos);
-        List<AddFlowTaskTaskDetail> details = new ArrayList<>();
-        details.add(detail);
-        AddFlowTaskTaskRequest addFlowTaskTaskRequest = new AddFlowTaskTaskRequest();
-        addFlowTaskTaskRequest.setId(request.getId());
-        addFlowTaskTaskRequest.setDetails(details);
-        var tasks = this.addTask(addFlowTaskTaskRequest);
-        String taskId = tasks.get(0).getId();
+            // 向场景中加入一个流量任务 , 得到一个任务id
+            var task = this.addTask(chooseFlow, request.getId(), target.getId());
+            String taskId = task.getId();
 
-        // 调整下配置
-        EditFlowTaskConfRequest confRequest = new EditFlowTaskConfRequest();
-        confRequest.setConf("1");
-        confRequest.setTaskId(taskId);
-        confRequest.setKeepRunning(0);
-        confRequest.setRateUnlimited(1);
-        confRequest.setReplay(0);
-        confRequest.setConfig(1);
+            // 设定好固定的流量配置
+            this.editTaskConfig(taskId, sourceIp, targetIp);
 
-        FlowTaskConf flowTaskConf = new FlowTaskConf();
-        FlowTaskRateConf rateConf = new FlowTaskRateConf();
-        rateConf.setLoadMode(0);
-        flowTaskConf.setRateConf(rateConf);
+            // 联通性记录到缓存里 ， 给外部推送数据时，同步推送一下
+            OutputFlowMessage.pingTestMap.put(taskId, pintTest);
 
-        FlowTaskFlowConf flowConf = new FlowTaskFlowConf();
-        flowConf.setIpv4Conf(new FlowTaskIpv4Conf());
-        flowConf.getIpv4Conf().setSip(sourceIp);
-        flowConf.getIpv4Conf().setDip(targetIp);
-        flowConf.setTcpConf(new FlowTaskTcpConf());
-        flowConf.getTcpConf().setMss(1460);
-        flowTaskConf.setFlowConf(flowConf);
-
-        FlowTaskCommonConf commonConf = new FlowTaskCommonConf();
-        commonConf.setLatency(0);
-        commonConf.setJitter(0);
-        commonConf.setDuration(5);
-        flowTaskConf.setCommonConf(commonConf);
-        confRequest.setFlowTaskConf(flowTaskConf);
-        csceneFlowService.editTaskConf(confRequest);
-
-        csceneFlowService.startTask(taskId);
-        return new ServiceResult(taskId).asResult();
+            // 启动流量
+            csceneFlowService.startTask(taskId);
+            return new ServiceResult(taskId).asResult();
+        }
     }
 
     @AuthTarget(TargetEnum.NO_AUTH)
@@ -213,16 +180,13 @@ public class CsceneOutController implements BaseModelListControllerBase {
         SshInfo sshInfo = this.getSshInfo(source.getPorts(), handler);
 
         // 取到指定工具
-        ImageToolRequest tool = new ImageToolRequest();
-        tool.setAttackType(AttackType.JIANGXIAO.getType());
-        tool.setParams(new ArrayList<>());
-        tool.setAttackDataTypes(Arrays.asList(AttackDataType.HOSTINFO.getType(), AttackDataType.PROCESS.getType(),AttackDataType.FLOW.getType(),AttackDataType.NETIFACE.getType()));
-        tool.setParams(request.getParams());
+        ImageToolRequest tool = null;
         for (var t : pluginSource.getAttackTools()) {
             if (StringUtils.equals(t.getId(), request.getToolId())) {
                 tool = t;
             }
         }
+        tool.setParams(request.getParams());
 
         // 构建执行参数
         String cmd = AttackType.getFormatCmd(tool.getAttackType(), tool.getParams());
@@ -332,6 +296,79 @@ public class CsceneOutController implements BaseModelListControllerBase {
         sshInfo.setUsername(username);
         sshInfo.setPassword(password);
         return sshInfo;
+    }
+
+    private FlowInfoModel chooseFlow(String type) {
+        String typeName = getTypeName(type);
+        var optionMapper = BeanCommon.getBean(OptionMapper.class);
+        var optionModel = optionMapper.first(new HumanCondition().filterEqual(OptionModel::getZhName, typeName)
+                                                     .filterEqual(OptionModel::getType, "flow_category"));
+        int category = Integer.parseInt(optionModel.getCode());
+        var list = flowInfoMapper.list(new HumanCondition().filterEqual(FlowInfoModel::getCategory, category));
+        Collections.shuffle(list);
+        var chooseFlow = list.get(0);
+        return chooseFlow;
+    }
+
+    private FlowTaskTaskModel addTask(FlowInfoModel chooseFlow, String csceneId, String targetNodeId) {
+        AddFlowTaskFlowInfo flowTaskFlowInfo = new AddFlowTaskFlowInfo();
+        flowTaskFlowInfo.setFlowId(chooseFlow.getId());
+        List<AddFlowTaskFlowInfo> flowInfos = new ArrayList<>();
+        flowInfos.add(flowTaskFlowInfo);
+        AddFlowTaskTaskDetail detail = new AddFlowTaskTaskDetail();
+        detail.setNodeId(targetNodeId);
+        detail.setFlowInfos(flowInfos);
+        List<AddFlowTaskTaskDetail> details = new ArrayList<>();
+        details.add(detail);
+        AddFlowTaskTaskRequest addFlowTaskTaskRequest = new AddFlowTaskTaskRequest();
+        addFlowTaskTaskRequest.setId(csceneId);
+        addFlowTaskTaskRequest.setDetails(details);
+        var tasks = this.addTask(addFlowTaskTaskRequest);
+        return tasks.get(0);
+    }
+
+    private void editTaskConfig(String taskId, String sourceIp, String targetIp) {
+        // 调整下配置
+        EditFlowTaskConfRequest confRequest = new EditFlowTaskConfRequest();
+        confRequest.setConf("1");
+        confRequest.setTaskId(taskId);
+        confRequest.setKeepRunning(0);
+        confRequest.setRateUnlimited(1);
+        confRequest.setReplay(0);
+        confRequest.setConfig(1);
+
+        FlowTaskConf flowTaskConf = new FlowTaskConf();
+        FlowTaskRateConf rateConf = new FlowTaskRateConf();
+        rateConf.setLoadMode(0);
+        flowTaskConf.setRateConf(rateConf);
+
+        FlowTaskFlowConf flowConf = new FlowTaskFlowConf();
+        flowConf.setIpv4Conf(new FlowTaskIpv4Conf());
+        flowConf.getIpv4Conf().setSip(sourceIp);
+        flowConf.getIpv4Conf().setDip(targetIp);
+        flowConf.setTcpConf(new FlowTaskTcpConf());
+        flowConf.getTcpConf().setMss(1460);
+        flowTaskConf.setFlowConf(flowConf);
+
+        FlowTaskCommonConf commonConf = new FlowTaskCommonConf();
+        commonConf.setLatency(0);
+        commonConf.setJitter(0);
+        commonConf.setDuration(5);
+        flowTaskConf.setCommonConf(commonConf);
+        confRequest.setFlowTaskConf(flowTaskConf);
+        csceneFlowService.editTaskConf(confRequest);
+    }
+
+    private PintTest getPingTest(SceneElementBO source, SceneElementBO target, CloudScenePluginHandler handler) {
+        SshInfo sshInfo = this.getSshInfo(source.getPorts(), handler);
+        String sourceIp = sshInfo.getIp();
+        String sourcePort = sshInfo.getPort();
+        String targetIp = target.getPorts().get(0).getIp();
+        String username = sshInfo.getUsername();
+        String password = sshInfo.getPassword();
+        String res = PythonExecUtil.exec("pingtest.py", sourceIp, sourcePort, targetIp, username, password);
+        var pingRes = JsonCommon.snakeParse(res, PintTest.class);
+        return pingRes;
     }
 
     @Getter

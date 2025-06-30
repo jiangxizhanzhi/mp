@@ -1,5 +1,8 @@
 package cn.cyberpeace.mp.flow.service.impl;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.out.FlowInfo;
+import cn.cyberpeace.mp.base.out.IOutputFlowMessage;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
@@ -277,6 +280,13 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
             flowTaskRecordModel.setCreateTime(localDateTime);
             //flowTaskRecordModel.setCreateTime(StringUtils.isEmpty(data.getString("record_time")) ? null : LocalDateTime.parse(data.getString("record_time"), df));
             this.getModelMapper().save(flowTaskRecordModel);
+
+            // 向外部系统发送数据
+            var outputFlowMessage = BeanCommon.getBean(IOutputFlowMessage.class);
+            FlowInfo flowInfo = new FlowInfo();
+            flowInfo.setTxBps(flowTaskRecordModel.getTxBps());
+            flowInfo.setTaskId(taskId);
+            outputFlowMessage.sendFlow(flowInfo);
         }
 
         // 任务回调处理
