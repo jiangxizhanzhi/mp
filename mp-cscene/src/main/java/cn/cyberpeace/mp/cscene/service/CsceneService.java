@@ -1,5 +1,8 @@
 package cn.cyberpeace.mp.cscene.service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -245,6 +248,25 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         if (type != null) {
             humanCondition.filterEqual(CsceneModel::getType, type);
         }
+		if (StringUtils.isNotBlank(queryParams.getCreatorName())) {
+			List<String> userIds = userService.listIdBySearchName(queryParams.getCreatorName());
+			if (userIds.isEmpty()) {
+				humanCondition.filterLessThan(CsceneModel::getPk, -1);
+			} else {
+                humanCondition.filterIn(CsceneModel::getCreateUser, userIds.toArray(new String[0]));
+			}
+		}
+		if (StringUtils.isNotBlank(queryParams.getStartTime()) && StringUtils.isNotBlank(queryParams.getEndTime())) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            LocalDate start = LocalDate.parse(queryParams.getStartTime(), formatter);
+            LocalDate end = LocalDate.parse(queryParams.getEndTime(), formatter);
+            LocalDateTime startTime = start.atStartOfDay();
+            LocalDateTime endTime = end.plusDays(1).atStartOfDay();
+			humanCondition.filterLessThan(CsceneModel::getUpdateTime,
+                    endTime);
+			humanCondition.filterGreaterThanOrEqual(CsceneModel::getUpdateTime,
+					startTime);
+		}
     }
 
     public ServiceResult<CsceneAuthorizeBO> getCsceneAuthorizeInfo(String csceneId) {

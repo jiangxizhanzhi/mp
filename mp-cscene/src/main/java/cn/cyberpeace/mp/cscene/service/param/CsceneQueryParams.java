@@ -1,5 +1,8 @@
 package cn.cyberpeace.mp.cscene.service.param;
 
+import java.time.LocalDateTime;
+import java.util.Date;
+
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -26,4 +29,13 @@ public class CsceneQueryParams extends QueryParams {
 
     @ApiModelProperty(value = "是否查看我的拓扑")
     private Boolean user;
+
+	@ApiModelProperty(value = "更新时间-开始时间,格式为xxxx-xx-xx")
+	private String startTime;
+
+	@ApiModelProperty(value = "更新时间-结束时间,格式为xxxx-xx-xx")
+	private String endTime;
+
+	@ApiModelProperty(value = "创建人名称")
+	private String creatorName;
 }

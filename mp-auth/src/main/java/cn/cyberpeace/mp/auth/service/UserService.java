@@ -116,4 +116,5 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
 
     List<String> getUserIdsByRoleId(String roleId);
 
+    List<String> listIdBySearchName(String creatorName);
 }

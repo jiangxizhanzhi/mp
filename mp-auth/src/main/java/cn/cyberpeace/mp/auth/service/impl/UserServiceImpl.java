@@ -1169,6 +1169,16 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 		}
 		return new ArrayList<>();
 	}
+
+    @Override
+    public List<String> listIdBySearchName(String creatorName) {
+		HumanCondition condition = new HumanCondition().filterOrStart()
+				.orIContains(UserModel::getUsername, creatorName)
+				.orIContains(UserModel::getName, creatorName).filterOrEnd()
+				.select(UserModel::getId);
+        List<UserModel> list = getModelMapper().list(condition);
+        return list.stream().map(UserModel::getId).collect(Collectors.toList());
+    }
 }
 
 class GroupConcat extends Aggregation<GroupConcat> {
