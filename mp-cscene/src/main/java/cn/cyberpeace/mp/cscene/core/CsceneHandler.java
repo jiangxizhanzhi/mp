@@ -189,6 +189,7 @@ public class CsceneHandler extends BaseCsceneHandler<
             reloadCsceneInstances();
         }
         CsceneBO csceneBO = getCscene();
+        csceneBO.calHardware();
         CsceneDataModifier.correctReturnCsceneData(csceneBO);
         return csceneBO;
     }
