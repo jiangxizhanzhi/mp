@@ -372,8 +372,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         });
         // 转为Map后顺序被打乱，此时再次排序
         listResult.getSource().getObjs().forEach(m -> csceneBOs.add(csceneBOMap.get(m.getId())));
-        return new ListObjServiceResult<>(new ListObjResult<>(csceneBOs, listResult.getSource().getTotal(),
-                listResult.getSource().getFields()));
+        return new ListObjServiceResult<>(new ListObjResult<>(csceneBOs, listResult.getSource().getTotal()));
     }
 
     public void setSharedUser(List<CsceneBO> csceneBOs, CsceneQueryParams queryParams) {
