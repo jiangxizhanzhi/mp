@@ -41,9 +41,9 @@ public class CsceneBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, CsceneR
     private Integer resourceOccupiedNums;
     @ApiModelProperty(value = "更新时间")
     private LocalDateTime updateTime;
-    private Integer TotalCpu ;
-    private Integer TotalRam ;
-    private Integer TotalDisk ;
+    private Integer totalCpu;
+    private Integer totalRam;
+    private Integer totalDisk;
 
 
     @Override
