@@ -21,6 +21,7 @@ import cn.cyberpeace.mp.devopscluster.enums.StatusEnum;
 import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
 import cn.cyberpeace.mp.devopscluster.repository.DeviceTargetMapper;
 import cn.cyberpeace.mp.devopscluster.utils.POLogoUtils;
+import com.alibaba.fastjson.JSON;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -189,7 +190,7 @@ public class DevopsTargetService {
      */
     protected DeviceTargetPO convertDevice(Device device) {
         DeviceTargetPO deviceTargetPO = new DeviceTargetPO();
-        deviceTargetPO.setAttackTools(device.getAttackTools());
+        deviceTargetPO.setAttackTools(JSON.toJSONString(device.getAttackTools()));
         deviceTargetPO.setId(device.getId().toString());
         deviceTargetPO.setUuid(device.getUuid());
         deviceTargetPO.setName(device.getName());

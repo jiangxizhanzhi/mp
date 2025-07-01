@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devopscluster.cloud.platform.model.base;
 
+import cn.cyberpeace.mp.base.bo.ImageToolRequest;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -186,7 +187,7 @@ public class Device extends BaseCloudPlatformResult {
      */
     private String defaultLaunchImageName;
 
-    private String attackTools;
+    private List<ImageToolRequest> attackTools;
 
     public Boolean getIsBuildIn() {
         boolean tmpImport = !Objects.isNull(isImport) && isImport;

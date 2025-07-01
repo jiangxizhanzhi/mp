@@ -1,14 +1,13 @@
 package cn.cyberpeace.mp.devopscluster.controller;
 
 import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.bo.ImageToolRequest;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
-import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.FileTypeUtils;
-import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.mptool.FileUtil;
 import cn.cyberpeace.mp.common.deprecated.FileResponseData;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Device;
@@ -22,7 +21,6 @@ import cn.cyberpeace.mp.devopscluster.converter.model.TypeAllConvertModel;
 import cn.cyberpeace.mp.devopscluster.converter.model.TypeConvertModel;
 import cn.cyberpeace.mp.devopscluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devopscluster.enums.CommonTargetNameEnum;
-import cn.cyberpeace.mp.devopscluster.model.DeviceToolModel;
 import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
 import cn.cyberpeace.mp.devopscluster.repository.DeviceTargetMapper;
 import cn.cyberpeace.mp.devopscluster.repository.DeviceToolMapper;
@@ -32,11 +30,15 @@ import cn.cyberpeace.mp.devopscluster.service.DevopsTargetService;
 import cn.cyberpeace.mp.devopscluster.service.upload.TargetIconUploadService;
 import cn.cyberpeace.mp.devopscluster.thread.ITask;
 import cn.cyberpeace.mp.devopscluster.utils.MultiThreadUtils;
-import cn.cyberpeace.mp.devopscluster.vo.*;
+import cn.cyberpeace.mp.devopscluster.vo.DeviceTargetByTypeVO;
+import cn.cyberpeace.mp.devopscluster.vo.DeviceTargetVO;
+import cn.cyberpeace.mp.devopscluster.vo.DeviceVO;
+import cn.cyberpeace.mp.devopscluster.vo.TargetSceneVO;
 import cn.cyberpeace.mp.devopscluster.vo.common.ListResult;
 import cn.cyberpeace.mp.devopscluster.vo.common.PageResult;
 import cn.cyberpeace.mp.devopscluster.vo.common.Result;
 import cn.cyberpeace.mp.devopscluster.vo.convert.DeviceVoConverter;
+import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -187,7 +189,7 @@ public class DevopsTargetController {
     @AuthTarget(TargetEnum.DEVOPS_TARGET_GROUP)
     @ApiOperation("查询所有靶标信息(带过滤条件)")
     @GetMapping("/listAll")
-    public ServiceResult<DeviceToolVO> listAll(TargetSceneRequest request){
+    public ServiceResult<Device> listAll(TargetSceneRequest request){
         TypeAllConvertModel l1AndL2AndL3Type = typeConverter.findL1AndL2AndL3Type();
         List<TypeConvertModel> firstTypeList = l1AndL2AndL3Type.getFirstTypeList();
         List<TypeConvertModel> secondTypeList = l1AndL2AndL3Type.getSecondTypeList();
@@ -240,14 +242,14 @@ public class DevopsTargetController {
         }
         //        工具数据
         DeviceTargetMapper deviceTargetMapper = BeanCommon.getBean(DeviceTargetMapper.class);
-//       HumanCondition human = new HumanCondition();
-//        human.filterIn(DeviceTargetPO::getUuid, deviceList.stream().map(Device::getUuid).toArray(String[]::new));
         List<String> uuids = deviceList.stream().map(Device::getUuid).collect(Collectors.toList());
 
         List<DeviceTargetPO> list = deviceTargetMapper.findByUuids(uuids);
-        Map<String, String> targetPOMap = list.stream().collect(Collectors.toMap(DeviceTargetPO::getUuid, po -> po.getAttackTools(), (existing, replacement) -> existing));
+        Map<String, String> targetPOMap = list.stream().collect(Collectors.toMap(DeviceTargetPO::getUuid, po -> po.getAttackTools() != null?po.getAttackTools():"[]" , (existing, replacement) -> existing));
         for (Device device : deviceList) {
-            device.setAttackTools(targetPOMap.getOrDefault(device.getUuid(), null));
+            targetPOMap.getOrDefault(device.getUuid(), "[]");
+            List<ImageToolRequest> imageToolRequests = JSON.parseArray(targetPOMap.getOrDefault(device.getUuid(), "[]"), ImageToolRequest.class);
+            device.setAttackTools(imageToolRequests);
         }
         return new Result(new ListResult<>(deviceList));
     }

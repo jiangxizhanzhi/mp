@@ -207,7 +207,7 @@ public class ImagesConverter implements BaseConverter{
     public void add(ImageRequest request) {
         Device device = imagesService.add(convertRequest(request));
         device.setIsHide(Objects.nonNull(request.getIsHide()) ? request.getIsHide() : Boolean.FALSE);
-        device.setAttackTools(JsonCommon.stringify(request.getAttackTools()));
+        device.setAttackTools(request.getAttackTools());
         devopsTargetService.insert(Collections.singletonList(device));
         //        增加工具
 //        deviceToolService.updateByDeviceUuid(request.getTools(), device.getUuid());
@@ -258,7 +258,7 @@ public class ImagesConverter implements BaseConverter{
     @Transactional
     public void update(ImageRequest request) {
         Device device = imagesService.update(request.getUuid(),convertRequest(request));
-        device.setAttackTools(JsonCommon.stringify(request.getAttackTools()));
+        device.setAttackTools(request.getAttackTools());
         HumanCondition humanCondition = new HumanCondition();
         humanCondition.filterEqual(DeviceToolModel::getDeviceUuid, device.getUuid());
         devopsTargetService.updateById(device);
