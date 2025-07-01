@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.cscene.bo.base.BaseCsceneBO;
 import cn.cyberpeace.mp.cscene.model.CsceneModel;
 import cn.cyberpeace.mp.cscene.model.CsceneRoleModel;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
+import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementBO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -40,6 +41,10 @@ public class CsceneBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, CsceneR
     private Integer resourceOccupiedNums;
     @ApiModelProperty(value = "更新时间")
     private LocalDateTime updateTime;
+    private Integer TotalCpu ;
+    private Integer TotalRam ;
+    private Integer TotalDisk ;
+
 
     @Override
     public CsceneModel createModel() {
@@ -70,8 +75,28 @@ public class CsceneBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, CsceneR
         if (sceneConfig != null) {
             csceneBO.setSceneConfig(sceneConfig.export());
         }
+        csceneBO.calHardware();
         return this;
     }
+
+    public void calHardware(){
+        int cpu = 0 ,ram = 0 ,disk = 0 ;
+        for (BaseSceneElementBO e : this.sceneConfig.getTopology().getElements()) {
+            if (e.getCpu() != null) {
+                cpu += e.getCpu();
+            }
+            if(e.getRam() != null){
+                ram += e.getRam();
+            }
+            if(e.getDisk() != null){
+                disk += e.getDisk();
+            }
+        }
+        this.setTotalCpu(cpu);
+        this.setTotalRam(ram);
+        this.setTotalDisk(disk);
+    }
+
 
     public CsceneInstanceBO exportToCsceneInstance() {
         var csceneInstance = export(CsceneInstanceBO.class, CsceneInstaneRoleBO.class,
