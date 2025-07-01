@@ -42,38 +42,38 @@ public class CharSequenceUtil {
      * @return
      */
     public static String sub(CharSequence str, int fromIndexInclude, int toIndexExclude) {
-        if (isEmpty(str)) {
-            return str(str);
-        }
-        int len = str.length();
-
-        if (fromIndexInclude < 0) {
-            fromIndexInclude = len + fromIndexInclude;
-            if (fromIndexInclude < 0) {
-                fromIndexInclude = 0;
-            }
-        } else if (fromIndexInclude > len) {
-            fromIndexInclude = len;
-        }
-
-        if (toIndexExclude < 0) {
-            toIndexExclude = len + toIndexExclude;
-            if (toIndexExclude < 0) {
-                toIndexExclude = len;
-            }
-        } else if (toIndexExclude > len) {
-            toIndexExclude = len;
-        }
-
-        if (toIndexExclude < fromIndexInclude) {
-            int tmp = fromIndexInclude;
-            fromIndexInclude = toIndexExclude;
-            toIndexExclude = tmp;
-        }
-
-        if (fromIndexInclude == toIndexExclude) {
-            return EMPTY;
-        }
+//        if (isEmpty(str)) {
+//            return str(str);
+//        }
+//        int len = str.length();
+//
+//        if (fromIndexInclude < 0) {
+//            fromIndexInclude = len + fromIndexInclude;
+//            if (fromIndexInclude < 0) {
+//                fromIndexInclude = 0;
+//            }
+//        } else if (fromIndexInclude > len) {
+//            fromIndexInclude = len;
+//        }
+//
+//        if (toIndexExclude < 0) {
+//            toIndexExclude = len + toIndexExclude;
+//            if (toIndexExclude < 0) {
+//                toIndexExclude = len;
+//            }
+//        } else if (toIndexExclude > len) {
+//            toIndexExclude = len;
+//        }
+//
+//        if (toIndexExclude < fromIndexInclude) {
+//            int tmp = fromIndexInclude;
+//            fromIndexInclude = toIndexExclude;
+//            toIndexExclude = tmp;
+//        }
+//
+//        if (fromIndexInclude == toIndexExclude) {
+//            return EMPTY;
+//        }
 
         return str.toString().substring(fromIndexInclude, toIndexExclude);
     }

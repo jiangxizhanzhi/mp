@@ -194,7 +194,7 @@ public class TaskPool {
      */
     public TaskPool(int poolSize, int holdSize, long keepAliveTime, ThreadFactory factory) {
         executor = new ThreadPoolExecutor(poolSize, poolSize, keepAliveTime, TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>(holdSize - poolSize), factory);
+                new LinkedBlockingQueue<>(holdSize), factory);
         TASK_POOL_INSTANCE_CACHE.add(this);
     }
 
@@ -207,7 +207,7 @@ public class TaskPool {
      */
     public TaskPool(int poolSize, int holdSize, long keepAliveTime) {
         executor = new ThreadPoolExecutor(poolSize, poolSize, keepAliveTime, TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>(holdSize - poolSize), createNameThreadFactory(""));
+                new LinkedBlockingQueue<>(holdSize), createNameThreadFactory(""));
         TASK_POOL_INSTANCE_CACHE.add(this);
     }
 

@@ -1144,7 +1144,7 @@ public interface BaseModelMapper<M extends BaseModel> {
          * @return
          */
         public BulkResult<T> addSuccessCount(int successCount) {
-            this.successCount += successCount;
+//            this.successCount += successCount;
             return this;
         }
 

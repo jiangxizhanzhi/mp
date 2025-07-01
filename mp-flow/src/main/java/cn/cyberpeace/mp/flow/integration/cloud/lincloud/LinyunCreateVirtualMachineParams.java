@@ -101,14 +101,14 @@ public class LinyunCreateVirtualMachineParams extends AbstractCreateVirtualMachi
         int networkEnd = networkStart | ~subnetMask;
 
         // 从网络的开始地址和结束地址生成随机地址
-        SecureRandom random = new SecureRandom();
-        int randomIPInt = networkStart + random.nextInt(networkEnd - networkStart + 1);
-
-        // 将随机生成的IP整数转换回字节形式
+//        SecureRandom random = new SecureRandom();
+//        int randomIPInt = networkStart + random.nextInt(networkEnd - networkStart + 1);
+//
+//        // 将随机生成的IP整数转换回字节形式
         byte[] randomIPBytes = new byte[4];
-        for (int i = 0; i < 4; i++) {
-            randomIPBytes[i] = (byte) ((randomIPInt >> (8 * (3 - i))) & 0xFF);
-        }
+//        for (int i = 0; i < 4; i++) {
+//            randomIPBytes[i] = (byte) ((randomIPInt >> (8 * (3 - i))) & 0xFF);
+//        }
 
         // 转换为字符串形式的IP地址
         InetAddress randomIP = null;

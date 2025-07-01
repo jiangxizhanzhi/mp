@@ -307,37 +307,33 @@ public class FlowTaskRecordService extends BaseModelServiceImpl<FlowTaskRecordMo
                                     .filterEqual(FlowTaskTaskModel::getNodeId, nodeId);
         List<FlowTaskTaskModel> taskTaskModels = flowTaskTaskMapper.list(condition);
         if (CollectionUtils.isNotEmpty(taskTaskModels)) {
-            long count = 0L;
-            for (FlowTaskTaskModel taskModel : taskTaskModels) {
-                if (taskModel.getTaskStatus() == TaskTaskStatusEnum.RUNNING.toValue()) {
-                    count++;
+//            for (FlowTaskTaskModel taskModel : taskTaskModels) {
+//                if (taskModel.getTaskStatus() == TaskTaskStatusEnum.RUNNING.toValue()) {
+//                    count++;
+//                }
+//            }
+            // 回调参数封装
+            BatchActuatorResponse batchActuatorResponse = new BatchActuatorResponse();
+            List<FlowTaskModel> successTaskModels = new ArrayList<>();
+            List<FlowTaskModel> errorTaskModels = new ArrayList<>();
+            for (FlowTaskTaskModel taskTaskModel : taskTaskModels) {
+                FlowTaskModel flowTaskModel = new FlowTaskModel();
+                flowTaskModel.setFlowId(taskTaskModel.getFlowId());
+                flowTaskModel.setId(taskTaskModel.getId());
+                if (TaskTaskStatusEnum.STOPPED.toValue() == taskTaskModel.getTaskStatus()) {
+                    successTaskModels.add(flowTaskModel);
+                } else {
+                    errorTaskModels.add(flowTaskModel);
                 }
             }
-            int runningCount = (int) count;
-            if (runningCount == 0) {
-                // 回调参数封装
-                BatchActuatorResponse batchActuatorResponse = new BatchActuatorResponse();
-                List<FlowTaskModel> successTaskModels = new ArrayList<>();
-                List<FlowTaskModel> errorTaskModels = new ArrayList<>();
-                for (FlowTaskTaskModel taskTaskModel : taskTaskModels) {
-                    FlowTaskModel flowTaskModel = new FlowTaskModel();
-                    flowTaskModel.setFlowId(taskTaskModel.getFlowId());
-                    flowTaskModel.setId(taskTaskModel.getId());
-                    if (TaskTaskStatusEnum.STOPPED.toValue() == taskTaskModel.getTaskStatus()) {
-                        successTaskModels.add(flowTaskModel);
-                    } else {
-                        errorTaskModels.add(flowTaskModel);
-                    }
-                }
-                batchActuatorResponse.setSuccessTaskModels(successTaskModels);
-                batchActuatorResponse.setErrorTaskModels(errorTaskModels);
+            batchActuatorResponse.setSuccessTaskModels(successTaskModels);
+            batchActuatorResponse.setErrorTaskModels(errorTaskModels);
 
-                log.info("batch tasks accept response: {}", batchActuatorResponse);
-                flowPostService.onNodeFlowTaskError(sceneId, nodeId, batchActuatorResponse);
+            log.info("batch tasks accept response: {}", batchActuatorResponse);
+            flowPostService.onNodeFlowTaskError(sceneId, nodeId, batchActuatorResponse);
 
-                log.info("batch tasks run onStop");
-                flowPostService.onStopTaskNode(sceneId, nodeId);
-            }
+            log.info("batch tasks run onStop");
+            flowPostService.onStopTaskNode(sceneId, nodeId);
         } else {
             log.error("no batch tasks for sceneId: {}", sceneId);
         }

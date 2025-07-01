@@ -206,19 +206,19 @@ public class FlowCollectionService extends BaseModelServiceImpl<FlowCollectionMo
         if (CollectionUtils.isNotEmpty(flowInfoModels)) {
             // 背景流量数量
             long result = 0L;
-            for (FlowInfoModel flowInfoModel : flowInfoModels) {
-                if (InteractiveTypeEnum.BACKGROUND.toValue() == flowInfoModel.getInteractiveType()) {
-                    result++;
-                }
-            }
+//            for (FlowInfoModel flowInfoModel : flowInfoModels) {
+//                if (InteractiveTypeEnum.BACKGROUND.toValue() == flowInfoModel.getInteractiveType()) {
+//                    result++;
+//                }
+//            }
             int backgroundCount = (int) result;
             // 攻击流量数量
             long count = 0L;
-            for (FlowInfoModel model : flowInfoModels) {
-                if (InteractiveTypeEnum.ATTACK.toValue() == model.getInteractiveType()) {
-                    count++;
-                }
-            }
+//            for (FlowInfoModel model : flowInfoModels) {
+//                if (InteractiveTypeEnum.ATTACK.toValue() == model.getInteractiveType()) {
+//                    count++;
+//                }
+//            }
             int attackCount = (int) count;
             if (isIncrease) {
                 // 增加
