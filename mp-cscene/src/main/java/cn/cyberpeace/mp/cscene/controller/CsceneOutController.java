@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.out.FlowInfo;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
@@ -30,10 +31,14 @@ import cn.cyberpeace.mp.flow.bo.FlowTaskFlowConf;
 import cn.cyberpeace.mp.flow.bo.FlowTaskIpv4Conf;
 import cn.cyberpeace.mp.flow.bo.FlowTaskRateConf;
 import cn.cyberpeace.mp.flow.bo.FlowTaskTcpConf;
+import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
 import cn.cyberpeace.mp.flow.enums.TaskTaskStatusEnum;
 import cn.cyberpeace.mp.flow.model.FlowInfoModel;
+import cn.cyberpeace.mp.flow.model.FlowTaskRecordModel;
 import cn.cyberpeace.mp.flow.model.FlowTaskTaskModel;
 import cn.cyberpeace.mp.flow.repository.FlowInfoMapper;
+import cn.cyberpeace.mp.flow.repository.FlowTaskRecordMapper;
+import cn.cyberpeace.mp.flow.repository.FlowTaskTaskMapper;
 import cn.cyberpeace.mp.flow.service.FlowTaskTaskService;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
@@ -41,6 +46,9 @@ import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
+import cn.cyberpeace.mp.situationaware.model.wazuh.common.request.CollectorBaseRequest;
+import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Netiface;
+import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.Data;
@@ -49,6 +57,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -133,9 +142,42 @@ public class CsceneOutController implements BaseModelListControllerBase {
     }
 
     @AuthTarget(TargetEnum.NO_AUTH)
+    @ApiOperation("启动攻击工具")
+    @GetMapping("/flowinfo")
+    public ServiceResult<FlowInfo> queryFlowInfo(String taskId) {
+        FlowTaskTaskMapper taskTaskMapper = BeanCommon.getBean(FlowTaskTaskMapper.class);
+        var task = taskTaskMapper.first(new HumanCondition().filterEqual(FlowTaskTaskModel::getId, taskId));
+        if (task == null) {
+            // 任务不存在
+            throw new MpRuntimeException(FlowErrorCode.TASK_NOT_EXIST);
+        }
+        if (task.getTaskStatus() == TaskTaskStatusEnum.ERROR.toValue()) {
+            // 任务执行失败
+            throw new MpRuntimeException(FlowErrorCode.TASK_INFO_ERROR);
+        }
+        if (task.getTaskStatus() != TaskTaskStatusEnum.STOPPED.toValue()) {
+            // 任务未结束
+            throw new MpRuntimeException(FlowErrorCode.TASK_IS_RUNNING);
+        }
+        // 取最后一条统计数据
+        FlowTaskRecordMapper recordMapper = BeanCommon.getBean(FlowTaskRecordMapper.class);
+        var record = recordMapper.first(new HumanCondition().filterEqual(FlowTaskRecordModel::getTaskId, taskId)
+                                                .orderBy(FlowTaskRecordModel::getPk, true));
+        // 取联通测试结果
+        var pintTest = OutputFlowMessage.pingTestMap.get(taskId);
+        FlowInfo flowInfo = new FlowInfo();
+        flowInfo.setDelay(pintTest.getDelay());
+        flowInfo.setPacketLoss(pintTest.getPacketLoss());
+        flowInfo.setConnected(pintTest.getConnected());
+        flowInfo.setTxBps(record.getTxBps());
+        flowInfo.setObytes(record.getObytes());
+        return new ServiceResult<>(flowInfo).asResult();
+    }
+
+    @AuthTarget(TargetEnum.NO_AUTH)
     @ApiOperation("使用ping检测源和目标节点的联通性")
     @PostMapping("/test_ping")
-    public ServiceResult<PintTest> pingTest(@RequestBody OutStartFlowTaskRequest request) {
+    public ServiceResult<ConnectInfo> pingTest(@RequestBody OutStartFlowTaskRequest request) {
         // 查找源节点和目标节点的信息
         var sceneId = csceneInstanceService.getSceneId(request.getId());
         SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, false);
@@ -162,7 +204,35 @@ public class CsceneOutController implements BaseModelListControllerBase {
         }
         String res = PythonExecUtil.exec("pingtest.py", sourceIp, String.valueOf(sourcePort), targetIp, username, password);
         var pingRes = JsonCommon.snakeParse(res, PintTest.class);
-        return new ServiceResult(pingRes).asResult();
+        ConnectInfo connectInfo = new ConnectInfo();
+        connectInfo.setConnected(pingRes.getConnected());
+        connectInfo.setDelay(pingRes.getDelay());
+        connectInfo.setPacketLoss(pingRes.getPacketLoss());
+        var hostInfo1 = attackDataOutputUtil.getHostInfo(source.getEid());
+        if (hostInfo1 != null) {
+            connectInfo.setFlow(hostInfo1.getMaxNetSpeed());
+        }
+        connectInfo.setObytes(this.getObytes(source.getEid()));
+        return new ServiceResult(connectInfo).asResult();
+    }
+
+    private Long getObytes(String eid) {
+        CollectorBaseRequest collectorBaseRequest = new CollectorBaseRequest();
+        collectorBaseRequest.setAgentName(eid);
+        collectorBaseRequest.setPage(1);
+        collectorBaseRequest.setPageSize(10);
+        collectorBaseRequest.setPerPage(10);
+        SysCollectorService sysCollectorService = BeanCommon.getBean(SysCollectorService.class);
+        List<Netiface> netifaces = new ArrayList<>();
+        var x = sysCollectorService.pageNetifaces(collectorBaseRequest);
+        netifaces.addAll(x.getSource().getObjs());
+        Long obytes = 0L;
+        for (Netiface netiface : netifaces) {
+            if (netiface.getTx() != null && netiface.getTx().getBytes() != null) {
+                obytes += netiface.getTx().getBytes();
+            }
+        }
+        return obytes;
     }
 
     @AuthTarget(TargetEnum.NO_AUTH)
@@ -201,7 +271,7 @@ public class CsceneOutController implements BaseModelListControllerBase {
         PythonExecUtil.exec("ssh_exec.py", encodeParams);
         // 启动一个线程 查询攻击结果 每隔5秒查询一次es数据 ， 查最新的一条数据
         CollectionScenePluginHandler collectionScenePluginHandler = sceneHandler.getPluginHandler("cpcollection");
-        attackDataOutputUtil.startOneAttackDataOutputTask(collectionScenePluginHandler,source , target, tool);
+        attackDataOutputUtil.startOneAttackDataOutputTask(collectionScenePluginHandler, source, target, tool);
     }
 
     private List<FlowTaskTaskModel> addTask(AddFlowTaskTaskRequest request) {
@@ -369,6 +439,18 @@ public class CsceneOutController implements BaseModelListControllerBase {
         String res = PythonExecUtil.exec("pingtest.py", sourceIp, sourcePort, targetIp, username, password);
         var pingRes = JsonCommon.snakeParse(res, PintTest.class);
         return pingRes;
+    }
+
+    @Getter
+    @Setter
+    public static class ConnectInfo {
+        private Boolean connected;
+        private Double packetLoss;
+        private Double delay;
+        // 最大速率
+        private String flow;
+        // 发送的流量数据
+        private Long obytes;
     }
 
     @Getter

@@ -1999,6 +1999,10 @@ public class DataCollectionService extends CollectionBaseService {
     }
 
     private Long string2Long(String val) {
+        if (val.contains(".")) {
+            var inx = val.indexOf(".");
+            val = val.substring(0, inx);
+        }
         Double doubleVal = Double.valueOf(val);
         Long longVal = BigDecimal.valueOf(doubleVal).longValue();
         return longVal;

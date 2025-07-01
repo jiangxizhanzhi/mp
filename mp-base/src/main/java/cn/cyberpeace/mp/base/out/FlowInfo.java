@@ -17,4 +17,6 @@ public class FlowInfo {
     private Double delay;
     @ApiModelProperty(value = "实时发送速率(单位byte/s)")
     private Long txBps;
+    @ApiModelProperty(value = "发送流量大小单位byte")
+    private Long obytes;
 }
