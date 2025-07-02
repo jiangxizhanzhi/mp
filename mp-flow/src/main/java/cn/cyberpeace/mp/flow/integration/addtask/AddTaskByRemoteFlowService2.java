@@ -233,13 +233,15 @@ public class AddTaskByRemoteFlowService2 implements IAddTaskService {
             List<FlowProtocolModel> protocolModels = new ArrayList<>();
             if (flow.getProtocolList() != null) {
                 for (var protocol : flow.getProtocolList()) {
-                    protocolRates.add(new FlowActuator.ProtocolRate(protocol.getProtocolName(), protocol.getRate()));
-                    FlowProtocolModel model = new FlowProtocolModel();
-                    model.setFlowId(flow.getFlowId());
-                    model.setRate(protocol.getRate());
-                    model.setMarked(protocol.getMarked());
-                    model.setProtocolName(protocol.getProtocolName());
-                    protocolModels.add(model);
+                    if (protocol.getMarked() != null && protocol.getMarked() == 1) {
+                        protocolRates.add(new FlowActuator.ProtocolRate(protocol.getProtocolName(), protocol.getRate()));
+                        FlowProtocolModel model = new FlowProtocolModel();
+                        model.setFlowId(flow.getFlowId());
+                        model.setRate(protocol.getRate());
+                        model.setMarked(protocol.getMarked());
+                        model.setProtocolName(protocol.getProtocolName());
+                        protocolModels.add(model);
+                    }
                 }
             }
             if (CollectionUtils.isNotEmpty(protocolModels)) {
