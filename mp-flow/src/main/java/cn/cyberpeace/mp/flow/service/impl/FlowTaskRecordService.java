@@ -410,7 +410,7 @@ public class FlowTaskRecordService extends BaseModelServiceImpl<FlowTaskRecordMo
     public void batchUpdateStatus(int status, List<String> taskIds) {
         HumanCondition condition = new HumanCondition().filterIn(FlowTaskRecordModel::getTaskId, taskIds.toArray());
         FlowTaskRecordModel recordModel = new FlowTaskRecordModel();
-        recordModel.setRecordStatus(0);
+        recordModel.setRecordStatus(status);
         getModelMapper().filterUpdate(recordModel, condition);
     }
 }
