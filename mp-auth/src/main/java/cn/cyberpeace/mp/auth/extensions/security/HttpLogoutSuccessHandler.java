@@ -12,13 +12,20 @@ package cn.cyberpeace.mp.auth.extensions.security;
 
 import cn.cyberpeace.mp.auth.config.AuthConfig;
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.extensions.security.common.JwtCommon;
 import cn.cyberpeace.mp.auth.extensions.security.event.UserEventPublisher;
 import cn.cyberpeace.mp.auth.extensions.security.event.UserLogoutEvent;
+import cn.cyberpeace.mp.auth.model.TokenModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.repository.TokenMapper;
 import cn.cyberpeace.mp.auth.service.UserService;
+import cn.cyberpeace.mp.auth.service.impl.ThirdSsoService;
+import cn.cyberpeace.mp.auth.util.JwtUtils;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.log.constant.LogConstant;
 import cn.cyberpeace.mp.log.enums.OpModuleEnums;
@@ -102,6 +109,18 @@ public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
      @Override
     public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
             throws IOException {
+
+         // 调用第三方接口退出登录
+         ThirdSsoService thirdSsoService = BeanCommon.getBean(ThirdSsoService.class);
+         // 取本系统的jwt token ，到数据库里置换下第三方的login_token ， 有的话就调用第三方接口退出下登录
+         var token = JwtCommon.getToken(request);
+         TokenMapper tokenMapper = BeanCommon.getBean(TokenMapper.class);
+         var tokenModel = tokenMapper.first(new HumanCondition().filterEqual(TokenModel::getJwt, token)
+                                                    .orderBy(TokenModel::getPk, true));
+         if (tokenModel != null) {
+             thirdSsoService.logout(tokenModel.getLogonToken());
+         }
+
         UserModel user = null;
         try {
             user = JwtCommon.verifyToken(request);

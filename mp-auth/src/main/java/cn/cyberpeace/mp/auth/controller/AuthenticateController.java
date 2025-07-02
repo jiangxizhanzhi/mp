@@ -94,7 +94,7 @@ public class AuthenticateController {
             throw new MpRuntimeException(AuthErrorCode.AUTHENTICATION_FAILED);
         }
         TokenModel tokenModel = tokenMapper.getByJwt(token);
-        if (tokenModel != null && !thirdSsoService.tokenCheck(tokenModel.getLoginToken())) {
+        if (tokenModel != null && !thirdSsoService.tokenCheck(tokenModel.getLogonToken())) {
             try {
                 response.sendRedirect(String.format("%s", authConfig.getThirdIp()));
             } catch (IOException e) {

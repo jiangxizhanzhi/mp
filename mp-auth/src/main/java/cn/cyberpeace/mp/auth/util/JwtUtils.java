@@ -13,17 +13,18 @@ package cn.cyberpeace.mp.auth.util;
 import cn.cyberpeace.mp.auth.config.AuthConfig;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
+import cn.cyberpeace.mp.auth.model.TokenModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.repository.TokenMapper;
+import cn.cyberpeace.mp.auth.service.impl.ThirdSsoService;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.exceptions.AlgorithmMismatchException;
-import com.auth0.jwt.exceptions.InvalidClaimException;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTDecodeException;
-import com.auth0.jwt.exceptions.SignatureVerificationException;
-import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -47,9 +48,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.Objects;
 
-import static cn.cyberpeace.mp.auth.constant.AuthConstant.FAIL_VERIFY_JWT_TOKEN;
-
-/**
+ /**
  * @Description:
  * @Author zhouxinghuai
  * @Date：2021/8/31 11:13
@@ -170,25 +169,20 @@ public class JwtUtils {
             var algorithm = Algorithm.HMAC256(jwtSecret);
             JWTVerifier verifier = JWT.require(algorithm).build();
             verifier.verify(token);
-        } catch (AlgorithmMismatchException e) {
-            throw new MpRuntimeException(AuthErrorCode.ALGORITHM_MISMATCH);
-        } catch (SignatureVerificationException e) {
-            if (!StringUtils.equals(jwtUtils.authConfig.getLogoutKeepSecretUser(), user.getId())) {
-                log.info(FAIL_VERIFY_JWT_TOKEN + " signature mismatch...", user.getId(), shortenToken(token));
-                throw new MpRuntimeException(AuthErrorCode.SIGNATURE_VERIFICATION);
-            }
-        } catch (TokenExpiredException e) {
-            if (!StringUtils.equals(jwtUtils.authConfig.getLogoutKeepSecretUser(), user.getId())) {
-                log.info(FAIL_VERIFY_JWT_TOKEN + " token expired...", user.getId(), shortenToken(token));
-                throw new MpRuntimeException(AuthErrorCode.TOKEN_EXPIRED);
-            }
-        } catch (InvalidClaimException e) {
-            throw new MpRuntimeException(AuthErrorCode.INVALID_CLAIM);
-        } catch (JWTDecodeException e) {
-            log.info(AuthConstant.FAIL_DECODE_JWT_TOKEN , token, e.getMessage());
-            throw new MpRuntimeException(AuthErrorCode.JWT_DECODE);
-        } catch (IllegalArgumentException e) {
-            throw new MpRuntimeException(AuthErrorCode.ILLEGAL_ARGUMENT);
+        } catch (Exception e){
+            log.error("{}", e);
+        }
+        // 调用第三方接口验证 token
+        TokenMapper mapper = BeanCommon.getBean(TokenMapper.class);
+        var x = mapper.first(new HumanCondition().filterEqual(TokenModel::getJwt, token)
+                                     .orderBy(TokenModel::getPk, true));
+        if(x == null){
+            throw new MpRuntimeException(AuthErrorCode.TOKEN_EXPIRED);
+        }
+        String loginToken = x.getLogonToken();
+        ThirdSsoService thirdSsoService = BeanCommon.getBean(ThirdSsoService.class);
+        if (!thirdSsoService.tokenCheck(loginToken)) {
+            throw new MpRuntimeException(AuthErrorCode.TOKEN_EXPIRED);
         }
         return user;
     }

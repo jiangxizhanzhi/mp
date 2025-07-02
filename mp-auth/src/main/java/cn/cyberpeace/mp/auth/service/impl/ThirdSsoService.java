@@ -26,12 +26,12 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.kafka.common.protocol.types.Field;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashMap;
@@ -113,7 +113,7 @@ public class ThirdSsoService {
                 JwtAuthenticationFilter.addThirdTokenToResponse(httpServletResponse, thirdToken.getLoginToken());
 
                 TokenModel tokenModel = new TokenModel();
-                tokenModel.setLoginToken(thirdToken.getLoginToken());
+                tokenModel.setLogonToken(thirdToken.getLoginToken());
                 tokenModel.setAccessToken(thirdToken.getAccessToken());
                 tokenModel.setJwt(newJwt);
                 tokenModel.setUserName(userModel.getUsername());
@@ -126,61 +126,6 @@ public class ThirdSsoService {
             }
             return String.format("redirect:%s", url);
         }
-    }
-
-    public Boolean tokenCheck(String token) {
-        String clientId = authConfig.getThirdClientId();
-        String tokenCheckUrl = authConfig.getThirdCheckUrl();
-        TokenCheckParams tokenCheckParams = new TokenCheckParams();
-        tokenCheckParams.setClientId(clientId);
-        tokenCheckParams.setLoginToken(token);
-        String params = JsonCommon.snakeStringify(tokenCheckParams);
-
-        log.info("check token , url is {} , params is {}", tokenCheckUrl, params);
-        String result = null;
-        try {
-            result = HttpUtils.sendPost(tokenCheckUrl, params);
-            log.info("check token , result is {}", result);
-        } catch (Exception e) {
-            log.error("faild to tokenCheck ", e);
-            throw new RuntimeException(e);
-        }
-        ThirdResponse<TokenCheckResult> thirdResponse = JsonCommon.snakeParse(result, new TypeReference<ThirdResponse<TokenCheckResult>>() {
-        });
-        if (thirdResponse.getCode() != 0) {
-            List<TokenModel> tokenModels = tokenMapper.getByLoginToken(token);
-            if (CollectionUtils.isNotEmpty(tokenModels)) {
-                for (TokenModel tokenModel : tokenModels){
-                    tokenMapper.delete(tokenModel.getId());
-                }
-            }
-            return false;
-        } else {
-            return true;
-        }
-    }
-
-    public void updateMenus(String accessToken) throws Exception {
-
-        // 查询用户信息
-        GetUserinfoParams getUserinfoParams = new GetUserinfoParams();
-        getUserinfoParams.setAccessToken(accessToken);
-        getUserinfoParams.setClientId(authConfig.getThirdClientId());
-        String params = JsonCommon.snakeStringify(getUserinfoParams);
-        log.info("query user info , url is {} , params is {}", authConfig.getThirdUserInfoUrl(), params);
-        String result = HttpUtils.sendPost(authConfig.getThirdUserInfoUrl(), params);
-        log.info("query user info , result is {}", result);
-        ThirdResponse<ThirdUserInfo> userResponse = JsonCommon.snakeParse(result, new TypeReference<ThirdResponse<ThirdUserInfo>>() {
-        });
-        var userInfo = userResponse.getData();
-        UserModel userModel = userService.getByUserName(userInfo.getUserAccount());
-
-        // 更新下菜单
-        UserModel updateModel = new UserModel();
-        updateModel.setId(userModel.getId());
-        updateModel.setMenusContent(JsonCommon.stringify(userInfo.getRoleMenu()));
-        userService.update(updateModel);
-
     }
 
     public ThirdUserInfo getuserinfoByLogintoken(String loginToken) {
@@ -206,6 +151,79 @@ public class ThirdSsoService {
         ThirdResponse<ThirdUserInfo> thirdResponse = JsonCommon.snakeParse(result, new TypeReference<ThirdResponse<ThirdUserInfo>>() {
         });
         return thirdResponse.getData();
+    }
+
+    public Boolean tokenCheck(String token) {
+        var user = this.getuserinfoByLogintoken(token);
+        if (user == null) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    @Getter
+    @Setter
+    public static class TokenCheckResult {
+        private ThirdUserInfo thirdUserInfo;
+        private Boolean checkResult;
+    }
+
+    public void updateMenus(String accessToken) throws Exception {
+
+        // 查询用户信息
+        GetUserinfoParams getUserinfoParams = new GetUserinfoParams();
+        getUserinfoParams.setAccessToken(accessToken);
+        getUserinfoParams.setClientId(authConfig.getThirdClientId());
+        String params = JsonCommon.snakeStringify(getUserinfoParams);
+        log.info("query user info , url is {} , params is {}", authConfig.getThirdUserInfoUrl(), params);
+        String result = HttpUtils.sendPost(authConfig.getThirdUserInfoUrl(), params);
+        log.info("query user info , result is {}", result);
+        ThirdResponse<ThirdUserInfo> userResponse = JsonCommon.snakeParse(result, new TypeReference<ThirdResponse<ThirdUserInfo>>() {
+        });
+        var userInfo = userResponse.getData();
+        UserModel userModel = userService.getByUserName(userInfo.getUserAccount());
+
+        // 更新下菜单
+        UserModel updateModel = new UserModel();
+        updateModel.setId(userModel.getId());
+        updateModel.setMenusContent(JsonCommon.stringify(userInfo.getRoleMenu()));
+        userService.update(updateModel);
+
+    }
+
+
+    public void updateMenus(ThirdUserInfo userInfo) {
+        UserModel userModel = userService.getByUserName(userInfo.getUserAccount());
+        // 更新下菜单
+        UserModel updateModel = new UserModel();
+        updateModel.setId(userModel.getId());
+        updateModel.setMenusContent(JsonCommon.stringify(userInfo.getRoleMenu()));
+        userService.update(updateModel);
+    }
+
+    public void logout(String loginToken) {
+        String url = authConfig.getThirdLogoutUrlV2();
+        LogoutParams logoutParams = new LogoutParams();
+        logoutParams.setClientId(authConfig.getThirdClientId());
+        logoutParams.setClientSecret(authConfig.getThirdClientSecret());
+        logoutParams.setLoginToken(loginToken);
+        String bodyStr = JsonCommon.snakeStringify(logoutParams);
+        try {
+            log.info("执行第三方退出登录 , 接口 {} , body 参数: {}", url, bodyStr);
+            String result = HttpUtils.sendPost(url, bodyStr);
+            log.info("退出登录 , 返回结果: {}", result);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Getter
+    @Setter
+    private static class LogoutParams{
+        private String clientId;
+        private String clientSecret;
+        private String loginToken;
     }
 
     @Getter
@@ -265,12 +283,6 @@ public class ThirdSsoService {
         private String clientId;
     }
 
-    @Getter
-    @Setter
-    private static class TokenCheckResult {
-        private Long loginTimeout;
-        private String userAccount;
-    }
 
     @Getter
     @Setter

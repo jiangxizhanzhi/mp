@@ -1,13 +1,13 @@
- // Copyright (C) 2024
- // All rights reserved.
- // Project name mp
- // Description:
- // Author:
- // File name JwtAuthenticationFilter.java.
- // File size 7045.
- // File create date Fri Jan 17 09:57:15 CST 2025.
- // File update date Fri Jan 17 11:23:14 CST 2025.
- // @Version 1.0.0
+// Copyright (C) 2024
+// All rights reserved.
+// Project name mp
+// Description:
+// Author:
+// File name JwtAuthenticationFilter.java.
+// File size 7045.
+// File create date Fri Jan 17 09:57:15 CST 2025.
+// File update date Fri Jan 17 11:23:14 CST 2025.
+// @Version 1.0.0
 package cn.cyberpeace.mp.auth.extensions.security.filter;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
@@ -44,96 +44,92 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.Objects;
 
- /**
-  * JWT认证过滤器
-  *
-  * @author 二竹
-  * @date 2025/01/17
-  */
- @Component
+/**
+ * JWT认证过滤器
+ * @author 二竹
+ * @date 2025/01/17
+ */
+@Component
 @Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-     /**
-      *
-      */
-     @Resource(name = "authCacheManager_6H")
+    /**
+     *
+     */
+    @Resource(name = "authCacheManager_6H")
     private CacheManager cacheManager;
 
-     /**
-      *
-      */
-     private final ObjectMapper mapper;
+    /**
+     *
+     */
+    private final ObjectMapper mapper;
 
-     /**
-      * JWT认证过滤器
-      *
-      * @param messageConverter 消息转换器
-      */
-     @Autowired
+    /**
+     * JWT认证过滤器
+     * @param messageConverter 消息转换器
+     */
+    @Autowired
     public JwtAuthenticationFilter(MappingJackson2HttpMessageConverter messageConverter) {
         this.mapper = messageConverter.getObjectMapper();
     }
 
-     /**
-      *
-      */
-     public static final String SKIP_JWT_FILTER = "SKIP_JWT_FILTER";
+    /**
+     *
+     */
+    public static final String SKIP_JWT_FILTER = "SKIP_JWT_FILTER";
 
-     /**
-      * 做内部过滤
-      *
-      * @param request     请求
-      * @param response    响应
-      * @param filterChain 过滤器链
-      * @throws ServletException servlet异常
-      * @throws IOException      ioexception
-      */
-     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException {
+    /**
+     * 做内部过滤
+     * @param request     请求
+     * @param response    响应
+     * @param filterChain 过滤器链
+     * @throws ServletException servlet异常
+     * @throws IOException      ioexception
+     */
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         Object skipJwtFilter = request.getAttribute(JwtAuthenticationFilter.SKIP_JWT_FILTER);
         boolean skip = Objects.nonNull(skipJwtFilter) && (Boolean) skipJwtFilter;
         if (!skip) {
 
-                String token = JwtCommon.getToken(request);
-                if (StringUtils.isNotBlank(token)) {
-                    UserModel user;
-                    try {
-                        user = JwtCommon.verifyToken(token);
-                    } catch (MpRuntimeException e) {
-                        log.info(e.getMessage());
-                        response.setContentType("application/json;charset=UTF-8");
-                        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                        ServiceResult<Object> result = ServiceResult.builder().serviceCode(e.getServiceCode()).build().asResult();
-                        PrintWriter writer = response.getWriter();
-                        mapper.writeValue(writer, result);
-                        writer.flush();
-                        return;
-                    }
-                    if (Objects.nonNull(user)) {
-                        // 第一步就要将请求类型塞入request attribute，否则后面的loadAuthorities()就可能出问题，参见浙能定制版commit id:f7cdf17f6c7e0bbc36e771a79db981a0ffd4990f
-                        UserUtils.setLoginUser2RequestAttr(request, user.getId(), user.getUsername(), LogConstant.USER_TYPE_USER);
-
-                        LoginUserContext loginUserContext = new LoginUserContext();
-                        loginUserContext.setValue(user.getId());
-                        refreshToken(response, token, user);
-                    }
+            String token = JwtCommon.getToken(request);
+            if (StringUtils.isNotBlank(token)) {
+                UserModel user;
+                try {
+                    user = JwtCommon.verifyToken(token);
+                } catch (MpRuntimeException e) {
+                    log.info(e.getMessage());
+                    response.setContentType("application/json;charset=UTF-8");
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    ServiceResult<Object> result = ServiceResult.builder().serviceCode(e.getServiceCode()).build()
+                            .asResult();
+                    PrintWriter writer = response.getWriter();
+                    mapper.writeValue(writer, result);
+                    writer.flush();
+                    return;
                 }
+                if (Objects.nonNull(user)) {
+                    // 第一步就要将请求类型塞入request attribute，否则后面的loadAuthorities()就可能出问题，参见浙能定制版commit id:f7cdf17f6c7e0bbc36e771a79db981a0ffd4990f
+                    UserUtils.setLoginUser2RequestAttr(request, user.getId(), user.getUsername(), LogConstant.USER_TYPE_USER);
+
+                    LoginUserContext loginUserContext = new LoginUserContext();
+                    loginUserContext.setValue(user.getId());
+                    refreshToken(response, token, user);
+                }
+            }
 
         }
 
         filterChain.doFilter(request, response);
     }
 
-     /**
-      * 刷新令牌
-      *
-      * @param response  响应
-      * @param token     令牌
-      * @param userModel 用户模型
-      */
-     private void refreshToken(HttpServletResponse response, String token, UserModel userModel) {
+    /**
+     * 刷新令牌
+     * @param response  响应
+     * @param token     令牌
+     * @param userModel 用户模型
+     */
+    private void refreshToken(HttpServletResponse response, String token, UserModel userModel) {
         Cache tokenCache = cacheManager.getCache("_token");
         String newJwt = tokenCache.get(token, String.class);
         if (StringUtils.isBlank(newJwt)) {
@@ -159,17 +155,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
     }
 
-     /**
-      * 集饼干
-      *
-      * @param response 响应
-      * @param name
-      * @param value
-      * @param path
-      * @param domain
-      * @param maxAge
-      */
-     private void setCookie(HttpServletResponse response, String name, String value, String path, String domain, int maxAge) {
+    /**
+     * 集饼干
+     * @param response 响应
+     * @param name
+     * @param value
+     * @param path
+     * @param domain
+     * @param maxAge
+     */
+    private void setCookie(HttpServletResponse response, String name, String value, String path, String domain, int maxAge) {
         Cookie cookie = new Cookie(name, null);
         cookie.setPath(path);
         if (StringUtils.isNotBlank(domain)) {
@@ -186,11 +181,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         response.addCookie(cookie);
     }
 
-     /**
-      * @param response 响应
-      * @param newJwt
-      */
-     public static void addJWTCookieToResponse(HttpServletResponse response, String newJwt) {
+    /**
+     * @param response 响应
+     * @param newJwt
+     */
+    public static void addJWTCookieToResponse(HttpServletResponse response, String newJwt) {
         Cookie cookie = new Cookie("cr_jwttoken", null);
         cookie.setPath("/");
         cookie.setMaxAge(Integer.MAX_VALUE);
@@ -205,11 +200,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     }
 
-     /**
-      * @param response 响应
-      * @param token    令牌
-      */
-     public static void addThirdTokenToResponse(HttpServletResponse response, String token) {
+    /**
+     * @param response 响应
+     * @param token    令牌
+     */
+    public static void addThirdTokenToResponse(HttpServletResponse response, String token) {
         Cookie cookie = new Cookie("third_token", null);
         cookie.setPath("/");
         cookie.setMaxAge(Integer.MAX_VALUE);
@@ -221,6 +216,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             e.printStackTrace();
         }
         response.addCookie(cookie);
+        response.setHeader("third_token", token);
+    }
 
+    public static void addJwtTokenToResponse(HttpServletResponse response, String token) {
+        response.setHeader(AuthConstant.JWT_HEADER_KEY, token);
+    }
+
+    public static void thirdLoginSuccessRefreshToken(HttpServletResponse response, String jwtToken, String thirdToken) {
+        addJwtTokenToResponse(response, jwtToken);
+        addThirdTokenToResponse(response, thirdToken);
+        addJWTCookieToResponse(response, jwtToken);
     }
 }
