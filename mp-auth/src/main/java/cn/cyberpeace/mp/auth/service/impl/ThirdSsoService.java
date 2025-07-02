@@ -34,7 +34,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import static cn.cyberpeace.mp.auth.constant.AuthConstant.ROLE_ADMIN_ID;
@@ -181,6 +183,31 @@ public class ThirdSsoService {
 
     }
 
+    public ThirdUserInfo getuserinfoByLogintoken(String loginToken) {
+
+        String url = authConfig.getThirdGetUserInfoByTokenUrlV2();
+        String clientId = authConfig.getThirdClientId();
+        String clientSecret = authConfig.getThirdClientSecret();
+        Map<String, Object> params = new HashMap<>();
+        params.put("client_secret", clientSecret);
+        params.put("client_id", clientId);
+        params.put("login_token", loginToken);
+        String paramsStr = JsonCommon.snakeStringify(params);
+
+        log.info("get user info by login token , url is {} , params is {}", url, paramsStr);
+        String result = null;
+        try {
+            result = HttpUtils.sendPost(url, paramsStr);
+            log.info("check token , result is {}", result);
+        } catch (Exception e) {
+            log.error("faild to tokenCheck ", e);
+            throw new RuntimeException(e);
+        }
+        ThirdResponse<ThirdUserInfo> thirdResponse = JsonCommon.snakeParse(result, new TypeReference<ThirdResponse<ThirdUserInfo>>() {
+        });
+        return thirdResponse.getData();
+    }
+
     @Getter
     @Setter
     private static class GetTokenParams {
@@ -250,7 +277,17 @@ public class ThirdSsoService {
     public static class ThirdRole {
         private Integer roleId;
         private String roleName;
+        private List<SystemLink> systems;
         private List<ThirdRoleMenu> menu;
+    }
+
+    @Getter
+    @Setter
+    public static class SystemLink {
+        private String systemName;
+        private String redirectUrl;
+        private String systemIcon;
+        private String clientId;
     }
 
     @Getter

@@ -82,4 +82,16 @@ public class AuthConfig {
     private String thirdUserInfoUrl;
 
     private String thirdCheckUrl;
+
+    private String thirdGetUserInfoByTokenUrlV2;
+
+    private String thirdLogoutUrlV2;
+
+    private String homePageV2;
+
+    private String thirdLoginPageV2;
+
+    private String systemPage1;
+    private String systemPage2;
+    private String systemPage3;
 }
