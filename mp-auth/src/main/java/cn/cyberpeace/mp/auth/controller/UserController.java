@@ -11,13 +11,17 @@
 package cn.cyberpeace.mp.auth.controller;
 
 import cn.cyberpeace.mp.auth.bo.user.UserBo;
+import cn.cyberpeace.mp.auth.bo.user.UserLink;
 import cn.cyberpeace.mp.auth.bo.user.UserSimpleBo;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
+import cn.cyberpeace.mp.auth.extensions.security.common.JwtCommon;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.request.user.UserRequest;
 import cn.cyberpeace.mp.auth.service.UserService;
+import cn.cyberpeace.mp.auth.service.impl.ThirdSsoService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
@@ -31,6 +35,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.common.protocol.types.Field;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -43,9 +48,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
  /**
   * 用户控制器
@@ -205,4 +213,31 @@ public class UserController {
         UserModel userModel = userService.modify(modifyRequest);
         return ResultCommon.success(userModel);
     }
+
+     @ApiOperation(value = "查询用户可跳转的子系统", notes = "")
+     @GetMapping("/get_user_link")
+     public ServiceResult<List<UserLink>> userLinks(HttpServletRequest request) {
+         String thirdToken = JwtCommon.getToken(request);
+         ThirdSsoService thirdSsoService = BeanCommon.getBean(ThirdSsoService.class);
+         var user = thirdSsoService.getuserinfoByLogintoken(thirdToken);
+         List<ThirdSsoService.SystemLink> systemLinks = new ArrayList<>();
+         for (var roleMenu : user.getRoleMenu()) {
+             if (roleMenu.getSystems() != null) {
+                 systemLinks.addAll(roleMenu.getSystems());
+             }
+         }
+         // 去重
+         Set<String> systemLinkSet = new HashSet<>();
+         List<UserLink> userLinks = new ArrayList<>();
+         for (ThirdSsoService.SystemLink systemLink : systemLinks) {
+             if (!systemLinkSet.contains(systemLink.getSystemName())) {
+                 systemLinkSet.add(systemLink.getSystemName());
+                 UserLink userLink = new UserLink();
+                 userLink.setUrl(systemLink.getRedirectUrl());
+                 userLink.setName(systemLink.getSystemName());
+                 userLinks.add(userLink);
+             }
+         }
+         return new ServiceResult<>(userLinks).asResult();
+     }
 }

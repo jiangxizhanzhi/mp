@@ -10,7 +10,6 @@
  // @Version 1.0.0
 package cn.cyberpeace.mp.auth.config;
 
-import cn.cyberpeace.mp.auth.service.impl.ThirdSsoService;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -82,4 +81,12 @@ public class AuthConfig {
     private String thirdUserInfoUrl;
 
     private String thirdCheckUrl;
+
+    private String thirdGetUserInfoByTokenUrlV2;
+
+    private String thirdLogoutUrlV2;
+
+    private String homePageV2;
+
+    private String thirdLoginPageV2;
 }
