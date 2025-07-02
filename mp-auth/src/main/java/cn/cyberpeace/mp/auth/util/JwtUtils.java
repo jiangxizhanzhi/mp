@@ -169,20 +169,20 @@ public class JwtUtils {
             var algorithm = Algorithm.HMAC256(jwtSecret);
             JWTVerifier verifier = JWT.require(algorithm).build();
             verifier.verify(token);
-        } catch (Exception e){
+        } catch (Exception e) {
+            // 不再依赖本系统的token校验，全部都校验通过，保留是为了使家里环境也能登录
             log.error("{}", e);
         }
-        // 调用第三方接口验证 token
+        // 如果存在第三方token 则调用第三方接口验证 token
         TokenMapper mapper = BeanCommon.getBean(TokenMapper.class);
-        var x = mapper.first(new HumanCondition().filterEqual(TokenModel::getJwt, token)
+        var latestToken = mapper.first(new HumanCondition().filterEqual(TokenModel::getJwt, token)
                                      .orderBy(TokenModel::getPk, true));
-        if(x == null){
-            throw new MpRuntimeException(AuthErrorCode.TOKEN_EXPIRED);
-        }
-        String loginToken = x.getLogonToken();
-        ThirdSsoService thirdSsoService = BeanCommon.getBean(ThirdSsoService.class);
-        if (!thirdSsoService.tokenCheck(loginToken)) {
-            throw new MpRuntimeException(AuthErrorCode.TOKEN_EXPIRED);
+        if (latestToken != null) {
+            String loginToken = latestToken.getLogonToken();
+            ThirdSsoService thirdSsoService = BeanCommon.getBean(ThirdSsoService.class);
+            if (!thirdSsoService.tokenCheck(loginToken)) {
+                throw new MpRuntimeException(AuthErrorCode.TOKEN_EXPIRED);
+            }
         }
         return user;
     }
