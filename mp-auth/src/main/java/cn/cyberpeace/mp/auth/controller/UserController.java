@@ -13,6 +13,7 @@ package cn.cyberpeace.mp.auth.controller;
 import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.bo.user.UserLink;
 import cn.cyberpeace.mp.auth.bo.user.UserSimpleBo;
+import cn.cyberpeace.mp.auth.config.AuthConfig;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.extensions.security.common.JwtCommon;
@@ -35,6 +36,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.common.protocol.types.Field;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -217,6 +219,25 @@ public class UserController {
      @ApiOperation(value = "查询用户可跳转的子系统", notes = "")
      @GetMapping("/get_user_link")
      public ServiceResult<List<UserLink>> userLinks(HttpServletRequest request) {
+         AuthConfig authConfig = BeanCommon.getBean(AuthConfig.class);
+         if (StringUtils.isNotEmpty(authConfig.getSystemPage1())) {
+             List<UserLink> result = new ArrayList<>();
+             UserLink userLink1 = new UserLink();
+             userLink1.setUrl(authConfig.getSystemPage1());
+             userLink1.setName("活动空间");
+             result.add(userLink1);
+
+             UserLink userLink2 = new UserLink();
+             userLink2.setUrl(authConfig.getSystemPage2());
+             userLink2.setName("数字空间");
+             result.add(userLink2);
+
+             UserLink userLink3 = new UserLink();
+             userLink3.setUrl(authConfig.getSystemPage3());
+             userLink3.setName("训练数据");
+             result.add(userLink3);
+             return new ServiceResult<>(result).asResult();
+         }
          String thirdToken = JwtCommon.getToken(request);
          ThirdSsoService thirdSsoService = BeanCommon.getBean(ThirdSsoService.class);
          var user = thirdSsoService.getuserinfoByLogintoken(thirdToken);

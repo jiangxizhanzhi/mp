@@ -232,6 +232,9 @@ mp:
     home_page_v2: ${mp.auth.ext-var.home_page_v2}
     third_login_page_v2: ${mp.auth.ext-var.third_login_page_v2}
     third_logout_url_v2: ${mp.auth.ext-var.third_logout_url_v2}
+    system_page1: ${mp.auth.ext-var.system_page1}
+    system_page2: ${mp.auth.ext-var.system_page2}
+    system_page3: ${mp.auth.ext-var.system_page3}
   # mp-front-admin 模块配置
   frontadmin:
     activ-enable: true

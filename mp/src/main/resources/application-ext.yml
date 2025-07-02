@@ -99,6 +99,9 @@ mp:
       home_page_v2: ${HOME_PAGE_V2:http://10.4.1.37}
       third_login_page_v2: ${THIRD_LOGIN_PAGE_V2:http://10.100.1.28/page/mg/login}
       third_logout_url_v2: ${THIRD_LOGOUT_URL_V2:http://10.100.27.1:5099/api/v2/user/logout}
+      system_page1: ${SYSTEM_PAGE1:https://172.30.122.162}
+      system_page2: ${SYSTEM_PAGE2:https://172.30.122.161}
+      system_page3: ${SYSTEM_PAGE3:https://172.30.122.79:9527}
   frontbusiness:
     ext-var:
       third-role-enabled: ${MP_THIRD_ROLE_ENABLED:false}

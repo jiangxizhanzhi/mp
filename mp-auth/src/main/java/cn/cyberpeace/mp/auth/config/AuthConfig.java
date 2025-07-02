@@ -89,4 +89,8 @@ public class AuthConfig {
     private String homePageV2;
 
     private String thirdLoginPageV2;
+
+    private String systemPage1;
+    private String systemPage2;
+    private String systemPage3;
 }
