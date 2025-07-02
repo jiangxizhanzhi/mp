@@ -111,12 +111,15 @@ public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
             throws IOException {
 
          // 调用第三方接口退出登录
+         log.info("log out start ----------");
          ThirdSsoService thirdSsoService = BeanCommon.getBean(ThirdSsoService.class);
          // 取本系统的jwt token ，到数据库里置换下第三方的login_token ， 有的话就调用第三方接口退出下登录
          var token = JwtCommon.getToken(request);
+         log.info("log out , token is {} ----------", token);
          TokenMapper tokenMapper = BeanCommon.getBean(TokenMapper.class);
          var tokenModel = tokenMapper.first(new HumanCondition().filterEqual(TokenModel::getJwt, token)
                                                     .orderBy(TokenModel::getPk, true));
+         log.info("log out , find token model {} ---------- ", JsonCommon.stringify(tokenModel));
          if (tokenModel != null) {
              thirdSsoService.logout(tokenModel.getLogonToken());
          }
