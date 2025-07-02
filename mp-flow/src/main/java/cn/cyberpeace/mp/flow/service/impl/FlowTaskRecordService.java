@@ -415,7 +415,7 @@ public class FlowTaskRecordService extends BaseModelServiceImpl<FlowTaskRecordMo
         HumanCondition condition = new HumanCondition();
         condition.filterIn(FlowTaskRecordModel::getTaskId, taskIds.toArray());
         FlowTaskRecordModel recordModel = new FlowTaskRecordModel();
-        recordModel.setRecordStatus(0);
+        recordModel.setRecordStatus(status);
         getModelMapper().filterUpdate(recordModel, condition);
     }
 }

@@ -55,11 +55,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * @ClassName AsyncPlatFlowTaskService
@@ -196,9 +192,14 @@ public class AsyncPlatFlowTaskService {
             if (TaskTaskStatusEnum.PREPARING.toValue() == taskTaskModel.getTaskStatus()) {
                 PREPARING++;
             }
-            if (TaskTaskStatusEnum.RUNNING.toValue() != taskTaskModel.getTaskStatus() && TaskTaskStatusEnum.INITING.toValue() != taskTaskModel.getTaskStatus() && TaskTaskStatusEnum.PREPARING.toValue() != taskTaskModel.getTaskStatus()) {
+            if (!Arrays.asList(TaskTaskStatusEnum.RUNNING.toValue(), TaskTaskStatusEnum.INITING.toValue(),
+                    TaskTaskStatusEnum.PREPARING.toValue(), TaskTaskStatusEnum.INIT.toValue(),
+                    TaskTaskStatusEnum.STARTING.toValue()).contains(taskTaskModel.getTaskStatus())){
                 notRunningTasks.add(taskTaskModel);
             }
+            //if (TaskTaskStatusEnum.RUNNING.toValue() != taskTaskModel.getTaskStatus() && TaskTaskStatusEnum.INITING.toValue() != taskTaskModel.getTaskStatus() && TaskTaskStatusEnum.PREPARING.toValue() != taskTaskModel.getTaskStatus()) {
+            //    notRunningTasks.add(taskTaskModel);
+            //}
         }
         if (CollectionUtils.isEmpty(notRunningTasks)) {
             if (PREPARING > 0 || INITING > 0) {
@@ -231,8 +232,9 @@ public class AsyncPlatFlowTaskService {
         }
 
         // 批量更新任务之前记录状态为无效
-        flowTaskRecordService.batchUpdateStatus(0, taskIds);
+        flowTaskRecordService.batchUpdateStatus(0, notRunningTaskIds);
 
+        // 启动非启动状态的任务
         List<FlowTaskStart> flowTaskStartList = new ArrayList<>();
         for (FlowTaskTaskModel flowTaskTaskModel : flowTaskTaskModels) {// 解析任务配置
             Optional<FlowTaskConfModel> result = Optional.empty();
