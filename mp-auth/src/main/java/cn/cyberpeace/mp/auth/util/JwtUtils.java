@@ -171,7 +171,7 @@ public class JwtUtils {
             verifier.verify(token);
         } catch (Exception e) {
             // 不再依赖本系统的token校验，全部都校验通过，保留是为了使家里环境也能登录
-            log.error("{}", e);
+//            log.error("{}", e);
         }
         // 如果存在第三方token 则调用第三方接口验证 token
         TokenMapper mapper = BeanCommon.getBean(TokenMapper.class);
