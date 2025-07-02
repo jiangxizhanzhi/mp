@@ -219,6 +219,25 @@ public class UserController {
      @ApiOperation(value = "查询用户可跳转的子系统", notes = "")
      @GetMapping("/get_user_link")
      public ServiceResult<List<UserLink>> userLinks(HttpServletRequest request) {
+         AuthConfig authConfig = BeanCommon.getBean(AuthConfig.class);
+         if (StringUtils.isNotEmpty(authConfig.getSystemPage1())) {
+             List<UserLink> result = new ArrayList<>();
+             UserLink userLink1 = new UserLink();
+             userLink1.setUrl(authConfig.getSystemPage1());
+             userLink1.setName("活动空间");
+             result.add(userLink1);
+
+             UserLink userLink2 = new UserLink();
+             userLink2.setUrl(authConfig.getSystemPage2());
+             userLink2.setName("数字空间");
+             result.add(userLink2);
+
+             UserLink userLink3 = new UserLink();
+             userLink3.setUrl(authConfig.getSystemPage3());
+             userLink3.setName("训练数据");
+             result.add(userLink3);
+             return new ServiceResult<>(result).asResult();
+         }
          String thirdToken = JwtCommon.getToken(request);
          ThirdSsoService thirdSsoService = BeanCommon.getBean(ThirdSsoService.class);
          var user = thirdSsoService.getuserinfoByLogintoken(thirdToken);
