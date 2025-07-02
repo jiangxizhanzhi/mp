@@ -145,7 +145,7 @@ public class JwtUtils {
     }
 
 
-    @Deprecated
+//    @Deprecated
     public static boolean addResponseHeaderWithJWT(UserModel user) {
         if (user == null) {
             return false;
