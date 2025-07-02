@@ -74,7 +74,11 @@ public class FlowClient {
         remoteFlowInfo.setInteractiveType(response.getInteractiveType());
         remoteFlowInfo.setFile(response.getFile());
         remoteFlowInfo.setFileName(response.getFileName());
-        remoteFlowInfo.setPcapFile(response.getPcapFile());
+        if (response.getLatestPcapFile() != null) {
+            remoteFlowInfo.setPcapFile(response.getLatestPcapFile());
+        } else {
+            remoteFlowInfo.setPcapFile(response.getPcapFile());
+        }
         remoteFlowInfo.setProtocolList(response.getProtocolList());
         remoteFlowInfo.setPcapSize(response.getPcapSize());
         remoteFlowInfo.setDuration(response.getDuration());
@@ -150,6 +154,7 @@ public class FlowClient {
         private String file;
         private String fileName;
         private String pcapFile;
+        private String latestPcapFile;
         private Long duration;
         private Long pcapSize;
         private Long pktNum;
