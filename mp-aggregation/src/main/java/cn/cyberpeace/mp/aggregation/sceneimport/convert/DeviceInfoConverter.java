@@ -134,6 +134,18 @@ class DeviceInfoConverter implements IConverter {
         if (device.getExtDocker() != null) {
             pluginElement.setInitSupport(device.getExtDocker().getInitSupport());
             pluginElement.setQuickCreateSupport(device.getExtDocker().getInitSupport());
+            element.setCpu(device.getExtDocker().getCpu());
+            element.setDisk(device.getExtDocker().getDisk());
+            element.setRam(device.getExtDocker().getRam());
+            if (element == null) {
+                element.setCpu(1);
+            }
+            if (element.getDisk() == null) {
+                element.setDisk(10);
+            }
+            if (element.getRam() == null) {
+                element.setRam(512);
+            }
         }
 
         if (CollectionUtils.isNotEmpty(device.getExtEntityAccess())) {
