@@ -1,18 +1,21 @@
 package cn.cyberpeace.mp.cscene.bo;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.lang3.ArrayUtils;
+
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.cscene.bo.base.BaseCsceneBO;
 import cn.cyberpeace.mp.cscene.model.CsceneModel;
 import cn.cyberpeace.mp.cscene.model.CsceneRoleModel;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import org.apache.commons.lang3.ArrayUtils;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 @ApiModel(description = "场景模板数据")
 @Data
@@ -79,23 +82,29 @@ public class CsceneBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, CsceneR
         return this;
     }
 
-    public void calHardware(){
-        int cpu = 0 ,ram = 0 ,disk = 0 ;
-        for (BaseSceneElementBO e : this.sceneConfig.getTopology().getElements()) {
-            if (e.getCpu() != null) {
-                cpu += e.getCpu();
-            }
-            if(e.getRam() != null){
-                ram += e.getRam();
-            }
-            if(e.getDisk() != null){
-                disk += e.getDisk();
-            }
-        }
-        this.setTotalCpu(cpu);
-        this.setTotalRam(ram);
-        this.setTotalDisk(disk);
-    }
+	public void calHardware() {
+		int cpu = 0, ram = 0, disk = 0;
+		Map<String, Map<String, Object>> pluginElements = this.sceneConfig.getPlugins()
+				.get("cpcloud").getElements();
+		for (BaseSceneElementBO e : this.sceneConfig.getTopology().getElements()) {
+			var node = pluginElements.get(e.getId());
+			int nodeCpu = e.getCpu() == null ? 0 : e.getCpu();
+			int nodeDisk = e.getDisk() == null ? 0 : e.getDisk();
+			int nodeRam = e.getRam() == null ? 0 : e.getRam();
+			if (BaseCloudPluginSceneElementModel.ImageType.CONTAINER
+					.equals(node.get("image_type"))) {
+				nodeCpu = 1;
+				nodeRam = 512;
+				disk = 10;
+			}
+			cpu += nodeCpu;
+			disk += nodeDisk;
+			ram += nodeRam;
+		}
+		this.setTotalCpu(cpu);
+		this.setTotalRam(ram);
+		this.setTotalDisk(disk);
+	}
 
 
     public CsceneInstanceBO exportToCsceneInstance() {
