@@ -167,7 +167,7 @@ public class DeviceTargetPO extends BaseModel {
     private String createUserName;
 
     /**
-     * 靶标创建用户名
+     * "资源类型 '1':'操作系统', '2':'数据库', '3':'中间件', '4':'办公软件', '5':'专用业务软件', '6':'漏洞及弱点'"
      */
     @DefaultStr
     private String imageResourceType;
