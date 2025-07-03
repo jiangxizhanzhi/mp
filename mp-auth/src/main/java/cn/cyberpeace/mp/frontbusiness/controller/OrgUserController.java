@@ -41,7 +41,7 @@ public class OrgUserController {
     @Autowired
     private TenantUserService tenantUserService;
 
-
+    @AuthTarget({TargetEnum.USER_MANAGE, TargetEnum.COURSES,TargetEnum.ROLE_MANAGE})
     @ApiOperation(value = "[组织用户管理] 分页查询组织下所有用户信息 （默认查询组织下所有层级子组织的用户，" +
             "可以通过设置showAllUnderLevel=false来关闭默认，只显示当前组织绑定的用户），附带组织，角色信息", notes = "")
     @GetMapping("/page/byorg")
@@ -51,7 +51,16 @@ public class OrgUserController {
 
         return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
     }
+    @ApiOperation(value = "[组织用户管理] 分页查询组织下所有用户信息 （默认查询组织下所有层级子组织的用户，" +
+            "可以通过设置showAllUnderLevel=false来关闭默认，只显示当前组织绑定的用户），附带组织，角色信息", notes = "")
+    @GetMapping("/page/byorg/front")
+    @AuthTarget(TargetEnum.RED_VS_BLUE)
+    public ListObjServiceResult<Object> getPageByOrgFront(OrgUserPageRequest req) {
+        req.ensure();
+        PageInfo pageInfo = tenantUserService.pageUsersByOrg(req);
 
+        return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
+    }
     @ApiOperation(value = "[组织用户管理] 根据userId列表查询用户信息", notes = "")
     @PostMapping("/list_by_ids")
     public ServiceResult<List<UserBo>> listByUserIds(@RequestBody List<String> ids) {

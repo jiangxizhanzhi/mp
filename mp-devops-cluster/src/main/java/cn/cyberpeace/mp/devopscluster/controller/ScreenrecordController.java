@@ -51,6 +51,7 @@ public class ScreenrecordController {
     @AuthTarget({TargetEnum.GROUP_TRAINING, TargetEnum.RANGE_TEST_SELF, TargetEnum.RED_VS_BLUE, TargetEnum.RESOURCE_USAGE_MANAGEMENT})
     @ApiOperation("分页查询录屏文件")
     @GetMapping("/page")
+    @AuthTarget(TargetEnum.RESOURCE_USAGE_MANAGEMENT)
     public ListObjServiceResult<ScreenrecordVO> pageScreenrecord(ScreenrecordQueryParams queryParams) {
         String sceneId = null;
         if (StringUtils.isNotEmpty(queryParams.getCsceneId())) {

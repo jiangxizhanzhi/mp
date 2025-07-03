@@ -124,7 +124,7 @@ public class ImagesController {
     /**
      * 分页查询
      */
-    @AuthTarget(TargetEnum.DEVOPS_IMAGE_GROUP)
+    @AuthTarget(TargetEnum.IMAGE_MANAGE)
     @ApiOperation("分页查询")
     @GetMapping("/page")
     public PageResult<ImagesPageVO> page(ImagePageRequest request){

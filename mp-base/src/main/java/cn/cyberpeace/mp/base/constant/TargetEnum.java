@@ -81,6 +81,7 @@ public enum TargetEnum {
     USER_MANAGE(new String[]{"user-manage"}),
     VULNERABILITY(new String[]{"vulnerability"}),
     VULNERABILITY_LIBRARY(new String[]{"vulnerability-library"}),
+    ROLE_MANAGE(new String[]{"role-manage"}), // 角色管理
 
     CSCENE_TARGET_GROUP(new String[]{
             COURSE_FOLDER.getTargets()[0], COURSES.getTargets()[0], CR_INDIVIDUAL_TRAINING.getTargets()[0], CR_TEAM_TRAINING.getTargets()[0],
