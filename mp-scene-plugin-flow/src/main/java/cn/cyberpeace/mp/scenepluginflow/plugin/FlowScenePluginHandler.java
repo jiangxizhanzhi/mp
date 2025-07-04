@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.scenepluginflow.plugin;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.flow.bo.AddFlowTaskFlowInfo;
 import cn.cyberpeace.mp.flow.bo.AddFlowTaskTaskInfo;
@@ -9,6 +10,7 @@ import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.plugin.ScenePluginHandler;
 import cn.cyberpeace.mp.scene.core.plugin.stereotype.PluginKey;
+import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneBO;
@@ -73,6 +75,7 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
         deleteHandler = new DeleteHandler(this);
         prepareHandler = new PrepareHandler(this);
         initiateHandler = new InitiateHandler(this);
+        postService = BeanCommon.getBean(FlowPostService.class);
     }
 
     @Override
@@ -238,6 +241,13 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
         log.info("-----------------getSourceSceneId()- " + getSourceSceneId());
         postService.onStopTaskNode(getSourceSceneId(), nodeId);
         return flag;
+    }
+
+    public void onStopTaskNode(String nodeId){
+        getSceneHandler().asyncAckElementChanged(nodeId, true, true);
+        if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
+            getSceneHandler().updateSceneElementWithPlugins(nodeId);
+        }
     }
 
     public boolean stopFlow(String nodeId, String flowId) {
