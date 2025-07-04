@@ -233,6 +233,9 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
 
         String finalSourceIp = sourceIp == null ? flow.getSourceIp() : sourceIp;
         boolean flag = handlerUtils.startFlow(flowElement, flow, finalSourceIp, async);
+        log.info("-----------------node- " + nodeId);
+        log.info("-----------------postService- " + postService);
+        log.info("-----------------getSourceSceneId()- " + getSourceSceneId());
         postService.onStopTaskNode(getSourceSceneId(), nodeId);
         return flag;
     }
