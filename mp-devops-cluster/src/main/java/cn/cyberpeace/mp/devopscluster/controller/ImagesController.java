@@ -176,6 +176,7 @@ public class ImagesController {
         } else {
             po.setAttackTools(JsonCommon.stringify(request.getAttackTools()));
         }
+        po.setIsAttacker(request.getIsAttacker());
         deviceTargetMapper.filterUpdate(po, new HumanCondition().filterEqual(DeviceTargetPO::getUuid, request.getUuid()));
 
         return ResultCommon.success();
@@ -229,7 +230,7 @@ public class ImagesController {
             });
             imagesByIdVO.setAttackTools(ac);
         }
-
+        imagesByIdVO.setIsAttacker(x.getIsAttacker());
 
         return new Result<>(imagesByIdVO);
     }

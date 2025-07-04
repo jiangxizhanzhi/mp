@@ -245,13 +245,27 @@ public class DevopsTargetController {
         List<String> uuids = deviceList.stream().map(Device::getUuid).collect(Collectors.toList());
 
         List<DeviceTargetPO> list = deviceTargetMapper.findByUuids(uuids);
-        Map<String, String> targetPOMap = list.stream().collect(Collectors.toMap(DeviceTargetPO::getUuid, po -> po.getAttackTools() != null?po.getAttackTools():"[]" , (existing, replacement) -> existing));
-        for (Device device : deviceList) {
-            targetPOMap.getOrDefault(device.getUuid(), "[]");
-            List<ImageToolRequest> imageToolRequests = JSON.parseArray(targetPOMap.getOrDefault(device.getUuid(), "[]"), ImageToolRequest.class);
-            device.setAttackTools(imageToolRequests);
-        }
-        return new Result(new ListResult<>(deviceList));
+        Map<String, String> attackToolsMap = list.stream()
+                .collect(Collectors.toMap(DeviceTargetPO::getUuid, po -> po.getAttackTools() != null?po.getAttackTools():"[]" , (existing, replacement) -> existing));
+        Map<String, Boolean> isAttackToolsMap = list.stream()
+                .collect(Collectors.toMap(DeviceTargetPO::getUuid, po -> StringUtils.isNotBlank(po.getAttackTools()) && !"[]".equals(po.getAttackTools()) ? true:false , (existing, replacement) -> existing));
+
+        Map<String, Boolean> isAttackerMap = list.stream().collect(Collectors.toMap(DeviceTargetPO::getUuid, po -> null==po.getIsAttacker()?false:po.getIsAttacker(), (existing, replacement) -> existing));
+        List<Device> devices = deviceList.stream()
+                .filter(device -> (request.getIsAttacker() == true && isAttackerMap.getOrDefault(device.getUuid(), false)) ||
+                        request.getIsAttacker() == false)
+                .filter(device -> (request.getIsAttackTools() == true && isAttackToolsMap.get(device.getUuid())) ||
+                        request.getIsAttackTools() == false)
+                .map(device -> {
+                    attackToolsMap.getOrDefault(device.getUuid(), "[]");
+                    List<ImageToolRequest> imageToolRequests = JSON.parseArray(attackToolsMap.getOrDefault(device.getUuid(), "[]"), ImageToolRequest.class);
+                    device.setAttackTools(imageToolRequests);
+                    device.setIsAttacker(isAttackerMap.get(device.getUuid()));
+                    return device;
+                })
+                .collect(Collectors.toList());
+
+        return new Result(new ListResult<>(devices));
     }
 
 

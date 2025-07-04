@@ -166,6 +166,15 @@ public class DeviceTargetPO extends BaseModel {
     @DefaultStr
     private String createUserName;
 
+    /**
+     * 攻击工具
+     */
     @DefaultStr
     private String attackTools;
+
+    /**
+     * 是否是攻击机
+     */
+    @DefaultBool
+    private Boolean isAttacker;
 }

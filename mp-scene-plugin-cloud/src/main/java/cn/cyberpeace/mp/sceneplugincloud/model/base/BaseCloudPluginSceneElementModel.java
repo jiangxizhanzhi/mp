@@ -263,6 +263,8 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     @DefaultStr
     private String mgmtMacAddr;
     @DefaultStr
-    private String attackTools ;
+    private String attackTools;
+    @DefaultBool
+    private Boolean isAttacker;
 
 }

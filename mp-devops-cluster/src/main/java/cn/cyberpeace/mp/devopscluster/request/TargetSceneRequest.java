@@ -138,4 +138,9 @@ public class TargetSceneRequest extends BasePageRequest implements Serializable 
     @ApiModelProperty(value = "true:过滤支持cloud-init的靶标")
     private Boolean initSupport;
 
+    @ApiModelProperty(value = "是否攻击机")
+    private Boolean isAttacker = false;
+
+    @ApiModelProperty(value = "是否攻击工具")
+    private Boolean isAttackTools = false;
 }

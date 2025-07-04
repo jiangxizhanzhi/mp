@@ -222,6 +222,9 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     @ApiModelProperty(value = "攻击工具")
     private List<ImageToolRequest> attackTools;
 
+    @ApiModelProperty(value = "是否是攻击机")
+    private Boolean isAttacker;
+
     @Override
     public void fromModel(M obj, String... ignoreFields) {
         //忽略直接赋值处理的字段，需要定制处理

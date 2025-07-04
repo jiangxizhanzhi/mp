@@ -187,7 +187,15 @@ public class Device extends BaseCloudPlatformResult {
      */
     private String defaultLaunchImageName;
 
+    /**
+     * 攻击工具
+     */
     private List<ImageToolRequest> attackTools;
+
+    /**
+     * 是否是攻击机
+     */
+    private Boolean isAttacker;
 
     public Boolean getIsBuildIn() {
         boolean tmpImport = !Objects.isNull(isImport) && isImport;

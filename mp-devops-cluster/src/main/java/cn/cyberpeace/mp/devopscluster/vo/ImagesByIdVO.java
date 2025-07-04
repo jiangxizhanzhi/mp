@@ -141,4 +141,7 @@ public class ImagesByIdVO extends BaseVO {
 
     @ApiModelProperty(value = "攻击工具")
     private List<ImageToolRequest> attackTools;
+
+    @ApiModelProperty(value = "是否是攻击机")
+    private Boolean isAttacker;
 }
