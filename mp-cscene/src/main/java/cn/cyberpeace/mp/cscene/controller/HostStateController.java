@@ -51,15 +51,20 @@ public class HostStateController {
     @ApiOperation(value = "场景主机状态趋势图")
     @GetMapping("/scene_trend")
     public ServiceResult<List<HostState>> getSceneHostStateTrend(HostStateTrendRequest hostStateTrendRequest) {
-        if (StringUtils.isEmpty(hostStateTrendRequest.getSceneId())) {
+        try {
+            if (StringUtils.isEmpty(hostStateTrendRequest.getSceneId())) {
+                return ResultCommon.success(new ArrayList<>());
+            }
+            if (CollectionUtils.isNotEmpty(hostStateTrendRequest.getElementIds())) {
+                List<HostState> hostStates = hostStateService.getElementHostStateTrend(hostStateTrendRequest);
+                return ResultCommon.success(hostStates);
+            } else {
+                List<HostState> hostStates = hostStateService.getSceneHostStateTrend(hostStateTrendRequest);
+                return ResultCommon.success(hostStates);
+            }
+        } catch (Exception e) {
+            log.info("failed to exec scene_trend , getSceneHostStateTrend ", e);
             return ResultCommon.success(new ArrayList<>());
-        }
-        if (CollectionUtils.isNotEmpty(hostStateTrendRequest.getElementIds())) {
-            List<HostState> hostStates = hostStateService.getElementHostStateTrend(hostStateTrendRequest);
-            return ResultCommon.success(hostStates);
-        } else {
-            List<HostState> hostStates = hostStateService.getSceneHostStateTrend(hostStateTrendRequest);
-            return ResultCommon.success(hostStates);
         }
     }
 
@@ -89,9 +94,14 @@ public class HostStateController {
     @ApiOperation(value = "节点主机状态趋势图")
     @GetMapping("/element_trend")
     public ServiceResult<List<HostState>> getElementHostStateTrend(HostStateTrendRequest hostStateTrendRequest) {
-        List<HostState> hostStates = hostStateService.getElementHostStateTrend(hostStateTrendRequest);
+        try {
+            List<HostState> hostStates = hostStateService.getElementHostStateTrend(hostStateTrendRequest);
 
-        return ResultCommon.success(hostStates);
+            return ResultCommon.success(hostStates);
+        }catch (Exception e){
+            log.info("failed to exec element_trend , getElementHostStateTrend ", e);
+            return ResultCommon.success(new ArrayList<>());
+        }
     }
 
 
