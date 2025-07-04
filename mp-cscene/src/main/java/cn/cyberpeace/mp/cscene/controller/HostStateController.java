@@ -102,9 +102,14 @@ public class HostStateController {
     @ApiOperation(value = "节点主机状态趋势图")
     @GetMapping("/element_trend")
     public ServiceResult<List<HostState>> getElementHostStateTrend(HostStateTrendRequest hostStateTrendRequest) {
-        List<HostState> hostStates = hostStateService.getElementHostStateTrend(hostStateTrendRequest);
+        try {
+            List<HostState> hostStates = hostStateService.getElementHostStateTrend(hostStateTrendRequest);
 
-        return ResultCommon.success(hostStates);
+            return ResultCommon.success(hostStates);
+        } catch (Exception e) {
+            log.error("failed to exec element_trend ( getElementHostStateTrend )", e);
+            return ResultCommon.success(new ArrayList<>());
+        }
     }
 
 
