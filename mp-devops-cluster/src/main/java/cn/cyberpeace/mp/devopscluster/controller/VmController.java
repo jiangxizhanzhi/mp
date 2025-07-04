@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devopscluster.converter.VmConverter;
 import cn.cyberpeace.mp.devopscluster.converter.bo.InstanceBO;
 import cn.cyberpeace.mp.devopscluster.converter.bo.common.BasePageBO;
+import cn.cyberpeace.mp.devopscluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devopscluster.dto.InstancePageDTO;
 import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
 import cn.cyberpeace.mp.devopscluster.repository.DeviceTargetMapper;
@@ -21,6 +22,7 @@ import cn.cyberpeace.mp.devopscluster.utils.POLogoUtils;
 import cn.cyberpeace.mp.devopscluster.vo.InstancePageVO;
 import cn.cyberpeace.mp.devopscluster.vo.common.PageResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineGetResult;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.annotation.JSONField;
@@ -153,9 +155,78 @@ public class VmController {
     @ApiOperation("分页查询虚拟机信息")
     @GetMapping("/page")
     public PageResult<InstancePageVO> page(InstancePageRequest request) {
-        BasePageBO<InstanceBO> model = vmConverter.page(new InstancePageDTO(request));
+        InstancePageDTO dto = new InstancePageDTO();
+        dto.setOffset(1);
+        dto.setLimit(1000);
+        // host 不需要在底层筛选，直接使用下面在内存中模糊搜索
+        dto.setHost(null);
+        BasePageBO<InstanceBO> model = vmConverter.page(dto);
         List<InstancePageVO> list = convertBOToPageVO(model);
-        return new PageResult<>(list, model.getTotal());
+
+        List<InstancePageVO> filterRes = new ArrayList<>();
+        for (var vo : list) {
+            if (StringUtils.isNotEmpty(request.getUserName())) {
+                if (vo.getUserName() == null || !vo.getUserName().contains(request.getUserName())) {
+                    continue;
+                }
+            }
+            if (StringUtils.isNotEmpty(request.getDeviceName())) {
+                if (vo.getSceneNodeName() == null || !vo.getSceneNodeName().contains(request.getDeviceName())) {
+                    continue;
+                }
+            }
+            if (StringUtils.isNotEmpty(request.getStatus())) {
+                if (vo.getStatus() == null || !vo.getStatus().equals(request.getStatus())) {
+                    continue;
+                }
+            }
+            if (StringUtils.isNotEmpty(request.getHost())) {
+                if (vo.getNode() == null || !vo.getNode().contains(request.getHost())) {
+                    continue;
+                }
+            }
+            filterRes.add(vo);
+        }
+
+        int start = (request.getPage() - 1) * request.getPerPage();
+        if (start >= filterRes.size()) {
+            return new PageResult<>(new ArrayList<>(), filterRes.size());
+        }
+        int end = Math.min(start + request.getPerPage(), filterRes.size());
+        var res = filterRes.subList(start, end);
+
+        convertBOToPageVOV2(res);
+        return new PageResult<>(res, filterRes.size());
+    }
+
+    @ApiOperation("分页查询虚拟机信息")
+    @GetMapping("/status_info")
+    public ServiceResult<List<StatusInfo>> getStatusInfo() {
+        List<StatusInfo> result = new ArrayList<>();
+
+        StatusInfo statusInfo = new StatusInfo();
+        statusInfo.setName("已启动");
+        statusInfo.setValue(VirtualMachineGetResult.Status.ACTIVE);
+        result.add(statusInfo);
+
+        statusInfo = new StatusInfo();
+        statusInfo.setName("未启动");
+        statusInfo.setValue(VirtualMachineGetResult.Status.SHUTOFF);
+        result.add(statusInfo);
+
+        statusInfo = new StatusInfo();
+        statusInfo.setName("暂停");
+        statusInfo.setValue(VirtualMachineGetResult.Status.PAUSED);
+        result.add(statusInfo);
+
+        return new ServiceResult<>(result).asResult();
+    }
+
+    @Getter
+    @Setter
+    public static class StatusInfo {
+        private String name;
+        private String value;
     }
 
     /**
@@ -163,7 +234,7 @@ public class VmController {
      * @param model
      * @return
      */
-    private List<InstancePageVO> convertBOToPageVO(BasePageBO<InstanceBO> model){
+    private List<InstancePageVO> convertBOToPageVO(BasePageBO<InstanceBO> model) {
         List<InstanceBO> instances = model.getList();
         List<String> instanceNames = instances.stream().map(InstanceBO::getName).collect(Collectors.toList());
         List<UserBo> userBoList = new ArrayList<>();
@@ -188,8 +259,7 @@ public class VmController {
         if (CollectionUtils.isNotEmpty(devopsResult)) {
             List<String> userIdList = devopsResult.stream()
                     .filter(deviceTargetPO -> StringUtils.isNotEmpty(deviceTargetPO.getInstanceCreateUser()))
-                    .map(DeviceTargetPO::getInstanceCreateUser)
-                    .collect(Collectors.toList());
+                    .map(DeviceTargetPO::getInstanceCreateUser).collect(Collectors.toList());
             uuid2UserId = devopsResult.stream()
                     .filter(deviceTargetPO -> StringUtils.isNotEmpty(deviceTargetPO.getInstanceCreateUser()))
                     .collect(Collectors.toMap(DeviceTargetPO::getUuid, DeviceTargetPO::getInstanceCreateUser));
@@ -200,14 +270,61 @@ public class VmController {
         List<UserBo> tmpUserBoList = userBoList;
         Map<String, String> uuid2User = uuid2UserId;
 
+        return instances.stream().map(instanceModel -> {
+            CsceneNodeInfoBO csceneNodeInfoBO = new CsceneNodeInfoBO();
+            if (Objects.nonNull(source.get(instanceModel.getName()))) {
+                csceneNodeInfoBO = source.get(instanceModel.getName());
+            }
+            String userName = "";
+            String userId = csceneNodeInfoBO.getUserId();
+            if (StringUtils.isNotBlank(userId)) {
+                Optional<UserBo> optional = tmpUserBoList.stream().filter(userDto -> userDto.getId().equals(userId))
+                        .findFirst();
+                if (optional.isPresent()) {
+                    userName = optional.get().getUsername();
+                }
+            } else if (StringUtils.isNotEmpty(uuid2User.get(instanceModel.getName()))) {
+                String createUser = uuid2User.get(instanceModel.getName());
+                Optional<UserBo> optional = tmpUserBoList.stream().filter(userDto -> userDto.getId().equals(createUser))
+                        .findFirst();
+                if (optional.isPresent()) {
+                    userName = optional.get().getUsername();
+                }
+            }
+
+            var r1 = InstancePageVO.builder().name(instanceModel.getName())
+                    .sceneNodeName(csceneNodeInfoBO.getNodeName())
+                    .nodeEid(csceneNodeInfoBO.getInternalNodeEid())
+                    .sceneName(StringUtils.isBlank(csceneNodeInfoBO.getCsceneName()) ? "" : csceneNodeInfoBO.getCsceneName())
+                    .id(instanceModel.getId()).node(instanceModel.getNode()).addressList(instanceModel.getAddressList())
+                    .userName(userName).ram(csceneNodeInfoBO.getRam())
+                    .referenceType(csceneNodeInfoBO.getReferenceType()).event(csceneNodeInfoBO.getEvent())
+                    .eventStatus(csceneNodeInfoBO.getEventStatus()).sceneStatus(csceneNodeInfoBO.getSceneStatus())
+                    .sceneStatusDesc(csceneNodeInfoBO.getSceneStatusDesc()).runningTime(instanceModel.getRunningTime())
+                    .processMessage(csceneNodeInfoBO.getProcessMessage())
+                    .cpuUsePercentage(csceneNodeInfoBO.getCpuPercent()).status(instanceModel.getStatus())
+                    .createTime(instanceModel.getCreateTime()).build();
+            // 暂停结束、挂起结束 的状态时，其最后运行时间为 节点的update time；否则为当前时间
+            if (csceneNodeInfoBO.isPause() || csceneNodeInfoBO.isSuspend()) {
+                r1.setLastRunTime(csceneNodeInfoBO.getNodeUpdateTime());
+            } else {
+                r1.setLastRunTime(LocalDateTime.now());
+            }
+            return r1;
+        }).collect(Collectors.toList());
+    }
+
+    private void convertBOToPageVOV2(List<InstancePageVO> list) {
         List<String> agentNames = new ArrayList<>();
-        for (var s : source.values()) {
-            if (StringUtils.isNotEmpty(s.getInternalNodeEid())) {
-                agentNames.add(s.getInternalNodeEid());
+        Map<String, InstancePageVO> source = new HashMap<>();
+        for (InstancePageVO l : list) {
+            if (StringUtils.isNotEmpty(l.getNodeEid())) {
+                agentNames.add(l.getNodeEid());
+                source.put(l.getNodeEid(), l);
             }
         }
 
-        if (!agentNames.isEmpty()) {
+        if (CollectionUtils.isNotEmpty(agentNames)) {
             // 批量查询探针采集的cpu使用率
             RestHighLevelClient client = (RestHighLevelClient) BeanCommon.getBean("logRestHighLevelClient");
             LocalDateTime now = LocalDateTime.now();
@@ -230,9 +347,9 @@ public class VmController {
                         EsResponseData data = JSONObject.parseObject(hit.getSourceAsString(), EsResponseData.class);
                         var percent = data.getData().getSicLaunchOutput().getCPUPercent();
                         var nodeEid = data.getAgent().getName();
-                        String key = "MP_SCENE_" + nodeEid;
-                        if (source.containsKey(key)) {
-                            source.get(key).setCpuPercent(percent);
+                        String key = nodeEid;
+                        if (source.containsKey(key) && percent != null) {
+                            source.get(key).setCpuUsePercentage(percent);
                         }
                     }
                 }
@@ -240,53 +357,6 @@ public class VmController {
                 log.error("failed to query elasticsearch", e);
             }
         }
-
-        return instances.stream().map(instanceModel -> {
-            CsceneNodeInfoBO csceneNodeInfoBO = new CsceneNodeInfoBO();
-            if (Objects.nonNull(source.get(instanceModel.getName()))) {
-                csceneNodeInfoBO = source.get(instanceModel.getName());
-            }
-            String userName = "";
-            String userId = csceneNodeInfoBO.getUserId();
-            if (StringUtils.isNotBlank(userId)) {
-                Optional<UserBo> optional =
-                        tmpUserBoList.stream().filter(userDto -> userDto.getId().equals(userId)).findFirst();
-                if (optional.isPresent()) {
-                    userName = optional.get().getUsername();
-                }
-            } else if (StringUtils.isNotEmpty(uuid2User.get(instanceModel.getName()))) {
-                String createUser = uuid2User.get(instanceModel.getName());
-                Optional<UserBo> optional =
-                        tmpUserBoList.stream().filter(userDto -> userDto.getId().equals(createUser)).findFirst();
-                if (optional.isPresent()) {
-                    userName = optional.get().getUsername();
-                }
-            }
-
-            var r1 = InstancePageVO.builder().name(instanceModel.getName())
-                    .sceneName(StringUtils.isBlank(csceneNodeInfoBO.getCsceneName()) ? "" : csceneNodeInfoBO.getCsceneName())
-                    .id(instanceModel.getId())
-                    .node(instanceModel.getNode())
-                    .addressList(instanceModel.getAddressList())
-                    .userName(userName)
-                    .ram(csceneNodeInfoBO.getRam())
-                    .referenceType(csceneNodeInfoBO.getReferenceType())
-                    .event(csceneNodeInfoBO.getEvent())
-                    .eventStatus(csceneNodeInfoBO.getEventStatus())
-                    .sceneStatus(csceneNodeInfoBO.getSceneStatus())
-                    .sceneStatusDesc(csceneNodeInfoBO.getSceneStatusDesc())
-                    .runningTime(instanceModel.getRunningTime())
-                    .processMessage(csceneNodeInfoBO.getProcessMessage())
-                    .cpuUsePercentage(csceneNodeInfoBO.getCpuPercent())
-                    .status(instanceModel.getStatus()).createTime(instanceModel.getCreateTime()).build();
-            // 暂停结束、挂起结束 的状态时，其最后运行时间为 节点的update time；否则为当前时间
-            if (csceneNodeInfoBO.isPause() || csceneNodeInfoBO.isSuspend()) {
-                r1.setLastRunTime(csceneNodeInfoBO.getNodeUpdateTime());
-            } else {
-                r1.setLastRunTime(LocalDateTime.now());
-            }
-            return r1;
-        }).collect(Collectors.toList());
     }
 
     @Getter

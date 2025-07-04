@@ -1,0 +1,2 @@
+INSERT ignore INTO mp_auth_url_ac (id, url, is_pattern, `group`, methods, `desc`, create_time, update_time) VALUES ('6e10d17d5afdc1ed90a0000ec67aaaaa', '/api/mp/devops/cluster/instance/status_info', 0, '6e10d17d5afdc1ed90a0000ec67aaaaa', 'get', '免认证接口', now(), now());
+INSERT ignore INTO mp_auth_url_ac_target (id, `group`, target, create_time, update_time) VALUES ('6e10d17d5afdc1ed90a0000ec67aaaaa', '6e10d17d5afdc1ed90a0000ec67aaaaa', 'no_auth', now(), now());

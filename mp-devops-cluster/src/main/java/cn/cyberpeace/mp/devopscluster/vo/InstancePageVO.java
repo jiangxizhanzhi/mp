@@ -32,6 +32,9 @@ public class InstancePageVO extends BaseVO {
     @ApiModelProperty("实例名称")
     private String name;
 
+    @ApiModelProperty("在场景里的节点名称")
+    private String sceneNodeName;
+
     /**
      * 场景名称
      */
@@ -100,5 +103,7 @@ public class InstancePageVO extends BaseVO {
 
     @ApiModelProperty(value = "最近运行时间")
     private LocalDateTime lastRunTime;
+
+    private String nodeEid;
 
 }

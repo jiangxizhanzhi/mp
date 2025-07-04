@@ -1049,6 +1049,8 @@ public class CsceneSpecialService {
                 CsceneNodeInfoBO nodeInfoBO = new CsceneNodeInfoBO();
                 BeanUtils.copyProperties(e, nodeInfoBO);
                 nodeInfoBO.setResourceName(name);
+                nodeInfoBO.setNodeName(e.getNodeName());
+                nodeInfoBO.setInternalNodeEid(e.getInternalNodeEid());
                 var scene = sceneMaps.get(nodeInfoBO.getInternalSceneEid());
                 if (scene != null) {
                     nodeInfoBO.setEvent(scene.getEvent());
