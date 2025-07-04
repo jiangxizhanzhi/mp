@@ -282,6 +282,36 @@ public class RangeDataLocalService {
     public void test(String sceneId, boolean info, boolean event, boolean log, LocalDateTime currentTime ) {
         List<ElementMonitorBasicInfo> basicInfoList = sceneMonitorService.getAllSceneElements(sceneId, false, new SceneAllElementsQueryRequest());
         List<Runnable> tasks = new ArrayList<>();
-        saveHostInfo(sceneId, "acddbb13-74c6-445f-b88e-fb7847e9514b",currentTime);
+        if (info) {
+            tasks.add(() -> saveHostInfo(sceneId, currentTime));
+        }
+        for (ElementMonitorBasicInfo elementMonitorBasicInfo : basicInfoList) {
+            String nodeId = elementMonitorBasicInfo.getId();
+            if (info) {
+                // 信息类 - 端口信息 采集周期到了查询最新数据保存即可
+                tasks.add(() -> savePortInfo(sceneId, nodeId));
+                // 信息类 - 进程信息 采集周期到了查询最新数据保存即可
+                tasks.add(() -> saveProcessInfo(sceneId, nodeId));
+                // 信息类 - 网卡信息 采集周期到了查询最新数据保存即可
+                tasks.add(() -> saveNetInfo(sceneId, nodeId));
+                // 信息类 - 连接信息
+                tasks.add(() -> saveConnectInfo(sceneId, nodeId));
+                // 信息类 - cpu\内存\磁盘
+                tasks.add(() -> saveHostInfo(sceneId, nodeId,currentTime));
+            }
+
+            if (event) {
+                // 事件类 - 文件变更 采集周期到了查询最近一个周期的数据保存即可
+                tasks.add(() -> saveFileModify(sceneId, nodeId));
+                // 事件类 - 注册表变更 采集周期到了查询最近一个周期的数据保存即可
+                tasks.add(() -> saveRegistryModify(sceneId, nodeId));
+            }
+
+            if (log) {
+                // 日志类
+                tasks.add(() -> saveLog(sceneId, nodeId));
+            }
+        }
+        TaskCommon.runTasks(tasks);
     }
 }
