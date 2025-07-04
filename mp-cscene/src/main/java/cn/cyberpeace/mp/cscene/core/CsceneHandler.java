@@ -22,10 +22,17 @@ import cn.cyberpeace.mp.cscene.repository.CsceneRoleMapper;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
+import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.service.SceneConfigService;
 import cn.cyberpeace.mp.scene.service.SceneService;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneConfigElementBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
+import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneModel;
+import cn.cyberpeace.mp.sceneplugincollection.util.CollectionCommonConfigUtil;
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
@@ -33,6 +40,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -268,7 +276,40 @@ public class CsceneHandler extends BaseCsceneHandler<
             }
         }
 
+        // 默认加上数据采集
+        if (!csceneInstanceBO.getScene().getPlugins()
+                .containsKey(cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant.PLUGIN_KEY)) {
+            addCollectionPlugin(csceneInstanceBO);
+        }
+
         return createInstance(CsceneInstanceModel.Type.APP, csceneInstanceBO);
+    }
+
+    public void addCollectionPlugin(CsceneInstanceBO csceneBO) {
+        CollectionPluginSceneModel scene = new CollectionPluginSceneModel();
+        scene.setEnableProbeCollect(true);
+        scene.setEnableFlowCollect(false);
+        scene.setEnableFlowMirror(false);
+
+        String defaultBizProbesContent = CollectionCommonConfigUtil.getConfigString(CollectionCommonConfigUtil.DEFAULT_BIZ_PROBES);
+        List<Probe> defaultBizProbes = JsonCommon.snakeParse(defaultBizProbesContent, new TypeReference<List<Probe>>() {
+        });
+        Map<String, Map<String, Object>> pluginElements = new HashMap<>();
+        for (SceneElementBO e : csceneBO.getScene().getTopology().getElements()) {
+            CollectionPluginSceneConfigElementBO elementModel = new CollectionPluginSceneConfigElementBO();
+            elementModel.setEnableProbeCollect(true);
+            elementModel.setProbes(defaultBizProbes);
+            pluginElements.put(e.getId(), JsonCommon.beanToSnakeMap(elementModel));
+        }
+
+        ScenePluginDataBO pluginData = new ScenePluginDataBO();
+        pluginData.setScene(JsonCommon.beanToSnakeMap(scene));
+        pluginData.setElements(pluginElements);
+        pluginData.setElementPorts(new HashMap<>());
+
+
+        csceneBO.getScene().getPlugins()
+                .put(cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant.PLUGIN_KEY, pluginData);
     }
 
     @Override
