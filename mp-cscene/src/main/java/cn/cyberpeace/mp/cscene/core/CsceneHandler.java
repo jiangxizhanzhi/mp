@@ -277,10 +277,10 @@ public class CsceneHandler extends BaseCsceneHandler<
         }
 
         // 默认加上数据采集
-//        if (!csceneInstanceBO.getScene().getPlugins()
-//                .containsKey(cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant.PLUGIN_KEY)) {
-//            addCollectionPlugin(csceneInstanceBO);
-//        }
+        if (!csceneInstanceBO.getScene().getPlugins()
+                .containsKey(cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant.PLUGIN_KEY)) {
+            addCollectionPlugin(csceneInstanceBO);
+        }
 
         return createInstance(CsceneInstanceModel.Type.APP, csceneInstanceBO);
     }
