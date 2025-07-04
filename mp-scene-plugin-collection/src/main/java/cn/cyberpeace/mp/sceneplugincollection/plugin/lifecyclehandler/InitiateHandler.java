@@ -201,7 +201,7 @@ public class InitiateHandler extends HandlerCommon {
                                 systemType, this.getLocationMap());
                     }
                     var probeInstallScript = getProbeCollector().generateProbeInstallScript(systemType,
-                            srcElement.getEid(), collectionId, controlParam, isContainer);
+                            srcElement.getEid(), collectionId, controlParam, isContainer,cloudElement.getSrcElement().getSystemArchitecture());
                     var initCommands = srcElement.getInitCommands();
                     if (initCommands == null) {
                         initCommands = new ArrayList<>();

@@ -46,6 +46,8 @@ public class WazuhCommon {
 
     public static final String WAZUH_AGENT_LINUX_FILE_PREFIX = "agent-linux";
 
+    public static final String WAZUH_AGENT_LINUX_FILE_PREFIX_C86 = "c86_agent-linux";
+
     public static final String WINDOWS_INSTALL_DIR = "C:\\ossec-agent";
     public static final String WINDOWS_WAZUHA_DIR = "C:\\wazuha";
     public static final String WINDOWS_STOP_SCRIPT = WINDOWS_WAZUHA_DIR + "\\stop.bat";
@@ -71,7 +73,7 @@ public class WazuhCommon {
     private WazuhCommon() {}
 
     public static List<String> generateWazuhAgentInstallScript(String systemType, String agentName, String wazuhHost,
-                                                               WazuhControl.ControlConfigParam controlParam, boolean isContainer) {
+                                                               WazuhControl.ControlConfigParam controlParam, boolean isContainer, String architecture) {
         if (wazuhProbeConfig == null) {
             wazuhProbeConfig = BeanCommon.getBean(WazuhProbeConfig.class);
         }
@@ -115,28 +117,53 @@ public class WazuhCommon {
                             "call start.bat"
                     ));
         } else if (SystemTypeCommandUtils.isLinux(systemType)) {
-            resource = new InstallerUtils.Installer();
-            resource.setFile(StringUtils.EMPTY);
-            resource.setInstallCommand(
-                    StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK,
-                            "sh /opt/wazuha/stop.sh",
-                            "sh /opt/wazuha/uninstall.sh",
-                            String.format("export SIC_WAZUH_MANAGER_IP=%s SIC_WAZUH_AGENT_NAME=%s " +
-                                            "SIC_WAZUH_MANAGER_REMOTE_PORT=%d SIC_WAZUH_MANAGER_AUTH_PORT=%d",
-                                    wazuhHost, agentName, getWazuhRemotePort(), getWazuhAuthPort()),
-                            String.format("unzip -o -q %s/%s -d %s/agent-installer", linuxInstallDir,
-                                    WAZUH_AGENT_LINUX_FILE_NAME, linuxInstallDir),
-                            String.format("cd %s/agent-installer/agent-linux_aarch", linuxInstallDir),
-                            "sh install.sh",
-                            String.format("cd %s", linuxInstallDir),
-                            "rm -rf agent-installer",
+            if (architecture != null && architecture.contains("86")) {
+                resource = new InstallerUtils.Installer();
+                resource.setFile(StringUtils.EMPTY);
+                resource.setInstallCommand(
+                        StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK,
+                                             "sh /opt/wazuha/stop.sh",
+                                             "sh /opt/wazuha/uninstall.sh",
+                                             String.format("export SIC_WAZUH_MANAGER_IP=%s SIC_WAZUH_AGENT_NAME=%s " +
+                                                                   "SIC_WAZUH_MANAGER_REMOTE_PORT=%d SIC_WAZUH_MANAGER_AUTH_PORT=%d",
+                                                           wazuhHost, agentName, getWazuhRemotePort(), getWazuhAuthPort()),
+                                             String.format("unzip -o -q %s/%s -d %s/agent-installer", linuxInstallDir,
+                                                           WAZUH_AGENT_LINUX_FILE_NAME, linuxInstallDir),
+                                             String.format("cd %s/agent-installer/agent-linux", linuxInstallDir),
+                                             "sh install.sh",
+                                             String.format("cd %s", linuxInstallDir),
+                                             "rm -rf agent-installer",
 //                            String.format("rm -rf %s", WAZUH_AGENT_LINUX_FILE_NAME),
-                            "cd /opt/wazuha",
-                            "sh config.sh",
-                            probeCommand,
-                            "sleep 10",
-                            "sh start.sh"
-                    ));
+                                             "cd /opt/wazuha",
+                                             "sh config.sh",
+                                             probeCommand,
+                                             "sleep 10",
+                                             "sh start.sh"
+                        ));
+            }else{
+                resource = new InstallerUtils.Installer();
+                resource.setFile(StringUtils.EMPTY);
+                resource.setInstallCommand(
+                        StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK,
+                                             "sh /opt/wazuha/stop.sh",
+                                             "sh /opt/wazuha/uninstall.sh",
+                                             String.format("export SIC_WAZUH_MANAGER_IP=%s SIC_WAZUH_AGENT_NAME=%s " +
+                                                                   "SIC_WAZUH_MANAGER_REMOTE_PORT=%d SIC_WAZUH_MANAGER_AUTH_PORT=%d",
+                                                           wazuhHost, agentName, getWazuhRemotePort(), getWazuhAuthPort()),
+                                             String.format("unzip -o -q %s/%s -d %s/agent-installer", linuxInstallDir,
+                                                           WAZUH_AGENT_LINUX_FILE_NAME, linuxInstallDir),
+                                             String.format("cd %s/agent-installer/agent-linux_aarch", linuxInstallDir),
+                                             "sh install.sh",
+                                             String.format("cd %s", linuxInstallDir),
+                                             "rm -rf agent-installer",
+//                            String.format("rm -rf %s", WAZUH_AGENT_LINUX_FILE_NAME),
+                                             "cd /opt/wazuha",
+                                             "sh config.sh",
+                                             probeCommand,
+                                             "sleep 10",
+                                             "sh start.sh"
+                        ));
+            }
         }
         List<String> result = resource == null ? new ArrayList<>() :
                 InstallerUtils.generateInstallerInstallCommand(systemType, List.of(resource));
@@ -160,13 +187,26 @@ public class WazuhCommon {
                 String filePathParam = String.format("filepath=%s/%s", linuxInstallDir,
                         WAZUH_AGENT_LINUX_FILE_NAME);
                 List<String> params = new ArrayList<>(CollectionUtil.toList(filePathParam));
-                nameFileMap.forEach((name, url) -> {
-                    if (name.startsWith(WAZUH_AGENT_LINUX_FILE_PREFIX)) {
-                        String remoteUrl = String.format("%s/%s", metadataFileServer, url);
-                        String param = String.format("%s=%s", name, remoteUrl);
-                        params.add(param);
-                    }
-                });
+                // 区分下虚拟机的架构
+                if (architecture != null && architecture.contains("86")) {
+                    // 如果是c86
+                    nameFileMap.forEach((name, url) -> {
+                        if (name.startsWith(WAZUH_AGENT_LINUX_FILE_PREFIX_C86)) {
+                            String remoteUrl = String.format("%s/%s", metadataFileServer, url);
+                            String finalName = StringUtils.replace(name, "c86_", "");
+                            String param = String.format("%s=%s", finalName, remoteUrl);
+                            params.add(param);
+                        }
+                    });
+                } else {
+                    nameFileMap.forEach((name, url) -> {
+                        if (name.startsWith(WAZUH_AGENT_LINUX_FILE_PREFIX)) {
+                            String remoteUrl = String.format("%s/%s", metadataFileServer, url);
+                            String param = String.format("%s=%s", name, remoteUrl);
+                            params.add(param);
+                        }
+                    });
+                }
                 addCommand = addCommand.concat(StringUtils.joinWith(StringUtils.SPACE, params.toArray()));
             }
             // 将容器或Linux虚拟机新增的获取agent安装包命令放在创建目录之后
