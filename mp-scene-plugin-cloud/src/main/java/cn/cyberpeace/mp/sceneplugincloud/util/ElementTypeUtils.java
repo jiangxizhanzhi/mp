@@ -13,13 +13,15 @@ public class ElementTypeUtils {
 
     private static String CORE_ROUTER_IMAGE_NAME = "Core Router";
 
+    private static String CORE_ROUTER_IMAGE_NAME2 = "Core_Router";
+
     /**
      * 是否核心路由器
      * @param image
      * @return
      */
     public static boolean isCoreRouter(String image) {
-        return CORE_ROUTER_IMAGE_NAME.equals(image);
+        return CORE_ROUTER_IMAGE_NAME.equals(image) || CORE_ROUTER_IMAGE_NAME2.equals(image);
     }
 
     /**
