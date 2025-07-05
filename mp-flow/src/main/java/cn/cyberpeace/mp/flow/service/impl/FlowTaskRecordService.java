@@ -10,6 +10,7 @@
 // Version 1.0.0
 package cn.cyberpeace.mp.flow.service.impl;
 
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
@@ -123,6 +124,9 @@ public class FlowTaskRecordService extends BaseModelServiceImpl<FlowTaskRecordMo
 
     public ArrayNode top5Protocols(String actuatorId) {
         FlowActuatorModel flowActuatorModel = flowActuatorMapper.get(actuatorId);
+        if (StringUtils.isEmpty(flowActuatorModel.getIp())) {
+            return JsonCommon.createArrayNode();
+        }
         return new FlowActuator(flowActuatorModel.getIp(), null).top5Protocols();
     }
 

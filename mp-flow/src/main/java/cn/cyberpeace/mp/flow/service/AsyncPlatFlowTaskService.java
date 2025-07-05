@@ -189,7 +189,7 @@ public class AsyncPlatFlowTaskService {
                 PREPARING++;
             }
             if (!Arrays.asList(TaskTaskStatusEnum.RUNNING.toValue(), TaskTaskStatusEnum.INITING.toValue(),
-                    TaskTaskStatusEnum.PREPARING.toValue(), TaskTaskStatusEnum.INIT.toValue(),
+                    TaskTaskStatusEnum.PREPARING.toValue(),
                     TaskTaskStatusEnum.STARTING.toValue()).contains(taskTaskModel.getTaskStatus())){
                 notRunningTasks.add(taskTaskModel);
             }
