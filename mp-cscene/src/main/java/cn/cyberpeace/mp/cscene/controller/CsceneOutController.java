@@ -249,6 +249,23 @@ public class CsceneOutController implements BaseModelListControllerBase {
         // 取源节点上的ssh信息
         SshInfo sshInfo = this.getSshInfo(source.getPorts(), handler);
 
+        for (ImageToolRequest.Params param : request.getParams()) {
+            if("ip".equals(param.getName()) && StringUtils.isBlank(param.getValue())) {
+//                ip不需要输入
+                String sourceIp = sshInfo.getIp();
+                String targetIp = "";
+                for (int i = 0; i < target.getPorts().size(); i++) {
+                    if(i==0){
+                        targetIp = target.getPorts().get(i).getIp();
+                    }
+                    if(areFirstThreeOctetsSame(sourceIp,target.getPorts().get(i).getIp())){
+                        targetIp = target.getPorts().get(i).getIp();
+                    }
+                }
+                param.setValue(targetIp);
+            }
+        }
+
         // 取到指定工具
         ImageToolRequest tool = null;
         for (var t : pluginTarget.getAttackTools()) {
@@ -269,7 +286,8 @@ public class CsceneOutController implements BaseModelListControllerBase {
         // 执行参数使用base64编码 然后执行
         var encodeParams = TextUtils.encodeBase64(JsonCommon.stringify(p));
         PythonExecUtil.exec("ssh_exec.py", encodeParams);
-        // 启动一个线程 查询攻击结果 每隔5秒查询一次es数据 ， 查最新的一条数据
+//         启动一个线程 查询攻击结果 每隔5秒查询一次es数据 ， 查最新的一条数据
+//        TODO 空指针
         CollectionScenePluginHandler collectionScenePluginHandler = sceneHandler.getPluginHandler("cpcollection");
         attackDataOutputUtil.startOneAttackDataOutputTask(collectionScenePluginHandler, source, target, tool);
     }
@@ -492,5 +510,23 @@ public class CsceneOutController implements BaseModelListControllerBase {
         private String port;
         private String username;
         private String password;
+    }
+
+    /**
+     * 判断两个IP地址的前三部分是否一致
+     * @return 如果前三部分一致，返回 true；否则返回 false
+     */
+    public static boolean areFirstThreeOctetsSame(String ip1, String ip2) {
+        // 将IP地址按点分割成数组
+        String[] octets1 = ip1.split("\\.");
+        String[] octets2 = ip2.split("\\.");
+
+        // 比较前三个八位组
+        for (int i = 0; i < 3; i++) {
+            if (!octets1[i].equals(octets2[i])) {
+                return false;  // 如果任何一个八位组不同，返回false
+            }
+        }
+        return true;  // 所有前三个八位组相同，返回true
     }
 }
