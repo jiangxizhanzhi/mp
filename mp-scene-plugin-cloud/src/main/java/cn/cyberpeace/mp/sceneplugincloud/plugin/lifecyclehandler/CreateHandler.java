@@ -1032,9 +1032,9 @@ public class CreateHandler extends HandlerCommon {
         if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(cloudElement.getEntityUsbs()) && StringUtils.isNotEmpty(cloudElement.getEntityUsbs().get(0).getHost())) {
             createData.setHost(cloudElement.getEntityUsbs().get(0).getHost());
         }
-        if (Boolean.TRUE.equals(cloudElement.getInitSupport())) {
+//        if (Boolean.TRUE.equals(cloudElement.getInitSupport())) {
             createData.setUserData(TextUtils.emptyNull(combineInitCommand(cloudElement)));
-        }
+//        }
         createData.setNetworks(CollectionUtils.emptyNull(genVirutalNics(cloudElement)));
         if (StringUtils.isNotEmpty(cloudElement.getIsoAttachFilename()) && StringUtils.isNotEmpty(cloudElement.getIsoTmpdirUuid())) {
             createData.setIsoAttach(true);
