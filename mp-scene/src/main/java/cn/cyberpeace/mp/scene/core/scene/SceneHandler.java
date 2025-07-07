@@ -667,9 +667,7 @@ public class SceneHandler extends BaseSceneHandler<
             return false;
         }
         overAllEvent(SceneModel.Event.DELETE, SceneElementModel.Event.DELETE);
-        if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
-            save();
-        }
+        save();
         return super.logicDelete();
     }
 
