@@ -738,24 +738,31 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         }
     }
 
-    private List<String> getCsceneIds(CsceneQueryParams queryParams) {
-        List<String> csceneIds = Lists.newArrayList();
-		if (Boolean.TRUE.equals(queryParams.getUser())) {
-            var currentUser = UserCommon.getCurrentUser();
-            String currentUserId = currentUser == null ? StringUtils.EMPTY : currentUser.getId();
-            HumanCondition humanCondition = new HumanCondition()
-                    .filterEqual(CsceneModel::getCreateUser, currentUserId);
-            List<String> myCsceneIds = getModelMapper().list(humanCondition).stream()
-                    .map(CsceneModel::getId).collect(Collectors.toList());
-            csceneIds.addAll(myCsceneIds);
+	private List<String> getCsceneIds(CsceneQueryParams queryParams) {
+		List<String> csceneIds = Lists.newArrayList();
+		if (Boolean.TRUE.equals(queryParams.getUser())
+				&& Boolean.TRUE.equals(queryParams.getSystem())
+				&& Boolean.TRUE.equals(queryParams.getTeacher())) {
+			// 3个都选择时，展示全部
+			return getModelMapper().list(new HumanCondition()).stream().map(CsceneModel::getId)
+					.collect(Collectors.toList());
 		}
-        if (Boolean.TRUE.equals(queryParams.getSystem())) {
-            HumanCondition humanCondition = new HumanCondition()
-                    .filterEqual(CsceneModel::getCreateUser, AuthConstant.ROOT_USER_ID);
-            List<String> sysCsceneIds = getModelMapper().list(humanCondition).stream()
-                    .map(CsceneModel::getId).collect(Collectors.toList());
-            csceneIds.addAll(sysCsceneIds);
-        }
+		if (Boolean.TRUE.equals(queryParams.getUser())) {
+			var currentUser = UserCommon.getCurrentUser();
+			String currentUserId = currentUser == null ? StringUtils.EMPTY : currentUser.getId();
+			HumanCondition humanCondition = new HumanCondition()
+					.filterEqual(CsceneModel::getCreateUser, currentUserId);
+			List<String> myCsceneIds = getModelMapper().list(humanCondition).stream()
+					.map(CsceneModel::getId).collect(Collectors.toList());
+			csceneIds.addAll(myCsceneIds);
+		}
+		if (Boolean.TRUE.equals(queryParams.getSystem())) {
+			HumanCondition humanCondition = new HumanCondition()
+					.filterEqual(CsceneModel::getCreateUser, AuthConstant.ROOT_USER_ID);
+			List<String> sysCsceneIds = getModelMapper().list(humanCondition).stream()
+					.map(CsceneModel::getId).collect(Collectors.toList());
+			csceneIds.addAll(sysCsceneIds);
+		}
 		if (Boolean.TRUE.equals(queryParams.getTeacher())) {
 			List<String> teacherIds = userService.getUserIdsByRoleId(AuthConstant.ROLE_TEACHER_ID);
 			if (!teacherIds.isEmpty()) {
@@ -766,8 +773,8 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
 				csceneIds.addAll(teacherCsceneIds);
 			}
 		}
-        return csceneIds;
-    }
+		return csceneIds;
+	}
 
     private List<String> getCsceneIds() {
         var currentUser = UserCommon.getCurrentUser();
