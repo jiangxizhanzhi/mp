@@ -125,7 +125,7 @@ public class AddTaskByRemoteFlowService2 implements IAddTaskService {
                 .filterEqual(FlowTaskTaskModel::getTaskStatus, 5);
         var flowTaskTaskModelList = flowTaskTaskMapper.list(condition);
         if (flowTaskTaskModelList.size() == 0) {
-            log.info("没有未处理的任务");
+            log.info("{} 没有未处理的任务", actuatorId);
             return;
         }
         List<String> taskIds = new ArrayList<>();
@@ -408,6 +408,7 @@ public class AddTaskByRemoteFlowService2 implements IAddTaskService {
         for (var flow : remoteFlowInfos) {
             FlowTaskTaskModel flowTaskTaskModel = new FlowTaskTaskModel();
             flowTaskTaskModel.setSceneId("");
+            flowTaskTaskModel.setFlowName(flow.getTitle());
             flowTaskTaskModel.setActuatorId(actuatorId);
             flowTaskTaskModel.setFlowId(flow.getFlowId());
             flowTaskTaskModel.setPortId(portId);

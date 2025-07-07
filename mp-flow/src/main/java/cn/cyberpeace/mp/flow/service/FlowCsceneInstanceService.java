@@ -81,7 +81,7 @@ public class FlowCsceneInstanceService {
             response.setTaskId(m.getId());
             response.setCsceneInstanceId(m.getSceneId());
             response.setCsceneNodeId(m.getNodeId());
-            response.setName(m.getNodeName());
+            response.setName(m.getFlowName());
             response.setFlowId(m.getFlowId());
             response.setInteractiveType(m.getInteractiveType());
             response.setResourceType(m.getResourceType());
