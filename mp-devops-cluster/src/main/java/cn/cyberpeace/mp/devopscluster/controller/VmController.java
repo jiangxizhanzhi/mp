@@ -196,6 +196,13 @@ public class VmController {
         var res = filterRes.subList(start, end);
 
         convertBOToPageVOV2(res);
+        // 场景中的节点使用节点名称作为name
+        for (var vo : res) {
+            if (StringUtils.isNotEmpty(vo.getSceneNodeName())) {
+                vo.setName(vo.getSceneNodeName());
+            }
+        }
+
         return new PageResult<>(res, filterRes.size());
     }
 
