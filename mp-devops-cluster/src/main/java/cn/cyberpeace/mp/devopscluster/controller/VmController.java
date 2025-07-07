@@ -185,6 +185,20 @@ public class VmController {
                     continue;
                 }
             }
+            if (StringUtils.isNotEmpty(request.getAddr())) {
+                if (vo.getAddressList() == null) {
+                    continue;
+                }
+                boolean eq = false;
+                for (String ip : vo.getAddressList()) {
+                    if (StringUtils.equals(ip, request.getAddr())) {
+                        eq = true;
+                    }
+                }
+                if (!eq) {
+                    continue;
+                }
+            }
             filterRes.add(vo);
         }
 
