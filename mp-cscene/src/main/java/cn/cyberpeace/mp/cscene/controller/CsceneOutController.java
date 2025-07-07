@@ -251,7 +251,7 @@ public class CsceneOutController implements BaseModelListControllerBase {
 
         // 取到指定工具
         ImageToolRequest tool = null;
-        for (var t : pluginSource.getAttackTools()) {
+        for (var t : pluginTarget.getAttackTools()) {
             if (StringUtils.equals(t.getId(), request.getToolId())) {
                 tool = t;
             }
@@ -272,6 +272,29 @@ public class CsceneOutController implements BaseModelListControllerBase {
         // 启动一个线程 查询攻击结果 每隔5秒查询一次es数据 ， 查最新的一条数据
         CollectionScenePluginHandler collectionScenePluginHandler = sceneHandler.getPluginHandler("cpcollection");
         attackDataOutputUtil.startOneAttackDataOutputTask(collectionScenePluginHandler, source, target, tool);
+    }
+
+    @AuthTarget(TargetEnum.NO_AUTH)
+    @ApiOperation("启动攻击工具")
+    @PostMapping("/attack_result")
+    public ServiceResult<AttackDataOutputUtil.DataWrapper> attackResult(@RequestBody OutAttackToolRequest request) {
+        var sceneId = csceneInstanceService.getSceneId(request.getId());
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, false);
+        CloudScenePluginHandler handler = sceneHandler.getPluginHandler("cpcloud");
+        var source = sceneHandler.getElement(request.getSourceNode());
+        var target = sceneHandler.getElement(request.getTargetNode());
+        var pluginTarget = handler.getElement(target.getId());
+        CollectionScenePluginHandler collectionScenePluginHandler = sceneHandler.getPluginHandler("cpcollection");
+        // 取到指定工具
+        ImageToolRequest tool = null;
+        for (var t : pluginTarget.getAttackTools()) {
+            if (StringUtils.equals(t.getId(), request.getToolId())) {
+                tool = t;
+            }
+        }
+        tool.setParams(request.getParams());
+        AttackDataOutputUtil.DataWrapper dataWrapper = attackDataOutputUtil.queryOneAttackData(collectionScenePluginHandler, source, target, tool);
+        return new ServiceResult(dataWrapper).asResult();
     }
 
     private List<FlowTaskTaskModel> addTask(AddFlowTaskTaskRequest request) {

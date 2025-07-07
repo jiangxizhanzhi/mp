@@ -94,6 +94,34 @@ public class AttackDataOutputUtil {
         }).start();
     }
 
+    public DataWrapper queryOneAttackData(CollectionScenePluginHandler collectionScenePluginHandler, SceneElementBO source, SceneElementBO target, ImageToolRequest finalTool) {
+        DataWrapper dataWrapper = new DataWrapper();
+        String agentName = target.getEid();
+        for (var dataType : finalTool.getAttackDataTypes()) {
+            if (dataType == AttackDataType.HOSTINFO.getType()) {
+                // 主机信息
+                var hostInfo = getHostInfo(agentName);
+                dataWrapper.setHostInfo(hostInfo);
+            } else if (dataType == AttackDataType.PROCESS.getType()) {
+                // 进程信息
+                var processInfo = getProcessInfo(agentName);
+                dataWrapper.setProcessInfo(processInfo);
+            } else if (dataType == AttackDataType.FLOW.getType()) {
+                // 流量信息
+                String sourceIp = source.getPorts().get(0).getIp();
+                String targetIp = target.getPorts().get(0).getIp();
+                var flows = getFlow(collectionScenePluginHandler.getScene()
+                        .getFlowCollector(), sourceIp, targetIp);
+                dataWrapper.setFlows(flows);
+            } else if (dataType == AttackDataType.NETIFACE.getType()) {
+                // 网卡信息
+                var connects = getConnect(agentName);
+                dataWrapper.setConnects(connects);
+            }
+        }
+        return dataWrapper;
+    }
+
     public HostStateOutput getHostInfo(String agentName) {
         BoolQueryBuilder finalQueryBuilder = QueryBuilders.boolQuery();
         // 指定节点
@@ -107,6 +135,7 @@ public class AttackDataOutputUtil {
             var xx = result.getList().get(0);
             String content = JsonCommon.stringify(xx.getData().getSicLaunchOutput());
             HostStateOutput hostStateOutput = JSON.parseObject(content, HostStateOutput.class);
+            hostStateOutput.setTimestamp(xx.getTimestamp());
             return hostStateOutput;
         } else {
             log.error("未查询到主机信息");

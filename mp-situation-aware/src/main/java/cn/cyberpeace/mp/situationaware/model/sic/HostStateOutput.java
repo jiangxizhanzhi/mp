@@ -3,6 +3,8 @@ package cn.cyberpeace.mp.situationaware.model.sic;
 import com.alibaba.fastjson.annotation.JSONField;
 import lombok.Data;
 
+import java.util.Date;
+
 /**
  * @Description:
  * @Author zhouxinghuai
@@ -64,4 +66,6 @@ public class HostStateOutput {
 
     @JSONField(name = "DiskIOPercent")
     private String diskIoPercent;
+
+    private Date timestamp;
 }
