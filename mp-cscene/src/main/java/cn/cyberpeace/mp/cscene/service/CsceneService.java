@@ -619,12 +619,6 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
             CsceneDataModifier.correctName(csceneId, createContext.getReferenceMetaData(), csceneInstance, cscene, csceneHandler.getCscene(), createContext.getName());
         }
 
-        // 默认加上数据采集
-        if (!csceneInstance.getScene().getPlugins()
-                .containsKey(cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant.PLUGIN_KEY)) {
-            addCollectionPlugin(cscene);
-        }
-
         return new ServiceResult<>(csceneHandler.createTestInstance(unique, csceneInstance));
     }
 

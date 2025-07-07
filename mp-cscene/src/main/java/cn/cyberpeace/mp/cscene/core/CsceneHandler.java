@@ -8,7 +8,12 @@ import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
-import cn.cyberpeace.mp.cscene.bo.*;
+import cn.cyberpeace.mp.cscene.bo.CsceneBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneRoleBO;
+import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
+import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.core.base.BaseCsceneHandler;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
@@ -30,6 +35,7 @@ import cn.cyberpeace.mp.scene.service.SceneService;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneConfigElementBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
+import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneModel;
 import cn.cyberpeace.mp.sceneplugincollection.util.CollectionCommonConfigUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -138,6 +144,9 @@ public class CsceneHandler extends BaseCsceneHandler<
         if (csceneInstance == null) {
             return null;
         }
+
+        addCollectionPlugin(csceneInstance);
+
         csceneInstance.setCscene(getCsceneId());
         csceneInstance.setType(type);
         if (type == CsceneInstanceModel.Type.TEST && csceneInstance.getScene() != null) {
@@ -276,16 +285,14 @@ public class CsceneHandler extends BaseCsceneHandler<
             }
         }
 
-        // 默认加上数据采集
-        if (!csceneInstanceBO.getScene().getPlugins()
-                .containsKey(cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant.PLUGIN_KEY)) {
-            addCollectionPlugin(csceneInstanceBO);
-        }
-
         return createInstance(CsceneInstanceModel.Type.APP, csceneInstanceBO);
     }
 
     public void addCollectionPlugin(CsceneInstanceBO csceneBO) {
+        if (csceneBO == null || csceneBO.getScene() == null || csceneBO.getScene()
+                .getPlugins() == null || csceneBO.getScene().getPlugins().containsKey(PluginConstant.PLUGIN_KEY)) {
+            return;
+        }
         CollectionPluginSceneModel scene = new CollectionPluginSceneModel();
         scene.setEnableProbeCollect(true);
         scene.setEnableFlowCollect(false);
