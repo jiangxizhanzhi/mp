@@ -66,6 +66,10 @@ public class FlowTaskTaskModel extends BaseModel {
 	@DefaultStr
 	private String flowId;
 
+	@ApiModelProperty(value = "流量名称")
+	@DefaultStr
+	private String flowName;
+
 	/**
 	 * 网口id
 	 */
