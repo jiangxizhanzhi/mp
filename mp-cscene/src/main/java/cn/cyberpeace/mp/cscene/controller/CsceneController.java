@@ -188,6 +188,17 @@ public class CsceneController implements BaseModelListControllerBase {
         JSONObject topology = new JSONObject();
         JSONObject plugins = new JSONObject();
         JSONObject cpcloud = new JSONObject();
+        JSONObject CpCollection = new JSONObject();
+        JSONObject CollectionElements = new JSONObject();
+        JSONObject CollectionScene = new JSONObject();
+        String probeFile = "probe.json";
+        JSONArray probes = new JSONArray();
+        try {
+            InputStream inputStream2 = new ClassPathResource(probeFile).getInputStream();
+              probes= JSONArray.parseArray(new String(inputStream2.readAllBytes(), StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         Map<String, JSONObject> cpElements = new HashMap<>();
         JSONObject cpElements_ports = new JSONObject();
         JSONArray areas = new JSONArray();
@@ -243,6 +254,13 @@ public class CsceneController implements BaseModelListControllerBase {
             // 根据name获取到镜像名称 从map中匹配出对应镜像
             cpElements.put(numberId ,jsonObject);
             cpElementIdMap.put(numberId, jsonObject);
+            JSONObject probeInfo = new JSONObject();
+            probeInfo.put("edited",true);
+            probeInfo.put("enableProbeCollect",true);
+            probeInfo.put("probes",probes);
+            CollectionElements.put(numberId,probeInfo);
+            CollectionScene.put("enableFlowCollect","true");
+            CollectionScene.put("enableFlowMirror","true");
 //            TODO 区域
             /*if(!areaMap.containsKey(areaName)){
                 JSONObject area = new JSONObject();
@@ -441,6 +459,10 @@ public class CsceneController implements BaseModelListControllerBase {
         cpcloud.put("elements", cpElements);
         cpcloud.put("element_ports", cpElements_ports);
         cpcloud.put("scene", new JSONObject());
+        CpCollection.put("elements",CollectionElements);
+        CpCollection.put("scene",CollectionScene);
+        plugins.put("cpcollection",CpCollection);
+
         plugins.put("cpcloud", cpcloud);
         sceneObj.put("plugins", plugins);
         SceneConfigDataBO sceneConfig = sceneObj.toJavaObject(SceneConfigDataBO.class);
