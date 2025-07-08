@@ -135,6 +135,7 @@ public class AddTaskByLocalFlowService implements IAddTaskService {
             flowTaskTaskModel.setResourceType(flowInfoModel.getResourceType());
             flowTaskTaskModel.setInteractiveType(flowInfoModel.getInteractiveType());
             flowTaskTaskModel.setFlowId(flowInfoModel.getId());
+            flowTaskTaskModel.setFlowName(flowInfoModel.getTitle());
             flowTaskTaskModel.setPortId(portModel.getId());
             flowTaskTaskModel.setNodeId("");
             flowTaskTaskModel.setNodeIp(targetIp);

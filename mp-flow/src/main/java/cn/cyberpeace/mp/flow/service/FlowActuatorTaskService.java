@@ -154,6 +154,7 @@ public class FlowActuatorTaskService extends BaseModelServiceImpl<FlowTaskTaskMo
             flowTaskTaskModel.setResourceType(flowInfoModel.getResourceType());
             flowTaskTaskModel.setInteractiveType(flowInfoModel.getInteractiveType());
             flowTaskTaskModel.setFlowId(flowInfoModel.getId());
+            flowTaskTaskModel.setFlowName(flowInfoModel.getTitle());
             flowTaskTaskModel.setPortId(portModel.getId());
             flowTaskTaskModel.setNodeId("");
             flowTaskTaskModel.setNodeIp(targetIp);
@@ -299,6 +300,7 @@ public class FlowActuatorTaskService extends BaseModelServiceImpl<FlowTaskTaskMo
             List<String> flowIds = new ArrayList<>();
             for (FlowTaskPageResponse l : list) {
                 flowIds.add(l.getFlowId());
+                l.setTitle(l.getFlowName());
             }
             var pcapInfo = this.getPcapInfo(flowIds);
             for (var f : list) {
