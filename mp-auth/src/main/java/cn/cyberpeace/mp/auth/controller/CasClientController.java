@@ -1,4 +1,4 @@
-package org.jeecg.modules.cas.controller;
+package cn.cyberpeace.mp.auth.controller;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
