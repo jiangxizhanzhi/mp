@@ -1,5 +1,9 @@
 package cn.cyberpeace.mp.auth.service;
 
+import java.util.List;
+
+import org.springframework.web.multipart.MultipartFile;
+
 import cn.cyberpeace.mp.auth.bo.excel.ExportUserBo;
 import cn.cyberpeace.mp.auth.bo.excel.ExportUserEnBo;
 import cn.cyberpeace.mp.auth.bo.excel.ImportUserBo;
@@ -11,9 +15,6 @@ import cn.cyberpeace.mp.auth.service.param.UserQueryParams;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.BaseModelService;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
 
 /**
  * @Description:
@@ -114,4 +115,5 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
 
    List<String> listExistedUserNames(List<String> userNames, Integer limit);
 
+	void createCasUser(String username, String name);
 }

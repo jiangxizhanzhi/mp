@@ -1,5 +1,26 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
+import java.io.*;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.web.multipart.MultipartFile;
+
 import cn.cyberpeace.mp.auth.bo.excel.ExportUserBo;
 import cn.cyberpeace.mp.auth.bo.excel.ExportUserEnBo;
 import cn.cyberpeace.mp.auth.bo.excel.ImportUserBo;
@@ -20,14 +41,7 @@ import cn.cyberpeace.mp.auth.repository.TenantUserMapper;
 import cn.cyberpeace.mp.auth.repository.UserMapper;
 import cn.cyberpeace.mp.auth.repository.UserRoleMapper;
 import cn.cyberpeace.mp.auth.request.user.UserRequest;
-import cn.cyberpeace.mp.auth.service.OperateUserPermissionService;
-import cn.cyberpeace.mp.auth.service.OrgService;
-import cn.cyberpeace.mp.auth.service.RoleService;
-import cn.cyberpeace.mp.auth.service.TenantUserService;
-import cn.cyberpeace.mp.auth.service.UserCacheService;
-import cn.cyberpeace.mp.auth.service.UserPermissionService;
-import cn.cyberpeace.mp.auth.service.UserRoleService;
-import cn.cyberpeace.mp.auth.service.UserService;
+import cn.cyberpeace.mp.auth.service.*;
 import cn.cyberpeace.mp.auth.service.fields.UserFields;
 import cn.cyberpeace.mp.auth.service.param.UserQueryParams;
 import cn.cyberpeace.mp.auth.service.sender.AuthStatusRabbitmqSender;
@@ -52,22 +66,6 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.io.FileUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheConfig;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
-
-import javax.servlet.http.HttpServletResponse;
-import java.io.*;
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * @Description:
@@ -129,6 +127,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Autowired
     private UserRoleMapper userRoleMapper;
+
+	@Autowired
+	private TransactionTemplate transactionTemplate;
 
 
     @Autowired
@@ -1160,6 +1161,40 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             return list.stream().map(UserModel::getUsername).collect(Collectors.toList());
         }
         return new ArrayList<>();
+	}
+
+	@Override
+	public void createCasUser(String username, String name) {
+		UserModel userModel = new UserModel();
+		userModel.setUsername(username);
+		userModel.setName(name);
+		userModel.setInitCheck(0);
+		userModel.setPassword("d8165e80c4abed2dcc1dd06df1a8be31");
+		userModel.encodePassword();
+		userModel.setTenant("CAS");
+
+		transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus status) {
+				boolean successFlag = getModelMapper().create(userModel);
+				if (successFlag) {
+					log.error("insert cas user error: {}", username);
+				} else {
+					throw new MpRuntimeException(AuthErrorCode.USER_ADD_ERROR);
+				}
+				// 默认一级组织
+				TenantUserModel tenantUserModel = TenantUserModel.builder().user(userModel.getId())
+						.org("a13262d600fe40c799d63dce5c1485af").build();
+				var re1 = tenantUserService.create(tenantUserModel);
+				ResultUtils.throwExceptionIfError(re1, AuthErrorCode.USER_ORG_ADD_ERROR);
+				// 默认管理员角色
+				UserRoleModel userRoleModel = UserRoleModel.builder().user(userModel.getId())
+						.role("5827ff7847504ffd806e0a85c417228d").build();
+				var re2 = userRoleService.create(userRoleModel);
+				ResultUtils.throwExceptionIfError(re2, AuthErrorCode.USER_ROLE_ADD_ERROR);
+			}
+		});
     }
 }
 
