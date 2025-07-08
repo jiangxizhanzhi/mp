@@ -256,6 +256,7 @@ public class FlowCsceneInstanceService {
             flowTaskTaskModel.setSceneId("");
             flowTaskTaskModel.setActuatorId(actuatorId);
             flowTaskTaskModel.setFlowId(flow.getFlowId());
+            flowTaskTaskModel.setFlowName(flow.getTitle());
             flowTaskTaskModel.setPortId(portId);
             flowTaskTaskModel.setNodeId(nodeId);
             flowTaskTaskModel.setNodeIp(targetIp);

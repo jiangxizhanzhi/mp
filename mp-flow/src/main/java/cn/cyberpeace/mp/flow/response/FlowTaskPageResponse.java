@@ -133,4 +133,7 @@ public class FlowTaskPageResponse {
 
     @ApiModelProperty(value = "流量id")
     private String flowId;
+
+    @ApiModelProperty(value = "流量名称")
+    private String flowName;
 }

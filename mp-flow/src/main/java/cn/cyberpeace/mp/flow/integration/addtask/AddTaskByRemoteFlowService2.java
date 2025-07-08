@@ -408,9 +408,9 @@ public class AddTaskByRemoteFlowService2 implements IAddTaskService {
         for (var flow : remoteFlowInfos) {
             FlowTaskTaskModel flowTaskTaskModel = new FlowTaskTaskModel();
             flowTaskTaskModel.setSceneId("");
-            flowTaskTaskModel.setFlowName(flow.getTitle());
             flowTaskTaskModel.setActuatorId(actuatorId);
             flowTaskTaskModel.setFlowId(flow.getFlowId());
+            flowTaskTaskModel.setFlowName(flow.getTitle());
             flowTaskTaskModel.setPortId(portId);
             flowTaskTaskModel.setNodeId(nodeId);
             flowTaskTaskModel.setNodeIp(targetIp);
