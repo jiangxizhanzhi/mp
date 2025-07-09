@@ -26,7 +26,7 @@ public class SshUtil {
     private static final int TIME_OUT = 30000;
 
     public static void refreshDir(ServerInfo serverInfo, String commands, String srcFilePath, String destFilePath) {
-        for (int i = 0; i <= 50; i++) {
+        for (int i = 0; i <= 5; i++) {
             try {
                 doRefreshDir(serverInfo, commands, srcFilePath, destFilePath);
                 return;
