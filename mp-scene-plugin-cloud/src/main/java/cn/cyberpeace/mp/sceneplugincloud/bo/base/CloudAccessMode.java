@@ -40,4 +40,8 @@ public class CloudAccessMode extends AccessMode {
 
     @ApiModelProperty(value = "创建端口映射的id")
     private String fwdId;
+
+    public Integer getAccessPort() {
+        return accessPort == null ? getPort() : accessPort;
+    }
 }
