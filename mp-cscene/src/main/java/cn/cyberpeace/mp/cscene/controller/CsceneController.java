@@ -354,7 +354,7 @@ public class CsceneController implements BaseModelListControllerBase {
         this.updateOldId(templateSceneConfig);
         this.modifyAreaId(templateSceneConfig, request.getAreaId());
         templateSceneConfig.getTopology().setAreaId(request.getAreaId());
-        CsceneDataModifier.handlerPosition(templateSceneConfig);
+        CsceneDataModifier.handlerReturnPosition(templateSceneConfig);
         this.mergeSceneConfig(originSceneConfig, templateSceneConfig);
         sceneConfigService.sync(originSceneConfig, false, null);
         var res = sceneConfigService.get(id, true, request.getAreaId(), null).getSource();
@@ -376,6 +376,12 @@ public class CsceneController implements BaseModelListControllerBase {
             for (SceneConfigElementBO sceneConfigElementBO : sceneConfigDataBO.getTopology().getElements()) {
                 if (StringUtils.isEmpty(sceneConfigElementBO.getArea())) {
                     sceneConfigElementBO.setArea(areaId);
+                }
+                if (sceneConfigElementBO.getOuterPosition2() != null) {
+                    var v = sceneConfigElementBO.getOuterPosition2().remove("");
+                    if (StringUtils.isNotEmpty(v)) {
+                        sceneConfigElementBO.getOuterPosition2().put(areaId, v);
+                    }
                 }
             }
         }
