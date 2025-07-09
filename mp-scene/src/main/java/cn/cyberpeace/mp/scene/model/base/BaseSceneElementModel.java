@@ -62,6 +62,7 @@ public class BaseSceneElementModel extends BaseSceneNodeModel {
 
         public static final String WINDOWS = "windows";
         public static final String LINUX = "linux";
+        public static final String UNIX = "unix";
 
         private SystemType() {}
     }
