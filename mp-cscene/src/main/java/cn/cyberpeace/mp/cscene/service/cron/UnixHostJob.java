@@ -56,6 +56,8 @@ public class UnixHostJob {
             file.mkdirs();
         }
         saveFile("ssh_run_cmd.py", dir + "/ssh_run_cmd.py");
+        saveFile("ssh_run_cmd2.py", dir + "/ssh_run_cmd2.py");
+        saveFile("ssh_run_cmd3.py", dir + "/ssh_run_cmd3.py");
         saveFile("host_info.json", dir + "/host_info.json");
     }
 
