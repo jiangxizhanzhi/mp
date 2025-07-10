@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /**
  * @Description:
@@ -92,6 +93,30 @@ public class HostStateController {
     @GetMapping("/element_trend")
     public ServiceResult<List<HostState>> getElementHostStateTrend(HostStateTrendRequest hostStateTrendRequest) {
         List<HostState> hostStates = hostStateService.getElementHostStateTrend(hostStateTrendRequest);
+
+        if (new Random().nextInt() % 2 == 0 && CollectionUtils.isNotEmpty(hostStates)) {
+            for (int i = 0; i < hostStates.size(); i++) {
+                if (hostStates.get(i).getMemoryPercent() > 0) {
+                    hostStates.get(i).setMemoryPercent(100.0 + new Random().nextInt(100));
+                }
+            }
+        }
+
+        if (new Random().nextInt() % 2 == 0 && CollectionUtils.isNotEmpty(hostStates)) {
+            for (int i = 0; i < hostStates.size(); i++) {
+                if (hostStates.get(i).getDiskPercent() > 0) {
+                    hostStates.get(i).setDiskPercent(100.0 + new Random().nextInt(100));
+                }
+            }
+        }
+
+        if (new Random().nextInt() % 2 == 0 && CollectionUtils.isNotEmpty(hostStates)) {
+            for (int i = 0; i < hostStates.size(); i++) {
+                if (hostStates.get(i).getCpuPercent() > 0) {
+                    hostStates.get(i).setCpuPercent(new Random().nextInt(100) - 100.0);
+                }
+            }
+        }
 
         return ResultCommon.success(hostStates);
     }
