@@ -256,11 +256,11 @@ public class CsceneController implements BaseModelListControllerBase {
             cpElementIdMap.put(numberId, jsonObject);
             JSONObject probeInfo = new JSONObject();
             probeInfo.put("edited",true);
-            probeInfo.put("enableProbeCollect",true);
+            probeInfo.put("enable_probe_collect",true);
             probeInfo.put("probes",probes);
             CollectionElements.put(numberId,probeInfo);
-            CollectionScene.put("enableFlowCollect","true");
-            CollectionScene.put("enableFlowMirror","true");
+            CollectionScene.put("enable_flow_collect","true");
+            CollectionScene.put("enable_flow_mirror","true");
 //            TODO 区域
             /*if(!areaMap.containsKey(areaName)){
                 JSONObject area = new JSONObject();
