@@ -767,5 +767,6 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                 throw new MpRuntimeException(AuthErrorCode.DEMO_ACCESS_ERROR);
             }
         }
+
     }
 }
