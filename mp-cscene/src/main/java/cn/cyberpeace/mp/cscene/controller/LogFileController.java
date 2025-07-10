@@ -181,11 +181,6 @@ public class LogFileController {
                 var info = getData(dir + "/ssh_run_cmd3.py", ip, port, usename, password);
                 int start = (pageRequest.getPage() - 1) * pageRequest.getPerPage();
                 int end = start + pageRequest.getPerPage();
-                if (start > info.length) {
-                    List res = new ArrayList<LogFileVO>();
-                    return new ListObjServiceResult<>(new ListObjResult<>(res, 0));
-                }
-                end = Math.min(end, info.length);
                 List<String> xxx = new ArrayList<>();
                 for (var in : info) {
                     String[] inf = in.split("_");
@@ -194,6 +189,11 @@ public class LogFileController {
                     }
                     xxx.add(in);
                 }
+                if (start > xxx.size()) {
+                    List res = new ArrayList<LogFileVO>();
+                    return new ListObjServiceResult<>(new ListObjResult<>(res, 0));
+                }
+                end = Math.min(end, xxx.size());
                 var t2 = xxx.subList(start, end);
                 List<LogFileVO> res = new ArrayList<>();
                 for (var tt2 : t2) {
