@@ -202,7 +202,7 @@ public class CsceneOutController implements BaseModelListControllerBase {
                 }
             }
         }
-        String res = PythonExecUtil.exec("pingtest.py", sourceIp, String.valueOf(sourcePort), targetIp, username, password);
+        String res = PythonExecUtil.exec("/opt/mp/boot/pingtest.py", sourceIp, String.valueOf(sourcePort), targetIp, username, password);
         var pingRes = JsonCommon.snakeParse(res, PintTest.class);
         ConnectInfo connectInfo = new ConnectInfo();
         connectInfo.setConnected(pingRes.getConnected());
@@ -285,7 +285,7 @@ public class CsceneOutController implements BaseModelListControllerBase {
         p.put("cmd", cmd);
         // 执行参数使用base64编码 然后执行
         var encodeParams = TextUtils.encodeBase64(JsonCommon.stringify(p));
-        PythonExecUtil.exec("ssh_exec.py", encodeParams);
+        PythonExecUtil.exec("/opt/mp/boot/ssh_exec.py", encodeParams);
 //         启动一个线程 查询攻击结果 每隔5秒查询一次es数据 ， 查最新的一条数据
 //        TODO 空指针
         CollectionScenePluginHandler collectionScenePluginHandler = sceneHandler.getPluginHandler("cpcollection");
@@ -477,7 +477,7 @@ public class CsceneOutController implements BaseModelListControllerBase {
         String targetIp = target.getPorts().get(0).getIp();
         String username = sshInfo.getUsername();
         String password = sshInfo.getPassword();
-        String res = PythonExecUtil.exec("pingtest.py", sourceIp, sourcePort, targetIp, username, password);
+        String res = PythonExecUtil.exec("/opt/mp/boot/pingtest.py", sourceIp, sourcePort, targetIp, username, password);
         var pingRes = JsonCommon.snakeParse(res, PintTest.class);
         return pingRes;
     }
