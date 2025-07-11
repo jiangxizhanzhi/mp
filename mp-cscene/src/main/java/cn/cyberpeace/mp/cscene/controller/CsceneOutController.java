@@ -24,6 +24,7 @@ import cn.cyberpeace.mp.cscene.service.CsceneFlowService;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.util.AttackDataOutputUtil;
 import cn.cyberpeace.mp.cscene.util.PythonExecUtil;
+import cn.cyberpeace.mp.cscene.ws.WebSocketClientService;
 import cn.cyberpeace.mp.flow.bo.AddFlowTaskFlowInfo;
 import cn.cyberpeace.mp.flow.bo.FlowTaskCommonConf;
 import cn.cyberpeace.mp.flow.bo.FlowTaskConf;
@@ -49,6 +50,8 @@ import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandle
 import cn.cyberpeace.mp.situationaware.model.wazuh.common.request.CollectorBaseRequest;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Netiface;
 import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.Data;
@@ -57,6 +60,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -64,11 +68,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @Description: 场景流量
@@ -96,6 +100,9 @@ public class CsceneOutController implements BaseModelListControllerBase {
 
     @Resource
     private AttackDataOutputUtil attackDataOutputUtil;
+
+    @Autowired
+    private WebSocketClientService webSocketClientService;
 
     /**
      * 新增流量任务
@@ -142,7 +149,7 @@ public class CsceneOutController implements BaseModelListControllerBase {
     }
 
     @AuthTarget(TargetEnum.NO_AUTH)
-    @ApiOperation("启动攻击工具")
+    @ApiOperation("流量执行结果")
     @GetMapping("/flowinfo")
     public ServiceResult<FlowInfo> queryFlowInfo(String taskId) {
         FlowTaskTaskMapper taskTaskMapper = BeanCommon.getBean(FlowTaskTaskMapper.class);
@@ -171,6 +178,17 @@ public class CsceneOutController implements BaseModelListControllerBase {
         flowInfo.setConnected(pintTest.getConnected());
         flowInfo.setTxBps(record.getTxBps());
         flowInfo.setObytes(record.getObytes());
+        // 这里可以改成向外部推送数据
+        JSONObject jsonObject = new JSONObject();
+        JSONObject dataJsonObject = new JSONObject();
+        dataJsonObject.put("data", flowInfo);
+        jsonObject.put("Data", dataJsonObject.toJSONString());
+        jsonObject.put("Function", "UniteFlowResultData");
+        jsonObject.put("ReceiveObjectName", "");
+        jsonObject.put("SendObjectName", "");
+//        发送构建数据
+        String jsonString = jsonObject.toJSONString();
+        webSocketClientService.sendMessage(jsonString);
         return new ServiceResult<>(flowInfo).asResult();
     }
 
@@ -178,11 +196,25 @@ public class CsceneOutController implements BaseModelListControllerBase {
     @ApiOperation("使用ping检测源和目标节点的联通性")
     @PostMapping("/test_ping")
     public ServiceResult<ConnectInfo> pingTest(@RequestBody OutStartFlowTaskRequest request) {
+//        1. ojj定时任务五秒执行一次判断已启动的联合训练
+//            查所有启动的有任务id的场景
+//        2. 拿到场景信息、需要判断的链路信息发送mp请求
+//        3. mp处理信息后，包装数据发送320
         // 查找源节点和目标节点的信息
         var sceneId = csceneInstanceService.getSceneId(request.getId());
         SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, false);
         var source = sceneHandler.getElement(request.getSourceNode());
         var target = sceneHandler.getElement(request.getTargetNode());
+        ConnectInfo connectInfo = getConnectInfo(sceneHandler, source, target);
+        return new ServiceResult(connectInfo).asResult();
+    }
+
+    private ConnectInfo getConnectInfo(SceneHandler sceneHandler, SceneElementBO source, SceneElementBO target) {
+        if(source == null || target == null) {
+            ConnectInfo connectInfo = new ConnectInfo();
+            connectInfo.setConnected(false);
+            return connectInfo;
+        }
         String sourceIp = "";
         Integer sourcePort = null;
         String targetIp = target.getPorts().get(0).getIp();
@@ -213,7 +245,43 @@ public class CsceneOutController implements BaseModelListControllerBase {
             connectInfo.setFlow(hostInfo1.getMaxNetSpeed());
         }
         connectInfo.setObytes(this.getObytes(source.getEid()));
-        return new ServiceResult(connectInfo).asResult();
+        return connectInfo;
+    }
+
+    @AuthTarget(TargetEnum.NO_AUTH)
+    @ApiOperation("使用ping检测源和目标节点的联通性")
+    @PostMapping("/test_ping_ping")
+    public ServiceResult<Boolean> pingPingTest(@RequestBody JSONArray jsonArray) {
+        List<JSONObject> jsonObjects = jsonArray.toJavaList(JSONObject.class);
+        for (JSONObject jsonObject : jsonObjects) {
+            List<ConnectInfo> connectInfoList = new ArrayList<>();
+            String mpSceneId = jsonObject.getString("mpSceneId");
+            String taskId = jsonObject.getString("taskId");
+            var sceneId = csceneInstanceService.getSceneId(mpSceneId);
+            SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, false);
+            Map<String, SceneElementBO> uniteElementMap = sceneHandler.getElementMap().values().stream()
+                    .collect(Collectors.toMap(element -> element.getUniteNumberId(), element -> element, (a, b) -> a));
+            for (JSONObject link : jsonObject.getJSONArray("links").toJavaList(JSONObject.class)) {
+                String sourceNumberId = link.getString("source_number_id");
+                String targetNumberId = link.getString("target_number_id");
+                SceneElementBO source = uniteElementMap.get(sourceNumberId);
+                SceneElementBO target = uniteElementMap.get(targetNumberId);
+                ConnectInfo connectInfo = getConnectInfo(sceneHandler, source, target);
+                connectInfo.setTaskId(taskId);
+                connectInfo.setLinkId(link.getString("link_id"));
+                JSONObject resultJson = new JSONObject();
+                JSONObject dataJsonObject = new JSONObject();
+                dataJsonObject.put("data", connectInfo);
+                resultJson.put("Data", dataJsonObject.toJSONString());
+                resultJson.put("Function", "UniteLinkStatusData");
+                resultJson.put("ReceiveObjectName", "");
+                resultJson.put("SendObjectName", "");
+//        发送构建数据
+                String jsonString = resultJson.toJSONString();
+                webSocketClientService.sendMessage(jsonString);
+            }
+        }
+        return new ServiceResult().asResult();
     }
 
     private Long getObytes(String eid) {
@@ -239,6 +307,7 @@ public class CsceneOutController implements BaseModelListControllerBase {
     @ApiOperation("启动攻击工具")
     @PostMapping("/attack")
     public void attack(@RequestBody OutAttackToolRequest request) {
+//        判断当前时间是否在开始时间内 若在开始时间内直接执行
         var sceneId = csceneInstanceService.getSceneId(request.getId());
         SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, false);
         CloudScenePluginHandler handler = sceneHandler.getPluginHandler("cpcloud");
@@ -274,6 +343,13 @@ public class CsceneOutController implements BaseModelListControllerBase {
             }
         }
         tool.setParams(request.getParams());
+//        执行前需要先查询数据用于对比 查询次数按开始结束时间差+5分钟进行
+        Date attackStarttime = request.getAttackStarttime();
+        Date attackEndtime = request.getAttackEndtime();
+        Long attackSconds = calculateSecondsBetween(attackStarttime,  attackEndtime) + 300;
+        //         启动一个线程 查询攻击结果 每隔5秒查询一次es数据，查最新的一条数据
+        CollectionScenePluginHandler collectionScenePluginHandler = sceneHandler.getPluginHandler("cpcollection");
+        attackDataOutputUtil.startOneAttackDataOutputTask(collectionScenePluginHandler, source, target, tool, attackSconds, request.getTaskId(), request.getTargetId());
 
         // 构建执行参数
         String cmd = AttackType.getFormatCmd(tool.getAttackType(), tool.getParams());
@@ -286,14 +362,10 @@ public class CsceneOutController implements BaseModelListControllerBase {
         // 执行参数使用base64编码 然后执行
         var encodeParams = TextUtils.encodeBase64(JsonCommon.stringify(p));
         PythonExecUtil.exec("/opt/mp/boot/ssh_exec.py", encodeParams);
-//         启动一个线程 查询攻击结果 每隔5秒查询一次es数据 ， 查最新的一条数据
-//        TODO 空指针
-        CollectionScenePluginHandler collectionScenePluginHandler = sceneHandler.getPluginHandler("cpcollection");
-        attackDataOutputUtil.startOneAttackDataOutputTask(collectionScenePluginHandler, source, target, tool);
     }
 
     @AuthTarget(TargetEnum.NO_AUTH)
-    @ApiOperation("启动攻击工具")
+    @ApiOperation("查询单次攻击数据")
     @PostMapping("/attack_result")
     public ServiceResult<AttackDataOutputUtil.DataWrapper> attackResult(@RequestBody OutAttackToolRequest request) {
         var sceneId = csceneInstanceService.getSceneId(request.getId());
@@ -311,8 +383,24 @@ public class CsceneOutController implements BaseModelListControllerBase {
             }
         }
         tool.setParams(request.getParams());
+        String filePath = "D:\\a.txt";
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath))) {
+            for (int i = 0; i < 300/5; i++) {
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
         AttackDataOutputUtil.DataWrapper dataWrapper = attackDataOutputUtil.queryOneAttackData(collectionScenePluginHandler, source, target, tool);
-        return new ServiceResult(dataWrapper).asResult();
+                System.out.println("cpu:"+ dataWrapper.getHostInfo().getCPUPercent()+"内存使用率："+dataWrapper.getHostInfo().getMemoryUsedPercent()+ " time："+ dataWrapper.getHostInfo().getTimestamp());
+                bw.write("cpu:"+ dataWrapper.getHostInfo().getCPUPercent()+"内存使用率："+dataWrapper.getHostInfo().getMemoryUsedPercent()+ " time："+ dataWrapper.getHostInfo().getTimestamp());
+                bw.newLine();
+            }
+            return null;
+        }catch (IOException e) {
+            log.error(e.getMessage());
+        }
+        return null;
     }
 
     private List<FlowTaskTaskModel> addTask(AddFlowTaskTaskRequest request) {
@@ -485,6 +573,8 @@ public class CsceneOutController implements BaseModelListControllerBase {
     @Getter
     @Setter
     public static class ConnectInfo {
+        private String taskId;
+        private String linkId;
         private Boolean connected;
         private Double packetLoss;
         private Double delay;
@@ -528,5 +618,22 @@ public class CsceneOutController implements BaseModelListControllerBase {
             }
         }
         return true;  // 所有前三个八位组相同，返回true
+    }
+
+    /**
+     * 计算时间差（秒）
+     */
+    private Long calculateSecondsBetween(Date startTime,Date endTime){
+        Calendar startCalendar = Calendar.getInstance();
+        startCalendar.setTime(startTime);
+
+        Calendar endCalendar = Calendar.getInstance();
+        endCalendar.setTime(endTime);
+
+//        毫秒
+        long diffInMillis = endCalendar.getTimeInMillis() - startCalendar.getTimeInMillis();
+
+//        返回秒
+        return diffInMillis / 1000;
     }
 }
