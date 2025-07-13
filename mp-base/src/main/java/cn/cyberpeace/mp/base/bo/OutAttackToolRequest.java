@@ -4,6 +4,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -28,4 +29,16 @@ public class OutAttackToolRequest {
 
     @ApiModelProperty(value = "参数")
     List<ImageToolRequest.Params> params;
+
+    @ApiModelProperty(value = "任务id")
+    private String taskId;
+
+    @ApiModelProperty(value = "目标id")
+    private String targetId;
+
+    @ApiModelProperty(value = "开始攻击时间")
+    private Date attackStarttime;
+
+    @ApiModelProperty(value = "攻击结束时间")
+    private Date attackEndtime;
 }

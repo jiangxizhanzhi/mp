@@ -9,7 +9,7 @@ import java.io.OutputStream;
 @Slf4j
 public final class PythonExecUtil {
 
-    private static String windowsPythonPath = "C:\\python3\\python.exe";
+    private static String windowsPythonPath = "python.exe";
 
     private static String linuxPythonPath = "python3" ;
 

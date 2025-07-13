@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.bo.AttackDataType;
 import cn.cyberpeace.mp.base.bo.ImageToolRequest;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.cscene.ws.WebSocketClientService;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincollection.service.collect.base.WazuhResult;
@@ -32,10 +33,11 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import java.io.IOException;
+import java.io.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -51,18 +53,25 @@ public class AttackDataOutputUtil {
     @Resource(name = "wazuhRestHighLevelClient")
     protected RestHighLevelClient restHighLevelClient;
 
-    public void startOneAttackDataOutputTask(CollectionScenePluginHandler collectionScenePluginHandler, SceneElementBO source, SceneElementBO target, ImageToolRequest finalTool) {
+    @Autowired
+    private WebSocketClientService webSocketClientService;
+
+    public void startOneAttackDataOutputTask(CollectionScenePluginHandler collectionScenePluginHandler, SceneElementBO source, SceneElementBO target,
+                                             ImageToolRequest finalTool, Long attackSconds, String taskId, String targetId) {
         // 启动一个线程 查询攻击结果 每隔5秒查询一次es数据 ， 查最新的一条数据
         new Thread(new Runnable() {
             @Override
             public void run() {
-                for (int i = 0; i < 30; i++) {
+                for (int i = 0; i < attackSconds / 5; i++) {
                     try {
                         Thread.sleep(5000);
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                     }
                     DataWrapper dataWrapper = new DataWrapper();
+                    dataWrapper.setTaskId(taskId);
+                    dataWrapper.setToolId(finalTool.getId());
+                    dataWrapper.setTargetId(targetId);
                     String agentName = target.getEid();
                     for (var dataType : finalTool.getAttackDataTypes()) {
                         if (dataType == AttackDataType.HOSTINFO.getType()) {
@@ -78,7 +87,7 @@ public class AttackDataOutputUtil {
                             String sourceIp = source.getPorts().get(0).getIp();
                             String targetIp = target.getPorts().get(0).getIp();
                             var flows = getFlow(collectionScenePluginHandler.getScene()
-                                                        .getFlowCollector(), sourceIp, targetIp);
+                                    .getFlowCollector(), sourceIp, targetIp);
                             dataWrapper.setFlows(flows);
                         } else if (dataType == AttackDataType.NETIFACE.getType()) {
                             // 网卡信息
@@ -87,7 +96,17 @@ public class AttackDataOutputUtil {
                         }
                     }
                     // 这里可以改成向外部推送数据
-                    System.out.println(dataWrapper.getHostInfo().getCPUPercent());
+                    JSONObject jsonObject = new JSONObject();
+                    JSONObject dataJsonObject = new JSONObject();
+                    dataJsonObject.put("data", dataWrapper);
+                    jsonObject.put("Data", dataJsonObject.toJSONString());
+                    jsonObject.put("Function", "AttackResultData");
+                    jsonObject.put("ReceiveObjectName", "");
+                    jsonObject.put("SendObjectName", "");
+//        发送构建数据
+                    String jsonString = jsonObject.toJSONString();
+                    webSocketClientService.sendMessage(jsonString);
+                    log.info("sendMessage320,taskId:{},toolId:{}",taskId,finalTool.getId());
                 }
             }
 
@@ -295,6 +314,9 @@ public class AttackDataOutputUtil {
     @Getter
     @Setter
     public static class DataWrapper {
+        private String taskId;
+        private String toolId;
+        private String targetId;
         private HostStateOutput hostInfo;
         private List<OutProcess> processInfo;
         private List<FlowLogBO> flows;

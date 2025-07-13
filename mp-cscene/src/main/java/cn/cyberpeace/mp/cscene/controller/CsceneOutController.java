@@ -234,7 +234,7 @@ public class CsceneOutController implements BaseModelListControllerBase {
                 }
             }
         }
-        String res = PythonExecUtil.exec("/opt/mp/boot/pingtest.py", sourceIp, String.valueOf(sourcePort), targetIp, username, password);
+        String res = PythonExecUtil.exec("pingtest.py", sourceIp, String.valueOf(sourcePort), targetIp, username, password);
         var pingRes = JsonCommon.snakeParse(res, PintTest.class);
         ConnectInfo connectInfo = new ConnectInfo();
         connectInfo.setConnected(pingRes.getConnected());
@@ -269,6 +269,8 @@ public class CsceneOutController implements BaseModelListControllerBase {
                 ConnectInfo connectInfo = getConnectInfo(sceneHandler, source, target);
                 connectInfo.setTaskId(taskId);
                 connectInfo.setLinkId(link.getString("link_id"));
+                connectInfo.setSourceNumberId(sourceNumberId);
+                connectInfo.setTargetNumberId(targetNumberId);
                 JSONObject resultJson = new JSONObject();
                 JSONObject dataJsonObject = new JSONObject();
                 dataJsonObject.put("data", connectInfo);
@@ -361,7 +363,7 @@ public class CsceneOutController implements BaseModelListControllerBase {
         p.put("cmd", cmd);
         // 执行参数使用base64编码 然后执行
         var encodeParams = TextUtils.encodeBase64(JsonCommon.stringify(p));
-        PythonExecUtil.exec("/opt/mp/boot/ssh_exec.py", encodeParams);
+        PythonExecUtil.exec("ssh_exec.py", encodeParams);
     }
 
     @AuthTarget(TargetEnum.NO_AUTH)
@@ -385,7 +387,7 @@ public class CsceneOutController implements BaseModelListControllerBase {
         tool.setParams(request.getParams());
         String filePath = "D:\\a.txt";
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath))) {
-            for (int i = 0; i < 300/5; i++) {
+            for (int i = 0; i < 300000/5; i++) {
                 try {
                     Thread.sleep(5000);
                 } catch (InterruptedException e) {
@@ -395,6 +397,21 @@ public class CsceneOutController implements BaseModelListControllerBase {
                 System.out.println("cpu:"+ dataWrapper.getHostInfo().getCPUPercent()+"内存使用率："+dataWrapper.getHostInfo().getMemoryUsedPercent()+ " time："+ dataWrapper.getHostInfo().getTimestamp());
                 bw.write("cpu:"+ dataWrapper.getHostInfo().getCPUPercent()+"内存使用率："+dataWrapper.getHostInfo().getMemoryUsedPercent()+ " time："+ dataWrapper.getHostInfo().getTimestamp());
                 bw.newLine();
+                // 这里可以改成向外部推送数据
+                dataWrapper.setTaskId(request.getTaskId());
+                dataWrapper.setToolId(request.getToolId());
+                dataWrapper.setTargetId(request.getTargetId());
+                JSONObject jsonObject = new JSONObject();
+                JSONObject dataJsonObject = new JSONObject();
+                dataJsonObject.put("data", dataWrapper);
+                jsonObject.put("Data", dataJsonObject.toJSONString());
+                jsonObject.put("Function", "AttackResultData");
+                jsonObject.put("ReceiveObjectName", "");
+                jsonObject.put("SendObjectName", "");
+//        发送构建数据
+                String jsonString = jsonObject.toJSONString();
+                webSocketClientService.sendMessage(jsonString);
+                log.info("sendMessage320,taskId:{},toolId:{}",request.getTaskId(),request.getToolId());
             }
             return null;
         }catch (IOException e) {
@@ -565,7 +582,7 @@ public class CsceneOutController implements BaseModelListControllerBase {
         String targetIp = target.getPorts().get(0).getIp();
         String username = sshInfo.getUsername();
         String password = sshInfo.getPassword();
-        String res = PythonExecUtil.exec("/opt/mp/boot/pingtest.py", sourceIp, sourcePort, targetIp, username, password);
+        String res = PythonExecUtil.exec("pingtest.py", sourceIp, sourcePort, targetIp, username, password);
         var pingRes = JsonCommon.snakeParse(res, PintTest.class);
         return pingRes;
     }
@@ -582,6 +599,8 @@ public class CsceneOutController implements BaseModelListControllerBase {
         private String flow;
         // 发送的流量数据
         private Long obytes;
+        private String sourceNumberId;
+        private String targetNumberId;
     }
 
     @Getter
