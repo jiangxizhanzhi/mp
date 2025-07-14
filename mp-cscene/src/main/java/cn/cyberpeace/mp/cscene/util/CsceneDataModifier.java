@@ -32,12 +32,14 @@ import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortConnectionBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
+import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneAreaBO;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneBO;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneDataBO;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneTopologyBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneAreaModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.DockerParams;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.EntityUsb;
@@ -973,23 +975,35 @@ public class CsceneDataModifier {
             return;
         }
         var topo = csceneBO.getTopology();
-        if (topo.getAreaId() != null) {
-            List<BaseSceneElementBO> elements = topo.getElements();
-            if (elements == null) {
-                return;
-            }
-            String areaId = topo.getAreaId();
-            for (BaseSceneElementBO e : elements) {
-                Map<String, String> outPosition = e.getOuterPosition2();
-                if (outPosition == null) {
-                    outPosition = new HashMap<>();
-                }
-                if (outPosition.containsKey(areaId)) {
-                    e.setPosition2(outPosition.get(areaId));
+        List<BaseSceneElementBO> elements = topo.getElements();
+        if (elements == null) {
+            return;
+        }
+        // 区块所属的区域
+        Map<String, String> area2Layer = new HashMap<>();
+        if (CollectionUtils.isNotEmpty(topo.getAreas())) {
+            for (var a : topo.getAreas()) {
+                BaseSceneAreaBO area = (BaseSceneAreaBO) a;
+                if (area.getType() == BaseSceneAreaModel.Type.LAYER) {
+                    area2Layer.put(area.getId(), area.getId());
                 } else {
-                    // 如果未存需要查询的层位置 那么返回节点所在层的位置 否则前端会居中
-                    e.setPosition2(outPosition.getOrDefault(e.getArea(), e.getPosition2()));
+                    area2Layer.put(area.getId(), area.getArea());
                 }
+            }
+        }
+
+        String areaId = topo.getAreaId() == null ? "" : topo.getAreaId();
+        for (BaseSceneElementBO e : elements) {
+            Map<String, String> outPosition = e.getOuterPosition2();
+            if (outPosition == null) {
+                outPosition = new HashMap<>();
+            }
+            if (outPosition.containsKey(areaId)) {
+                e.setPosition2(outPosition.get(areaId));
+            } else {
+                // 如果未存需要查询的层位置 那么返回节点所在层的位置 否则前端会居中
+                String layerId = area2Layer.get(e.getArea());
+                e.setPosition2(outPosition.getOrDefault(layerId, e.getPosition2()));
             }
         }
     }
