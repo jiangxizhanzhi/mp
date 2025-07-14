@@ -21,7 +21,12 @@ public final class PythonExecUtil {
 
     private static String linuxPythonPath = "python3" ;
 
-    static {
+    private static volatile boolean INIT = false ;
+
+    private static void init(){
+        if (INIT) {
+            return;
+        }
         log.info("init pingtest.py 、 ssh_exec.py start");
         String dir = BeanCommon.getBean(BaseAppConfig.class).getResourcesDir();
         File file = new File(dir);
@@ -31,6 +36,7 @@ public final class PythonExecUtil {
         saveFile("pingtest.py", dir + "pingtest.py");
         saveFile("ssh_exec.py", dir + "ssh_exec.py");
         log.info("init pingtest.py 、 ssh_exec.py end");
+        INIT = true;
     }
 
     private static void saveFile(String from, String to) {
