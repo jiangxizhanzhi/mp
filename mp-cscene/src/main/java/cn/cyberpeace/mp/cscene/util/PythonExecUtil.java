@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.cscene.util;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -13,6 +14,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 
 @Slf4j
+@Component
 public final class PythonExecUtil {
 
     private static String windowsPythonPath = "python.exe";
@@ -20,10 +22,6 @@ public final class PythonExecUtil {
     private static String linuxPythonPath = "python3" ;
 
     static {
-        init();
-    }
-
-    public static void init() {
         log.info("init pingtest.py 、 ssh_exec.py start");
         String dir = BeanCommon.getBean(BaseAppConfig.class).getResourcesDir();
         File file = new File(dir);
@@ -64,9 +62,6 @@ public final class PythonExecUtil {
             while ((bytesRead = inputStream.read(buffer)) != -1) {
                 outputStream.write(buffer, 0, bytesRead);
             }
-
-            log.info("文件写入成功！");
-
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -81,7 +76,7 @@ public final class PythonExecUtil {
         }
     }
 
-    public static String exec(String scriptPath, String... params) {
+    public String exec(String scriptPath, String... params) {
         String paramsStr = "";
         if (params != null) {
             for (String p : params) {

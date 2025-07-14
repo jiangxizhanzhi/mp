@@ -105,6 +105,9 @@ public class CsceneOutController implements BaseModelListControllerBase {
     @Autowired
     private WebSocketClientService webSocketClientService;
 
+    @Autowired
+    private PythonExecUtil pythonExecUtil ;
+
     /**
      * 新增流量任务
      * @param request
@@ -237,7 +240,7 @@ public class CsceneOutController implements BaseModelListControllerBase {
         }
         String dir = BeanCommon.getBean(BaseAppConfig.class).getResourcesDir();
         String pintTestPath = dir + "/" + "pingtest.py";
-        String res = PythonExecUtil.exec(pintTestPath, sourceIp, String.valueOf(sourcePort), targetIp, username, password);
+        String res = pythonExecUtil.exec(pintTestPath, sourceIp, String.valueOf(sourcePort), targetIp, username, password);
         var pingRes = JsonCommon.snakeParse(res, PintTest.class);
         ConnectInfo connectInfo = new ConnectInfo();
         connectInfo.setConnected(pingRes.getConnected());
@@ -368,7 +371,7 @@ public class CsceneOutController implements BaseModelListControllerBase {
         var encodeParams = TextUtils.encodeBase64(JsonCommon.stringify(p));
         String dir = BeanCommon.getBean(BaseAppConfig.class).getResourcesDir();
         String pintTestPath = dir + "/" + "ssh_exec.py";
-        PythonExecUtil.exec(pintTestPath, encodeParams);
+        pythonExecUtil.exec(pintTestPath, encodeParams);
     }
 
     @AuthTarget(TargetEnum.NO_AUTH)
@@ -587,7 +590,7 @@ public class CsceneOutController implements BaseModelListControllerBase {
         String targetIp = target.getPorts().get(0).getIp();
         String username = sshInfo.getUsername();
         String password = sshInfo.getPassword();
-        String res = PythonExecUtil.exec("pingtest.py", sourceIp, sourcePort, targetIp, username, password);
+        String res = pythonExecUtil.exec("pingtest.py", sourceIp, sourcePort, targetIp, username, password);
         var pingRes = JsonCommon.snakeParse(res, PintTest.class);
         return pingRes;
     }
