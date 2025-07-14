@@ -79,11 +79,11 @@ def check_network_via_ssh(ip, port, username, password, target_ip):
 
 # 示例用法
 if __name__ == "__main__":
-    source_ip = sys.argv[1]
-    source_port = sys.argv[2]
-    target_ip = sys.argv[3]
-    username = sys.argv[4]
-    password = sys.argv[5]
+    source_ip = sys.argv[1].replace("\"","")
+    source_port = sys.argv[2].replace("\"","")
+    target_ip = sys.argv[3].replace("\"","")
+    username = sys.argv[4].replace("\"","")
+    password = sys.argv[5].replace("\"","")
     result = check_network_via_ssh(
         ip=source_ip,
         port=source_port,

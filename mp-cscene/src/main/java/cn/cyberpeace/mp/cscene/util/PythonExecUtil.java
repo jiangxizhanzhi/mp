@@ -33,8 +33,8 @@ public final class PythonExecUtil {
         if (!file.exists()) {
             file.mkdirs();
         }
-        saveFile("pingtest.py", dir + "pingtest.py");
-        saveFile("ssh_exec.py", dir + "ssh_exec.py");
+        saveFile("pingtest.py", dir + "/pingtest.py");
+        saveFile("ssh_exec.py", dir + "/ssh_exec.py");
         log.info("init pingtest.py 、 ssh_exec.py end");
         INIT = true;
     }
@@ -69,7 +69,7 @@ public final class PythonExecUtil {
                 outputStream.write(buffer, 0, bytesRead);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("error", e);
         } finally {
             try {
                 // 关闭流
@@ -83,6 +83,7 @@ public final class PythonExecUtil {
     }
 
     public String exec(String scriptPath, String... params) {
+        init();
         String paramsStr = "";
         if (params != null) {
             for (String p : params) {
