@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.bo.ImageToolRequest;
 import cn.cyberpeace.mp.base.bo.OutAttackToolRequest;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -234,7 +235,9 @@ public class CsceneOutController implements BaseModelListControllerBase {
                 }
             }
         }
-        String res = PythonExecUtil.exec("pingtest.py", sourceIp, String.valueOf(sourcePort), targetIp, username, password);
+        String dir = BeanCommon.getBean(BaseAppConfig.class).getResourcesDir();
+        String pintTestPath = dir + "/" + "pingtest.py";
+        String res = PythonExecUtil.exec(pintTestPath, sourceIp, String.valueOf(sourcePort), targetIp, username, password);
         var pingRes = JsonCommon.snakeParse(res, PintTest.class);
         ConnectInfo connectInfo = new ConnectInfo();
         connectInfo.setConnected(pingRes.getConnected());
@@ -363,7 +366,9 @@ public class CsceneOutController implements BaseModelListControllerBase {
         p.put("cmd", cmd);
         // 执行参数使用base64编码 然后执行
         var encodeParams = TextUtils.encodeBase64(JsonCommon.stringify(p));
-        PythonExecUtil.exec("ssh_exec.py", encodeParams);
+        String dir = BeanCommon.getBean(BaseAppConfig.class).getResourcesDir();
+        String pintTestPath = dir + "/" + "ssh_exec.py";
+        PythonExecUtil.exec(pintTestPath, encodeParams);
     }
 
     @AuthTarget(TargetEnum.NO_AUTH)
