@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.cscene.util;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.cscene.controller.CsceneOutController;
 import lombok.extern.slf4j.Slf4j;
 
@@ -19,18 +21,25 @@ public class PythonInitUtil {
     }
 
     public static void init() {
-        saveFile("pingtest.py");
-        saveFile("ssh_exec.py");
+        String dir = BeanCommon.getBean(BaseAppConfig.class).getResourcesDir();
+        File file = new File(dir);
+        if (!file.exists()) {
+            file.mkdirs();
+        }
+        saveFile("pingtest.py", dir + "pingtest.py");
+        saveFile("ssh_exec.py", dir + "ssh_exec.py");
     }
 
-    public static void saveFile(String fileName) {
-        File file = new File(fileName);
+    private static void saveFile(String from, String to) {
+        // 已存在 跳过
+        File file = new File(to);
         if (file.exists()) {
-            file.delete();
+            return;
         }
-        InputStream inputStream = CsceneOutController.class.getClassLoader().getResourceAsStream(fileName);
-        writeFile(inputStream, fileName);
+        InputStream inputStream = PythonInitUtil.class.getClassLoader().getResourceAsStream(from);
+        writeFile(inputStream, to);
     }
+
 
     public static void writeFile(InputStream inputStream, String fileName) {
 
