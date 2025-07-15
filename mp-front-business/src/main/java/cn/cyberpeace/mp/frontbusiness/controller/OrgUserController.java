@@ -56,6 +56,12 @@ public class OrgUserController {
         return ResultCommon.success(list);
     }
 
+    @ApiOperation(value = "查询所有的管理员信息", notes = "")
+    @GetMapping("/list/admin")
+    public ServiceResult<List<UserBo>> listAllAdmin() {
+        return ResultCommon.success(tenantUserService.listAdmins());
+    }
+
 
     @ApiOperation(value = "查询组织下所有用户信息", notes = "")
     @ApiImplicitParam(name = "orgId", value = "组织ID", dataTypeClass = String.class)

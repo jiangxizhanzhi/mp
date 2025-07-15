@@ -367,6 +367,20 @@ public class TenantUserServiceImpl
 
     }
 
+    public List<UserBo> listAdmins() {
+        PageInfo<UserBo> pageInfo = listPageUsers(null, new ArrayList<>(), null, null, "", new ArrayList<>(),
+                new ArrayList<>(), LocalDateTime.now(), 1, Integer.MAX_VALUE);
+        List<UserBo> userBos = pageInfo.getList();
+        if (CollectionUtil.isNotEmpty(userBos)) {
+            return userBos.stream().filter(userBo -> userBo.getIsAdmin() == 1 || userBo.getIsSuperUser() == 1)
+                    .collect(Collectors.toList());
+        } else {
+            return new ArrayList<>();
+        }
+    }
+
+
+
     @Override
     public boolean deleteByUserId(String userId) {
         ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
