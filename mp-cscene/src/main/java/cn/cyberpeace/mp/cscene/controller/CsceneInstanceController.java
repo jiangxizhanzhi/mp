@@ -216,10 +216,17 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         return getModelService().listCsceneInstanceBO(queryParams, new CsceneContextBO(queryParams.getAccessUserId(), null)).asResult();
     }
 
-    @AuthTarget({TargetEnum.FRONT_ALL, TargetEnum.INSTANCE_MONITORING})
+    @AuthTarget({ TargetEnum.INSTANCE_MONITORING})
     @ApiOperation("获取分页的聚合数据")
     @GetMapping("/list_stat")
     public ListObjServiceResult<CsceneInstanceStat> listStat(CsceneInstanceStatQueryParams queryParams) {
+        handleQueryParams("listStat", queryParams);
+        return csceneSpecialService.listCsceneInstanceStats(queryParams).asResult();
+    }
+    @AuthTarget( TargetEnum.FRONT_ALL)
+    @ApiOperation("获取分页的聚合数据")
+    @GetMapping("/list_stat/front")
+    public ListObjServiceResult<CsceneInstanceStat> listStatFront(CsceneInstanceStatQueryParams queryParams) {
         handleQueryParams("listStat", queryParams);
         return csceneSpecialService.listCsceneInstanceStats(queryParams).asResult();
     }
