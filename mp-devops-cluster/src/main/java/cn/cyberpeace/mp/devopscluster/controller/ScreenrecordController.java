@@ -48,7 +48,6 @@ public class ScreenrecordController {
 
     private final CsceneInstanceMapper csceneInstanceMapper;
 
-    @AuthTarget({TargetEnum.GROUP_TRAINING, TargetEnum.RANGE_TEST_SELF, TargetEnum.RED_VS_BLUE, TargetEnum.RESOURCE_USAGE_MANAGEMENT})
     @ApiOperation("分页查询录屏文件")
     @GetMapping("/page")
     @AuthTarget(TargetEnum.RESOURCE_USAGE_MANAGEMENT)

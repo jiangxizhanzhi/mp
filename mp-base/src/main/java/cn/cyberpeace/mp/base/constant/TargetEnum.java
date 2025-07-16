@@ -37,6 +37,7 @@ public enum TargetEnum {
     EXERCISES(new String[]{"exercises"}),
     FLAGS_SOLVE(new String[]{"flags-solve"}),
     FRONT_ALL(new String[]{"front_all"}),
+    BACK_ALL(new String[]{"back_all"}),
     GHDB_LIBRARY(new String[]{"ghdb-library"}),
     GROUP_TRAINING(new String[]{"group-training"}),
     IMAGE_MANAGE(new String[]{"image-manage"}),

@@ -134,6 +134,16 @@ public class ImagesController {
         return new PageResult<>(list,model.getTotal());
     }
 
+    @AuthTarget(TargetEnum.FRONT_ALL)
+    @ApiOperation("分页查询")
+    @GetMapping("/page/front")
+    public PageResult<ImagesPageVO> pageFront(ImagePageRequest request){
+        BasePageBO<ImageConvertModel> model = imagesConverter.page(new ImagePageDTO(request));
+        List<ImagesPageVO> list = convertBOToPageVO(model);
+
+        return new PageResult<>(list,model.getTotal());
+    }
+
     /**
      * 新增
      */
