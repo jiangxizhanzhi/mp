@@ -1,0 +1,4 @@
+INSERT INTO `mp_situation_flow_classification`( `id`, `name`, `category_en`, `category_zh`, `severity`, `create_time`, `update_time`) VALUES ( '5fe40a52d8ce4c959a572d457c8a0001', 'sniffing', 'sniffing', '嗅探', 2, now(), now());
+INSERT INTO `mp_situation_flow_classification`( `id`, `name`, `category_en`, `category_zh`, `severity`, `create_time`, `update_time`) VALUES ( '5fe40a52d8ce4c959a572d457c8a0002', 'destroyed', 'destroyed', 'RDP协议致瘫攻击', 2, now(), now());
+INSERT INTO `mp_situation_flow_classification`( `id`, `name`, `category_en`, `category_zh`, `severity`, `create_time`, `update_time`) VALUES ( '5fe40a52d8ce4c959a572d457c8a0003', 'deception', 'deception', '中间人攻击', 2, now(), now());
+INSERT INTO `mp_situation_flow_classification`( `id`, `name`, `category_en`, `category_zh`, `severity`, `create_time`, `update_time`) VALUES ( '5fe40a52d8ce4c959a572d457c8a0004', 'denial-of-service-attack', 'denial-of-service-attack', '拒绝服务攻击', 2, now(), now());

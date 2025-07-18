@@ -27,6 +27,7 @@ import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -39,6 +40,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 import java.io.*;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -49,6 +51,8 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 public class AttackDataOutputUtil {
+
+    private static final int INTERVAL_SECONDS = 5;
 
     @Resource(name = "wazuhRestHighLevelClient")
     protected RestHighLevelClient restHighLevelClient;
@@ -64,7 +68,7 @@ public class AttackDataOutputUtil {
             public void run() {
                 for (int i = 0; i < attackSconds / 5; i++) {
                     try {
-                        Thread.sleep(5000);
+                        Thread.sleep(INTERVAL_SECONDS*1000);
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                     }
@@ -216,7 +220,10 @@ public class AttackDataOutputUtil {
         BoolQueryBuilder finalQueryBuilder = QueryBuilders.boolQuery();
         finalQueryBuilder.must(QueryBuilders.termQuery("destination.ip", targetIp));
         finalQueryBuilder.must(QueryBuilders.existsQuery("suricata"));
-
+        RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery("@timestamp");
+        rangeQueryBuilder.gte(LocalDateTime.now().minusSeconds(INTERVAL_SECONDS).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
+        rangeQueryBuilder.lte(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
+        finalQueryBuilder.must(rangeQueryBuilder);
         String index = indices + "_sessions3-" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyMMdd"));
         var flows = this.queryArkimeData(index, 0, 10, List.of(finalQueryBuilder));
         return flows;
@@ -240,6 +247,7 @@ public class AttackDataOutputUtil {
 
         SearchRequest searchRequest = new SearchRequest(arkimeSession);
         searchRequest.source(sourceBuilder);
+        log.info("query es data params: {}", searchRequest.source().toString());
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
         try {
 
@@ -255,6 +263,12 @@ public class AttackDataOutputUtil {
                 Map<String, Object> sourceAsMap = hit.getSourceAsMap();
                 FlowLogBO flowLogBO = JSONObject.parseObject(hit.getSourceAsString(), FlowLogBO.class);
                 flowLogBO.setTimestamp(Long.valueOf(sourceAsMap.get("@timestamp").toString()));
+                if (flowLogBO.getSource() != null) {
+                    flowLogBO.getSource().setMac(null);
+                }
+                if (flowLogBO.getDestination() != null) {
+                    flowLogBO.getDestination().setMac(null);
+                }
                 return flowLogBO;
             }).collect(Collectors.toList());
             return flowLogBOList;

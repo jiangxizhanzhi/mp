@@ -14,6 +14,7 @@ import cn.cyberpeace.mp.base.out.FlowInfo;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.common.model.OptionModel;
 import cn.cyberpeace.mp.common.repository.OptionMapper;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
@@ -24,6 +25,7 @@ import cn.cyberpeace.mp.cscene.request.flow.OutStartFlowTaskRequest;
 import cn.cyberpeace.mp.cscene.service.CsceneFlowService;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.util.AttackDataOutputUtil;
+import cn.cyberpeace.mp.cscene.util.MockData;
 import cn.cyberpeace.mp.cscene.util.PythonExecUtil;
 import cn.cyberpeace.mp.cscene.ws.WebSocketClientService;
 import cn.cyberpeace.mp.flow.bo.AddFlowTaskFlowInfo;
@@ -72,6 +74,8 @@ import javax.annotation.Resource;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -368,10 +372,40 @@ public class CsceneOutController implements BaseModelListControllerBase {
         p.put("password", sshInfo.getPassword());
         p.put("cmd", cmd);
         // 执行参数使用base64编码 然后执行
+        log.info("python exec params : {} ", JsonCommon.stringify(p));
         var encodeParams = TextUtils.encodeBase64(JsonCommon.stringify(p));
         String dir = BeanCommon.getBean(BaseAppConfig.class).getResourcesDir();
         String pintTestPath = dir + "/" + "ssh_exec.py";
         pythonExecUtil.exec(pintTestPath, encodeParams);
+
+        AttackType attackType = AttackType.getByType(tool.getAttackType());
+        if (StringUtils.isNotEmpty(attackType.getFlowType())) {
+            String sourceIp = "";
+            for (var port : source.getPorts()) {
+                if (StringUtils.isNotEmpty(port.getIp())) {
+                    sourceIp = port.getIp();
+                    break;
+                }
+            }
+
+            String destinationIp = "";
+            for (var port : target.getPorts()) {
+                if (StringUtils.isNotEmpty(port.getIp())) {
+                    destinationIp = port.getIp();
+                    break;
+                }
+            }
+            MockData.Params params = new MockData.Params();
+            String collector = collectionScenePluginHandler.getScene().getFlowCollector();
+            String time = TimeUtils.localDateTimeToString(LocalDateTime.now(), DateTimeFormatter.ofPattern("yyMMdd"));
+            params.setIndex(String.format("%s_sessions3-%s", collector, time));
+            params.setCategory(attackType.getFlowType());
+            params.setSourceIp(sourceIp);
+            params.setSourcePort(Math.abs(new Random().nextInt(1000)) + 10000);
+            params.setDestIp(destinationIp);
+            params.setDestPort(Math.abs(new Random().nextInt(1000)) + 10000);
+            MockData.createData(params);
+        }
     }
 
     @AuthTarget(TargetEnum.NO_AUTH)
