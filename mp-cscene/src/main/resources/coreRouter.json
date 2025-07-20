@@ -1,0 +1,69 @@
+{
+  "unite_number_id": "",
+  "attack_tools": [],
+  "area": "",
+  "display_context": "{\"size\":40,\"zIndex\":2,\"text\":{\"fontSize\":12,\"fill\":\"var(--neutral9)\",\"refY\":53,\"transform\":\"rotate(0)\",\"fontWeight\":400,\"text\":\"核心路由器\",\"opacity\":1,\"class\":\"node-label original\"}}",
+  "id": "37159a65-9ad0-42d3-a13b-e4ab1fd089c3",
+  "name": "核心路由器",
+  "type": 2,
+  "icon2": "/api/mp/file/499/611/6c18ee3df28f72a48ec733b67a19fb43.png",
+  "icon3": "",
+  "system_language": "en",
+  "system_architecture": "64",
+  "system_type": 314,
+  "max_port_number": 0,
+  "cpu": 1,
+  "ram": 1024,
+  "disk": 10,
+  "init_commands": [
+    ""
+  ],
+  "ports": [
+    {
+      "id": "port_37159a65-9ad0-42d3-a13b-e4ab1fd089c3_wan_1",
+      "nat": false,
+      "name": "eth1",
+      "ip": "",
+      "egress": null,
+      "ingress": null,
+      "delay": null,
+      "loss": null,
+      "access_modes": [
+        {
+          "protocol": "console",
+          "auth_protocol": null,
+          "hostname": null,
+          "port": null,
+          "username": "vyos",
+          "password": "vyos",
+          "private_key_enable": null,
+          "private_key_path": null,
+          "private_key_file_name": null,
+          "description": null,
+          "manage_mode": null,
+          "desc": ""
+        }
+      ],
+      "connect_mode": "access",
+      "port_connect_net_cidr": null,
+      "usable": true
+    },
+    {
+      "id": "port_37159a65-9ad0-42d3-a13b-e4ab1fd089c3_wan_2",
+      "nat": false,
+      "name": "eth2",
+      "ip": "",
+      "egress": null,
+      "ingress": null,
+      "delay": null,
+      "loss": null,
+      "access_modes": [],
+      "connect_mode": "access",
+      "port_connect_net_cidr": null,
+      "usable": true
+    }
+  ],
+  "file": "",
+  "node_command": "",
+  "position2": "{\"x\":780,\"y\":380}"
+}

@@ -361,6 +361,9 @@ public class CsceneOutController implements BaseModelListControllerBase {
         Long attackSconds = calculateSecondsBetween(attackStarttime,  attackEndtime) + 300;
         //         启动一个线程 查询攻击结果 每隔5秒查询一次es数据，查最新的一条数据
         CollectionScenePluginHandler collectionScenePluginHandler = sceneHandler.getPluginHandler("cpcollection");
+//        先发送前3分钟主机采集数据
+        attackDataOutputUtil.queryRecentHostInfo(target);
+//        再每5秒发送最新数据
         attackDataOutputUtil.startOneAttackDataOutputTask(collectionScenePluginHandler, source, target, tool, attackSconds, request.getTaskId(), request.getTargetId());
 
         // 构建执行参数
@@ -429,7 +432,7 @@ public class CsceneOutController implements BaseModelListControllerBase {
         tool.setParams(request.getParams());
         String filePath = "D:\\a.txt";
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath))) {
-            for (int i = 0; i < 300000/5; i++) {
+            for (int i = 0; i < 300/5; i++) {
                 try {
                     Thread.sleep(5000);
                 } catch (InterruptedException e) {

@@ -106,6 +106,8 @@ mp:
       public-net-proxy-exclude-protocols: ${MP_PUBLIC_NET_PROXY_EXCLUDE_PROTOCOLS:console,vnc,ssh,telnet,rdp}
       allow-export: ${MP_ALLOW_EXPORT:false}
       trex-image: ${TREX_IMAGE:tgn-trex}
+      ws-ip: ${WS_IP:127.0.0.1}                # 云平台适配层接口地址
+      ws-port: ${WS_PORT:1234}
   base:
     ext-var:
       fdfs-ip: ${FDFS_IP:10.100.27.1}

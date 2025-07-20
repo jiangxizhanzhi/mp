@@ -99,7 +99,7 @@ public class AttackDataOutputUtil {
                             dataWrapper.setConnects(connects);
                         }
                     }
-                    // 这里可以改成向外部推送数据
+                    // 向320推送数据
                     JSONObject jsonObject = new JSONObject();
                     JSONObject dataJsonObject = new JSONObject();
                     dataJsonObject.put("data", dataWrapper);
@@ -115,6 +115,49 @@ public class AttackDataOutputUtil {
             }
 
         }).start();
+    }
+
+    /**
+     * 查询3分钟内主机采集信息
+     * @param target
+     * @return
+     */
+    public  List<HostStateOutput> queryRecentHostInfo(SceneElementBO target) {
+        String agentName = target.getEid();
+        BoolQueryBuilder finalQueryBuilder = QueryBuilders.boolQuery();
+        // 指定节点
+        finalQueryBuilder.must(QueryBuilders.termQuery("agent.name", agentName));
+        // 指定端口数据的判断条件
+        BoolQueryBuilder necessaryQuery = QueryBuilders.boolQuery()
+                .should(QueryBuilders.termQuery("data.sic_launch_id", "eda72998ba654c8d8625f61eaa918eb3"));
+        finalQueryBuilder.must(necessaryQuery);
+        WazuhResult<WazuhFileRoot> result = queryWazuhData(0, 36, List.of(finalQueryBuilder));
+        List<HostStateOutput> hostStateOutputList;
+        if (CollectionUtils.isNotEmpty(result.getList())) {
+            hostStateOutputList = result.getList().stream().map(xx -> {
+                String content = JsonCommon.stringify(xx.getData().getSicLaunchOutput());
+                HostStateOutput hostStateOutput = JSON.parseObject(content, HostStateOutput.class);
+                hostStateOutput.setTimestamp(xx.getTimestamp());
+                return hostStateOutput;
+            }).collect(Collectors.toList());
+            return hostStateOutputList;
+        } else {
+            log.error("未查询到主机信息");
+            hostStateOutputList = new ArrayList<>();
+        }
+
+        // 向320推送数据
+        JSONObject jsonObject = new JSONObject();
+        JSONObject dataJsonObject = new JSONObject();
+        dataJsonObject.put("data", hostStateOutputList);
+        jsonObject.put("Data", dataJsonObject.toJSONString());
+        jsonObject.put("Function", "UniteRecentHostInfoData");
+        jsonObject.put("ReceiveObjectName", "");
+        jsonObject.put("SendObjectName", "");
+//        发送构建数据
+        String jsonString = jsonObject.toJSONString();
+        webSocketClientService.sendMessage(jsonString);
+        return hostStateOutputList;
     }
 
     public DataWrapper queryOneAttackData(CollectionScenePluginHandler collectionScenePluginHandler, SceneElementBO source, SceneElementBO target, ImageToolRequest finalTool) {

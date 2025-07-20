@@ -94,6 +94,11 @@ public class CsceneAppConfig {
     @Value("${mp.cscene.default-container-disk-count:10}")
     private int defaultContainerDiskCount;
 
+    @Value("${mp.cscene.ws-ip:127.0.0.1}")
+    private String wsIp;
+
+    @Value("${mp.cscene.ws-port:1234}")
+    private String wsPort;
 
     @Autowired
     private MessageSource messageSource;

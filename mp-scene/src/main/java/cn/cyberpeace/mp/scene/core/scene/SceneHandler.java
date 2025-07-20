@@ -1141,4 +1141,10 @@ public class SceneHandler extends BaseSceneHandler<
         }
         overSceneEvent(sceneEvent);
     }
+
+    public void coreRouterConnect() {
+        for (var plugin : getPlugins()) {
+            plugin.coreRouterConnect();
+        }
+    }
 }

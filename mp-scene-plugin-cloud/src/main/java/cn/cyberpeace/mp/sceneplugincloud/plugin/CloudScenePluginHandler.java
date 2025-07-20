@@ -55,16 +55,9 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 @Component
 @PluginKey(value = PluginConstant.PLUGIN_KEY, priority = PluginConstant.PLUGIN_PRIORITY)
@@ -851,5 +844,56 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         super.elementBOClass = CloudPluginSceneElementBO.class;
         super.elementPortBOClass = CloudPluginSceneElementPortBO.class;
         super.contextClass = CloudScenePluginContext.class;
+    }
+
+    public static String CORE_ROUTER_IMAGE_NAME = "Core Router";
+
+    @Override
+    public void coreRouterConnect() {
+        TopoReformUtils topoReformUtils = new TopoReformUtils(this);
+
+        Map<String, CloudPluginSceneElementBO> elementMap = getElementMap();
+        Optional<CloudPluginSceneElementBO> coreRouterElementOptional = elementMap.values().stream()
+                .filter(element -> ElementTypeUtils.isCoreRouter(element))
+                .findFirst();
+        if (coreRouterElementOptional.isPresent()) {
+            CloudPluginSceneElementBO coreRouterElement = coreRouterElementOptional.get();
+            List<CloudPluginSceneElementBO> elements = elementMap.values().stream()
+                    .filter(element -> !ElementTypeUtils.isCoreRouter(element))
+                    .collect(Collectors.toList());
+            for (CloudPluginSceneElementBO element : elements) {
+                List<SceneElementPortBO> notIpPortsByNotConnectedPorts = getElementNotConnectedPorts(element.getSrcElement().getId());
+                // 核心路由器新增一个端口 端口默认有telnet接入方式
+                var coreRouterPort = topoReformUtils.addAuxiliaryPort(coreRouterElement);
+                topoReformUtils.addAuxiliaryAccessMode(coreRouterPort.getPluginPort(), AccessMode.Protocol.TELNET);
+                // 交换机和核心路由器新增一根连线
+                topoReformUtils.addConnect(notIpPortsByNotConnectedPorts.get(0), coreRouterPort.getScenePort());
+            }
+        }
+
+    }
+
+    /**
+     * 获取未获得网元连接的网元
+     *
+     * @param nodeId 网元节点id
+     */
+    public List<SceneElementPortBO> getElementNotConnectedPorts(String nodeId) {
+        var ele = this.getSceneHandler().getElement(nodeId);
+        var ports = ele.getPorts();
+        if (ports == null) {
+            return new ArrayList<>();
+        }
+        List<SceneElementPortBO> notConnectedPorts = new ArrayList<>();
+        for (SceneElementPortBO port : ports) {
+            var connectedPort = this.getSceneHandler().getPortConnectedPort(port.getId());
+            if (connectedPort == null) {
+                notConnectedPorts.add(port);
+            } else {
+                notConnectedPorts.clear();
+                break;
+            }
+        }
+        return notConnectedPorts;
     }
 }

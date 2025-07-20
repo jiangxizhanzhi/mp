@@ -276,6 +276,8 @@ mp:
     cp-ip: ${mp.common.ext-var.cp-ip}
     cp-port: ${mp.common.ext-var.cp-port}
     support-collect: ${mp.cscene.ext-var.support-collect:213,214,236}
+    ws-ip: ${mp.common.ext-var.ws-ip}
+    ws-port: ${mp.common.ext-var.ws-port}
   scene:
     scene-pool-size: ${mp.scene.ext-var.scene-pool-size}
     scene-hold-size: ${mp.scene.ext-var.scene-hold-size}

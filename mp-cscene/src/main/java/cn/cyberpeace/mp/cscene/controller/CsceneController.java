@@ -24,6 +24,7 @@ import cn.cyberpeace.mp.cscene.controller.request.CsceneCreateInstanceRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneSyncRequest;
 import cn.cyberpeace.mp.cscene.model.CsceneModel;
 import cn.cyberpeace.mp.cscene.model.CsceneRoleModel;
+import cn.cyberpeace.mp.cscene.model.base.BaseCsceneModel;
 import cn.cyberpeace.mp.cscene.model.base.BaseCsceneRoleModel;
 import cn.cyberpeace.mp.cscene.repository.CsceneRoleMapper;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
@@ -33,12 +34,9 @@ import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
 import cn.cyberpeace.mp.cscene.util.RegionLayoutCalculator;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
-import cn.cyberpeace.mp.scene.core.bo.SceneConfigAreaBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneConfigAreaNodeConnectionBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortConnectionBO;
+import cn.cyberpeace.mp.scene.core.bo.*;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
+import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
 import cn.cyberpeace.mp.scene.model.SceneConfigAreaModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneAreaModel;
@@ -171,6 +169,48 @@ public class CsceneController implements BaseModelListControllerBase {
         put(5, "centosCp");
     }};
 
+    /**
+     * 创建核心路由器
+     * @param elements
+     */
+    private void createCoreRoute(Map<String, JSONObject> cpElements, Map<String, JSONObject> cpElementIdMap,JSONArray elements){
+        JSONObject jsonObject = new JSONObject();
+        JSONObject object = new JSONObject();
+        try {
+            InputStream inputStream = new ClassPathResource("coreRouter.json").getInputStream();
+            object = JSONObject.parseObject(new String(inputStream.readAllBytes(), StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            InputStream inputStream2 = new ClassPathResource("coreRouterCp.json").getInputStream();
+            jsonObject = JSONObject.parseObject(new String(inputStream2.readAllBytes(), StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+//            替换id TODO 核心路由器先不处理网络
+        /*String originalId = object.getString("id");
+        JSONArray ports = object.getJSONArray("ports");
+        ports.toJavaList(JSONObject.class).forEach(port -> {
+            String portId = port.getString("id");
+            // 使用replace方法替换原始id为新的node.getNumberId()
+            String newPortId = portId.replace(originalId, node.getNumberId());
+            // 更新端口的id
+            port.put("id", newPortId);
+            portAccessModesMap.put(newPortId, port.getJSONArray("access_modes"));
+        });*/
+//        TODO id
+        String numberId = object.getString("id");
+        String numberName= object.getString("name");
+        object.put("id", object.getString("id"));
+
+//            elementBO.setName(nodeName);
+        // 根据name获取到镜像名称 从map中匹配出对应镜像
+        cpElements.put(numberId ,jsonObject);
+        cpElementIdMap.put(numberId, jsonObject);
+        elements.add(object);
+    }
+
     @ApiOperation(value = "保存下发指令场景模板", notes = "请忽略test_scenes和app_scenes字段")
     @PostMapping("/release")
     public ServiceResult<CsceneBO> saveReleaseTopo(@RequestBody ReleaseCsceneBO releaseCsceneBO) {
@@ -208,6 +248,9 @@ public class CsceneController implements BaseModelListControllerBase {
         Map<String, List<String>> areaPositionMap = new HashMap<>();
         Map<String, JSONObject> areaMap = new HashMap<>();
         HashMap<String, JSONArray> portAccessModesMap = new HashMap<>();
+
+//        核心路由器
+        createCoreRoute(cpElements, cpElementIdMap, elements);
 
         for(ReleaseCsceneNodeBO node:nodes){
             //根据设备类型 获取对应默认的设备信息 默认设备信息从常用节点中拿取 win centos 的数据可根据现场镜像信息适配修改
@@ -260,7 +303,7 @@ public class CsceneController implements BaseModelListControllerBase {
             probeInfo.put("probes",probes);
             CollectionElements.put(numberId,probeInfo);
             CollectionScene.put("enable_flow_collect","true");
-            CollectionScene.put("enable_flow_mirror","true");
+            CollectionScene.put("enable_flow_mirror","false");
 //            TODO 区域
             /*if(!areaMap.containsKey(areaName)){
                 JSONObject area = new JSONObject();
@@ -288,7 +331,7 @@ public class CsceneController implements BaseModelListControllerBase {
             elements.add(object);
         }
 
-        for(ReleaseCsceneLinkBO link:links){
+        /*for(ReleaseCsceneLinkBO link:links){
 
             int targetPortCount = 1;
             int sourcePortCount = 1;
@@ -397,7 +440,7 @@ public class CsceneController implements BaseModelListControllerBase {
             connect.put("name", linkName.toJSONString());
             connections.add(connect);
 
-        }
+        }*/
 
         // TODO 默认值测试 可根据画布大小调整 给节点设置x、y地址
         generateUniformNodes(elements, 800, 200);
@@ -467,9 +510,47 @@ public class CsceneController implements BaseModelListControllerBase {
         sceneObj.put("plugins", plugins);
         SceneConfigDataBO sceneConfig = sceneObj.toJavaObject(SceneConfigDataBO.class);
         csceneBO.setSceneConfig(sceneConfig);
-//        correctRequestCsceneParamsForReleaseSync(csceneBO);
+        csceneBO.setReferenceType(BaseCsceneModel.ReferenceType.READ_VS_BLUE);
         var result = modelService.sync(csceneBO, null, true).asResult();
         return result;
+
+        /*
+        correctRequestCsceneParamsForReleaseSync(csceneBO);
+
+        String configContent = JsonCommon.snakeStringify(csceneBO.getSceneConfig());
+        SceneDataBO sceneDataBO = JsonCommon.snakeParse(configContent, SceneDataBO.class);
+        sceneDataBO.getTopology().setScene(new SceneBO());
+        SceneHandler instanceHandler = new SceneHandler(sceneDataBO, null);
+        instanceHandler.save();
+//        TODO 报错
+        instanceHandler.initiate();
+        instanceHandler.coreRouterConnect();
+        instanceHandler.save();
+
+        String instanceContent = JsonCommon.snakeStringify(instanceHandler.toData());
+        SceneConfigDataBO sceneConfigDataBO = JsonCommon.snakeParse(instanceContent, SceneConfigDataBO.class);
+
+        CsceneBO tmp = new CsceneBO();
+        sceneConfigDataBO.getTopology().setScene(new SceneConfigBO());
+        tmp.setSceneConfig(sceneConfigDataBO);
+        correctRequestCsceneParamsForSync(tmp);
+        SceneConfigHandler newConfigHandler = new SceneConfigHandler(sceneConfigDataBO, null);
+        newConfigHandler.save();
+
+        return new ServiceResult<>(tmp);*/
+    }
+
+    @ApiOperation(value = "保存下发指令场景模板", notes = "请忽略test_scenes和app_scenes字段")
+    @PostMapping("/release2")
+    public ServiceResult<CsceneBO> saveReleaseTopo2(@RequestBody ReleaseCsceneBO releaseCsceneBO) {
+        SceneDataBO sceneDataBO = new SceneDataBO();
+        SceneTopologyBO sceneTopologyBO = new SceneTopologyBO();
+        sceneDataBO.setTopology(sceneTopologyBO);
+        sceneDataBO.getTopology().setScene(new SceneBO());
+        SceneHandler instanceHandler = new SceneHandler(sceneDataBO, null);
+        instanceHandler.save();
+        instanceHandler.initiate();
+        return null;
     }
 
     private void generateUniformNodes(JSONArray cpElements, int canvasWidth, int canvasHeight) {
