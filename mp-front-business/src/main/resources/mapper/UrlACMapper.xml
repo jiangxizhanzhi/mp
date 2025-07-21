@@ -4,9 +4,9 @@
 
     <select id="getById" resultType="cn.cyberpeace.mp.frontbusiness.dto.UrlAccessCtlDto">
         SELECT distinct ua.id,
-                        ua.url,
-                        ua.is_pattern,
-                        ua.methods                               as methodStr,
+                        max(ua.url),
+                        max(ua.is_pattern),
+                        max(ua.methods)                               as methodStr,
                         group_concat(mauat.target separator ',') as targetsStr
         FROM mp_auth_url_ac ua
         left join mp_auth_url_ac_target mauat
@@ -18,9 +18,9 @@
     <select id="listAllUrlAccessCtlDtos" resultType="cn.cyberpeace.mp.frontbusiness.dto.UrlAccessCtlDto">
         SELECT
                distinct ua.id,
-               ua.url,
-               ua.is_pattern,
-               ua.methods as methodStr,
+               max(ua.url),
+               max(ua.is_pattern),
+               max(ua.methods) as methodStr,
                group_concat(mauat.target separator ',') as targetsStr
         FROM mp_auth_url_ac ua
         left join mp_auth_url_ac_target mauat
@@ -33,9 +33,9 @@
     <select id="listAllUrlAccessCtlPatternDtos" resultType="cn.cyberpeace.mp.frontbusiness.dto.UrlAccessCtlDto">
         SELECT
             distinct ua.id,
-                     ua.url,
-                     ua.is_pattern,
-                     ua.methods as methodStr,
+                     max(ua.url),
+                     max(ua.is_pattern),
+                     max(ua.methods) as methodStr,
                      group_concat(mauat.target separator ',') as targetsStr
         FROM mp_auth_url_ac ua
         left join mp_auth_url_ac_target mauat
@@ -47,9 +47,9 @@
     <select id="listByTargetIds" resultType="cn.cyberpeace.mp.frontbusiness.dto.UrlAccessCtlDto">
         SELECT
             distinct ua.id,
-            ua.url,
-            ua.is_pattern,
-            ua.methods as methodStr,
+            max(ua.url),
+            max(ua.is_pattern),
+            max(ua.methods) as methodStr,
         group_concat(mauat.target separator ',') as targetsStr
         FROM mp_auth_url_ac ua
         left join mp_auth_url_ac_target mauat
