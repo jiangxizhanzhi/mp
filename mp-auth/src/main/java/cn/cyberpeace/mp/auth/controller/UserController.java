@@ -238,7 +238,7 @@ public class UserController {
              result.add(userLink3);
              return new ServiceResult<>(result).asResult();
          }
-         String thirdToken = JwtCommon.getToken(request);
+         String thirdToken = JwtCommon.getThirdToken(request);
          ThirdSsoService thirdSsoService = BeanCommon.getBean(ThirdSsoService.class);
          var user = thirdSsoService.getuserinfoByLogintoken(thirdToken);
          List<ThirdSsoService.SystemLink> systemLinks = new ArrayList<>();
