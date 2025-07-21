@@ -130,6 +130,26 @@ public class InitiateHandler extends HandlerCommon {
             }
         }
 
+        for (var e : allCloudElements) {
+            if (Boolean.TRUE.equals(e.getTransparent())) {
+                for (var p : e.getSrcElement().getPorts()) {
+                    var connectOpaquePort = getHandlerUtils().getPortConnectedOpaqueSrcPort(p.getId());
+                    if (connectOpaquePort != null) {
+                        if (StringUtils.isNotEmpty(connectOpaquePort.getIp())) {
+                            String cidr = IpUtils.getFormatCidrIp(connectOpaquePort.getIp() + "/24");
+                            e.setTransparentNetCidr(cidr);
+                            break;
+                        }
+                        String cidr = getPluginHandler().getElement(connectOpaquePort.getElement().getId()).getCidr();
+                        if (StringUtils.isNotEmpty(cidr)) {
+                            e.setTransparentNetCidr(cidr);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
         // 初始化节点属性
         List<Runnable> initiateElementTasks = new ArrayList<>();
         for (CloudPluginSceneElementBO cloudPluginSceneElementBO : cloudElements) {
@@ -426,7 +446,7 @@ public class InitiateHandler extends HandlerCommon {
         // 如果连线的对端节点,有相同cidr的网络,那么这个网络就是默认网络
         boolean defaultNetwordIsDerive = true;
         for (SceneElementPortBO port : ports) {
-            SceneElementPortBO connectPort = getHandlerUtils().getPortConnectedOpaqueSrcPort(port.getId());
+            SceneElementPortBO connectPort = getPluginHandler().getPortConnectedSrcPort(port.getId());
             if (connectPort != null) {
                 // 有连线 且 对端端口已归属某个网络 则本端口接入即可
                 CloudPluginSceneElementNetworkBO connectNetwork = getHandlerUtils().getNetworkByPort(connectPort);
@@ -440,9 +460,10 @@ public class InitiateHandler extends HandlerCommon {
         }
 
         Map<String, ConnectedNetworkBO> cidr2ConnectedNetwork = new HashMap<>();
+        List<ConnectedNetworkBO> transparentNetworks = new ArrayList<>();
         List<ConnectedNetworkBO> noCidrNetwork = new ArrayList<>();
         for (SceneElementPortBO port : ports) {
-            SceneElementPortBO connectPort = getHandlerUtils().getPortConnectedOpaqueSrcPort(port.getId());
+            SceneElementPortBO connectPort = getPluginHandler().getPortConnectedSrcPort(port.getId());
             if (connectPort != null) {
                 // 有连线 且 对端端口已归属某个网络 则本端口接入即可
                 CloudPluginSceneElementNetworkBO connectNetwork = getHandlerUtils().getNetworkByPort(connectPort);
@@ -455,6 +476,9 @@ public class InitiateHandler extends HandlerCommon {
             }
             // 根据用户手动配置的网络参数，初始化网络和网络设置
             String cidrDivideIp = getConnectCidrDivideIp(port, connectPort);
+            if (Boolean.TRUE.equals(cloudElement.getTransparent())) {
+                cidrDivideIp = cloudElement.getTransparentNetCidr();
+            }
             String connectCidrByManualSettingInPort = getConnectCidrByManualSettingInPort(port, connectPort);
             boolean connectCidrNotManualSetFlag = StringUtils.isBlank(cidrDivideIp) && StringUtils.isBlank(connectCidrByManualSettingInPort);
             if (connectCidrNotManualSetFlag) {
@@ -489,6 +513,13 @@ public class InitiateHandler extends HandlerCommon {
                     defaultConnectedNetwork.addPort(port, connectPort, true);
                 } else if (this.isInCidr(defaultConnectedNetwork.getNetwork().getCidr(), cidrDivideIp)) {
                     defaultConnectedNetwork.addPort(port, connectPort, true);
+                } else if (Boolean.TRUE.equals(cloudElement.getTransparent())) {
+                    // 透明模式的节点 每个端口一个网络
+                    CloudPluginSceneElementNetworkBO createNetwork = new CloudPluginSceneElementNetworkBO(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
+                    createNetwork.setCidr(cidr);
+                    var connectedNetwork = new ConnectedNetworkBO(createNetwork, getHandlerUtils());
+                    connectedNetwork.addPort(port, connectPort, true);
+                    transparentNetworks.add(connectedNetwork);
                 } else {
                     // 和默认网段不同,构建网络
                     ConnectedNetworkBO connectedNetwork = cidr2ConnectedNetwork.get(cidr);
@@ -510,6 +541,14 @@ public class InitiateHandler extends HandlerCommon {
                 }
             }
             cloudElement.getDeriveNetworks().addAll(cidr2ConnectedNetwork.values());
+            cloudElement.getDeriveNetworks().addAll(noCidrNetwork);
+        } else if (Boolean.TRUE.equals(cloudElement.getTransparent())) {
+            if (CollectionUtils.isNotEmpty(defaultConnectedNetwork.getFromPorts())) {
+                if (defaultNetwordIsDerive) {
+                    cloudElement.getDeriveNetworks().add(defaultConnectedNetwork);
+                }
+            }
+            cloudElement.getDeriveNetworks().addAll(transparentNetworks);
             cloudElement.getDeriveNetworks().addAll(noCidrNetwork);
         } else {
             // 其余 有连线才接网络
@@ -1307,6 +1346,40 @@ public class InitiateHandler extends HandlerCommon {
         allCloudElements.forEach(cloudElement -> this.initCoreType(cloudElement));
         // 根据节点的类型排序,这个顺序直接影响组网的结果
         Collections.sort(allCloudElements, Comparator.comparing(CloudPluginSceneElementBO::getCoreType));
+
+        // 透明模式的节点，需要在最前面
+        List<CloudPluginSceneElementBO> tmpElements = new ArrayList<>();
+        List<CloudPluginSceneElementBO> transparentElements = new ArrayList<>();
+        for (var e : allCloudElements) {
+            if (Boolean.TRUE.equals(e.getTransparent())) {
+                transparentElements.add(e);
+            } else {
+                tmpElements.add(e);
+            }
+        }
+        List<CloudPluginSceneElementBO> e1 = new ArrayList<>();
+        List<CloudPluginSceneElementBO> e2 = new ArrayList<>();
+        for (var e : transparentElements) {
+            var connectElements = getPluginHandler().getElementConnectedSrcElements(e.getSrcElement().getId());
+            boolean allTransparent = true;
+            for (var connectElement : connectElements) {
+                var cloudElement = getPluginHandler().getElement(connectElement.getId());
+                if (Boolean.FALSE.equals(cloudElement.getTransparent())) {
+                    allTransparent = false;
+                }
+            }
+            if (allTransparent) {
+                e2.add(e);
+            } else {
+                e1.add(e);
+            }
+        }
+        allCloudElements = new ArrayList<>();
+        allCloudElements.addAll(e1);
+        allCloudElements.addAll(e2);
+        allCloudElements.addAll(tmpElements);
+
+
         return allCloudElements;
     }
 

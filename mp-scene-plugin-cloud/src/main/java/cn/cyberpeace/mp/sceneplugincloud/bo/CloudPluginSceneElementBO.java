@@ -31,6 +31,9 @@ public class CloudPluginSceneElementBO extends BaseCloudPluginSceneElementBO<Clo
     @ApiModelProperty(value = "云平台用于分布式部署时需要的ip,节点的每个网络需要一个")
     private Map<String, String> fwdnsIps = new ConcurrentHashMap<>();
 
+    // 透明模式节点使用的cidr ， 透明模式节点所有端口的cidr都是相同的
+    private String transparentNetCidr = null ;
+
     // 加入的网络
     @JsonIgnore
     public List<ConnectedNetworkBO> accessNetworks = new ArrayList<>();

@@ -46,7 +46,7 @@ public class CsceneAppConfig {
     @Value("${mp.cscene.scene-enable-recording-key:screen_recording}")
     private String sceneEnableRecordingKey;
 
-    @Value("${mp.cscene.scene-edit-node-limit:5}")
+    @Value("${mp.cscene.scene-edit-node-limit:50}")
     private Integer sceneEditNodeLimit;
 
     @Value("${mp.cscene.scene-using-node-limit:1000}")
