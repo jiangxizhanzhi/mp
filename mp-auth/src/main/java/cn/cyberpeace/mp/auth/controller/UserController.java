@@ -251,6 +251,11 @@ public class UserController {
          Set<String> systemLinkSet = new HashSet<>();
          List<UserLink> userLinks = new ArrayList<>();
          for (ThirdSsoService.SystemLink systemLink : systemLinks) {
+             String clientId = authConfig.getThirdClientId();
+             if (Objects.equals(systemLink.getClientId(), clientId)) {
+                 log.info("当前不需要展示知识空间的跳转, {}-{}", systemLink.getSystemName(), systemLink.getClientId());
+                 continue;
+             }
              if (!systemLinkSet.contains(systemLink.getSystemName())) {
                  systemLinkSet.add(systemLink.getSystemName());
                  UserLink userLink = new UserLink();
