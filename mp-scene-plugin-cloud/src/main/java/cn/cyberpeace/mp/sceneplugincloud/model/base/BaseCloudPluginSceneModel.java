@@ -21,6 +21,6 @@ public class BaseCloudPluginSceneModel extends BasePluginSceneModel {
     @DefaultStr
     private String internalNetId;
 
-    @DefaultBool(value = true)
+    @DefaultBool(value = false)
     private Boolean createInternalVm;
 }
