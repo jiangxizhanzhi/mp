@@ -885,47 +885,6 @@ public class CsceneDataModifier {
         }
     }
 
-    public static void checkSameCidrForCpcollection(CsceneBO csceneBO) {
-        SceneConfigDataBO sceneConfigDataBO = csceneBO.getSceneConfig();
-        if (sceneConfigDataBO != null && sceneConfigDataBO.getPlugins() != null && sceneConfigDataBO.getPlugins().get(cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant.PLUGIN_KEY) != null) {
-            ScenePluginDataBO collctionPluginDataBO = csceneBO.getSceneConfig().getPlugins().get(cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant.PLUGIN_KEY);
-            Map<String, Object> sceneSwitchMap = collctionPluginDataBO.getScene();
-            boolean checkCidr = sceneSwitchMap.get(ENABLE_PROBE_COLLECT) != null && Boolean.TRUE.toString().equals(sceneSwitchMap.get(ENABLE_PROBE_COLLECT).toString());
-            if(!checkCidr){
-                Map<String, Map<String, Object>> elements = collctionPluginDataBO.getElements();
-                if (elements != null && !elements.isEmpty()) {
-                    for(Map<String, Object> map : elements.values()){
-                        if (map.get(ENABLE_PROBE_COLLECT) != null && Boolean.TRUE.toString().equals(map.get(ENABLE_PROBE_COLLECT).toString())) {
-                            checkCidr = true;
-                            break;
-                        }
-                    }
-                }
-            }
-            if(!checkCidr){
-                return;
-            }
-            //检查cpcloud下是否有相同cidr
-            ScenePluginDataBO cloudPluginDataBO = csceneBO.getSceneConfig().getPlugins().get(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
-            Map<String, Map<String, Object>> elements = cloudPluginDataBO.getElements();
-            Set<String> cidrSet = new HashSet();
-            if (elements != null && !elements.isEmpty()) {
-                for(Map<String, Object> map : elements.values()){
-                    if (!ObjectUtils.isEmpty(map.get(CIDR))) {
-                       String cidr = String.valueOf(map.get(CIDR));
-                       if(cidrSet.contains(cidr)){
-                           MpRuntimeException ex = new MpRuntimeException(CsceneErrorCode.PARAMS_SAME_CIDR_FOR_COLLECTION);
-                           ex.setDetail("conflict cidr: ".concat(map.get(CIDR).toString()));
-                           throw ex;
-                       }
-                       cidrSet.add(cidr);
-                    }
-                }
-            }
-        }
-    }
-
-
     public static void checkFirewallRules(CsceneBO csceneBO) {
         if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getPlugins() != null && csceneBO.getSceneConfig().getPlugins().get("cpcloud") != null) {
             Map<String, Map<String, Object>> ports = csceneBO.getSceneConfig().getPlugins().get("cpcloud").getElementPorts();

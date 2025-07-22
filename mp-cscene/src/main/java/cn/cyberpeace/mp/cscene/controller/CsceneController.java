@@ -134,7 +134,6 @@ public class CsceneController implements BaseModelListControllerBase {
         CsceneDataModifier.handlerEnableRate(csceneBO);
         CsceneDataModifier.checkFlowNum(csceneBO);
         //check cidr not same when enable collection
-        CsceneDataModifier.checkSameCidrForCpcollection(csceneBO);
         CsceneDataModifier.checkVlanId(csceneBO);
         CsceneDataModifier.check(csceneBO);
         CsceneDataModifier.checkIngressAndEgress(csceneBO);
