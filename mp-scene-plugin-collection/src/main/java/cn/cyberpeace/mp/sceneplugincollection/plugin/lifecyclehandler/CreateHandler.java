@@ -95,7 +95,7 @@ public class CreateHandler extends HandlerCommon {
             VirtualRouterCreateData virtualRouter = getVirtualRouterCreateData(sceneId, new ArrayList<>(gp.values()));
             probeRouters.add(virtualRouter.getId());
         }
-        getPluginHandler().getScene().setProbeRouter(StringUtils.joinWith(",", probeRouters));
+        getPluginHandler().getScene().setProbeRouter(StringUtils.join(probeRouters, ","));
     }
 
     private VirtualRouterCreateData getVirtualRouterCreateData(String sceneId, List<CollectionPluginSceneProbeRouterPortModel> routerPorts) {
