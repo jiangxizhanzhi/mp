@@ -82,6 +82,7 @@ public class CreateHandler extends HandlerCommon {
 
         CloudScenePluginHandler cloudPluginHandler = getPluginHandler().getSceneHandler()
                 .getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
+        Set<String> cidrs = new HashSet<>();
         routerPorts.forEach(routerPort -> {
             CloudPluginSceneElementBO cloudElement = cloudPluginHandler.getElement(routerPort.getSceneElement());
             String networkId = null;
@@ -96,10 +97,15 @@ public class CreateHandler extends HandlerCommon {
                 return;
             }
             routerPort.setNetworkId(networkId);
+            String cidr = routerPort.getIp().substring(0, routerPort.getIp().lastIndexOf("."));
+            if (cidrs.contains(cidr)) {
+                return;
+            }
             VirtualNic virtualNic = new VirtualNic();
             virtualNic.setNetworkId(networkId);
             virtualNic.setFixedIp(routerPort.getIp());
             virtualNics.add(virtualNic);
+            cidrs.add(cidr);
         });
         getSceneProbeRouterPortMapper().bulkUpdate(routerPorts);
         createData.setNetworks(virtualNics);

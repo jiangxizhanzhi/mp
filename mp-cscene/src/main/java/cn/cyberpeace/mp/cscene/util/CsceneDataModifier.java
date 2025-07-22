@@ -907,9 +907,9 @@ public class CsceneDataModifier {
                     if (!ObjectUtils.isEmpty(map.get(CIDR))) {
                        String cidr = String.valueOf(map.get(CIDR));
                        if(cidrSet.contains(cidr)){
-                           MpRuntimeException ex = new MpRuntimeException(CsceneErrorCode.PARAMS_SAME_CIDR_FOR_COLLECTION);
-                           ex.setDetail("conflict cidr: ".concat(map.get(CIDR).toString()));
-                           throw ex;
+//                           MpRuntimeException ex = new MpRuntimeException(CsceneErrorCode.PARAMS_SAME_CIDR_FOR_COLLECTION);
+//                           ex.setDetail("conflict cidr: ".concat(map.get(CIDR).toString()));
+//                           throw ex;
                        }
                        cidrSet.add(cidr);
                     }
