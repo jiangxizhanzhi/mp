@@ -163,10 +163,12 @@ public class DeleteHandler extends HandlerCommon {
         String probeRouterId = scene.getProbeRouter();
         if (!StringUtils.isEmpty(probeRouterId)) {
             runSceneProgress(SceneProcess.DELETE_PROBE_ROUTER, () -> {
-                deleteProbeRouter(probeRouterId);
+                var probeRouterIds = StringUtils.split(probeRouterId, ",");
+                for (String id : probeRouterIds) {
+                    deleteProbeRouter(id);
+                }
             });
         }
-
     }
 
     public void unbindProbeCollectAgentProcess(CollectionPluginSceneElementBO collectionElement, String probeCollectorId) {

@@ -27,6 +27,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -71,6 +72,33 @@ public class CreateHandler extends HandlerCommon {
         String sceneId = getPluginHandler().getSrcScene().getEid();
         List<CollectionPluginSceneProbeRouterPortModel> routerPorts = getSceneProbeRouterPortMapper().list(
                 new HumanCondition().filterEqual(CollectionPluginSceneProbeRouterPortModel::getScene, sceneId));
+        // 将业务网络分组 保证每个组内没有重复的网段
+        List<Map<String, CollectionPluginSceneProbeRouterPortModel>> groupPort = new ArrayList<>();
+        for (var rp : routerPorts) {
+            String cidr = rp.getIp().substring(0, rp.getIp().lastIndexOf("."));
+            boolean addNew = true;
+            for (var gp : groupPort) {
+                if (!gp.containsKey(cidr)) {
+                    gp.put(cidr, rp);
+                    addNew = false;
+                    break;
+                }
+            }
+            if (addNew) {
+                var gp = new HashMap<String, CollectionPluginSceneProbeRouterPortModel>();
+                gp.put(cidr, rp);
+                groupPort.add(gp);
+            }
+        }
+        List<String> probeRouters = new ArrayList<>();
+        for (var gp : groupPort) {
+            VirtualRouterCreateData virtualRouter = getVirtualRouterCreateData(sceneId, new ArrayList<>(gp.values()));
+            probeRouters.add(virtualRouter.getId());
+        }
+        getPluginHandler().getScene().setProbeRouter(StringUtils.joinWith(",", probeRouters));
+    }
+
+    private VirtualRouterCreateData getVirtualRouterCreateData(String sceneId, List<CollectionPluginSceneProbeRouterPortModel> routerPorts) {
         VirtualRouter vrClient = new VirtualRouter();
         // 创建辅助路由
         VirtualRouterCreateData createData = new VirtualRouterCreateData();
@@ -104,7 +132,7 @@ public class CreateHandler extends HandlerCommon {
         getSceneProbeRouterPortMapper().bulkUpdate(routerPorts);
         createData.setNetworks(virtualNics);
         VirtualRouterCreateData virtualRouter = vrClient.create(createData);
-        getPluginHandler().getScene().setProbeRouter(virtualRouter.getId());
+        return virtualRouter;
     }
 
     public void create() {
