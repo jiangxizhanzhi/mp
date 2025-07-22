@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.auth.service;
 
 import java.util.List;
 
+import cn.cyberpeace.mp.auth.bo.redis.AddUserMessage;
 import org.springframework.web.multipart.MultipartFile;
 
 import cn.cyberpeace.mp.auth.bo.excel.ExportUserBo;
@@ -116,4 +117,6 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
    List<String> listExistedUserNames(List<String> userNames, Integer limit);
 
 	void createCasUser(String username, String name);
+
+    void createRedisUser(AddUserMessage message, String orgId);
 }

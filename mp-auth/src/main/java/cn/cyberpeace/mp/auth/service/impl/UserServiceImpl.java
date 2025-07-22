@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 
+import cn.cyberpeace.mp.auth.bo.redis.AddUserMessage;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1195,6 +1196,43 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 				ResultUtils.throwExceptionIfError(re2, AuthErrorCode.USER_ROLE_ADD_ERROR);
 			}
 		});
+    }
+
+    @Override
+    public void createRedisUser(AddUserMessage message, String orgId) {
+        UserModel userModel = new UserModel();
+        userModel.setId(message.getId());
+        userModel.setUsername(message.getUsername());
+        userModel.setName(message.getDisplayName());
+        userModel.setInitCheck(0);
+        userModel.setPassword(message.getPassword());
+        userModel.encodePassword();
+        userModel.setTenant("gfkd");
+        userModel.setEmail(message.getEmail());
+        userModel.setMobile(message.getMobile());
+
+        transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+
+            @Override
+            protected void doInTransactionWithoutResult(TransactionStatus status) {
+                boolean successFlag = getModelMapper().create(userModel);
+                if (successFlag) {
+                    log.error("insert gfkd user error: {}", userModel.getUsername());
+                } else {
+                    throw new MpRuntimeException(AuthErrorCode.USER_ADD_ERROR);
+                }
+                // 默认一级组织
+                TenantUserModel tenantUserModel = TenantUserModel.builder().user(userModel.getId())
+                        .org(orgId).build();
+                var re1 = tenantUserService.create(tenantUserModel);
+                ResultUtils.throwExceptionIfError(re1, AuthErrorCode.USER_ORG_ADD_ERROR);
+                // 默认管理员角色
+                UserRoleModel userRoleModel = UserRoleModel.builder().user(userModel.getId())
+                        .role("5827ff7847504ffd806e0a85c417228d").build();
+                var re2 = userRoleService.create(userRoleModel);
+                ResultUtils.throwExceptionIfError(re2, AuthErrorCode.USER_ROLE_ADD_ERROR);
+            }
+        });
     }
 }
 

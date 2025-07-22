@@ -83,4 +83,6 @@ public interface OrgService extends BaseModelService<OrgModel, QueryParams> {
      */
     List<List<String>> getBathPathToList(List<OrgModel> orgModelList);
 
+    OrgModel getModelByName(String name);
+
 }

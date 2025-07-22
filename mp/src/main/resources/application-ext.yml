@@ -19,6 +19,15 @@ spring:
       username: ${RABBITMQ_USERNAME:cpcloud}
       password: ${RABBITMQ_PASSWORD:MzhhMzU4NDQzNzU}
 
+  redis:
+    database: 0
+    host: ${REDIS_HOST:192.168.1.18}
+    port: ${REDIS_PORT:6379}
+    password: 'redis@2024'
+    topic: uia-topic-addUser,uia-topic-updateUser,uia-topic-deleteUser #redis 订阅主题
+    threadName: mp-redis-executor #redis 线程前缀
+
+
 springfox:
   documentation:
     ext-var:

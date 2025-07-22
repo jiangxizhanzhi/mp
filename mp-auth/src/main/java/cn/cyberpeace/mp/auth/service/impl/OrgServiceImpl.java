@@ -244,6 +244,13 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     }
 
     @Override
+    public OrgModel getModelByName(String name) {
+        HumanCondition humanCondition = new HumanCondition();
+        humanCondition.filterEqual(OrgModel::getName, name);
+        return getModelMapper().first(humanCondition);
+    }
+
+    @Override
     public ServiceResult<Integer> bulkUpdate(List<OrgModel> objs) {
 //        return super.bulkUpdate(objs);
         throw new MpRuntimeException(AuthErrorCode.OP_ERROR);

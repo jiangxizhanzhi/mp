@@ -3,6 +3,7 @@ dependencies {
     implementation project(':mp-common')
     implementation project(':mp-auth-base')
     implementation project(':mp-log')
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 }
 
 tasks.test {
