@@ -627,7 +627,9 @@ public class CsceneOutController implements BaseModelListControllerBase {
         String targetIp = target.getPorts().get(0).getIp();
         String username = sshInfo.getUsername();
         String password = sshInfo.getPassword();
-        String res = pythonExecUtil.exec("pingtest.py", sourceIp, sourcePort, targetIp, username, password);
+        String dir = BeanCommon.getBean(BaseAppConfig.class).getResourcesDir();
+        String pintTestPath = dir + "/" + "pingtest.py";
+        String res = pythonExecUtil.exec(pintTestPath, sourceIp, sourcePort, targetIp, username, password);
         var pingRes = JsonCommon.snakeParse(res, PintTest.class);
         return pingRes;
     }
