@@ -858,17 +858,24 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
                 .findFirst();
         if (coreRouterElementOptional.isPresent()) {
             CloudPluginSceneElementBO coreRouterElement = coreRouterElementOptional.get();
+            List<SceneElementPortBO> coreRouterNotIpPortsByNotConnectedPorts = getElementNotConnectedPorts(coreRouterElement.getSrcElement().getId());
             List<CloudPluginSceneElementBO> elements = elementMap.values().stream()
                     .filter(element -> !ElementTypeUtils.isCoreRouter(element))
                     .collect(Collectors.toList());
-            for (CloudPluginSceneElementBO element : elements) {
+            for (int i = 0; i < elements.size(); i++) {
+                CloudPluginSceneElementBO element = elements.get(i);
+                List<SceneElementPortBO> notIpPortsByNotConnectedPorts = getElementNotConnectedPorts(element.getSrcElement().getId());
+                // 交换机和核心路由器新增一根连线
+                topoReformUtils.addConnect(coreRouterNotIpPortsByNotConnectedPorts.get(i),notIpPortsByNotConnectedPorts.get(0));
+            }
+            /*for (CloudPluginSceneElementBO element : elements) {
                 List<SceneElementPortBO> notIpPortsByNotConnectedPorts = getElementNotConnectedPorts(element.getSrcElement().getId());
                 // 核心路由器新增一个端口 端口默认有telnet接入方式
                 var coreRouterPort = topoReformUtils.addAuxiliaryPort(coreRouterElement);
                 topoReformUtils.addAuxiliaryAccessMode(coreRouterPort.getPluginPort(), AccessMode.Protocol.TELNET);
                 // 交换机和核心路由器新增一根连线
                 topoReformUtils.addConnect(notIpPortsByNotConnectedPorts.get(0), coreRouterPort.getScenePort());
-            }
+            }*/
         }
 
     }

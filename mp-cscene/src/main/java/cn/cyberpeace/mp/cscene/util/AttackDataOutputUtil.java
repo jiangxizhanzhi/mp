@@ -122,7 +122,7 @@ public class AttackDataOutputUtil {
      * @param target
      * @return
      */
-    public  List<HostStateOutput> queryRecentHostInfo(SceneElementBO target) {
+    public  List<HostStateOutput> queryRecentHostInfo(SceneElementBO target, String toolId, String taskId, String targetId) {
         String agentName = target.getEid();
         BoolQueryBuilder finalQueryBuilder = QueryBuilders.boolQuery();
         // 指定节点
@@ -140,7 +140,6 @@ public class AttackDataOutputUtil {
                 hostStateOutput.setTimestamp(xx.getTimestamp());
                 return hostStateOutput;
             }).collect(Collectors.toList());
-            return hostStateOutputList;
         } else {
             log.error("未查询到主机信息");
             hostStateOutputList = new ArrayList<>();
@@ -149,7 +148,12 @@ public class AttackDataOutputUtil {
         // 向320推送数据
         JSONObject jsonObject = new JSONObject();
         JSONObject dataJsonObject = new JSONObject();
-        dataJsonObject.put("data", hostStateOutputList);
+        JSONObject recentHostInfoList = new JSONObject();
+        recentHostInfoList.put("recentHostInfoList", hostStateOutputList);
+        recentHostInfoList.put("taskId",taskId);
+        recentHostInfoList.put("toolId",toolId);
+        recentHostInfoList.put("targetId",targetId);
+        dataJsonObject.put("data", recentHostInfoList);
         jsonObject.put("Data", dataJsonObject.toJSONString());
         jsonObject.put("Function", "UniteRecentHostInfoData");
         jsonObject.put("ReceiveObjectName", "");
@@ -264,8 +268,9 @@ public class AttackDataOutputUtil {
         finalQueryBuilder.must(QueryBuilders.termQuery("destination.ip", targetIp));
         finalQueryBuilder.must(QueryBuilders.existsQuery("suricata"));
         RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery("@timestamp");
-        rangeQueryBuilder.gte(LocalDateTime.now().minusSeconds(INTERVAL_SECONDS).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
-        rangeQueryBuilder.lte(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
+//        TODO 时间范围需要修改 查不到数据
+//        rangeQueryBuilder.gte(LocalDateTime.now().minusSeconds(INTERVAL_SECONDS).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
+//        rangeQueryBuilder.lte(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
         finalQueryBuilder.must(rangeQueryBuilder);
         String index = indices + "_sessions3-" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyMMdd"));
         var flows = this.queryArkimeData(index, 0, 10, List.of(finalQueryBuilder));

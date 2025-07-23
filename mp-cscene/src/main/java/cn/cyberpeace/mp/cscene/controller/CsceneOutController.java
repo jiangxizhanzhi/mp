@@ -47,7 +47,9 @@ import cn.cyberpeace.mp.flow.service.FlowTaskTaskService;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
+import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
 import cn.cyberpeace.mp.situationaware.model.wazuh.common.request.CollectorBaseRequest;
@@ -269,28 +271,31 @@ public class CsceneOutController implements BaseModelListControllerBase {
             String taskId = jsonObject.getString("taskId");
             var sceneId = csceneInstanceService.getSceneId(mpSceneId);
             SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, false);
-            Map<String, SceneElementBO> uniteElementMap = sceneHandler.getElementMap().values().stream()
-                    .collect(Collectors.toMap(element -> element.getUniteNumberId(), element -> element, (a, b) -> a));
-            for (JSONObject link : jsonObject.getJSONArray("links").toJavaList(JSONObject.class)) {
-                String sourceNumberId = link.getString("source_number_id");
-                String targetNumberId = link.getString("target_number_id");
-                SceneElementBO source = uniteElementMap.get(sourceNumberId);
-                SceneElementBO target = uniteElementMap.get(targetNumberId);
-                ConnectInfo connectInfo = getConnectInfo(sceneHandler, source, target);
-                connectInfo.setTaskId(taskId);
-                connectInfo.setLinkId(link.getString("link_id"));
-                connectInfo.setSourceNumberId(sourceNumberId);
-                connectInfo.setTargetNumberId(targetNumberId);
-                JSONObject resultJson = new JSONObject();
-                JSONObject dataJsonObject = new JSONObject();
-                dataJsonObject.put("data", connectInfo);
-                resultJson.put("Data", dataJsonObject.toJSONString());
-                resultJson.put("Function", "UniteLinkStatusData");
-                resultJson.put("ReceiveObjectName", "");
-                resultJson.put("SendObjectName", "");
+//            运行中场景
+            if (sceneHandler.getScene().getEvent() == SceneModel.Event.CREATE && sceneHandler.getScene().getEventStatus() == EventStatus.OVER) {
+                Map<String, SceneElementBO> uniteElementMap = sceneHandler.getElementMap().values().stream()
+                        .collect(Collectors.toMap(element -> element.getUniteNumberId(), element -> element, (a, b) -> a));
+                for (JSONObject link : jsonObject.getJSONArray("links").toJavaList(JSONObject.class)) {
+                    String sourceNumberId = link.getString("source_number_id");
+                    String targetNumberId = link.getString("target_number_id");
+                    SceneElementBO source = uniteElementMap.get(sourceNumberId);
+                    SceneElementBO target = uniteElementMap.get(targetNumberId);
+                    ConnectInfo connectInfo = getConnectInfo(sceneHandler, source, target);
+                    connectInfo.setTaskId(taskId);
+                    connectInfo.setLinkId(link.getString("link_id"));
+                    connectInfo.setSourceNumberId(sourceNumberId);
+                    connectInfo.setTargetNumberId(targetNumberId);
+                    JSONObject resultJson = new JSONObject();
+                    JSONObject dataJsonObject = new JSONObject();
+                    dataJsonObject.put("data", connectInfo);
+                    resultJson.put("Data", dataJsonObject.toJSONString());
+                    resultJson.put("Function", "UniteLinkStatusData");
+                    resultJson.put("ReceiveObjectName", "");
+                    resultJson.put("SendObjectName", "");
 //        发送构建数据
-                String jsonString = resultJson.toJSONString();
-                webSocketClientService.sendMessage(jsonString);
+                    String jsonString = resultJson.toJSONString();
+                    webSocketClientService.sendMessage(jsonString);
+                }
             }
         }
         return new ServiceResult().asResult();
@@ -330,6 +335,16 @@ public class CsceneOutController implements BaseModelListControllerBase {
         // 取源节点上的ssh信息
         SshInfo sshInfo = this.getSshInfo(source.getPorts(), handler);
 
+//        工具未单独村表 解决节点与工具不匹配报错
+        if(request.getParams() == null){
+            ArrayList<ImageToolRequest.Params> params = new ArrayList<>();
+            ImageToolRequest.Params ipParams = new ImageToolRequest.Params();
+            ipParams.setName("ip");
+            ipParams.setType(1);
+            params.add(ipParams);
+            request.setParams(params);
+        }
+
         for (ImageToolRequest.Params param : request.getParams()) {
             if("ip".equals(param.getName()) && StringUtils.isBlank(param.getValue())) {
 //                ip不需要输入
@@ -354,6 +369,11 @@ public class CsceneOutController implements BaseModelListControllerBase {
                 tool = t;
             }
         }
+        if(tool == null){
+            tool = new ImageToolRequest();
+            tool.setId(request.getToolId());
+            tool.setAttackDataTypes(Arrays.asList(1,2,3,4));
+        }
         tool.setParams(request.getParams());
 //        执行前需要先查询数据用于对比 查询次数按开始结束时间差+5分钟进行
         Date attackStarttime = request.getAttackStarttime();
@@ -362,7 +382,7 @@ public class CsceneOutController implements BaseModelListControllerBase {
         //         启动一个线程 查询攻击结果 每隔5秒查询一次es数据，查最新的一条数据
         CollectionScenePluginHandler collectionScenePluginHandler = sceneHandler.getPluginHandler("cpcollection");
 //        先发送前3分钟主机采集数据
-        attackDataOutputUtil.queryRecentHostInfo(target);
+        attackDataOutputUtil.queryRecentHostInfo(target, tool.getId(), request.getTaskId(), request.getTargetId());
 //        再每5秒发送最新数据
         attackDataOutputUtil.startOneAttackDataOutputTask(collectionScenePluginHandler, source, target, tool, attackSconds, request.getTaskId(), request.getTargetId());
 
