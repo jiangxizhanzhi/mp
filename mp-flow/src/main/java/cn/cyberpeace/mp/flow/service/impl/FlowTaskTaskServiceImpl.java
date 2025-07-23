@@ -293,6 +293,7 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
                         protocolRate.put(flowProtocolModel.getProtocolName(), flowProtocolModel.getRate());
                     }
                     object.put("protocolRate", protocolRate);
+                    object.put("protocol_rate", object.get("protocolRate"));
                 }
             } else {
                 fileByte = FsCommon.downloadRawContent(flowInfoModel.getScriptFile());
