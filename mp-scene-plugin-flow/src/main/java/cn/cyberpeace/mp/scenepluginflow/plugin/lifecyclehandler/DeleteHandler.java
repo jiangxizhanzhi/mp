@@ -44,14 +44,10 @@ public class DeleteHandler extends HandlerCommon {
         runSceneProgress(SceneProcess.DELETE_FLOW, () -> runTasks(deleteFlowTasks));
 
         // 删除执行器
-        var executor = scene.getExecutor();
-        if (executor != null) {
+        String executorId = scene.getExecutor();
+        if (StringUtils.isNotBlank(executorId)) {
             runSceneProgress(SceneProcess.DELETE_EXECUTOR, () -> {
-                for (var e : executor) {
-                    if (StringUtils.isNotEmpty(e.getExecutorId())) {
-                        getHandlerUtils().deleteExecutor(e.getExecutorId());
-                    }
-                }
+                getHandlerUtils().deleteExecutor(executorId);
             });
         }
 

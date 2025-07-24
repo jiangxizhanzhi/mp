@@ -177,7 +177,7 @@ public class SceneHandlerUtils {
             return false;
         }
 
-        String executorId = pluginHandler.getScene().getExecutorId(flowElement.getSrcElement().getId());
+        String executorId = pluginHandler.getScene().getExecutor();
         if (StringUtils.isEmpty(executorId)) {
             errorFLow(flow, "Empty executor id");
             return false;
