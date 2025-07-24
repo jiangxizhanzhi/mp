@@ -16,10 +16,13 @@ public class OutputFlowMessage implements IOutputFlowMessage {
     @Override
     public void sendFlow(FlowInfo flowInfo) {
         CsceneOutController.PintTest pintTest = pingTestMap.get(flowInfo.getTaskId());
-        flowInfo.setDelay(pintTest.getDelay());
-        flowInfo.setPacketLoss(pintTest.getPacketLoss());
-        flowInfo.setConnected(pintTest.getConnected());
-        // 在这里可以执行对外部系统发送数据的逻辑
-        System.out.println(JsonCommon.stringify(pintTest));
+        if(pintTest != null) {
+            flowInfo.setDelay(pintTest.getDelay());
+            flowInfo.setPacketLoss(pintTest.getPacketLoss());
+            flowInfo.setConnected(pintTest.getConnected());
+            // 在这里可以执行对外部系统发送数据的逻辑
+            System.out.println(JsonCommon.stringify(pintTest));
+        }
     }
+
 }
