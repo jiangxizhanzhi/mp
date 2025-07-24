@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.cscene.service;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
@@ -60,6 +61,7 @@ import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneBO;
 import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneElementBO;
 import cn.cyberpeace.mp.scenepluginflow.bo.base.Flow;
 import cn.cyberpeace.mp.scenepluginflow.plugin.FlowScenePluginHandler;
+import cn.cyberpeace.mp.scenepluginflow.plugin.lifecyclehandler.CreateHandler;
 import cn.cyberpeace.mp.scenepluginflow.util.SceneFlowCacheUtil;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -76,6 +78,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -140,7 +143,6 @@ public class CsceneFlowService {
         }
         request.setDetails(list);
 
-        List<FlowTaskTaskModel> flowTaskTaskModelList = new ArrayList<FlowTaskTaskModel>();
         for (AddFlowTaskTaskDetail detail : request.getDetails()) {
             HumanCondition condition = new HumanCondition();
             List<String> flowIds = new ArrayList<>();
@@ -157,6 +159,7 @@ public class CsceneFlowService {
             condition.filterIn(FlowInfoModel::getId, flowIds.toArray());
             List<FlowInfoModel> flowInfoModelList = flowInfoMapper.list(condition);
             //保存流量任务信息
+            List<FlowTaskTaskModel> flowTaskTaskModelList = new ArrayList<FlowTaskTaskModel>();
             for (FlowInfoModel flowInfoModel : flowInfoModelList) {
                 FlowTaskTaskModel flowTaskTaskModel = new FlowTaskTaskModel();
                 flowTaskTaskModel.setSceneId(sceneId);
@@ -167,15 +170,16 @@ public class CsceneFlowService {
                 flowTaskTaskModel.setTaskStatus(TaskTaskStatusEnum.INITING.toValue());
                 flowTaskTaskModelList.add(flowTaskTaskModel);
             }
+            detail.setFlowTaskTaskModelList(flowTaskTaskModelList);
+            flowTaskTaskService.bulkCreate(flowTaskTaskModelList);
         }
-        flowTaskTaskService.bulkCreate(flowTaskTaskModelList);
 
-        TaskCommon.executeTask(() -> asyncAddTask(sceneId, request.getDetails(), flowTaskTaskModelList));
+        TaskCommon.executeTask(() -> asyncAddTask(sceneId, request.getDetails()));
 
         log.debug("CsceneFlowService.addTask end.");
     }
 
-    public void asyncAddTask(String sceneId, List<AddFlowTaskTaskDetail> addFlowTaskTaskDetails, List<FlowTaskTaskModel> flowTaskTaskModelList) {
+    public void asyncAddTask(String sceneId, List<AddFlowTaskTaskDetail> addFlowTaskTaskDetails) {
         SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
         FlowScenePluginHandler flowScenePluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.scenepluginflow.constant.PluginConstant.PLUGIN_KEY);
         //如果没有flowplugin，则初始化flowplugin
@@ -190,28 +194,29 @@ public class CsceneFlowService {
                 scenePluginDataBO.getElements().put(detail.getNodeId(), JsonCommon.beanToSnakeMap(elementBO));
             }
             SceneDataBO scene = sceneHandler.toData();
-            scene.getPlugins().put(cn.cyberpeace.mp.scenepluginflow.constant.PluginConstant.PLUGIN_KEY, scenePluginDataBO);
+            scene.getPlugins()
+                    .put(cn.cyberpeace.mp.scenepluginflow.constant.PluginConstant.PLUGIN_KEY, scenePluginDataBO);
             SceneHandler sceneHandler2 = new SceneHandler(scene, null);
+            flowScenePluginHandler = sceneHandler2.getPluginHandler(cn.cyberpeace.mp.scenepluginflow.constant.PluginConstant.PLUGIN_KEY);
+            var executor = new CreateHandler(flowScenePluginHandler).getExecutor();
+            flowScenePluginHandler.getScene().setExecutor(executor);
             sceneHandler2.save();
             sceneHandler = new SceneHandler(sceneId, null, false, null);
             flowScenePluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.scenepluginflow.constant.PluginConstant.PLUGIN_KEY);
         }
-        String actuatorId = flowScenePluginHandler.getScene().getExecutor();
-        //流量执行器不存在则创建流量执行器
-        if (StringUtils.isEmpty(actuatorId)) {
-            String trexName = StringUtils.joinWith("_", FlowPlatformEnum.TREX, sceneId);
-            actuatorId = asyncPlatFlowTaskService.syncStartExecutor(trexName);
-            FlowPluginSceneBO scene = flowScenePluginHandler.getScene();
-            scene.setExecutor(actuatorId);
-            flowScenePluginHandler.saveScene();
-        }
-        List<AddFlowTaskTaskInfo> addFlowTaskTaskInfoList = new ArrayList<>();
-        //遍历任务详情，初始化节点参数
-        for (AddFlowTaskTaskDetail detail : addFlowTaskTaskDetails) {
+        for (var detail : addFlowTaskTaskDetails) {
+            String actuatorId = flowScenePluginHandler.getScene().getExecutorId(detail.getNodeId());
+            if (StringUtils.isEmpty(actuatorId)) {
+                String trexName = StringUtils.joinWith("_", FlowPlatformEnum.TREX, sceneId);
+                actuatorId = asyncPlatFlowTaskService.syncStartExecutor(trexName);
+                FlowPluginSceneBO scene = flowScenePluginHandler.getScene();
+                scene.setExecutorId(detail.getNodeId(), actuatorId);
+                flowScenePluginHandler.saveScene();
+            }
+            //遍历任务详情，初始化节点参数
             if (CollectionUtils.isEmpty(detail.getFlowInfos())) {
                 continue;
             }
-
             for (var f : detail.getFlowInfos()) {
                 Flow flow = new Flow();
                 flow.setId(f.getFlowId());
@@ -236,7 +241,8 @@ public class CsceneFlowService {
                 for (SceneElementPortBO p : sceneHandler.getElement(detail.getNodeId()).getPorts()) {
                     nodeIp = p.getIp();
                     if (StringUtils.isNotEmpty(nodeIp)) {
-                        CloudPluginSceneElementNetworkBO cloudPluginSceneElementNetworkBO = cloudPluginHandler.getHandlerUtils().getNetworkByPort(p);
+                        CloudPluginSceneElementNetworkBO cloudPluginSceneElementNetworkBO = cloudPluginHandler.getHandlerUtils()
+                                .getNetworkByPort(p);
                         networkId = cloudPluginSceneElementNetworkBO.getResourceId();
                         break;
                     }
@@ -244,11 +250,9 @@ public class CsceneFlowService {
             }
             if (StringUtils.isEmpty(nodeIp)) {
                 continue;
-//                throw new MpRuntimeException(CsceneErrorCode.NODEIP_NOT_EXIST);
             }
             if (StringUtils.isEmpty(networkId)) {
                 continue;
-//                throw new MpRuntimeException(CsceneErrorCode.NETWORKID_NOT_EXIST);
             }
             AddFlowTaskTaskInfo addFlowTaskTaskInfo = new AddFlowTaskTaskInfo();
             addFlowTaskTaskInfo.setFlowInfos(detail.getFlowInfos());
@@ -256,13 +260,11 @@ public class CsceneFlowService {
             addFlowTaskTaskInfo.setNodeIp(nodeIp);
             addFlowTaskTaskInfo.setNodeName(nodeName);
             addFlowTaskTaskInfo.setNetworkId(networkId);
-            addFlowTaskTaskInfoList.add(addFlowTaskTaskInfo);
-        }
-        sceneHandler.save();
-        SceneFlowCacheUtil.clearCache(sceneId);
-        //新增流量执行任务
-        if (CollectionUtils.isNotEmpty(addFlowTaskTaskInfoList)) {
-            flowTaskTaskService.addTask(addFlowTaskTaskInfoList, sceneId, actuatorId, true, flowTaskTaskModelList);
+
+            sceneHandler.save();
+            SceneFlowCacheUtil.clearCache(sceneId);
+            //新增流量执行任务
+            flowTaskTaskService.addTask(Arrays.asList(addFlowTaskTaskInfo), sceneId, actuatorId, true, detail.getFlowTaskTaskModelList());
         }
     }
 
@@ -471,7 +473,7 @@ public class CsceneFlowService {
         if (flowScenePluginHandler == null) {
             return protocols;
         }
-        String actuatorId = flowScenePluginHandler.getScene().getExecutor();
+        String actuatorId = flowScenePluginHandler.getScene().getExecutorId("");
         if (StringUtils.isNotEmpty(actuatorId)) {
             FlowActuatorModel flowActuatorModel = flowActuatorMapper.get(actuatorId);
             if (flowActuatorModel != null && StringUtils.isNotEmpty(flowActuatorModel.getIp())) {

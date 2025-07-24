@@ -200,7 +200,10 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
             details.add(addFlowTaskTaskInfo);
         }
         if (CollectionUtils.isNotEmpty(details)) {
-            getHandlerUtils().addFlowTask(details, sceneId, getScene().getExecutor());
+            for (AddFlowTaskTaskInfo addFlowTaskTaskInfo : details) {
+                String executorId = getScene().getExecutorId(addFlowTaskTaskInfo.getNodeId());
+                getHandlerUtils().addFlowTask(details, sceneId, executorId);
+            }
         }
     }
 

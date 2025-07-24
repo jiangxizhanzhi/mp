@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.cscene.request.flow;
 
 import cn.cyberpeace.mp.flow.bo.AddFlowTaskFlowInfo;
+import cn.cyberpeace.mp.flow.model.FlowTaskTaskModel;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -27,4 +28,6 @@ public class AddFlowTaskTaskDetail {
      */
     @ApiModelProperty(value = "流量集合")
     private List<AddFlowTaskFlowInfo> flowInfos;
+
+    private List<FlowTaskTaskModel> flowTaskTaskModelList ;
 }

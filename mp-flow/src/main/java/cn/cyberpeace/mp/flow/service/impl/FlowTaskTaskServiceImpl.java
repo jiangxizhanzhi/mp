@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.flow.service.impl;
 
 import cn.cyberpeace.mp.base.common.FsCommon;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
@@ -115,7 +116,7 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
      * @param addFlowTaskTaskInfos
      * @param sceneId
      */
-    @Transactional
+//    @Transactional
     public void addTask(List<AddFlowTaskTaskInfo> addFlowTaskTaskInfos, String sceneId, String actuatorId, boolean isAsync, List<FlowTaskTaskModel> flowTaskTaskModels) {
         log.info("FlowTaskTaskServiceImpl.addTask begin. addFlowTaskTaskInfos:{}, sceneId:{}", addFlowTaskTaskInfos, sceneId);
         if (CollectionUtils.isNotEmpty(addFlowTaskTaskInfos)) {
@@ -238,7 +239,11 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
                     flowTaskConfModel.setConf(JSONObject.toJSONString(flowTaskConf));
                     flowTaskConfModelList.add(flowTaskConfModel);
                 }
-                flowTaskConfService.bulkCreate(flowTaskConfModelList);
+
+                log.info("flowTaskConfModelList : {}", JsonCommon.stringify(flowTaskConfModelList));
+                var x = flowTaskConfService.bulkCreate(flowTaskConfModelList);
+                log.info("task conf res size : {}", JsonCommon.stringify(x));
+
                 //初始化网口
                 List<String> taskIdList = new ArrayList<>();
                 for (FlowTaskTaskModel flowTaskTaskModel : flowTaskTaskModelList) {
