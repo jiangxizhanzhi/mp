@@ -150,6 +150,9 @@ public class CreateHandler extends HandlerCommon {
                 }
             }
         }
+        // 获取用户手动选择的流量镜像节点
+        retainSelectedNodeWhenUserManualSelectedFlowMirrorNodes(collectorVmInstanceIds, mirrorVmInstanceIds, cloudPluginHandler);
+
         boolean enableCollector = !collectorVmInstanceIds.isEmpty() || !collectorContainerInstanceIds.isEmpty();
         boolean enableMirror = !mirrorVmInstanceIds.isEmpty() || !mirrorContainerInstanceIds.isEmpty();
         if (enableCollector) {
@@ -243,6 +246,37 @@ public class CreateHandler extends HandlerCommon {
 //            if (!bindProbeCollectAgentTasks.isEmpty()) {
 //                runSceneProgress(SceneProcess.BIND_PROBE_COLLECT_AGENTS, () -> runTasks(bindProbeCollectAgentTasks));
 //            }
+        }
+    }
+
+
+    /**
+     * 如果用户选择了指定节点进行流量采集，
+     * 则将传入平台的采集节点只保留用户选择的。
+     * @param vmResourceIds
+     * @param containerResourceIds
+     * @param cloudScenePluginHandler
+     */
+    private void retainSelectedNodeWhenUserManualSelectedFlowMirrorNodes(Set<String> vmResourceIds, Set<String> containerResourceIds,
+                                                                          CloudScenePluginHandler cloudScenePluginHandler) {
+        var flowCollectNodes = this.getPluginHandler().getScene().getFlowCollectNodes();
+        if (CollectionUtils.isEmpty(flowCollectNodes)) {
+            return;
+        } else {
+            Set<String> selectNodeResourceIds = new HashSet<>();
+            for (String nodeId : flowCollectNodes) {
+                String resourceId = cloudScenePluginHandler.getElementMap().get(nodeId).getResourceId();
+                if (StringUtils.isNotBlank(resourceId)) {
+                    selectNodeResourceIds.add(resourceId);
+                }
+            }
+            if (CollectionUtils.isNotEmpty(vmResourceIds)) {
+                vmResourceIds.retainAll(selectNodeResourceIds);
+            }
+
+            if (CollectionUtils.isNotEmpty(containerResourceIds)) {
+                containerResourceIds.retainAll(selectNodeResourceIds);
+            }
         }
     }
 
