@@ -11,16 +11,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowAnalysisSummary;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackConfigInfo;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackDto;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackTime;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackTypeCount;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowPcapFileInfo;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowProtocolsInfo;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowRiskCount;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowTrend;
-import cn.cyberpeace.mp.cscene.dto.flow.TotalFlowAttackRatio;
+import cn.cyberpeace.mp.cscene.dto.flow.*;
 import cn.cyberpeace.mp.cscene.request.common.AssetsStatisticsRequest;
 import cn.cyberpeace.mp.cscene.request.common.AttackCountRequest;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
@@ -33,6 +24,10 @@ import cn.cyberpeace.mp.cscene.response.AssetsStatisticsResponse;
 import cn.cyberpeace.mp.cscene.service.CsceneCommonService;
 import cn.cyberpeace.mp.cscene.service.FlowAttackTypeConvert;
 import cn.cyberpeace.mp.cscene.service.FlowMonitorService;
+import cn.cyberpeace.mp.cscene.service.exportfile.CsvExportFileService;
+import cn.cyberpeace.mp.cscene.service.exportfile.PageIterator;
+import cn.cyberpeace.mp.cscene.service.exportfile.XlsExportFileService;
+import cn.cyberpeace.mp.cscene.service.exportfile.XlsxExportFileService;
 import cn.cyberpeace.mp.cscene.vo.FlowGroupByDestinationIpAndSeverityVO;
 import cn.cyberpeace.mp.cscene.vo.FlowGroupPortWithProtocolVO;
 import cn.cyberpeace.mp.frontadmin.service.sys.SysConfigService;
@@ -58,12 +53,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import javax.servlet.http.HttpServletResponse;
+import java.util.*;
 
 /**
  * @Description:
@@ -365,6 +356,39 @@ public class FlowMonitorController {
 
         ListObjServiceResult<FlowAttackDto> result = flowMonitorService.pageFlow(id, queryParams);
         return result;
+    }
+
+    @ApiOperation(value = "流量分页查询的数据的导出")
+    @GetMapping("/export_file")
+    public void exportPageFlowFile(@RequestParam String id, FlowQueryParams queryParams, @RequestParam("file_type") String fileType, HttpServletResponse response) {
+        log.info("download pageFlow ====>> id:{}, queryParams:{}, fileType: {}", id, queryParams, fileType);
+        queryParams.setId(id);
+        if (StringUtils.isEmpty(fileType)) {
+            fileType = "xlsx";
+        }
+        String filename = "流量分析文件";
+        PageIterator<FlowAttackData, FlowQueryParams> iterator =
+                new PageIterator<>(queryParams, flowMonitorService::pageFlow) {};
+
+        switch (fileType) {
+            case "xlsx":
+                XlsxExportFileService service = new XlsxExportFileService();
+
+                service.exportFile(response, iterator, filename);
+                break;
+            case "xls":
+                XlsExportFileService xlsExportFileService = new XlsExportFileService();
+                xlsExportFileService.exportFile(response, iterator, filename);
+                break;
+            case "csv":
+                CsvExportFileService csvExportFileService = new CsvExportFileService();
+                csvExportFileService.exportFile(response, iterator, filename);
+            default:
+                XlsxExportFileService service1 = new XlsxExportFileService();
+                service1.exportFile(response, iterator, filename);
+                break;
+        }
+
     }
 
 

@@ -58,6 +58,7 @@ import java.net.URL;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @Description:
@@ -443,6 +444,13 @@ public class FlowMonitorService {
             }
         }
         return totalFlowAttackRatio;
+    }
+
+
+    public ListObjServiceResult<FlowAttackData> pageFlow(FlowQueryParams queryParams) {
+        ListObjServiceResult<FlowAttackDto> result = pageFlow(queryParams.getId(), queryParams);
+        var data =  result.getData().getList().stream().map(FlowAttackData::new).collect(Collectors.toList());
+        return new ListObjServiceResult(new ListObjResult(data, result.getData().getTotal()).asResult()).asResult();
     }
 
 

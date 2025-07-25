@@ -14,6 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @ApiModel
 public class FlowQueryParams extends QueryParams {
+    private String id;
     @ApiModelProperty(value = "协议")
     private String protocol;
 
