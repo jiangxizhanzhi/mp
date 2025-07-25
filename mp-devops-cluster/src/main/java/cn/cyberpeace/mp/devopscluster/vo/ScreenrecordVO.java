@@ -1,15 +1,20 @@
 package cn.cyberpeace.mp.devopscluster.vo;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
+import cn.cyberpeace.mp.base.util.mptool.URLUtil;
+import cn.cyberpeace.mp.common.config.CommonAppConfig;
+import cn.cyberpeace.mp.sceneplugincloud.config.CloudAppConfig;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
-import io.micrometer.core.instrument.util.StringUtils;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
 
+import java.net.URL;
 import java.time.LocalDateTime;
 
 /**
@@ -128,6 +133,30 @@ public class ScreenrecordVO extends BaseModel {
             this.setUserOrgName(org);
         }
         this.setPlayUrl(CloudSingleton.cloudAppConfig.getCpcloudServer() + String.format(CloudUrlConstant.RECORDING_PLAY_URL, this.getFileName()));
+
+        String formatUrl = this.getPlayUrl();
+        CloudAppConfig config = BeanCommon.getBean(CloudAppConfig.class);
+        if (config.getPublicNetProxy() && config.getPublicNetProxyServer()) {
+            if (StringUtils.isNotEmpty(config.getPublicNetProxyIp())) {
+                URL u = URLUtil.url(formatUrl);
+                // 如果和 cpcloud 同网段的才进行ip的替换
+                CommonAppConfig commonAppConfig = BeanCommon.getBean(CommonAppConfig.class);
+                String[] ip1 = commonAppConfig.getCpIp().split("\\.");
+                String[] ip2 = u.getHost().split("\\.");
+                // 比较前三个分段
+                boolean replace = true;
+                for (int i = 0; i < 3; i++) {
+                    if (!ip1[i].equals(ip2[i])) {
+                        replace = false;
+                        break;
+                    }
+                }
+                if (replace) {
+                    formatUrl = StringUtils.replaceOnce(formatUrl, u.getHost(), config.getPublicNetProxyIp());
+                }
+            }
+        }
+        this.setPlayUrl(formatUrl);
         this.setUserId(record.getUsername());
         this.setRecortime(record.getRecortime());
         this.setCreateTime(TimeUtils.utcToLocalDateTime(record.getRecordate()));
