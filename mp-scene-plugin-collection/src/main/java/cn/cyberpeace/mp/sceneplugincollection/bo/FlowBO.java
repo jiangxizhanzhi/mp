@@ -13,6 +13,8 @@ import java.util.List;
  */
 @Data
 public class FlowBO {
+    @ApiModelProperty("数据id")
+    private String dataId;
 
     @ApiModelProperty("场景id")
     private String sceneId;

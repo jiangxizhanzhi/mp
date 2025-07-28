@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
@@ -8,9 +9,13 @@ import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.HttpUtils;
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
+import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowAnalysisSummary;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackConfigInfo;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackDto;
@@ -31,15 +36,21 @@ import cn.cyberpeace.mp.cscene.request.flow.FlowSceneSimulationRequest;
 import cn.cyberpeace.mp.cscene.request.flow.FlowTrendRequest;
 import cn.cyberpeace.mp.cscene.response.AssetsStatisticsResponse;
 import cn.cyberpeace.mp.cscene.service.CsceneCommonService;
+import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.FlowAttackTypeConvert;
 import cn.cyberpeace.mp.cscene.service.FlowMonitorService;
 import cn.cyberpeace.mp.cscene.vo.FlowGroupByDestinationIpAndSeverityVO;
 import cn.cyberpeace.mp.cscene.vo.FlowGroupPortWithProtocolVO;
 import cn.cyberpeace.mp.frontadmin.service.sys.SysConfigService;
+import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CategoryGroupBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.SceneAssetsBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.SceneConfigAssetBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.SceneConfigCategoryGroupBO;
+import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneModel;
+import cn.cyberpeace.mp.sceneplugincollection.repository.CollectionPluginSceneMapper;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.util.FlowPcapExportUtil;
@@ -51,13 +62,26 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -89,7 +113,10 @@ public class FlowMonitorController {
     private FlowClassificationsService flowClassificationsService;
 
     @Autowired
-    private SysConfigService sysConfigService ;
+    private SysConfigService sysConfigService;
+
+    @Autowired
+    private CsceneInstanceService csceneInstanceService;
 
     @ApiOperation(value = "模拟流量")
     @GetMapping("/simulation")
@@ -501,4 +528,42 @@ public class FlowMonitorController {
         return new ServiceResult<>(FlowPcapExportUtil.getProcess(id)).asResult();
     }
 
+    @ApiOperation(value = "指定pcap下载")
+    @GetMapping("/download_pcap/by_id")
+    public ResponseEntity<Resource> exportPcap(HttpServletResponse httpServletResponse, String csceneId, String pcapId) {
+        String sceneId = csceneInstanceService.getSceneId(csceneId);
+        CollectionPluginSceneMapper sceneMapper = BeanCommon.getBean(CollectionPluginSceneMapper.class);
+        var scene = sceneMapper.first(new HumanCondition().filterEqual(CollectionPluginSceneModel::getScene, sceneId));
+        if (scene == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        String arkimeName = scene.getFlowCollector();
+        Container container = new Container();
+        var c = container.getContainerByName(arkimeName);
+        String ip = new ArrayList<>(c.getAddresses().values()).get(0).get(0).getAddr();
+        String hostname = c.getHostname();
+        String downloadUrl = "http://${ip}:8005/${hostname}/pcap/${pcapId}.pcap";
+        downloadUrl = downloadUrl.replace("${ip}", ip);
+        downloadUrl = downloadUrl.replace("${hostname}", hostname);
+        downloadUrl = downloadUrl.replace("${pcapId}", pcapId);
+        File tmpFile = new File(TextUtils.uuid());
+        try {
+            var httpResponse = HttpUtils.sendGetDownLoadWithDigestAuth(downloadUrl, "admin", "admin");
+            HttpHeaders httpHeaders = new HttpHeaders();
+            var output = new FileOutputStream(tmpFile);
+            var input = httpResponse.getEntity().getContent();
+            IOUtils.copy(input, output);
+            var resource = new InputStreamResource(new FileInputStream(tmpFile));
+            httpHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            httpServletResponse.setHeader("Content-Disposition", "attachment; filename=" + pcapId + ".pcap");
+            return ResponseEntity.ok().headers(httpHeaders)
+                    .contentType(MediaType.parseMediaType("application/octet-stream")).body(resource);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            if (tmpFile.exists()) {
+                tmpFile.delete();
+            }
+        }
+    }
 }

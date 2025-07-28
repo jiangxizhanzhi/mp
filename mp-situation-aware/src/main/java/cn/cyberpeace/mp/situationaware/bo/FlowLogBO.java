@@ -20,6 +20,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class FlowLogBO {
+    private String dataId ;
 
     /**
      * 来源
