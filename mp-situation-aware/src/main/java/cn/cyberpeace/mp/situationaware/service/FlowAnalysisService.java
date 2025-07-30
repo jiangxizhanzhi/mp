@@ -531,6 +531,7 @@ public class FlowAnalysisService extends AbstractBaseService {
             flowLogBOList = Arrays.stream(searchHits).map(hit -> {
                 Map<String, Object> sourceAsMap = hit.getSourceAsMap();
                 FlowLogBO flowLogBO = JSONObject.parseObject(hit.getSourceAsString(), FlowLogBO.class);
+                flowLogBO.setDataId(hit.getId());
                 flowLogBO.setTimestamp(Long.valueOf(sourceAsMap.get("@timestamp").toString()));
                 return flowLogBO;
             } ).collect(Collectors.toList());

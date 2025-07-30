@@ -1247,6 +1247,7 @@ public class ScenePluginCollectionSceneService {
 
     private CollectionFlowBO buildCollectionFlowBOFrom(FlowLogBO flowLogBO, Map<String, SceneElementBO> mac2ElementMap, Map<String, SceneElementBO> ipElementMap, Map<String, String> mac2SceneId) {
         CollectionFlowBO flowBO = new CollectionFlowBO();
+        flowBO.setDataId(flowLogBO.getDataId());
         if (flowLogBO.getTimestamp() != null) {
             flowBO.setTime(TimeUtils.timestampToLocalDateTime(flowLogBO.getTimestamp()));
             flowBO.setTimestamp(flowLogBO.getTimestamp());

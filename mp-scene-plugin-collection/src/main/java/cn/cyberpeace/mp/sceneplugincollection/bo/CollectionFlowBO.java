@@ -12,6 +12,8 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CollectionFlowBO {
+    @ApiModelProperty("数据id")
+    private String dataId;
 
     @ApiModelProperty("场景id")
     private String sceneId;
