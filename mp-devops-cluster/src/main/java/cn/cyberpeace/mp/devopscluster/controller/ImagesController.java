@@ -134,7 +134,7 @@ public class ImagesController {
         return new PageResult<>(list,model.getTotal());
     }
 
-    @AuthTarget(TargetEnum.FRONT_ALL)
+    @AuthTarget(TargetEnum.DEVOPS_IMAGE_GROUP)
     @ApiOperation("分页查询")
     @GetMapping("/page/front")
     public PageResult<ImagesPageVO> pageFront(ImagePageRequest request){
