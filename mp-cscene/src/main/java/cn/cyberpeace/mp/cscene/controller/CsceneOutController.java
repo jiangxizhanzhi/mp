@@ -58,6 +58,7 @@ import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiOperation;
 import lombok.Data;
 import lombok.Getter;
@@ -133,7 +134,7 @@ public class CsceneOutController implements BaseModelListControllerBase {
         String targetIp = target.getPorts().get(0).getIp();
 
         // 测试该流量任务中 源节点和目标节点的联通性
-        PintTest pintTest = this.getPingTest(source, target, cloudScenePluginHandler);
+        PintTest pintTest = this.getPingTest(source, target, cloudScenePluginHandler, request.getId(), request.getAttackerId(), request.getTargetId());
         if (!Boolean.TRUE.equals(pintTest.getConnected())) {
             // 如果不联通 返回错误？ todo
             return null;
@@ -640,7 +641,8 @@ public class CsceneOutController implements BaseModelListControllerBase {
         csceneFlowService.editTaskConf(confRequest);
     }
 
-    private PintTest getPingTest(SceneElementBO source, SceneElementBO target, CloudScenePluginHandler handler) {
+    private PintTest getPingTest(SceneElementBO source, SceneElementBO target, CloudScenePluginHandler handler,
+                                String taskId,String attackerId,String targetId) {
         SshInfo sshInfo = this.getSshInfo(source.getPorts(), handler);
         String sourceIp = sshInfo.getIp();
         String sourcePort = sshInfo.getPort();
@@ -651,6 +653,9 @@ public class CsceneOutController implements BaseModelListControllerBase {
         String pintTestPath = dir + "/" + "pingtest.py";
         String res = pythonExecUtil.exec(pintTestPath, sourceIp, sourcePort, targetIp, username, password);
         var pingRes = JsonCommon.snakeParse(res, PintTest.class);
+        pingRes.setTargetId(targetId);
+        pingRes.setAttackerId(attackerId);
+        pingRes.setTaskId(taskId);
         return pingRes;
     }
 
@@ -677,6 +682,9 @@ public class CsceneOutController implements BaseModelListControllerBase {
         private Double packetLoss;
         private Double delay;
         private String error;
+        private String taskId;
+        private String attackerId;
+        private String targetId;
     }
 
     @Getter

@@ -1,0 +1,1 @@
+alter table mp_auth_user add column token varchar(128) default '' comment '第三方登录时的token值';

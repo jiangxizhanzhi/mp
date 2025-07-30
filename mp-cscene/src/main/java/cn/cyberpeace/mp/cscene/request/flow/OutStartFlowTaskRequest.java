@@ -26,4 +26,22 @@ public class OutStartFlowTaskRequest {
 
     @ApiModelProperty(value = "1 视频/2 音频/3 普通数据包/4 邮件/5 聊天")
     private Integer type;
+
+    /**
+     * 任务id
+     */
+    @ApiModelProperty(value = "任务id")
+    private String taskId;
+
+    /**
+     * 源id
+     */
+    @ApiModelProperty(value = "源id")
+    private String attackerId;
+
+    /**
+     * 目的id
+     */
+    @ApiModelProperty(value = "目的id")
+    private String targetId;
 }
