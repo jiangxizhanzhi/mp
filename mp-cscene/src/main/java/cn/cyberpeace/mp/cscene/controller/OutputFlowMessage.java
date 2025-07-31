@@ -36,6 +36,9 @@ public class OutputFlowMessage implements IOutputFlowMessage {
             flowInfoJson.put("targetId", pintTest.getTargetId());
             dataObject.put("data", flowInfoJson);
             jsonObject.put("Data", dataObject.toJSONString());
+            jsonObject.put("Function", "UniteFlowResultData");
+            jsonObject.put("ReceiveObjectName", "");
+            jsonObject.put("SendObjectName", "");
             //        发送构建数据
             String jsonString = jsonObject.toJSONString();
             log.info("发送数据:{}",jsonString);
