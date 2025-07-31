@@ -3,7 +3,10 @@ package cn.cyberpeace.mp.cscene.service;
 import cn.cyberpeace.mp.base.bo.IntervalSizeBO;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -28,6 +31,8 @@ import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.cscene.util.SegmentCount2IntervalSecondsUtil;
 import cn.cyberpeace.mp.cscene.vo.FlowGroupByDestinationIpAndSeverityVO;
 import cn.cyberpeace.mp.cscene.vo.FlowGroupPortWithProtocolVO;
+import cn.cyberpeace.mp.flow.model.FlowActuatorModel;
+import cn.cyberpeace.mp.flow.repository.FlowActuatorMapper;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.config.CloudAppConfig;
 import cn.cyberpeace.mp.sceneplugincollection.bo.AttackInfo;
@@ -41,6 +46,8 @@ import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowGroupCountParams
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowSimulationParams;
 import cn.cyberpeace.mp.sceneplugincollection.util.FlowPcapExportUtil;
+import cn.cyberpeace.mp.scenepluginflow.model.FlowPluginSceneModel;
+import cn.cyberpeace.mp.scenepluginflow.repository.FlowPluginSceneMapper;
 import cn.cyberpeace.mp.situationaware.bo.AttackWayAggregationBO;
 import cn.cyberpeace.mp.situationaware.bo.TeamAttackBO;
 import cn.cyberpeace.mp.situationaware.model.enums.SeverityEnum;
@@ -52,6 +59,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.net.URL;
@@ -89,6 +97,22 @@ public class FlowMonitorService {
 
     @Autowired
     private CsceneFileService csceneFileService;
+
+    @Cacheable("trex_ip_by_scene_instance_id")
+    public String getTrexIp(String sceneInstanceId) {
+        FlowPluginSceneMapper flowPluginSceneMapper = BeanCommon.getBean(FlowPluginSceneMapper.class);
+        var flowScene = flowPluginSceneMapper.first(new HumanCondition().filterEqual(FlowPluginSceneModel::getScene, sceneInstanceId));
+        if (Objects.isNull(flowScene)) {
+            throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("当前场景不存在流量执行器"));
+        }
+        var flowActuatorMapper = BeanCommon.getBean(FlowActuatorMapper.class);
+        var flowActuator = flowActuatorMapper.first(new HumanCondition().filterEqual(FlowActuatorModel::getId, flowScene.getExecutor()));
+        if (Objects.isNull(flowActuator)) {
+            throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("无法获取当前场景的流量执行器"));
+        }
+        String[] ipAndPort = flowActuator.getIp().split(":");
+        return ipAndPort[0];
+    }
 
 
     /**

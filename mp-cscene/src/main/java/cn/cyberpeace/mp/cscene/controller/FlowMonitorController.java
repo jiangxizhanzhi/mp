@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
+import cn.cyberpeace.mp.base.context.SysContextHolder;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
@@ -16,6 +17,7 @@ import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
+import cn.cyberpeace.mp.cscene.controller.request.FlowSimpleReplayRequest;
 import cn.cyberpeace.mp.cscene.dto.flow.*;
 import cn.cyberpeace.mp.cscene.request.common.AssetsStatisticsRequest;
 import cn.cyberpeace.mp.cscene.request.common.AttackCountRequest;
@@ -36,6 +38,7 @@ import cn.cyberpeace.mp.cscene.service.exportfile.XlsExportFileService;
 import cn.cyberpeace.mp.cscene.service.exportfile.XlsxExportFileService;
 import cn.cyberpeace.mp.cscene.vo.FlowGroupByDestinationIpAndSeverityVO;
 import cn.cyberpeace.mp.cscene.vo.FlowGroupPortWithProtocolVO;
+import cn.cyberpeace.mp.flow.util.SshUtil;
 import cn.cyberpeace.mp.frontadmin.service.sys.SysConfigService;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CategoryGroupBO;
@@ -63,16 +66,16 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @Description:
@@ -85,6 +88,8 @@ import java.util.*;
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/monitor/flow")
 @AuthTarget(TargetEnum.CSCENE_MONITOR_GROUP)
 public class FlowMonitorController {
+
+    private static final Map<String, ReentrantLock> PCAP_REPLAY_LOCK = new ConcurrentHashMap<>();
 
     private static final String STR_PROTOCOLS = "[\"arp\", \"dns\", \"ftp\", \"ftp-data\", \"http\", \"icmp\", \"ikev2\", \"ip\", \"ipv6\", \"krb5\", \"ldap\", \"nfs\", \"ntp\", \"pkthdr\", \"pop3\", \"rdp\", \"rmi\", \"sftp\", \"smb\", \"smtp\", \"snmp\", \"ssh\", \"syn\", \"tcp\", \"tcp-pkt\", \"tcp-stream\", \"tcpmux\", \"telnet\", \"tls\", \"udp\" , \"dhcpv6\"]";
 
@@ -546,9 +551,53 @@ public class FlowMonitorController {
         return new ServiceResult<>(FlowPcapExportUtil.getProcess(id)).asResult();
     }
 
+    @ApiOperation(value = "指定pcap重放")
+    @PostMapping("/pcap/replay")
+    public ServiceResult<String> replayPcap(@Validated @RequestBody FlowSimpleReplayRequest flowSimpleReplayRequest) {
+        var lock = PCAP_REPLAY_LOCK.putIfAbsent(flowSimpleReplayRequest.getPcapId(), new ReentrantLock());
+        if (Objects.isNull(lock)) {
+            lock = PCAP_REPLAY_LOCK.get(flowSimpleReplayRequest.getPcapId());
+        }
+        synchronized (lock) {
+            if (lock.isLocked()) {
+                throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("当前流量正在执行重放中，请等待流量重放完毕再重试"));
+            }
+            lock.lock();
+        }
+
+        try {
+            String sceneId = csceneInstanceService.getSceneId(flowSimpleReplayRequest.getCsceneId());
+            CollectionPluginSceneMapper sceneMapper = BeanCommon.getBean(CollectionPluginSceneMapper.class);
+            var scene = sceneMapper.first(new HumanCondition().filterEqual(CollectionPluginSceneModel::getScene, sceneId));
+            if (scene == null) {
+                throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+            }
+            String arkimeName = scene.getFlowCollector();
+            Container container = new Container();
+            var c = container.getContainerByName(arkimeName);
+            String ip = new ArrayList<>(c.getAddresses().values()).get(0).get(0).getAddr();
+            String hostname = c.getHostname();
+            String downloadUrl = "http://" + ip + ":8005/api/session/entire/" + hostname + "/" + flowSimpleReplayRequest.getPcapId() + "/pcap";
+            String trexIp = flowMonitorService.getTrexIp(sceneId);
+
+            String result = SshUtil.executeCommandWithReturn(new SshUtil.ServerInfo(trexIp, "root", "111111"), "bash /root/tcpreplay/tcpreplay_start.sh " + downloadUrl + " " + flowSimpleReplayRequest.getTargetIp() + SysContextHolder.getCallChainId());
+            return new ServiceResult<>(result).asResult();
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("重放流量发送异常: " + e.getMessage()));
+        } finally {
+            lock.unlock();
+        }
+    }
+
+
+
     @ApiOperation(value = "指定pcap下载")
     @GetMapping("/download_pcap/by_id")
     public ResponseEntity<Resource> exportPcap(HttpServletResponse httpServletResponse, String csceneId, String pcapId) {
+        if (Objects.isNull(pcapId)) {
+            throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("传入的pcapId为空"));
+        }
         String sceneId = csceneInstanceService.getSceneId(csceneId);
         CollectionPluginSceneMapper sceneMapper = BeanCommon.getBean(CollectionPluginSceneMapper.class);
         var scene = sceneMapper.first(new HumanCondition().filterEqual(CollectionPluginSceneModel::getScene, sceneId));

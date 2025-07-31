@@ -70,6 +70,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -677,7 +678,7 @@ public class AsyncPlatFlowTaskService {
                 if (!flag) {
                     log.error("Trex vm start error:{}", addVmRequest.getName());
                 }
-                checkStartTrex(finalFixedIp);
+                checkStartTrexAndUpdateTgnCodeAndInstallTcpreplay(finalFixedIp);
 
             } else {
                 log.error("add trex vm error");
@@ -1169,12 +1170,14 @@ public class AsyncPlatFlowTaskService {
      * 校验trex启动状态
      * @param fixedIp
      */
-    private void checkStartTrex(String fixedIp) {
+    private void checkStartTrexAndUpdateTgnCodeAndInstallTcpreplay(String fixedIp) {
         String commands = "./init.sh";
         SshUtil.ServerInfo serverInfo = new SshUtil.ServerInfo();
         serverInfo.setHost(fixedIp);
         serverInfo.setUser("root");
         serverInfo.setPassword("111111");
+
+        uploadTcpreplayAndInstallPackage(serverInfo);
         SshUtil.refreshDir(serverInfo, commands, TGN_PATH, "/opt/project_dirs");
 
         boolean flag = NetworkUtils.probePort(fixedIp, 5001, 1000, 1000, 1000 * 60 * 2,
@@ -1182,6 +1185,17 @@ public class AsyncPlatFlowTaskService {
         if (!flag) {
             log.error("Trex vm start error:{}", fixedIp);
         }
+    }
+
+    private void uploadTcpreplayAndInstallPackage(SshUtil.ServerInfo serverInfo) {
+        SshUtil.scpFileToRemote(serverInfo, "/root/tcpreplay", new ClassPathResource("tcpreplay/libpcap-debs.tar"));
+        SshUtil.scpFileToRemote(serverInfo, "/root/tcpreplay", new ClassPathResource("tcpreplay/tcpreplay-4.4.4.tar.xz"));
+        SshUtil.scpFileToRemote(serverInfo, "/root/tcpreplay", new ClassPathResource("tcpreplay/tcpreplay_install.sh"));
+        SshUtil.scpFileToRemote(serverInfo, "/root/tcpreplay", new ClassPathResource("tcpreplay/tcpreplay_start.sh"));
+        log.info("成功上传tcpreplay安装包，开始执行tcpreplay安装");
+        String result = SshUtil.executeCommandWithReturn(serverInfo, "bash /root/tcpreplay/tcpreplay_install.sh");
+        log.info("安装结果：" + result);
+
     }
 
     /**

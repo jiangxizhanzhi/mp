@@ -5,10 +5,12 @@ import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import com.jcraft.jsch.*;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.poi.util.IOUtils;
+import org.springframework.core.io.ClassPathResource;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -25,6 +27,9 @@ public class SshUtil {
 
     private static final int TIME_OUT = 30000;
 
+    private static final int MAX_RETRIES = 4;
+    private static final long INITIAL_RETRY_DELAY = 5000; // 初始重试延迟1秒
+
     public static void refreshDir(ServerInfo serverInfo, String commands, String srcFilePath, String destFilePath) {
         for (int i = 0; i <= 50; i++) {
             try {
@@ -40,6 +45,96 @@ public class SshUtil {
             }
         }
     }
+
+    public static void scpFileToRemote(ServerInfo serverInfo,
+                                String remoteDir, ClassPathResource sourceFile) {
+        int attempt = 0;
+        while (attempt < MAX_RETRIES) {
+            Session session = null;
+            ChannelSftp channel = null;
+            try {
+                // 1. 创建JSch会话
+                JSch jsch = new JSch();
+                session = jsch.getSession(serverInfo.getUser(), serverInfo.getHost(), serverInfo.getPort());
+                session.setPassword(serverInfo.getPassword());
+                session.setConfig("StrictHostKeyChecking", "no"); // 仅为示例，生产环境应使用已知主机
+                session.setServerAliveInterval(30000);
+                session.setServerAliveCountMax(3);
+
+                // 2. 连接会话
+                session.connect(TIME_OUT);
+
+                // 3. 创建SFTP通道
+                channel = (ChannelSftp) session.openChannel("sftp");
+                channel.connect(TIME_OUT);
+
+                // 4. 确保远程目录存在
+                createRemoteDirectory(channel, remoteDir);
+
+                // 5. 从resources读取文件
+                if (!sourceFile.exists()) {
+                    throw new RuntimeException("Source file not found: " + sourceFile.getFilename());
+                }
+
+                // 6. 执行SCP传输
+                try (InputStream inputStream = sourceFile.getInputStream()) {
+                    String fileName = sourceFile.getFilename();
+                    channel.put(inputStream, remoteDir + "/" + fileName);
+                }
+
+                System.out.println("File transferred successfully!");
+                return; // 传输成功则退出方法
+
+            } catch (JSchException | SftpException | IOException e) {
+                attempt++;
+                if (attempt >= MAX_RETRIES) {
+                    log.error(e.getMessage(), e);
+                    throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format(
+                            "SCP transfer failed after " + MAX_RETRIES + " attempts"));
+                }
+
+                // 计算指数退避延迟
+                long delay = INITIAL_RETRY_DELAY * (1L << (attempt - 1));
+                log.error("Attempt {}  failed. Retrying in {}ms...", attempt, delay);
+                try {
+                    Thread.sleep(delay);
+                } catch (InterruptedException interruptedException) {
+                    log.error("Thread interrupted: ", interruptedException);
+                }
+
+            } finally {
+                // 7. 清理资源
+                if (channel != null && channel.isConnected()) {
+                    channel.disconnect();
+                }
+                if (session != null && session.isConnected()) {
+                    session.disconnect();
+                }
+            }
+        }
+    }
+
+    private static void createRemoteDirectory(ChannelSftp channel, String remoteDir) throws SftpException {
+        try {
+            channel.cd(remoteDir);
+        } catch (SftpException e) {
+            // 目录不存在则逐级创建
+            String[] folders = remoteDir.split("/");
+            StringBuilder pathBuilder = new StringBuilder();
+            for (String folder : folders) {
+                if (folder.isEmpty()) continue;
+                pathBuilder.append("/").append(folder);
+                try {
+                    channel.cd(pathBuilder.toString());
+                } catch (SftpException ex) {
+                    channel.mkdir(pathBuilder.toString());
+                    channel.cd(pathBuilder.toString());
+                }
+            }
+        }
+    }
+
+
 
     /**
      * 刷新目录
@@ -114,6 +209,104 @@ public class SshUtil {
             close(sftpChannel);
             close(session);
             IOUtils.closeQuietly(outputStream);
+        }
+    }
+
+    public static String executeCommandWithReturn(ServerInfo serverInfo,
+                                           String command) {
+        Session session = null;
+        ChannelExec channel = null;
+        InputStream stdout = null;
+        InputStream stderr = null;
+        BufferedReader stdoutReader = null;
+        BufferedReader stderrReader = null;
+
+        try {
+            // 1. 创建JSch会话
+            JSch jsch = new JSch();
+            session = jsch.getSession(serverInfo.user, serverInfo.getHost(), serverInfo.port);
+            session.setPassword(serverInfo.getPassword());
+            session.setServerAliveInterval(30000);
+            session.setServerAliveCountMax(3);
+
+            // 安全配置（生产环境应使用已知主机）
+            session.setConfig("StrictHostKeyChecking", "no");
+
+            // 2. 连接会话（带超时）
+            session.connect(5000);
+
+            // 3. 创建执行通道
+            channel = (ChannelExec) session.openChannel("exec");
+            channel.setCommand(command);
+
+            // 4. 设置输出流
+            stdout = channel.getInputStream();
+            stderr = channel.getErrStream();
+
+            // 5. 连接通道（开始执行命令）
+            channel.connect();
+
+            // 6. 准备读取输出
+            stdoutReader = new BufferedReader(new InputStreamReader(stdout));
+            stderrReader = new BufferedReader(new InputStreamReader(stderr));
+
+            StringBuilder output = new StringBuilder();
+            StringBuilder error = new StringBuilder();
+
+            // 7. 设置超时监控
+            long startTime = System.currentTimeMillis();
+
+            // 8. 循环读取输出（直到通道关闭或超时）
+            while (!channel.isClosed()) {
+                // 检查超时
+                if (System.currentTimeMillis() - startTime > TimeUnit.SECONDS.toMillis(50)) {
+                    throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("命令执行超时"));
+                }
+
+                // 读取标准输出
+                while (stdoutReader.ready()) {
+                    output.append(stdoutReader.readLine()).append("\n");
+                }
+
+                // 读取错误输出
+                while (stderrReader.ready()) {
+                    error.append(stderrReader.readLine()).append("\n");
+                }
+
+                // 短暂休眠避免CPU过度占用
+                Thread.sleep(100);
+            }
+
+            // 9. 读取剩余输出
+            String line;
+            while ((line = stdoutReader.readLine()) != null) {
+                output.append(line).append("\n");
+            }
+            while ((line = stderrReader.readLine()) != null) {
+                error.append(line).append("\n");
+            }
+
+            // 10. 获取退出状态码
+            int exitStatus = channel.getExitStatus();
+
+            log.debug("命令执行完成，退出状态: {}", exitStatus);
+
+            return StringUtils.isEmpty(error.toString().trim()) ? output.toString().trim() : error.toString().trim();
+
+        } catch (JSchException | InterruptedException | IOException e) {
+            throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("SSH命令执行失败: " + e.getMessage()));
+        } finally {
+            // 11. 安全关闭资源
+            try {
+                if (channel != null) channel.disconnect();
+                if (session != null) session.disconnect();
+                if (stdoutReader != null) stdoutReader.close();
+                if (stderrReader != null) stderrReader.close();
+                if (stdout != null) stdout.close();
+                if (stderr != null) stderr.close();
+            } catch (IOException e) {
+                log.error("关闭SSH资源时出错", e);
+            }
         }
     }
 
@@ -315,6 +508,7 @@ public class SshUtil {
     }
 
     @Data
+    @NoArgsConstructor
     public static final class ServerInfo {
 
         private String host;
@@ -324,6 +518,12 @@ public class SshUtil {
         private String password;
 
         private int port = 22;
+
+        public ServerInfo(String host, String user, String password) {
+            this.host = host;
+            this.user = user;
+            this.password = password;
+        }
     }
 
 }
