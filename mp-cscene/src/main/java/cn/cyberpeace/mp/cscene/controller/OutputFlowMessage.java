@@ -1,14 +1,18 @@
 package cn.cyberpeace.mp.cscene.controller;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.out.FlowInfo;
 import cn.cyberpeace.mp.base.out.IOutputFlowMessage;
+import cn.cyberpeace.mp.cscene.ws.WebSocketClientService;
 import com.alibaba.fastjson.JSONObject;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
+@Slf4j
 @Service
 public class OutputFlowMessage implements IOutputFlowMessage {
 
@@ -18,6 +22,7 @@ public class OutputFlowMessage implements IOutputFlowMessage {
     public void sendFlow(FlowInfo flowInfo) {
         CsceneOutController.PintTest pintTest = pingTestMap.get(flowInfo.getTaskId());
         if(pintTest != null) {
+            WebSocketClientService webSocketClientService = BeanCommon.getBean(WebSocketClientService.class);
             flowInfo.setDelay(pintTest.getDelay());
             flowInfo.setPacketLoss(pintTest.getPacketLoss());
             flowInfo.setConnected(pintTest.getConnected());
@@ -31,7 +36,11 @@ public class OutputFlowMessage implements IOutputFlowMessage {
             flowInfoJson.put("targetId", pintTest.getTargetId());
             dataObject.put("data", flowInfoJson);
             jsonObject.put("Data", dataObject.toJSONString());
-            System.out.println(JsonCommon.stringify(pintTest));
+            //        发送构建数据
+            String jsonString = jsonObject.toJSONString();
+            log.info("发送数据:{}",jsonString);
+            webSocketClientService.sendMessage(jsonString);
+            log.info("发送数据结束");
         }
     }
 
