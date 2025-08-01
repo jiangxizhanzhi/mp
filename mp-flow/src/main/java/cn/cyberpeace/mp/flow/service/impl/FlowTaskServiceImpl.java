@@ -703,6 +703,9 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
         flowTaskModel = getModelMapper().get(flowTaskModel.getId());
         log.info("flow task is {}", flowTaskModel);
         AddFlowTaskRequest addFlowTaskRequest = new AddFlowTaskRequest();
+        if (Objects.isNull(flowTaskModel)) {
+            return result;
+        }
         BeanUtils.copyProperties(flowTaskModel, addFlowTaskRequest);
         asyncPlatFlowTaskService.savePlatFlowTask(addFlowTaskRequest, true);
         return result;
