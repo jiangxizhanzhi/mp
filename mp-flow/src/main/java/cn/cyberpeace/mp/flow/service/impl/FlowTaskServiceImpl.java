@@ -699,7 +699,9 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
             flowTaskModel.setOriginIps("127.0.0.1-127.0.0.1");
         }
         int result = getModelMapper().updateTaskInfo(flowTaskModel);
+        log.info("flow task model id is {}", flowTaskModel.getId());
         flowTaskModel = getModelMapper().get(flowTaskModel.getId());
+        log.info("flow task is {}", flowTaskModel);
         AddFlowTaskRequest addFlowTaskRequest = new AddFlowTaskRequest();
         BeanUtils.copyProperties(flowTaskModel, addFlowTaskRequest);
         asyncPlatFlowTaskService.savePlatFlowTask(addFlowTaskRequest, true);
