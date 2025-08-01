@@ -48,4 +48,5 @@ mp-situation-aware/log
 **/target/generated-test-sources/**
 **/target/maven-archiver/**
 **/target/maven-status/**
-**/target/
+**/target/*.jar
+**/target/*.original

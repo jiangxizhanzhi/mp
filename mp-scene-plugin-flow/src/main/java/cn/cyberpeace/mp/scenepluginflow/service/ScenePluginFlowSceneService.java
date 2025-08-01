@@ -16,6 +16,7 @@ import cn.cyberpeace.mp.scenepluginflow.plugin.flow.FlowExecutor;
 import cn.cyberpeace.mp.scenepluginflow.plugin.params.FlowIdWithSourceIp;
 import cn.cyberpeace.mp.scenepluginflow.service.response.SceneFlowRecordsResponse;
 import cn.cyberpeace.mp.scenepluginflow.util.SceneFlowCacheUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,9 +25,9 @@ import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class ScenePluginFlowSceneService {
 
     @Resource
@@ -56,6 +57,7 @@ public class ScenePluginFlowSceneService {
         FlowScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
         Flow flow = pluginHandler.updateFlowParams(nodeId, flowId, sourceIp);
         if (flow != null && flow.getTaskId() != null) {
+            log.info("update flow task info,flowId is {},taskId is {}", flow.getId(), flow.getTaskId());
             FlowTaskModel model = new FlowTaskModel();
             model.setId(flow.getTaskId());
             model.setOriginIps(sourceIp);

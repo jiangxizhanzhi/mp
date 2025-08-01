@@ -31,4 +31,27 @@ public class SysConfigModel extends BaseModel {
 
     @ApiModelProperty(value = "初始值")
     private String initValue;
+
+    @DefaultStr(Type.TEXT)
+    private String type;
+
+    @DefaultStr("1-120")
+    private String range;
+
+    @DefaultStr("{}")
+    private String options;
+
+    @DefaultStr()
+    private String unit;
+
+
+    public static class Type {
+        public static final String TEXT = "text";
+        public static final String NUMBER = "number";
+        public static final String SELECT_ONE = "selectOne";
+        public static final String SELECT_MULTI = "selectMulti";
+    }
+
+
+
 }
