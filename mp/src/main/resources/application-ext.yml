@@ -6,6 +6,8 @@ spring:
       max: ${MP_TOMCAT_MAX_POOL_SIZE:200}
   datasource:
     ext-var:
+      db-driver: ${MP_DB_DRIVER:org.mariadb.jdbc.Driver}
+      db-type: ${MP_DB_TYPE:mysql}
       db-ip: ${MP_DB_IP:10.100.27.1}
       db-port: ${MP_DB_PORT:3306}
       db-database: ${MP_DB_DATABASE:mp}
@@ -17,6 +19,7 @@ spring:
   flyway:
     ext-var:
       enabled: ${MP_FLYWAY_ENABLED_VALUE:false}
+      migration-dir: ${MP_FLYWAY_MIGRATION_DIR:migration}
 
   rabbitmq:
     ext-var:
