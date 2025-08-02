@@ -6,6 +6,7 @@ server:
     threads:
       min-spare: 10
       max: 200
+      max-websocket-buffer-size: 327680
 
 mybatis:
   mapper-locations: classpath*:mapper/*.xml
