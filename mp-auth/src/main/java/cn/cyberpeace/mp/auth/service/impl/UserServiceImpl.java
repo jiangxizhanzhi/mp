@@ -1137,6 +1137,81 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return userModel;
     }
 
+    @Transactional(rollbackFor = Exception.class)
+    public UserModel addV2(UserRequest createRequest) {
+        UserModel userCreated = upsertThirdUserModel(createRequest);
+        String userId = userCreated.getId();
+        log.info("user create success id:{}", userId);
+
+        // 保存组织-用户关系
+        saveUserOrgRelationV2(createRequest.getOrgIds(), userId);
+        // 保存角色-用户关系
+//        saveUserRoleRelationV2(createRequest.getRoleIds(), userId);
+
+        userCacheService.evictAllUserCache();
+        return userCreated;
+    }
+
+    private UserModel upsertThirdUserModel(UserRequest thirdUserRequest) {
+        UserModel userModel = new UserModel();
+        userModel.setName(thirdUserRequest.getName());
+        userModel.setUsername(thirdUserRequest.getUsername());
+        userModel.setInitCheck(0);
+        userModel.setPassword(thirdUserRequest.getPassword());
+        userModel.encodePassword();
+        userModel.setIdentifier(userModel.getUsername());
+        userModel.setIdCard("");
+        userModel.setMobile("");
+        userModel.setAddress("");
+        userModel.setNickname("");
+        userModel.setAvatar("");
+        userModel.setBirthday(LocalDate.now());
+        userModel.setEmail("");
+        userModel.setAvatar("");
+        userModel.setDelayRemindLicenseTime(LocalDateTime.now());
+        getModelMapper().save(userModel);
+        return userModel;
+    }
+
+    private void saveUserOrgRelationV2(List<String> orgIds, String userId) {
+        // 保存组织-用户关系
+        if (CollectionUtils.isNotEmpty(orgIds)) {
+            // 清除原来所有用户关联的组织
+            tenantUserService.deleteByUserId(userId);
+
+            orgIds.forEach(id -> {
+                TenantUserModel tenantUserModel = TenantUserModel.builder().user(userId).org(id).build();
+                var re = tenantUserService.create(tenantUserModel);
+                ResultUtils.throwExceptionIfError(re, AuthErrorCode.USER_ORG_ADD_ERROR);
+            });
+        }
+
+    }
+
+    @Override
+    public void saveUserRoleRelationV3(String roleId, String userId) {
+        // 保存角色-用户关系
+        if (StringUtils.isNotEmpty(roleId)) {
+
+            UserRoleModel userRoleModel = UserRoleModel.builder().user(userId).role(roleId).build();
+            var re = userRoleService.create(userRoleModel);
+            ResultUtils.throwExceptionIfError(re, AuthErrorCode.USER_ROLE_ADD_ERROR);
+        }
+    }
+
+    private void saveUserRoleRelationV2(List<String> roleIds, String userId) {
+        // 保存角色-用户关系
+        if (CollectionUtils.isNotEmpty(roleIds)) {
+            // 清除原来所有用户关联的角色
+            userRoleService.deleteByUserId(userId);
+
+            roleIds.forEach(id -> {
+                UserRoleModel userRoleModel = UserRoleModel.builder().user(userId).role(id).build();
+                var re = userRoleService.create(userRoleModel);
+                ResultUtils.throwExceptionIfError(re, AuthErrorCode.USER_ROLE_ADD_ERROR);
+            });
+        }
+    }
 
     private ExportUserBo user2ExportUser(UserModel user) {
         if (Objects.isNull(user)) {

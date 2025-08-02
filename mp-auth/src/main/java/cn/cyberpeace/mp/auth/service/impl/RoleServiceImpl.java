@@ -279,6 +279,50 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         return roleCreated;
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public RoleModel addV3(RoleRequest createRequest) {
+        ParamCheck.notNull(createRequest, AuthBasei18nCode.REQUEST_PARAMS);
+
+        RoleModel roleModel = new RoleModel();
+        BeanUtils.copyProperties(createRequest, roleModel);
+
+        createCheck(roleModel);
+
+        if (StringUtils.isBlank(roleModel.getIdentifier())) {
+            // 如果ident为空，则随机生成一个
+            roleModel.setIdentifier(IdUtils.globalId());
+        }
+
+        ObjServiceResult<RoleModel> result = create(roleModel);
+        ResultUtils.throwExceptionIfError(result, AuthErrorCode.OP_ERROR);
+
+        RoleModel roleCreated = result.getSource().getObj();
+        String roleId = roleCreated.getId();
+        log.info("role created id:{}", roleId);
+
+        // 保存角色-权限关系
+        List<String> targetIds = createRequest.getTargetIds();
+        if (CollectionUtils.isNotEmpty(targetIds)) {
+            // 对 targetIds 去重
+            TreeSet<String> set = new TreeSet<>(targetIds);
+
+            for (String id : set) {
+                boolean isTargetExist = targetService.exists(id);
+                if (isTargetExist) {
+                    RolePermissionModel rolePermissionModel = new RolePermissionModel();
+                    rolePermissionModel.setOwner(roleId);
+                    rolePermissionModel.setTarget(id);
+                    // 如果保存错误，抛出异常
+                    ObjServiceResult re = rolePermissionService.create(rolePermissionModel);
+                    ResultUtils.throwExceptionIfError(re, AuthErrorCode.ROLE_TARGET_ADD_ERROR);
+                }
+            }
+        }
+
+        return roleCreated;
+    }
+
 
     @Override
     @Transactional(rollbackFor = Exception.class)

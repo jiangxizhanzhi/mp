@@ -177,7 +177,12 @@ mp:
       element-process-save-realtime: ${MP_ELEMENT_PROCESS_SAVE_REALTIME:true}
       dhcp-control: ${MP_SCENE_DHCP_CONTROL:false}
       metadata-file-server: ${MP_METADATA_FILE_SERVER:http://169.254.169.254/file}
-
+  thirdsso:
+    ext-var:
+      login-success-redirect-url: ${MP_LOGIN_SUCCESS_REDIRECT_URL:http://192.168.3.111:911/page/mg/}
+      third-login-page-url: ${MP_THIRD_LOGIN_PAGE_URL:http://192.168.3.201:8096/index/index}
+      ticket-check-url: ${MP_TICKET_CHECK_URL:http://192.168.3.201:8096/api/ops-service/system/user/userInfo}
+      third-login-out-url: ${MP_THIRD_LOGIN_OUT_URL:http://192.168.3.201:8096/api/gateway/auth/logout}
 # for kaptcha
 #kaptcha:
 #  text-producer:

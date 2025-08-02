@@ -290,7 +290,11 @@ mp:
     metadata-file-server: ${mp.scene.ext-var.metadata-file-server}
   aggregation:
     export-image-timeout: ${mp.aggregation.ext-var.export-image-timeout}
-
+  thirdsso:
+    login-success-redirect-url: ${mp.thirdsso.ext-var.login-success-redirect-url}
+    third-login-page-url: ${mp.thirdsso.ext-var.third-login-page-url}
+    ticket-check-url: ${mp.thirdsso.ext-var.ticket-check-url}
+    third-login-out-url: ${mp.thirdsso.ext-var.third-login-out-url}
 # for kaptcha
 kaptcha:
   border:
