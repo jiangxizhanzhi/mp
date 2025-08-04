@@ -43,6 +43,19 @@ public class CloudHypervisor extends CloudClient {
         }
     }
 
+    public List<HypervisorData> getHypervisorsV2() {
+        var params = new HypervisorCloudPageParams();
+        CloudResponse<HypervisorCloudData> response = cloudGet(CloudUrlConstant.HYPERVISORS_STATISTICS_V2, params, new TypeReference<CloudResponse<HypervisorCloudData>>() {
+        }, true);
+        if (response != null && response.getData() != null && CollectionUtils.isNotEmpty(response.getData()
+                                                                                                 .getList())) {
+            return response.getData().getList();
+        } else {
+            log.error("get hypervisors empty , params is {} , response is {}", JsonCommon.stringify(params), JsonCommon.stringify(response));
+            return new ArrayList<>();
+        }
+    }
+
     @Getter
     @Setter
     private static class HypervisorCloudPageParams implements SnakeHttpParam {
