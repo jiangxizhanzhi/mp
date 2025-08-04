@@ -131,7 +131,7 @@ public class CloudUrlConstant {
     public static final String VIRTUAL_DYNAMIPS_LIFE_CONTROL_URL = "/cpcloud/device/v1/dynamips/{instance_id}/action";
     public static final String GET_DYNAMIPS_INFO = "/cpcloud/device/v1/dynamips/type";
 
-    public static final String HYPERVISORS_STATISTICS = "/v1/hypervisors";
+    public static final String HYPERVISORS_STATISTICS = "/v1/scenarios/hypervisors";
 
     private CloudUrlConstant() {
     }
