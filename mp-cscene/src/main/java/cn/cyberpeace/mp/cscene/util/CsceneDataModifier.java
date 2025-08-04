@@ -1119,6 +1119,12 @@ public class CsceneDataModifier {
     }
 
     public static void checkTransparent(CsceneBO csceneBO) {
+        if (csceneBO.getSceneConfig() == null) {
+            return;
+        }
+        if (csceneBO.getSceneConfig().getPlugins() == null || csceneBO.getSceneConfig().getPlugins().get("cpcloud") == null) {
+            return;
+        }
         SceneConfigHandler sceneConfigHandler = new SceneConfigHandler(csceneBO.getSceneConfig(), new SceneConfigContextBO() {
         });
         CloudSceneConfigPluginHandler handler = sceneConfigHandler.getPluginHandler("cpcloud");
