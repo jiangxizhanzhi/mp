@@ -25,6 +25,7 @@ import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortConnectionBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigPieceBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
+import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
@@ -153,39 +154,50 @@ public class SceneExporter {
             nodeIdMap.put(convertInfo.getOriginId(), convertInfo.getId());
         }
         var cloudPlugin = sceneConfigDataBO.getPlugins().get("cpcloud");
+
+        var newCloudPlugin = new ScenePluginDataBO();
+        newCloudPlugin.setScene(cloudPlugin.getScene());
+        newCloudPlugin.setElements(new HashMap<>());
+        newCloudPlugin.setElementPorts(new HashMap<>());
+        sceneConfigDataBO.getPlugins().put("cpcloud", newCloudPlugin);
+
         for (SceneConfigElementBO element : sceneConfigDataBO.getTopology().getElements()) {
             String originId = element.getId();
             String newId = nodeIdMap.getOrDefault(originId, originId);
             // 更新节点的id
             element.setId(newId);
-            var cloudPluginElement = cloudPlugin.getElements().remove(originId);
+            var cloudPluginElement = cloudPlugin.getElements().get(originId);
             if (cloudPluginElement != null) {
-                cloudPlugin.getElements().put(newId, cloudPluginElement);
+                newCloudPlugin.getElements().put(newId, cloudPluginElement);
             }
             // 更新端口的id
             for (SceneConfigElementPortBO port : element.getPorts()) {
                 String originPortId = port.getId();
-                String newPortId = StringUtils.replace(originPortId, originId, newId);
+                String newPortId = StringUtils.replace(originPortId, portKey(originId), portKey(newId));
                 port.setId(newPortId);
-                var cloudPluginPort = cloudPlugin.getElementPorts().remove(originPortId);
+                var cloudPluginPort = cloudPlugin.getElementPorts().get(originPortId);
                 if (cloudPluginPort != null) {
-                    cloudPlugin.getElementPorts().put(newPortId, cloudPluginPort);
+                    newCloudPlugin.getElementPorts().put(newPortId, cloudPluginPort);
                 }
             }
             // 更新连线数据里的id
             for (SceneConfigElementPortConnectionBO c : sceneConfigDataBO.getTopology().getConnections()) {
-                c.setSource(StringUtils.replace(c.getSource(), originId, newId));
-                c.setTarget(StringUtils.replace(c.getTarget(), originId, newId));
-                c.setInfo(StringUtils.replace(c.getInfo(), originId, newId));
-                c.setName(StringUtils.replace(c.getName(), originId, newId));
+                c.setSource(StringUtils.replace(c.getSource(), portKey(originId), portKey(newId)));
+                c.setTarget(StringUtils.replace(c.getTarget(), portKey(originId), portKey(newId)));
+                c.setInfo(StringUtils.replace(c.getInfo(), portKey(originId), portKey(newId)));
+                c.setName(StringUtils.replace(c.getName(), portKey(originId), portKey(newId)));
             }
             // 更新层节点和靶标节点连线的id
             for (SceneConfigAreaNodeConnectionBO n : sceneConfigDataBO.getTopology().getNodeConnections()) {
-                n.setSource(StringUtils.replace(n.getSource(), originId, newId));
-                n.setTarget(StringUtils.replace(n.getTarget(), originId, newId));
-                n.setName(StringUtils.replace(n.getName(), originId, newId));
+                n.setSource(StringUtils.replace(n.getSource(), portKey(originId), portKey(newId)));
+                n.setTarget(StringUtils.replace(n.getTarget(), portKey(originId), portKey(newId)));
+                n.setName(StringUtils.replace(n.getName(), portKey(originId), portKey(newId)));
             }
         }
+    }
+
+    private String portKey(String nodeId) {
+        return "_" + nodeId + "_";
     }
 
     private void createTopoJson(SceneConfigDataBO sceneConfigDataBO, String sceneNum, String filePath) {
