@@ -114,6 +114,25 @@ public class HypervisorConverter implements BaseConverter {
         return convertModel;
     }
 
+    public BasePageBO<HypervisorBO> pageUnCacheV2(BasePageDTO dto, String... ignoreFields) {
+        var hypervisors = new CloudHypervisor().getHypervisorsV2();
+        List<HypervisorBO> list = new ArrayList<>();
+        for (HypervisorData hypervisor : hypervisors) {
+            HypervisorBO build = HypervisorBO.builder().name(hypervisor.getHostname())
+                    .ip(hypervisor.getHostIp()).status(hypervisor.getStatus()).state(hypervisor.getState())
+                    .cpu(hypervisor.getCpu()).ram(hypervisor.getRam()).disk(hypervisor.getDisk())
+                    .cpuUsed(hypervisor.getCpuUsed()).ramUsed(hypervisor.getRamUsed()).totalInstances(hypervisor.getRunningVms())
+                    .serviceStatus(false)
+                    .diskUsed(hypervisor.getDiskUsed()).build();
+            list.add(build);
+        }
+
+        BasePageBO<HypervisorBO> convertModel = new BasePageBO<>();
+        convertModel.setList(list);
+        convertModel.setTotal(hypervisors.size());
+        return convertModel;
+    }
+
     /**
      * 获取虚拟机数量限制与权重
      * @param dto

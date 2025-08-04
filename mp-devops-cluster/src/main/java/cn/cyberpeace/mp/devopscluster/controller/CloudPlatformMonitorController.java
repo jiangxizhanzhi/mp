@@ -289,7 +289,7 @@ public class CloudPlatformMonitorController {
             return new PageResult<>(hypervisorPageRespons, model.getTotal());
         }
 
-        BasePageBO<HypervisorBO> model = hypervisorConverter.pageUnCache(new BasePageDTO(request.getLimit(),request.getOffset()));
+        BasePageBO<HypervisorBO> model = hypervisorConverter.pageUnCacheV2(new BasePageDTO(request.getLimit(),request.getOffset()));
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getList())){
             return new PageResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
         }
