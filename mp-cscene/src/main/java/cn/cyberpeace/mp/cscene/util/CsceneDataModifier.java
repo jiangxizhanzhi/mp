@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
 import cn.cyberpeace.mp.base.util.PythonExecUtil;
@@ -22,7 +23,7 @@ import cn.cyberpeace.mp.scene.core.bo.SceneBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigAreaBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigAreaNodeConnectionBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigContextBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortConnectionBO;
@@ -39,6 +40,7 @@ import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneTopologyBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
+import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneAreaModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.DockerParams;
@@ -46,12 +48,11 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.base.EntityUsb;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.VirtualUsb;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
-import com.fasterxml.jackson.core.type.TypeReference;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudSceneConfigPluginHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.util.ObjectUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -1112,6 +1113,22 @@ public class CsceneDataModifier {
                             }
                         }
                     }
+                }
+            }
+        }
+    }
+
+    public static void checkTransparent(CsceneBO csceneBO) {
+        SceneConfigHandler sceneConfigHandler = new SceneConfigHandler(csceneBO.getSceneConfig(), new SceneConfigContextBO() {
+        });
+        CloudSceneConfigPluginHandler handler = sceneConfigHandler.getPluginHandler("cpcloud");
+        for (var e : handler.getElementMap().values()) {
+            if (Boolean.TRUE.equals(e.getTransparent())) {
+                // 透明模式必须连接两个节点
+                var connectedElements = handler.getElementConnectedSrcElements(e.getSrcElement().getId());
+                if (connectedElements == null || connectedElements.size() != 2) {
+                    throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format(String.format("透明节点[%s]必须连接两个节点", e.getSrcElement()
+                            .getName())));
                 }
             }
         }

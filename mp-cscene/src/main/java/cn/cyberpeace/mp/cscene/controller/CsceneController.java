@@ -143,6 +143,7 @@ public class CsceneController implements BaseModelListControllerBase {
         CsceneDataModifier.checkCloudElement(csceneBO);
         CsceneDataModifier.handlerPosition(csceneBO.getSceneConfig());
         CsceneDataModifier.checkDockerParams(csceneBO);
+        CsceneDataModifier.checkTransparent(csceneBO);
     }
 
     private void correctRequestCsceneParamsForAppInstance(CsceneBO csceneBO) {
