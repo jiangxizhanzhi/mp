@@ -20,17 +20,6 @@ public class SysConfigBO extends ModelBO<SysConfigModel, SysConfigBO> {
     @ApiModelProperty(value = "初始值")
     private String initValue;
 
-    @ApiModelProperty(value = "前端组件类型")
-    private String type;
-
-    @ApiModelProperty(value = "范围")
-    private String range;
-
-    @ApiModelProperty(value = "select组件的下拉")
-    private Option options;
-
-    @ApiModelProperty(value = "单位")
-    private String unit;
 
     @Override
     public SysConfigModel createModel() {

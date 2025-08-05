@@ -40,6 +40,7 @@ import cn.cyberpeace.mp.cscene.vo.FlowGroupByDestinationIpAndSeverityVO;
 import cn.cyberpeace.mp.cscene.vo.FlowGroupPortWithProtocolVO;
 import cn.cyberpeace.mp.flow.util.SshUtil;
 import cn.cyberpeace.mp.frontadmin.service.sys.SysConfigService;
+import cn.cyberpeace.mp.frontadmin.util.CompressFile;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CategoryGroupBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.SceneAssetsBO;
@@ -580,7 +581,7 @@ public class FlowMonitorController {
             String downloadUrl = "http://" + ip + ":8005/api/session/entire/" + hostname + "/" + flowSimpleReplayRequest.getPcapId() + "/pcap";
             String trexIp = flowMonitorService.getTrexIp(sceneId);
 
-            String result = SshUtil.executeCommandWithReturn(new SshUtil.ServerInfo(trexIp, "root", "111111"), "bash /root/tcpreplay/tcpreplay_start.sh " + downloadUrl + " " + flowSimpleReplayRequest.getTargetIp() + SysContextHolder.getCallChainId());
+            String result = SshUtil.executeCommandWithReturn(new SshUtil.ServerInfo(trexIp, "root", "111111"), "bash /root/tcpreplay/tcpreplay_start.sh " + downloadUrl + " " + flowSimpleReplayRequest.getTargetIp() + " " + SysContextHolder.getCallChainId());
             return new ServiceResult<>(result).asResult();
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -594,7 +595,8 @@ public class FlowMonitorController {
 
     @ApiOperation(value = "指定pcap下载")
     @GetMapping("/download_pcap/by_id")
-    public ResponseEntity<Resource> exportPcap(HttpServletResponse httpServletResponse, String csceneId, String pcapId) {
+    public ResponseEntity<Resource> exportPcap(HttpServletResponse httpServletResponse, @RequestParam("cscene_id") String csceneId,
+                                               @RequestParam("pcap_id") String pcapId) {
         if (Objects.isNull(pcapId)) {
             throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("传入的pcapId为空"));
         }
@@ -614,13 +616,17 @@ public class FlowMonitorController {
         downloadUrl = downloadUrl.replace("${hostname}", hostname);
         downloadUrl = downloadUrl.replace("${pcapId}", pcapId);
         File tmpFile = new File(TextUtils.uuid());
+        File tempCompressFile = null;
         try {
             var httpResponse = HttpUtils.sendGetDownLoadWithDigestAuth(downloadUrl, "admin", "admin");
             HttpHeaders httpHeaders = new HttpHeaders();
             var output = new FileOutputStream(tmpFile);
             var input = httpResponse.getEntity().getContent();
             IOUtils.copy(input, output);
-            var resource = new InputStreamResource(new FileInputStream(tmpFile));
+
+            tempCompressFile = CompressFile.compressZip(tmpFile);
+
+            var resource = new InputStreamResource(new FileInputStream(tempCompressFile));
             httpHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
             httpServletResponse.setHeader("Content-Disposition", "attachment; filename=" + pcapId + ".pcap");
             return ResponseEntity.ok().headers(httpHeaders)
@@ -630,6 +636,9 @@ public class FlowMonitorController {
         } finally {
             if (tmpFile.exists()) {
                 tmpFile.delete();
+            }
+            if (tempCompressFile != null && tempCompressFile.exists()) {
+                tempCompressFile.delete();
             }
         }
     }

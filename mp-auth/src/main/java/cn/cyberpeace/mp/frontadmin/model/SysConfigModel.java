@@ -32,17 +32,6 @@ public class SysConfigModel extends BaseModel {
     @ApiModelProperty(value = "初始值")
     private String initValue;
 
-    @DefaultStr(Type.TEXT)
-    private String type;
-
-    @DefaultStr("1-120")
-    private String range;
-
-    @DefaultStr("{}")
-    private String options;
-
-    @DefaultStr()
-    private String unit;
 
 
     public static class Type {
@@ -50,6 +39,25 @@ public class SysConfigModel extends BaseModel {
         public static final String NUMBER = "number";
         public static final String SELECT_ONE = "selectOne";
         public static final String SELECT_MULTI = "selectMulti";
+    }
+
+    public static class KeyName {
+
+        public static final String FLOW_COMPRESSION__PASSWORD = "flow_compression_password";
+        public static final String FLOW_COMPRESSION_TYPE = "flow_compression_type";
+        public static final String FLOW_PERSISTENCE_TIMESTAMP_TYPE = "flow_persistence_timestamp_type";
+        public static final String FLOW_PERSISTENCE_TIME_RANGE = "flow_persistence_time_range";
+
+    }
+
+    public static class COMPRESSION_TYPE {
+        public static final String ZIP = "ZIP";
+        public static final String LZ4 = "LZ4";
+    }
+
+    public static class TIMESTAMP_TYPE {
+        public static final String NTP = "ntp";
+        public static final String PTP = "ptp";
     }
 
 
