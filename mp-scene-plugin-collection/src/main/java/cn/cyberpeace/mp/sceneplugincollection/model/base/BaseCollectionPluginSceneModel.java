@@ -5,6 +5,8 @@ import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.scene.core.plugin.model.BasePluginSceneModel;
 import lombok.Data;
 
+import java.util.Set;
+
 @Data
 public class BaseCollectionPluginSceneModel extends BasePluginSceneModel {
     @DefaultBool
@@ -15,6 +17,20 @@ public class BaseCollectionPluginSceneModel extends BasePluginSceneModel {
     private Boolean enableFlowMirror;
     @DefaultStr
     private String flowCollectNodes;
+    @DefaultStr
+    private String CustomeMirror;
+
+
+
+
+
+
+    @Data
+    public static class CustomMirror {
+        private Set<String> sourceNodes;
+
+        private String targetNode;
+    }
 
 
 

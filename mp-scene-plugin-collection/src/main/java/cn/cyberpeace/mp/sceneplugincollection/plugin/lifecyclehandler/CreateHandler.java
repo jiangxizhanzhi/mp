@@ -26,12 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -151,10 +146,18 @@ public class CreateHandler extends HandlerCommon {
             }
         }
         // 获取用户手动选择的流量镜像节点
-        retainSelectedNodeWhenUserManualSelectedFlowMirrorNodes(collectorVmInstanceIds, mirrorVmInstanceIds, cloudPluginHandler);
+        retainSelectedNodeWhenUserManualSelectedFlowMirrorNodes(collectorVmInstanceIds, collectorContainerInstanceIds, cloudPluginHandler);
 
         boolean enableCollector = !collectorVmInstanceIds.isEmpty() || !collectorContainerInstanceIds.isEmpty();
         boolean enableMirror = !mirrorVmInstanceIds.isEmpty() || !mirrorContainerInstanceIds.isEmpty();
+
+        //用户自定义流量镜像参数
+        if (enableMirror) {
+            mirrorByUserDefined(mirrorVmInstanceIds, mirrorContainerInstanceIds, cloudPluginHandler);
+        }
+
+
+
         if (enableCollector) {
             String sceneId = getPluginHandler().getSrcScene().getEid();
             // 创建流量采集器
@@ -182,6 +185,11 @@ public class CreateHandler extends HandlerCommon {
                 getPluginHandler().getScene().setFlowCollector(flowCollectorId);
             });
         }
+
+
+
+
+
         getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CollectionSceneStage.CREATE_FLOW_COLLECT);
 
         // 绑定探针agent到探针采集器
@@ -276,6 +284,38 @@ public class CreateHandler extends HandlerCommon {
 
             if (CollectionUtils.isNotEmpty(containerResourceIds)) {
                 containerResourceIds.retainAll(selectNodeResourceIds);
+            }
+        }
+    }
+
+    private void mirrorByUserDefined(Set<String> vmResourceIds, Set<String> containerResourceIds, CloudScenePluginHandler cloudScenePluginHandler) {
+        var customeMirror = this.getPluginHandler().getScene().getCustomeMirror();
+        if (Objects.isNull(customeMirror)) {
+            return;
+        } else if (CollectionUtils.isNotEmpty(customeMirror.getSourceNodes()) && StringUtils.isNotEmpty(customeMirror.getTargetNode())) {
+            Set<String> sourceNodeIds = customeMirror.getSourceNodes();
+            Set<String> sourceResourceIds = new HashSet<>();
+            for (String nodeId : sourceNodeIds) {
+                String resourceId = cloudScenePluginHandler.getElementMap().get(nodeId).getResourceId();
+                sourceResourceIds.add(resourceId);
+            }
+
+            if (CollectionUtils.isNotEmpty(vmResourceIds)) {
+                vmResourceIds.retainAll(sourceResourceIds);
+            }
+
+            if (CollectionUtils.isNotEmpty(containerResourceIds)) {
+                containerResourceIds.retainAll(sourceResourceIds);
+            }
+
+            String targetResourceId = cloudScenePluginHandler.getElementMap().get(customeMirror.getTargetNode()).getResourceId();
+
+            if (StringUtils.isNotEmpty(targetResourceId) && (vmResourceIds.contains(targetResourceId)
+                    || containerResourceIds.contains(targetResourceId))) {
+                if (CollectionUtils.isNotEmpty(vmResourceIds) || CollectionUtils.isNotEmpty(containerResourceIds)) {
+                    getFlowCollector().bindNetworkPorts(cloudScenePluginHandler.getScene().getSrcScene().getEid(), targetResourceId, new ArrayList<>(vmResourceIds),
+                            new ArrayList<>(containerResourceIds), true);
+                }
             }
         }
     }

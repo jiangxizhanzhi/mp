@@ -26,6 +26,8 @@ public abstract class BaseCollectionPluginSceneBO<M extends BaseCollectionPlugin
     private Boolean enableFlowMirror;
     @ApiModelProperty(value = "用户选择的开启流量采集的节点")
     private Set<String> flowCollectNodes;
+    @ApiModelProperty(value = "自定义流量镜像参数")
+    private BaseCollectionPluginSceneModel.CustomMirror customeMirror;
 
 
     @Override
@@ -35,6 +37,10 @@ public abstract class BaseCollectionPluginSceneBO<M extends BaseCollectionPlugin
         );
         if (StringUtils.isNotBlank(obj.getFlowCollectNodes())) {
             this.flowCollectNodes = JsonCommon.parse(obj.getFlowCollectNodes(), new TypeReference<Set<String>>() {});
+        }
+
+        if (StringUtils.isNotBlank(obj.getCustomeMirror())) {
+            this.customeMirror = JsonCommon.parse(obj.getCustomeMirror(), BaseCollectionPluginSceneModel.CustomMirror.class);
         }
     }
 
@@ -47,6 +53,12 @@ public abstract class BaseCollectionPluginSceneBO<M extends BaseCollectionPlugin
             obj.setFlowCollectNodes("");
         } else {
             obj.setFlowCollectNodes(JsonCommon.stringify(this.flowCollectNodes));
+        }
+
+        if (Objects.isNull(this.customeMirror)) {
+            obj.setCustomeMirror("");
+        } else {
+            obj.setCustomeMirror(JsonCommon.stringify(this.customeMirror));
         }
         return obj;
     }
