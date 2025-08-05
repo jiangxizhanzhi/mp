@@ -32,6 +32,9 @@ public class BaseSceneElementModel extends BaseSceneNodeModel {
     @DefaultStr
     private String uniteNumberId;
 
+    @DefaultStr("四川省")
+    private String geo;
+
     public static class Type {
         public static final int OTHER = 0;
         public static final int SWITCH = 1;

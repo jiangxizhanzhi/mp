@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.scene.core.bo.base;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
-import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.define.SerializableFunction;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
@@ -14,7 +13,6 @@ import org.apache.commons.lang3.StringUtils;
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Data
 public abstract class BaseSceneElementBO<M extends BaseSceneElementModel, P extends BaseSceneElementPortBO<?, P, T>,
@@ -48,6 +46,10 @@ public abstract class BaseSceneElementBO<M extends BaseSceneElementModel, P exte
     private Boolean isAuxiliary;
     @ApiModelProperty(value = "联合核心设备id")
     private String uniteNumberId;
+
+    @ApiModelProperty(value = "地理位置")
+    private String geo;
+
 
     @Override
     public void fromModel(M obj, String... ignoreFields) {
