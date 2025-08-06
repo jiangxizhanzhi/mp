@@ -58,12 +58,14 @@ import cn.cyberpeace.mp.cscene.service.impl.ScreenshotServiceImpl;
 import cn.cyberpeace.mp.cscene.service.taskpool.CsceneReportTaskPool;
 import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
 import cn.cyberpeace.mp.base.util.ReentrantLockUtils;
+import cn.cyberpeace.mp.flow.util.SshUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortConnectionBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneTopologyBO;
+import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.event.SceneStageRecorder;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
@@ -2015,5 +2017,86 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             humanCondition.select(selectFields);
         }
         return sceneElementMapper.list(humanCondition);
+    }
+
+    public Boolean resetPassword(String nodeId,String oldPassword, String newPassword, String sceneId) {
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, false);
+        CloudScenePluginHandler handler = sceneHandler.getPluginHandler("cpcloud");
+        var elementBO = sceneHandler.getElement(nodeId);
+        // 取源节点上的ssh信息
+        SshUtil.ServerInfo serverInfo = this.getSshInfo(elementBO.getPorts(), handler);
+        serverInfo.setUser("root");
+        serverInfo.setPassword(oldPassword);
+        String command = "echo \"root:" + newPassword + "\" | chpasswd";
+        SshUtil.execCommand(serverInfo, command);
+        log.info("虚拟机密码修改成功");
+        updatePassword(elementBO.getPorts(), handler, newPassword);
+        updatePassword2(sceneHandler.getElement(nodeId).getPorts().get(0).getAccessModes(), newPassword);
+        sceneHandler.save();
+        log.info("数据库中密码修改成功");
+        return true;
+    }
+
+    public Boolean setPortForwarding(String nodeId, String sceneId, Integer sourcePort, Integer destPort) {
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, false);
+        CloudScenePluginHandler handler = sceneHandler.getPluginHandler("cpcloud");
+        var elementBO = sceneHandler.getElement(nodeId);
+        // 取源节点上的ssh信息
+        SshUtil.ServerInfo serverInfo = this.getSshInfo(elementBO.getPorts(), handler);
+        String command = "sudo iptables -t nat -A PREROUTING -p tcp --dport " + sourcePort + " -j REDIRECT --to-port " + destPort +
+                "; sudo iptables -t nat -A PREROUTING -p udp --dport " + sourcePort + " -j REDIRECT --to-port " + destPort;
+        SshUtil.execCommand(serverInfo, command);
+        return true;
+    }
+
+
+    private SshUtil.ServerInfo getSshInfo(List<SceneElementPortBO> portBOS, CloudScenePluginHandler handler) {
+        String sourceIp = "";
+        Integer sourcePort = null;
+        String username = "";
+        String password = "";
+        for (var port : portBOS) {
+            var pluginPort = handler.getPort(port.getId());
+            if (CollectionUtils.isNotEmpty(pluginPort.getAccessModes())) {
+                for (var a : pluginPort.getAccessModes()) {
+                    if (AccessMode.Protocol.SSH.equals(a.getProtocol())) {
+                        sourceIp = a.getAccessIp();
+                        sourcePort = a.getAccessPort();
+                        username = a.getUsername();
+                        password = a.getPassword();
+                    }
+                }
+            }
+        }
+        if (sourcePort == null) {
+            throw new MpRuntimeException(CsceneErrorCode.CANNOT_FIND_SSH);
+        }
+        SshUtil.ServerInfo serverInfo = new SshUtil.ServerInfo();
+        serverInfo.setHost(sourceIp);
+        serverInfo.setPort(sourcePort);
+        serverInfo.setUser(username);
+        serverInfo.setPassword(password);
+        return serverInfo;
+    }
+
+    private void updatePassword(List<SceneElementPortBO> portBOS, CloudScenePluginHandler handler, String newPassword) {
+        for (var port : portBOS) {
+            var pluginPort = handler.getPort(port.getId());
+            if (CollectionUtils.isNotEmpty(pluginPort.getAccessModes())) {
+                for (var a : pluginPort.getAccessModes()) {
+                    if (AccessMode.Protocol.SSH.equals(a.getProtocol()) && "root".equals(a.getUsername())) {
+                        a.setPassword(newPassword);
+                    }
+                }
+            }
+        }
+    }
+
+    private void updatePassword2(List<AccessMode> accessModes, String newPassword) {
+        for (AccessMode a : accessModes) {
+            if (AccessMode.Protocol.SSH.equals(a.getProtocol()) && "root".equals(a.getUsername())) {
+                a.setPassword(newPassword);
+            }
+        }
     }
 }

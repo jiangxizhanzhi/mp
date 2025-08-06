@@ -337,7 +337,7 @@ public class SshUtil {
             ExecutorService executorService = Executors.newSingleThreadExecutor();
             try {
                 Future<String> future = executorService.submit(task);
-                execResult = future.get(1000 * 10, TimeUnit.MILLISECONDS); //任务处理超时时间设为10秒
+                execResult = future.get(1000 * 25, TimeUnit.MILLISECONDS); //任务处理超时时间设为10秒
                 log.info("exec shell commands result: {}", execResult);
             } catch (TimeoutException ex) {
                 log.error("exec shell commands timeout", ex);
