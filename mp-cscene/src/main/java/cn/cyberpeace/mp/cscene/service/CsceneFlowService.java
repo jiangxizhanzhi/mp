@@ -63,6 +63,9 @@ import cn.cyberpeace.mp.scenepluginflow.plugin.FlowScenePluginHandler;
 import cn.cyberpeace.mp.scenepluginflow.util.SceneFlowCacheUtil;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -81,6 +84,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @Description: 场景流量服务
@@ -453,6 +458,23 @@ public class CsceneFlowService {
         return flowNodeTxBpsList;
     }
 
+    private LoadingCache<String, ArrayNode> cache = CacheBuilder.newBuilder().maximumSize(50)
+            .expireAfterWrite(60, TimeUnit.SECONDS).build(new CacheLoader<String, ArrayNode>() {
+                @Override
+                public ArrayNode load(String key) throws Exception {
+                    return top5Protocols(key);
+                }
+            });
+
+    public ArrayNode top5ProtocolsCache(String id) {
+        try {
+            return cache.get(id);
+        } catch (ExecutionException e) {
+            log.error("failed to get top5Protocols", e);
+            return JsonCommon.createArrayNode();
+        }
+    }
+
     /**
      * TOP5流量协议
      *
@@ -528,7 +550,7 @@ public class CsceneFlowService {
         flowStatisticsAll.setFlowSummary(flowTaskRecordService.queryFlowSummary(sceneId));
         flowStatisticsAll.setFlowStatisticsInfo(flowTaskRecordService.flowStatistics(sceneId));
         flowStatisticsAll.setTop5NodeTxBpsList(this.top5NodeTxBps(id));
-        flowStatisticsAll.setTop5Protocols(this.top5Protocols(id));
+        flowStatisticsAll.setTop5Protocols(this.top5ProtocolsCache(id));
         flowStatisticsAll.setTotalRateList(this.totalRate(id));
         log.debug("CsceneFlowService.flowStatisticsAll end. flowStatisticsAll:{}", flowStatisticsAll);
         return flowStatisticsAll;
