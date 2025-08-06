@@ -1123,7 +1123,7 @@ public class CreateHandler extends HandlerCommon {
         }
 
         // 容器参数
-        if (cloudElement.getDockerParams() != null && Boolean.TRUE.equals(cloudElement.getDockerParams()
+        if (cloudElement.getDockerParams() != null && !Boolean.FALSE.equals(cloudElement.getDockerParams()
                                                                                   .getOptions())) {
             DockerParams dockerParams = cloudElement.getDockerParams();
             createData.setInteractive(dockerParams.getInteractive());
