@@ -171,12 +171,6 @@ public class ImagesController {
         if (StringUtils.isBlank(request.getUuid())){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
-
-        ImageConvertModel model = imagesConverter.findByUuid(request.getUuid());
-        if (request.getExtImageInfo() != null && model.getExtImageInfo() != null) {
-            request.getExtImageInfo().setImageSource(model.getExtImageInfo().getImageSource());
-        }
-
         imagesConverter.update(request);
         return ResultCommon.success();
     }
@@ -218,15 +212,6 @@ public class ImagesController {
             imagesByIdVO.setAllowChangeIso(CollectionUtils.isEmpty(res));
         } else {
             imagesByIdVO.setAllowChangeIso(true);
-        }
-
-        // 先导出 后导入的靶标会变成云平台类型的  这里特殊处理下
-        if (imagesByIdVO.getExtImageInfo() != null && imagesByIdVO.getExtImageInfo().getMetaData() != null) {
-            var meta = imagesByIdVO.getExtImageInfo().getMetaData();
-            if (StringUtils.isNotEmpty(meta.getEnvironmentStr()) && StringUtils.isNotEmpty(meta.getHostConfigExStr())) {
-                imagesByIdVO.getExtImageInfo().setImageSource(3);
-                imagesByIdVO.getExtImageInfo().getMetaData().setOptions(true);
-            }
         }
 
         return new Result<>(imagesByIdVO);
