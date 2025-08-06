@@ -61,4 +61,13 @@ public class FlowBO {
     @ApiModelProperty("时间戳毫秒级")
     private Long timestamp;
 
+    @ApiModelProperty("应用")
+    private String app;
+
+    @ApiModelProperty("地理位置")
+    private String geo;
+
+    @ApiModelProperty("vlan")
+    private String vlan;
+
 }

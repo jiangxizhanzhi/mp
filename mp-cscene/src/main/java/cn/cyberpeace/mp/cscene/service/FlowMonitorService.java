@@ -16,6 +16,7 @@ import cn.cyberpeace.mp.base.util.mptool.URLUtil;
 import cn.cyberpeace.mp.common.config.CommonAppConfig;
 import cn.cyberpeace.mp.cscene.bo.CsceneCollectionFlowBO;
 import cn.cyberpeace.mp.cscene.controller.request.SceneAllElementsQueryRequest;
+import cn.cyberpeace.mp.cscene.dto.common.FlowApp;
 import cn.cyberpeace.mp.cscene.dto.element.ConnectionState;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
 import cn.cyberpeace.mp.cscene.dto.flow.*;
@@ -34,6 +35,8 @@ import cn.cyberpeace.mp.cscene.vo.FlowGroupPortWithProtocolVO;
 import cn.cyberpeace.mp.flow.model.FlowActuatorModel;
 import cn.cyberpeace.mp.flow.repository.FlowActuatorMapper;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
+import cn.cyberpeace.mp.scene.model.SceneElementModel;
+import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
 import cn.cyberpeace.mp.sceneplugincloud.config.CloudAppConfig;
 import cn.cyberpeace.mp.sceneplugincollection.bo.AttackInfo;
 import cn.cyberpeace.mp.sceneplugincollection.bo.FlowAttackCountBO;
@@ -53,6 +56,7 @@ import cn.cyberpeace.mp.situationaware.bo.TeamAttackBO;
 import cn.cyberpeace.mp.situationaware.model.enums.SeverityEnum;
 import cn.cyberpeace.mp.situationaware.request.FlowAnalysisRequest;
 import cn.cyberpeace.mp.situationaware.service.FlowAnalysisService;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -60,12 +64,19 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -76,6 +87,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class FlowMonitorService {
+
 
     @Autowired
     private ScenePluginCollectionSceneService scenePluginCollectionSceneService;
@@ -97,6 +109,44 @@ public class FlowMonitorService {
 
     @Autowired
     private CsceneFileService csceneFileService;
+
+    @Autowired
+    private JsonCommon jsonCommon;
+
+    private static final String FLOW_RESOURCE_PATH = "/root/.mp/resources/flows";
+    private static final String FLOW_APP_FILE = "flow_app.json";
+
+    private static volatile Map<Integer, String> PORT_TO_PROTOCOL = new HashMap<>();
+    private static volatile long FLOW_APP_LAST_MODIFY = 0L;
+
+    private static final ScheduledThreadPoolExecutor FLOW_APP_INFO_EXECUTOR = new ScheduledThreadPoolExecutor(1);
+
+    static {
+        FLOW_APP_INFO_EXECUTOR.scheduleWithFixedDelay(() -> {
+            if (!Files.exists(Path.of(FLOW_RESOURCE_PATH, FLOW_APP_FILE))) {
+                ClassPathResource resource = new ClassPathResource("flow_app.json");
+                try {
+                    Files.copy(resource.getInputStream(), Path.of(FLOW_RESOURCE_PATH, FLOW_APP_FILE));
+                } catch (Exception e) {
+                    log.error("copy flow_app.json error", e);
+                }
+            }
+
+            File flowAppFile = new File(FLOW_RESOURCE_PATH, FLOW_APP_FILE);
+            if (FLOW_APP_LAST_MODIFY < flowAppFile.lastModified()) {
+                FLOW_APP_LAST_MODIFY = flowAppFile.lastModified();
+                try {
+                    String content = Files.readString(Path.of(FLOW_RESOURCE_PATH, FLOW_APP_FILE));
+                    List<FlowApp> flowApps = JsonCommon.parse(content, new TypeReference<>() {
+                    });
+
+                    PORT_TO_PROTOCOL = flowApps.stream().collect(Collectors.toMap(FlowApp::getPort, FlowApp::getName, (a, b) -> a));
+                } catch (IOException e) {
+                    log.error("read flow_app.json error", e);
+                }
+            }
+        }, 5L, 10L, TimeUnit.SECONDS);
+    }
 
     @Cacheable("trex_ip_by_scene_instance_id")
     public String getTrexIp(String sceneInstanceId) {
@@ -477,6 +527,70 @@ public class FlowMonitorService {
         return new ListObjServiceResult(new ListObjResult(data, result.getData().getTotal()).asResult()).asResult();
     }
 
+
+
+    public void addFlowAppInfo(FlowAttackDto flowAttackDto) {
+        try {
+            int targetPort = Integer.parseInt(flowAttackDto.getTargetPort());
+
+            String app = PORT_TO_PROTOCOL.get(targetPort);
+            if (StringUtils.isNotEmpty(app)) {
+                flowAttackDto.setApp(app);
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+
+
+    public void addFLowGeoInfo(FlowAttackDto flowAttackDto) {
+        SceneElementMapper sceneElementMapper = BeanCommon.getBean(SceneElementMapper.class);
+        List<SceneElementModel> sceneElementModels = sceneElementMapper.list(new HumanCondition().filterIn(SceneElementModel::getNodeId,
+                new String[]{flowAttackDto.getSourceNodeId(), flowAttackDto.getTargetNodeId()}));
+        if (CollectionUtils.isEmpty(sceneElementModels)) {
+            return;
+        } else {
+            Set<String> geos = sceneElementModels.stream().map(SceneElementModel::getGeo).filter(StringUtils::isNotBlank).collect(Collectors.toSet());
+            flowAttackDto.setGeo(String.join(",", geos));
+        }
+    }
+
+
+    public boolean flowFilter(FlowAttackDto flowAttackDto, FlowQueryParams queryParams) {
+        if (StringUtils.isNotEmpty(flowAttackDto.getApp()) && StringUtils.isNotEmpty(queryParams.getApp())) {
+            if (!flowAttackDto.getApp().contains(queryParams.getApp())) {
+                return false;
+            }
+        }
+
+        if (StringUtils.isNotEmpty(flowAttackDto.getGeo()) && StringUtils.isNotEmpty(queryParams.getGeo())) {
+            if (!flowAttackDto.getGeo().contains(queryParams.getGeo())) {
+                return false;
+            }
+        }
+
+        if (StringUtils.isNotEmpty(flowAttackDto.getVlan()) && StringUtils.isNotEmpty(queryParams.getVlan())) {
+            if (!flowAttackDto.getVlan().contains(queryParams.getVlan())) {
+                return false;
+            }
+        }
+
+        if (CollectionUtils.isEmpty(flowAttackDto.getSourceMac())) {
+            flowAttackDto.setSourceMac(new ArrayList<>());
+        }
+
+        if (CollectionUtils.isEmpty(flowAttackDto.getTargetMac())) {
+            flowAttackDto.setTargetMac(new ArrayList<>());
+        }
+
+        if (StringUtils.isNotEmpty(queryParams.getMacAddr())) {
+            if (!flowAttackDto.getSourceMac().contains(queryParams.getMacAddr()) && !flowAttackDto.getTargetMac().contains(queryParams.getMacAddr())) {
+                return false;
+            }
+        }
+        return true;
+
+    }
 
     /**
      * 流量分页接口包装

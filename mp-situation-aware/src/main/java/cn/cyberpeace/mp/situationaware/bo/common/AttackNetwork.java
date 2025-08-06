@@ -14,4 +14,6 @@ public class AttackNetwork{
      */
     private Long bytes;
 
+    private VlanInfo vlan;
+
 }

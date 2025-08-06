@@ -68,4 +68,17 @@ public class FlowQueryParams extends QueryParams {
      */
     @ApiModelProperty("强制过滤的目标IP集合")
     private List<String> filterDestinationIps;
+
+
+    @ApiModelProperty("应用")
+    private String app;
+
+    @ApiModelProperty("地理位置")
+    private String geo;
+
+    @ApiModelProperty("vlan")
+    private String vlan;
+
+    @ApiModelProperty("mac_addr")
+    private String macAddr;
 }

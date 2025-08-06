@@ -63,4 +63,7 @@ public class CollectionFlowBO {
     @ApiModelProperty("本条流量包含的攻击信息")
     private List<AttackInfo> attackInfos;
 
+    @ApiModelProperty("vlan")
+    private String vlan;
+
 }

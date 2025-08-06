@@ -1,0 +1,502 @@
+[
+  {
+    "name": "SSH",
+    "port": 22
+  },
+  {
+    "name": "Telnet",
+    "port": 23
+  },
+  {
+    "name": "DNS",
+    "port": 53
+  },
+  {
+    "name": "DHCP Server",
+    "port": 67
+  },
+  {
+    "name": "DHCP Client",
+    "port": 68
+  },
+  {
+    "name": "TFTP",
+    "port": 69
+  },
+  {
+    "name": "HTTP",
+    "port": 80
+  },
+  {
+    "name": "HTTPS",
+    "port": 443
+  },
+  {
+    "name": "Kerberos",
+    "port": 88
+  },
+  {
+    "name": "POP3",
+    "port": 110
+  },
+  {
+    "name": "POP3S",
+    "port": 995
+  },
+  {
+    "name": "IMAP",
+    "port": 143
+  },
+  {
+    "name": "IMAPS",
+    "port": 993
+  },
+  {
+    "name": "SMTP",
+    "port": 25
+  },
+  {
+    "name": "SMTPS",
+    "port": 465
+  },
+  {
+    "name": "FTP",
+    "port": 21
+  },
+  {
+    "name": "FTP Data",
+    "port": 20
+  },
+  {
+    "name": "SFTP",
+    "port": 22
+  },
+  {
+    "name": "FTPS",
+    "port": 990
+  },
+  {
+    "name": "NTP",
+    "port": 123
+  },
+  {
+    "name": "SNMP",
+    "port": 161
+  },
+  {
+    "name": "SNMP Trap",
+    "port": 162
+  },
+  {
+    "name": "LDAP",
+    "port": 389
+  },
+  {
+    "name": "LDAPS",
+    "port": 636
+  },
+  {
+    "name": "Syslog",
+    "port": 514
+  },
+  {
+    "name": "RDP",
+    "port": 3389
+  },
+  {
+    "name": "VNC",
+    "port": 5900
+  },
+  {
+    "name": "NFS",
+    "port": 2049
+  },
+  {
+    "name": "MySQL",
+    "port": 3306
+  },
+  {
+    "name": "PostgreSQL",
+    "port": 5432
+  },
+  {
+    "name": "Microsoft SQL Server",
+    "port": 1433
+  },
+  {
+    "name": "SQL Server Browser",
+    "port": 1434
+  },
+  {
+    "name": "Oracle DB",
+    "port": 1521
+  },
+  {
+    "name": "MongoDB",
+    "port": 27017
+  },
+  {
+    "name": "Redis",
+    "port": 6379
+  },
+  {
+    "name": "Memcached",
+    "port": 11211
+  },
+  {
+    "name": "Cassandra",
+    "port": 9042
+  },
+  {
+    "name": "Elasticsearch",
+    "port": 9200
+  },
+  {
+    "name": "Elasticsearch Cluster",
+    "port": 9300
+  },
+  {
+    "name": "InfluxDB",
+    "port": 8086
+  },
+  {
+    "name": "CouchDB",
+    "port": 5984
+  },
+  {
+    "name": "RethinkDB",
+    "port": 28015
+  },
+  {
+    "name": "Neo4j",
+    "port": 7474
+  },
+  {
+    "name": "RabbitMQ Management",
+    "port": 15672
+  },
+  {
+    "name": "RabbitMQ AMQP",
+    "port": 5672
+  },
+  {
+    "name": "RabbitMQ AMQPS",
+    "port": 5671
+  },
+  {
+    "name": "Apache Kafka",
+    "port": 9092
+  },
+  {
+    "name": "Kafka JMX",
+    "port": 9999
+  },
+  {
+    "name": "ActiveMQ",
+    "port": 61616
+  },
+  {
+    "name": "MQTT",
+    "port": 1883
+  },
+  {
+    "name": "MQTTS",
+    "port": 8883
+  },
+  {
+    "name": "ZeroMQ",
+    "port": 5555
+  },
+  {
+    "name": "NATS",
+    "port": 4222
+  },
+  {
+    "name": "IIS HTTP",
+    "port": 80
+  },
+  {
+    "name": "IIS HTTPS",
+    "port": 443
+  },
+  {
+    "name": "Tomcat HTTP",
+    "port": 8080
+  },
+  {
+    "name": "Tomcat AJP",
+    "port": 8009
+  },
+  {
+    "name": "JBoss HTTP",
+    "port": 8080
+  },
+  {
+    "name": "WebLogic Admin",
+    "port": 7001
+  },
+  {
+    "name": "WebLogic Managed",
+    "port": 7002
+  },
+  {
+    "name": "GlassFish Admin",
+    "port": 4848
+  },
+  {
+    "name": "GlassFish HTTP",
+    "port": 8080
+  },
+  {
+    "name": "Node.js (Express)",
+    "port": 3000
+  },
+  {
+    "name": "React Dev Server",
+    "port": 3000
+  },
+  {
+    "name": "Vue Dev Server",
+    "port": 8080
+  },
+  {
+    "name": "Webpack Dev Server",
+    "port": 8080
+  },
+  {
+    "name": "Docker Daemon",
+    "port": 2375
+  },
+  {
+    "name": "Docker TLS",
+    "port": 2376
+  },
+  {
+    "name": "Docker Registry",
+    "port": 5000
+  },
+  {
+    "name": "Kubernetes API",
+    "port": 6443
+  },
+  {
+    "name": "etcd Client",
+    "port": 2379
+  },
+  {
+    "name": "etcd Peer",
+    "port": 2380
+  },
+  {
+    "name": "kubelet API",
+    "port": 10250
+  },
+  {
+    "name": "kube-scheduler",
+    "port": 10259
+  },
+  {
+    "name": "kube-controller",
+    "port": 10257
+  },
+  {
+    "name": "Calico BGP",
+    "port": 179
+  },
+  {
+    "name": "Flannel VXLAN",
+    "port": 8472
+  },
+  {
+    "name": "Prometheus",
+    "port": 9090
+  },
+  {
+    "name": "Grafana",
+    "port": 3000
+  },
+  {
+    "name": "Zabbix Server",
+    "port": 10051
+  },
+  {
+    "name": "Zabbix Agent",
+    "port": 10050
+  },
+  {
+    "name": "Nagios",
+    "port": 5666
+  },
+  {
+    "name": "Splunk Web",
+    "port": 8000
+  },
+  {
+    "name": "Splunk Forwarder",
+    "port": 9997
+  },
+  {
+    "name": "ELK Kibana",
+    "port": 5601
+  },
+  {
+    "name": "ELK Logstash",
+    "port": 5044
+  },
+  {
+    "name": "Jaeger Collector",
+    "port": 14250
+  },
+  {
+    "name": "Jaeger Query",
+    "port": 16686
+  },
+  {
+    "name": "Zipkin",
+    "port": 9411
+  },
+  {
+    "name": "OpenVPN",
+    "port": 1194
+  },
+  {
+    "name": "IPSec",
+    "port": 500
+  },
+  {
+    "name": "IPSec NAT-T",
+    "port": 4500
+  },
+  {
+    "name": "Radius",
+    "port": 1812
+  },
+  {
+    "name": "Radius Accounting",
+    "port": 1813
+  },
+  {
+    "name": "TACACS+",
+    "port": 49
+  },
+  {
+    "name": "OpenLDAP",
+    "port": 389
+  },
+  {
+    "name": "FreeIPA",
+    "port": "80/443"
+  },
+  {
+    "name": "Hashicorp Vault",
+    "port": 8200
+  },
+  {
+    "name": "Nessus",
+    "port": 8834
+  },
+  {
+    "name": "Metasploit",
+    "port": 55553
+  },
+  {
+    "name": "Samba (SMB)",
+    "port": 139
+  },
+  {
+    "name": "Samba (SMB over IP)",
+    "port": 445
+  },
+  {
+    "name": "NFS Mountd",
+    "port": 20048
+  },
+  {
+    "name": "iSCSI",
+    "port": 3260
+  },
+  {
+    "name": "Ceph Monitor",
+    "port": 6789
+  },
+  {
+    "name": "Ceph OSD",
+    "port": 6800
+  },
+  {
+    "name": "GlusterFS",
+    "port": 24007
+  },
+  {
+    "name": "MinIO",
+    "port": 9000
+  },
+  {
+    "name": "GitLab SSH",
+    "port": 22
+  },
+  {
+    "name": "Gitea",
+    "port": 3000
+  },
+  {
+    "name": "Jenkins",
+    "port": 8080
+  },
+  {
+    "name": "SonarQube",
+    "port": 9000
+  },
+  {
+    "name": "Nexus Repository",
+    "port": 8081
+  },
+  {
+    "name": "Jupyter Notebook",
+    "port": 8888
+  },
+  {
+    "name": "Visual Studio Code Server",
+    "port": 8000
+  },
+  {
+    "name": "Xdebug",
+    "port": 9003
+  },
+  {
+    "name": "Docker Swarm",
+    "port": 2377
+  },
+  {
+    "name": "Minecraft",
+    "port": 25565
+  },
+  {
+    "name": "Steam",
+    "port": 27015
+  },
+  {
+    "name": "Counter-Strike",
+    "port": 27015
+  },
+  {
+    "name": "Team Fortress 2",
+    "port": 27015
+  },
+  {
+    "name": "World of Warcraft",
+    "port": 3724
+  },
+  {
+    "name": "Quake III Arena",
+    "port": 27960
+  },
+  {
+    "name": "Call of Duty",
+    "port": 28960
+  },
+  {
+    "name": "FiveM (GTA V)",
+    "port": 30120
+  }
+]

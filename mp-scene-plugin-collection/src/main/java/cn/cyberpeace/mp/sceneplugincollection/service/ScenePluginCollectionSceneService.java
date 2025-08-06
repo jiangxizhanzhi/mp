@@ -1302,6 +1302,11 @@ public class ScenePluginCollectionSceneService {
             flowBO.setSize(flowLogBO.getNetwork().getBytes());
         }
         flowBO.setProtocol(flowLogBO.getProtocol());
+        if (Objects.nonNull(flowLogBO.getNetwork())) {
+            if (Objects.nonNull(flowLogBO.getNetwork().getVlan()) && CollectionUtils.isEmpty(flowLogBO.getNetwork().getVlan().getId())) {
+                flowBO.setVlan(String.join(",", flowLogBO.getNetwork().getVlan().getId()));
+            }
+        }
         return flowBO;
     }
 

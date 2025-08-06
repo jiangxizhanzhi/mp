@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.base.context.SysContextHolder;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.HttpUtils;
@@ -77,6 +78,7 @@ import java.io.FileOutputStream;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 
 /**
  * @Description:
@@ -380,9 +382,31 @@ public class FlowMonitorController {
     @GetMapping("/page")
     public ListObjServiceResult<FlowAttackDto> pageFlow(@RequestParam String id, FlowQueryParams queryParams) {
         log.info("pageFlow ====>> id:{}, queryParams:{}", id, queryParams);
+        Integer originPerPage = queryParams.getPerPage();
+        if (Objects.isNull(originPerPage)) {
+            originPerPage = 10;
+        }
+        Integer originPage = queryParams.getPage();
+        if (Objects.isNull(originPage)) {
+            originPage = 1;
+        }
 
+        // 在内存按照应用地理位置、应用、vlan过滤
+        queryParams.setPerPage(10000);
+        queryParams.setPage(1);
         ListObjServiceResult<FlowAttackDto> result = flowMonitorService.pageFlow(id, queryParams);
-        return result;
+
+        if (CollectionUtils.isNotEmpty(result.getData().getList())) {
+            List<FlowAttackDto> list = result.getData().getList().stream().peek(flow -> flowMonitorService.addFlowAppInfo(flow))
+                    .peek(flow -> flowMonitorService.addFLowGeoInfo(flow)).filter(flow -> flowMonitorService.
+                    flowFilter(flow, queryParams)).collect(Collectors.toList());
+
+            return new ListObjServiceResult(new ListObjResult(list.subList((originPage - 1) * originPerPage, originPage * originPerPage)
+                    , list.size()).asResult()).asResult();
+        } else {
+            return result;
+        }
+
     }
 
     @ApiOperation(value = "流量分页查询的数据的导出")
