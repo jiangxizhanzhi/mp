@@ -2020,11 +2020,12 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
     public Boolean resetPassword(String nodeId,String oldPassword, String newPassword, String sceneId) {
+        sceneId = this.getSceneId(sceneId);
         SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, false);
         CloudScenePluginHandler handler = sceneHandler.getPluginHandler("cpcloud");
         var elementBO = sceneHandler.getElement(nodeId);
         // 取源节点上的ssh信息
-        SshUtil.ServerInfo serverInfo = this.getSshInfo(elementBO.getPorts(), handler);
+        SshUtil.ServerInfo serverInfo = this.getSshInfo(elementBO.getPorts(), handler, elementBO.getName());
         serverInfo.setUser("root");
         serverInfo.setPassword(oldPassword);
         String command = "echo \"root:" + newPassword + "\" | chpasswd";
@@ -2038,11 +2039,12 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
     public Boolean setPortForwarding(String nodeId, String sceneId, Integer sourcePort, Integer destPort) {
+        sceneId = this.getSceneId(sceneId);
         SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, false);
         CloudScenePluginHandler handler = sceneHandler.getPluginHandler("cpcloud");
         var elementBO = sceneHandler.getElement(nodeId);
         // 取源节点上的ssh信息
-        SshUtil.ServerInfo serverInfo = this.getSshInfo(elementBO.getPorts(), handler);
+        SshUtil.ServerInfo serverInfo = this.getSshInfo(elementBO.getPorts(), handler, elementBO.getName());
         String command = "sudo iptables -t nat -A PREROUTING -p tcp --dport " + sourcePort + " -j REDIRECT --to-port " + destPort +
                 "; sudo iptables -t nat -A PREROUTING -p udp --dport " + sourcePort + " -j REDIRECT --to-port " + destPort;
         SshUtil.execCommand(serverInfo, command);
@@ -2050,7 +2052,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
 
-    private SshUtil.ServerInfo getSshInfo(List<SceneElementPortBO> portBOS, CloudScenePluginHandler handler) {
+    private SshUtil.ServerInfo getSshInfo(List<SceneElementPortBO> portBOS, CloudScenePluginHandler handler, String name) {
         String sourceIp = "";
         Integer sourcePort = null;
         String username = "";
@@ -2069,7 +2071,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             }
         }
         if (sourcePort == null) {
-            throw new MpRuntimeException(CsceneErrorCode.CANNOT_FIND_SSH);
+            throw new MpRuntimeException(CsceneErrorCode.CANNOT_FIND_SSH.format(name));
         }
         SshUtil.ServerInfo serverInfo = new SshUtil.ServerInfo();
         serverInfo.setHost(sourceIp);
