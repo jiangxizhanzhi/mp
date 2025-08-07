@@ -175,7 +175,7 @@ public class ImagesController {
 
         // 如果是 系统镜像=云平台 的容器 ， 更新时需要加载下原有的meta_data
         // todo
-        if (StringUtils.equals(request.getImageType(), BaseCloudPluginSceneElementModel.ImageType.CONTAINER)) {
+        if (StringUtils.equals(request.getImageType(), "container")) {
             if (request.getExtImageInfo() != null && request.getExtImageInfo()
                     .getImageSource() != null && request.getExtImageInfo().getImageSource() == 2) {
                 var x = imagesConverter.findByUuid(request.getUuid());
