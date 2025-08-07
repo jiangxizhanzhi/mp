@@ -1128,6 +1128,7 @@ public class CreateHandler extends HandlerCommon {
             DockerParams dockerParams = cloudElement.getDockerParams();
             createData.setInteractive(dockerParams.getInteractive());
             createData.setPrivileged(dockerParams.getPrivileged());
+            createData.setTty(dockerParams.getTty());
             createData.setRun(dockerParams.getRun());
 
             String dir = BeanCommon.getBean(BaseAppConfig.class).getResourcesDir() + "/scene_plugin_cloud/parser";
