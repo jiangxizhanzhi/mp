@@ -45,6 +45,7 @@ import cn.cyberpeace.mp.log.annotation.OperateLog;
 import cn.cyberpeace.mp.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
+import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudmessageconvert.CloudMessageConvertUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -171,6 +172,19 @@ public class ImagesController {
         if (StringUtils.isBlank(request.getUuid())){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
+
+        // 如果是 系统镜像=云平台 的容器 ， 更新时需要加载下原有的meta_data
+        // todo
+        if (StringUtils.equals(request.getImageType(), BaseCloudPluginSceneElementModel.ImageType.CONTAINER)) {
+            if (request.getExtImageInfo() != null && request.getExtImageInfo()
+                    .getImageSource() != null && request.getExtImageInfo().getImageSource() == 2) {
+                var x = imagesConverter.findByUuid(request.getUuid());
+                if (x.getExtImageInfo() != null && x.getExtImageInfo().getMetaData() != null) {
+                    request.getExtImageInfo().setMetaData(x.getExtImageInfo().getMetaData());
+                }
+            }
+        }
+
         imagesConverter.update(request);
         return ResultCommon.success();
     }
