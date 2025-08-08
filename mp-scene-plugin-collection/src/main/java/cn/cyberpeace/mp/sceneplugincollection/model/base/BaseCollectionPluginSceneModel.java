@@ -21,17 +21,4 @@ public class BaseCollectionPluginSceneModel extends BasePluginSceneModel {
     private String CustomeMirror;
 
 
-
-
-
-
-    @Data
-    public static class CustomMirror {
-        private Set<String> sourceNodes;
-
-        private String targetNode;
-    }
-
-
-
 }

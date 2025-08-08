@@ -27,27 +27,29 @@ public abstract class BaseCollectionPluginSceneBO<M extends BaseCollectionPlugin
     @ApiModelProperty(value = "用户选择的开启流量采集的节点")
     private Set<String> flowCollectNodes;
     @ApiModelProperty(value = "自定义流量镜像参数")
-    private BaseCollectionPluginSceneModel.CustomMirror customeMirror;
+    private CustomMirror customeMirror;
 
 
     @Override
     public void fromModel(M obj, String... ignoreFields) {
         super.fromModel(obj,
-                ArrayUtils.addAll(ignoreFields, BeanUtils.getBeanGetterFieldName(BaseCollectionPluginSceneModel::getFlowCollectNodes))
+                ArrayUtils.addAll(ignoreFields, BeanUtils.getBeanGetterFieldName(BaseCollectionPluginSceneModel::getFlowCollectNodes),
+                        BeanUtils.getBeanGetterFieldName(BaseCollectionPluginSceneModel::getCustomeMirror))
         );
         if (StringUtils.isNotBlank(obj.getFlowCollectNodes())) {
             this.flowCollectNodes = JsonCommon.parse(obj.getFlowCollectNodes(), new TypeReference<Set<String>>() {});
         }
 
         if (StringUtils.isNotBlank(obj.getCustomeMirror())) {
-            this.customeMirror = JsonCommon.parse(obj.getCustomeMirror(), BaseCollectionPluginSceneModel.CustomMirror.class);
+            this.customeMirror = JsonCommon.parse(obj.getCustomeMirror(), CustomMirror.class);
         }
     }
 
     @Override
     public M toModel(String... ignoreFields) {
         M obj = super.toModel(
-                ArrayUtils.addAll(ignoreFields, BeanUtils.getBeanGetterFieldName(BaseCollectionPluginSceneModel::getFlowCollectNodes)
+                ArrayUtils.addAll(ignoreFields, BeanUtils.getBeanGetterFieldName(BaseCollectionPluginSceneModel::getFlowCollectNodes),
+                        BeanUtils.getBeanGetterFieldName(BaseCollectionPluginSceneModel::getCustomeMirror)
                 ));
         if (Objects.isNull(this.flowCollectNodes)) {
             obj.setFlowCollectNodes("");
