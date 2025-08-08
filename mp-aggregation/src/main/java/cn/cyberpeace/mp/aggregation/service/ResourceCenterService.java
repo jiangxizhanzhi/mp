@@ -6,7 +6,10 @@ import cn.cyberpeace.mp.aggregation.sceneimport.parse.export.ExportResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.export.SceneExporter;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.YmlParseResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.image.ImageParseResult;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.FsCommon;
+import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -14,16 +17,31 @@ import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Device;
+import cn.cyberpeace.mp.devopscluster.converter.TargetConverter;
+import cn.cyberpeace.mp.devopscluster.converter.bo.common.BasePageBO;
+import cn.cyberpeace.mp.devopscluster.dto.ImagePageDTO;
+import cn.cyberpeace.mp.devopscluster.request.TargetSceneRequest;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
+import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudSceneConfigPluginHandler;
+import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.List;
+import java.util.Properties;
 
 /**
  * @Description
@@ -50,6 +68,56 @@ public class ResourceCenterService {
 
     @Resource
     private ResourceCenterConverter cSceneBoConverter;
+
+    @Resource
+    private TargetConverter targetConverter;
+
+    public ServiceResult<CsceneBO> importByConfig(String ymlFilePath, String imageFilePath, List<String> imageFilePathList, String sceneFilePath) {
+        String importResMode = BaseAppConfig.getImportMode();
+        if ("json".equals(importResMode) || true) {
+            log.info("开启使用json文件导入场景");
+            String jsonFilePath = ymlFilePath + "/topo.json";
+            if (new File(jsonFilePath).exists()) {
+                log.info("使用json文件导入");
+                return this.importByJsonConfig(ymlFilePath , sceneFilePath);
+            } else {
+                log.info("topo.json不存在");
+            }
+        }
+        log.info("使用yml文件导入");
+        return this.importByYmlConfig(ymlFilePath, imageFilePath, imageFilePathList, sceneFilePath);
+    }
+
+    public ServiceResult<CsceneBO> importByJsonConfig(String ymlFilePath, String sceneFilePath) {
+        String logoPath = ymlFilePath + "/" + LOGO_NAME;
+        // 处理logo
+        String fdfsLogoFilePath = null;
+        File logo = new File(logoPath);
+        if (logo.exists()) {
+            String fdfsPath = FsCommon.upload(logoPath);
+            fdfsLogoFilePath = String.format(LOGO_FILEPATH_FORMAT, fdfsPath);
+        } else {
+            log.info("import logo , no logo file for path {}", sceneFilePath);
+        }
+        // 转换bo
+        File file = new File(ymlFilePath + "/topo.json");
+        String content = null;
+        try {
+            content = FileUtils.readFileToString(file,"utf8");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        SceneConfigDataBO sceneConfigDataBO  = JsonCommon.snakeParse(content, SceneConfigDataBO.class);
+        SceneConfigHandler sceneConfigHandler = new SceneConfigHandler(sceneConfigDataBO, null);
+        CloudSceneConfigPluginHandler pluginHandler = sceneConfigHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+        this.handlerElementFiles(sceneConfigHandler, pluginHandler, ymlFilePath + "/topo_json/elements");
+        CsceneBO csceneBO = new CsceneBO();
+        csceneBO.setSceneConfig(sceneConfigHandler.toData());
+        csceneBO.setLogo(fdfsLogoFilePath);
+
+        // 保存
+        return csceneService.syncWithoutCheckLimit(csceneBO, new CsceneContextBO());
+    }
 
     public ServiceResult<CsceneBO> importByYmlConfig(String ymlFilePath, String imageFilePath, List<String> imageFilePathList, String sceneFilePath) {
         // 解析 topo.yml
@@ -134,5 +202,78 @@ public class ResourceCenterService {
             log.error("Exec shell error! command=[{}], catch error:{}", shell, ExceptionUtils.getStackTrace(e));
         }
         log.info("End exec shell!");
+    }
+
+    private void handlerElementFiles(SceneConfigHandler sceneConfigHandler, CloudSceneConfigPluginHandler pluginHandler, String envElementPath) {
+        for (String nodeId : sceneConfigHandler.getElementMap().keySet()) {
+            CloudPluginSceneConfigElementBO pluginElement = pluginHandler.getElement(nodeId);
+            // 处理image和image_uuid字段
+            String imageName = pluginElement.getImage();
+            if (StringUtils.isNotEmpty(imageName) && imageName.endsWith(ElementTypeUtils.CORE_ROUTER_IMAGE_NAME)) {
+                imageName = ElementTypeUtils.CORE_ROUTER_IMAGE_NAME;
+                pluginElement.setImage(imageName);
+                pluginElement.setIsBuildIn(true);
+            }
+            Device device = this.getByImageName(imageName);
+            if (device != null) {
+                pluginElement.setImageUuid(device.getUuid());
+            }
+
+            var pluginData = sceneConfigHandler.getScenePluginData().get("cpcloud");
+            if (pluginData != null && pluginData.getElements() != null) {
+                var dbElement = pluginData.getElements().get(nodeId);
+                if (dbElement != null) {
+                    dbElement.put("image", pluginElement.getImage());
+                    dbElement.put("is_build_in", pluginElement.getIsBuildIn());
+                    dbElement.put("image_uuid", pluginElement.getImageUuid());
+                    pluginData.getElements().put(nodeId, dbElement);
+                }
+            }
+
+            // 处理图片和附件
+            File nodeDir = new File(envElementPath + "/" + nodeId);
+            if (nodeDir.exists()) {
+                for (var nodeFile : nodeDir.listFiles()) {
+                    FsCommon.upload(nodeFile.getAbsolutePath());
+                }
+            }
+        }
+    }
+
+    private Device getByImageName(String imageName){
+        TargetSceneRequest request = new TargetSceneRequest();
+        request.setName(imageName);
+        request.setIgnoreUser(true);
+        // 精确搜索
+        request.setLikeName(false);
+        //不过滤隐藏靶标
+        request.setIsHide(Boolean.TRUE);
+        BasePageBO<Device> targetSceneConvertModel = null;
+        ImagePageDTO imagePageDTOParams = new ImagePageDTO(request);
+        try {
+            targetSceneConvertModel = this.targetConverter.allTarget(imagePageDTOParams);
+        } catch (Exception e) {
+            String detail = "导入场景失败,调用云平台所有靶标接口报错,输入参数:" + JsonCommon.stringify(imagePageDTOParams) + ",响应:" + e.getMessage();
+            log.error(detail, e);
+            throw new MpRuntimeException(BaseErrorCode.ERROR, detail);
+        }
+
+        if (targetSceneConvertModel != null && CollectionUtils.isNotEmpty(targetSceneConvertModel.getList())) {
+            return targetSceneConvertModel.getList().get(0);
+        } else {
+            List<Device> devices = null;
+            try {
+                devices = this.targetConverter.getCommonTargets(request.getName());
+            } catch (Exception e) {
+                String detail = "导入场景失败,调用云平台常用靶标接口报错,输入参数:" + request.getName() + ",响应:" + e.getMessage();
+                log.error(detail, e);
+                throw new MpRuntimeException(BaseErrorCode.ERROR, detail);
+            }
+            if (CollectionUtils.isNotEmpty(devices)) {
+                return devices.get(0);
+            } else {
+                return null;
+            }
+        }
     }
 }

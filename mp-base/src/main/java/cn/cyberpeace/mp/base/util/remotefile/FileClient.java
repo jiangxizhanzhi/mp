@@ -105,7 +105,8 @@ public interface FileClient {
         } catch (IOException e) {
             var msg = String.format("File(%s) download to memory error: %s", fileKey, e.getMessage());
             log.error(msg);
-            throw new MpRuntimeException(msg);
+//            throw new MpRuntimeException(msg);
+            byteContent = new byte[0];
         }
         return byteContent;
     }

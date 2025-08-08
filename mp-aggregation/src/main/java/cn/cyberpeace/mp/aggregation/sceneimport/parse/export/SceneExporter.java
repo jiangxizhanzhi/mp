@@ -13,6 +13,16 @@ import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
+import cn.cyberpeace.mp.base.util.mptool.FileUtil;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigAreaBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortConnectionBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigPieceBO;
+import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
+import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
+import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpParam;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
@@ -33,6 +43,7 @@ import org.yaml.snakeyaml.representer.Representer;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -116,7 +127,162 @@ public class SceneExporter {
             convertInfos.add(convertInfo);
         });
         exportResult.setConvertInfos(convertInfos);
+
+        // 生成json格式的toop导入资源
+        SceneConfigHandler sceneConfigHandler = new SceneConfigHandler(sceneId, null, null);
+        this.removeEid(sceneConfigHandler);
+        SceneConfigDataBO sceneConfigDataBO = sceneConfigHandler.toData();
+        // 替换各个节点的id ， 保持节点id和使用yml时的一致
+        this.changeNodeId(sceneConfigDataBO, convertInfos);
+        this.createTopoJson(sceneConfigDataBO, sceneNumber, envPath + "/topo.json");
+        // 生成各个节点的图片和附件
+        this.createElementFiles(sceneConfigHandler, envPath + "/topo_json/elements");
+        // 生成各个区域中使用的图片
+        this.createAreaFiles(sceneConfigHandler, envPath + "/topo_json/areas");
+
         return exportResult;
+    }
+
+    private void changeNodeId(SceneConfigDataBO sceneConfigDataBO, List<ExportResult.ConvertInfo> convertInfos) {
+        Map<String, String> nodeIdMap = new HashMap<>();
+        for (ExportResult.ConvertInfo convertInfo : convertInfos) {
+            nodeIdMap.put(convertInfo.getOriginId(), convertInfo.getId());
+        }
+        var cloudPlugin = sceneConfigDataBO.getPlugins().get("cpcloud");
+
+        var newCloudPlugin = new ScenePluginDataBO();
+        newCloudPlugin.setScene(cloudPlugin.getScene());
+        newCloudPlugin.setElements(new HashMap<>());
+        newCloudPlugin.setElementPorts(new HashMap<>());
+        sceneConfigDataBO.getPlugins().put("cpcloud", newCloudPlugin);
+
+        for (SceneConfigElementBO element : sceneConfigDataBO.getTopology().getElements()) {
+            String originId = element.getId();
+            String newId = nodeIdMap.getOrDefault(originId, originId);
+            // 更新节点的id
+            element.setId(newId);
+            var cloudPluginElement = cloudPlugin.getElements().get(originId);
+            if (cloudPluginElement != null) {
+                newCloudPlugin.getElements().put(newId, cloudPluginElement);
+            }
+            // 更新端口的id
+            for (SceneConfigElementPortBO port : element.getPorts()) {
+                String originPortId = port.getId();
+                String newPortId = StringUtils.replace(originPortId, portKey(originId), portKey(newId));
+                port.setId(newPortId);
+                var cloudPluginPort = cloudPlugin.getElementPorts().get(originPortId);
+                if (cloudPluginPort != null) {
+                    newCloudPlugin.getElementPorts().put(newPortId, cloudPluginPort);
+                }
+            }
+            // 更新连线数据里的id
+            for (SceneConfigElementPortConnectionBO c : sceneConfigDataBO.getTopology().getConnections()) {
+                c.setSource(StringUtils.replace(c.getSource(), portKey(originId), portKey(newId)));
+                c.setTarget(StringUtils.replace(c.getTarget(), portKey(originId), portKey(newId)));
+                c.setName(StringUtils.replace(c.getName(), portKey(originId), portKey(newId)));
+            }
+        }
+    }
+
+    private String portKey(String nodeId) {
+        return "_" + nodeId + "_";
+    }
+
+    private void createTopoJson(SceneConfigDataBO sceneConfigDataBO, String sceneNum, String filePath) {
+        sceneConfigDataBO.getPlugins().remove("cpflow");
+        sceneConfigDataBO.getPlugins().remove("cpcollection");
+        var cloudData = sceneConfigDataBO.getPlugins().get("cpcloud");
+        for (Map<String, Object> cloudElement : cloudData.getElements().values()) {
+            var imageType = cloudElement.get("image_type");
+            if (StringUtils.isEmpty(sceneNum)) {
+                continue;
+            }
+            boolean isContainer = BaseCloudPluginSceneElementModel.ImageType.CONTAINER.equals(imageType);
+            boolean isVm = BaseCloudPluginSceneElementModel.ImageType.VM.equals(imageType);
+            if (isVm || isContainer) {
+                Object image = cloudElement.get("image");
+                if (image != null) {
+                    cloudElement.put("image", sceneNum + image);
+                }
+            }
+        }
+        String content = JsonCommon.snakeStringify(sceneConfigDataBO);
+        try {
+            this.createFile(content.getBytes("utf8"), filePath);
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void createElementFiles(SceneConfigHandler sceneConfigHandler, String envElementsPath) {
+        for (var e : sceneConfigHandler.getElementMap().values()) {
+            if (StringUtils.isNotEmpty(e.getIcon2()) || StringUtils.isNotEmpty(e.getIcon3()) || StringUtils.isNotEmpty(e.getFile())) {
+                // 确保目录上层目录存在
+                new File(envElementsPath).mkdirs();
+            }
+            String nodeId = e.getId();
+            if (StringUtils.isNotEmpty(e.getIcon2())) {
+                var p = new ParseFileKey(e.getIcon2(), "png");
+                byte[] content = FsCommon.downloadRawContent(p.getFilePath());
+                writeFile(content, envElementsPath + "/" + nodeId + "/icon2." + p.getSuffix(), 3);
+            }
+            String icon3 = e.getIcon3();
+            if (StringUtils.isNotEmpty(icon3) && icon3.contains("/")) {
+                var p = new ParseFileKey(e.getIcon3(), "png");
+                byte[] content = FsCommon.downloadRawContent(p.getFilePath());
+                writeFile(content, envElementsPath + "/" + nodeId + "/icon3." + p.getSuffix(), 3);
+            }
+            String file = e.getFile();
+            if (StringUtils.isNotEmpty(file)) {
+                var p = new ParseFileKey(e.getFile(), "zip");
+                byte[] content = FsCommon.downloadRawContent(p.getFilePath());
+                String fileName = FileUtil.getName(p.getFilePath());
+                writeFile(content, envElementsPath + "/" + nodeId + "/attachment." + p.getSuffix(), 3);
+            }
+        }
+    }
+
+    private void createAreaFiles(SceneConfigHandler sceneConfigHandler, String envAreasPath) {
+        if (sceneConfigHandler.getAreaMap() == null) {
+            return;
+        }
+        for (var a : sceneConfigHandler.getAreaMap().values()) {
+            String display = a.getDisplayContext();
+            if (StringUtils.isNotEmpty(display)) {
+                var map = JsonCommon.parseMap(display);
+                if (map != null && map.containsKey("fillPic")) {
+                    String fillPic = map.get("fillPic").toString();
+                    if (StringUtils.isNotEmpty(fillPic)) {
+                        var p = new ParseFileKey(fillPic, "png");
+                        byte[] content = FsCommon.downloadRawContent(p.getFilePath());
+                        writeFile(content, envAreasPath + "/" + a.getId() + "/fillPic." + p.getSuffix(), 3);
+                    }
+                }
+            }
+        }
+    }
+
+    private SceneConfigHandler removeEid(SceneConfigHandler sceneConfigHandler){
+        sceneConfigHandler.getScene().setEid(null);
+        for (Map.Entry<String, SceneConfigElementBO> entry : sceneConfigHandler.getElementMap().entrySet()) {
+            SceneConfigElementBO value = entry.getValue();
+            value.setEid(null);
+            value.getPorts().forEach(p -> p.setEid(null));
+        }
+        for (Map.Entry<String, SceneConfigAreaBO> entry : sceneConfigHandler.getAreaMap().entrySet()) {
+            SceneConfigAreaBO value = entry.getValue();
+            value.setEid(null);
+        }
+        for (Map.Entry<String, SceneConfigPieceBO> entry : sceneConfigHandler.getPieceMap().entrySet()) {
+            SceneConfigPieceBO value = entry.getValue();
+            value.setEid(null);
+        }
+        for (Map.Entry<String, SceneConfigElementPortConnectionBO> entry : sceneConfigHandler.getElementPortConnectionMap()
+                .entrySet()) {
+            SceneConfigElementPortConnectionBO v = entry.getValue();
+            v.setEid(null);
+        }
+        return sceneConfigHandler;
     }
 
     private void createImageAndServiceYml(String imagePath, String singleImagePath, List<SceneParseResourceCenterV2.Device> devices, String sceneNumber) {
@@ -471,5 +637,37 @@ public class SceneExporter {
             }
         }
         return "mx." + flavor;
+    }
+
+    @Getter
+    private static class ParseFileKey {
+        private String filePath;
+        private String fileName;
+        private String suffix;
+
+        public ParseFileKey(String input, String defaultSuffix) {
+            int queryIndex = input.indexOf('?');
+            this.filePath = (queryIndex != -1) ? input.substring(0, queryIndex) : input;
+            this.suffix = FileUtil.getSuffix(this.filePath);
+            this.fileName = FileUtil.getName(this.filePath);
+            if (StringUtils.isEmpty(this.suffix)) {
+                this.suffix = defaultSuffix;
+            }
+        }
+    }
+
+    private void writeFile(byte[] content, String filePath, int tryTimes) {
+        Exception throwE = null;
+        for (int i = 0; i < tryTimes; i++) {
+            try {
+                FileUtils.writeByteArrayToFile(new File(filePath), content);
+                return;
+            } catch (Exception e) {
+                throwE = e;
+            }
+        }
+        if (throwE != null) {
+            throw new MpRuntimeException(throwE.getMessage());
+        }
     }
 }

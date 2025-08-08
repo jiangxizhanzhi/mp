@@ -11,7 +11,7 @@ import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementM
  */
 public class ElementTypeUtils {
 
-    private static String CORE_ROUTER_IMAGE_NAME = "Core Router";
+    public static String CORE_ROUTER_IMAGE_NAME = "Core Router";
 
     /**
      * 是否核心路由器

@@ -151,7 +151,8 @@ public class LfsClient implements FileClient {
         if (!FileUtil.exist(targetFilePath)) {
             var msg = String.format("Local download %s to output stream error: file not found", fileKey);
             log.error(msg);
-            throw new MpRuntimeException(msg);
+            return;
+//            throw new MpRuntimeException(msg);
         }
         try (var is = new FileInputStream(targetFilePath)) {
             StreamUtils.copy(is, os);
