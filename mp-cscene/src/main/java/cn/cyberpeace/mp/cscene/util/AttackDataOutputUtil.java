@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.bo.AttackDataType;
 import cn.cyberpeace.mp.base.bo.ImageToolRequest;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.base.util.thread.ThreadUtils;
 import cn.cyberpeace.mp.cscene.ws.WebSocketClientService;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
@@ -63,7 +64,8 @@ public class AttackDataOutputUtil {
     public void startOneAttackDataOutputTask(CollectionScenePluginHandler collectionScenePluginHandler, SceneElementBO source, SceneElementBO target,
                                              ImageToolRequest finalTool, Long attackSconds, String taskId, String targetId) {
         // 启动一个线程 查询攻击结果 每隔5秒查询一次es数据 ， 查最新的一条数据
-        new Thread(new Runnable() {
+
+        new Thread(ThreadUtils.format(new Runnable() {
             @Override
             public void run() {
                 for (int i = 0; i < attackSconds / 5; i++) {
@@ -114,7 +116,7 @@ public class AttackDataOutputUtil {
                 }
             }
 
-        }).start();
+        })).start();
     }
 
     /**

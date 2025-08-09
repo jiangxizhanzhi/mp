@@ -39,7 +39,8 @@ public class WebSocketClientService {
             try {
                 SESSION.sendMessage(new TextMessage(message));
             } catch (IOException e) {
-                log.error(e.getMessage());
+                log.error("320 WebSocket发送消息失败: {}", e.getMessage());
+                log.error(e.getMessage(), e);
             }
         }
     }
@@ -53,7 +54,8 @@ public class WebSocketClientService {
             log.info("320 WebSocket连接成功");
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("320 WebSocket连接失败: {}", e.getMessage());
+            log.error(e.getMessage(), e);
         }
     }
 
