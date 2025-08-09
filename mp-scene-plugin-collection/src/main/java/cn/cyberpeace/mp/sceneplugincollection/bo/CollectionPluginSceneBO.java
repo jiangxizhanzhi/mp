@@ -19,6 +19,10 @@ public class CollectionPluginSceneBO extends BaseCollectionPluginSceneBO<Collect
     @ApiModelProperty(value = "采集路由id")
     private String probeRouter;
 
+
+    @ApiModelProperty(value="arkime ip")
+    private String arkimeIp;
+
     @Override
     public CollectionPluginSceneModel createModel() {
         return new CollectionPluginSceneModel();

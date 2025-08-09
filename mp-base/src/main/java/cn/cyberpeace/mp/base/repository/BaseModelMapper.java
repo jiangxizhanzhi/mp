@@ -55,6 +55,8 @@ public interface BaseModelMapper<M extends BaseModel> {
             return ((java.sql.Date) fieldValue).toLocalDate();
         } else if (LocalTime.class.equals(fieldType) && fieldValue instanceof java.sql.Time) {
             return ((java.sql.Time) fieldValue).toLocalTime();
+        } else if (Boolean.class.equals(fieldType) && fieldValue instanceof Integer) {
+            return (Integer) fieldValue != 0;
         } else {
             return fieldValue;
         }

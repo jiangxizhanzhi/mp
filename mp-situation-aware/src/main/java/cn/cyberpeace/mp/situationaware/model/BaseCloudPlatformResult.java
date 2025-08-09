@@ -86,4 +86,6 @@ public class BaseCloudPlatformResult {
      */
     @ApiModelProperty(hidden = true)
     private String url;
+
+    private String data;
 }

@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.service.BaseModelService;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.frontadmin.model.SysConfigModel;
 
+import java.io.File;
 import java.util.List;
 
 /**
@@ -28,5 +29,21 @@ public interface SysConfigService extends BaseModelService<SysConfigModel, Query
     boolean isNewUserNeedAudit();
 
     void publishConfigUpdateEvent(List<SysConfigModel> configs);
+
+
+    int getFlowPersistenceTimeConfig();
+
+/**
+ * 获取流量持久化时间戳类型配置的方法
+ * 该方法用于返回当前系统配置的流量持久化时间戳类型
+ *
+ * @return 返回一个整型值，表示当前配置的流量持久化时间戳类型
+ */
+    String getFlowPersistenceTimestamp();
+
+
+    File compressFile(File originFile);
+
+
 
 }

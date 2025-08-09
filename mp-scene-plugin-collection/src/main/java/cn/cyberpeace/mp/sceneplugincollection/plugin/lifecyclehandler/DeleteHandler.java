@@ -1,10 +1,13 @@
 package cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
+import cn.cyberpeace.mp.scene.model.ArkimeFlowPersistenceTaskModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.scene.repository.ArkimeFlowPersistenceTaskMapper;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
@@ -140,6 +143,13 @@ public class DeleteHandler extends HandlerCommon {
                     getFlowCollector().deleteEntityMirror(new ArrayList<>(mirrorVmInstanceIds), new ArrayList<>(mirrorContainerInstanceIds));
                 }
             });
+
+            ArkimeFlowPersistenceTaskMapper arkimeFlowPersistenceTaskMapper = BeanCommon.getBean(ArkimeFlowPersistenceTaskMapper.class);
+            ArkimeFlowPersistenceTaskModel arkimeFlowPersistenceTaskModel = new ArkimeFlowPersistenceTaskModel();
+            arkimeFlowPersistenceTaskModel.setValid(false);
+            arkimeFlowPersistenceTaskMapper.filterUpdate(arkimeFlowPersistenceTaskModel, new HumanCondition()
+                    .filterEqual(ArkimeFlowPersistenceTaskModel::getScene,
+                            getPluginHandler().getScene().getSrcScene().getEid()));
         }
 
         String probeCollectorId = scene.getProbeCollector();

@@ -1,11 +1,15 @@
 package cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.core.event.base.SceneEventProcess;
+import cn.cyberpeace.mp.scene.model.ArkimeFlowPersistenceTaskModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.scene.repository.ArkimeFlowPersistenceTaskMapper;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
@@ -31,6 +35,8 @@ import java.util.stream.Collectors;
 
 @Slf4j
 public class CreateHandler extends HandlerCommon {
+
+    private ArkimeFlowPersistenceTaskMapper arkimeFlowPersistenceTaskMapper = BeanCommon.getBean(ArkimeFlowPersistenceTaskMapper.class);
 
     public static class SceneProcess {
         public static final SceneEventProcess CREATE_FLOW_COLLECTOR = new SceneEventProcess("create_flow_collector", "sceneplugincollection.event.create_flow_collector", "create_flow_collect", 1);
@@ -162,8 +168,21 @@ public class CreateHandler extends HandlerCommon {
             String sceneId = getPluginHandler().getSrcScene().getEid();
             // 创建流量采集器
             runSceneProgress(SceneProcess.CREATE_FLOW_COLLECTOR, () -> {
-                String flowCollectorId = getFlowCollector().createCollector();
+                String[] result = getFlowCollector().createCollector();
+                String flowCollectorId = result[0];
+                String arkimeIp = result[1];
                 getPluginHandler().getScene().setFlowCollector(flowCollectorId);
+                getPluginHandler().getScene().setArkimeIp(arkimeIp);
+
+                ArkimeFlowPersistenceTaskModel arkimeFlowPersistenceTaskModel = new ArkimeFlowPersistenceTaskModel();
+                arkimeFlowPersistenceTaskModel.setScene(getPluginHandler().getScene().getSrcScene().getEid());
+                arkimeFlowPersistenceTaskModel.setArkimeIp(arkimeIp);
+                arkimeFlowPersistenceTaskModel.setValid(true);
+                arkimeFlowPersistenceTaskModel.setLatestExecuteMessage("");
+                arkimeFlowPersistenceTaskModel.setFlowPersistenceRule(JsonCommon.stringify(
+                        getPluginHandler().getScene().getFlowPersistenceRule()));
+                arkimeFlowPersistenceTaskMapper.save(arkimeFlowPersistenceTaskModel);
+
             });
 
             String flowCollectorId = getPluginHandler().getScene().getFlowCollector();
@@ -181,8 +200,21 @@ public class CreateHandler extends HandlerCommon {
         } else if (creatFlowCollector) {
             // 只创建流量采集器
             runSceneProgress(SceneProcess.CREATE_FLOW_COLLECTOR, () -> {
-                String flowCollectorId = getFlowCollector().createCollector();
+                String[] result = getFlowCollector().createCollector();
+                String flowCollectorId = result[0];
+                String arkimeIp = result[1];
                 getPluginHandler().getScene().setFlowCollector(flowCollectorId);
+                getPluginHandler().getScene().setArkimeIp(arkimeIp);
+
+
+                ArkimeFlowPersistenceTaskModel arkimeFlowPersistenceTaskModel = new ArkimeFlowPersistenceTaskModel();
+                arkimeFlowPersistenceTaskModel.setScene(getPluginHandler().getScene().getSrcScene().getEid());
+                arkimeFlowPersistenceTaskModel.setArkimeIp(arkimeIp);
+                arkimeFlowPersistenceTaskModel.setValid(true);
+                arkimeFlowPersistenceTaskModel.setLatestExecuteMessage("");
+                arkimeFlowPersistenceTaskModel.setFlowPersistenceRule(JsonCommon.stringify(
+                        getPluginHandler().getScene().getFlowPersistenceRule()));
+                arkimeFlowPersistenceTaskMapper.save(arkimeFlowPersistenceTaskModel);
             });
         }
 

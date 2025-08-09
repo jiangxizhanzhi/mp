@@ -7,18 +7,21 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.auth.AuthSchemeProvider;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.config.AuthSchemes;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.*;
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.ContentBody;
+import org.apache.http.impl.auth.DigestSchemeFactory;
 import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicHeader;
-import org.springframework.http.MediaType;
 import org.springframework.util.StreamUtils;
 
 import java.io.File;
@@ -50,6 +53,8 @@ public class HttpClient {
     private Map<String, String> headers;
 
     private Integer timeout = DEFAULT_TIMEOUT;
+
+    private Integer connectTimeout = 2000;
 
     private Charset charset = StandardCharsets.UTF_8;
 
@@ -90,7 +95,8 @@ public class HttpClient {
                                                      Map<String, String> headers, Integer timeout) {
         T request = ClassUtils.createInstance(requestClass);
         request.setURI(URI.create(formatUrl(url, param)));
-        request.setConfig(RequestConfig.custom().setSocketTimeout(timeout == null ? this.timeout : timeout).build());
+        request.setConfig(RequestConfig.custom().setSocketTimeout(timeout == null ? this.timeout : timeout)
+                .setConnectionRequestTimeout(this.getConnectTimeout()).build());
 
         Map<String, String> mergedHeaders = mergeHeaders(headers);
         if (mergedHeaders != null) {
@@ -186,6 +192,8 @@ public class HttpClient {
         private String username;
         private String password;
 
+        private String authType;
+
         public HttpClientBuilder configServer(String server) {
             this.server = server;
             return this;
@@ -213,12 +221,12 @@ public class HttpClient {
         }
 
         public HttpClient build() {
-            return new HttpClient(server, timeout, maxConnPerRoute, maxConnTotal, username, password);
+            return new HttpClient(server, timeout, maxConnPerRoute, maxConnTotal, username, password, authType);
         }
     }
 
     private HttpClient(String server, Integer timeout, Integer maxConnPerRoute, Integer maxConnTotal,
-                      String username, String password) {
+                      String username, String password, String authType) {
         this.server = server;
         org.apache.http.impl.client.HttpClientBuilder clientBuilder = HttpClients.custom().disableAutomaticRetries();
         if (maxConnPerRoute != null) {
@@ -228,16 +236,28 @@ public class HttpClient {
             clientBuilder.setMaxConnTotal(maxConnTotal);
         }
         if (username != null && password != null) {
+
             BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
             UsernamePasswordCredentials usernamePasswordCredentials = new UsernamePasswordCredentials(username, password);
             credentialsProvider.setCredentials(AuthScope.ANY, usernamePasswordCredentials);
             clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
+
+            if (AuthSchemes.DIGEST.equals(authType)) {
+                // 注册Digest认证方案工厂
+                Registry<AuthSchemeProvider> authRegistry = RegistryBuilder.<AuthSchemeProvider>create()
+                        .register(AuthSchemes.DIGEST, new DigestSchemeFactory())
+                        .build();
+                clientBuilder.setDefaultAuthSchemeRegistry(authRegistry);
+            }
+
         }
         innerHttpClient = clientBuilder.build();
         if (timeout != null) {
             this.timeout = timeout;
         }
     }
+
+
 
     public static HttpClientBuilder builder() {
         return new HttpClientBuilder();
@@ -246,6 +266,8 @@ public class HttpClient {
     public HttpResult get(String url, HttpParam param, Map<String, String> headers, Integer timeout) {
         return request(HttpGet.class, url, null, param, headers, timeout, true);
     }
+
+
 
     public HttpResult post(String url, HttpData data, HttpParam param, Map<String, String> headers, Integer timeout) {
         return request(HttpPost.class, url, data, param, headers, timeout, true);

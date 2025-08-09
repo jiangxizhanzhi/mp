@@ -25,7 +25,7 @@ public class FlowCollector {
         setNetworkTrafficService(networkTrafficService);
     }
 
-    public String createCollector() {
+    public String[] createCollector() {
         return networkTrafficGroupService.addArkimeImageInstance(null);
     }
 

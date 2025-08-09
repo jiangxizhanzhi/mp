@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.situationaware.service;
 
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.common.config.CommonAppConfig;
@@ -14,6 +15,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONPath;
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -115,11 +117,11 @@ public class NetworkTrafficGroupService {
      *
      * @param groupModel
      */
-    public String addArkimeImageInstance(GroupModel groupModel) {
+    public String[] addArkimeImageInstance(GroupModel groupModel) {
         String arkimePrefixId = indexPrefix + String.valueOf(System.currentTimeMillis());
         log.info("index prefix generated {}", arkimePrefixId);
-        createArkimeImageInstance(arkimePrefixId);
-        return arkimePrefixId;
+        String arkimeIp = createArkimeImageInstance(arkimePrefixId);
+        return new String[]{arkimePrefixId, arkimeIp};
     }
 
     /**
@@ -127,7 +129,7 @@ public class NetworkTrafficGroupService {
      *
      * @param instanceId instanceId
      */
-    public void createArkimeImageInstance(String instanceId) {
+    public String createArkimeImageInstance(String instanceId) {
         if (Objects.isNull(SituationalAwareConstant.ArkimeNetworkId)) {
             throw new MpRuntimeException(SituationalAwareErrorCode.ARKIME_ADD_ERROR, "networkId 为空");
         }
@@ -173,6 +175,8 @@ public class NetworkTrafficGroupService {
                 throw new MpRuntimeException(SituationalAwareErrorCode.ARKIME_ADD_ERROR,model.getMessage());
             }
             log.info("create arkime Image instance res {}", result);
+            JsonNode jsonNode = JsonCommon.parse(model.getData(), JsonNode.class);
+            return jsonNode.get("networks").get(0).get("fixed_ip").asText();
         } catch (Exception e) {
             log.error("create arkime Image instance error {}", ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException(SituationalAwareErrorCode.ARKIME_ADD_ERROR, ExceptionUtils.getStackTrace(e));

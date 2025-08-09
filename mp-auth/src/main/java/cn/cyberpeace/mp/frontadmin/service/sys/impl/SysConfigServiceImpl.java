@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.Compress;
 import cn.cyberpeace.mp.frontadmin.constant.AdminBasei18nCode;
 import cn.cyberpeace.mp.frontadmin.constant.AdminErrorCode;
 import cn.cyberpeace.mp.frontadmin.constant.SysConfigConstant;
@@ -27,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.File;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
@@ -172,6 +174,55 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
         }
     }
 
+    @Override
+    public int getFlowPersistenceTimeConfig() {
+        List<SysConfigModel> sysConfigModels = getModelMapper().list(new HumanCondition().filterEqual(SysConfigModel::getKeyName,
+                SysConfigModel.KeyName.FLOW_PERSISTENCE_TIME_RANGE));
+        if (CollectionUtils.isEmpty(sysConfigModels)) {
+            return 120;
+        } else {
+            String value = sysConfigModels.get(0).getValue();
+            try {
+                return Integer.parseInt(value);
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+            }
+        }
+        return 120;
+    }
+
+    @Override
+    public String getFlowPersistenceTimestamp() {
+        List<SysConfigModel> sysConfigModels = getModelMapper().list(new HumanCondition().filterEqual(SysConfigModel::getKeyName,
+                SysConfigModel.KeyName.FLOW_PERSISTENCE_TIMESTAMP_TYPE));
+        if (CollectionUtils.isEmpty(sysConfigModels)) {
+            return System.currentTimeMillis() + "";
+        } else {
+            String value = sysConfigModels.get(0).getValue();
+            if ("ntp".equals(value)) {
+                return System.currentTimeMillis() + "";
+            } else {
+                return System.nanoTime() + "";
+            }
+        }
+    }
+
+    @Override
+    public File compressFile(File originFile) {
+        List<SysConfigModel> sysConfigModelList = getModelMapper().list(new HumanCondition().filterEqual(SysConfigModel::getKeyName, SysConfigModel.KeyName.FLOW_COMPRESSION_TYPE));
+        List<SysConfigModel> passwordList = getModelMapper().list(new HumanCondition().filterEqual(SysConfigModel::getKeyName, SysConfigModel.KeyName.FLOW_COMPRESSION__PASSWORD));
+        String password = "";
+        if (CollectionUtils.isNotEmpty(passwordList) && StringUtils.isNotBlank(passwordList.get(0).getValue())) {
+            password = passwordList.get(0).getValue();
+        }
+        if (CollectionUtils.isEmpty(sysConfigModelList) || SysConfigModel.COMPRESSION_TYPE.ZIP.equals(
+                sysConfigModelList.get(0).getValue())) {
+            return Compress.compressZip(originFile, password);
+        } else {
+            return Compress.compressLZ4(originFile);
+        }
+    }
+
     private Map<String, String> configs2Map(List<SysConfigModel> configs) {
         Map<String, String> configMap = new HashMap();
         for (SysConfigModel model : configs) {
@@ -179,5 +230,4 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
         }
         return configMap;
     }
-
 }

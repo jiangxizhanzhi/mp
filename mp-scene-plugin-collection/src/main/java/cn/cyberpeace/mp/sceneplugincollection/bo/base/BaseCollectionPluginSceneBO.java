@@ -28,13 +28,16 @@ public abstract class BaseCollectionPluginSceneBO<M extends BaseCollectionPlugin
     private Set<String> flowCollectNodes;
     @ApiModelProperty(value = "自定义流量镜像参数")
     private CustomMirror customeMirror;
+    @ApiModelProperty(value = "流量留存规则")
+    private FlowPersistenceRule flowPersistenceRule;
 
 
     @Override
     public void fromModel(M obj, String... ignoreFields) {
         super.fromModel(obj,
                 ArrayUtils.addAll(ignoreFields, BeanUtils.getBeanGetterFieldName(BaseCollectionPluginSceneModel::getFlowCollectNodes),
-                        BeanUtils.getBeanGetterFieldName(BaseCollectionPluginSceneModel::getCustomeMirror))
+                        BeanUtils.getBeanGetterFieldName(BaseCollectionPluginSceneModel::getCustomeMirror),
+                        BeanUtils.getBeanGetterFieldName(BaseCollectionPluginSceneModel::getFlowPersistenceRule))
         );
         if (StringUtils.isNotBlank(obj.getFlowCollectNodes())) {
             this.flowCollectNodes = JsonCommon.parse(obj.getFlowCollectNodes(), new TypeReference<Set<String>>() {});
@@ -42,6 +45,9 @@ public abstract class BaseCollectionPluginSceneBO<M extends BaseCollectionPlugin
 
         if (StringUtils.isNotBlank(obj.getCustomeMirror())) {
             this.customeMirror = JsonCommon.parse(obj.getCustomeMirror(), CustomMirror.class);
+        }
+        if (StringUtils.isNotBlank(obj.getFlowPersistenceRule())) {
+            this.flowPersistenceRule = JsonCommon.parse(obj.getFlowPersistenceRule(), FlowPersistenceRule.class);
         }
     }
 
@@ -61,6 +67,12 @@ public abstract class BaseCollectionPluginSceneBO<M extends BaseCollectionPlugin
             obj.setCustomeMirror("");
         } else {
             obj.setCustomeMirror(JsonCommon.stringify(this.customeMirror));
+        }
+
+        if (Objects.isNull(this.flowPersistenceRule)) {
+            obj.setFlowPersistenceRule("");
+        } else {
+            obj.setFlowPersistenceRule(JsonCommon.stringify(this.flowPersistenceRule));
         }
         return obj;
     }

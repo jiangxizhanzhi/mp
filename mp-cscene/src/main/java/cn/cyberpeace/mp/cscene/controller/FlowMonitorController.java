@@ -20,6 +20,8 @@ import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.controller.request.FlowSimpleReplayRequest;
 import cn.cyberpeace.mp.cscene.dto.flow.*;
+import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
+import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.request.common.AssetsStatisticsRequest;
 import cn.cyberpeace.mp.cscene.request.common.AttackCountRequest;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
@@ -75,6 +77,12 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
@@ -91,6 +99,12 @@ import java.util.stream.Collectors;
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/monitor/flow")
 @AuthTarget(TargetEnum.CSCENE_MONITOR_GROUP)
 public class FlowMonitorController {
+
+    public static final Map<String, Queue<Path>> SCENE_TO_FILE_QUEUE_MAP = new ConcurrentHashMap<>();
+
+    public static final DateTimeFormatter BASIC_DATETIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+            .withZone(ZoneId.systemDefault());
+
 
     private static final Map<String, ReentrantLock> PCAP_REPLAY_LOCK = new ConcurrentHashMap<>();
 
@@ -401,8 +415,13 @@ public class FlowMonitorController {
                     .peek(flow -> flowMonitorService.addFLowGeoInfo(flow)).filter(flow -> flowMonitorService.
                     flowFilter(flow, queryParams)).collect(Collectors.toList());
 
-            return new ListObjServiceResult(new ListObjResult(list.subList((originPage - 1) * originPerPage, originPage * originPerPage)
-                    , list.size()).asResult()).asResult();
+            try {
+                return new ListObjServiceResult(new ListObjResult(list.subList((originPage - 1) * originPerPage, originPage * originPerPage)
+                        , list.size()).asResult()).asResult();
+            } catch (IndexOutOfBoundsException e) {
+                log.error(e.getMessage(), e);
+                return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<FlowAttackDto>(), 0).asResult()).asResult();
+            }
         } else {
             return result;
         }
@@ -648,11 +667,11 @@ public class FlowMonitorController {
             var input = httpResponse.getEntity().getContent();
             IOUtils.copy(input, output);
 
-            tempCompressFile = CompressFile.compressZip(tmpFile);
+            tempCompressFile = CompressFile.compressFile(tmpFile);
 
             var resource = new InputStreamResource(new FileInputStream(tempCompressFile));
             httpHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-            httpServletResponse.setHeader("Content-Disposition", "attachment; filename=" + pcapId + ".pcap");
+            httpServletResponse.setHeader("Content-Disposition", "attachment; filename=" + tempCompressFile.getName());
             return ResponseEntity.ok().headers(httpHeaders)
                     .contentType(MediaType.parseMediaType("application/octet-stream")).body(resource);
         } catch (Exception e) {
@@ -664,6 +683,82 @@ public class FlowMonitorController {
             if (tempCompressFile != null && tempCompressFile.exists()) {
                 tempCompressFile.delete();
             }
+        }
+    }
+
+    @ApiOperation(value = "流量归档页面分页查询接口")
+    @GetMapping("/persistence/page")
+    public ListObjServiceResult<FlowPersistenceFileDto> pagePersistenceFlowFile(@RequestParam String id, FlowQueryParams queryParams) {
+        queryParams.ensure();
+        CsceneInstanceMapper csceneInstanceMapper = BeanCommon.getBean(CsceneInstanceMapper.class);
+        List<CsceneInstanceModel> csceneInstances = csceneInstanceMapper.list(new HumanCondition().filterEqual(CsceneInstanceModel::getId, id));
+        if (CollectionUtils.isEmpty(csceneInstances)) {
+            throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("当前场景实例不存在"));
+        }
+        String scene = csceneInstances.get(0).getScene();
+
+        var queue = SCENE_TO_FILE_QUEUE_MAP.get(scene);
+        if (CollectionUtils.isEmpty(queue)) {
+            return new ListObjServiceResult(new ListObjResult(Collections.emptyList(), 0).asResult()).asResult();
+        } else {
+            ArrayList<Path> paths = new ArrayList<>(queue);
+            int originPage = queryParams.getPage();
+            int originPerPage = queryParams.getPerPage();
+            List<Path> pagePaths = new ArrayList<>();
+            try {
+                pagePaths = paths.subList((originPage - 1) * originPerPage, originPage * originPerPage);
+            } catch (IndexOutOfBoundsException e) {
+                pagePaths = new ArrayList<>();
+            }
+
+            List<FlowPersistenceFileDto> flowPersistenceFiles = new ArrayList<>();
+            for (Path pagePath : pagePaths) {
+                String fileName = pagePath.getFileName().toString();
+                FlowPersistenceFileDto flowPersistenceFileDto = new FlowPersistenceFileDto();
+                flowPersistenceFileDto.setFileName(fileName);
+                try {
+                    BasicFileAttributes basicAttributes = Files.readAttributes(pagePath, BasicFileAttributes.class);
+                    String fileSize = basicAttributes.size() / 1024 + "KB";
+                    String datetime = BASIC_DATETIME_FORMATTER.format(basicAttributes.lastModifiedTime().toInstant());
+
+                    flowPersistenceFileDto.setFileSize(fileSize);
+                    flowPersistenceFileDto.setModifyTime(datetime);
+                } catch (Exception e) {
+                    log.error(e.getMessage(), e);
+                }
+                flowPersistenceFiles.add(flowPersistenceFileDto);
+            }
+
+            return new ListObjServiceResult(new ListObjResult(flowPersistenceFiles, paths.size()).asResult()).asResult();
+        }
+
+    }
+
+
+    @ApiOperation(value = "流量归档页面分页查询接口")
+    @GetMapping("/persistence/download")
+    public ResponseEntity<Resource> exportPersistenceFile(HttpServletResponse httpServletResponse, @RequestParam("cscene_id") String csceneId,
+                                               @RequestParam("file_name") String fileName) {
+        CsceneInstanceMapper csceneInstanceMapper = BeanCommon.getBean(CsceneInstanceMapper.class);
+        List<CsceneInstanceModel> csceneInstances = csceneInstanceMapper.list(new HumanCondition().filterEqual(CsceneInstanceModel::getId, csceneId));
+        if (CollectionUtils.isEmpty(csceneInstances)) {
+            throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("当前场景实例不存在"));
+        }
+        String scene = csceneInstances.get(0).getScene();
+
+        Path filepath = Path.of("/root/.mp/files", scene, fileName);
+
+        File compressFile = CompressFile.compressFile(filepath.toFile());
+        try {
+            var resource = new InputStreamResource(new FileInputStream(compressFile));
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            httpServletResponse.setHeader("Content-Disposition", "attachment; filename=" + compressFile.getName());
+            return ResponseEntity.ok().headers(httpHeaders)
+                    .contentType(MediaType.parseMediaType("application/octet-stream")).body(resource);
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+            throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("文件下载失败"));
         }
     }
 }

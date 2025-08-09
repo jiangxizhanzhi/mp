@@ -19,6 +19,8 @@ public class BaseCollectionPluginSceneModel extends BasePluginSceneModel {
     private String flowCollectNodes;
     @DefaultStr
     private String customeMirror;
+    @DefaultStr
+    private String flowPersistenceRule;
 
 
 }

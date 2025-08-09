@@ -14,7 +14,7 @@ import java.util.List;
 public class CompressFile {
 
 
-    public static File compressZip(File inputFile) {
+    public static File compressFile(File inputFile) {
         SysConfigMapper sysConfigMapper = BeanCommon.getBean(SysConfigMapper.class);
         List<SysConfigModel> sysConfigModelList = sysConfigMapper.list(new HumanCondition().filterEqual(SysConfigModel::getKeyName, SysConfigModel.KeyName.FLOW_COMPRESSION_TYPE));
         List<SysConfigModel> passwordList = sysConfigMapper.list(new HumanCondition().filterEqual(SysConfigModel::getKeyName, SysConfigModel.KeyName.FLOW_COMPRESSION__PASSWORD));
