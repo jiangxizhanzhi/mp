@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -139,7 +140,14 @@ public class DevopsTargetService {
      * @return
      */
     public Map<String, Object> countVmTarget() {
-        return deviceTargetMapper.countVmTarget();
+        var dbData = deviceTargetMapper.countVmTarget();
+        Map<String, Object> res = new HashMap<>();
+        for (Map.Entry<String, Object> entry : dbData.entrySet()) {
+            String key = StringUtils.replace(entry.getKey(), "cat_", "");
+            var value = entry.getValue();
+            res.put(key, value);
+        }
+        return res;
     }
 
     /**
@@ -147,7 +155,14 @@ public class DevopsTargetService {
      * @return
      */
     public Map<String, Object> countEntityTarget() {
-        return deviceTargetMapper.countEntityTarget();
+        var dbData = deviceTargetMapper.countEntityTarget();
+        Map<String, Object> res = new HashMap<>();
+        for (Map.Entry<String, Object> entry : dbData.entrySet()) {
+            String key = StringUtils.replace(entry.getKey(), "cat_", "");
+            var value = entry.getValue();
+            res.put(key, value);
+        }
+        return res;
     }
 
     /**
