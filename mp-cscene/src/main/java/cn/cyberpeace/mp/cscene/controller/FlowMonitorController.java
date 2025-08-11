@@ -416,7 +416,13 @@ public class FlowMonitorController {
                     flowFilter(flow, queryParams)).collect(Collectors.toList());
 
             try {
-                return new ListObjServiceResult(new ListObjResult(list.subList((originPage - 1) * originPerPage, originPage * originPerPage)
+
+                int startIndex = (originPage - 1) * originPerPage;
+                int endIndex = originPage * originPerPage;
+                if (startIndex < list.size()) {
+                    endIndex = Math.min(endIndex, list.size());
+                }
+                return new ListObjServiceResult(new ListObjResult(list.subList(startIndex, endIndex)
                         , list.size()).asResult()).asResult();
             } catch (IndexOutOfBoundsException e) {
                 log.error(e.getMessage(), e);
@@ -706,7 +712,12 @@ public class FlowMonitorController {
             int originPerPage = queryParams.getPerPage();
             List<Path> pagePaths = new ArrayList<>();
             try {
-                pagePaths = paths.subList((originPage - 1) * originPerPage, originPage * originPerPage);
+                int startIndex = (originPage - 1) * originPerPage;
+                int endIndex = originPage * originPerPage;
+                if (startIndex < paths.size()) {
+                    endIndex = Math.min(endIndex, paths.size());
+                }
+                pagePaths = paths.subList(startIndex, endIndex);
             } catch (IndexOutOfBoundsException e) {
                 pagePaths = new ArrayList<>();
             }
