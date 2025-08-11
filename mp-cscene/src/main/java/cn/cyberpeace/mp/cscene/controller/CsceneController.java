@@ -281,15 +281,10 @@ public class CsceneController implements BaseModelListControllerBase {
             });
             object.put("id", node.getNumberId());
 
-//            测试代码/
-            String areaName = StringUtils.isEmpty(node.getAreaName()) ? "area" + node.getNumberName() : node.getAreaName();
-//            String areaName = node.getAreaName();
             String numberId = node.getNumberId();
             String nodeName = node.getNumberName();
             object.put("name", nodeName);
             object.put("uniteNumberId", numberId);
-//            elementBO.setName(nodeName);
-            // 根据name获取到镜像名称 从map中匹配出对应镜像
             cpElements.put(numberId ,jsonObject);
             cpElementIdMap.put(numberId, jsonObject);
             JSONObject probeInfo = new JSONObject();
@@ -299,177 +294,12 @@ public class CsceneController implements BaseModelListControllerBase {
             CollectionElements.put(numberId,probeInfo);
             CollectionScene.put("enable_flow_collect","true");
             CollectionScene.put("enable_flow_mirror","false");
-//            TODO 区域
-            /*if(!areaMap.containsKey(areaName)){
-                JSONObject area = new JSONObject();
-                String areaId = UUID.randomUUID().toString().replaceAll("-", "");
-                object.put("area", areaId);
-                area.put("id", areaId);
-                area.put("name", areaName);
-                area.put("display_context", "{\"body\":{\"fill\":\"var(--neutral0)\",\"stroke\":\"var(--neutral1)\",\"strokeWidth\":\"1px\",\"rx\":0,\"strokeDasharray\":0},\"label\":{\"fontSize\":14,\"refY\":15,\"refX\":10,\"fill\":\"var(--neutral9)\",\"transform\":\"rotate(0)\",\"transformOrigin\":\"-10px -15px\",\"fontWeight\":400},\"zIndex\":0,\"animation\":\"\",\"fillPic\":\"\"}");
-                areas.add(area);
-                if(areaPositionMap.containsKey(areaId)){
-                    List<String> numbers = areaPositionMap.get(areaId);
-                    numbers.add(numberId);
-                    areaPositionMap.put(areaId, numbers);
-                } else {
-                    List<String> numbers = new ArrayList<>();
-                    numbers.add(numberId);
-                    areaPositionMap.put(areaId, numbers);
-                }
-                areaMap.put(areaName, area);
-            } else {
-                JSONObject areaObj = areaMap.get(areaName);
-                object.put("area", areaObj.getString("id"));
-            }*/
             elementIdMap.put(numberId, object);
             elements.add(object);
         }
 
-        /*for(ReleaseCsceneLinkBO link:links){
-
-            int targetPortCount = 1;
-            int sourcePortCount = 1;
-            JSONObject connect = new JSONObject();
-            JSONObject linkName = new JSONObject();
-
-            String sourceNumberId = link.getSourceNumberId();
-            String targetNumberId = link.getTargetNumberId();
-
-            JSONObject cpTarget = cpElementIdMap.get(targetNumberId);
-            JSONObject cpSource = cpElementIdMap.get(sourceNumberId);
-            JSONObject sourceObj = elementIdMap.get(sourceNumberId);
-            JSONObject targetObj = elementIdMap.get(targetNumberId);
-            Integer targetRole = cpTarget.getInteger("role");
-            Integer sourceRole = cpSource.getInteger("role");
-
-            // role =4 端口名称取eth 否则取E
-            String portName = "E";
-            String portLastName = "_electrical";
-            int defaultSourcePortCount = 1;
-            int defaultTargetPortCount = 1;
-            if(targetRole == 4){
-                portName = "eth";
-                defaultTargetPortCount = 4;
-                portLastName = "";
-            }
-
-            String sourcePortType = "E";
-            String sourcePortLastName = "_electrical";
-            if(sourceRole == 4){
-                sourcePortType = "eth";
-                defaultSourcePortCount = 4;
-                sourcePortLastName = "";
-            }
-
-            Integer bandWidth = link.getBandWidth();
-
-            connect.put("id", link.getLinkId());
-            connect.put("unidirectional", false);
-            connect.put("vertices", new JSONArray());
-            connect.put("type", "straight");
-            connect.put("display_context", "{\"line\":{\"stroke\":\"var(--neutral7)\",\"zIndex\":1,\"strokeWidth\":1,\"strokeDasharray\":0,\"opacity\":1},\"labels\":{\"body\":{\"fill\":\"rgba(255,255,255,1)\",\"refWidth\":\"100%\",\"rx\":0,\"ry\":0,\"refHeight\":\"100%\",\"refX\":\"0%\",\"refY\":\"0%\",\"opacity\":1},\"text\":{\"fill\":\"rgba(0,0,0,1)\",\"fontSize\":12,\"fontWeight\":400,\"opacity\":1}}}");
-
-            if(elementPortCountMap.containsKey(targetNumberId)){
-                targetPortCount = elementPortCountMap.get(targetNumberId) + 1;
-                elementPortCountMap.put(targetNumberId, targetPortCount);
-            } else {
-                elementPortCountMap.put(targetNumberId ,targetPortCount);
-            }
-            String targetPortName = "port_" + targetNumberId + portLastName + "_" + targetPortCount;
-
-
-            if(elementPortCountMap.containsKey(sourceNumberId)){
-                sourcePortCount = elementPortCountMap.get(sourceNumberId) + 1;
-                elementPortCountMap.put(sourceNumberId, sourcePortCount);
-            } else {
-                elementPortCountMap.put(sourceNumberId ,sourcePortCount);
-            }
-            String sourcePortName = "port_" + sourceNumberId + sourcePortLastName + "_" + sourcePortCount;
-            connect.put("source", sourcePortName);
-            connect.put("target", targetPortName);
-            JSONObject cpPort1 = new JSONObject();
-            cpPort1.put("access_modes", portAccessModesMap.getOrDefault(sourcePortName,new JSONArray()));
-            cpPort1.put("firewall_rules", new JSONArray());
-            cpPort1.put("connect_mode", null);
-            JSONObject cpPort2 = new JSONObject();
-            cpPort2.put("access_modes", portAccessModesMap.getOrDefault(targetPortName,new JSONArray()));
-            cpPort2.put("firewall_rules", new JSONArray());
-            cpPort2.put("connect_mode", null);
-            cpElements_ports.put(targetPortName, cpPort2);
-            cpElements_ports.put(sourcePortName, cpPort1);
-
-            // 设置端口的name规则 topology中的端口信息
-            JSONObject tarPort = new JSONObject();
-            tarPort.put("id", targetPortName);
-            String value1 = portName + "0/" + targetPortCount;
-            tarPort.put("name", value1);
-            tarPort.put("access_modes", new JSONArray());
-            tarPort.put("egress", bandWidth);
-            tarPort.put("ingress", bandWidth);
-            JSONObject sourPort = new JSONObject();
-            sourPort.put("id", sourcePortName);
-
-
-
-            String value = sourcePortType + "0/" + sourcePortCount;
-            sourPort.put("name", value);
-            sourPort.put("access_modes", new JSONArray());
-            sourPort.put("egress", bandWidth);
-            sourPort.put("ingress", bandWidth);
-
-            int targetIndex = elements.indexOf(targetObj);
-            int sourceIndex = elements.indexOf(sourceObj);
-
-            updatePort(sourPort, sourceObj, defaultSourcePortCount, sourcePortCount);
-
-            updatePort(tarPort, targetObj, defaultTargetPortCount, targetPortCount);
-            elements.set(targetIndex, targetObj);
-            elements.set(sourceIndex, sourceObj);
-
-            targetObj.put("nat",false);
-            targetObj.put("access_modes",new JSONArray());
-            targetObj.put("firewall_rules",new JSONArray());
-            linkName.put("source", value);
-            linkName.put("target", value1);
-            connect.put("name", linkName.toJSONString());
-            connections.add(connect);
-
-        }*/
-
         // TODO 默认值测试 可根据画布大小调整 给节点设置x、y地址
         generateUniformNodes(elements, 800, 200);
-/*
-        String jsonArrayStr = elements.toJSONString(); // 你的 JSON 数据
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode jsonArray = null;
-        try {
-            jsonArray = mapper.readTree(jsonArrayStr);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-
-        // 使用 Stream 分组
-        Map<String, List<JsonNode>> groupedData = new HashMap<>();
-        jsonArray.forEach(item -> {
-            String key = item.get("area").asText();
-            groupedData.computeIfAbsent(key, k -> new ArrayList<>()).add(item);
-        });
-        List<Integer> nodeCounts = new ArrayList<>();
-
-        for(int i =0;i<areas.size();i++){
-            JSONObject area = areas.getJSONObject(i);
-            List<JsonNode> nodeList = groupedData.get(area.getString("id"));
-            nodeCounts.add(nodeList.size());
-//            area.put("position2", RegionGenerator.generateRegionJson(nodeList));
-        }
-        List<ObjectNode> objectNodes = RegionLayoutCalculator.calculateLayout(areas.size(), nodeCounts);
-
-        for(int i =0;i<objectNodes.size();i++){
-            ObjectNode objectNode = objectNodes.get(i);
-            JSONObject area = areas.getJSONObject(i);
-            area.put("position2",objectNode.toString());
-        }*/
 //        topology plugins port不一致启动失败
         for (Map.Entry<String, JSONArray> port : portAccessModesMap.entrySet()) {
             if(!cpElements_ports.containsKey(port.getKey())){
@@ -508,31 +338,6 @@ public class CsceneController implements BaseModelListControllerBase {
         csceneBO.setReferenceType(BaseCsceneModel.ReferenceType.READ_VS_BLUE);
         var result = modelService.sync(csceneBO, null, true).asResult();
         return result;
-
-        /*
-        correctRequestCsceneParamsForReleaseSync(csceneBO);
-
-        String configContent = JsonCommon.snakeStringify(csceneBO.getSceneConfig());
-        SceneDataBO sceneDataBO = JsonCommon.snakeParse(configContent, SceneDataBO.class);
-        sceneDataBO.getTopology().setScene(new SceneBO());
-        SceneHandler instanceHandler = new SceneHandler(sceneDataBO, null);
-        instanceHandler.save();
-//        TODO 报错
-        instanceHandler.initiate();
-        instanceHandler.coreRouterConnect();
-        instanceHandler.save();
-
-        String instanceContent = JsonCommon.snakeStringify(instanceHandler.toData());
-        SceneConfigDataBO sceneConfigDataBO = JsonCommon.snakeParse(instanceContent, SceneConfigDataBO.class);
-
-        CsceneBO tmp = new CsceneBO();
-        sceneConfigDataBO.getTopology().setScene(new SceneConfigBO());
-        tmp.setSceneConfig(sceneConfigDataBO);
-        correctRequestCsceneParamsForSync(tmp);
-        SceneConfigHandler newConfigHandler = new SceneConfigHandler(sceneConfigDataBO, null);
-        newConfigHandler.save();
-
-        return new ServiceResult<>(tmp);*/
     }
 
     @ApiOperation(value = "保存下发指令场景模板", notes = "请忽略test_scenes和app_scenes字段")
