@@ -23,11 +23,7 @@ import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionScene
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Slf4j
 public class DeleteHandler extends HandlerCommon {
@@ -75,6 +71,10 @@ public class DeleteHandler extends HandlerCommon {
         prepareEventProcess(SceneModel.Event.DELETE, SceneProcess.class, ElementProcess.class);
 
         CollectionPluginSceneBO scene = getPluginHandler().getScene();
+        if (Objects.isNull(scene)) {
+            log.error("collect scene is null");
+            return;
+        }
         String flowCollectorId = scene.getFlowCollector();
         if (!StringUtils.isEmpty(flowCollectorId)) {
             // 先保存流量数据

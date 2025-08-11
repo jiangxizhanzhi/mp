@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.base.context.SysContextHolder;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.http.HttpClient;
+import cn.cyberpeace.mp.base.util.thread.ThreadUtils;
 import cn.cyberpeace.mp.frontadmin.service.sys.SysConfigService;
 import cn.cyberpeace.mp.job.base.init.MpInitiate;
 import cn.cyberpeace.mp.scene.model.ArkimeFlowPersistenceTaskModel;
@@ -55,14 +56,50 @@ public class ArkimeFlowPersistenceTaskJob {
 
     @MpInitiate(id = "arkime_flow_persistence_task", description = "对arkime采集到的流量数据进行留存")
     public void execute() {
-        SCHEDULER_EXECUTOR.scheduleWithFixedDelay(() -> {
-            //新增文件
-            downloadPcapFile();
-            //将文件移除，保持在限制的最大保留时间
-            removeFileToMaxLimit();
-            //清楚场景关闭的queue
-            gcQueue();
-        }, 1, 5, TimeUnit.MINUTES);
+        String originCallChainId = SysContextHolder.getCallChainId();
+        SysContextHolder.setCallChainId("arkime_flow_persistence_task" + originCallChainId);
+        initSceneFileQueue();
+        SCHEDULER_EXECUTOR.scheduleWithFixedDelay(        ThreadUtils.format(
+                () -> {
+                    //新增文件
+                    downloadPcapFile();
+                    //将文件移除，保持在限制的最大保留时间
+                    removeFileToMaxLimit();
+                    //清楚场景关闭的queue
+                    gcQueue();
+                }
+        ), 1, 5, TimeUnit.MINUTES);
+        SysContextHolder.setCallChainId(originCallChainId);
+    }
+
+/**
+ * 初始化场景文件队列的方法
+ * 该方法用于遍历指定文件夹中的所有文件，并将其加入队列
+ */
+    private void initSceneFileQueue() {
+        // 使用Files.list方法获取指定文件夹下的所有文件路径
+        // Path.of(FILE_FOLDER)表示获取FILE_FOLDER常量定义的文件夹路径
+        // forEach对每个路径进行处理
+        try {
+            Files.list(Path.of(FILE_FOLDER)).forEach(path -> {
+                if (Files.isDirectory(path)) {
+                    try {
+                        Files.list(path).forEach(file -> {
+                            if (file.getFileName().endsWith("flow_pcap.pcap")) {
+                                SCENE_TO_FILE_QUEUE_MAP.computeIfAbsent(path.getName(-1).toString(),
+                                        k -> new PriorityQueue<>()).offer(file);
+                            }
+                        });
+                    } catch (IOException e) {
+                        log.error(e.getMessage(), e);
+                    }
+                }
+            });
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+
+        }
+
     }
 
     private void gcQueue() {
@@ -81,15 +118,20 @@ public class ArkimeFlowPersistenceTaskJob {
     private void downloadPcapFile()  {
         var persistenceTasks = arkimeFlowPersistenceTaskMapper.list(new HumanCondition().filterEqual(ArkimeFlowPersistenceTaskModel::getValid, true));
         for (ArkimeFlowPersistenceTaskModel persistenceTask : persistenceTasks) {
-            HttpClient httpClient = HttpClient.builder()
-                    .configBasicAuth("admin", "admin")
-                    .configMaxConnPerRoute(1)
-                    .configMaxConnTotal(1)
-                    .configServer("http://" + persistenceTask.getArkimeIp() + ":8005")
-                    .configTimeout(20000)
-                    .build();
-            long currentTIme = arkimeCurrentTime(httpClient);
-            downloadRecentPcapFile(httpClient, persistenceTask, currentTIme);
+            try {
+                HttpClient httpClient = HttpClient.builder()
+                        .configBasicAuth("admin", "admin")
+                        .configMaxConnPerRoute(1)
+                        .configMaxConnTotal(1)
+                        .configServer("http://" + persistenceTask.getArkimeIp() + ":8005")
+                        .configTimeout(20000)
+                        .build();
+                long currentTIme = arkimeCurrentTime(httpClient);
+                downloadRecentPcapFile(httpClient, persistenceTask, currentTIme);
+            } catch (MpRuntimeException e) {
+                persistenceTask.setLatestExecuteMessage(SysContextHolder.getCallChainId() + ":" + e.getMessage());
+                arkimeFlowPersistenceTaskMapper.update(persistenceTask);
+            }
         }
 
 
@@ -163,8 +205,8 @@ public class ArkimeFlowPersistenceTaskJob {
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            persistenceTask.setLatestExecuteMessage(SysContextHolder.getCallChainId() + ":" + e.getMessage());
-            arkimeFlowPersistenceTaskMapper.update(persistenceTask);
+            throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("下载pcap失败"));
+
         } finally {
             if (Objects.nonNull(out)) {
                 try {
