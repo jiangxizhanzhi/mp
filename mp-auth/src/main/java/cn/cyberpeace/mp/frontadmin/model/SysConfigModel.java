@@ -51,8 +51,8 @@ public class SysConfigModel extends BaseModel {
     }
 
     public static class COMPRESSION_TYPE {
-        public static final String ZIP = "ZIP";
-        public static final String LZ4 = "LZ4";
+        public static final String ZIP = "zip";
+        public static final String LZ4 = "lz4";
     }
 
     public static class TIMESTAMP_TYPE {

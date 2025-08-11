@@ -59,6 +59,7 @@ public class ArkimeFlowPersistenceTaskJob {
         String originCallChainId = SysContextHolder.getCallChainId();
         SysContextHolder.setCallChainId("arkime_flow_persistence_task" + originCallChainId);
         initSceneFileQueue();
+        log.info("arkime flow scene queue: {}", SCENE_TO_FILE_QUEUE_MAP);
         SCHEDULER_EXECUTOR.scheduleWithFixedDelay(        ThreadUtils.format(
                 () -> {
                     //新增文件
@@ -83,11 +84,15 @@ public class ArkimeFlowPersistenceTaskJob {
         try {
             Files.list(Path.of(FILE_FOLDER)).forEach(path -> {
                 if (Files.isDirectory(path)) {
+                    log.info("arkime flow path is " + path.toString());
                     try {
                         Files.list(path).forEach(file -> {
-                            if (file.getFileName().endsWith("flow_pcap.pcap")) {
-                                SCENE_TO_FILE_QUEUE_MAP.computeIfAbsent(path.getName(-1).toString(),
-                                        k -> new PriorityQueue<>()).offer(file);
+                            log.info("arkime flow file is {}", file.getFileName());
+                            if (file.getFileName().toString().endsWith("flow_pcap.pcap")) {
+
+                                SCENE_TO_FILE_QUEUE_MAP.computeIfAbsent(path.getName(path.getNameCount()-1).toString(),
+                                                k -> new PriorityQueue<Path>((a, b) -> a.toString().compareTo(b.toString())))
+                                        .offer(file);
                             }
                         });
                     } catch (IOException e) {

@@ -72,6 +72,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -126,7 +127,7 @@ public class FlowMonitorService {
             if (!Files.exists(Path.of(FLOW_RESOURCE_PATH, FLOW_APP_FILE))) {
                 ClassPathResource resource = new ClassPathResource("flow_app.json");
                 try {
-                    Files.copy(resource.getInputStream(), Path.of(FLOW_RESOURCE_PATH, FLOW_APP_FILE));
+                    Files.copy(resource.getInputStream(), Path.of(FLOW_RESOURCE_PATH, FLOW_APP_FILE), StandardCopyOption.REPLACE_EXISTING);
                 } catch (Exception e) {
                     log.error("copy flow_app.json error", e);
                 }
@@ -135,13 +136,16 @@ public class FlowMonitorService {
             File flowAppFile = new File(FLOW_RESOURCE_PATH, FLOW_APP_FILE);
             if (FLOW_APP_LAST_MODIFY < flowAppFile.lastModified()) {
                 FLOW_APP_LAST_MODIFY = flowAppFile.lastModified();
+                log.info("read flow_app.json");
                 try {
                     String content = Files.readString(Path.of(FLOW_RESOURCE_PATH, FLOW_APP_FILE));
+                    log.info("flow_app content: {}", content);
                     List<FlowApp> flowApps = JsonCommon.parse(content, new TypeReference<>() {
                     });
 
                     PORT_TO_PROTOCOL = flowApps.stream().collect(Collectors.toMap(FlowApp::getPort, FlowApp::getName, (a, b) -> a));
-                } catch (IOException e) {
+                    log.info("read flow_app.json finished : {}", PORT_TO_PROTOCOL);
+                } catch (Exception e) {
                     log.error("read flow_app.json error", e);
                 }
             }
@@ -540,6 +544,16 @@ public class FlowMonitorService {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    public void addFlowMacInfo(FlowAttackDto flowAttackDto) {
+        List<String> sourceMacs = Optional.ofNullable(flowAttackDto.getSourceMac()).orElse(new ArrayList<>());
+        List<String> targetMacs = Optional.ofNullable(flowAttackDto.getTargetMac()).orElse(new ArrayList<>());
+
+        List<String> allMacs = new ArrayList<>();
+        allMacs.addAll(sourceMacs);
+        allMacs.addAll(targetMacs);
+        flowAttackDto.setMacAddr(allMacs.stream().collect(Collectors.joining(",")));
     }
 
 

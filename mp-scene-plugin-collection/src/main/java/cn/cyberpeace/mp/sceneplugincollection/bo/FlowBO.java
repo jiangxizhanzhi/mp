@@ -70,4 +70,7 @@ public class FlowBO {
     @ApiModelProperty("vlan")
     private String vlan;
 
+    @ApiModelProperty("mac_addr")
+    private String macAddr;
+
 }

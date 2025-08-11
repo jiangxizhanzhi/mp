@@ -412,7 +412,9 @@ public class FlowMonitorController {
 
         if (CollectionUtils.isNotEmpty(result.getData().getList())) {
             List<FlowAttackDto> list = result.getData().getList().stream().peek(flow -> flowMonitorService.addFlowAppInfo(flow))
-                    .peek(flow -> flowMonitorService.addFLowGeoInfo(flow)).filter(flow -> flowMonitorService.
+                    .peek(flow -> flowMonitorService.addFLowGeoInfo(flow))
+                    .peek(flow -> flowMonitorService.addFlowMacInfo(flow))
+                    .filter(flow -> flowMonitorService.
                     flowFilter(flow, queryParams)).collect(Collectors.toList());
 
             try {
