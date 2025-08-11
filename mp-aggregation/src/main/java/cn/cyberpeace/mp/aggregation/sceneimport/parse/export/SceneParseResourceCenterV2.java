@@ -33,6 +33,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -138,7 +139,12 @@ public class SceneParseResourceCenterV2 extends BaseSceneParseResourceCenter {
         int serverIndex = 1;
         int routerIndex = 1;
         int firewallIndex = 1;
-        for (SceneConfigElementBO e : sceneHandler.getElementMap().values()) {
+        // 根据id排序下节点，这样以 internet 、 server 、 router 、 firewall 开头的id导出之后可以保持id不变
+        var sortedElements = new ArrayList<>(sceneHandler.getElementMap().values());
+        Collections.sort(sortedElements, (a1, a2) -> {
+            return a1.getId().compareTo(a2.getId());
+        });
+        for (SceneConfigElementBO e : sortedElements) {
 
             String areaId = sceneHandler.getAreaId() == null ? "" : sceneHandler.getAreaId();
             Map<String, String> outPosition = e.getOuterPosition2();
