@@ -1,25 +1,11 @@
 package cn.cyberpeace.mp.aggregation.sceneimport.parse.export;
 
-import cn.cyberpeace.mp.aggregation.constant.AggregationSingleton;
-import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.InitCommandParseResult;
-import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.ExtNodeInfo;
-import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.image.AccessModeExportResult;
-import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.v2.YmlParseResultV2;
-import cn.cyberpeace.mp.aggregation.service.DefaultImgService;
-import cn.cyberpeace.mp.auth.constant.AuthConstant;
-import cn.cyberpeace.mp.base.common.BeanCommon;
-import cn.cyberpeace.mp.base.common.FsCommon;
-import cn.cyberpeace.mp.base.common.JsonCommon;
-import cn.cyberpeace.mp.base.constant.BaseErrorCode;
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.util.basic.TimeUtils;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
-import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpParam;
-import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
-import com.fasterxml.jackson.core.type.TypeReference;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
+import java.io.File;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.util.*;
+
+import cn.cyberpeace.mp.devopscluster.cloud.platform.service.DeviceService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -31,15 +17,28 @@ import org.yaml.snakeyaml.nodes.MappingNode;
 import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.representer.Representer;
 
-import java.io.File;
-import java.io.IOException;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+import com.fasterxml.jackson.core.type.TypeReference;
+
+import cn.cyberpeace.mp.aggregation.constant.AggregationSingleton;
+import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.ExtNodeInfo;
+import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.InitCommandParseResult;
+import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.image.AccessModeExportResult;
+import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.v2.YmlParseResultV2;
+import cn.cyberpeace.mp.aggregation.service.DefaultImgService;
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
+import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.common.FsCommon;
+import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.util.basic.TimeUtils;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Device;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
+import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpParam;
+import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @Description
@@ -136,6 +135,8 @@ public class SceneExporter {
                 ExportDeviceYmlParams params = new ExportDeviceYmlParams();
                 params.setImageName(device.getImage());
                 params.setDestPath(currentImageDir);
+
+                Device deviceInfo = BeanCommon.getBean(DeviceService.class).findByUuid((device.getImageUuid()));
                 var result = new Remote().cloudGet(EXPORT_DEVICE_YML, params, new TypeReference<CloudResponse<Map>>() {
                 }, true, AggregationSingleton.aggregationConfig.getExportImageTimeout());
                 var imageMap = result.getData();
@@ -244,6 +245,10 @@ public class SceneExporter {
                 }
                 if (StringUtils.isEmpty(image.get系统语言())) {
                     image.set系统语言("hasNoSystemServer");
+                }
+
+                if (StringUtils.isNotEmpty(deviceInfo.getExtSystemInfo().getSystemArchitecture())) {
+                    image.set系统架构(deviceInfo.getExtSystemInfo().getSystemArchitecture());
                 }
 
                 ServerYml serverYml = new ServerYml();
