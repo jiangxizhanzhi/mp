@@ -180,20 +180,109 @@ public class SceneExporter {
                     newCloudPlugin.getElementPorts().put(newPortId, cloudPluginPort);
                 }
             }
-            // 更新连线数据里的id
-            for (SceneConfigElementPortConnectionBO c : sceneConfigDataBO.getTopology().getConnections()) {
-                c.setSource(StringUtils.replace(c.getSource(), portKey(originId), portKey(newId)));
-                c.setTarget(StringUtils.replace(c.getTarget(), portKey(originId), portKey(newId)));
-                c.setInfo(StringUtils.replace(c.getInfo(), portKey(originId), portKey(newId)));
-                c.setName(StringUtils.replace(c.getName(), portKey(originId), portKey(newId)));
-            }
-            // 更新层节点和靶标节点连线的id
-            for (SceneConfigAreaNodeConnectionBO n : sceneConfigDataBO.getTopology().getNodeConnections()) {
-                n.setSource(StringUtils.replace(n.getSource(), portKey(originId), portKey(newId)));
-                n.setTarget(StringUtils.replace(n.getTarget(), portKey(originId), portKey(newId)));
-                n.setName(StringUtils.replace(n.getName(), portKey(originId), portKey(newId)));
+        }
+
+        changeConnectionSource(sceneConfigDataBO, nodeIdMap);
+        changeConnectionTarget(sceneConfigDataBO, nodeIdMap);
+        changeConnectionInfo(sceneConfigDataBO, nodeIdMap);
+        changeConnectionName(sceneConfigDataBO, nodeIdMap);
+
+        // 更新层节点和靶标节点连线的id
+        changeNodeConnectionSource(sceneConfigDataBO, nodeIdMap);
+        changeNodeConnectionTarget(sceneConfigDataBO, nodeIdMap);
+        changeNodeConnectionName(sceneConfigDataBO, nodeIdMap);
+    }
+
+    private void changeNodeConnectionName(SceneConfigDataBO sceneConfigDataBO, Map<String, String> nodeIdMap) {
+        for (SceneConfigAreaNodeConnectionBO n : sceneConfigDataBO.getTopology().getNodeConnections()) {
+            for (var e : nodeIdMap.entrySet()) {
+                String originIdKey = portKey(e.getKey());
+                String newIdKey = portKey(e.getValue());
+                if (n.getName().contains(originIdKey)) {
+                    n.setName(StringUtils.replace(n.getName(), originIdKey, newIdKey));
+                }
             }
         }
+    }
+
+    private void changeNodeConnectionTarget(SceneConfigDataBO sceneConfigDataBO, Map<String, String> nodeIdMap) {
+        for (SceneConfigAreaNodeConnectionBO n : sceneConfigDataBO.getTopology().getNodeConnections()) {
+            for (var e : nodeIdMap.entrySet()) {
+                String originIdKey = portKey(e.getKey());
+                String newIdKey = portKey(e.getValue());
+                if (n.getTarget().contains(originIdKey)) {
+                    n.setTarget(StringUtils.replace(n.getTarget(), originIdKey, newIdKey));
+                }
+            }
+        }
+    }
+
+    private void changeNodeConnectionSource(SceneConfigDataBO sceneConfigDataBO, Map<String, String> nodeIdMap) {
+        for (SceneConfigAreaNodeConnectionBO n : sceneConfigDataBO.getTopology().getNodeConnections()) {
+            for (var e : nodeIdMap.entrySet()) {
+                String originIdKey = portKey(e.getKey());
+                String newIdKey = portKey(e.getValue());
+                if (n.getSource().contains(originIdKey)) {
+                    n.setSource(StringUtils.replace(n.getSource(), originIdKey, newIdKey));
+                }
+            }
+        }
+    }
+
+    private void changeConnectionName(SceneConfigDataBO sceneConfigDataBO, Map<String, String> nodeIdMap) {
+        for (SceneConfigElementPortConnectionBO c : sceneConfigDataBO.getTopology().getConnections()) {
+            for (var e : nodeIdMap.entrySet()) {
+                String originIdKey = portKey(e.getKey());
+                String newIdKey = portKey(e.getValue());
+                if (c.getName().contains(originIdKey)) {
+                    c.setName(StringUtils.replace(c.getName(), originIdKey, newIdKey));
+                    break;
+                }
+            }
+        }
+    }
+
+    private void changeConnectionInfo(SceneConfigDataBO sceneConfigDataBO, Map<String, String> nodeIdMap) {
+        for (SceneConfigElementPortConnectionBO c : sceneConfigDataBO.getTopology().getConnections()) {
+            for (var e : nodeIdMap.entrySet()) {
+                String originIdKey = portKey(e.getKey());
+                String newIdKey = portKey(e.getValue());
+                if (c.getInfo().contains(originIdKey)) {
+                    c.setInfo(StringUtils.replace(c.getInfo(), originIdKey, newIdKey));
+                    break;
+                }
+            }
+        }
+    }
+
+    private void changeConnectionTarget(SceneConfigDataBO sceneConfigDataBO, Map<String, String> nodeIdMap) {
+        for (SceneConfigElementPortConnectionBO c : sceneConfigDataBO.getTopology().getConnections()) {
+            for (var e : nodeIdMap.entrySet()) {
+                String originIdKey = portKey(e.getKey());
+                String newIdKey = portKey(e.getValue());
+                if (c.getTarget().contains(originIdKey)) {
+                    c.setTarget(StringUtils.replace(c.getTarget(), originIdKey, newIdKey));
+                    break;
+                }
+            }
+        }
+    }
+
+    private void changeConnectionSource(SceneConfigDataBO sceneConfigDataBO, Map<String, String> nodeIdMap) {
+        for (SceneConfigElementPortConnectionBO c : sceneConfigDataBO.getTopology().getConnections()) {
+            for (var e : nodeIdMap.entrySet()) {
+                String originIdKey = portKey(e.getKey());
+                String newIdKey = portKey(e.getValue());
+                if (c.getSource().contains(originIdKey)) {
+                    c.setSource(StringUtils.replace(c.getSource(), originIdKey, newIdKey));
+                    break;
+                }
+            }
+        }
+    }
+
+    private void changeConnection(){
+
     }
 
     private String portKey(String nodeId) {
