@@ -3,7 +3,7 @@
 <mapper namespace="cn.cyberpeace.mp.auth.repository.UserOnlineRecordMapper">
 
     <select id="listRecordSummary" resultType="cn.cyberpeace.mp.auth.bo.user.UserOnlineRecordSummaryBo">
-        select `user`, sum(duration_minutes) total_online_minutes, sum(status = 0) unCompleteCnt, mp_auth_user.username, mp_auth_user.name
+        select `user`, sum(duration_minutes) total_online_minutes, sum(status) unCompleteCnt, mp_auth_user.username, mp_auth_user.name
         from mp_auth_user_online_record
         left join mp_auth_user on mp_auth_user_online_record.`user` = mp_auth_user.id
         <where>
@@ -17,13 +17,6 @@
         </where>
         group by `user`
         order by unCompleteCnt desc,
-        <if test="priorityUserIds != null and priorityUserIds.size() > 0">
-            (case when `user` IN
-            <foreach item="priorityUserId" index="index" collection="priorityUserIds" open="(" separator="," close=")">
-                #{priorityUserId}
-            </foreach>
-            then 1 ELSE 2 END),
-        </if>
         total_online_minutes desc
     </select>
 </mapper>

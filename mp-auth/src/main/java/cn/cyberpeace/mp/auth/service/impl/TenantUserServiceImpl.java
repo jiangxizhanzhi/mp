@@ -197,11 +197,33 @@ public class TenantUserServiceImpl
         humanCondition.currentLink(TenantUserModel.class)
                 .selectAs(TenantUserModel::getUser, "userId")
                 .currentLink(OrgModel.class)
-                .selectAs(GroupConcat.f(OrgModel::getId).distinct(), "orgIds")
-                .selectAs(GroupConcat.f(OrgModel::getName).distinct(), "orgNames")
-                .currentLink(TenantUserModel.class)
-                .groupBy(TenantUserModel::getUser);
-        return getModelMapper().list(humanCondition, UserOrgMapBo.class);
+                .selectAs(OrgModel::getId, "orgIds")
+                .selectAs(OrgModel::getName, "orgNames")
+                .currentLink(TenantUserModel.class);
+        var res = getModelMapper().list(humanCondition, UserOrgMapBo.class);
+        Map<String, List<UserOrgMapBo>> map = new HashMap<>();
+        for (UserOrgMapBo re : res) {
+            var orgMapBo = map.getOrDefault(re.getUserId(), new ArrayList<>());
+            orgMapBo.add(re);
+            map.put(re.getUserId(), orgMapBo);
+        }
+
+        var result = new ArrayList<>();
+        for (var e : map.entrySet()) {
+            List<String> orgIds = new ArrayList<>();
+            List<String> orgNames = new ArrayList<>();
+            for(var re : e.getValue()){
+                orgIds.add(re.getOrgIds());
+                orgNames.add(re.getOrgNames());
+            }
+            var userOrgBo = new UserOrgMapBo();
+            BeanUtils.copyProperties(e.getValue().get(0), userOrgBo);
+            userOrgBo.setOrgIds(StringUtils.join(orgIds, ","));
+            userOrgBo.setOrgNames(StringUtils.join(orgNames, ","));
+            result.add(userOrgBo);
+        }
+
+        return res;
     }
 
     @Override
@@ -629,17 +651,24 @@ public class TenantUserServiceImpl
     private Map<String, String> getUserOrgMap(List<String> userIdList) {
         HumanCondition orgCondition = new HumanCondition()
                 .select(TenantUserModel::getUser)
-                .selectAs(GroupConcat.f(TenantUserModel::getOrg).distinct(), "orgs");
+                .selectAs(TenantUserModel::getOrg, "orgs");
         if (CollectionUtils.isNotEmpty(userIdList)) {
             orgCondition.filterIn(TenantUserModel::getUser, userIdList.toArray());
         }
-        orgCondition.groupBy(TenantUserModel::getUser);
         List<Map<String, Object>> userOrgMaps = tenantUserMapper.originList(orgCondition);
+
+        Map<String, List<String>> userOrgsMap = new HashMap<>();
+        for (Map<String, Object> userOrg : userOrgMaps) {
+            String userId = (String) userOrg.get(UserOrgRoleBo.FIELD_USER);
+            String orgId = (String) userOrg.get(UserOrgRoleBo.FIELD_ORGS);
+            List<String> userOrgs = userOrgsMap.getOrDefault(userId, new ArrayList<>());
+            userOrgs.add(orgId);
+            userOrgsMap.put(userId, userOrgs);
+        }
+
         Map<String, String> userOrgMap = new HashMap<>(userOrgMaps.size());
-        for (Map<String, Object> map : userOrgMaps) {
-            String userId = (String) map.get("user");
-            String orgs = (String) map.get("orgs");
-            userOrgMap.put(userId, orgs);
+        for (Map.Entry<String, List<String>> entry : userOrgsMap.entrySet()) {
+            userOrgMap.put(entry.getKey(), StringUtils.join(entry.getValue(), ","));
         }
         return userOrgMap;
     }
@@ -647,17 +676,24 @@ public class TenantUserServiceImpl
     private Map<String, String> getUserRoleMap(List<String> userIdList) {
         HumanCondition roleCondition = new HumanCondition()
                 .select(UserRoleModel::getUser)
-                .selectAs(GroupConcat.f(UserRoleModel::getRole).distinct(), "roles");
+                .selectAs(UserRoleModel::getRole, "roles");
         if (CollectionUtils.isNotEmpty(userIdList)) {
             roleCondition.filterIn(UserRoleModel::getUser, userIdList.toArray());
         }
-        roleCondition.groupBy(TenantUserModel::getUser);
         List<Map<String, Object>> userRoleMaps = userRoleMapper.originList(roleCondition);
+
+        Map<String, List<String>> userRolessMap = new HashMap<>();
+        for (Map<String, Object> userOrg : userRoleMaps) {
+            String userId = (String) userOrg.get(UserOrgRoleBo.FIELD_USER);
+            String orgId = (String) userOrg.get(UserOrgRoleBo.FIELD_ORGS);
+            List<String> userOrgs = userRolessMap.getOrDefault(userId, new ArrayList<>());
+            userOrgs.add(orgId);
+            userRolessMap.put(userId, userOrgs);
+        }
+
         Map<String, String> userRoleMap = new HashMap<>(userRoleMaps.size());
-        for (Map<String, Object> map : userRoleMaps) {
-            String userId = (String) map.get("user");
-            String roles = (String) map.get("roles");
-            userRoleMap.put(userId, roles);
+        for (Map.Entry<String, List<String>> entry : userRolessMap.entrySet()) {
+            userRoleMap.put(entry.getKey(), StringUtils.join(entry.getValue(), ","));
         }
         return userRoleMap;
     }
