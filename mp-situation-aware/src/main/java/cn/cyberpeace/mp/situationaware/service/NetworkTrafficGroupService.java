@@ -171,10 +171,10 @@ public class NetworkTrafficGroupService {
             log.info("create arkime Image instance param {}",paramObject.toJSONString());
             String result = HttpUtils.sendPost(url, paramObject.toJSONString());
             BaseCloudPlatformResult  model = JsonUtils.toSnakeObject(result, BaseCloudPlatformResult.class);
+            log.info("create arkime Image instance res {}", result);
             if (Objects.isNull(model) || !model.getCode().equals("0")){
                 throw new MpRuntimeException(SituationalAwareErrorCode.ARKIME_ADD_ERROR,model.getMessage());
             }
-            log.info("create arkime Image instance res {}", result);
             JsonNode jsonNode = JsonCommon.parse(model.getData(), JsonNode.class);
             return jsonNode.get("networks").get(0).get("fixed_ip").asText();
         } catch (Exception e) {
