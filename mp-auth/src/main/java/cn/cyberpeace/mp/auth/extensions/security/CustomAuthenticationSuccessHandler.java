@@ -97,12 +97,12 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             result = new ServiceResult<>(null, BaseErrorCode.ERROR);
         } else {
-            recordLoginLog(user, request);
             AuthErrorCode errorCode = checkUserErrorStatus(user);
             if (Objects.nonNull(errorCode)) {
                 response.setStatus(HttpServletResponse.SC_OK);
                 result = new ServiceResult<>(null, errorCode);
             } else {
+                recordLoginLog(user, request);
                 if (Objects.nonNull(authConfig.getLoginResetSecret()) && authConfig.getLoginResetSecret()) {
                     if (!StringUtils.equals(user.getId(), authConfig.getLoginKeepSecretUser())) {
                         // 使其它登录的token失效
