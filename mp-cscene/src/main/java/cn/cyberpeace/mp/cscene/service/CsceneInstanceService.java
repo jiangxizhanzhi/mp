@@ -77,6 +77,7 @@ import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
 import cn.cyberpeace.mp.scene.service.SceneService;
 import cn.cyberpeace.mp.scene.service.SceneSnapshotService;
+import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
 import cn.cyberpeace.mp.sceneplugincloud.bo.AccessUserBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.ElementCommandExecBO;
@@ -2024,6 +2025,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, false);
         CloudScenePluginHandler handler = sceneHandler.getPluginHandler("cpcloud");
         var elementBO = sceneHandler.getElement(nodeId);
+        if (!SystemTypeCommandUtils.isLinux(SystemTypeUtils.getSystemTypeItem(elementBO.getSystemType()).getStandardName())) {
+            throw new MpRuntimeException(CsceneErrorCode.NOT_LINUX.format(elementBO.getName()));
+        }
         // 取源节点上的ssh信息
         SshUtil.ServerInfo serverInfo = this.getSshInfo(elementBO.getPorts(), handler, elementBO.getName());
         serverInfo.setUser("root");

@@ -44,7 +44,8 @@ public enum CsceneErrorCode implements ErrorCode {
     DISK_LIMIT("MP-110303", "disk_limit"),
     UN_SUPPORT_AREA("MP-110304", "un_support_area"),
     SCENE_EDIT_LIMIT("MP-110305", "scene_edit_limit"),
-    CANNOT_FIND_SSH("MP-110306", "cannot_find_ssh")
+    CANNOT_FIND_SSH("MP-110306", "cannot_find_ssh"),
+    NOT_LINUX("MP-110307", "not_linux"),
     ;
 
     CsceneErrorCode(String code, String message) {
