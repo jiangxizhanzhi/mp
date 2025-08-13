@@ -214,6 +214,7 @@ public class SshUtil {
 
     public static String executeCommandWithReturn(ServerInfo serverInfo,
                                            String command) {
+        log.info("execute command {}", command);
         Session session = null;
         ChannelExec channel = null;
         InputStream stdout = null;
