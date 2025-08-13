@@ -2086,7 +2086,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             var pluginPort = handler.getPort(port.getId());
             if (CollectionUtils.isNotEmpty(pluginPort.getAccessModes())) {
                 for (var a : pluginPort.getAccessModes()) {
-                    if (AccessMode.Protocol.SSH.equals(a.getProtocol()) && "root".equals(a.getUsername())) {
+                    if ("root".equals(a.getUsername())) {
                         a.setPassword(newPassword);
                     }
                 }
@@ -2096,7 +2096,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     private void updatePassword2(List<AccessMode> accessModes, String newPassword) {
         for (AccessMode a : accessModes) {
-            if (AccessMode.Protocol.SSH.equals(a.getProtocol()) && "root".equals(a.getUsername())) {
+            if ("root".equals(a.getUsername())) {
                 a.setPassword(newPassword);
             }
         }
