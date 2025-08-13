@@ -2045,9 +2045,14 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         var elementBO = sceneHandler.getElement(nodeId);
         // 取源节点上的ssh信息
         SshUtil.ServerInfo serverInfo = this.getSshInfo(elementBO.getPorts(), handler, elementBO.getName());
-        String command = "sudo iptables -t nat -A PREROUTING -p tcp --dport " + sourcePort + " -j REDIRECT --to-port " + destPort +
-                "; sudo iptables -t nat -A PREROUTING -p udp --dport " + sourcePort + " -j REDIRECT --to-port " + destPort;
+        String command = "sudo iptables -t nat -I PREROUTING 1 -p tcp --dport " + sourcePort + " -j REDIRECT --to-port " + destPort +
+                "; sudo iptables -t nat -I PREROUTING 2 -p udp --dport " + sourcePort + " -j REDIRECT --to-port " + destPort;
         SshUtil.execCommand(serverInfo, command);
+
+        String commandTow = String.format("sudo iptables -t nat -I OUTPUT 1 -p tcp --dport %s -j REDIRECT --to-port %s", sourcePort, destPort);
+        String commandThree = String.format("sudo iptables -t nat -I OUTPUT 2 -p udp --dport %s -j REDIRECT --to-port %s", sourcePort, destPort);
+        SshUtil.execCommand(serverInfo, commandTow);
+        SshUtil.execCommand(serverInfo, commandThree);
         return true;
     }
 
