@@ -260,7 +260,7 @@ public class SshUtil {
             // 8. 循环读取输出（直到通道关闭或超时）
             while (!channel.isClosed()) {
                 // 检查超时
-                if (System.currentTimeMillis() - startTime > TimeUnit.SECONDS.toMillis(50)) {
+                if (System.currentTimeMillis() - startTime > TimeUnit.SECONDS.toMillis(120)) {
                     throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("命令执行超时"));
                 }
 
@@ -275,7 +275,7 @@ public class SshUtil {
                 }
 
                 // 短暂休眠避免CPU过度占用
-                Thread.sleep(100);
+                Thread.sleep(10000);
             }
 
             // 9. 读取剩余输出
@@ -524,6 +524,13 @@ public class SshUtil {
             this.host = host;
             this.user = user;
             this.password = password;
+        }
+
+        public ServerInfo(String host, String user, String password, int port) {
+            this.host = host;
+            this.user = user;
+            this.password = password;
+            this.port = port;
         }
     }
 

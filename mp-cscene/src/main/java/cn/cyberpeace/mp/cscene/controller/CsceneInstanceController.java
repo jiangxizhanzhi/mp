@@ -2,12 +2,14 @@ package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.ReentrantLockUtils;
@@ -22,6 +24,8 @@ import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.dto.scene.ElementCommandExecResult;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneLinkStatusInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
+import cn.cyberpeace.mp.cscene.model.AttackCommandHistoryModel;
+import cn.cyberpeace.mp.cscene.repository.AttackCommandHistoryMapper;
 import cn.cyberpeace.mp.cscene.service.CsceneFileService;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
@@ -983,6 +987,25 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
             return modelService.uploadElementFile(id, nodeId, filePath, filename, destPath, null).asResult();
         }
     }
+
+    @GetMapping("/attack_history/list")
+    public ServiceResult<List<AttackCommandHistoryModel>> getAttackCommandHistory(@RequestParam("cscene_id") String csceneId) {
+        AttackCommandHistoryMapper attackCommandHistoryMapper = BeanCommon.getBean(AttackCommandHistoryMapper.class);
+        var commandHistory = attackCommandHistoryMapper.list(new HumanCondition().filterEqual(AttackCommandHistoryModel::getCsceneId, csceneId)
+                .reverseOrderBy(AttackCommandHistoryModel::getUpdateTime));
+        return new ServiceResult<>(commandHistory).asResult();
+
+    }
+
+    @PostMapping("/attack_instory/update")
+    public ServiceResult<Boolean> updateAttackCommandHistory(@RequestParam("id") String id, @RequestParam("attack_effected_flag") Boolean attackEffectedFlag) {
+        AttackCommandHistoryMapper attackCommandHistoryMapper = BeanCommon.getBean(AttackCommandHistoryMapper.class);
+        var attackCommandHistoryModel = attackCommandHistoryMapper.get(id);
+        attackCommandHistoryModel.setAttackEffectedFlag(attackEffectedFlag);
+        attackCommandHistoryMapper.update(attackCommandHistoryModel);
+        return new ServiceResult<>(true).asResult();
+    }
+
 
     @AuthTarget(TargetEnum.INSTANCE_MONITORING)
     @GetMapping("/status")

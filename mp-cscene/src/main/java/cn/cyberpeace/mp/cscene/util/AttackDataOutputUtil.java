@@ -1,10 +1,17 @@
 package cn.cyberpeace.mp.cscene.util;
 
 import cn.cyberpeace.mp.base.bo.AttackDataType;
+import cn.cyberpeace.mp.base.bo.AttackType;
 import cn.cyberpeace.mp.base.bo.ImageToolRequest;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.thread.ThreadUtils;
+import cn.cyberpeace.mp.cscene.dto.common.AttackCommandExecuteInfoToThirdDto;
+import cn.cyberpeace.mp.cscene.model.AttackCommandHistoryModel;
+import cn.cyberpeace.mp.cscene.repository.AttackCommandHistoryMapper;
 import cn.cyberpeace.mp.cscene.ws.WebSocketClientService;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
@@ -43,10 +50,7 @@ import java.io.*;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -62,7 +66,7 @@ public class AttackDataOutputUtil {
     private WebSocketClientService webSocketClientService;
 
     public void startOneAttackDataOutputTask(CollectionScenePluginHandler collectionScenePluginHandler, SceneElementBO source, SceneElementBO target,
-                                             ImageToolRequest finalTool, Long attackSconds, String taskId, String targetId) {
+                                             ImageToolRequest finalTool, Long attackSconds, String taskId, String targetId, String cmdHistoryId, AttackType attackType) {
         // 启动一个线程 查询攻击结果 每隔5秒查询一次es数据 ， 查最新的一条数据
 
         new Thread(ThreadUtils.format(new Runnable() {
@@ -101,6 +105,13 @@ public class AttackDataOutputUtil {
                             dataWrapper.setConnects(connects);
                         }
                     }
+                    AttackCommandHistoryMapper attackCommandHistoryMapper = BeanCommon.getBean(AttackCommandHistoryMapper.class);
+                    AttackCommandHistoryModel attackCommandHistoryModel = attackCommandHistoryMapper.get(cmdHistoryId);
+                    if (Objects.isNull(attackCommandHistoryModel)) {
+                        log.error("cmdHistoryId:{} 获取不到命令历史详情",cmdHistoryId);
+                        throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("获取不到命令历史详情"));
+                    }
+                    dataWrapper.setAttackCommandOutput(new AttackCommandExecuteInfoToThirdDto(attackType, attackCommandHistoryModel));
                     // 向320推送数据
                     JSONObject jsonObject = new JSONObject();
                     JSONObject dataJsonObject = new JSONObject();
@@ -385,6 +396,7 @@ public class AttackDataOutputUtil {
         private List<OutProcess> processInfo;
         private List<FlowLogBO> flows;
         private List<OutConnect> connects;
+        private AttackCommandExecuteInfoToThirdDto attackCommandOutput;
     }
 
     @Getter

@@ -6,7 +6,9 @@ import cn.cyberpeace.mp.base.bo.ImageToolRequest;
 import cn.cyberpeace.mp.base.bo.OutAttackToolRequest;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -18,6 +20,8 @@ import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.common.model.OptionModel;
 import cn.cyberpeace.mp.common.repository.OptionMapper;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
+import cn.cyberpeace.mp.cscene.model.AttackCommandHistoryModel;
+import cn.cyberpeace.mp.cscene.repository.AttackCommandHistoryMapper;
 import cn.cyberpeace.mp.cscene.request.flow.AddFlowTaskTaskDetail;
 import cn.cyberpeace.mp.cscene.request.flow.AddFlowTaskTaskRequest;
 import cn.cyberpeace.mp.cscene.request.flow.EditFlowTaskConfRequest;
@@ -44,6 +48,7 @@ import cn.cyberpeace.mp.flow.repository.FlowInfoMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskRecordMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskTaskMapper;
 import cn.cyberpeace.mp.flow.service.FlowTaskTaskService;
+import cn.cyberpeace.mp.flow.util.SshUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
@@ -322,6 +327,32 @@ public class CsceneOutController implements BaseModelListControllerBase {
     }
 
     @AuthTarget(TargetEnum.NO_AUTH)
+    @ApiOperation("测试命令")
+    @PostMapping("/test_attack")
+    public ServiceResult<String> testAttack(@RequestBody OutAttackToolRequest request) {
+        var sceneId = csceneInstanceService.getSceneId(request.getId());
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, false);
+        CloudScenePluginHandler handler = sceneHandler.getPluginHandler("cpcloud");
+        var source = sceneHandler.getElement(request.getSourceNode());
+        var target = sceneHandler.getElement(request.getTargetNode());
+        var pluginSource = handler.getElement(source.getId());
+        var pluginTarget = handler.getElement(target.getId());
+        // 取源节点上的ssh信息
+        SshInfo sshInfo = this.getSshInfo(source.getPorts(), handler);
+        List<ImageToolRequest.Params> params = new ArrayList<>();
+        ImageToolRequest.Params param = new ImageToolRequest.Params();
+        param.setName("ip");
+        param.setValue(target.getPorts().get(0).getIp());
+        params.add(param);
+        String cmd = AttackType.getFormatCmd(3, params);
+        String commdExecteResult = SshUtil.executeCommandWithReturn(new SshUtil.ServerInfo(sshInfo.getIp(), sshInfo.getUsername(),
+                sshInfo.getPassword(), Integer.parseInt(sshInfo.getPort())), cmd);
+        log.info("ssh exec input: {}, result : {} ", cmd, commdExecteResult);
+        return new ServiceResult(commdExecteResult).asResult();
+    }
+
+
+    @AuthTarget(TargetEnum.NO_AUTH)
     @ApiOperation("启动攻击工具")
     @PostMapping("/attack")
     public void attack(@RequestBody OutAttackToolRequest request) {
@@ -380,29 +411,21 @@ public class CsceneOutController implements BaseModelListControllerBase {
         Date attackStarttime = request.getAttackStarttime();
         Date attackEndtime = request.getAttackEndtime();
         Long attackSconds = calculateSecondsBetween(attackStarttime,  attackEndtime) + 300;
+
+
+        String cmdHistoryId = createCommandHistoryAndExecCommand(sshInfo, tool, request.getId(), source, target);
+        AttackType attackType = AttackType.getByType(tool.getAttackType());
+
+
         //         启动一个线程 查询攻击结果 每隔5秒查询一次es数据，查最新的一条数据
         CollectionScenePluginHandler collectionScenePluginHandler = sceneHandler.getPluginHandler("cpcollection");
 //        先发送前3分钟主机采集数据
         attackDataOutputUtil.queryRecentHostInfo(target, tool.getId(), request.getTaskId(), request.getTargetId());
 //        再每5秒发送最新数据
-        attackDataOutputUtil.startOneAttackDataOutputTask(collectionScenePluginHandler, source, target, tool, attackSconds, request.getTaskId(), request.getTargetId());
+        attackDataOutputUtil.startOneAttackDataOutputTask(collectionScenePluginHandler, source, target, tool, attackSconds, request.getTaskId(), request.getTargetId(), cmdHistoryId, attackType);
 
-        // 构建执行参数
-        String cmd = AttackType.getFormatCmd(tool.getAttackType(), tool.getParams());
-        Map<String, Object> p = new HashMap<>();
-        p.put("ip", sshInfo.getIp());
-        p.put("port", sshInfo.getPort());
-        p.put("username", sshInfo.getUsername());
-        p.put("password", sshInfo.getPassword());
-        p.put("cmd", cmd);
-        // 执行参数使用base64编码 然后执行
-        log.info("python exec params : {} ", JsonCommon.stringify(p));
-        var encodeParams = TextUtils.encodeBase64(JsonCommon.stringify(p));
-        String dir = BeanCommon.getBean(BaseAppConfig.class).getResourcesDir();
-        String pintTestPath = dir + "/" + "ssh_exec.py";
-        pythonExecUtil.exec(pintTestPath, encodeParams);
 
-        AttackType attackType = AttackType.getByType(tool.getAttackType());
+
         if (StringUtils.isNotEmpty(attackType.getFlowType())) {
             String sourceIp = "";
             for (var port : source.getPorts()) {
@@ -432,6 +455,59 @@ public class CsceneOutController implements BaseModelListControllerBase {
         }
     }
 
+    private String createCommandHistoryAndExecCommand(SshInfo sshInfo, ImageToolRequest tool, String csceneId, SceneElementBO source, SceneElementBO target) {
+        AttackType attackType = AttackType.getByType(tool.getAttackType());
+        if (Objects.isNull(attackType)) {
+            throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("无法获取到攻击类别"));
+        }
+
+        String cmd = AttackType.getFormatCmd(tool.getAttackType(), tool.getParams());
+
+        AttackCommandHistoryModel attackCmdHistoryModel = new AttackCommandHistoryModel();
+        String id = TextUtils.uuid();
+        attackCmdHistoryModel.setId(id);
+        attackCmdHistoryModel.setAttackCommand(cmd);
+        attackCmdHistoryModel.setAttackDesc(attackType.getAttackDesc());
+        attackCmdHistoryModel.setAttackEffectedFlag(false);
+        attackCmdHistoryModel.setNeedManualCheckAttackEffect(attackType.getNeedManualCheckAttackEffect());
+        attackCmdHistoryModel.setCommandStatus(AttackCommandHistoryModel.CommandStatus.RUNNING);
+        attackCmdHistoryModel.setCsceneId(csceneId);
+        attackCmdHistoryModel.setCategory(attackType.getCategory());
+        attackCmdHistoryModel.setAttackTarget(target.getName());
+        attackCmdHistoryModel.setAttackTargetId(target.getId());
+        attackCmdHistoryModel.setAttackSourceId(source.getId());
+        attackCmdHistoryModel.setAttackExpectedEffect(attackType.getAttackExpectedEffect());
+        AttackCommandHistoryMapper attackCommandHistoryMapper = BeanCommon.getBean(AttackCommandHistoryMapper.class);
+        attackCommandHistoryMapper.save(attackCmdHistoryModel);
+
+        TaskCommon.executeTask(() -> {
+            // 构建执行参数
+            try {
+                String commdExecteResult = SshUtil.executeCommandWithReturn(new SshUtil.ServerInfo(sshInfo.getIp(), sshInfo.getUsername(),
+                        sshInfo.getPassword(), Integer.parseInt(sshInfo.getPort())), cmd);
+                log.info("ssh exec input: {}, result : {} ", cmd, commdExecteResult);
+                attackCmdHistoryModel.setAttackCommandOutput(commdExecteResult);
+                attackCmdHistoryModel.setCommandStatus(AttackCommandHistoryModel.CommandStatus.SUCCESS);
+                attackCmdHistoryModel.setAttackEffectedFlag(true);
+                attackCommandHistoryMapper.update(attackCmdHistoryModel);
+            } catch (MpRuntimeException e) {
+                log.error(e.getMessage(), e);
+                attackCmdHistoryModel.setAttackCommandOutput("执行完毕");
+                attackCmdHistoryModel.setCommandStatus(AttackCommandHistoryModel.CommandStatus.SUCCESS);
+                attackCmdHistoryModel.setAttackEffectedFlag(true);
+                attackCommandHistoryMapper.update(attackCmdHistoryModel);
+
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+                attackCmdHistoryModel.setAttackCommandOutput(e.getMessage());
+                attackCmdHistoryModel.setCommandStatus(AttackCommandHistoryModel.CommandStatus.FAIL);
+                attackCmdHistoryModel.setAttackEffectedFlag(false);
+                attackCommandHistoryMapper.update(attackCmdHistoryModel);
+            }
+        });
+        return id;
+    }
+
     @AuthTarget(TargetEnum.NO_AUTH)
     @ApiOperation("查询单次攻击数据")
     @PostMapping("/attack_result")
@@ -459,7 +535,7 @@ public class CsceneOutController implements BaseModelListControllerBase {
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
-        AttackDataOutputUtil.DataWrapper dataWrapper = attackDataOutputUtil.queryOneAttackData(collectionScenePluginHandler, source, target, tool);
+                AttackDataOutputUtil.DataWrapper dataWrapper = attackDataOutputUtil.queryOneAttackData(collectionScenePluginHandler, source, target, tool);
                 System.out.println("cpu:"+ dataWrapper.getHostInfo().getCPUPercent()+"内存使用率："+dataWrapper.getHostInfo().getMemoryUsedPercent()+ " time："+ dataWrapper.getHostInfo().getTimestamp());
                 bw.write("cpu:"+ dataWrapper.getHostInfo().getCPUPercent()+"内存使用率："+dataWrapper.getHostInfo().getMemoryUsedPercent()+ " time："+ dataWrapper.getHostInfo().getTimestamp());
                 bw.newLine();
