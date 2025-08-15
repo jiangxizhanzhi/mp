@@ -356,6 +356,7 @@ public class CsceneOutController implements BaseModelListControllerBase {
     @ApiOperation("启动攻击工具")
     @PostMapping("/attack")
     public void attack(@RequestBody OutAttackToolRequest request) {
+        log.info("启动攻击: {}", request);
 //        判断当前时间是否在开始时间内 若在开始时间内直接执行
         var sceneId = csceneInstanceService.getSceneId(request.getId());
         SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, false);
@@ -391,6 +392,36 @@ public class CsceneOutController implements BaseModelListControllerBase {
                     }
                 }
                 param.setValue(targetIp);
+            } else if ("username".equals(param.getName()) && StringUtils.isBlank(param.getValue())) {
+                if (CollectionUtils.isNotEmpty(target.getPorts())) {
+                    if (CollectionUtils.isNotEmpty(target.getPorts().get(0).getAccessModes())) {
+                        target.getPorts().get(0).getAccessModes().forEach(accessMode -> {
+                            if (StringUtils.isNotEmpty(accessMode.getUsername())) {
+                                param.setValue(accessMode.getUsername());
+                            }
+                        });
+                    }
+                }
+            } else if ("username".equals(param.getName()) && StringUtils.isBlank(param.getValue())) {
+                if (CollectionUtils.isNotEmpty(target.getPorts())) {
+                    if (CollectionUtils.isNotEmpty(target.getPorts().get(0).getAccessModes())) {
+                        target.getPorts().get(0).getAccessModes().forEach(accessMode -> {
+                            if (StringUtils.isNotEmpty(accessMode.getUsername())) {
+                                param.setValue(accessMode.getUsername());
+                            }
+                        });
+                    }
+                }
+            } else if ("password".equals(param.getName()) && StringUtils.isBlank(param.getValue())) {
+                if (CollectionUtils.isNotEmpty(target.getPorts())) {
+                    if (CollectionUtils.isNotEmpty(target.getPorts().get(0).getAccessModes())) {
+                        target.getPorts().get(0).getAccessModes().forEach(accessMode -> {
+                            if (StringUtils.isNotEmpty(accessMode.getPassword())) {
+                                param.setValue(accessMode.getPassword());
+                            }
+                        });
+                    }
+                }
             }
         }
 
@@ -492,10 +523,18 @@ public class CsceneOutController implements BaseModelListControllerBase {
                 attackCommandHistoryMapper.update(attackCmdHistoryModel);
             } catch (MpRuntimeException e) {
                 log.error(e.getMessage(), e);
-                attackCmdHistoryModel.setAttackCommandOutput("执行完毕");
-                attackCmdHistoryModel.setCommandStatus(AttackCommandHistoryModel.CommandStatus.SUCCESS);
-                attackCmdHistoryModel.setAttackEffectedFlag(true);
-                attackCommandHistoryMapper.update(attackCmdHistoryModel);
+                //执行时间长默认成功
+                if (e.getMessage().contains("命令执行超时")) {
+                    attackCmdHistoryModel.setAttackCommandOutput("执行完毕");
+                    attackCmdHistoryModel.setCommandStatus(AttackCommandHistoryModel.CommandStatus.SUCCESS);
+                    attackCmdHistoryModel.setAttackEffectedFlag(true);
+                    attackCommandHistoryMapper.update(attackCmdHistoryModel);
+                } else {
+                    attackCmdHistoryModel.setAttackCommandOutput(e.getMessage());
+                    attackCmdHistoryModel.setCommandStatus(AttackCommandHistoryModel.CommandStatus.FAIL);
+                    attackCmdHistoryModel.setAttackEffectedFlag(false);
+                    attackCommandHistoryMapper.update(attackCmdHistoryModel);
+                }
 
             } catch (Exception e) {
                 log.error(e.getMessage(), e);

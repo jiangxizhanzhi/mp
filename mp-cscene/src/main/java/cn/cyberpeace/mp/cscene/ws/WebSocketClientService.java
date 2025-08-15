@@ -37,11 +37,14 @@ public class WebSocketClientService {
     public static void sendMessage(String message) {
         if (SESSION != null && SESSION.isOpen()) {
             try {
+                log.info("成功发送 {}", message);
                 SESSION.sendMessage(new TextMessage(message));
             } catch (IOException e) {
                 log.error("320 WebSocket发送消息失败: {}", e.getMessage());
                 log.error(e.getMessage(), e);
             }
+        } else {
+            log.error("320 WebSocket会话已关闭，无法发送消息");
         }
     }
 

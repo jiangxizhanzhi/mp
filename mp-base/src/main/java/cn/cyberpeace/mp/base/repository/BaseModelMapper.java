@@ -391,7 +391,7 @@ public interface BaseModelMapper<M extends BaseModel> {
      */
     @Recommendation
     default boolean save(M obj) {
-        if (StringUtils.isEmpty(obj.getId())) {
+        if (StringUtils.isNotEmpty(obj.getId())) {
             if (Objects.isNull(get(obj.getId()))) {
                 return create(obj);
             } else {

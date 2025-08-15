@@ -998,10 +998,10 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     }
 
     @PostMapping("/attack_instory/update")
-    public ServiceResult<Boolean> updateAttackCommandHistory(@RequestParam("id") String id, @RequestParam("attack_effected_flag") Boolean attackEffectedFlag) {
+    public ServiceResult<Boolean> updateAttackCommandHistory(AttackHistoryUpdateRequest attackHistoryUpdateRequest) {
         AttackCommandHistoryMapper attackCommandHistoryMapper = BeanCommon.getBean(AttackCommandHistoryMapper.class);
-        var attackCommandHistoryModel = attackCommandHistoryMapper.get(id);
-        attackCommandHistoryModel.setAttackEffectedFlag(attackEffectedFlag);
+        var attackCommandHistoryModel = attackCommandHistoryMapper.get(attackHistoryUpdateRequest.getId());
+        attackCommandHistoryModel.setAttackEffectedFlag(attackHistoryUpdateRequest.getAttackEffectedFlag());
         attackCommandHistoryMapper.update(attackCommandHistoryModel);
         return new ServiceResult<>(true).asResult();
     }

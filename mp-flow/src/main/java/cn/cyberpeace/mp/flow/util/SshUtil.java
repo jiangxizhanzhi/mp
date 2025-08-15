@@ -13,8 +13,12 @@ import org.apache.poi.util.IOUtils;
 import org.springframework.core.io.ClassPathResource;
 
 import java.io.*;
+import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.concurrent.*;
 
 /**
@@ -212,8 +216,32 @@ public class SshUtil {
         }
     }
 
+    public static boolean checkPortConnectivity(String ip, int port) {
+        Instant startTime = Instant.now();
+        final long maxTimeoutMs = 300_000; // 5分钟超时（毫秒）
+
+        while (Duration.between(startTime, Instant.now()).toMillis() < maxTimeoutMs) {
+            try (Socket socket = new Socket()) {
+                // 设置单次连接超时（每次尝试5秒）
+                socket.connect(new InetSocketAddress(ip, port), 5000);
+                return true; // 连接成功
+            } catch (IOException e) {
+                // 失败后等待1秒重试
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }
+        return false; // 超时未连通
+    }
+
     public static String executeCommandWithReturn(ServerInfo serverInfo,
                                            String command) {
+        if (!checkPortConnectivity(serverInfo.getHost(), serverInfo.getPort())) {
+            throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("目标服务器超时无法连接"));
+        }
         log.info("execute command {}", command);
         Session session = null;
         ChannelExec channel = null;
@@ -260,7 +288,7 @@ public class SshUtil {
             // 8. 循环读取输出（直到通道关闭或超时）
             while (!channel.isClosed()) {
                 // 检查超时
-                if (System.currentTimeMillis() - startTime > TimeUnit.SECONDS.toMillis(120)) {
+                if (System.currentTimeMillis() - startTime > TimeUnit.SECONDS.toMillis(300)) {
                     throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("命令执行超时"));
                 }
 
@@ -290,7 +318,7 @@ public class SshUtil {
             // 10. 获取退出状态码
             int exitStatus = channel.getExitStatus();
 
-            log.debug("命令执行完成，退出状态: {}", exitStatus);
+            log.info("命令执行完成，退出状态: {}", exitStatus);
 
             return StringUtils.isEmpty(error.toString().trim()) ? output.toString().trim() : error.toString().trim();
 
