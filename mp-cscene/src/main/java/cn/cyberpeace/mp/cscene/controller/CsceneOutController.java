@@ -517,6 +517,9 @@ public class CsceneOutController implements BaseModelListControllerBase {
                 String commdExecteResult = SshUtil.executeCommandWithRetrunAndRetry(new SshUtil.ServerInfo(sshInfo.getIp(), sshInfo.getUsername(),
                         sshInfo.getPassword(), Integer.parseInt(sshInfo.getPort())), cmd);
                 log.info("ssh exec input: {}, result : {} ", cmd, commdExecteResult);
+                if (StringUtils.isNotEmpty(commdExecteResult) && commdExecteResult.length() > 5000) {
+                    commdExecteResult = commdExecteResult.substring(0, 5000);
+                }
                 attackCmdHistoryModel.setAttackCommandOutput(commdExecteResult);
                 attackCmdHistoryModel.setCommandStatus(AttackCommandHistoryModel.CommandStatus.SUCCESS);
                 attackCmdHistoryModel.setAttackEffectedFlag(attackType.commandSuccess(commdExecteResult));

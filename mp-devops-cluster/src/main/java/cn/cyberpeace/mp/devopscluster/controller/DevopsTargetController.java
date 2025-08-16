@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devopscluster.controller;
 
 import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.bo.AttackType;
 import cn.cyberpeace.mp.base.bo.ImageToolRequest;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.FsCommon;
@@ -19,6 +20,7 @@ import cn.cyberpeace.mp.devopscluster.converter.TypeConverter;
 import cn.cyberpeace.mp.devopscluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devopscluster.converter.model.TypeAllConvertModel;
 import cn.cyberpeace.mp.devopscluster.converter.model.TypeConvertModel;
+import cn.cyberpeace.mp.devopscluster.dto.AttackToolDto;
 import cn.cyberpeace.mp.devopscluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devopscluster.enums.CommonTargetNameEnum;
 import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
@@ -85,6 +87,14 @@ public class DevopsTargetController {
 
     @Autowired
     private DeviceToolMapper deviceToolMapper;
+
+    @AuthTarget(TargetEnum.NO_AUTH)
+    @ApiOperation("获取指定type的预制自动攻击工具")
+    @GetMapping("/attack_tools/list")
+    public ServiceResult<List<AttackToolDto>> listAttackTools(@RequestParam("type_id") String typeId) {
+        List<AttackType> attackTypes = AttackType.getToolsByType(typeId);
+        return new ServiceResult<>(attackTypes.stream().map(AttackToolDto::new).collect(Collectors.toList())).asResult();
+    }
 
     /**
      * 查询FTP信息

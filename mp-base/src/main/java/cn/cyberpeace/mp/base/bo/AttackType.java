@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.base.bo;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public enum AttackType {
@@ -15,10 +16,10 @@ public enum AttackType {
     XIUTAN(3, "17517000425963","嗅探","sniffing", "nmap ${ip}", "目标系统嗅探", "探查目标服务器开放服务端口", false, "Nmap done:"),
 
     //操控
-    CAOKONG(4, "17517000425964","操控","", "python3 CVE-2017-16720.py ${ip}", "Advantech WebAccess 远程命令执行漏洞", "远程控制目标主机打开计算器calc.exe。", false, ""),
+    CAOKONG(4, "17517000425964","操控","", "python3 CVE-2017-16720.py ${ip}", "Advantech WebAccess 远程命令执行漏洞", "远程控制目标主机打开计算器calc.exe。", false, "Did it work?"),
 
     //瘫毁
-    TANHUI(5, "17517000425965","瘫毁","destroyed", "./auto-destory.exp ${ip} ${username} ${password}", "CVE-2019-0708（BlueKeep）", "利用SSH弱密码登录Centos操作系统,删除目标机器系统文件，造成系统瘫痪", false, ""),
+    TANHUI(5, "17517000425965","瘫毁","destroyed", "./auto-destory.exp ${ip} ${username} ${password}", "CVE-2019-0708（BlueKeep）", "利用SSH弱密码登录Centos操作系统,删除目标机器系统文件，造成系统瘫痪", false, "rm: cannot remove"),
 
     //欺骗
     QIPIAN(6, "17517000425966","欺骗","deception", "ettercap -T -F modbus.ef -q -M ARP:remote -w /tmp/network.pcap //192.168.1.89/502 //${ip}/", "ettercap中间人攻击", "利用ettercap进行ARP欺骗，通过脚本识别到modbus协议流量中含有你设定的流量特征来进行更改，可以通过攻击机与目标主机的流量特征来判断效果，还可以攻击时通过登录modbuscan_202507031516靶标观察信号灯的变化", true, ""),
@@ -120,5 +121,15 @@ public enum AttackType {
             cmd = cmd.replace("${" + p.getName() + "}", p.getValue());
         }
         return cmd;
+    }
+
+    public static List<AttackType> getToolsByType(String typeId) {
+        List<AttackType> results = new ArrayList<>();
+        for (AttackType value : AttackType.values()) {
+            if (typeId.equals(value.getType())) {
+                results.add(value);
+            }
+        }
+        return results;
     }
 }
