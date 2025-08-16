@@ -237,6 +237,27 @@ public class SshUtil {
         return false; // 超时未连通
     }
 
+    public static String executeCommandWithRetrunAndRetry(ServerInfo serverInfo, String command) {
+        int retryCount = 3;
+        for (int i = 0; i < retryCount; i++) {
+            try {
+                return executeCommandWithReturn(serverInfo, command);
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+                if (e.getMessage().contains("connection is closed by foreign host")) {
+                    try {
+                        Thread.sleep(60000);
+                    } catch (Exception se) {
+                        log.error(se.getMessage(), e);
+                    }
+                } else {
+                    throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format(e.getMessage()));
+                }
+            }
+        }
+        throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("执行命令失败, connection is closed by foreign host"));
+    }
+
     public static String executeCommandWithReturn(ServerInfo serverInfo,
                                            String command) {
         if (!checkPortConnectivity(serverInfo.getHost(), serverInfo.getPort())) {

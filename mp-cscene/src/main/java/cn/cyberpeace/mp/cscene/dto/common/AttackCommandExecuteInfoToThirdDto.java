@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.cscene.dto.common;
 
 import cn.cyberpeace.mp.base.bo.AttackType;
-import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.cscene.model.AttackCommandHistoryModel;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
@@ -33,7 +32,7 @@ public class AttackCommandExecuteInfoToThirdDto {
     private AttackCommandOutput attackCommandOutput;
 
     public AttackCommandExecuteInfoToThirdDto(AttackType attackType, AttackCommandHistoryModel attackCommandHistoryModel) {
-        this.category = attackType.getCategoryId();
+        this.category = attackType.getToolId();
         this.attackDesc = attackType.getAttackDesc();
         this.attackEffectedFlag = attackCommandHistoryModel.getAttackEffectedFlag();
         this.attackCommandOutput = new AttackCommandOutput(attackCommandHistoryModel.getAttackCommandOutput());
@@ -63,13 +62,13 @@ public class AttackCommandExecuteInfoToThirdDto {
     @Data
     public static class AttackCommandOutput {
         private String origin;
-        private String format;
+        private Object format;
 
 
         public AttackCommandOutput(String origin) {
             this.origin = origin;
             if (StringUtils.isNotEmpty(origin) && origin.contains("Nmap")) {
-                this.format = JsonCommon.stringify(new NmapFormat(origin));
+                this.format = new NmapFormat(origin);
             }
         }
     }

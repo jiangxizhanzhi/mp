@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.base.repository;
 
 import cn.cyberpeace.mp.base.annotation.Recommendation;
 import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.model.common.ModelUtils;
@@ -171,12 +172,16 @@ public interface BaseModelMapper<M extends BaseModel> {
         Object[][] createFieldValuesList = new Object[objs.size()][createFields.length];
         for (int i = 0; i < objs.size(); i++) {
             M obj = objs.get(i);
+            log.info("init before obj = {}", JsonCommon.stringify(obj));
             obj.initDefault();
+            log.info("init after obj = {}", JsonCommon.stringify(obj));
 
             Object[] createFieldValues = new Object[createFields.length];
             for (int j = 0; j < createFields.length; j++) {
                 Object fieldValue = ClassUtils.getObjFieldValue(obj, createFields[j]);
                 if (fieldValue == null) {
+                    log.info("filed {} value is null obj = {}", createFields[j], JsonCommon.stringify(obj));
+
                     return new Object[0];
                 }
                 createFieldValues[j] = fieldValue;
@@ -398,7 +403,7 @@ public interface BaseModelMapper<M extends BaseModel> {
                 return update(obj);
             }
         } else {
-            return update(obj);
+            return create(obj);
         }
     }
 

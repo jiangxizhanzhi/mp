@@ -1193,7 +1193,7 @@ public class AsyncPlatFlowTaskService {
         SshUtil.scpFileToRemote(serverInfo, "/root/tcpreplay", new ClassPathResource("tcpreplay/tcpreplay_install.sh"));
         SshUtil.scpFileToRemote(serverInfo, "/root/tcpreplay", new ClassPathResource("tcpreplay/tcpreplay_start.sh"));
         log.info("成功上传tcpreplay安装包，开始执行tcpreplay安装");
-        String result = SshUtil.executeCommandWithReturn(serverInfo, "bash /root/tcpreplay/tcpreplay_install.sh");
+        String result = SshUtil.executeCommandWithRetrunAndRetry(serverInfo, "bash /root/tcpreplay/tcpreplay_install.sh");
         log.info("安装结果：" + result);
 
     }

@@ -345,7 +345,7 @@ public class CsceneOutController implements BaseModelListControllerBase {
         param.setValue(target.getPorts().get(0).getIp());
         params.add(param);
         String cmd = AttackType.getFormatCmd(3, params);
-        String commdExecteResult = SshUtil.executeCommandWithReturn(new SshUtil.ServerInfo(sshInfo.getIp(), sshInfo.getUsername(),
+        String commdExecteResult = SshUtil.executeCommandWithRetrunAndRetry(new SshUtil.ServerInfo(sshInfo.getIp(), sshInfo.getUsername(),
                 sshInfo.getPassword(), Integer.parseInt(sshInfo.getPort())), cmd);
         log.info("ssh exec input: {}, result : {} ", cmd, commdExecteResult);
         return new ServiceResult(commdExecteResult).asResult();
@@ -441,7 +441,7 @@ public class CsceneOutController implements BaseModelListControllerBase {
 //        执行前需要先查询数据用于对比 查询次数按开始结束时间差+5分钟进行
         Date attackStarttime = request.getAttackStarttime();
         Date attackEndtime = request.getAttackEndtime();
-        Long attackSconds = calculateSecondsBetween(attackStarttime,  attackEndtime) + 300;
+        Long attackSconds = calculateSecondsBetween(attackStarttime,  attackEndtime) + 480;
 
 
         String cmdHistoryId = createCommandHistoryAndExecCommand(sshInfo, tool, request.getId(), source, target);
@@ -514,12 +514,12 @@ public class CsceneOutController implements BaseModelListControllerBase {
         TaskCommon.executeTask(() -> {
             // 构建执行参数
             try {
-                String commdExecteResult = SshUtil.executeCommandWithReturn(new SshUtil.ServerInfo(sshInfo.getIp(), sshInfo.getUsername(),
+                String commdExecteResult = SshUtil.executeCommandWithRetrunAndRetry(new SshUtil.ServerInfo(sshInfo.getIp(), sshInfo.getUsername(),
                         sshInfo.getPassword(), Integer.parseInt(sshInfo.getPort())), cmd);
                 log.info("ssh exec input: {}, result : {} ", cmd, commdExecteResult);
                 attackCmdHistoryModel.setAttackCommandOutput(commdExecteResult);
                 attackCmdHistoryModel.setCommandStatus(AttackCommandHistoryModel.CommandStatus.SUCCESS);
-                attackCmdHistoryModel.setAttackEffectedFlag(true);
+                attackCmdHistoryModel.setAttackEffectedFlag(attackType.commandSuccess(commdExecteResult));
                 attackCommandHistoryMapper.update(attackCmdHistoryModel);
             } catch (MpRuntimeException e) {
                 log.error(e.getMessage(), e);

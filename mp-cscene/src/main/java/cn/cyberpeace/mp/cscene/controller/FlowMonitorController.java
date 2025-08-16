@@ -632,7 +632,7 @@ public class FlowMonitorController {
             String downloadUrl = "http://" + ip + ":8005/" + hostname + "/pcap/" + flowSimpleReplayRequest.getPcapId() + ".pcap";
             String trexIp = flowMonitorService.getTrexIp(sceneId);
 
-            String result = SshUtil.executeCommandWithReturn(new SshUtil.ServerInfo(trexIp, "root", "111111"), "bash /root/tcpreplay/tcpreplay_start.sh " + downloadUrl + " " + flowSimpleReplayRequest.getTargetIp() + " " + SysContextHolder.getCallChainId());
+            String result = SshUtil.executeCommandWithRetrunAndRetry(new SshUtil.ServerInfo(trexIp, "root", "111111"), "bash /root/tcpreplay/tcpreplay_start.sh " + downloadUrl + " " + flowSimpleReplayRequest.getTargetIp() + " " + SysContextHolder.getCallChainId());
             return new ServiceResult<>(result).asResult();
         } catch (Exception e) {
             log.error(e.getMessage(), e);

@@ -111,7 +111,7 @@ public class AttackDataOutputUtil {
                         log.error("cmdHistoryId:{} 获取不到命令历史详情",cmdHistoryId);
                         throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("获取不到命令历史详情"));
                     }
-                    dataWrapper.setAttackCommandOutput(new AttackCommandExecuteInfoToThirdDto(attackType, attackCommandHistoryModel));
+                    dataWrapper.setCommandExecuteDetail(new AttackCommandExecuteInfoToThirdDto(attackType, attackCommandHistoryModel));
                     // 向320推送数据
                     JSONObject jsonObject = new JSONObject();
                     JSONObject dataJsonObject = new JSONObject();
@@ -396,7 +396,7 @@ public class AttackDataOutputUtil {
         private List<OutProcess> processInfo;
         private List<FlowLogBO> flows;
         private List<OutConnect> connects;
-        private AttackCommandExecuteInfoToThirdDto attackCommandOutput;
+        private AttackCommandExecuteInfoToThirdDto commandExecuteDetail;
     }
 
     @Getter
