@@ -361,7 +361,7 @@ public class CsceneOutController implements BaseModelListControllerBase {
         var sceneId = csceneInstanceService.getSceneId(request.getId());
         SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, false);
         CloudScenePluginHandler handler = sceneHandler.getPluginHandler("cpcloud");
-        var source = sceneHandler.getElement(request.getSourceNode());
+        SceneElementBO source = sceneHandler.getElement(request.getSourceNode());
         var target = sceneHandler.getElement(request.getTargetNode());
         var pluginSource = handler.getElement(source.getId());
         var pluginTarget = handler.getElement(target.getId());
@@ -492,7 +492,7 @@ public class CsceneOutController implements BaseModelListControllerBase {
             throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("无法获取到攻击类别"));
         }
 
-        String cmd = AttackType.getFormatCmd(tool.getAttackType(), tool.getParams());
+        String cmd = AttackType.getFormatCmdByToolId(tool.getId(), tool.getParams());
 
         AttackCommandHistoryModel attackCmdHistoryModel = new AttackCommandHistoryModel();
         String id = TextUtils.uuid();

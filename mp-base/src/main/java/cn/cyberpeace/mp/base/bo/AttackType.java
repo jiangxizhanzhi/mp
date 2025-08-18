@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.base.bo;
 
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -122,6 +124,27 @@ public enum AttackType {
         }
         return cmd;
     }
+
+    public static String getFormatCmdByToolId(String toolId, List<ImageToolRequest.Params> params) {
+        String cmd = getByToolId(toolId).getCmd();
+        for (var p : params) {
+            cmd = cmd.replace("${" + p.getName() + "}", p.getValue());
+        }
+        return cmd;
+    }
+
+    public static AttackType getByToolId(String toolId) {
+        if (StringUtils.isEmpty(toolId)) {
+            throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("toolId为空"));
+        }
+        for (AttackType value : values()) {
+            if (value.toolId == toolId) {
+                return value;
+            }
+        }
+        throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("tooId " + toolId + "不存在指定指令"));
+    }
+
 
     public static List<AttackType> getToolsByType(String typeId) {
         List<AttackType> results = new ArrayList<>();
