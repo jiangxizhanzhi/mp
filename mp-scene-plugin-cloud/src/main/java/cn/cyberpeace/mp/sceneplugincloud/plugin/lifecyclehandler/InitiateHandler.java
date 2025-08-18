@@ -712,6 +712,16 @@ public class InitiateHandler extends HandlerCommon {
 
             if (dhcpOpenAndNeedMpAllocateDhcpFlag && !onlyVirtualRouterConnectFlag) {
                 if (StringUtils.isEmpty(network.getDhcpIp())) {
+                    List<String> possibleDhcpIps = this.getPossibleDhcpIps(network.getGateway(), network.getCidr());
+                    for (String possibleDhcpIp : possibleDhcpIps) {
+                        if (!existIps.contains(possibleDhcpIp) && !possibleDhcpIp.endsWith("255")) {
+                            network.setDhcpIp(possibleDhcpIp);
+                            existIps.add(possibleDhcpIp);
+                            break;
+                        }
+                    }
+                }
+                if (StringUtils.isEmpty(network.getDhcpIp())) {
                     List<String> ipPool = IpUtils.newRandomIps(network.getCidr(), 1, new ArrayList<>(existIps), new ArrayList<>(), BoolUtils.bool(element.getDhcp()));
                     if (CollectionUtils.isNotEmpty(ipPool)) {
                         network.setDhcpIp(ipPool.get(0));
