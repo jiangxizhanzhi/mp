@@ -216,6 +216,9 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     @ApiModelProperty(value = "宿主机名称")
     private String host;
 
+    @ApiModelProperty(value = "域")
+    private String domain;
+
     @Override
     public void fromModel(M obj, String... ignoreFields) {
         //忽略直接赋值处理的字段，需要定制处理

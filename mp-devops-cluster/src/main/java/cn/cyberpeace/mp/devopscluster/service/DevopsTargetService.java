@@ -181,6 +181,7 @@ public class DevopsTargetService {
     protected DeviceTargetPO convertDevice(Device device) {
         DeviceTargetPO deviceTargetPO = new DeviceTargetPO();
         deviceTargetPO.setId(device.getId().toString());
+        deviceTargetPO.setDomain(device.getDomain());
         deviceTargetPO.setUuid(device.getUuid());
         deviceTargetPO.setName(device.getName());
         deviceTargetPO.setLogo(DefaultImgUtil.fdfsUrlToPath(device.getLogo()));

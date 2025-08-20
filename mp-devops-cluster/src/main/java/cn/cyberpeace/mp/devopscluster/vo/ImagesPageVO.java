@@ -143,4 +143,7 @@ public class ImagesPageVO extends BaseVO {
 
     @ApiModelProperty("是否为Hyper-V虚拟机")
     private Boolean hyperV = false;
+
+    @ApiModelProperty(value = "域")
+    private String domain ;
 }

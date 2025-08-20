@@ -151,4 +151,5 @@ public class ImageConvertModel extends BasePageConvertModel{
      */
     private String imageResourceType;
 
+    private String domain ;
 }

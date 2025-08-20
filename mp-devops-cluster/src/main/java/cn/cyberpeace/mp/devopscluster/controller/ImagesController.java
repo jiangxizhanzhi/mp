@@ -187,6 +187,7 @@ public class ImagesController {
         ImageConvertModel model = imagesConverter.findByUuid(uuid);
         ImagesByIdVO imagesByIdVO = new ImagesByIdVO();
         imagesByIdVO.setUuid(model.getUuid());
+        imagesByIdVO.setDomain(model.getDomain());
         imagesByIdVO.setName(model.getName());
         imagesByIdVO.setCategory(model.getMainCategory());
         imagesByIdVO.setSecondCategory(model.getSubCategory());
@@ -704,6 +705,7 @@ public class ImagesController {
             ExtImageInfo extImageInfo = v.getExtImageInfo();
             var vo = ImagesPageVO.builder().uuid(v.getUuid()).name(v.getName())
                     .logo(v.getLogo())
+                    .domain(v.getDomain())
                     .mainCategory(v.getMainCategory()).subCategory(v.getSubCategory()).thirdCategory(v.getThirdCategory())
                     .imageType(v.getImageType())
                     .isImport(v.getIsImport())

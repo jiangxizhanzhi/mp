@@ -197,4 +197,6 @@ public class Device extends BaseCloudPlatformResult {
     }
 
     private Boolean supportExport;
+
+    private String domain ;
 }

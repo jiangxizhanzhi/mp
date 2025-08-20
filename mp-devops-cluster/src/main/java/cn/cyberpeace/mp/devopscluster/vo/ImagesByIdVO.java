@@ -140,4 +140,7 @@ public class ImagesByIdVO extends BaseVO {
 
     @ApiModelProperty("资源类型 '1':'操作系统', '2':'数据库', '3':'中间件', '4':'办公软件', '5':'专用业务软件'")
     private String imageResourceType;
+
+    @ApiModelProperty(value = "域")
+    private String domain ;
 }

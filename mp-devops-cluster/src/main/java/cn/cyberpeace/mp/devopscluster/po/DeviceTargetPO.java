@@ -171,4 +171,7 @@ public class DeviceTargetPO extends BaseModel {
      */
     @DefaultStr
     private String imageResourceType;
+
+    @DefaultStr
+    private String domain ;
 }

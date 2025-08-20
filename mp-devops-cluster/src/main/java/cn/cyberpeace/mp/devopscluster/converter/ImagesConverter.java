@@ -161,6 +161,7 @@ public class ImagesConverter implements BaseConverter{
                             imageConvertModel.getExtDocker().setInitSupport(supportExports.get(imageConvertModel.getUuid()).getInitSupport());
                         }
                     }
+                    imageConvertModel.setDomain(supportExports.get(imageConvertModel.getUuid()).getDomain());
                 }
                 //设置镜像资源类型
                 imageConvertModel.setImageResourceType(supportExports.get(imageConvertModel.getUuid()).getImageResourceType());
@@ -181,6 +182,7 @@ public class ImagesConverter implements BaseConverter{
         Device device = imagesService.add(convertRequest(request));
         device.setIsHide(Objects.nonNull(request.getIsHide()) ? request.getIsHide() : Boolean.FALSE);
         device.setImageResourceType(request.getImageResourceType());
+        device.setDomain(request.getDomain());
         devopsTargetService.insert(Collections.singletonList(device));
     }
 
@@ -193,6 +195,7 @@ public class ImagesConverter implements BaseConverter{
         Device device = deviceService.findByUuid(id);
         DeviceTargetPO deviceTargetPO = deviceTargetMapper.findByUuid(id);
         device.setImageResourceType(deviceTargetPO.getImageResourceType());
+        device.setDomain(deviceTargetPO.getDomain());
         return wrapperImageConvertModel(device);
     }
 
@@ -220,6 +223,7 @@ public class ImagesConverter implements BaseConverter{
     public void update(ImageRequest request) {
         Device device = imagesService.update(request.getUuid(),convertRequest(request));
         device.setImageResourceType(request.getImageResourceType());
+        device.setDomain(request.getDomain());
         devopsTargetService.updateById(device);
     }
 
@@ -510,6 +514,7 @@ public class ImagesConverter implements BaseConverter{
         imageModel.setExtGateway(device.getExtGateway());
         imageModel.setExtDocker(device.getExtDocker());
         imageModel.setImageResourceType(device.getImageResourceType());
+        imageModel.setDomain(device.getDomain());
         return imageModel;
     }
 
