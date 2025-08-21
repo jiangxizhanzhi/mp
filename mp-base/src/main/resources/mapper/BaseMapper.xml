@@ -210,13 +210,165 @@
         SELECT
         <foreach item="updateFieldValue" index="fieldIndex" collection="updateFieldValues"
                  open="" separator="," close="">
-            #{updateFieldValue} AS #{updateFields[${fieldIndex}]}
+            <if test="fieldIndex == 0">
+                #{updateFieldValue} AS "${updateFields[0]}"
+            </if>
+            <if test="fieldIndex == 1">
+                #{updateFieldValue} AS "${updateFields[1]}"
+            </if>
+            <if test="fieldIndex == 2">
+                #{updateFieldValue} AS "${updateFields[2]}"
+            </if>
+            <if test="fieldIndex == 3">
+                #{updateFieldValue} AS "${updateFields[3]}"
+            </if>
+            <if test="fieldIndex == 4">
+                #{updateFieldValue} AS "${updateFields[4]}"
+            </if>
+            <if test="fieldIndex == 5">
+                #{updateFieldValue} AS "${updateFields[5]}"
+            </if>
+            <if test="fieldIndex == 6">
+                #{updateFieldValue} AS "${updateFields[6]}"
+            </if>
+            <if test="fieldIndex == 7">
+                #{updateFieldValue} AS "${updateFields[7]}"
+            </if>
+            <if test="fieldIndex == 8">
+                #{updateFieldValue} AS "${updateFields[8]}"
+            </if>
+            <if test="fieldIndex == 9">
+                #{updateFieldValue} AS "${updateFields[9]}"
+            </if>
+            <if test="fieldIndex == 10">
+                #{updateFieldValue} AS "${updateFields[10]}"
+            </if>
+            <if test="fieldIndex == 11">
+                #{updateFieldValue} AS "${updateFields[11]}"
+            </if>
+            <if test="fieldIndex == 12">
+                #{updateFieldValue} AS "${updateFields[12]}"
+            </if>
+            <if test="fieldIndex == 13">
+                #{updateFieldValue} AS "${updateFields[13]}"
+            </if>
+            <if test="fieldIndex == 14">
+                #{updateFieldValue} AS "${updateFields[14]}"
+            </if>
+            <if test="fieldIndex == 15">
+                #{updateFieldValue} AS "${updateFields[15]}"
+            </if>
+            <if test="fieldIndex == 16">
+                #{updateFieldValue} AS "${updateFields[16]}"
+            </if>
+            <if test="fieldIndex == 17">
+                #{updateFieldValue} AS "${updateFields[17]}"
+            </if>
+            <if test="fieldIndex == 18">
+                #{updateFieldValue} AS "${updateFields[18]}"
+            </if>
+            <if test="fieldIndex == 19">
+                #{updateFieldValue} AS "${updateFields[19]}"
+            </if>
+            <if test="fieldIndex == 20">
+                #{updateFieldValue} AS "${updateFields[20]}"
+            </if>
+            <if test="fieldIndex == 21">
+                #{updateFieldValue} AS "${updateFields[21]}"
+            </if>
+            <if test="fieldIndex == 22">
+                #{updateFieldValue} AS "${updateFields[22]}"
+            </if>
+            <if test="fieldIndex == 23">
+                #{updateFieldValue} AS "${updateFields[23]}"
+            </if>
+            <if test="fieldIndex == 24">
+                #{updateFieldValue} AS "${updateFields[24]}"
+            </if>
+            <if test="fieldIndex == 25">
+                #{updateFieldValue} AS "${updateFields[25]}"
+            </if>
+            <if test="fieldIndex == 26">
+                #{updateFieldValue} AS "${updateFields[26]}"
+            </if>
+            <if test="fieldIndex == 27">
+                #{updateFieldValue} AS "${updateFields[27]}"
+            </if>
+            <if test="fieldIndex == 28">
+                #{updateFieldValue} AS "${updateFields[28]}"
+            </if>
+            <if test="fieldIndex == 29">
+                #{updateFieldValue} AS "${updateFields[29]}"
+            </if>
+            <if test="fieldIndex == 30">
+                #{updateFieldValue} AS "${updateFields[30]}"
+            </if>
+            <if test="fieldIndex == 31">
+                #{updateFieldValue} AS "${updateFields[31]}"
+            </if>
+            <if test="fieldIndex == 32">
+                #{updateFieldValue} AS "${updateFields[32]}"
+            </if>
+            <if test="fieldIndex == 33">
+                #{updateFieldValue} AS "${updateFields[33]}"
+            </if>
+            <if test="fieldIndex == 34">
+                #{updateFieldValue} AS "${updateFields[34]}"
+            </if>
+            <if test="fieldIndex == 35">
+                #{updateFieldValue} AS "${updateFields[35]}"
+            </if>
+            <if test="fieldIndex == 36">
+                #{updateFieldValue} AS "${updateFields[36]}"
+            </if>
+            <if test="fieldIndex == 37">
+                #{updateFieldValue} AS "${updateFields[37]}"
+            </if>
+            <if test="fieldIndex == 38">
+                #{updateFieldValue} AS "${updateFields[38]}"
+            </if>
+            <if test="fieldIndex == 39">
+                #{updateFieldValue} AS "${updateFields[39]}"
+            </if>
+            <if test="fieldIndex == 40">
+                #{updateFieldValue} AS "${updateFields[40]}"
+            </if>
+            <if test="fieldIndex == 41">
+                #{updateFieldValue} AS "${updateFields[41]}"
+            </if>
+            <if test="fieldIndex == 42">
+                #{updateFieldValue} AS "${updateFields[42]}"
+            </if>
+            <if test="fieldIndex == 43">
+                #{updateFieldValue} AS "${updateFields[43]}"
+            </if>
+            <if test="fieldIndex == 44">
+                #{updateFieldValue} AS "${updateFields[44]}"
+            </if>
+            <if test="fieldIndex == 45">
+                #{updateFieldValue} AS "${updateFields[45]}"
+            </if>
+            <if test="fieldIndex == 46">
+                #{updateFieldValue} AS "${updateFields[46]}"
+            </if>
+            <if test="fieldIndex == 47">
+                #{updateFieldValue} AS "${updateFields[47]}"
+            </if>
+            <if test="fieldIndex == 48">
+                #{updateFieldValue} AS "${updateFields[48]}"
+            </if>
+            <if test="fieldIndex == 49">
+                #{updateFieldValue} AS "${updateFields[49]}"
+            </if>
+            <if test="fieldIndex == 50">
+                #{updateFieldValue} AS "${updateFields[50]}"
+            </if>
         </foreach>
     </foreach>) a USING(id)
         SET
         <foreach item="field" index="index" collection="updateFields"
                  open="" separator="," close="">
-            <if test="field != 'id'">${table}.${field} = a.${field}</if>
+            <if test="field != 'id'">${table}."${field}" = a."${field}"</if>
         </foreach>
     </sql>
     <sql id="bulkDeleteTemplate">

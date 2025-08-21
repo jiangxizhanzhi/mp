@@ -213,7 +213,7 @@ public class CsceneFlowController implements BaseModelListControllerBase {
     @GetMapping("/top5_protocols")
     public ServiceResult<ArrayNode> top5Protocols(@RequestParam String id) {
         log.info("FlowInfoController.top5Protocols begin. id:{}", id);
-        ArrayNode result = csceneFlowService.top5ProtocolsCache(id);
+        ArrayNode result = csceneFlowService.top5Protocols(id);
         log.info("FlowInfoController.top5Protocols end. result:{}", result);
         return ResultCommon.success(result);
     }
