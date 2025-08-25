@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.CollectionUtils;
@@ -39,6 +40,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.CreateTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
+import cn.cyberpeace.mp.scene.service.IFlowMirror;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -1386,6 +1388,29 @@ public class CreateHandler extends HandlerCommon {
                 }
             });
             vpClient.syncFlowPortInfo(portIds, "add");
+        }
+
+        // 如果指定了节点流量镜像，需要调用下接口
+        var scene = getPluginHandler().getScene();
+        if (scene.getFlowTarget() != null && scene.getFlowTarget().getTarget() != null && scene.getFlowTarget()
+                .getSource() != null) {
+            IFlowMirror flowMirror = BeanCommon.getBean(IFlowMirror.class);
+            IFlowMirror.NetworkTrafficMirrorRequest request = new IFlowMirror.NetworkTrafficMirrorRequest();
+            request.setSceneId(scene.getSrcScene().getEid());
+            request.setEntity(false);
+            var source = getPluginHandler().getElement(scene.getFlowTarget().getSource().getNodeId());
+            if (source.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE) {
+                request.setContainerInstanceIds(new ArrayList<>());
+                request.setVmInstanceIds(Arrays.asList(source.getResourceId()));
+            } else {
+                request.setVmInstanceIds(new ArrayList<>());
+                request.setContainerInstanceIds(Arrays.asList(source.getResourceId()));
+            }
+
+            var target = getPluginHandler().getElement(scene.getFlowTarget().getTarget().getNodeId());
+            request.setArkimeInstanceNames(Arrays.asList("MP_SCENE_" + target.getSrcElement().getEid()));
+
+            flowMirror.flowMirror(request);
         }
     }
 

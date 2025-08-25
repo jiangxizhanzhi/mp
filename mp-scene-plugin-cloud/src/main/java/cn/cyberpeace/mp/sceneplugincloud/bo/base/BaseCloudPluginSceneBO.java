@@ -23,6 +23,8 @@ public abstract class BaseCloudPluginSceneBO<M extends BaseCloudPluginSceneModel
     private Boolean enableRate;
     @ApiModelProperty(value = "dnsNameservers")
     private List<DnsPool> dnsNameservers;
+    @ApiModelProperty(value = "跨节点流量镜像")
+    private FlowTargetBO flowTarget;
 
     @Override
     public void fromModel(M obj, String... ignoreFields) {
@@ -34,6 +36,9 @@ public abstract class BaseCloudPluginSceneBO<M extends BaseCloudPluginSceneModel
         dnsNameservers = StringUtils.isEmpty(obj.getDnsNameservers()) ? new ArrayList<>()
                 : JsonCommon.parse(obj.getDnsNameservers(), new TypeReference<List<DnsPool>>() {
         });
+        flowTarget = StringUtils.isEmpty(obj.getFlowTarget()) ? new FlowTargetBO()
+                : JsonCommon.parse(obj.getFlowTarget(), new TypeReference<FlowTargetBO>() {
+        });
     }
 
     @Override
@@ -43,6 +48,9 @@ public abstract class BaseCloudPluginSceneBO<M extends BaseCloudPluginSceneModel
         ));
         if (dnsNameservers != null) {
             obj.setDnsNameservers(JsonCommon.stringify(dnsNameservers));
+        }
+        if (flowTarget != null) {
+            obj.setFlowTarget(JsonCommon.stringify(flowTarget));
         }
         return obj;
     }
