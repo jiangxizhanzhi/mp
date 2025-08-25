@@ -19,6 +19,8 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -85,6 +87,15 @@ public class SceneMonitorController {
                 }
             }
         }
+        if (StringUtils.isNotEmpty(request.getDomain())) {
+            List<ElementMonitorBasicInfo> x = new ArrayList<>();
+            for (ElementMonitorBasicInfo e : result) {
+                if (StringUtils.contains(e.getDomain(), request.getDomain())) {
+                    x.add(e);
+                }
+            }
+            result = x;
+        }
         return ResultCommon.success(result);
     }
 
@@ -108,6 +119,15 @@ public class SceneMonitorController {
     @GetMapping("/config/all_elements/{id}")
     public ServiceResult<List<ElementMonitorBasicInfo>> getSceneAllElements(@PathVariable String id, SceneAllElementsQueryRequest request) {
         List<ElementMonitorBasicInfo> basicInfoList = sceneMonitorService.getAllSceneConfigElements(id, request);
+        if (StringUtils.isNotEmpty(request.getDomain())) {
+            List<ElementMonitorBasicInfo> x = new ArrayList<>();
+            for (ElementMonitorBasicInfo e : basicInfoList) {
+                if (StringUtils.contains(e.getDomain(), request.getDomain())) {
+                    x.add(e);
+                }
+            }
+            basicInfoList = x;
+        }
         return ResultCommon.success(basicInfoList);
     }
 

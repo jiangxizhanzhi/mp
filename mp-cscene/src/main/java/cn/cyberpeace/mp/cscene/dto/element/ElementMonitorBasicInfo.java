@@ -89,4 +89,7 @@ public class ElementMonitorBasicInfo {
     @ApiModelProperty(value = "接入用户集合")
     private List<AccessUserBO> accessUsers;
 
+    @ApiModelProperty(value = "域")
+    private String domain;
+
 }
