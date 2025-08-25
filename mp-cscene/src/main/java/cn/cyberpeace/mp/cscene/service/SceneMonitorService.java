@@ -358,6 +358,13 @@ public class SceneMonitorService {
             // 添加定时上报任务
             SceneHostStateReportScheduleService.addCsceneInstance(sceneId);
         }
+
+        CloudScenePluginHandler handler = sceneHandler.getPluginHandler("cpcloud");
+        for (var e : basicInfos) {
+            var cloudElement = handler.getElement(e.getId());
+            e.setDomain(cloudElement.getDomain());
+        }
+
         return basicInfos;
     }
 
@@ -423,6 +430,13 @@ public class SceneMonitorService {
         } else {
             result = res;
         }
+
+        CloudSceneConfigPluginHandler handler = sceneConfigHandler.getPluginHandler("cpcloud");
+        for (var e : res) {
+            var cloudPluginSceneConfigElementBO = handler.getElement(e.getId());
+            e.setDomain(cloudPluginSceneConfigElementBO.getDomain());
+        }
+
         return result;
     }
 

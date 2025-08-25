@@ -173,6 +173,8 @@ public class ImagePageDTO extends BasePageDTO{
      */
     private String imageResourceType;
 
+    private String domain;
+
     public Boolean getLikeName() {
         return Objects.isNull(likeName) ? Boolean.TRUE : likeName;
     }
