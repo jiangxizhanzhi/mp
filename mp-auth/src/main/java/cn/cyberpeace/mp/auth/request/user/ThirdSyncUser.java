@@ -9,6 +9,9 @@ import java.util.List;
 @Setter
 public class ThirdSyncUser {
     // 基本信息
+    private String app_account__id ;
+    private String app_account__account_no ;
+    private String app_account__account_name ;
     private String accountNo;         // IT账号
     private String userUid;           // 员工号
     private String userName;          // 姓名

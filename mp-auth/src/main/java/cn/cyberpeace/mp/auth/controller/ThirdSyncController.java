@@ -21,6 +21,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -59,13 +60,31 @@ public class ThirdSyncController {
 //        ThirdSsoUtil.verify(accessToken, config.getSyncclientsecret());
         ThirdSyncUser user = JsonCommon.parse(JsonCommon.stringify(input), ThirdSyncUser.class);
         UserRequest request = new UserRequest();
-        request.setThirdAccountNo(user.getAccountNo());
+        if (StringUtils.isNotEmpty(user.getApp_account__account_name())) {
+            request.setThirdAccountNo(user.getApp_account__account_no());
+        } else {
+            request.setThirdAccountNo(user.getAccountNo());
+        }
+
         request.setMobile(user.getMobile());
         request.setTenant("default");
-        request.setUsername(user.getWesisCustomUnique());
-        request.setPassword(String.format("%s123#", user.getWesisCustomUnique()));
-        request.setName(user.getUserName());
-        request.setNickname(user.getUserName());
+
+        if (StringUtils.isNotEmpty(user.getWesisCustomUnique())) {
+            request.setUsername(user.getWesisCustomUnique());
+        } else {
+            request.setUsername(user.getApp_account__account_no());
+        }
+
+        request.setPassword(String.format("%s123#", "abcdef"));
+
+        if (StringUtils.isNotEmpty(user.getApp_account__account_name())) {
+            request.setName(user.getApp_account__account_name());
+            request.setNickname(user.getApp_account__account_name());
+        } else {
+            request.setName(user.getUserName());
+            request.setNickname(user.getUserName());
+        }
+
         request.setAvatar("");
         request.setEmail(user.getEmail());
         request.setDescription("");
@@ -73,7 +92,7 @@ public class ThirdSyncController {
         List<String> roleIds = new ArrayList<>();
         request.setRoleIds(roleIds);
         request.setOrgIds(orgIds);
-        if (user.getOrgs() != null) {
+        if (CollectionUtils.isNotEmpty(user.getOrgs())) {
             List<String> orgIdentfierIds = new ArrayList<>();
             for (ThirdSyncUserOrganization r : user.getOrgs()) {
                 orgIdentfierIds.add(r.getOrgCustomUnique());
@@ -86,45 +105,44 @@ public class ThirdSyncController {
                 }
             }
         }
-        if (user.getRoles() != null) {
+        if (CollectionUtils.isNotEmpty(user.getRoles())) {
             for (var t : user.getRoles()) {
                 roleIds.add(t.getRoleCode());
             }
         }
 
+        HumanCondition condition = new HumanCondition().filterEqual(UserModel::getUsername, request.getUsername());
+        var userModel = userMapper.first(condition);
+        if (userModel == null) {
+            // 新增用户
+            log.info("新增用户");
+            userService.addV2(request);
+        } else {
+            // 修改用户
+            log.info("修改用户 , user id {} ", userModel.getId());
+            request.setId(userModel.getId());
+            userService.modifyV2(request);
+        }
 
-        if (user.getActionFlag() == 4) {
+        if (user.getActionFlag() != null && user.getActionFlag() == 4) {
             // 禁用
-            HumanCondition condition = new HumanCondition().filterEqual(UserModel::getUsername, request.getUsername());
-            var userModel = userMapper.first(condition);
-            if (userModel != null) {
-                userService.disable(userModel.getId());
+            HumanCondition conditionx = new HumanCondition().filterEqual(UserModel::getUsername, request.getUsername());
+            var userModelx = userMapper.first(conditionx);
+            if (userModelx != null) {
+                userService.disable(userModelx.getId());
             } else {
                 log.error("禁用用户，但是指定的用户不存在!");
                 return Res.fail("disable user , user not exists");
             }
-        } else if (user.getActionFlag() == 3) {
+        } else if (user.getActionFlag() != null && user.getActionFlag() == 3) {
             // 启用
-            HumanCondition condition = new HumanCondition().filterEqual(UserModel::getUsername, request.getUsername());
-            var userModel = userMapper.first(condition);
-            if (userModel != null) {
-                userService.enable(userModel.getId());
+            HumanCondition conditionx = new HumanCondition().filterEqual(UserModel::getUsername, request.getUsername());
+            var userModelx = userMapper.first(conditionx);
+            if (userModelx != null) {
+                userService.enable(userModelx.getId());
             } else {
                 log.error("启用用户，但是指定的用户不存在!");
                 return Res.fail("enable user , user not exists");
-            }
-        } else {
-            HumanCondition condition = new HumanCondition().filterEqual(UserModel::getUsername, request.getUsername());
-            var userModel = userMapper.first(condition);
-            if (userModel == null) {
-                // 新增用户
-                log.info("新增用户");
-                userService.addV2(request);
-            } else {
-                // 修改用户
-                log.info("修改用户 , user id {} ", userModel.getId());
-                request.setId(userModel.getId());
-                userService.modifyV2(request);
             }
         }
         return Res.success();
