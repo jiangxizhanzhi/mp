@@ -111,11 +111,15 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
         }
 
         Map<String, Integer> userName2IndexBoMap = new LinkedHashMap<>();
+        Map<String, Integer> mobile2IndexBoMap = new LinkedHashMap<>();
         for (int i = 0; i < users.size(); i++) {
             ImportUserBo user = users.get(i);
             int index = i + 1;
             if (Objects.nonNull(user)) {
                 userName2IndexBoMap.put(user.getUsername(), index);
+                if (!StringUtils.isEmpty(user.getMobile())) {
+                    mobile2IndexBoMap.put(user.getMobile(), index);
+                }
                 checkUserName(user.getUsername(), index);
                 checkName(user.getName(), index);
                 checkPwd(user.getPassword(), index);
@@ -131,9 +135,13 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
             log.error("import error! username {} duplicated!", duplicatedUserNames);
             throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_USERNAME_DUPLICATED.format(duplicatedUserNames));
         }
+        // 表格内手机号重复内容校验
+        checkMobileDuplicated(users);
 
         // 校验用户名
         checkUserNameFromDB(userName2IndexBoMap);
+        // 校验手机号
+        checkMobileFromDB(mobile2IndexBoMap);
     }
 
     /**
@@ -310,6 +318,43 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
         });
     }
 
+    private void checkMobileDuplicated(List<ImportUserBo> users) {
+        var mobiles = new HashSet<>();
+        var duplicateMobiles = new HashSet<>();
+        for (var user : users) {
+            if (StringUtils.isEmpty(user.getMobile())) {
+                continue;
+            }
+            if (mobiles.contains(user.getMobile())) {
+                duplicateMobiles.add(user.getMobile());
+            } else {
+                mobiles.add(user.getMobile());
+            }
+        }
+        if (!duplicateMobiles.isEmpty()) {
+            String duplicatedMobilesStr = StringUtils.joinWith(",", duplicateMobiles.toArray());
+            log.error("import error! mobile {} duplicated!", duplicatedMobilesStr);
+            throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_MOBILE_DUPLICATED.format(duplicatedMobilesStr));
+        }
+    }
+
+    /**
+     * 校验手机号
+     *
+     * @param mobile2IndexBoMap
+     */
+    private void checkMobileFromDB(Map<String, Integer> mobile2IndexBoMap) {
+        if (mobile2IndexBoMap.isEmpty()) {
+            return;
+        }
+        List<String> mobiles = mobile2IndexBoMap.keySet().stream().collect(Collectors.toList());
+        List<String> existedMobiles = userService.listExistedMobiles(mobiles, 1);
+        if (CollectionUtils.isNotEmpty(existedMobiles)) {
+            String mobile = existedMobiles.get(0);
+            log.error("No {} row error! mobile {} already existed!", mobile2IndexBoMap.get(mobile), mobile);
+            throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_MOBILE_EXISTED.format(String.valueOf(mobile2IndexBoMap.get(mobile)), mobile));
+        }
+    }
 
     private void preProcessOrgsAndRoles(List<ImportUserBo> users) {
         preProcessOrgs(users);
@@ -434,6 +479,5 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
         var list = users.stream().collect(Collectors.groupingBy(u -> u.getUsername(), Collectors.counting())).entrySet().stream().filter(entry -> entry.getValue() > 1).collect(Collectors.toList());
         return list;
     }
-
 
 }

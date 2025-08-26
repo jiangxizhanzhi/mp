@@ -113,6 +113,8 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
 
     List<String> listExistedUserNames(List<String> userNames, Integer limit);
 
+    List<String> listExistedMobiles(List<String> mobiles, Integer limit);
+
     UserModel sync(UserRequest syncRequest);
 
     LoginResp disguiseLogin(String id, String username, String mobile);

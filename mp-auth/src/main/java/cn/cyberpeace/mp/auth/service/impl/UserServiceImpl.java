@@ -1051,6 +1051,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                         .name(importUserBo.getName())
                         // 此处不需要加密，后面的create()方法会加密
                         .password(importUserBo.getPassword())
+                        .mobile(importUserBo.getMobile())
                         .build();
         if (StringUtils.isNotBlank(importUserBo.getExpiredTime())) {
             var expDate = TimeUtils.stringToLocalDate(importUserBo.getExpiredTime());
@@ -1188,6 +1189,17 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         List<UserModel> list = getModelMapper().list(condition);
         if (CollectionUtils.isNotEmpty(list)) {
             return list.stream().map(UserModel::getUsername).collect(Collectors.toList());
+        }
+        return new ArrayList<>();
+    }
+
+    @Override
+    public List<String> listExistedMobiles(List<String> mobiles, Integer limit) {
+        HumanCondition condition = new HumanCondition().filterIn(UserModel::getMobile, mobiles.toArray());
+        condition.setLimit(limit);
+        List<UserModel> list = getModelMapper().list(condition);
+        if (CollectionUtils.isNotEmpty(list)) {
+            return list.stream().map(UserModel::getMobile).collect(Collectors.toList());
         }
         return new ArrayList<>();
     }

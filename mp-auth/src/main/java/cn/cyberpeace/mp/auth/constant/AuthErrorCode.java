@@ -132,6 +132,9 @@ public enum AuthErrorCode implements ErrorCode {
 
     PERMISSION_DENIED("MP-110140", "permission_denied"),
 
+    EXCEL_LIST_MOBILE_EXISTED("MP-110141", "excel_list_mobile_existed"),
+    EXCEL_LIST_MOBILE_DUPLICATED("MP-110142", "excel_list_mobile_duplicated"),
+
     FILE_OVERSIZE_ERROR("MP-110150", "file_oversize_error"),
     FILE_SUFFIX_TYPE_ERROR("MP-110151", "file_suffix_type_error"),
     FILE_MAGIC_HEADER_ERROR("MP-110152", "file_magic_header_error"),
