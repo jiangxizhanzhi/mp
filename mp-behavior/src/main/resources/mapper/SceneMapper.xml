@@ -13,4 +13,9 @@
         from mp_behavior_scene
         where scene_id = #{scene_id} and node_id = #{node_id}
     </select>
+    <select id="selectNodeIdBySceneId" resultType="java.lang.String">
+        select node_id
+        from mp_behavior_scene
+        where scene_id = #{scene_id}
+    </select>
 </mapper>

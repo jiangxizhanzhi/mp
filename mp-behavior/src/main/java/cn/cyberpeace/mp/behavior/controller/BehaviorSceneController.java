@@ -11,6 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Slf4j
 @Api(tags = "场景行为配置")
 @RestController
@@ -32,6 +34,12 @@ public class BehaviorSceneController {
 	public ServiceResult<Boolean> saveBehavior(@RequestBody NodeBehavior nodeBehavior ) {
 		sceneBehaviorService.save(nodeBehavior);
 		return new ServiceResult<>(true).asResult();
+	}
+
+	@ApiOperation("查看场景中配置行为的节点列表")
+	@GetMapping("/node_list")
+	public ServiceResult<List<String>> getNodeList(@ApiParam(name = "scene_id", value = "场景id") @RequestParam("scene_id") String sceneId) {
+		return new ServiceResult<>(sceneBehaviorService.getNodeList(sceneId));
 	}
 
 

@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.behavior.service;
 
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.behavior.bo.NodeBehavior;
 import cn.cyberpeace.mp.behavior.bo.NodeUserBehavior;
@@ -11,6 +12,7 @@ import cn.cyberpeace.mp.behavior.model.SimulateModel;
 import cn.cyberpeace.mp.behavior.model.TaskModel;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -74,5 +76,12 @@ public class SceneBehaviorService {
 				simulateService.runSimulate(simulateModel.getId(), true);
 			}
 		}
+	}
+
+	public List<String> getNodeList (String sceneId) {
+		if (StringUtils.isEmpty(sceneId)) {
+			throw new MpRuntimeException("请输入场景id");
+		}
+		return sceneModelMapper.selectNodeIdBySceneId(sceneId);
 	}
 }
