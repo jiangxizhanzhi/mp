@@ -33,6 +33,8 @@ public class InstanceBO {
      */
     private List<String> addressList;
 
+    private List<String> macAddressList;
+
     /**
      * 状态
      */

@@ -33,6 +33,8 @@ public class NetworkBO {
      */
     private List<NetworkSubnetBO> subnets;
 
+    private String vlanId;
+
     /**
      * 下行带宽(Kb/s)
      */

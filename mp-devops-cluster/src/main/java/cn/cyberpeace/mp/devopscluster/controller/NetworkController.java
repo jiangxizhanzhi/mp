@@ -34,7 +34,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 /**
  * 网络管理类
@@ -106,6 +105,7 @@ public class NetworkController {
                 //.freeIps(networkModel.getFreeIps())
                 //.usedIps(networkModel.getUsedIps())
                 .nodeNum(networkModel.getNodeNum())
+                .vlanId(networkModel.getVlanId())
                 .build();
     }
 

@@ -49,6 +49,9 @@ public class InstancePageVO extends BaseVO {
     @ApiModelProperty("IP地址")
     private List<String> addressList;
 
+    @ApiModelProperty("mac地址")
+    private List<String> macAddressList;
+
     /**
      * 状态
      */

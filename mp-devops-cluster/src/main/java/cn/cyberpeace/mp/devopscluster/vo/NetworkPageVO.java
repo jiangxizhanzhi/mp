@@ -20,6 +20,8 @@ import java.util.List;
 @ApiModel(value = "网络分页返回信息")
 public class NetworkPageVO extends SceneInfoVO {
 
+    private String vlanId;
+
     /**
      * 网络名称
      */

@@ -32,7 +32,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * 虚拟机管理类
@@ -250,6 +249,7 @@ public class VmController {
                 .id(instanceModel.getId())
                 .node(instanceModel.getNode())
                 .addressList(instanceModel.getAddressList())
+                .macAddressList(instanceModel.getMacAddressList())
                 .userName(userName)
                 .userRealname(userRealname)
                 .referenceType(csceneNodeInfoBO.getReferenceType())

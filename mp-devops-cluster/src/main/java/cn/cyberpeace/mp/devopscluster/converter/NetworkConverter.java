@@ -18,11 +18,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.*;
 
 /**
  * 网络管理
@@ -67,6 +63,7 @@ public class NetworkConverter implements BaseConverter{
                 .downloadSpeed(networkModel.getInBps())
                 .uploadSpeed(networkModel.getOutBps())
                 .nodeNum(networkModel.getNodeNum())
+                .vlanId(Optional.ofNullable(networkModel.getSegmentationId()).orElse(0).toString())
                 .build();
     }
 

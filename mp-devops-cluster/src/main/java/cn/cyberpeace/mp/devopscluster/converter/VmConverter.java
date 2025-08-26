@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * 虚拟机管理
@@ -40,14 +39,17 @@ public class VmConverter implements BaseConverter{
         List<InstanceBO> list = new ArrayList<>();
         for (InstanceModel instanceModel : model.getList()) {
             List<String> result = new ArrayList<>();
+            List<String> macAddressList = new ArrayList<>();
             for (InstanceModel.Address address : instanceModel.getAddresses()) {
                 String ip = address.getIp();
                 result.add(ip);
+                macAddressList.add(address.getMac());
             }
             InstanceBO build = InstanceBO.builder().name(instanceModel.getName()).node(instanceModel.getHost())
                     .id(instanceModel.getId())
                     .runningTime(instanceModel.getRunningTime())
                     .addressList(result)
+                    .macAddressList(macAddressList)
                     .status(instanceModel.getStatus()).createTime(instanceModel.getCreatedAt()).build();
             list.add(build);
         }
