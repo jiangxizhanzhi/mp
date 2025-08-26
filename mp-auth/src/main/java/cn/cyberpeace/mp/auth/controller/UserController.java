@@ -165,11 +165,12 @@ public class UserController {
 
     @ApiOperation(value = "获取指定用户token", notes = "")
     @ApiImplicitParams({
-            @ApiImplicitParam(name="username", paramType="body", value="用户名", dataTypeClass = String.class),
+            @ApiImplicitParam(name="loginRequest", value="指定用户信息", dataTypeClass = DisguiseLoginRequest.class),
     })
     @PostMapping("/disguise_login")
     public ServiceResult<LoginResp> disguiseLogin(@RequestBody DisguiseLoginRequest loginRequest) {
-        LoginResp loginResp = userService.disguiseLogin(loginRequest.getId(), loginRequest.getUsername());
+        LoginResp loginResp = userService.disguiseLogin(loginRequest.getId(), loginRequest.getUsername(),
+                loginRequest.getMobile());
         return ResultCommon.success(loginResp);
     }
 

@@ -1218,13 +1218,15 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
     @Override
-    public LoginResp disguiseLogin(String id, String username) {
+    public LoginResp disguiseLogin(String id, String username, String mobile) {
         checkOperateRootUser();
         UserModel user = null;
         if (!StringUtils.isEmpty(id)) {
             user = getModelMapper().get(id);
         } else if (!StringUtils.isEmpty(username)) {
             user = getModelMapper().first(new HumanCondition().filterEqual(UserModel::getUsername, username));
+        } else if (!StringUtils.isEmpty(mobile)) {
+            user = getModelMapper().first(new HumanCondition().filterEqual(UserModel::getMobile, mobile));
         }
         if (user == null) {
             throw new MpRuntimeException(AuthErrorCode.ACCOUNT_NOT_EXISTED);

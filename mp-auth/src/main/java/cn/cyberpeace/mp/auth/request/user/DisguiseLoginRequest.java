@@ -15,4 +15,7 @@ public class DisguiseLoginRequest {
     @ApiModelProperty(value = "用户名")
     private String username;
 
+    @ApiModelProperty(value = "手机号")
+    private String mobile;
+
 }
