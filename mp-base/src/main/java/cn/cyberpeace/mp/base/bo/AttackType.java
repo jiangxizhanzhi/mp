@@ -149,7 +149,7 @@ public enum AttackType {
     public static List<AttackType> getToolsByType(String typeId) {
         List<AttackType> results = new ArrayList<>();
         for (AttackType value : AttackType.values()) {
-            if (typeId.equals(value.getType())) {
+            if (Integer.parseInt(typeId) == value.getType()) {
                 results.add(value);
             }
         }
