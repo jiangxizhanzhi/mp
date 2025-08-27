@@ -295,6 +295,7 @@ mp:
     roleappcode: ${mp.thirdsso.ext-var.roleappcode}
     roleclientid: ${mp.thirdsso.ext-var.roleclientid}
     roleclientsecret: ${mp.thirdsso.ext-var.roleclientsecret}
+    defaultroleid: ${mp.thirdsso.ext-var.defaultroleid}
     clientid: ${mp.thirdsso.ext-var.clientid}
     clientsecret: ${mp.thirdsso.ext-var.clientsecret}
     syncclientsecret: ${mp.thirdsso.ext-var.syncclientsecret}

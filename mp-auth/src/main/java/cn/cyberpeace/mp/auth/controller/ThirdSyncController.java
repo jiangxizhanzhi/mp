@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -105,10 +106,10 @@ public class ThirdSyncController {
                 }
             }
         }
-        if (CollectionUtils.isNotEmpty(user.getRoles())) {
-            for (var t : user.getRoles()) {
-                roleIds.add(t.getRoleCode());
-            }
+
+        String defaultRoleId = BeanCommon.getBean(ThirdSsoConfig.class).getDefaultroleid();
+        if (StringUtils.isNotEmpty(defaultRoleId)) {
+            request.setRoleIds(Arrays.asList(defaultRoleId));
         }
 
         HumanCondition condition = new HumanCondition().filterEqual(UserModel::getUsername, request.getUsername());

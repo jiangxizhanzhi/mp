@@ -30,4 +30,5 @@ public class ThirdSsoConfig {
     private String syncroleurl;
     private Boolean synctokencheck;
     private String logoutredirecturl;
+    private String defaultroleid;
 }

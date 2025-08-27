@@ -12,7 +12,7 @@ spring:
       db-port: ${MP_DB_PORT:3306}
       db-database: ${MP_DB_DATABASE:mp}
       username: ${MP_DB_USERNAME:mp}
-      password: ${MP_DB_PASSWORD:YjViMjg0Y2RiZWRh}
+      password: ${MP_DB_PASSWORD:x1Pn8QG1cz3JJ7zR}
       maximum-pool-size: ${MP_DB_MAX_POOL_SIZE:10}
       minimum-idle: ${MP_DB_MIN_POOL_SIZE:10}
 
@@ -187,6 +187,7 @@ mp:
       roleappcode: ${roleappcode:sxpt}
       roleclientid: ${roleclientid:0ebc99b175b4449c}
       roleclientsecret: ${roleclientsecret:8ec51f5d869e4f1388b97edfaf24f8f9}
+      defaultroleid: ${defaultroleid:f727a2c9fc2a4f9c99be42d3098179b6}
       responsetype: ${responsetype:code}
       redirecturi: ${redirecturi:http://www.cyberpeacebc.cn/api/mp/unauth/third-login}
       pageurl: ${pageurl:http://www.cyberpeacebc.cn/page/mg/personal}
