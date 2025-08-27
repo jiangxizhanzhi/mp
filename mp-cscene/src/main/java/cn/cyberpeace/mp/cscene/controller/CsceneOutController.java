@@ -807,7 +807,7 @@ public class CsceneOutController implements BaseModelListControllerBase {
 
     @Getter
     @Setter
-    private static class SshInfo {
+    public static class SshInfo {
         private String ip;
         private String port;
         private String username;

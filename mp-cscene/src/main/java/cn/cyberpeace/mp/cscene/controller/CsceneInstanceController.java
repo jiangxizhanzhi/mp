@@ -23,9 +23,11 @@ import cn.cyberpeace.mp.cscene.controller.request.*;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.dto.scene.ElementCommandExecResult;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneLinkStatusInfo;
+import cn.cyberpeace.mp.cscene.dto.scene.SshChannelExecuteOutputDto;
 import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
 import cn.cyberpeace.mp.cscene.model.AttackCommandHistoryModel;
 import cn.cyberpeace.mp.cscene.repository.AttackCommandHistoryMapper;
+import cn.cyberpeace.mp.cscene.request.SshChannelCommandReq;
 import cn.cyberpeace.mp.cscene.service.CsceneFileService;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
@@ -33,14 +35,18 @@ import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceQueryParams;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceStatQueryParams;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
+import cn.cyberpeace.mp.flow.util.SshUtil;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
 import cn.cyberpeace.mp.scene.core.bo.SceneAreaBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
+import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneAreaModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventTypeBO;
@@ -84,6 +90,9 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
 
     @Resource(name = "sysOptionServiceImpl")
     private OptionService optionService;
+
+    @Resource
+    private CsceneInstanceService csceneInstanceService;
 
     private CsceneInstanceActionRequest formatActionRequest(CsceneInstanceActionRequest request, String paramId) {
         if (request == null) {
@@ -183,6 +192,52 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         setCsceneSpecialService(csceneSpecialService);
         setCsceneFileService(csceneFileService);
     }
+
+    @ApiOperation("通过ssh通道下发指令")
+    @PostMapping("/node/ssh_channel")
+    public ServiceResult<SshChannelExecuteOutputDto> sshChannelExecute(@RequestBody SshChannelCommandReq sshChannelCommandReq) {
+        var sceneId = csceneInstanceService.getSceneId(sshChannelCommandReq.getCsceneId());
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, false);
+        CloudScenePluginHandler handler = sceneHandler.getPluginHandler("cpcloud");
+        var target = sceneHandler.getElement(sshChannelCommandReq.getNodeId());
+        // 取源节点上的ssh信息
+        CsceneOutController.SshInfo sshInfo = this.getSshInfo(target.getPorts(), handler);
+        String commdExecteResult = SshUtil.executeCommandWithRetrunAndRetry(new SshUtil.ServerInfo(sshInfo.getIp(), sshInfo.getUsername(),
+                sshInfo.getPassword(), Integer.parseInt(sshInfo.getPort())), sshChannelCommandReq.getCommandContent());
+        log.info("ssh exec input: {}, result : {} ", sshChannelCommandReq.getCommandContent(), commdExecteResult);
+        return new ServiceResult<SshChannelExecuteOutputDto>(new SshChannelExecuteOutputDto(commdExecteResult)).asResult();
+
+    }
+
+    private CsceneOutController.SshInfo getSshInfo(List<SceneElementPortBO> portBOS, CloudScenePluginHandler handler) {
+        String sourceIp = "";
+        Integer sourcePort = null;
+        String username = "";
+        String password = "";
+        for (var port : portBOS) {
+            var pluginPort = handler.getPort(port.getId());
+            if (CollectionUtils.isNotEmpty(pluginPort.getAccessModes())) {
+                for (var a : pluginPort.getAccessModes()) {
+                    if (AccessMode.Protocol.SSH.equals(a.getProtocol())) {
+                        username = a.getUsername();
+                        password = a.getPassword();
+                        sourceIp = a.getAccessIp();
+                        sourcePort = a.getAccessPort();
+                    }
+                }
+            }
+        }
+        CsceneOutController.SshInfo sshInfo = new CsceneOutController.SshInfo();
+        if (StringUtils.isEmpty(sourceIp) || Objects.isNull(sourcePort) || StringUtils.isEmpty(username) || StringUtils.isEmpty(password)) {
+            throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("当前节点无法支持ssh通道连接"));
+        }
+        sshInfo.setIp(sourceIp);
+        sshInfo.setPort(sourcePort.toString());
+        sshInfo.setUsername(username);
+        sshInfo.setPassword(password);
+        return sshInfo;
+    }
+
 
     @AuthTarget(TargetEnum.CSCENE_INSTANCE_GROUP)
     @ApiOperation("获取分页数据")
