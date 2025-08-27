@@ -30,6 +30,12 @@ public class HypervisorPageVO extends BaseVO {
     @ApiModelProperty("节点IP")
     private String ip;
 
+    @ApiModelProperty("操作系统")
+    private String os = "linux";
+
+    @ApiModelProperty("机架位置")
+    private String rackPosition;
+
     /**
      * 物理主机服务状态
      */

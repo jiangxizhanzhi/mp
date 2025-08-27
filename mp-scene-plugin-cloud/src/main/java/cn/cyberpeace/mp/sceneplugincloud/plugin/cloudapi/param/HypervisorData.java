@@ -17,6 +17,8 @@ public class HypervisorData implements Serializable {
      */
     private String id;
 
+    private String os = "linux";
+
     /**
      * 主机IP
      */
