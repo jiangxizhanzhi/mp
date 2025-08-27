@@ -1,11 +1,13 @@
 package cn.cyberpeace.mp.devopscluster.controller;
 
 import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
@@ -40,7 +42,9 @@ import cn.cyberpeace.mp.devopscluster.dto.NetworkPageDTO;
 import cn.cyberpeace.mp.devopscluster.dto.RouterPageDTO;
 import cn.cyberpeace.mp.devopscluster.enums.HypervisorActionEnum;
 import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
+import cn.cyberpeace.mp.devopscluster.model.PhysicNodeModel;
 import cn.cyberpeace.mp.devopscluster.model.common.ServiceStatus;
+import cn.cyberpeace.mp.devopscluster.repository.PhysicNodeMapper;
 import cn.cyberpeace.mp.devopscluster.request.CloudPlatformPageRequest;
 import cn.cyberpeace.mp.devopscluster.request.ContainerPageRequest;
 import cn.cyberpeace.mp.devopscluster.request.HypervisorPageRequest;
@@ -84,6 +88,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * 云平台监控
@@ -265,6 +271,33 @@ public class CloudPlatformMonitorController {
     }
 
 
+    @ApiOperation("云平台集群节点物理信息更新")
+    @PostMapping("/hypervisor/node/rack_position")
+    public ServiceResult<Boolean> updatePhysicNode(@RequestBody PhysicNodeModel physicNodeModel) {
+        PhysicNodeMapper physicNodeMapper = BeanCommon.getBean(PhysicNodeMapper.class);
+        String nodeName = physicNodeModel.getNodeName();
+        if (StringUtils.isEmpty(nodeName)) {
+            throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("节点信息异常"));
+        }
+        var physicNodes =  physicNodeMapper.list(new HumanCondition().filterEqual(PhysicNodeModel::getNodeName, physicNodeModel.getNodeName()));
+        if (CollectionUtils.isEmpty(physicNodes)) {
+            throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("不存在当前物理节点"));
+        } else {
+            physicNodes.forEach(physicNode -> {
+                physicNode.setRackPosition(physicNodeModel.getRackPosition());
+                physicNode.setCpuInfo(physicNodeModel.getCpuInfo());
+                physicNode.setMemoryInfo(physicNodeModel.getMemoryInfo());
+                physicNode.setDiskInfo(physicNodeModel.getDiskInfo());
+                physicNode.setNicInfo(physicNodeModel.getNicInfo());
+            });
+            physicNodeMapper.bulkUpdate(physicNodes);
+            return new ServiceResult<>(true).asResult();
+        }
+    }
+
+
+
+
 
 
     /**
@@ -289,6 +322,10 @@ public class CloudPlatformMonitorController {
                         .diskUsed(hypervisor.getDiskUsed()).build();
                 hypervisorPageRespons.add(build);
             }
+
+            addPhysicInfoToHypervisorPageRespons(hypervisorPageRespons);
+
+
             return new PageResult<>(hypervisorPageRespons, model.getTotal());
         }
 
@@ -372,7 +409,26 @@ public class CloudPlatformMonitorController {
                 hypervisorPageRespon.setMaxInstances(weight.getMaxInstances());
             }
         }
+        addPhysicInfoToHypervisorPageRespons(hypervisorPageRespons);
+
         return new PageResult<>(hypervisorPageRespons, model.getTotal());
+    }
+
+
+    private void addPhysicInfoToHypervisorPageRespons(List<HypervisorPageVO> hypervisorPageRespons) {
+        List<String> hostNames = hypervisorPageRespons.stream().map(HypervisorPageVO::getName).collect(Collectors.toList());
+        PhysicNodeMapper physicNodeMapper = BeanCommon.getBean(PhysicNodeMapper.class);
+        Map<String, PhysicNodeModel> nameToPhysicNodeMap = physicNodeMapper.list(new HumanCondition().filterIn(PhysicNodeModel::getNodeName, hostNames.toArray()))
+                .stream().collect(Collectors.toMap(PhysicNodeModel::getNodeName, Function.identity(), (a, b) -> a));
+        hypervisorPageRespons.forEach(hypervisorPageVO -> {
+            var physicNode = nameToPhysicNodeMap.get(hypervisorPageVO.getName());
+            hypervisorPageVO.setRackPosition(physicNode.getRackPosition());
+            hypervisorPageVO.setOs(physicNode.getOs());
+            hypervisorPageVO.setCpuInfo(physicNode.getCpuInfo());
+            hypervisorPageVO.setMemoryInfo(physicNode.getMemoryInfo());
+            hypervisorPageVO.setDiskInfo(physicNode.getDiskInfo());
+            hypervisorPageVO.setNicInfo(physicNode.getNicInfo());
+        });
     }
 
     /**

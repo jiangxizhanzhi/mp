@@ -36,6 +36,20 @@ public class HypervisorPageVO extends BaseVO {
     @ApiModelProperty("机架位置")
     private String rackPosition;
 
+    @ApiModelProperty("cpu信息")
+    private String cpuInfo;
+
+    @ApiModelProperty("内存信息")
+    private String memoryInfo;
+
+    @ApiModelProperty("disk信息")
+    private String diskInfo;
+
+    @ApiModelProperty("nic信息")
+    private String nicInfo;
+
+
+
     /**
      * 物理主机服务状态
      */
