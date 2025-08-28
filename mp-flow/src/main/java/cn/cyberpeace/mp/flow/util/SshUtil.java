@@ -292,6 +292,7 @@ public class SshUtil {
             // 4. 设置输出流
             stdout = channel.getInputStream();
             stderr = channel.getErrStream();
+            channel.setPty(true);  // 需要设置伪终端，不然会导致输出阻塞等待
 
             // 5. 连接通道（开始执行命令）
             channel.connect();

@@ -17,9 +17,9 @@ public enum AttackType {
     // 嗅探， 端口服务扫描
     XIUTAN(3, "17517000425963","嗅探","sniffing", "nmap ${ip}", "nmap目标系统嗅探", "探查目标服务器开放服务端口", false, "Nmap done:"),
     // 嗅探，操作系统版本/数据库版本
-    XIUTAN_SQLMAP(3, "17517000425931","嗅探","sniffing", "sqlmap -u http://${ip}:80/animal-detail.php?anid=1 --batch", "sqlmap目标数据库嗅探", "嗅探目标服务系统版本信息安装数据库服务信息", false, "back-end DBMS"),
+    XIUTAN_SQLMAP(3, "17517000425931","嗅探","sniffing", "sqlmap -u 'http://${ip}:80/animal-detail.php?anid=1' --batch", "sqlmap目标数据库嗅探", "嗅探目标服务系统版本信息安装数据库服务信息", false, "back-end DBMS"),
     // 嗅探，获取/etc目录下的文件内容
-    XIUTAN_FILE(3, "17517000425932","嗅探","sniffing", "python cve-2020-6142.py http://${ip}/ admin test0@123456 /etc/passwd", "目标文件嗅探", "嗅探目标系统下/etc目录的文件信息", false, "root:"),
+    XIUTAN_FILE(3, "17517000425932","嗅探","sniffing", "python cve-2020-6142.py http://${ip}/ admin test0@123456 /etc/passwd", "目标配置文件嗅探", "嗅探目标系统下/etc目录的文件信息", false, "root:"),
 
     //操控
     CAOKONG(4, "17517000425964","操控","", "python3 CVE-2017-16720.py ${ip}", "Advantech WebAccess 远程命令执行漏洞", "远程控制目标主机打开计算器calc.exe。", false, "Did it work?"),
@@ -115,23 +115,6 @@ public enum AttackType {
         return successContent;
     }
 
-    public static AttackType getByType(int type) {
-        for (AttackType value : values()) {
-            if (value.type == type) {
-                return value;
-            }
-        }
-        return null;
-    }
-
-    public static String getFormatCmd(int type, List<ImageToolRequest.Params> params) {
-        String cmd = getByType(type).getCmd();
-        for(var p:params){
-            cmd = cmd.replace("${" + p.getName() + "}", p.getValue());
-        }
-        return cmd;
-    }
-
     public static String getFormatCmdByToolId(String toolId, List<ImageToolRequest.Params> params) {
         String cmd = getByToolId(toolId).getCmd();
         for (var p : params) {
@@ -145,7 +128,7 @@ public enum AttackType {
             throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("toolId为空"));
         }
         for (AttackType value : values()) {
-            if (value.toolId == toolId) {
+            if (value.toolId.equals(toolId)) {
                 return value;
             }
         }

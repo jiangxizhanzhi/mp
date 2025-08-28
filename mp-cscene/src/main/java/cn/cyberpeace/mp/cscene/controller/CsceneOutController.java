@@ -344,7 +344,7 @@ public class CsceneOutController implements BaseModelListControllerBase {
         param.setName("ip");
         param.setValue(target.getPorts().get(0).getIp());
         params.add(param);
-        String cmd = AttackType.getFormatCmd(3, params);
+        String cmd = AttackType.getFormatCmdByToolId(request.getToolId(), params);
         String commdExecteResult = SshUtil.executeCommandWithRetrunAndRetry(new SshUtil.ServerInfo(sshInfo.getIp(), sshInfo.getUsername(),
                 sshInfo.getPassword(), Integer.parseInt(sshInfo.getPort())), cmd);
         log.info("ssh exec input: {}, result : {} ", cmd, commdExecteResult);
@@ -445,7 +445,7 @@ public class CsceneOutController implements BaseModelListControllerBase {
 
 
         String cmdHistoryId = createCommandHistoryAndExecCommand(sshInfo, tool, request.getId(), source, target);
-        AttackType attackType = AttackType.getByType(tool.getAttackType());
+        AttackType attackType = AttackType.getByToolId(tool.getId());
 
 
         //         启动一个线程 查询攻击结果 每隔5秒查询一次es数据，查最新的一条数据
@@ -487,10 +487,7 @@ public class CsceneOutController implements BaseModelListControllerBase {
     }
 
     private String createCommandHistoryAndExecCommand(SshInfo sshInfo, ImageToolRequest tool, String csceneId, SceneElementBO source, SceneElementBO target) {
-        AttackType attackType = AttackType.getByType(tool.getAttackType());
-        if (Objects.isNull(attackType)) {
-            throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("无法获取到攻击类别"));
-        }
+        AttackType attackType = AttackType.getByToolId(tool.getId());
 
         String cmd = AttackType.getFormatCmdByToolId(tool.getId(), tool.getParams());
 
