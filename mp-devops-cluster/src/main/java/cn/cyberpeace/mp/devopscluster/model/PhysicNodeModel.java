@@ -16,4 +16,5 @@ public class PhysicNodeModel extends BaseModel {
     private String memoryInfo;
     private String diskInfo;
     private String nicInfo;
+    private String connectionUrl;
 }

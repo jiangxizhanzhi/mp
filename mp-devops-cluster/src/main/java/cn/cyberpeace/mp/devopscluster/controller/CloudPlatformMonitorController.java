@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
 import cn.cyberpeace.mp.cscene.request.agent.AgentNameBasedRequest;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
@@ -45,12 +46,7 @@ import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devopscluster.model.PhysicNodeModel;
 import cn.cyberpeace.mp.devopscluster.model.common.ServiceStatus;
 import cn.cyberpeace.mp.devopscluster.repository.PhysicNodeMapper;
-import cn.cyberpeace.mp.devopscluster.request.CloudPlatformPageRequest;
-import cn.cyberpeace.mp.devopscluster.request.ContainerPageRequest;
-import cn.cyberpeace.mp.devopscluster.request.HypervisorPageRequest;
-import cn.cyberpeace.mp.devopscluster.request.HypervisorRequest;
-import cn.cyberpeace.mp.devopscluster.request.RealEquipmentPageRequest;
-import cn.cyberpeace.mp.devopscluster.request.ServerRestartRequest;
+import cn.cyberpeace.mp.devopscluster.request.*;
 import cn.cyberpeace.mp.devopscluster.service.MonitorScriptControlService;
 import cn.cyberpeace.mp.devopscluster.service.ServiceMonitorService;
 import cn.cyberpeace.mp.devopscluster.vo.HypervisorPageVO;
@@ -60,7 +56,9 @@ import cn.cyberpeace.mp.devopscluster.vo.VirtualRealSwitchStatusVO;
 import cn.cyberpeace.mp.devopscluster.vo.common.ListResult;
 import cn.cyberpeace.mp.devopscluster.vo.common.PageResult;
 import cn.cyberpeace.mp.devopscluster.vo.common.Result;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualDynamips;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleCreateConnectionData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualDynamipsStatisticsResult;
 import cn.cyberpeace.mp.situationaware.model.dto.monitor.ServiceMonitorDto;
 import com.google.common.collect.Lists;
@@ -132,6 +130,8 @@ public class CloudPlatformMonitorController {
     private final HostStateService hostStateService;
 
     private final CsceneService csceneService;
+
+    private final Remote REMOTE = new Remote();
 
     /**
      * 资源统计
@@ -268,6 +268,50 @@ public class CloudPlatformMonitorController {
                 totalRoutersCf, totalNpcsCf, totalFirewallsCf, totalNetworksCf, totalDynamipsCf, hypervisorStatisticsCf);
         allCf.join();
         return new Result<>(response);
+    }
+
+
+    @ApiOperation("云平台集群节点ssh登录")
+    @PostMapping("/hypervisor/node/connection_url")
+    public ServiceResult<String> getConnectionUrl(@RequestBody NodeConnectionReq nodeConnectionReq) {
+        synchronized (nodeConnectionReq.getNodeName().intern()) {
+            PhysicNodeMapper physicNodeMapper = BeanCommon.getBean(PhysicNodeMapper.class);
+            String nodeName = nodeConnectionReq.getNodeName();
+            if (StringUtils.isEmpty(nodeName)) {
+                throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("节点信息异常"));
+            }
+            var physicNodes =  physicNodeMapper.list(new HumanCondition().filterEqual(PhysicNodeModel::getNodeName, nodeConnectionReq.getNodeName()));
+            if (CollectionUtils.isEmpty(physicNodes)) {
+                throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("不存在当前物理节点"));
+            } else {
+                if (StringUtils.isNotEmpty(physicNodes.get(0).getConnectionUrl())) {
+                    return new ServiceResult<>(physicNodes.get(0).getConnectionUrl()).asResult();
+                } else {
+
+                    try {
+                        GuacamoleCreateConnectionData guacamoleCreateConnectionData = new
+                                GuacamoleCreateConnectionData();
+                        guacamoleCreateConnectionData.setUsername(TextUtils.uuid());
+                        guacamoleCreateConnectionData.setHost(nodeConnectionReq.getNodeName());
+                        guacamoleCreateConnectionData.setFlag(false);
+                        GuacamoleCreateConnectionData.ConnectionParams connectionParams = new GuacamoleCreateConnectionData.ConnectionParams();
+                        connectionParams.setProtocol("ssh");
+                        connectionParams.setHostname(nodeConnectionReq.getNodeIp());
+                        connectionParams.setUsername("woodpecker");
+                        connectionParams.setPassword("woodpecker");
+                        connectionParams.setPort("22");
+                        guacamoleCreateConnectionData.setConnectionParams(connectionParams);
+                        String url = REMOTE.createConnection(guacamoleCreateConnectionData).getUrl();
+                        physicNodes.get(0).setConnectionUrl(url);
+                        physicNodeMapper.update(physicNodes.get(0));
+                        return new ServiceResult<>(url).asResult();
+                    } catch (Exception e) {
+                        log.error(e.getMessage(), e);
+                        throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("获取ssh链接失败"));
+                    }
+                }
+            }
+        }
     }
 
 
@@ -422,6 +466,9 @@ public class CloudPlatformMonitorController {
                 .stream().collect(Collectors.toMap(PhysicNodeModel::getNodeName, Function.identity(), (a, b) -> a));
         hypervisorPageRespons.forEach(hypervisorPageVO -> {
             var physicNode = nameToPhysicNodeMap.get(hypervisorPageVO.getName());
+            if (Objects.isNull(physicNode)) {
+                return;
+            }
             hypervisorPageVO.setRackPosition(physicNode.getRackPosition());
             hypervisorPageVO.setOs(physicNode.getOs());
             hypervisorPageVO.setCpuInfo(physicNode.getCpuInfo());

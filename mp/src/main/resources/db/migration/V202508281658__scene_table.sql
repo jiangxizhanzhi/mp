@@ -1,0 +1,1 @@
+alter table mp_devops_physic_node add column connection_url varchar(1024) not null default '' comment '访问链接';
