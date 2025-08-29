@@ -117,7 +117,7 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
 
     UserModel sync(UserRequest syncRequest);
 
-    LoginResp disguiseLogin(String id, String username, String mobile);
+    LoginResp disguiseLogin(String id, String username, String mobile, boolean checkExist);
 
     UserModel getByUsername(String username);
 

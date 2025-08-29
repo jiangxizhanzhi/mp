@@ -1230,16 +1230,28 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
     @Override
-    public LoginResp disguiseLogin(String id, String username, String mobile) {
+    public LoginResp disguiseLogin(String id, String username, String mobile, boolean checkExist) {
         checkOperateRootUser();
-        UserModel user = null;
+
+        var condition = new HumanCondition();
         if (!StringUtils.isEmpty(id)) {
-            user = getModelMapper().get(id);
+            condition = new HumanCondition().filterEqual(UserModel::getId, id);
         } else if (!StringUtils.isEmpty(username)) {
-            user = getModelMapper().first(new HumanCondition().filterEqual(UserModel::getUsername, username));
+            condition = new HumanCondition().filterEqual(UserModel::getUsername, username);
         } else if (!StringUtils.isEmpty(mobile)) {
-            user = getModelMapper().first(new HumanCondition().filterEqual(UserModel::getMobile, mobile));
+            condition = new HumanCondition().filterEqual(UserModel::getMobile, mobile);
         }
+        if (condition == null) {
+            throw new MpRuntimeException(AuthErrorCode.ACCOUNT_NOT_EXISTED);
+        }
+        if (checkExist) {
+            if (!getModelMapper().exist(condition)) {
+                throw new MpRuntimeException(AuthErrorCode.ACCOUNT_NOT_EXISTED);
+            }
+            return new LoginResp();
+        }
+
+        UserModel user = getModelMapper().first(condition);
         if (user == null) {
             throw new MpRuntimeException(AuthErrorCode.ACCOUNT_NOT_EXISTED);
         }

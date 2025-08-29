@@ -18,4 +18,7 @@ public class DisguiseLoginRequest {
     @ApiModelProperty(value = "手机号")
     private String mobile;
 
+    @ApiModelProperty(value = "检查账号是否存在")
+    private boolean checkExist = false;
+
 }

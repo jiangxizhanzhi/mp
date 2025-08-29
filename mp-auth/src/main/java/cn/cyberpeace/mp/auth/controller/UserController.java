@@ -170,7 +170,7 @@ public class UserController {
     @PostMapping("/disguise_login")
     public ServiceResult<LoginResp> disguiseLogin(@RequestBody DisguiseLoginRequest loginRequest) {
         LoginResp loginResp = userService.disguiseLogin(loginRequest.getId(), loginRequest.getUsername(),
-                loginRequest.getMobile());
+                loginRequest.getMobile(), loginRequest.isCheckExist());
         return ResultCommon.success(loginResp);
     }
 
