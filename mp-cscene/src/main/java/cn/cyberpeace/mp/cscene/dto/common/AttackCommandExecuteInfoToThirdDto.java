@@ -35,7 +35,7 @@ public class AttackCommandExecuteInfoToThirdDto {
         this.category = attackType.getToolId();
         this.attackDesc = attackType.getAttackDesc();
         this.attackEffectedFlag = attackCommandHistoryModel.getAttackEffectedFlag();
-        this.attackCommandOutput = new AttackCommandOutput(attackCommandHistoryModel.getAttackCommandOutput());
+        this.attackCommandOutput = new AttackCommandOutput(attackCommandHistoryModel.getAttackCommandOutput(), attackType.getToolId());
     }
 
 
@@ -63,12 +63,17 @@ public class AttackCommandExecuteInfoToThirdDto {
     public static class AttackCommandOutput {
         private String origin;
         private Object format;
+        private String toolId;
 
 
-        public AttackCommandOutput(String origin) {
+        public AttackCommandOutput(String origin, String toolId) {
             this.origin = origin;
-            if (StringUtils.isNotEmpty(origin) && origin.contains("Nmap")) {
+            if (StringUtils.isNotEmpty(origin) && origin.contains("Nmap")
+                    && toolId.equals(AttackType.XIUTAN.getToolId())) {
                 this.format = new NmapFormat(origin);
+            }
+            if (StringUtils.isNotEmpty(origin) && toolId.equals(AttackType.XIUTAN_SQLMAP.getToolId())) {
+                this.format = new SqlmapFormat(origin);
             }
         }
     }
@@ -117,6 +122,34 @@ public class AttackCommandExecuteInfoToThirdDto {
         }
 
 
+
+    }
+
+    @Data
+    public static class SqlmapFormat {
+        // 系统版本
+        private String operatingSystem;
+        // web应用
+        private String webApplication;
+        // 数据库信息
+        private String dbms;
+
+        public SqlmapFormat(String origin) {
+            if (StringUtils.isNotEmpty(origin)) {
+                String[] commandLines = origin.split("\n");
+                for (String commandLine : commandLines) {
+                    if (commandLine.contains("web server operating system:")) {
+                        operatingSystem =  commandLine.substring(28, commandLine.length() - 1);
+                    }
+                    if (commandLine.contains("web application technology:")) {
+                        webApplication =  commandLine.substring(27, commandLine.length() - 1);
+                    }
+                    if (commandLine.contains("back-end DBMS:")) {
+                        dbms = commandLine.substring(14, commandLine.length() - 1);
+                    }
+                }
+            }
+        }
 
     }
 

@@ -123,7 +123,7 @@ public class AttackDataOutputUtil {
 //        发送构建数据
                     String jsonString = jsonObject.toJSONString();
                     webSocketClientService.sendMessage(jsonString);
-                    log.info("sendMessage320,taskId:{},toolId:{}",taskId,finalTool.getId());
+                    log.info("sendMessage320,taskId:{},toolId:{}, jsonString {}",taskId,finalTool.getId(), jsonString);
                 }
             }
 
