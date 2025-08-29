@@ -63,7 +63,7 @@ public class WebSocketClientService {
     }
 
     // 定期检查连接状态并尝试重连
-    @Scheduled(fixedRate = 5000) // 每5秒检查一次连接状态。可以根据实际需求调整时间间隔。
+    @Scheduled(fixedRate = 60 * 1000) // 每60秒检查一次连接状态。可以根据实际需求调整时间间隔。
     public void checkAndReconnect() {
         if (SESSION == null || !SESSION.isOpen()) { // 如果session为null或已关闭，则尝试重新连接。
             log.info("320 WebSocket连接已断开，尝试重新连接...");
