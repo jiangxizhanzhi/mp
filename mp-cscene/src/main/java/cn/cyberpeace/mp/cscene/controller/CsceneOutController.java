@@ -351,11 +351,31 @@ public class CsceneOutController implements BaseModelListControllerBase {
         return new ServiceResult(commdExecteResult).asResult();
     }
 
+    @ApiOperation("测试320上报消息")
+    @PostMapping("/test_320")
+    public ServiceResult<JSONObject> test320(@RequestBody JSONObject data,
+                                             @RequestParam(value = "function", required = false) String functionNmae) {
+        JSONObject dataJsonObject = new JSONObject();
+        JSONObject jsonObject = new JSONObject();
+        dataJsonObject.put("data", data);
+        jsonObject.put("Data", dataJsonObject.toJSONString());
+        if (functionNmae == null) {
+            functionNmae = "AttackResultData";
+        }
+        jsonObject.put("Function", functionNmae);
+        jsonObject.put("ReceiveObjectName", "");
+        jsonObject.put("SendObjectName", "");
+//        发送构建数据
+        String jsonString = jsonObject.toJSONString();
+        webSocketClientService.sendMessage(jsonString);
+        return new ServiceResult(jsonObject).asResult();
+    }
+
 
     @AuthTarget(TargetEnum.NO_AUTH)
     @ApiOperation("启动攻击工具")
     @PostMapping("/attack")
-    public void attack(@RequestBody OutAttackToolRequest request) {
+    public ServiceResult<String> attack(@RequestBody OutAttackToolRequest request) {
         log.info("启动攻击: {}", request);
 //        判断当前时间是否在开始时间内 若在开始时间内直接执行
         var sceneId = csceneInstanceService.getSceneId(request.getId());
@@ -484,6 +504,8 @@ public class CsceneOutController implements BaseModelListControllerBase {
             params.setDestPort(Math.abs(new Random().nextInt(1000)) + 10000);
             MockData.createData(params);
         }
+
+        return new ServiceResult("").asResult();
     }
 
     private String createCommandHistoryAndExecCommand(SshInfo sshInfo, ImageToolRequest tool, String csceneId, SceneElementBO source, SceneElementBO target) {

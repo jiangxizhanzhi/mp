@@ -54,10 +54,10 @@ public class WebSocketClientService {
         try {
             // 连接到服务器并获取会话对象
             SESSION = webSocketClient.doHandshake(handler, url).get();
-            log.info("320 WebSocket连接成功");
+            log.info("320 WebSocket连接成功 {}", url);
 
         } catch (Exception e) {
-            log.error("320 WebSocket连接失败: {}", e.getMessage());
+            log.error("320 WebSocket连接失败{}: {}", url, e.getMessage());
             log.error(e.getMessage(), e);
         }
     }
