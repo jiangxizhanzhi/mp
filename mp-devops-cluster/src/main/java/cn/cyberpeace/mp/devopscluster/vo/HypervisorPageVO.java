@@ -31,6 +31,7 @@ public class HypervisorPageVO extends BaseVO {
     private String ip;
 
     @ApiModelProperty("操作系统")
+    @Builder.Default
     private String os = "linux";
 
     @ApiModelProperty("机架位置")

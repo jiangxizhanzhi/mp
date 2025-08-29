@@ -1,9 +1,7 @@
 package cn.cyberpeace.mp.scene.service;
 
 import com.google.common.collect.Lists;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.List;
 
@@ -12,6 +10,9 @@ public interface IFlowMirror {
 
     @Getter
     @Setter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     class NetworkTrafficMirrorRequest {
         /**
          * 虚拟机id列表
