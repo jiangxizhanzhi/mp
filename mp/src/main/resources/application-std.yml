@@ -60,7 +60,7 @@ logging:
     #      max-row-length: ${MP_LOGFILE_MAX_ROW_LENGTH:2000}
     max-file-size: ${logging.file.ext-var.max-file-size}
     max-total-size: ${logging.file.ext-var.max-total-size}
-#    max-row-length: ${logging.file.ext-var.max-row-length}
+    max-row-length: ${logging.file.ext-var.max-row-length}
   logback:
     rollingpolicy:
       max-history: ${logging.file.ext-var.max-history}

@@ -530,9 +530,15 @@ public class CsceneOutController implements BaseModelListControllerBase {
                 String commdExecteResult = SshUtil.executeCommandWithRetrunAndRetry(new SshUtil.ServerInfo(sshInfo.getIp(), sshInfo.getUsername(),
                         sshInfo.getPassword(), Integer.parseInt(sshInfo.getPort())), cmd);
                 log.info("ssh exec input: {}, result : {} ", cmd, commdExecteResult);
-                if (StringUtils.isNotEmpty(commdExecteResult) && commdExecteResult.length() > 50000) {
-                    commdExecteResult = commdExecteResult.substring(0, 50000);
+                if (StringUtils.isNotEmpty(commdExecteResult) && commdExecteResult.length() > 20000) {
+                    if (attackType.getToolId().equals(AttackType.TANHUI.getToolId())) {
+                        // 瘫毁没有用的字符太多
+                        commdExecteResult = commdExecteResult.substring(0, 5000);
+                    } else {
+                        commdExecteResult = commdExecteResult.substring(0, 20000);
+                    }
                 }
+
                 attackCmdHistoryModel.setAttackCommandOutput(commdExecteResult);
                 attackCmdHistoryModel.setCommandStatus(AttackCommandHistoryModel.CommandStatus.SUCCESS);
                 attackCmdHistoryModel.setAttackEffectedFlag(attackType.commandSuccess(commdExecteResult));
@@ -596,6 +602,7 @@ public class CsceneOutController implements BaseModelListControllerBase {
                 bw.newLine();
                 // 这里可以改成向外部推送数据
                 dataWrapper.setTaskId(request.getTaskId());
+                dataWrapper.setSendTime(TimeUtils.localDateTimeToString(LocalDateTime.now()));
                 dataWrapper.setToolId(request.getToolId());
                 dataWrapper.setTargetId(request.getTargetId());
                 JSONObject jsonObject = new JSONObject();

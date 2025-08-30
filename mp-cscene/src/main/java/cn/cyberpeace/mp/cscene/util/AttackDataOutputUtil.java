@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.base.util.thread.ThreadUtils;
 import cn.cyberpeace.mp.cscene.dto.common.AttackCommandExecuteInfoToThirdDto;
 import cn.cyberpeace.mp.cscene.model.AttackCommandHistoryModel;
@@ -80,6 +81,7 @@ public class AttackDataOutputUtil {
                     }
                     DataWrapper dataWrapper = new DataWrapper();
                     dataWrapper.setTaskId(taskId);
+                    dataWrapper.setSendTime(TimeUtils.localDateTimeToString(LocalDateTime.now()));
                     dataWrapper.setToolId(finalTool.getId());
                     dataWrapper.setTargetId(targetId);
                     String agentName = target.getEid();
@@ -393,6 +395,8 @@ public class AttackDataOutputUtil {
         private String taskId;
         private String toolId;
         private String targetId;
+        // 方便观察 消息是否发送到320中，320观测软件无法展示全部的json数据；
+        private String sendTime;
         private HostStateOutput hostInfo;
         private List<OutProcess> processInfo;
         private List<FlowLogBO> flows;
