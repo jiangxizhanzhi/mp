@@ -118,7 +118,7 @@ public class OperatePermissionService {
         boolean isAdmin = isLoginUserAdmin();
 
         // 超级用户不限制
-        if (isSupserUser) {
+        if (isSupserUser || isAdmin) {
             return;
         }
 
