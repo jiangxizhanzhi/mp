@@ -35,12 +35,12 @@ public class OperateRolePermissionService extends OperatePermissionService {
     public List<String> getExcludeRoleIdsByLoginUserForSearchingRoles() {
 
         boolean isSupserUser = isLoginUserSuperUser();
-        if (isSupserUser) {
+        boolean isAdmin = isLoginUserAdmin();
+        if (isSupserUser || isAdmin) {
             // 超级用户不受限制
             return Collections.emptyList();
         }
 
-        boolean isAdmin = isLoginUserAdmin();
         if (isAdmin) {
             // 管理员不可查询同级管理员角色和超级用户角色
             return Arrays.asList(AuthConstant.ROLE_ADMIN_ID);
