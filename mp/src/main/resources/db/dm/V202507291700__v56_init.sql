@@ -1,7550 +1,5756 @@
-CREATE TABLE "MP"."mp_auth_client_details"
-(
-    "pk"                      INT IDENTITY(2, 1) NOT NULL,
-    "client_id"               VARCHAR(128 char ) NULL,
-        "resource_ids"            VARCHAR(256 char) NULL,
-        "client_secret"           VARCHAR(256 char) NULL,
-        "type"                    INT DEFAULT 1 NOT NULL,
-        "scope"                   VARCHAR(256 char) NULL,
-        "authorized_grant_types"  VARCHAR(256 char) NULL,
-        "web_server_redirect_uri" VARCHAR(256 char) NULL,
-        "authorities"             VARCHAR(256 char) NULL,
-        "access_token_validity"   INT NULL,
-        "refresh_token_validity"  INT NULL,
-        "additional_information"  VARCHAR(4096 char) NULL,
-        "autoapprove"             VARCHAR(256 char) NULL
-    );
-
-CREATE TABLE "MP"."mp_auth_org"
-(
-    "pk"          INT IDENTITY(2, 1) NOT NULL,
-    "id"          VARCHAR(64 char ) NOT NULL,
-        "tenant"      VARCHAR(64 char) DEFAULT '' NOT NULL,
-        "parent"      VARCHAR(64 char) DEFAULT '' NOT NULL,
-        "identifier"  VARCHAR(64 char) NOT NULL,
-        "name"        VARCHAR(64 char) NOT NULL,
-        "path"        VARCHAR(180 char) NULL,
-        "description" VARCHAR(1024 char) NOT NULL,
-        "create_time" TIMESTAMP(0) NOT NULL,
-        "update_time" TIMESTAMP(0) NOT NULL
-    );
-
-CREATE TABLE "MP"."mp_auth_org_permission"
-(
-    "pk"          INT IDENTITY(1, 1) NOT NULL,
-    "id"          VARCHAR(64 char ) NOT NULL,
-        "tenant"      VARCHAR(64 char) NOT NULL,
-        "owner"       VARCHAR(64 char) NOT NULL,
-        "target"      VARCHAR(64 char) NOT NULL,
-        "can_read"    TINYINT NOT NULL,
-        "can_create"  TINYINT NOT NULL,
-        "can_update"  TINYINT NOT NULL,
-        "can_delete"  TINYINT NOT NULL,
-        "create_time" TIMESTAMP(0) NOT NULL,
-        "update_time" TIMESTAMP(0) NOT NULL
-    );
-
-CREATE TABLE "MP"."mp_auth_role"
-(
-    "pk"          INT IDENTITY(3, 1) NOT NULL,
-    "id"          VARCHAR(64 char ) NOT NULL,
-        "tenant"      VARCHAR(64 char) DEFAULT '' NOT NULL,
-        "org"         VARCHAR(64 char) DEFAULT '' NOT NULL,
-        "identifier"  VARCHAR(64 char) NOT NULL,
-        "name"        VARCHAR(64 char) NOT NULL,
-        "description" VARCHAR(1024 char) NOT NULL,
-        "create_time" TIMESTAMP(0) NOT NULL,
-        "update_time" TIMESTAMP(0) NOT NULL,
-        "visible"     TINYINT DEFAULT 1 NOT NULL
-    );
-
-CREATE TABLE "MP"."mp_auth_role_permission"
-(
-    "pk"          INT IDENTITY(10, 1) NOT NULL,
-    "id"          VARCHAR(64 char ) NOT NULL,
-        "tenant"      VARCHAR(64 char) NOT NULL,
-        "owner"       VARCHAR(64 char) NOT NULL,
-        "target"      VARCHAR(64 char) NOT NULL,
-        "can_read"    TINYINT NOT NULL,
-        "can_create"  TINYINT NOT NULL,
-        "can_update"  TINYINT NOT NULL,
-        "can_delete"  TINYINT NOT NULL,
-        "create_time" TIMESTAMP(0) NOT NULL,
-        "update_time" TIMESTAMP(0) NOT NULL
-    );
-
-CREATE TABLE "MP"."mp_auth_target"
-(
-    "pk"          INT IDENTITY(343, 1) NOT NULL,
-    "id"          VARCHAR(64 char ) NOT NULL,
-        "parent"      VARCHAR(64 char) NULL,
-        "identifier"  VARCHAR(64 char) NOT NULL,
-        "tenant"      VARCHAR(64 char) NOT NULL,
-        "name"        VARCHAR(64 char) NOT NULL,
-        "path"        VARCHAR(255 char) NULL,
-        "type"        INT NOT NULL,
-        "visible"     INT DEFAULT 1 NOT NULL,
-        "create_time" TIMESTAMP(0) NOT NULL,
-        "update_time" TIMESTAMP(0) NOT NULL
-    );
-
-CREATE TABLE "MP"."mp_auth_tenant"
-(
-    "pk"          INT IDENTITY(2, 1) NOT NULL,
-    "id"          VARCHAR(64 char ) NOT NULL,
-        "identifier"  VARCHAR(64 char) NOT NULL,
-        "name"        VARCHAR(64 char) NOT NULL,
-        "create_time" TIMESTAMP(0) NOT NULL,
-        "update_time" TIMESTAMP(0) NOT NULL
-    );
-
-CREATE TABLE "MP"."mp_auth_tenant_user"
-(
-    "pk"          INT IDENTITY(3, 1) NOT NULL,
-    "id"          VARCHAR(64 char ) NOT NULL,
-        "tenant"      VARCHAR(64 char) DEFAULT '' NOT NULL,
-        "org"         VARCHAR(64 char) NOT NULL,
-        "user"        VARCHAR(64 char) NOT NULL,
-        "create_time" TIMESTAMP(0) NOT NULL,
-        "update_time" TIMESTAMP(0) NOT NULL
-    );
-
-CREATE TABLE "MP"."mp_auth_url_ac"
-(
-    "pk"          INT IDENTITY(708, 1) NOT NULL,
-    "id"          VARCHAR(64 char ) NOT NULL,
-        "url"         VARCHAR(500 char) NOT NULL,
-        "is_pattern"  INT DEFAULT 0 NOT NULL,
-        "group"       VARCHAR(64 char) NOT NULL,
-        "methods"     VARCHAR(100 char) NOT NULL,
-        "desc"        VARCHAR(500 char) NULL,
-        "create_time" TIMESTAMP(0) NOT NULL,
-        "update_time" TIMESTAMP(0) NOT NULL
-    );
-
-CREATE TABLE "MP"."mp_auth_url_ac_target"
-(
-    "pk"          INT IDENTITY(1183, 1) NOT NULL,
-    "id"          VARCHAR(64 char ) NOT NULL,
-        "group"       VARCHAR(64 char) NOT NULL,
-        "target"      VARCHAR(64 char) NOT NULL,
-        "create_time" TIMESTAMP(0) NOT NULL,
-        "update_time" TIMESTAMP(0) NOT NULL
-    );
-
-CREATE TABLE "MP"."mp_auth_user"
-(
-    "pk"                        INT IDENTITY(4, 1) NOT NULL,
-    "id"                        VARCHAR(64 char ) NOT NULL,
-        "tenant"                    VARCHAR(64 char) DEFAULT '' NOT NULL,
-        "username"                  VARCHAR(64 char) NOT NULL,
-        "identifier"                VARCHAR(64 char) NULL,
-        "password"                  VARCHAR(128 char) NOT NULL,
-        "token_secret"              VARCHAR(128 char) NOT NULL,
-        "name"                      VARCHAR(128 char) NOT NULL,
-        "nickname"                  VARCHAR(128 char) NOT NULL,
-        "avatar"                    VARCHAR(2048 char) NOT NULL,
-        "birthday"                  DATE NOT NULL,
-        "email"                     VARCHAR(255 char) NOT NULL,
-        "mobile"                    VARCHAR(64 char) NOT NULL,
-        "id_card"                   VARCHAR(64 char) NOT NULL,
-        "address"                   VARCHAR(255 char) NOT NULL,
-        "is_enabled"                INT NOT NULL,
-        "is_audited"                INT NOT NULL,
-        "init_check"                INT DEFAULT 0 NOT NULL,
-        "delay_remind_license_time" TIMESTAMP(0) DEFAULT CURRENT_TIMESTAMP() NOT NULL,
-        "description"               VARCHAR(1024 char) NULL,
-        "date_joined"               TIMESTAMP(0) NULL,
-        "expired_time"              TIMESTAMP(0) NOT NULL,
-        "last_login"                TIMESTAMP(0) NULL,
-        "create_time"               TIMESTAMP(0) NOT NULL,
-        "update_time"               TIMESTAMP(0) NOT NULL
-    );
-
-CREATE TABLE "MP"."mp_auth_user_online_record"
-(
-    "pk"               INT IDENTITY(10, 1) NOT NULL,
-    "id"               VARCHAR(64 char ) NOT NULL,
-        "user"             VARCHAR(64 char) NOT NULL,
-        "tenant"           VARCHAR(64 char) NOT NULL,
-        "start_time"       TIMESTAMP(0) NOT NULL,
-        "end_time"         TIMESTAMP(0) NULL,
-        "duration_minutes" INT DEFAULT 0 NOT NULL,
-        "status"           INT DEFAULT 0 NOT NULL,
-        "create_time"      TIMESTAMP(0) NOT NULL,
-        "update_time"      TIMESTAMP(0) NOT NULL
-    );
-
-CREATE TABLE "MP"."mp_auth_user_permission"
-(
-    "pk"          INT IDENTITY(1, 1) NOT NULL,
-    "id"          VARCHAR(64 char ) NOT NULL,
-        "tenant"      VARCHAR(64 char) NOT NULL,
-        "owner"       VARCHAR(64 char) NOT NULL,
-        "target"      VARCHAR(64 char) NOT NULL,
-        "can_read"    TINYINT NOT NULL,
-        "can_create"  TINYINT NOT NULL,
-        "can_update"  TINYINT NOT NULL,
-        "can_delete"  TINYINT NOT NULL,
-        "create_time" TIMESTAMP(0) NOT NULL,
-        "update_time" TIMESTAMP(0) NOT NULL
-    );
-
-CREATE TABLE "MP"."mp_auth_user_role"
-(
-    "pk"          INT IDENTITY(4, 1) NOT NULL,
-    "id"          VARCHAR(64 char ) NOT NULL,
-        "tenant"      VARCHAR(64 char) NOT NULL,
-        "user"        VARCHAR(64 char) NOT NULL,
-        "role"        VARCHAR(64 char) NOT NULL,
-        "create_time" TIMESTAMP(0) NOT NULL,
-        "update_time" TIMESTAMP(0) NOT NULL
-    );
-
-CREATE TABLE "MP"."mp_base_local_file_mapping"
-(
-    "pk"                       INT IDENTITY(335, 1) NOT NULL,
-    "id"                       VARCHAR(64 char ) NOT NULL,
-        "group"                    VARCHAR(64 char) NOT NULL,
-        "seq"                      INT NOT NULL,
-        "name"                     VARCHAR(255 char) NOT NULL,
-        "local_file"               VARCHAR(2048 char) NOT NULL,
-        "local_file_modified_time" BIGINT NOT NULL,
-        "remote_file"              VARCHAR(2048 char) NOT NULL,
-        "create_time"              TIMESTAMP(6) NOT NULL,
-        "update_time"              TIMESTAMP(6) NOT NULL
-    );
-
-CREATE TABLE "MP"."mp_common_option"
-(
-    "pk"          INT IDENTITY(111, 1) NOT NULL,
-    "id"          VARCHAR(64 char ) NOT NULL,
-        "code"        VARCHAR(255 char) NOT NULL,
-        "parent_code" VARCHAR(255 char) NOT NULL,
-        "zh_name"     VARCHAR(255 char) NOT NULL,
-        "en_name"     VARCHAR(255 char) NOT NULL,
-        "sort"        INT NOT NULL,
-        "type"        VARCHAR(255 char) NOT NULL,
-        "meta"        VARCHAR(2000 char) NOT NULL,
-        "create_time" TIMESTAMP(0) NOT NULL,
-        "update_time" TIMESTAMP(0) NOT NULL
-    );
-
-CREATE TABLE "MP"."mp_cscene_common_config"
-(
-    "pk"          INT IDENTITY(1, 1) NOT NULL,
-    "id"          VARCHAR(64 char ) NOT NULL,
-        "key"         VARCHAR(32 char) NOT NULL,
-        "content"     TEXT NOT NULL,
-        "create_time" TIMESTAMP(6) NOT NULL,
-        "update_time" TIMESTAMP(6) NOT NULL
-    );
-
-CREATE TABLE "MP"."mp_cscene_cscene"
-(
-    "pk"                    INT IDENTITY(8, 1) NOT NULL,
-    "id"                    VARCHAR(64 char ) NOT NULL,
-        "name"                  VARCHAR(255 char) DEFAULT '' NOT NULL,
-        "type"                  INT NOT NULL,
-        "auth_type"             INT NOT NULL,
-        "reference_type"        INT NOT NULL,
-        "reference_meta_data"   VARCHAR(2048 char) NOT NULL,
-        "logo"                  VARCHAR(2048 char) NOT NULL,
-        "scene_config"          VARCHAR(64 char) NOT NULL,
-        "create_user"           VARCHAR(64 char) NOT NULL,
-        "create_username"       VARCHAR(64 char) NOT NULL,
-        "deleted"               TINYINT NOT NULL,
-        "create_time"           TIMESTAMP(6) NOT NULL,
-        "update_time"           TIMESTAMP(6) NOT NULL,
-        "support_partial_start" TINYINT NOT NULL
-    );
-
-CREATE TABLE "MP"."mp_cscene_cscene_auth"
-(
-    "pk"          INT IDENTITY(1, 1) NOT NULL,
-    "id"          VARCHAR(64 char ) NOT NULL,
-        "tenant"      VARCHAR(64 char) NULL,
-        "owner"       VARCHAR(64 char) NOT NULL,
-        "target"      VARCHAR(64 char) NOT NULL,
-        "can_read"    TINYINT NULL,
-        "can_create"  TINYINT NULL,
-        "can_update"  TINYINT NULL,
-        "can_delete"  TINYINT NULL,
-        "create_time" TIMESTAMP(6) NOT NULL,
-        "update_time" TIMESTAMP(6) NOT NULL
-    );
-
-CREATE TABLE "MP"."mp_cscene_cscene_instance"
-(
-    "pk"                    INT IDENTITY(4, 1) NOT NULL,
-    "id"                    VARCHAR(64 char ) NOT NULL,
-        "name"                  VARCHAR(255 char) DEFAULT '' NOT NULL,
-        "cscene"                VARCHAR(64 char) NOT NULL,
-        "type"                  INT NOT NULL,
-        "reference_type"        INT NOT NULL,
-        "reference_meta_data"   VARCHAR(2048 char) NOT NULL,
-        "scene"                 VARCHAR(64 char) NOT NULL,
-        "scene_ttl"             INT NOT NULL,
-        "scene_attr"            INT NOT NULL,
-        "create_user"           VARCHAR(64 char) NOT NULL,
-        "create_username"       VARCHAR(64 char) NOT NULL,
-        "deleted"               TINYINT NOT NULL,
-        "create_time"           TIMESTAMP(6) NOT NULL,
-        "update_time"           TIMESTAMP(6) NOT NULL,
-        "pass_through"          TEXT NULL,
-        "support_partial_start" TINYINT NOT NULL,
-        "logo"                  VARCHAR(2048 char) NOT NULL
-    );
-
-CREATE TABLE "MP"."mp_cscene_cscene_instance_role"
-(
-    "pk"            INT IDENTITY(1, 1) NOT NULL,
-    "id"            VARCHAR(64 char ) NOT NULL,
-        "cscene"        VARCHAR(64 char) NOT NULL,
-        "parent"        VARCHAR(64 char) NOT NULL,
-        "key"           VARCHAR(64 char) NOT NULL,
-        "name"          VARCHAR(64 char) NOT NULL,
-        "type"          VARCHAR(64 char) NOT NULL,
-        "asset_nodes"   VARCHAR(2048 char) NOT NULL,
-        "visible_nodes" VARCHAR(2048 char) NOT NULL,
-        "users"         VARCHAR(2048 char) NOT NULL,
-        "create_time"   TIMESTAMP(6) NOT NULL,
-        "update_time"   TIMESTAMP(6) NOT NULL
-    );
-
-CREATE TABLE "MP"."mp_cscene_cscene_role"
-(
-    "pk"            INT IDENTITY(10, 1) NOT NULL,
-    "id"            VARCHAR(64 char ) NOT NULL,
-        "cscene"        VARCHAR(64 char) NOT NULL,
-        "parent"        VARCHAR(64 char) NOT NULL,
-        "key"           VARCHAR(64 char) NOT NULL,
-        "name"          VARCHAR(256 char) NOT NULL,
-        "type"          VARCHAR(64 char) NOT NULL,
-        "asset_nodes"   VARCHAR(2048 char) NOT NULL,
-        "visible_nodes" VARCHAR(2048 char) NOT NULL,
-        "users"         VARCHAR(2048 char) NOT NULL,
-        "create_time"   TIMESTAMP(6) NOT NULL,
-        "update_time"   TIMESTAMP(6) NOT NULL
-    );
-
-CREATE TABLE "MP"."mp_cscene_instance_user_count"
-(
-    "pk"          BIGINT IDENTITY(2, 1) NOT NULL,
-    "id"          VARCHAR(64 char ) NOT NULL,
-        "user_id"     VARCHAR(64 char) NOT NULL,
-        "count"       BIGINT DEFAULT 0 NOT NULL,
-        "update_time" TIMESTAMP(0) NOT NULL,
-        "create_time" TIMESTAMP(0) NOT NULL
-    );
-
-CREATE TABLE "MP"."mp_cscene_snapshot"
-(
-    "pk"                   INT IDENTITY(1, 1) NOT NULL,
-    "id"                   VARCHAR(64 char ) NOT NULL,
-        "cscene_id"            VARCHAR(64 char) NOT NULL,
-        "cscene_instance_id"   VARCHAR(64 char) NOT NULL,
-        "name"                 VARCHAR(255 char) NOT NULL,
-        "source_name"          VARCHAR(255 char) NOT NULL,
-        "node_id"              VARCHAR(64 char) NOT NULL,
-        "snapshot_id"          VARCHAR(64 char) NOT NULL,
-        "snapshot_resource_id" VARCHAR(64 char) NOT NULL,
-        "deleted"              TINYINT NOT NULL,
-        "create_time"          TIMESTAMP(6) NOT NULL,
-        "update_time"          TIMESTAMP(6) NOT NULL
-    );
-
-CREATE TABLE "MP"."mp_devops_alarm_statistics"
-(
-    "pk"          BIGINT IDENTITY(2, 1) NOT NULL,
-    "id"          VARCHAR(64 char ) NOT NULL,
-        "alarm_type"  TINYINT NOT NULL,
-        "alarm_count" BIGINT NOT NULL,
-        "alarm_date"  TIMESTAMP(0) NOT NULL,
-        "create_time" TIMESTAMP(0) NOT NULL,
-        "update_time" TIMESTAMP(0) NOT NULL
-    );
-
-CREATE TABLE "MP"."mp_devops_cpnode_monitor_script_config"
-(
-    "pk"          INT IDENTITY(4, 1) NOT NULL,
-    "id"          VARCHAR(64 char ) NOT NULL,
-        "agent_name"  VARCHAR(64 char) NOT NULL,
-        "hostname"    VARCHAR(64 char) NOT NULL,
-        "ip"          VARCHAR(64 char) NOT NULL,
-        "config"      VARCHAR(2000 char) NOT NULL,
-        "status"      INT NOT NULL,
-        "create_time" TIMESTAMP(0) NOT NULL,
-        "update_time" TIMESTAMP(0) NOT NULL
-    );
-
-CREATE TABLE "MP"."mp_devops_log_operation"
-(
-    "pk"           INT IDENTITY(66, 1) NOT NULL,
-    "id"           VARCHAR(64 char ) NOT NULL,
-        "site_type"    INT NOT NULL,
-        "from"         VARCHAR(255 char) NOT NULL,
-        "log_type"     INT NOT NULL,
-        "op_module"    VARCHAR(255 char) NOT NULL,
-        "op_module_id" INT NOT NULL,
-        "op_type"      VARCHAR(255 char) NOT NULL,
-        "op_type_id"   INT NOT NULL,
-        "op_target"    VARCHAR(255 char) NOT NULL,
-        "op_target_id" INT NOT NULL,
-        "title"        VARCHAR(255 char) NOT NULL,
-        "user_id"      VARCHAR(64 char) NOT NULL,
-        "user_name"    VARCHAR(64 char) NOT NULL,
-        "user_type"    VARCHAR(64 char) NOT NULL,
-        "content"      TEXT NOT NULL,
-        "description"  VARCHAR(1024 char) NOT NULL,
-        "op_time"      TIMESTAMP(0) NOT NULL,
-        "op_ip"        VARCHAR(64 char) NOT NULL,
-        "create_time"  TIMESTAMP(0) NOT NULL,
-        "update_time"  TIMESTAMP(0) NOT NULL
-    );
-
-CREATE TABLE "MP"."mp_devops_screenshot"
-(
-    "pk"            BIGINT IDENTITY(1, 1) NOT NULL,
-    "id"            VARCHAR(64 char ) NOT NULL,
-        "file"          VARCHAR(256 char) NOT NULL,
-        "file_name"     VARCHAR(256 char) NOT NULL,
-        "file_size"     BIGINT NOT NULL,
-        "scene_name"    VARCHAR(256 char) NOT NULL,
-        "user_id"       VARCHAR(64 char) NOT NULL,
-        "user_name"     VARCHAR(64 char) NOT NULL,
-        "user_org_name" VARCHAR(1024 char) NOT NULL,
-        "scene"         VARCHAR(64 char) DEFAULT '' NOT NULL,
-        "node_id"       VARCHAR(64 char) DEFAULT '' NOT NULL,
-        "create_time"   TIMESTAMP(0) NOT NULL,
-        "update_time"   TIMESTAMP(0) NOT NULL
-    );
-
-CREATE TABLE "MP"."mp_devops_system_alarm"
-(
-    "pk"           BIGINT IDENTITY(2, 1) NOT NULL,
-    "id"           VARCHAR(64 char ) NOT NULL,
-        "alarm_type"   TINYINT NOT NULL,
-        "alarm_msg"    VARCHAR(256 char) NOT NULL,
-        "hostname"     VARCHAR(128 char) NOT NULL,
-        "servername"   VARCHAR(128 char) NOT NULL,
-        "running_time" INT NOT NULL,
-        "alarm_status" TINYINT NOT NULL,
-        "create_time"  TIMESTAMP(0) NOT NULL,
-        "update_time"  TIMESTAMP(0) NOT NULL
-    );
-
-CREATE TABLE "MP"."mp_devops_target"
-(
-    "pk"                   INT IDENTITY(16, 1) NOT NULL,
-    "id"                   VARCHAR(64 char ) NOT NULL,
-        "uuid"                 VARCHAR(64 char) NOT NULL,
-        "name"                 VARCHAR(164 char) NOT NULL,
-        "logo"                 VARCHAR(255 char) NULL,
-        "role"                 TINYINT NULL,
-        "main_category"        INT NULL,
-        "sub_category"         INT NULL,
-        "third_category"       INT NULL,
-        "image_type"           VARCHAR(32 char) NULL,
-        "is_public"            TINYINT NOT NULL,
-        "quick_create_support" TINYINT DEFAULT 0 NOT NULL,
-        "in_position"          TINYINT NULL,
-        "reference_status"     INT DEFAULT 0 NOT NULL,
-        "use_status"           TINYINT DEFAULT 0 NOT NULL,
-        "parent_system_type"   INT NULL,
-        "system_type"          INT NULL,
-        "system_architecure"   VARCHAR(16 char) NULL,
-        "language"             VARCHAR(16 char) NULL,
-        "image_status"         TINYINT NULL,
-        "base_image_support"   TINYINT DEFAULT 0 NULL,
-        "init_support"         TINYINT DEFAULT 0 NOT NULL,
-        "create_time"          TIMESTAMP(6) NOT NULL,
-        "update_time"          TIMESTAMP(6) NOT NULL,
-        "image_source"         TINYINT NULL,
-        "is_import"            TINYINT DEFAULT 0 NOT NULL,
-        "is_hide"              TINYINT DEFAULT 0 NOT NULL,
-        "instance_state"       TINYINT DEFAULT 0 NOT NULL,
-        "is_init"              TINYINT DEFAULT 0 NULL,
-        "instance_create_user" VARCHAR(64 char) NULL,
-        "support_export"       TINYINT DEFAULT 0 NOT NULL,
-        "create_user"          VARCHAR(128 char) NOT NULL,
-        "create_user_name"     VARCHAR(128 char) NOT NULL
-    );
-
-CREATE TABLE "MP"."mp_devops_target_auth"
-(
-    "pk"          INT IDENTITY(1, 1) NOT NULL,
-    "id"          VARCHAR(64 char ) NOT NULL,
-        "tenant"      VARCHAR(64 char) NULL,
-        "owner"       VARCHAR(64 char) NOT NULL,
-        "target"      VARCHAR(64 char) NOT NULL,
-        "can_read"    TINYINT NULL,
-        "can_create"  TINYINT NULL,
-        "can_update"  TINYINT NULL,
-        "can_delete"  TINYINT NULL,
-        "create_time" TIMESTAMP(6) NOT NULL,
-        "update_time" TIMESTAMP(6) NOT NULL
-    );
-
-CREATE TABLE "MP"."mp_event_tracking_record"
-(
-    "pk"          INT IDENTITY(1, 1) NOT NULL,
-    "id"          VARCHAR(64 char ) NOT NULL,
-        "module"      VARCHAR(256 char) NOT NULL,
-        "category"    VARCHAR(256 char) NOT NULL,
-        "action"      VARCHAR(1024 char) NOT NULL,
-        "target"      VARCHAR(1024 char) NOT NULL,
-        "create_time" TIMESTAMP(6) NOT NULL,
-        "update_time" TIMESTAMP(6) NOT NULL
-    );
-
-CREATE TABLE "MP"."mp_flow_actuator"
-(
-    "pk"          BIGINT IDENTITY(2, 1) NOT NULL,
-    "id"          VARCHAR(64 char ) NOT NULL,
-        "title"       VARCHAR(64 char) NOT NULL,
-        "ip"          VARCHAR(32 char) NOT NULL,
-        "network_id"  VARCHAR(64 char) NOT NULL,
-        "instance_id" VARCHAR(64 char) NOT NULL,
-        "create_time" TIMESTAMP(0) NOT NULL,
-        "update_time" TIMESTAMP(0) NOT NULL
-    );
-
-CREATE TABLE "MP"."mp_flow_collection"
-(
-    "pk"                    BIGINT IDENTITY(1, 1) NOT NULL,
-    "id"                    VARCHAR(64 char ) NOT NULL,
-        "title"                 VARCHAR(64 char) NOT NULL,
-        "description"           VARCHAR(320 char) NOT NULL,
-        "category"              TINYINT NOT NULL,
-        "type_flag"             SMALLINT DEFAULT 2 NOT NULL,
-        "background_flow_count" INT NOT NULL,
-        "attack_flow_count"     INT NOT NULL,
-        "create_time"           TIMESTAMP(0) NOT NULL,
-        "update_time"           TIMESTAMP(0) NOT NULL
-    );
-
-CREATE TABLE "MP"."mp_flow_collection_rel"
-(
-    "pk"            BIGINT IDENTITY(1, 1) NOT NULL,
-    "id"            VARCHAR(64 char ) NOT NULL,
-        "collection_id" VARCHAR(64 char) NOT NULL,
-        "flow_id"       VARCHAR(64 char) NOT NULL,
-        "create_time"   TIMESTAMP(0) NOT NULL,
-        "update_time"   TIMESTAMP(0) NOT NULL
-    );
-
-CREATE TABLE "MP"."mp_flow_flow_info"
-(
-    "pk"               BIGINT IDENTITY(154, 1) NOT NULL,
-    "id"               VARCHAR(64 char ) NOT NULL,
-        "title"            VARCHAR(64 char) NOT NULL,
-        "flow_desc"        VARCHAR(320 char) NOT NULL,
-        "interactive_type" TINYINT NOT NULL,
-        "resource_type"    TINYINT NOT NULL,
-        "run_cmd"          VARCHAR(128 char) NOT NULL,
-        "category"         TINYINT NOT NULL,
-        "file_name"        VARCHAR(128 char) NOT NULL,
-        "pcap_file"        VARCHAR(255 char) NOT NULL,
-        "script_file"      VARCHAR(255 char) NOT NULL,
-        "create_time"      TIMESTAMP(0) NOT NULL,
-        "update_time"      TIMESTAMP(0) NOT NULL
-    );
-
-CREATE TABLE "MP"."mp_flow_pcap"
-(
-    "pk"          BIGINT IDENTITY(141, 1) NOT NULL,
-    "id"          VARCHAR(64 char ) NOT NULL,
-        "flow_id"     VARCHAR(64 char) NOT NULL,
-        "duration"    DECIMAL(20, 0) NOT NULL,
-        "pcap_size"   DECIMAL(20, 0) NOT NULL,
-        "pkt_num"     DECIMAL(20, 0) NOT NULL,
-        "protocols"   VARCHAR(128 char) NOT NULL,
-        "pcap_file"   VARCHAR(255 char) NOT NULL,
-        "create_time" TIMESTAMP(0) NOT NULL,
-        "update_time" TIMESTAMP(0) NOT NULL
-    );
-
-CREATE TABLE "MP"."mp_flow_port"
-(
-    "pk"             BIGINT IDENTITY(1, 1) NOT NULL,
-    "id"             VARCHAR(64 char ) NOT NULL,
-        "server_ip"      VARCHAR(32 char) NOT NULL,
-        "server_mac"     VARCHAR(32 char) NOT NULL,
-        "server_port_id" VARCHAR(40 char) NOT NULL,
-        "server_gateway" VARCHAR(32 char) NOT NULL,
-        "client_ip"      VARCHAR(32 char) NOT NULL,
-        "client_mac"     VARCHAR(32 char) NOT NULL,
-        "client_port_id" VARCHAR(40 char) NOT NULL,
-        "client_gateway" VARCHAR(32 char) NOT NULL,
-        "network_id"     VARCHAR(64 char) DEFAULT '' NOT NULL,
-        "actuator_id"    VARCHAR(64 char) DEFAULT '' NOT NULL,
-        "port_type"      TINYINT DEFAULT 0 NOT NULL,
-        "create_time"    TIMESTAMP(0) NOT NULL,
-        "update_time"    TIMESTAMP(0) NOT NULL
-    );
-
-CREATE TABLE "MP"."mp_flow_protocol"
-(
-    "pk"            BIGINT IDENTITY(1106, 1) NOT NULL,
-    "id"            VARCHAR(64 char ) NOT NULL,
-        "flow_id"       VARCHAR(64 char) NOT NULL,
-        "protocol_name" VARCHAR(64 char) NOT NULL,
-        "rate"          REAL NOT NULL,
-        "marked"        SMALLINT NOT NULL,
-        "create_time"   TIMESTAMP(0) NOT NULL,
-        "update_time"   TIMESTAMP(0) NOT NULL
-    );
-
-CREATE TABLE "MP"."mp_flow_script_demo"
-(
-    "pk"          BIGINT IDENTITY(6, 1) NOT NULL,
-    "id"          VARCHAR(64 char ) NOT NULL,
-        "script_name" VARCHAR(64 char) NOT NULL,
-        "url"         VARCHAR(1024 char) NOT NULL,
-        "create_time" TIMESTAMP(0) NOT NULL,
-        "update_time" TIMESTAMP(0) NOT NULL,
-        "type"        INT DEFAULT 1 NULL
-    );
-
-CREATE TABLE "MP"."mp_flow_script_param"
-(
-    "pk"          BIGINT IDENTITY(29, 1) NOT NULL,
-    "id"          VARCHAR(64 char ) NOT NULL,
-        "flow_id"     VARCHAR(64 char) NOT NULL,
-        "param_key"   VARCHAR(50 char) NOT NULL,
-        "param_value" VARCHAR(64 char) NOT NULL,
-        "param_type"  TINYINT NOT NULL,
-        "param_desc"  VARCHAR(2048 char) NOT NULL,
-        "create_time" TIMESTAMP(0) NOT NULL,
-        "update_time" TIMESTAMP(0) NOT NULL
-    );
-
-CREATE TABLE "MP"."mp_flow_task"
-(
-    "pk"              BIGINT IDENTITY(1, 1) NOT NULL,
-    "id"              VARCHAR(64 char ) NOT NULL,
-        "title"           VARCHAR(64 char) NOT NULL,
-        "task_desc"       VARCHAR(320 char) NOT NULL,
-        "actuator_id"     VARCHAR(64 char) NOT NULL,
-        "flow_id"         VARCHAR(64 char) NOT NULL,
-        "flow_port_id"    VARCHAR(64 char) NOT NULL,
-        "flow_platform"   TINYINT NOT NULL,
-        "third_flow_id"   VARCHAR(64 char) NOT NULL,
-        "third_flow_name" VARCHAR(128 char) NOT NULL,
-        "third_task_id"   VARCHAR(64 char) NOT NULL,
-        "count"           BIGINT NOT NULL,
-        "delay"           BIGINT NOT NULL,
-        "interval_time"   BIGINT NOT NULL,
-        "task_status"     TINYINT DEFAULT 0 NOT NULL,
-        "running_count"   INT DEFAULT 0 NOT NULL,
-        "origin_ips"      VARCHAR(32 char) NOT NULL,
-        "target_ips"      VARCHAR(32 char) NOT NULL,
-        "node_id"         VARCHAR(64 char) NOT NULL,
-        "custom_flag"     TINYINT DEFAULT 0 NOT NULL,
-        "flow_protocol"   VARCHAR(512 char) NOT NULL,
-        "content"         VARCHAR(1024 char) NOT NULL,
-        "mult"            INT DEFAULT 1 NOT NULL,
-        "create_time"     TIMESTAMP(0) NOT NULL,
-        "update_time"     TIMESTAMP(0) NOT NULL
-    );
-
-CREATE TABLE "MP"."mp_flow_task_conf"
-(
-    "pk"             BIGINT IDENTITY(29, 1) NOT NULL,
-    "id"             VARCHAR(64 char ) NOT NULL,
-        "task_id"        VARCHAR(64 char) NOT NULL,
-        "keep_running"   SMALLINT NOT NULL,
-        "rate_unlimited" SMALLINT NOT NULL,
-        "replay"         SMALLINT NOT NULL,
-        "conf"           TEXT NOT NULL,
-        "create_time"    TIMESTAMP(0) NOT NULL,
-        "update_time"    TIMESTAMP(0) NOT NULL,
-        "config"         INT DEFAULT 0 NOT NULL
-    );
-
-CREATE TABLE "MP"."mp_flow_task_port"
-(
-    "pk"          BIGINT IDENTITY(4, 1) NOT NULL,
-    "id"          VARCHAR(64 char ) NOT NULL,
-        "network_id"  VARCHAR(64 char) DEFAULT '' NOT NULL,
-        "actuator_id" VARCHAR(64 char) DEFAULT '' NOT NULL,
-        "mac"         VARCHAR(64 char) NOT NULL,
-        "create_time" TIMESTAMP(0) NOT NULL,
-        "update_time" TIMESTAMP(0) NOT NULL
-    );
-
-CREATE TABLE "MP"."mp_flow_task_record"
-(
-    "pk"            BIGINT IDENTITY(64, 1) NOT NULL,
-    "id"            VARCHAR(64 char ) NOT NULL,
-        "actuator_id"   VARCHAR(64 char) NOT NULL,
-        "task_id"       VARCHAR(64 char) NOT NULL,
-        "tx_bps"        BIGINT NOT NULL,
-        "tx_pps"        BIGINT NOT NULL,
-        "latency"       BIGINT NOT NULL,
-        "jitter"        BIGINT NOT NULL,
-        "obytes"        BIGINT NOT NULL,
-        "oerrors"       BIGINT NOT NULL,
-        "total_tx_L2"   BIGINT NOT NULL,
-        "total_tx_L1"   BIGINT NOT NULL,
-        "total_pps"     BIGINT NOT NULL,
-        "total_rx"      BIGINT NOT NULL,
-        "queue_full"    BIGINT NOT NULL,
-        "drop_rate"     BIGINT NOT NULL,
-        "record_status" TINYINT NOT NULL,
-        "create_time"   TIMESTAMP(0) NOT NULL,
-        "update_time"   TIMESTAMP(0) NOT NULL
-    );
-
-CREATE TABLE "MP"."mp_flow_task_task"
-(
-    "pk"               BIGINT IDENTITY(29, 1) NOT NULL,
-    "id"               VARCHAR(64 char ) NOT NULL,
-        "scene_id"         VARCHAR(64 char) NOT NULL,
-        "actuator_id"      VARCHAR(64 char) NOT NULL,
-        "resource_type"    TINYINT NOT NULL,
-        "interactive_type" TINYINT NOT NULL,
-        "flow_id"          VARCHAR(64 char) NOT NULL,
-        "port_id"          VARCHAR(64 char) NOT NULL,
-        "success_count"    INT DEFAULT 0 NOT NULL,
-        "error_count"      INT DEFAULT 0 NOT NULL,
-        "task_status"      TINYINT DEFAULT 0 NOT NULL,
-        "msg"              VARCHAR(1024 char) DEFAULT '' NOT NULL,
-        "node_id"          VARCHAR(64 char) NOT NULL,
-        "node_ip"          VARCHAR(24 char) NOT NULL,
-        "node_name"        VARCHAR(64 char) NOT NULL,
-        "create_time"      TIMESTAMP(0) NOT NULL,
-        "update_time"      TIMESTAMP(0) NOT NULL
-    );
-
-CREATE TABLE "MP"."mp_front_admin_activ_ctl"
-(
-    "pk"                INT IDENTITY(2, 1) NOT NULL,
-    "id"                VARCHAR(64 char ) NOT NULL,
-        "tenant"            VARCHAR(64 char) DEFAULT '' NOT NULL,
-        "salt"              VARCHAR(64 char) NULL,
-        "suffix"            VARCHAR(10 char) NULL,
-        "license_code"      VARCHAR(256 char) NULL,
-        "first_active_date" VARCHAR(256 char) NULL,
-        "last_active_date"  VARCHAR(256 char) NULL,
-        "expire_date"       VARCHAR(256 char) NULL,
-        "active_count"      INT DEFAULT 1 NOT NULL,
-        "sys_timestamp" CLOB NULL,
-        "sys_run_seconds" VARCHAR(256 char) DEFAULT '0' NULL,
-        "sys_lifetime"    VARCHAR(256 char) NULL,
-        "status"          INT DEFAULT 1 NOT NULL,
-        "create_time"     TIMESTAMP(0) NOT NULL,
-        "update_time"     TIMESTAMP(0) NOT NULL
-    );
-
-CREATE TABLE "MP"."mp_front_admin_menu_extra_info"
-(
-    "pk"          INT IDENTITY(224, 1) NOT NULL,
-    "id"          VARCHAR(64 char ) NOT NULL,
-        "tenant"      VARCHAR(64 char) DEFAULT '' NOT NULL,
-        "menu"        VARCHAR(64 char) NOT NULL,
-        "editions"    VARCHAR(200 char) NOT NULL,
-        "activ_keys"  VARCHAR(1024 char) NOT NULL,
-        "create_time" TIMESTAMP(0) NOT NULL,
-        "update_time" TIMESTAMP(0) NOT NULL
-    );
-
-CREATE TABLE "MP"."mp_log_level"
-(
-    "pk"          INT IDENTITY(1, 1) NOT NULL,
-    "id"          VARCHAR(256 char ) NULL,
-        "log_name"    VARCHAR(256 char) NOT NULL,
-        "log_level"   VARCHAR(8 char) NOT NULL,
-        "create_time" TIMESTAMP(0) NOT NULL,
-        "update_time" TIMESTAMP(0) NOT NULL
-    );
-
-CREATE TABLE "MP"."mp_log_report"
-(
-    "pk"           INT IDENTITY(51065, 1) NOT NULL,
-    "id"           VARCHAR(32 char ) NOT NULL,
-        "file_name"    VARCHAR(32 char) NOT NULL,
-        "type"         VARCHAR(20 char) NOT NULL,
-        "file_size"    BIGINT NOT NULL,
-        "download_url" VARCHAR(255 char) NOT NULL,
-        "host_ip"      VARCHAR(20 char) DEFAULT '' NOT NULL,
-        "create_time"  TIMESTAMP(0) NOT NULL,
-        "update_time"  TIMESTAMP(0) NOT NULL
-    );
-
-ALTER TABLE "MP"."mp_auth_client_details" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_auth_org" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_auth_org_permission" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_auth_role" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_auth_role_permission" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_auth_target" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_auth_tenant" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_auth_tenant_user" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_auth_url_ac" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_auth_url_ac_target" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_auth_user" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_auth_user_online_record" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_auth_user_permission" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_auth_user_role" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_base_local_file_mapping" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_common_option" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_cscene_common_config" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_cscene_cscene" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_cscene_cscene_auth" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_cscene_cscene_instance" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_cscene_cscene_instance_role" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_cscene_cscene_role" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_cscene_instance_user_count" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_cscene_snapshot" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_devops_alarm_statistics" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_devops_cpnode_monitor_script_config" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_devops_log_operation" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_devops_screenshot" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_devops_system_alarm" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_devops_target" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_devops_target_auth" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_event_tracking_record" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_flow_actuator" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_flow_collection" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_flow_collection_rel" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_flow_flow_info" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_flow_pcap" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_flow_port" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_flow_protocol" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_flow_script_demo" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_flow_script_param" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_flow_task" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_flow_task_conf" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_flow_task_port" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_flow_task_record" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_flow_task_task" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_front_admin_activ_ctl" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_front_admin_menu_extra_info" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_log_level" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_log_report" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-CREATE INDEX "module_cat"
-    ON "MP"."mp_event_tracking_record"
-        (
-         "module",
-         "category"
-            );
-
-ALTER INDEX "MP"."module_cat" VISIBLE;
-
-ALTER TABLE "MP"."mp_cscene_instance_user_count" ADD CONSTRAINT "MPCONS134218851" CHECK ("count" >= 0) ENABLE;
-
-ALTER TABLE "MP"."mp_auth_client_details" ADD CONSTRAINT "client_id" UNIQUE ("client_id");
-
-ALTER TABLE "MP"."mp_auth_org" ADD CONSTRAINT "tenant" UNIQUE ("tenant", "identifier");
-
-ALTER TABLE "MP"."mp_auth_org" ADD CONSTRAINT "id" UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_auth_org_permission" ADD UNIQUE ("tenant", "owner", "target");
-
-ALTER TABLE "MP"."mp_auth_org_permission" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_auth_role" ADD CONSTRAINT "tenant_2" UNIQUE ("tenant", "name");
-
-ALTER TABLE "MP"."mp_auth_role" ADD UNIQUE ("tenant", "identifier");
-
-ALTER TABLE "MP"."mp_auth_role" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_auth_role_permission" ADD UNIQUE ("tenant", "owner", "target");
-
-ALTER TABLE "MP"."mp_auth_role_permission" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_auth_target" ADD CONSTRAINT "identifier" UNIQUE ("identifier");
-
-ALTER TABLE "MP"."mp_auth_target" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_auth_tenant" ADD UNIQUE ("identifier");
-
-ALTER TABLE "MP"."mp_auth_tenant" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_auth_tenant_user" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_auth_url_ac" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_auth_url_ac_target" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_auth_user" ADD CONSTRAINT "username" UNIQUE ("username");
-
-ALTER TABLE "MP"."mp_auth_user" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_auth_user_online_record" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_auth_user_permission" ADD UNIQUE ("tenant", "owner", "target");
-
-ALTER TABLE "MP"."mp_auth_user_permission" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_auth_user_role" ADD UNIQUE ("tenant", "user", "role");
-
-ALTER TABLE "MP"."mp_auth_user_role" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_base_local_file_mapping" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_common_option" ADD CONSTRAINT "code" UNIQUE ("code", "type");
-
-ALTER TABLE "MP"."mp_common_option" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_cscene_common_config" ADD CONSTRAINT "key" UNIQUE ("key");
-
-ALTER TABLE "MP"."mp_cscene_common_config" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_cscene_cscene" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_cscene_cscene_auth" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_cscene_cscene_instance" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_cscene_cscene_instance_role" ADD CONSTRAINT "cscene_id" UNIQUE ("cscene", "id");
-
-ALTER TABLE "MP"."mp_cscene_cscene_role" ADD UNIQUE ("cscene", "id");
-
-ALTER TABLE "MP"."mp_cscene_snapshot" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_devops_alarm_statistics" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_devops_cpnode_monitor_script_config" ADD CONSTRAINT "agent_name" UNIQUE ("agent_name");
-
-ALTER TABLE "MP"."mp_devops_cpnode_monitor_script_config" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_devops_log_operation" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_devops_screenshot" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_devops_system_alarm" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_devops_target" ADD CONSTRAINT "name" UNIQUE ("name");
-
-ALTER TABLE "MP"."mp_devops_target" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_devops_target_auth" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_flow_actuator" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_flow_collection" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_flow_collection_rel" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_flow_collection_rel" ADD CONSTRAINT "collection_id" UNIQUE ("collection_id", "flow_id");
-
-ALTER TABLE "MP"."mp_flow_flow_info" ADD CONSTRAINT "title" UNIQUE ("title");
-
-ALTER TABLE "MP"."mp_flow_flow_info" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_flow_pcap" ADD CONSTRAINT "flow_id" UNIQUE ("flow_id");
-
-ALTER TABLE "MP"."mp_flow_pcap" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_flow_port" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_flow_protocol" ADD CONSTRAINT "flow_protocol_id" UNIQUE ("id", "flow_id");
-
-ALTER TABLE "MP"."mp_flow_script_demo" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_flow_script_param" ADD UNIQUE ("id", "flow_id");
-
-ALTER TABLE "MP"."mp_flow_task" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_flow_task_conf" ADD CONSTRAINT "task_id" UNIQUE ("task_id");
-
-ALTER TABLE "MP"."mp_flow_task_conf" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_flow_task_port" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_flow_task_record" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_flow_task_task" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_front_admin_activ_ctl" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_front_admin_menu_extra_info" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_log_level" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_log_level" ADD CONSTRAINT "log_name" UNIQUE ("log_name");
-
-ALTER TABLE "MP"."mp_log_report" ADD UNIQUE ("id");
-
-COMMENT ON TABLE "MP"."mp_auth_client_details"
-IS
-    '客户端认证配置表';
-    COMMENT ON COLUMN "MP"."mp_auth_client_details"."access_token_validity"
-IS
-    'access_token的有效期（秒）';
-    COMMENT ON COLUMN "MP"."mp_auth_client_details"."additional_information"
-IS
-    '预留字段';
-    COMMENT ON COLUMN "MP"."mp_auth_client_details"."authorities"
-IS
-    '权限';
-    COMMENT ON COLUMN "MP"."mp_auth_client_details"."authorized_grant_types"
-IS
-    '授权类型';
-    COMMENT ON COLUMN "MP"."mp_auth_client_details"."autoapprove"
-IS
-    '设置用户是否自动approve操作';
-    COMMENT ON COLUMN "MP"."mp_auth_client_details"."client_id"
-IS
-    '客户端ID';
-    COMMENT ON COLUMN "MP"."mp_auth_client_details"."client_secret"
-IS
-    '客户端秘钥';
-    COMMENT ON COLUMN "MP"."mp_auth_client_details"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_auth_client_details"."refresh_token_validity"
-IS
-    'refresh_token的有效期（秒）';
-    COMMENT ON COLUMN "MP"."mp_auth_client_details"."resource_ids"
-IS
-    '资源id';
-    COMMENT ON COLUMN "MP"."mp_auth_client_details"."scope"
-IS
-    '权限范围';
-    COMMENT ON COLUMN "MP"."mp_auth_client_details"."type"
-IS
-    '类型 1:Oauth2渠道 2:免认证渠道';
-    COMMENT ON COLUMN "MP"."mp_auth_client_details"."web_server_redirect_uri"
-IS
-    '回跳地址';
-    COMMENT ON TABLE "MP"."mp_auth_org"
-IS
-    '组织表';
-    COMMENT ON COLUMN "MP"."mp_auth_org"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_auth_org"."description"
-IS
-    '描述';
-    COMMENT ON COLUMN "MP"."mp_auth_org"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_auth_org"."identifier"
-IS
-    '编号';
-    COMMENT ON COLUMN "MP"."mp_auth_org"."name"
-IS
-    '名称';
-    COMMENT ON COLUMN "MP"."mp_auth_org"."parent"
-IS
-    '父组织';
-    COMMENT ON COLUMN "MP"."mp_auth_org"."path"
-IS
-    '组织结构路径';
-    COMMENT ON COLUMN "MP"."mp_auth_org"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_auth_org"."tenant"
-IS
-    '所属租户';
-    COMMENT ON COLUMN "MP"."mp_auth_org"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_auth_org_permission"
-IS
-    '组织权限关系表';
-    COMMENT ON COLUMN "MP"."mp_auth_org_permission"."can_create"
-IS
-    '创建权限';
-    COMMENT ON COLUMN "MP"."mp_auth_org_permission"."can_delete"
-IS
-    '删除权限';
-    COMMENT ON COLUMN "MP"."mp_auth_org_permission"."can_read"
-IS
-    '读权限';
-    COMMENT ON COLUMN "MP"."mp_auth_org_permission"."can_update"
-IS
-    '更新权限';
-    COMMENT ON COLUMN "MP"."mp_auth_org_permission"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_auth_org_permission"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_auth_org_permission"."owner"
-IS
-    '权限所有者(组织)';
-    COMMENT ON COLUMN "MP"."mp_auth_org_permission"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_auth_org_permission"."target"
-IS
-    '资源目标';
-    COMMENT ON COLUMN "MP"."mp_auth_org_permission"."tenant"
-IS
-    '所属租户';
-    COMMENT ON COLUMN "MP"."mp_auth_org_permission"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_auth_role"
-IS
-    '角色表';
-    COMMENT ON COLUMN "MP"."mp_auth_role"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_auth_role"."description"
-IS
-    '描述';
-    COMMENT ON COLUMN "MP"."mp_auth_role"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_auth_role"."identifier"
-IS
-    '编号';
-    COMMENT ON COLUMN "MP"."mp_auth_role"."name"
-IS
-    '名称';
-    COMMENT ON COLUMN "MP"."mp_auth_role"."org"
-IS
-    '所属组织';
-    COMMENT ON COLUMN "MP"."mp_auth_role"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_auth_role"."tenant"
-IS
-    '所属租户';
-    COMMENT ON COLUMN "MP"."mp_auth_role"."update_time"
-IS
-    '更新时间';
-    COMMENT ON COLUMN "MP"."mp_auth_role"."visible"
-IS
-    '是否可见 1:可见，0:不可见';
-    COMMENT ON TABLE "MP"."mp_auth_role_permission"
-IS
-    '角色权限关系表';
-    COMMENT ON COLUMN "MP"."mp_auth_role_permission"."can_create"
-IS
-    '创建权限';
-    COMMENT ON COLUMN "MP"."mp_auth_role_permission"."can_delete"
-IS
-    '删除权限';
-    COMMENT ON COLUMN "MP"."mp_auth_role_permission"."can_read"
-IS
-    '读权限';
-    COMMENT ON COLUMN "MP"."mp_auth_role_permission"."can_update"
-IS
-    '更新权限';
-    COMMENT ON COLUMN "MP"."mp_auth_role_permission"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_auth_role_permission"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_auth_role_permission"."owner"
-IS
-    '权限所有者(角色ID)';
-    COMMENT ON COLUMN "MP"."mp_auth_role_permission"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_auth_role_permission"."target"
-IS
-    '权限ID';
-    COMMENT ON COLUMN "MP"."mp_auth_role_permission"."tenant"
-IS
-    '所属租户';
-    COMMENT ON COLUMN "MP"."mp_auth_role_permission"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_auth_target"
-IS
-    '权限（资源）表';
-    COMMENT ON COLUMN "MP"."mp_auth_target"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_auth_target"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_auth_target"."identifier"
-IS
-    '编号';
-    COMMENT ON COLUMN "MP"."mp_auth_target"."name"
-IS
-    '名称';
-    COMMENT ON COLUMN "MP"."mp_auth_target"."parent"
-IS
-    '父权限ID';
-    COMMENT ON COLUMN "MP"."mp_auth_target"."path"
-IS
-    '路径';
-    COMMENT ON COLUMN "MP"."mp_auth_target"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_auth_target"."tenant"
-IS
-    '所属租户';
-    COMMENT ON COLUMN "MP"."mp_auth_target"."type"
-IS
-    '资源类型 1:菜单, 2:API, 3:数据';
-    COMMENT ON COLUMN "MP"."mp_auth_target"."update_time"
-IS
-    '更新时间';
-    COMMENT ON COLUMN "MP"."mp_auth_target"."visible"
-IS
-    '是否可见 1:可见，0:不可见（受控于激活选项） 默认为可见';
-    COMMENT ON TABLE "MP"."mp_auth_tenant"
-IS
-    '租户表';
-    COMMENT ON COLUMN "MP"."mp_auth_tenant"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_auth_tenant"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_auth_tenant"."identifier"
-IS
-    '编号';
-    COMMENT ON COLUMN "MP"."mp_auth_tenant"."name"
-IS
-    '名称';
-    COMMENT ON COLUMN "MP"."mp_auth_tenant"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_auth_tenant"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_auth_user_permission"
-IS
-    '用户权限关系表';
-    COMMENT ON COLUMN "MP"."mp_auth_user_permission"."can_create"
-IS
-    '创建权限';
-    COMMENT ON COLUMN "MP"."mp_auth_user_permission"."can_delete"
-IS
-    '删除权限';
-    COMMENT ON COLUMN "MP"."mp_auth_user_permission"."can_read"
-IS
-    '读权限';
-    COMMENT ON COLUMN "MP"."mp_auth_user_permission"."can_update"
-IS
-    '更新权限';
-    COMMENT ON COLUMN "MP"."mp_auth_user_permission"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_auth_user_permission"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_auth_user_permission"."owner"
-IS
-    '权限所有者(用户ID)';
-    COMMENT ON COLUMN "MP"."mp_auth_user_permission"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_auth_user_permission"."target"
-IS
-    '资源目标';
-    COMMENT ON COLUMN "MP"."mp_auth_user_permission"."tenant"
-IS
-    '所属租户';
-    COMMENT ON COLUMN "MP"."mp_auth_user_permission"."update_time"
-IS
-    '更新时间';
-    COMMENT ON COLUMN "MP"."mp_base_local_file_mapping"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_base_local_file_mapping"."group"
-IS
-    '分组';
-    COMMENT ON COLUMN "MP"."mp_base_local_file_mapping"."id"
-IS
-    'id';
-    COMMENT ON COLUMN "MP"."mp_base_local_file_mapping"."local_file"
-IS
-    '本地文件路径';
-    COMMENT ON COLUMN "MP"."mp_base_local_file_mapping"."local_file_modified_time"
-IS
-    '本地文件修改时间';
-    COMMENT ON COLUMN "MP"."mp_base_local_file_mapping"."name"
-IS
-    '名称';
-    COMMENT ON COLUMN "MP"."mp_base_local_file_mapping"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_base_local_file_mapping"."remote_file"
-IS
-    '远程文件路径';
-    COMMENT ON COLUMN "MP"."mp_base_local_file_mapping"."seq"
-IS
-    '序号';
-    COMMENT ON COLUMN "MP"."mp_base_local_file_mapping"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_common_option"
-IS
-    '选项表';
-    COMMENT ON COLUMN "MP"."mp_common_option"."code"
-IS
-    '选项编码';
-    COMMENT ON COLUMN "MP"."mp_common_option"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_common_option"."en_name"
-IS
-    '选项英文名称';
-    COMMENT ON COLUMN "MP"."mp_common_option"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_common_option"."meta"
-IS
-    '元数据';
-    COMMENT ON COLUMN "MP"."mp_common_option"."parent_code"
-IS
-    '父级选项编码';
-    COMMENT ON COLUMN "MP"."mp_common_option"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_common_option"."sort"
-IS
-    '排序字段';
-    COMMENT ON COLUMN "MP"."mp_common_option"."type"
-IS
-    '选项类型';
-    COMMENT ON COLUMN "MP"."mp_common_option"."update_time"
-IS
-    '更新时间';
-    COMMENT ON COLUMN "MP"."mp_common_option"."zh_name"
-IS
-    '选项中文名称';
-    COMMENT ON TABLE "MP"."mp_cscene_common_config"
-IS
-    '场景通用配置表';
-    COMMENT ON COLUMN "MP"."mp_cscene_common_config"."content"
-IS
-    '配置内容';
-    COMMENT ON COLUMN "MP"."mp_cscene_common_config"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_cscene_common_config"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_cscene_common_config"."key"
-IS
-    '配置对应key';
-    COMMENT ON COLUMN "MP"."mp_cscene_common_config"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_cscene_common_config"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_cscene_cscene"
-IS
-    '场景信息表';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene"."auth_type"
-IS
-    '授权类型';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene"."create_user"
-IS
-    '创建用户id';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene"."create_username"
-IS
-    '创建用户名称';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene"."deleted"
-IS
-    '是否删除';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene"."logo"
-IS
-    '综合场景模板logo';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene"."name"
-IS
-    '名称';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene"."reference_meta_data"
-IS
-    '综合场景模板引用元数据';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene"."reference_type"
-IS
-    '综合场景模板引用类型';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene"."scene_config"
-IS
-    '场景模板id';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene"."support_partial_start"
-IS
-    '是否支持部分启动';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene"."type"
-IS
-    '综合场景模板类型';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_cscene_cscene_auth"
-IS
-    '场景模板授权信息表';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene_auth"."can_create"
-IS
-    '可创建';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene_auth"."can_delete"
-IS
-    '可删除';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene_auth"."can_read"
-IS
-    '可读';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene_auth"."can_update"
-IS
-    '可更新';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene_auth"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene_auth"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene_auth"."owner"
-IS
-    '用户ID';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene_auth"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene_auth"."target"
-IS
-    '场景模板id';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene_auth"."tenant"
-IS
-    '租户';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene_auth"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_cscene_cscene_instance"
-IS
-    '场景实例表';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene_instance"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene_instance"."create_user"
-IS
-    '创建用户id';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene_instance"."create_username"
-IS
-    '创建用户名称';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene_instance"."cscene"
-IS
-    '综合场景id';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene_instance"."deleted"
-IS
-    '是否删除';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene_instance"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene_instance"."logo"
-IS
-    '综合场景模板logo';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene_instance"."name"
-IS
-    '名称';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene_instance"."pass_through"
-IS
-    '透传字段';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene_instance"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene_instance"."reference_meta_data"
-IS
-    '综合场景实例引用元数据';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene_instance"."reference_type"
-IS
-    '综合场景实例引用类型';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene_instance"."scene"
-IS
-    '场景实例id';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene_instance"."scene_attr"
-IS
-    '场景实例属性';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene_instance"."scene_ttl"
-IS
-    '场景实例存活时间';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene_instance"."support_partial_start"
-IS
-    '是否支持部分启动';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene_instance"."type"
-IS
-    '综合场景实例类型';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene_instance"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_cscene_cscene_instance_role"
-IS
-    '场景实例角色表';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene_instance_role"."asset_nodes"
-IS
-    '资产节点';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene_instance_role"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene_instance_role"."cscene"
-IS
-    '综合场景实例id';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene_instance_role"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene_instance_role"."key"
-IS
-    '角色key';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene_instance_role"."name"
-IS
-    '名称';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene_instance_role"."parent"
-IS
-    '父角色id';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene_instance_role"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene_instance_role"."type"
-IS
-    '类型';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene_instance_role"."update_time"
-IS
-    '更新时间';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene_instance_role"."users"
-IS
-    '包含用户';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene_instance_role"."visible_nodes"
-IS
-    '可见节点';
-    COMMENT ON TABLE "MP"."mp_cscene_cscene_role"
-IS
-    '场景角色表';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene_role"."asset_nodes"
-IS
-    '资产节点';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene_role"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene_role"."cscene"
-IS
-    '综合场景id';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene_role"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene_role"."key"
-IS
-    '角色key';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene_role"."name"
-IS
-    '名称';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene_role"."parent"
-IS
-    '父角色id';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene_role"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene_role"."type"
-IS
-    '类型';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene_role"."update_time"
-IS
-    '更新时间';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene_role"."users"
-IS
-    '包含用户';
-    COMMENT ON COLUMN "MP"."mp_cscene_cscene_role"."visible_nodes"
-IS
-    '可见节点';
-    COMMENT ON TABLE "MP"."mp_devops_alarm_statistics"
-IS
-    '告警统计信息表';
-    COMMENT ON COLUMN "MP"."mp_devops_alarm_statistics"."alarm_count"
-IS
-    '告警数量';
-    COMMENT ON COLUMN "MP"."mp_devops_alarm_statistics"."alarm_date"
-IS
-    '告警日期';
-    COMMENT ON COLUMN "MP"."mp_devops_alarm_statistics"."alarm_type"
-IS
-    '告警类型：0 云平台服务, 1 业务服务 2 服务器';
-    COMMENT ON COLUMN "MP"."mp_devops_alarm_statistics"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_devops_alarm_statistics"."id"
-IS
-    '告警统计id';
-    COMMENT ON COLUMN "MP"."mp_devops_alarm_statistics"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_devops_alarm_statistics"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_devops_cpnode_monitor_script_config"
-IS
-    '云平台节点探针监控脚本安装信息表';
-    COMMENT ON COLUMN "MP"."mp_devops_cpnode_monitor_script_config"."agent_name"
-IS
-    '探针名称';
-    COMMENT ON COLUMN "MP"."mp_devops_cpnode_monitor_script_config"."config"
-IS
-    '脚本配置JSON字符串，包括launchid, interval，scriptUrl等信息';
-    COMMENT ON COLUMN "MP"."mp_devops_cpnode_monitor_script_config"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_devops_cpnode_monitor_script_config"."hostname"
-IS
-    '主机名称';
-    COMMENT ON COLUMN "MP"."mp_devops_cpnode_monitor_script_config"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_devops_cpnode_monitor_script_config"."ip"
-IS
-    'IP地址';
-    COMMENT ON COLUMN "MP"."mp_devops_cpnode_monitor_script_config"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_devops_cpnode_monitor_script_config"."status"
-IS
-    '1:已完成安装 2:已发送指令-待确认安装成功 3:安装失败';
-    COMMENT ON COLUMN "MP"."mp_devops_cpnode_monitor_script_config"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_devops_screenshot"
-IS
-    '截屏文件管理表';
-    COMMENT ON COLUMN "MP"."mp_devops_screenshot"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_devops_screenshot"."file"
-IS
-    '截屏文件地址';
-    COMMENT ON COLUMN "MP"."mp_devops_screenshot"."file_name"
-IS
-    '截屏文件名称';
-    COMMENT ON COLUMN "MP"."mp_devops_screenshot"."file_size"
-IS
-    '截屏文件大小，单位:B';
-    COMMENT ON COLUMN "MP"."mp_devops_screenshot"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_devops_screenshot"."node_id"
-IS
-    '节点id';
-    COMMENT ON COLUMN "MP"."mp_devops_screenshot"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_devops_screenshot"."scene"
-IS
-    '场景id';
-    COMMENT ON COLUMN "MP"."mp_devops_screenshot"."scene_name"
-IS
-    '场景名称';
-    COMMENT ON COLUMN "MP"."mp_devops_screenshot"."update_time"
-IS
-    '更新时间';
-    COMMENT ON COLUMN "MP"."mp_devops_screenshot"."user_id"
-IS
-    '用户id';
-    COMMENT ON COLUMN "MP"."mp_devops_screenshot"."user_name"
-IS
-    '用户名称';
-    COMMENT ON COLUMN "MP"."mp_devops_screenshot"."user_org_name"
-IS
-    '组织名称';
-    COMMENT ON TABLE "MP"."mp_devops_system_alarm"
-IS
-    '告警信息表';
-    COMMENT ON COLUMN "MP"."mp_devops_system_alarm"."alarm_msg"
-IS
-    '告警信息';
-    COMMENT ON COLUMN "MP"."mp_devops_system_alarm"."alarm_status"
-IS
-    '告警状态：0 生效， 1失效';
-    COMMENT ON COLUMN "MP"."mp_devops_system_alarm"."alarm_type"
-IS
-    '告警类型：0 云平台服务, 1 业务服务 2 服务器';
-    COMMENT ON COLUMN "MP"."mp_devops_system_alarm"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_devops_system_alarm"."hostname"
-IS
-    '节点名称';
-    COMMENT ON COLUMN "MP"."mp_devops_system_alarm"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_devops_system_alarm"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_devops_system_alarm"."running_time"
-IS
-    '持续时间';
-    COMMENT ON COLUMN "MP"."mp_devops_system_alarm"."servername"
-IS
-    '设备名称';
-    COMMENT ON COLUMN "MP"."mp_devops_system_alarm"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_devops_target_auth"
-IS
-    '靶标授权表';
-    COMMENT ON COLUMN "MP"."mp_devops_target_auth"."can_create"
-IS
-    '可创建';
-    COMMENT ON COLUMN "MP"."mp_devops_target_auth"."can_delete"
-IS
-    '可删除';
-    COMMENT ON COLUMN "MP"."mp_devops_target_auth"."can_read"
-IS
-    '可读';
-    COMMENT ON COLUMN "MP"."mp_devops_target_auth"."can_update"
-IS
-    '可更新';
-    COMMENT ON COLUMN "MP"."mp_devops_target_auth"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_devops_target_auth"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_devops_target_auth"."owner"
-IS
-    '用户ID';
-    COMMENT ON COLUMN "MP"."mp_devops_target_auth"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_devops_target_auth"."target"
-IS
-    '镜像UUID';
-    COMMENT ON COLUMN "MP"."mp_devops_target_auth"."tenant"
-IS
-    '租户';
-    COMMENT ON COLUMN "MP"."mp_devops_target_auth"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_event_tracking_record"
-IS
-    '埋点表';
-    COMMENT ON COLUMN "MP"."mp_event_tracking_record"."action"
-IS
-    '动作';
-    COMMENT ON COLUMN "MP"."mp_event_tracking_record"."category"
-IS
-    '分类';
-    COMMENT ON COLUMN "MP"."mp_event_tracking_record"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_event_tracking_record"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_event_tracking_record"."module"
-IS
-    '模块';
-    COMMENT ON COLUMN "MP"."mp_event_tracking_record"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_event_tracking_record"."target"
-IS
-    '操作目标';
-    COMMENT ON COLUMN "MP"."mp_event_tracking_record"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_flow_actuator"
-IS
-    '流量执行器表';
-    COMMENT ON COLUMN "MP"."mp_flow_actuator"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_flow_actuator"."id"
-IS
-    '执行器id';
-    COMMENT ON COLUMN "MP"."mp_flow_actuator"."instance_id"
-IS
-    '实例id';
-    COMMENT ON COLUMN "MP"."mp_flow_actuator"."ip"
-IS
-    '执行器ip地址';
-    COMMENT ON COLUMN "MP"."mp_flow_actuator"."network_id"
-IS
-    '网络id';
-    COMMENT ON COLUMN "MP"."mp_flow_actuator"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_flow_actuator"."title"
-IS
-    '执行器名称';
-    COMMENT ON COLUMN "MP"."mp_flow_actuator"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_flow_collection_rel"
-IS
-    '流量关联集合表';
-    COMMENT ON COLUMN "MP"."mp_flow_collection_rel"."collection_id"
-IS
-    '流量集合id';
-    COMMENT ON COLUMN "MP"."mp_flow_collection_rel"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_flow_collection_rel"."flow_id"
-IS
-    '流量id';
-    COMMENT ON COLUMN "MP"."mp_flow_collection_rel"."id"
-IS
-    '关联id';
-    COMMENT ON COLUMN "MP"."mp_flow_collection_rel"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_flow_collection_rel"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_flow_flow_info"
-IS
-    '流量信息表';
-    COMMENT ON COLUMN "MP"."mp_flow_flow_info"."category"
-IS
-    '分类   0:"测试测量",1:"应用升级",2:"网络管理",3:"P2P",4:"金融",5:"邮件",6:"安全工作",7:"分布式计算",8:"手机",9:"移动设备",10:"即时通讯",11:"SCADA",12:"机动",13:"远程控制",14:"音视频",15:"企业应用",16:"社会网络搜索",17:"文件传输",18:"数据库",19:"身份认证",20:"ERP",21:"存储",22:"游戏",23:"安全数据传输"';
-    COMMENT ON COLUMN "MP"."mp_flow_flow_info"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_flow_flow_info"."file_name"
-IS
-    '文件名称';
-    COMMENT ON COLUMN "MP"."mp_flow_flow_info"."flow_desc"
-IS
-    '流量描述';
-    COMMENT ON COLUMN "MP"."mp_flow_flow_info"."id"
-IS
-    '流量id';
-    COMMENT ON COLUMN "MP"."mp_flow_flow_info"."interactive_type"
-IS
-    '交互类型：0 背景流量，1 攻击流量，2 全流量';
-    COMMENT ON COLUMN "MP"."mp_flow_flow_info"."pcap_file"
-IS
-    'pcap文件地址';
-    COMMENT ON COLUMN "MP"."mp_flow_flow_info"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_flow_flow_info"."resource_type"
-IS
-    '资源类型：0 pcap包，1 脚本';
-    COMMENT ON COLUMN "MP"."mp_flow_flow_info"."run_cmd"
-IS
-    '攻击脚本运行命令';
-    COMMENT ON COLUMN "MP"."mp_flow_flow_info"."script_file"
-IS
-    '脚本文件地址';
-    COMMENT ON COLUMN "MP"."mp_flow_flow_info"."title"
-IS
-    '流量标题';
-    COMMENT ON COLUMN "MP"."mp_flow_flow_info"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_flow_port"
-IS
-    '流量执行网口表';
-    COMMENT ON COLUMN "MP"."mp_flow_port"."actuator_id"
-IS
-    '流量执行器id';
-    COMMENT ON COLUMN "MP"."mp_flow_port"."client_gateway"
-IS
-    '客户端网关';
-    COMMENT ON COLUMN "MP"."mp_flow_port"."client_ip"
-IS
-    '客户端ip';
-    COMMENT ON COLUMN "MP"."mp_flow_port"."client_mac"
-IS
-    '客户端mac';
-    COMMENT ON COLUMN "MP"."mp_flow_port"."client_port_id"
-IS
-    '客户端portId';
-    COMMENT ON COLUMN "MP"."mp_flow_port"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_flow_port"."id"
-IS
-    '网口id';
-    COMMENT ON COLUMN "MP"."mp_flow_port"."network_id"
-IS
-    '网络id';
-    COMMENT ON COLUMN "MP"."mp_flow_port"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_flow_port"."port_type"
-IS
-    '网口类型：0 pcap包，1 脚本';
-    COMMENT ON COLUMN "MP"."mp_flow_port"."server_gateway"
-IS
-    '服务端网关';
-    COMMENT ON COLUMN "MP"."mp_flow_port"."server_ip"
-IS
-    '服务端ip';
-    COMMENT ON COLUMN "MP"."mp_flow_port"."server_mac"
-IS
-    '服务端mac';
-    COMMENT ON COLUMN "MP"."mp_flow_port"."server_port_id"
-IS
-    '服务端portId';
-    COMMENT ON COLUMN "MP"."mp_flow_port"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_flow_script_demo"
-IS
-    '流量脚本模板表';
-    COMMENT ON COLUMN "MP"."mp_flow_script_demo"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_flow_script_demo"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_flow_script_demo"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_flow_script_demo"."script_name"
-IS
-    '脚本名称';
-    COMMENT ON COLUMN "MP"."mp_flow_script_demo"."type"
-IS
-    '示例脚本类型 1:流量 2:探针';
-    COMMENT ON COLUMN "MP"."mp_flow_script_demo"."update_time"
-IS
-    '更新时间';
-    COMMENT ON COLUMN "MP"."mp_flow_script_demo"."url"
-IS
-    '脚本url';
-    COMMENT ON TABLE "MP"."mp_flow_script_param"
-IS
-    '流量脚本参数表';
-    COMMENT ON COLUMN "MP"."mp_flow_script_param"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_flow_script_param"."flow_id"
-IS
-    '流量id';
-    COMMENT ON COLUMN "MP"."mp_flow_script_param"."id"
-IS
-    '脚本参数id';
-    COMMENT ON COLUMN "MP"."mp_flow_script_param"."param_desc"
-IS
-    '参数说明';
-    COMMENT ON COLUMN "MP"."mp_flow_script_param"."param_key"
-IS
-    '参数名';
-    COMMENT ON COLUMN "MP"."mp_flow_script_param"."param_type"
-IS
-    '参数类型：0 string,1 IP,2 number,3 bool';
-    COMMENT ON COLUMN "MP"."mp_flow_script_param"."param_value"
-IS
-    '参数值';
-    COMMENT ON COLUMN "MP"."mp_flow_script_param"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_flow_script_param"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_flow_task_port"
-IS
-    '流量任务网口表';
-    COMMENT ON COLUMN "MP"."mp_flow_task_port"."actuator_id"
-IS
-    '流量执行器id';
-    COMMENT ON COLUMN "MP"."mp_flow_task_port"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_flow_task_port"."id"
-IS
-    '网口id';
-    COMMENT ON COLUMN "MP"."mp_flow_task_port"."mac"
-IS
-    '网口mac';
-    COMMENT ON COLUMN "MP"."mp_flow_task_port"."network_id"
-IS
-    '网络id';
-    COMMENT ON COLUMN "MP"."mp_flow_task_port"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_flow_task_port"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_flow_task_task"
-IS
-    '流量执行任务表';
-    COMMENT ON COLUMN "MP"."mp_flow_task_task"."actuator_id"
-IS
-    '流量执行器id';
-    COMMENT ON COLUMN "MP"."mp_flow_task_task"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_flow_task_task"."error_count"
-IS
-    '失败执行次数';
-    COMMENT ON COLUMN "MP"."mp_flow_task_task"."flow_id"
-IS
-    '流量id';
-    COMMENT ON COLUMN "MP"."mp_flow_task_task"."id"
-IS
-    '任务id';
-    COMMENT ON COLUMN "MP"."mp_flow_task_task"."interactive_type"
-IS
-    '交互类型：0 背景流量，1 攻击流量';
-    COMMENT ON COLUMN "MP"."mp_flow_task_task"."msg"
-IS
-    '错误信息';
-    COMMENT ON COLUMN "MP"."mp_flow_task_task"."node_id"
-IS
-    '目标节点id';
-    COMMENT ON COLUMN "MP"."mp_flow_task_task"."node_ip"
-IS
-    '目标节点ip';
-    COMMENT ON COLUMN "MP"."mp_flow_task_task"."node_name"
-IS
-    '目标节点名称';
-    COMMENT ON COLUMN "MP"."mp_flow_task_task"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_flow_task_task"."port_id"
-IS
-    '网口id';
-    COMMENT ON COLUMN "MP"."mp_flow_task_task"."resource_type"
-IS
-    '资源类型：0 pcap包，1 脚本';
-    COMMENT ON COLUMN "MP"."mp_flow_task_task"."scene_id"
-IS
-    '场景实例id';
-    COMMENT ON COLUMN "MP"."mp_flow_task_task"."success_count"
-IS
-    '成功执行次数';
-    COMMENT ON COLUMN "MP"."mp_flow_task_task"."task_status"
-IS
-    '任务状态: 0 初始化，1 正在运行，2 正在停止， 3 已停止, 4 失败';
-    COMMENT ON COLUMN "MP"."mp_flow_task_task"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_front_admin_activ_ctl"
-IS
-    '系统激活信息表';
-    COMMENT ON COLUMN "MP"."mp_front_admin_activ_ctl"."active_count"
-IS
-    '同一个激活码的激活次数';
-    COMMENT ON COLUMN "MP"."mp_front_admin_activ_ctl"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_front_admin_activ_ctl"."expire_date"
-IS
-    '（密文）过期日期';
-    COMMENT ON COLUMN "MP"."mp_front_admin_activ_ctl"."first_active_date"
-IS
-    '（密文）系统首次激活日期。如果同一个license_code多次激活，最终的过期日期以第一次激活日期为准';
-    COMMENT ON COLUMN "MP"."mp_front_admin_activ_ctl"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_front_admin_activ_ctl"."last_active_date"
-IS
-    '（密文）系统最近一次激活日期，同一个激活码的情况下';
-    COMMENT ON COLUMN "MP"."mp_front_admin_activ_ctl"."license_code"
-IS
-    '（密文）激活码';
-    COMMENT ON COLUMN "MP"."mp_front_admin_activ_ctl"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_front_admin_activ_ctl"."salt"
-IS
-    '随机盐';
-    COMMENT ON COLUMN "MP"."mp_front_admin_activ_ctl"."status"
-IS
-    '状态 1:有效 0:无效';
-    COMMENT ON COLUMN "MP"."mp_front_admin_activ_ctl"."suffix"
-IS
-    '6位随机数字+字母，当前表中每次新增一条数据，则随机产生一个suffix';
-    COMMENT ON COLUMN "MP"."mp_front_admin_activ_ctl"."sys_lifetime"
-IS
-    '系统寿命';
-    COMMENT ON COLUMN "MP"."mp_front_admin_activ_ctl"."sys_run_seconds"
-IS
-    '系统运行秒数';
-    COMMENT ON COLUMN "MP"."mp_front_admin_activ_ctl"."sys_timestamp"
-IS
-    '定时任务记录的系统时间戳，发生时间回拨，则该值也回到回拨时间，用于累计系统运行秒数';
-    COMMENT ON COLUMN "MP"."mp_front_admin_activ_ctl"."tenant"
-IS
-    '所属租户';
-    COMMENT ON COLUMN "MP"."mp_front_admin_activ_ctl"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_log_level"
-IS
-    '系统日志级别配置表';
-    COMMENT ON COLUMN "MP"."mp_log_level"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_log_level"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_log_level"."log_level"
-IS
-    '日志级别(DEBUGINFOWARNERROR)';
-    COMMENT ON COLUMN "MP"."mp_log_level"."log_name"
-IS
-    '日志名称(一般为包路径)';
-    COMMENT ON COLUMN "MP"."mp_log_level"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_log_level"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_log_report"
-IS
-    '日志上报表';
-    COMMENT ON COLUMN "MP"."mp_log_report"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_log_report"."download_url"
-IS
-    '文件下载地址';
-    COMMENT ON COLUMN "MP"."mp_log_report"."file_name"
-IS
-    '文件名称';
-    COMMENT ON COLUMN "MP"."mp_log_report"."file_size"
-IS
-    '文件大小';
-    COMMENT ON COLUMN "MP"."mp_log_report"."host_ip"
-IS
-    '节点ip';
-    COMMENT ON COLUMN "MP"."mp_log_report"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_log_report"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_log_report"."type"
-IS
-    '日志类型（CRMPADCP)';
-    COMMENT ON COLUMN "MP"."mp_log_report"."update_time"
-IS
-    '更新时间';
-CREATE TABLE "MP"."mp_menu_template_info"
-(
-    "pk"          INT IDENTITY(234, 1) NOT NULL,
-    "id"          VARCHAR(64 char ) NOT NULL,
-            "template_id" VARCHAR(64 char) NOT NULL,
-            "menu_id"     VARCHAR(64 char) NOT NULL,
-            "parent"      VARCHAR(64 char) NULL,
-            "identifier"  VARCHAR(64 char) NOT NULL,
-            "tenant"      VARCHAR(64 char) NOT NULL,
-            "type"        INT NOT NULL,
-            "visible"     INT DEFAULT 1 NOT NULL,
-            "name"        VARCHAR(64 char) NOT NULL,
-            "en_name"     VARCHAR(64 char) NOT NULL,
-            "path"        VARCHAR(255 char) NULL,
-            "create_time" TIMESTAMP(0) NOT NULL,
-            "update_time" TIMESTAMP(0) NOT NULL
-        );
-
-CREATE TABLE "MP"."mp_menu_template_role"
-(
-    "pk"          INT IDENTITY(2, 1) NOT NULL,
-    "id"          VARCHAR(64 char ) NOT NULL,
-            "template_id" VARCHAR(64 char) NOT NULL,
-            "role_id"     VARCHAR(64 char) NOT NULL,
-            "create_time" TIMESTAMP(0) NOT NULL,
-            "update_time" TIMESTAMP(0) NOT NULL
-        );
-
-CREATE TABLE "MP"."mp_scene_scene"
-(
-    "pk"                     INT IDENTITY(4, 1) NOT NULL,
-    "id"                     VARCHAR(64 char ) NOT NULL,
-            "source"                 VARCHAR(64 char) NOT NULL,
-            "name"                   VARCHAR(255 char) NOT NULL,
-            "description"            VARCHAR(2048 char) NOT NULL,
-            "file"                   VARCHAR(2048 char) NOT NULL,
-            "display_context"        TEXT NOT NULL,
-            "event"                  INT NOT NULL,
-            "event_status"           INT NOT NULL,
-            "process"                VARCHAR(64 char) NOT NULL,
-            "process_status"         INT NOT NULL,
-            "process_message"        VARCHAR(2048 char) NOT NULL,
-            "create_consume_seconds" INT NOT NULL,
-            "deleted"                TINYINT NOT NULL,
-            "create_time"            TIMESTAMP(6) NOT NULL,
-            "update_time"            TIMESTAMP(6) NOT NULL,
-            "stage"                  VARCHAR(64 char) NOT NULL,
-            "stage_name"             VARCHAR(64 char) NOT NULL,
-            "stage_percentage"       INT NOT NULL,
-            "stage_list"             VARCHAR(2048 char) NOT NULL
-        );
-
-CREATE TABLE "MP"."mp_scene_scene_area"
-(
-    "pk"              INT IDENTITY(1, 1) NOT NULL,
-    "id"              VARCHAR(64 char ) NOT NULL,
-            "scene"           VARCHAR(64 char) NOT NULL,
-            "node_id"         VARCHAR(64 char) NOT NULL,
-            "area"            VARCHAR(64 char) NOT NULL,
-            "icon2"           VARCHAR(2048 char) NOT NULL,
-            "position2"       VARCHAR(128 char) NOT NULL,
-            "icon3"           VARCHAR(2048 char) NOT NULL,
-            "position3"       VARCHAR(128 char) NOT NULL,
-            "name"            VARCHAR(255 char) NOT NULL,
-            "description"     VARCHAR(1024 char) NOT NULL,
-            "open"            TINYINT NOT NULL,
-            "type"            TINYINT DEFAULT 0 NULL,
-            "create_time"     TIMESTAMP(6) NOT NULL,
-            "update_time"     TIMESTAMP(6) NOT NULL,
-            "display_context" VARCHAR(2048 char) NOT NULL,
-            "outer_position2" VARCHAR(1024 char) NOT NULL
-        );
-
-CREATE TABLE "MP"."mp_scene_scene_config"
-(
-    "pk"              INT IDENTITY(8, 1) NOT NULL,
-    "id"              VARCHAR(64 char ) NOT NULL,
-            "type"            INT NOT NULL,
-            "source"          VARCHAR(64 char) NOT NULL,
-            "name"            VARCHAR(255 char) NOT NULL,
-            "description"     VARCHAR(2048 char) NOT NULL,
-            "file"            VARCHAR(2048 char) NOT NULL,
-            "display_context" TEXT NOT NULL,
-            "deleted"         TINYINT NOT NULL,
-            "create_time"     TIMESTAMP(6) NOT NULL,
-            "update_time"     TIMESTAMP(6) NOT NULL
-        );
-
-CREATE TABLE "MP"."mp_scene_scene_config_area"
-(
-    "pk"              INT IDENTITY(1, 1) NOT NULL,
-    "id"              VARCHAR(64 char ) NOT NULL,
-            "scene"           VARCHAR(64 char) NOT NULL,
-            "node_id"         VARCHAR(64 char) NOT NULL,
-            "area"            VARCHAR(64 char) NOT NULL,
-            "icon2"           VARCHAR(2048 char) NOT NULL,
-            "position2"       VARCHAR(128 char) NOT NULL,
-            "icon3"           VARCHAR(2048 char) NOT NULL,
-            "position3"       VARCHAR(128 char) NOT NULL,
-            "name"            VARCHAR(255 char) NOT NULL,
-            "description"     VARCHAR(1024 char) NOT NULL,
-            "open"            TINYINT NOT NULL,
-            "type"            TINYINT DEFAULT 0 NULL,
-            "create_time"     TIMESTAMP(6) NOT NULL,
-            "update_time"     TIMESTAMP(6) NOT NULL,
-            "display_context" VARCHAR(2048 char) NOT NULL,
-            "outer_position2" VARCHAR(1024 char) NOT NULL
-        );
-
-CREATE TABLE "MP"."mp_scene_scene_config_element"
-(
-    "pk"                  INT IDENTITY(34, 1) NOT NULL,
-    "id"                  VARCHAR(64 char ) NOT NULL,
-            "scene"               VARCHAR(64 char) NOT NULL,
-            "node_id"             VARCHAR(64 char) NOT NULL,
-            "area"                VARCHAR(64 char) NOT NULL,
-            "icon2"               VARCHAR(2048 char) NOT NULL,
-            "position2"           VARCHAR(64 char) NOT NULL,
-            "icon3"               VARCHAR(2048 char) NOT NULL,
-            "position3"           VARCHAR(64 char) NOT NULL,
-            "name"                VARCHAR(255 char) NOT NULL,
-            "description"         VARCHAR(1024 char) NOT NULL,
-            "type"                INT NOT NULL,
-            "file"                VARCHAR(2048 char) NOT NULL,
-            "system_type"         VARCHAR(64 char) NOT NULL,
-            "system_architecture" VARCHAR(16 char) NOT NULL,
-            "system_language"     VARCHAR(8 char) NOT NULL,
-            "cpu"                 INT NOT NULL,
-            "ram"                 INT NOT NULL,
-            "disk"                INT NOT NULL,
-            "init_commands" CLOB NOT NULL,
-            "max_port_number" INT NOT NULL,
-            "create_time"     TIMESTAMP(6) NOT NULL,
-            "update_time"     TIMESTAMP(6) NOT NULL,
-            "display_context" VARCHAR(2048 char) NOT NULL,
-            "is_auxiliary"    TINYINT NOT NULL,
-            "outer_position2" VARCHAR(1024 char) NOT NULL
-        );
-
-CREATE TABLE "MP"."mp_scene_scene_config_element_plugin"
-(
-    "pk"            INT IDENTITY(51, 1) NOT NULL,
-    "id"            VARCHAR(64 char ) NOT NULL,
-            "scene"         VARCHAR(64 char) NOT NULL,
-            "scene_element" VARCHAR(64 char) NOT NULL,
-            "plugin_key"    VARCHAR(32 char) NOT NULL,
-            "create_time"   TIMESTAMP(6) NOT NULL,
-            "update_time"   TIMESTAMP(6) NOT NULL
-        );
-
-CREATE TABLE "MP"."mp_scene_scene_config_element_port"
-(
-    "pk"                    INT IDENTITY(75, 1) NOT NULL,
-    "id"                    VARCHAR(64 char ) NOT NULL,
-            "scene"                 VARCHAR(64 char) NOT NULL,
-            "scene_element"         VARCHAR(64 char) NOT NULL,
-            "port_id"               VARCHAR(64 char) NOT NULL,
-            "name"                  VARCHAR(255 char) NOT NULL,
-            "type"                  INT NOT NULL,
-            "usable"                TINYINT DEFAULT 1 NULL,
-            "mac_addr"              VARCHAR(32 char) NOT NULL,
-            "ip"                    VARCHAR(32 char) NOT NULL,
-            "netmask"               VARCHAR(32 char) NOT NULL,
-            "gateway"               VARCHAR(32 char) NOT NULL,
-            "dhcp"                  TINYINT NOT NULL,
-            "dns"                   VARCHAR(255 char) NOT NULL,
-            "egress"                INT NOT NULL,
-            "ingress"               INT NOT NULL,
-            "delay"                 INT NOT NULL,
-            "loss"                  INT NOT NULL,
-            "access_modes"          TEXT NOT NULL,
-            "create_time"           TIMESTAMP(6) NOT NULL,
-            "update_time"           TIMESTAMP(6) NOT NULL,
-            "order"                 INT DEFAULT 0 NOT NULL,
-            "is_auxiliary"          TINYINT NOT NULL,
-            "port_connect_net_cidr" VARCHAR(20 char) NULL
-        );
-
-CREATE TABLE "MP"."mp_scene_scene_config_element_port_connection"
-(
-    "pk"              INT IDENTITY(27, 1) NOT NULL,
-    "id"              VARCHAR(64 char ) NOT NULL,
-            "scene"           VARCHAR(64 char) NOT NULL,
-            "source_element"  VARCHAR(64 char) NOT NULL,
-            "target_element"  VARCHAR(64 char) NOT NULL,
-            "source_port"     VARCHAR(64 char) NOT NULL,
-            "target_port"     VARCHAR(64 char) NOT NULL,
-            "connection_id"   VARCHAR(64 char) NOT NULL,
-            "source_port_id"  VARCHAR(64 char) NOT NULL,
-            "target_port_id"  VARCHAR(64 char) NOT NULL,
-            "name"            VARCHAR(255 char) NOT NULL,
-            "unidirectional"  TINYINT NOT NULL,
-            "create_time"     TIMESTAMP(6) NOT NULL,
-            "update_time"     TIMESTAMP(6) NOT NULL,
-            "display_context" VARCHAR(2048 char) NOT NULL,
-            "type"            VARCHAR(64 char) NULL,
-            "vertices"        TEXT NULL,
-            "info"            TEXT NULL
-        );
-
-CREATE TABLE "MP"."mp_scene_scene_config_node_connection"
-(
-    "pk"              INT IDENTITY(1, 1) NOT NULL,
-    "id"              VARCHAR(64 char ) NOT NULL,
-            "scene"           VARCHAR(64 char) NOT NULL,
-            "source_node_id"  VARCHAR(64 char) NOT NULL,
-            "target_node_id"  VARCHAR(64 char) NOT NULL,
-            "source_node"     VARCHAR(64 char) NOT NULL,
-            "target_node"     VARCHAR(64 char) NOT NULL,
-            "connection_id"   VARCHAR(64 char) NOT NULL,
-            "name"            VARCHAR(255 char) NOT NULL,
-            "create_time"     TIMESTAMP(6) NOT NULL,
-            "update_time"     TIMESTAMP(6) NOT NULL,
-            "display_context" VARCHAR(2048 char) NOT NULL,
-            "type"            VARCHAR(64 char) NULL,
-            "vertices"        TEXT NULL
-        );
-
-CREATE TABLE "MP"."mp_scene_scene_config_piece"
-(
-    "pk"              INT IDENTITY(1, 1) NOT NULL,
-    "id"              VARCHAR(64 char ) NOT NULL,
-            "scene"           VARCHAR(64 char) NOT NULL,
-            "node_id"         VARCHAR(64 char) NOT NULL,
-            "area"            VARCHAR(64 char) NOT NULL,
-            "icon2"           VARCHAR(2048 char) NOT NULL,
-            "position2"       VARCHAR(128 char) NOT NULL,
-            "icon3"           VARCHAR(2048 char) NOT NULL,
-            "position3"       VARCHAR(128 char) NOT NULL,
-            "name"            VARCHAR(64 char) NOT NULL,
-            "description"     VARCHAR(1024 char) NOT NULL,
-            "type"            VARCHAR(64 char) NOT NULL,
-            "display_context" VARCHAR(2048 char) NOT NULL,
-            "create_time"     TIMESTAMP(6) NOT NULL,
-            "update_time"     TIMESTAMP(6) NOT NULL,
-            "outer_position2" VARCHAR(1024 char) NOT NULL
-        );
-
-CREATE TABLE "MP"."mp_scene_scene_element"
-(
-    "pk"                  INT IDENTITY(17, 1) NOT NULL,
-    "id"                  VARCHAR(64 char ) NOT NULL,
-            "scene"               VARCHAR(64 char) NOT NULL,
-            "node_id"             VARCHAR(64 char) NOT NULL,
-            "area"                VARCHAR(64 char) NOT NULL,
-            "icon2"               VARCHAR(2048 char) NOT NULL,
-            "position2"           VARCHAR(64 char) NOT NULL,
-            "icon3"               VARCHAR(2048 char) NOT NULL,
-            "position3"           VARCHAR(64 char) NOT NULL,
-            "name"                VARCHAR(255 char) NOT NULL,
-            "description"         VARCHAR(1024 char) NOT NULL,
-            "type"                INT NOT NULL,
-            "file"                VARCHAR(2048 char) NOT NULL,
-            "system_type"         VARCHAR(64 char) NOT NULL,
-            "system_architecture" VARCHAR(16 char) NOT NULL,
-            "system_language"     VARCHAR(8 char) NOT NULL,
-            "cpu"                 INT NOT NULL,
-            "ram"                 INT NOT NULL,
-            "disk"                INT NOT NULL,
-            "init_commands" CLOB NOT NULL,
-            "max_port_number" INT NOT NULL,
-            "event"           INT NOT NULL,
-            "event_status"    INT NOT NULL,
-            "process"         VARCHAR(64 char) NOT NULL,
-            "process_status"  INT NOT NULL,
-            "process_message" VARCHAR(2048 char) NOT NULL,
-            "create_time"     TIMESTAMP(6) NOT NULL,
-            "update_time"     TIMESTAMP(6) NOT NULL,
-            "display_context" VARCHAR(2048 char) NOT NULL,
-            "is_auxiliary"    TINYINT NOT NULL,
-            "outer_position2" VARCHAR(1024 char) NOT NULL
-        );
-
-CREATE TABLE "MP"."mp_scene_scene_element_plugin"
-(
-    "pk"            INT IDENTITY(25, 1) NOT NULL,
-    "id"            VARCHAR(64 char ) NOT NULL,
-            "scene"         VARCHAR(64 char) NOT NULL,
-            "scene_element" VARCHAR(64 char) NOT NULL,
-            "plugin_key"    VARCHAR(32 char) NOT NULL,
-            "create_time"   TIMESTAMP(6) NOT NULL,
-            "update_time"   TIMESTAMP(6) NOT NULL
-        );
-
-CREATE TABLE "MP"."mp_scene_scene_element_port"
-(
-    "pk"                    INT IDENTITY(36, 1) NOT NULL,
-    "id"                    VARCHAR(64 char ) NOT NULL,
-            "scene"                 VARCHAR(64 char) NOT NULL,
-            "scene_element"         VARCHAR(64 char) NOT NULL,
-            "port_id"               VARCHAR(64 char) NOT NULL,
-            "name"                  VARCHAR(255 char) NOT NULL,
-            "type"                  INT NOT NULL,
-            "usable"                TINYINT DEFAULT 1 NULL,
-            "mac_addr"              VARCHAR(32 char) NOT NULL,
-            "ip"                    VARCHAR(32 char) NOT NULL,
-            "netmask"               VARCHAR(32 char) NOT NULL,
-            "gateway"               VARCHAR(32 char) NOT NULL,
-            "dhcp"                  TINYINT NOT NULL,
-            "dns"                   VARCHAR(255 char) NOT NULL,
-            "egress"                INT NOT NULL,
-            "ingress"               INT NOT NULL,
-            "delay"                 INT NOT NULL,
-            "loss"                  INT NOT NULL,
-            "access_modes"          TEXT NOT NULL,
-            "create_time"           TIMESTAMP(6) NOT NULL,
-            "update_time"           TIMESTAMP(6) NOT NULL,
-            "order"                 INT DEFAULT 0 NOT NULL,
-            "is_auxiliary"          TINYINT NOT NULL,
-            "port_connect_net_cidr" VARCHAR(20 char) NULL
-        );
-
-CREATE TABLE "MP"."mp_scene_scene_element_port_connection"
-(
-    "pk"              INT IDENTITY(14, 1) NOT NULL,
-    "id"              VARCHAR(64 char ) NOT NULL,
-            "scene"           VARCHAR(64 char) NOT NULL,
-            "source_element"  VARCHAR(64 char) NOT NULL,
-            "target_element"  VARCHAR(64 char) NOT NULL,
-            "source_port"     VARCHAR(64 char) NOT NULL,
-            "target_port"     VARCHAR(64 char) NOT NULL,
-            "connection_id"   VARCHAR(64 char) NOT NULL,
-            "source_port_id"  VARCHAR(64 char) NOT NULL,
-            "target_port_id"  VARCHAR(64 char) NOT NULL,
-            "name"            VARCHAR(255 char) NOT NULL,
-            "unidirectional"  TINYINT NOT NULL,
-            "create_time"     TIMESTAMP(6) NOT NULL,
-            "update_time"     TIMESTAMP(6) NOT NULL,
-            "display_context" VARCHAR(2048 char) NOT NULL,
-            "type"            VARCHAR(64 char) NULL,
-            "vertices"        TEXT NULL,
-            "info"            TEXT NULL
-        );
-
-CREATE TABLE "MP"."mp_scene_scene_element_snapshot"
-(
-    "pk"            INT IDENTITY(1, 1) NOT NULL,
-    "id"            VARCHAR(64 char ) NOT NULL,
-            "scene_element" VARCHAR(64 char) NOT NULL,
-            "name"          VARCHAR(255 char) NOT NULL,
-            "description"   VARCHAR(2048 char) NOT NULL,
-            "address"       VARCHAR(512 char) NOT NULL,
-            "create_time"   TIMESTAMP(6) NOT NULL,
-            "update_time"   TIMESTAMP(6) NOT NULL,
-            "scene"         VARCHAR(64 char) NOT NULL,
-            "source_name"   VARCHAR(255 char) NOT NULL
-        );
-
-CREATE TABLE "MP"."mp_scene_scene_node_connection"
-(
-    "pk"              INT IDENTITY(1, 1) NOT NULL,
-    "id"              VARCHAR(64 char ) NOT NULL,
-            "scene"           VARCHAR(64 char) NOT NULL,
-            "source_node_id"  VARCHAR(64 char) NOT NULL,
-            "target_node_id"  VARCHAR(64 char) NOT NULL,
-            "source_node"     VARCHAR(64 char) NOT NULL,
-            "target_node"     VARCHAR(64 char) NOT NULL,
-            "connection_id"   VARCHAR(64 char) NOT NULL,
-            "name"            VARCHAR(255 char) NOT NULL,
-            "create_time"     TIMESTAMP(6) NOT NULL,
-            "update_time"     TIMESTAMP(6) NOT NULL,
-            "display_context" VARCHAR(2048 char) NOT NULL,
-            "type"            VARCHAR(64 char) NULL,
-            "vertices"        TEXT NULL
-        );
-
-CREATE TABLE "MP"."mp_scene_scene_piece"
-(
-    "pk"              INT IDENTITY(1, 1) NOT NULL,
-    "id"              VARCHAR(64 char ) NOT NULL,
-            "scene"           VARCHAR(64 char) NOT NULL,
-            "node_id"         VARCHAR(64 char) NOT NULL,
-            "area"            VARCHAR(64 char) NOT NULL,
-            "icon2"           VARCHAR(2048 char) NOT NULL,
-            "position2"       VARCHAR(128 char) NOT NULL,
-            "icon3"           VARCHAR(2048 char) NOT NULL,
-            "position3"       VARCHAR(128 char) NOT NULL,
-            "name"            VARCHAR(64 char) NOT NULL,
-            "description"     VARCHAR(1024 char) NOT NULL,
-            "type"            VARCHAR(64 char) NOT NULL,
-            "display_context" VARCHAR(2048 char) NOT NULL,
-            "create_time"     TIMESTAMP(6) NOT NULL,
-            "update_time"     TIMESTAMP(6) NOT NULL,
-            "outer_position2" VARCHAR(1024 char) NOT NULL
-        );
-
-CREATE TABLE "MP"."mp_sceneplugincloud_scene"
-(
-    "pk"               INT IDENTITY(4, 1) NOT NULL,
-    "id"               VARCHAR(64 char ) NOT NULL,
-            "scene"            VARCHAR(64 char) NOT NULL,
-            "create_time"      TIMESTAMP(6) NOT NULL,
-            "update_time"      TIMESTAMP(6) NOT NULL,
-            "enable_recording" TINYINT NOT NULL,
-            "enable_rate"      TINYINT NOT NULL,
-            "dns_nameservers"  TEXT NULL
-        );
-
-CREATE TABLE "MP"."mp_sceneplugincloud_scene_config"
-(
-    "pk"               INT IDENTITY(8, 1) NOT NULL,
-    "id"               VARCHAR(64 char ) NOT NULL,
-            "scene"            VARCHAR(64 char) NOT NULL,
-            "create_time"      TIMESTAMP(6) NOT NULL,
-            "update_time"      TIMESTAMP(6) NOT NULL,
-            "enable_recording" TINYINT NOT NULL,
-            "enable_rate"      TINYINT NOT NULL,
-            "dns_nameservers"  TEXT NULL
-        );
-
-CREATE TABLE "MP"."mp_sceneplugincloud_scene_config_element"
-(
-    "pk"                   INT IDENTITY(34, 1) NOT NULL,
-    "id"                   VARCHAR(64 char ) NOT NULL,
-            "scene"                VARCHAR(64 char) NOT NULL,
-            "scene_element"        VARCHAR(64 char) NOT NULL,
-            "external"             TINYINT NOT NULL,
-            "virtual_type"         INT NOT NULL,
-            "transparent"          TINYINT NOT NULL,
-            "resource_id"          VARCHAR(64 char) NOT NULL,
-            "electric_port_number" INT NOT NULL,
-            "electric_port_type"   VARCHAR(8 char) NOT NULL,
-            "optical_port_number"  INT NOT NULL,
-            "optical_port_type"    VARCHAR(8 char) NOT NULL,
-            "cidr"                 VARCHAR(32 char) NOT NULL,
-            "gateway"              VARCHAR(32 char) NOT NULL,
-            "gateway_off"          TINYINT NOT NULL,
-            "dns_nameservers"      VARCHAR(255 char) NOT NULL,
-            "dhcp"                 TINYINT NOT NULL,
-            "allocation_pools"     VARCHAR(1024 char) NOT NULL,
-            "vlan"                 TINYINT NOT NULL,
-            "vlan_id"              INT NOT NULL,
-            "static_routes"        TEXT NOT NULL,
-            "firewall_rules"       TEXT NOT NULL,
-            "image"                VARCHAR(255 char) NOT NULL,
-            "initial_tools"        VARCHAR(2048 char) NOT NULL,
-            "role"                 INT NOT NULL,
-            "image_type"           VARCHAR(64 char) NOT NULL,
-            "category"             INT NOT NULL,
-            "init_support"         TINYINT NOT NULL,
-            "quick_create_support" TINYINT NOT NULL,
-            "quick_create_params" CLOB NOT NULL,
-            "auxiliary_network_on"                 TINYINT NOT NULL,
-            "auxiliary_network_id"                 VARCHAR(64 char) NOT NULL,
-            "auxiliary_network_cidr"               VARCHAR(32 char) NOT NULL,
-            "auxiliary_network_gateway"            VARCHAR(32 char) NOT NULL,
-            "auxiliary_network_dns_nameservers"    VARCHAR(255 char) NOT NULL,
-            "auxiliary_network_dhcp"               TINYINT NOT NULL,
-            "auxiliary_network_allocation_pools"   VARCHAR(1024 char) NOT NULL,
-            "auxiliary_network_vlan"               TINYINT NOT NULL,
-            "auxiliary_network_vlan_id"            INT NOT NULL,
-            "enable_mgmt"                          TINYINT NOT NULL,
-            "mgmt_port_resource_id"                VARCHAR(64 char) NOT NULL,
-            "mgmt_ip"                              VARCHAR(32 char) NOT NULL,
-            "mgmt_mac_addr"                        VARCHAR(32 char) NOT NULL,
-            "create_time"                          TIMESTAMP(6) NOT NULL,
-            "update_time"                          TIMESTAMP(6) NOT NULL,
-            "wan_port_number"                      INT NOT NULL,
-            "wan_port_type"                        VARCHAR(8 char) NOT NULL,
-            "lan_port_number"                      INT NOT NULL,
-            "lan_port_type"                        VARCHAR(8 char) NOT NULL,
-            "host"                                 VARCHAR(64 char) DEFAULT '' NOT NULL,
-            "category2"                            INT NOT NULL,
-            "category3"                            INT NOT NULL,
-            "auxiliary_network_router_on"          TINYINT NOT NULL,
-            "auxiliary_network_router_resource_id" VARCHAR(64 char) NOT NULL,
-            "auxiliary_network_router_ip"          VARCHAR(32 char) NOT NULL,
-            "firewall_resource_id"                 VARCHAR(64 char) NOT NULL,
-            "host_routes"                          TEXT NOT NULL,
-            "auxiliary_network_host_routes"        TEXT NOT NULL,
-            "is_build_in"                          TINYINT NOT NULL,
-            "auxiliary_router_off"                 TINYINT NOT NULL,
-            "ospf_router_id"                       VARCHAR(16 char) NOT NULL,
-            "image_uuid"                           VARCHAR(64 char) NOT NULL,
-            "rip_loopback"                         VARCHAR(64 char) NOT NULL,
-            "net_mode"                             INT NOT NULL,
-            "iso_attach_filename"                  VARCHAR(64 char) NOT NULL,
-            "iso_tmpdir_uuid"                      VARCHAR(64 char) NOT NULL,
-            "virtual_usbs"                         VARCHAR(512 char) NOT NULL,
-            "entity_usbs"                          VARCHAR(512 char) NOT NULL,
-            "docker_params"                        TEXT NOT NULL,
-            "platform"                             VARCHAR(64 char) NOT NULL,
-            "snmp_config"                          TEXT NULL,
-            "mib_data"                             TEXT NULL
-        );
-
-CREATE TABLE "MP"."mp_sceneplugincloud_scene_config_element_port"
-(
-    "pk"                   INT IDENTITY(75, 1) NOT NULL,
-    "id"                   VARCHAR(64 char ) NOT NULL,
-            "scene"                VARCHAR(64 char) NOT NULL,
-            "scene_element_port"   VARCHAR(64 char) NOT NULL,
-            "resource_id"          VARCHAR(64 char) NOT NULL,
-            "nat"                  TINYINT NOT NULL,
-            "entity_access_type"   VARCHAR(64 char) NOT NULL,
-            "entity_switch_name"   VARCHAR(64 char) NOT NULL,
-            "entity_switch_port"   VARCHAR(64 char) NOT NULL,
-            "gateway_port_type"    INT NOT NULL,
-            "gateway_port_ips"     VARCHAR(64 char) NOT NULL,
-            "auxiliary_network_id" VARCHAR(64 char) NOT NULL,
-            "qos_id"               VARCHAR(64 char) NOT NULL,
-            "access_modes"         TEXT NOT NULL,
-            "floating_ip"          VARCHAR(32 char) NOT NULL,
-            "floating_ip_id"       VARCHAR(64 char) NOT NULL,
-            "create_time"          TIMESTAMP(6) NOT NULL,
-            "update_time"          TIMESTAMP(6) NOT NULL,
-            "firewall_rules"       TEXT NOT NULL,
-            "firewall_resource_id" VARCHAR(64 char) NOT NULL,
-            "ospf_ip"              VARCHAR(64 char) NOT NULL,
-            "ospf_area"            VARCHAR(16 char) NOT NULL,
-            "bgp_as"               VARCHAR(16 char) NOT NULL,
-            "bgp_ip"               VARCHAR(64 char) NOT NULL,
-            "bgp_peer"             VARCHAR(64 char) NOT NULL,
-            "bgp_peer_as"          VARCHAR(16 char) NOT NULL,
-            "entity_port"          VARCHAR(128 char) NOT NULL,
-            "connect_mode"         VARCHAR(32 char) NOT NULL,
-            "rip_ip"               VARCHAR(32 char) NOT NULL,
-            "rip_pear"             VARCHAR(32 char) NOT NULL
-        );
-
-CREATE TABLE "MP"."mp_sceneplugincloud_scene_connection"
-(
-    "pk"                          INT IDENTITY(1, 1) NOT NULL,
-    "id"                          VARCHAR(64 char ) NOT NULL,
-            "scene"                       VARCHAR(64 char) NOT NULL,
-            "scene_element"               VARCHAR(64 char) NOT NULL,
-            "scene_element_port"          VARCHAR(64 char) NOT NULL,
-            "access_mode_id"              VARCHAR(32 char) NOT NULL,
-            "protocol"                    VARCHAR(64 char) NOT NULL,
-            "port"                        INT NOT NULL,
-            "username"                    VARCHAR(255 char) NOT NULL,
-            "password"                    VARCHAR(255 char) NOT NULL,
-            "token"                       VARCHAR(2048 char) NOT NULL,
-            "access_ip"                   VARCHAR(32 char) NOT NULL,
-            "access_port"                 INT NOT NULL,
-            "access_user"                 VARCHAR(255 char) NOT NULL,
-            "access_pass"                 VARCHAR(255 char) NOT NULL,
-            "access_token"                VARCHAR(2048 char) NOT NULL,
-            "access_token_expire_time"    TIMESTAMP(6) NOT NULL,
-            "connection_id"               VARCHAR(64 char) NOT NULL,
-            "connection_url"              VARCHAR(2048 char) NOT NULL,
-            "create_time"                 TIMESTAMP(6) NOT NULL,
-            "update_time"                 TIMESTAMP(6) NOT NULL,
-            "connection_enable_recording" TINYINT NOT NULL,
-            "connection_recording_name"   VARCHAR(255 char) NOT NULL,
-            "disable"                     TINYINT NOT NULL
-        );
-
-CREATE TABLE "MP"."mp_sceneplugincloud_scene_element"
-(
-    "pk"                   INT IDENTITY(17, 1) NOT NULL,
-    "id"                   VARCHAR(64 char ) NOT NULL,
-            "scene"                VARCHAR(64 char) NOT NULL,
-            "scene_element"        VARCHAR(64 char) NOT NULL,
-            "external"             TINYINT NOT NULL,
-            "virtual_type"         INT NOT NULL,
-            "transparent"          TINYINT NOT NULL,
-            "resource_id"          VARCHAR(64 char) NOT NULL,
-            "electric_port_number" INT NOT NULL,
-            "electric_port_type"   VARCHAR(8 char) NOT NULL,
-            "optical_port_number"  INT NOT NULL,
-            "optical_port_type"    VARCHAR(8 char) NOT NULL,
-            "cidr"                 VARCHAR(32 char) NOT NULL,
-            "gateway"              VARCHAR(32 char) NOT NULL,
-            "gateway_off"          TINYINT NOT NULL,
-            "dns_nameservers"      VARCHAR(255 char) NOT NULL,
-            "dhcp"                 TINYINT NOT NULL,
-            "allocation_pools"     VARCHAR(1024 char) NOT NULL,
-            "vlan"                 TINYINT NOT NULL,
-            "vlan_id"              INT NOT NULL,
-            "static_routes"        TEXT NOT NULL,
-            "firewall_rules"       TEXT NOT NULL,
-            "image"                VARCHAR(255 char) NOT NULL,
-            "initial_tools"        VARCHAR(2048 char) NOT NULL,
-            "role"                 INT NOT NULL,
-            "image_type"           VARCHAR(64 char) NOT NULL,
-            "category"             INT NOT NULL,
-            "init_support"         TINYINT NOT NULL,
-            "quick_create_support" TINYINT NOT NULL,
-            "quick_create_params" CLOB NOT NULL,
-            "auxiliary_network_on"                 TINYINT NOT NULL,
-            "auxiliary_network_id"                 VARCHAR(64 char) NOT NULL,
-            "auxiliary_network_cidr"               VARCHAR(32 char) NOT NULL,
-            "auxiliary_network_gateway"            VARCHAR(32 char) NOT NULL,
-            "auxiliary_network_dns_nameservers"    VARCHAR(255 char) NOT NULL,
-            "auxiliary_network_dhcp"               TINYINT NOT NULL,
-            "auxiliary_network_allocation_pools"   VARCHAR(1024 char) NOT NULL,
-            "auxiliary_network_vlan"               TINYINT NOT NULL,
-            "auxiliary_network_vlan_id"            INT NOT NULL,
-            "enable_mgmt"                          TINYINT NOT NULL,
-            "mgmt_port_resource_id"                VARCHAR(64 char) NOT NULL,
-            "mgmt_ip"                              VARCHAR(32 char) NOT NULL,
-            "mgmt_mac_addr"                        VARCHAR(32 char) NOT NULL,
-            "create_time"                          TIMESTAMP(6) NOT NULL,
-            "update_time"                          TIMESTAMP(6) NOT NULL,
-            "wan_port_number"                      INT NOT NULL,
-            "wan_port_type"                        VARCHAR(8 char) NOT NULL,
-            "lan_port_number"                      INT NOT NULL,
-            "lan_port_type"                        VARCHAR(8 char) NOT NULL,
-            "host"                                 VARCHAR(64 char) DEFAULT '' NOT NULL,
-            "category2"                            INT NOT NULL,
-            "category3"                            INT NOT NULL,
-            "auxiliary_network_router_on"          TINYINT NOT NULL,
-            "auxiliary_network_router_resource_id" VARCHAR(64 char) NOT NULL,
-            "auxiliary_network_router_ip"          VARCHAR(32 char) NOT NULL,
-            "firewall_resource_id"                 VARCHAR(64 char) NOT NULL,
-            "host_routes"                          TEXT NOT NULL,
-            "auxiliary_network_host_routes"        TEXT NOT NULL,
-            "is_build_in"                          TINYINT NOT NULL,
-            "auxiliary_router_off"                 TINYINT NOT NULL,
-            "ospf_router_id"                       VARCHAR(64 char) NOT NULL,
-            "image_uuid"                           VARCHAR(64 char) NOT NULL,
-            "rip_loopback"                         VARCHAR(64 char) NOT NULL,
-            "net_mode"                             INT NOT NULL,
-            "iso_attach_filename"                  VARCHAR(64 char) NOT NULL,
-            "iso_tmpdir_uuid"                      VARCHAR(64 char) NOT NULL,
-            "virtual_usbs"                         VARCHAR(512 char) NOT NULL,
-            "entity_usbs"                          VARCHAR(512 char) NOT NULL,
-            "docker_params"                        TEXT NOT NULL,
-            "platform"                             VARCHAR(64 char) NOT NULL,
-            "snmp_config"                          TEXT NULL,
-            "mib_data"                             TEXT NULL,
-            "fwdns_ips"                            TEXT NULL
-        );
-
-CREATE TABLE "MP"."mp_sceneplugincloud_scene_element_network"
-(
-    "pk"                                   INT IDENTITY(19, 1) NOT NULL,
-    "id"                                   VARCHAR(64 char ) NOT NULL,
-            "scene"                                VARCHAR(64 char) NOT NULL,
-            "scene_element"                        VARCHAR(64 char) NOT NULL,
-            "cidr"                                 VARCHAR(32 char) NOT NULL,
-            "gateway"                              VARCHAR(32 char) NOT NULL,
-            "gateway_off"                          TINYINT NOT NULL,
-            "dns_nameservers"                      VARCHAR(255 char) NOT NULL,
-            "dhcp"                                 TINYINT NOT NULL,
-            "dhcp_ip"                              VARCHAR(32 char) NOT NULL,
-            "allocation_pools"                     VARCHAR(1024 char) NOT NULL,
-            "vlan"                                 TINYINT NOT NULL,
-            "vlan_id"                              INT NOT NULL,
-            "host_routes"                          TEXT NOT NULL,
-            "resource_id"                          VARCHAR(64 char) NOT NULL,
-            "external"                             TINYINT NOT NULL,
-            "create_time"                          TIMESTAMP(0) NOT NULL,
-            "update_time"                          TIMESTAMP(0) NOT NULL,
-            "auxiliary_network_router_on"          TINYINT NOT NULL,
-            "auxiliary_network_router_resource_id" VARCHAR(64 char) NOT NULL,
-            "auxiliary_network_router_ip"          VARCHAR(32 char) NOT NULL,
-            "net_mode"                             INT NOT NULL
-        );
-
-CREATE TABLE "MP"."mp_sceneplugincloud_scene_element_port"
-(
-    "pk"                          INT IDENTITY(36, 1) NOT NULL,
-    "id"                          VARCHAR(64 char ) NOT NULL,
-            "scene"                       VARCHAR(64 char) NOT NULL,
-            "scene_element_port"          VARCHAR(64 char) NOT NULL,
-            "resource_id"                 VARCHAR(64 char) NOT NULL,
-            "nat"                         TINYINT NOT NULL,
-            "entity_access_type"          VARCHAR(64 char) NOT NULL,
-            "entity_switch_name"          VARCHAR(64 char) NOT NULL,
-            "entity_switch_port"          VARCHAR(64 char) NOT NULL,
-            "gateway_port_type"           INT NOT NULL,
-            "gateway_port_ips"            VARCHAR(64 char) NOT NULL,
-            "auxiliary_network_id"        VARCHAR(64 char) NOT NULL,
-            "qos_id"                      VARCHAR(64 char) NOT NULL,
-            "access_modes"                TEXT NOT NULL,
-            "distributed_port_mapping_ip" VARCHAR(32 char) NOT NULL,
-            "floating_ip"                 VARCHAR(32 char) NOT NULL,
-            "floating_ip_id"              VARCHAR(64 char) NOT NULL,
-            "create_time"                 TIMESTAMP(6) NOT NULL,
-            "update_time"                 TIMESTAMP(6) NOT NULL,
-            "firewall_rules"              TEXT NOT NULL,
-            "firewall_resource_id"        VARCHAR(64 char) NOT NULL,
-            "logic_network_id"            VARCHAR(64 char) NOT NULL,
-            "ospf_ip"                     VARCHAR(64 char) NOT NULL,
-            "ospf_area"                   VARCHAR(16 char) NOT NULL,
-            "bgp_as"                      VARCHAR(16 char) NOT NULL,
-            "bgp_ip"                      VARCHAR(64 char) NOT NULL,
-            "bgp_peer"                    VARCHAR(64 char) NOT NULL,
-            "bgp_peer_as"                 VARCHAR(16 char) NOT NULL,
-            "entity_port"                 VARCHAR(128 char) NOT NULL,
-            "connect_mode"                VARCHAR(32 char) NOT NULL,
-            "rip_ip"                      VARCHAR(32 char) NOT NULL,
-            "rip_pear"                    VARCHAR(32 char) NOT NULL
-        );
-
-CREATE TABLE "MP"."mp_sceneplugincollection_scene"
-(
-    "pk"                   INT IDENTITY(4, 1) NOT NULL,
-    "id"                   VARCHAR(64 char ) NOT NULL,
-            "scene"                VARCHAR(64 char) NOT NULL,
-            "enable_flow_collect"  TINYINT NOT NULL,
-            "flow_collector"       VARCHAR(64 char) NOT NULL,
-            "create_time"          TIMESTAMP(6) NOT NULL,
-            "update_time"          TIMESTAMP(6) NOT NULL,
-            "probe_collector"      VARCHAR(64 char) NOT NULL,
-            "enable_probe_collect" TINYINT NOT NULL,
-            "probe_router"         VARCHAR(64 char) NOT NULL,
-            "flow_file"            VARCHAR(256 char) DEFAULT '' NOT NULL,
-            "enable_flow_mirror"   TINYINT NOT NULL
-        );
-
-CREATE TABLE "MP"."mp_sceneplugincollection_scene_config"
-(
-    "pk"                   INT IDENTITY(8, 1) NOT NULL,
-    "id"                   VARCHAR(64 char ) NOT NULL,
-            "scene"                VARCHAR(64 char) NOT NULL,
-            "enable_flow_collect"  TINYINT NOT NULL,
-            "create_time"          TIMESTAMP(6) NOT NULL,
-            "update_time"          TIMESTAMP(6) NOT NULL,
-            "enable_probe_collect" TINYINT NOT NULL,
-            "enable_flow_mirror"   TINYINT NOT NULL
-        );
-
-CREATE TABLE "MP"."mp_sceneplugincollection_scene_config_element"
-(
-    "pk"            INT IDENTITY(14, 1) NOT NULL,
-    "id"            VARCHAR(64 char ) NOT NULL,
-            "scene"         VARCHAR(64 char) NOT NULL,
-            "scene_element" VARCHAR(64 char) NOT NULL,
-            "probes" CLOB NOT NULL,
-            "create_time"          TIMESTAMP(6) NOT NULL,
-            "update_time"          TIMESTAMP(6) NOT NULL,
-            "enable_probe_collect" TINYINT NOT NULL,
-            "edited"               TINYINT DEFAULT 0 NOT NULL
-        );
-
-CREATE TABLE "MP"."mp_sceneplugincollection_scene_config_element_port"
-(
-    "pk"                  INT IDENTITY(1, 1) NOT NULL,
-    "id"                  VARCHAR(64 char ) NOT NULL,
-            "scene"               VARCHAR(64 char) NOT NULL,
-            "scene_element_port"  VARCHAR(64 char) NOT NULL,
-            "enable_flow_collect" TINYINT NOT NULL,
-            "create_time"         TIMESTAMP(6) NOT NULL,
-            "update_time"         TIMESTAMP(6) NOT NULL,
-            "enable_flow_mirror"  TINYINT NOT NULL
-        );
-
-CREATE TABLE "MP"."mp_sceneplugincollection_scene_data"
-(
-    "pk"            INT IDENTITY(134473, 1) NOT NULL,
-    "id"            VARCHAR(64 char ) NOT NULL,
-            "scene"         VARCHAR(64 char) NOT NULL,
-            "scene_element" VARCHAR(64 char) NOT NULL,
-            "type"          INT NOT NULL,
-            "data"          TEXT NOT NULL,
-            "update_time"   TIMESTAMP(6) NOT NULL,
-            "create_time"   TIMESTAMP(6) NOT NULL
-        );
-
-CREATE TABLE "MP"."mp_sceneplugincollection_scene_element"
-(
-    "pk"            INT IDENTITY(7, 1) NOT NULL,
-    "id"            VARCHAR(64 char ) NOT NULL,
-            "scene"         VARCHAR(64 char) NOT NULL,
-            "scene_element" VARCHAR(64 char) NOT NULL,
-            "probes" CLOB NOT NULL,
-            "create_time"          TIMESTAMP(6) NOT NULL,
-            "update_time"          TIMESTAMP(6) NOT NULL,
-            "enable_probe_collect" TINYINT NOT NULL
-        );
-
-CREATE TABLE "MP"."mp_sceneplugincollection_scene_element_port"
-(
-    "pk"                  INT IDENTITY(1, 1) NOT NULL,
-    "id"                  VARCHAR(64 char ) NOT NULL,
-            "scene"               VARCHAR(64 char) NOT NULL,
-            "scene_element_port"  VARCHAR(64 char) NOT NULL,
-            "enable_flow_collect" TINYINT NOT NULL,
-            "create_time"         TIMESTAMP(6) NOT NULL,
-            "update_time"         TIMESTAMP(6) NOT NULL,
-            "enable_flow_mirror"  TINYINT NOT NULL
-        );
-
-CREATE TABLE "MP"."mp_sceneplugincollection_scene_probe_router_port"
-(
-    "pk"            INT IDENTITY(2, 1) NOT NULL,
-    "id"            VARCHAR(64 char ) NOT NULL,
-            "scene"         VARCHAR(64 char) NOT NULL,
-            "scene_element" VARCHAR(64 char) NOT NULL,
-            "network_id"    VARCHAR(64 char) NOT NULL,
-            "ip"            VARCHAR(32 char) NOT NULL,
-            "create_time"   TIMESTAMP(6) NOT NULL,
-            "update_time"   TIMESTAMP(6) NOT NULL
-        );
-
-CREATE TABLE "MP"."mp_sceneplugincollection_wazuh_rule"
-(
-    "pk"               INT IDENTITY(3167, 1) NOT NULL,
-    "file"             VARCHAR(64 char ) NOT NULL,
-            "relative_dirname" VARCHAR(64 char) NOT NULL,
-            "id"               VARCHAR(64 char) NOT NULL,
-            "level"            INT NOT NULL,
-            "status"           VARCHAR(64 char) NOT NULL,
-            "details"          VARCHAR(1024 char) NULL,
-            "pci_dss"          VARCHAR(256 char) NULL,
-            "gpg13"            VARCHAR(256 char) NULL,
-            "gdpr"             VARCHAR(256 char) NULL,
-            "hipaa"            VARCHAR(256 char) NULL,
-            "nist"             VARCHAR(256 char) NULL,
-            "tsc"              VARCHAR(256 char) NULL,
-            "mitre"            VARCHAR(256 char) NULL,
-            "groups"           VARCHAR(256 char) NOT NULL,
-            "description"      VARCHAR(256 char) NULL,
-            "create_time"      TIMESTAMP(0) NOT NULL,
-            "update_time"      TIMESTAMP(0) NOT NULL
-        );
-
-CREATE TABLE "MP"."mp_sceneplugincollection_wazuh_rule_type"
-(
-    "pk"          INT IDENTITY(34, 1) NOT NULL,
-    "type"        VARCHAR(64 char ) NOT NULL,
-            "id"          VARCHAR(64 char) NOT NULL,
-            "code"        VARCHAR(64 char) NOT NULL,
-            "create_time" TIMESTAMP(0) NOT NULL,
-            "update_time" TIMESTAMP(0) NOT NULL
-        );
-
-CREATE TABLE "MP"."mp_sceneplugincollection_wazuh_rule_type_relation"
-(
-    "pk"          INT IDENTITY(2352, 1) NOT NULL,
-    "id"          VARCHAR(64 char ) NULL,
-            "rule_id"     VARCHAR(64 char) NOT NULL,
-            "type_id"     VARCHAR(64 char) NOT NULL,
-            "create_time" TIMESTAMP(0) NOT NULL,
-            "update_time" TIMESTAMP(0) NOT NULL
-        );
-
-CREATE TABLE "MP"."mp_scenepluginflow_scene"
-(
-    "pk"          INT IDENTITY(2, 1) NOT NULL,
-    "id"          VARCHAR(64 char ) NOT NULL,
-            "scene"       VARCHAR(64 char) NOT NULL,
-            "executor"    VARCHAR(64 char) NOT NULL,
-            "create_time" TIMESTAMP(6) NOT NULL,
-            "update_time" TIMESTAMP(6) NOT NULL
-        );
-
-CREATE TABLE "MP"."mp_scenepluginflow_scene_config"
-(
-    "pk"          INT IDENTITY(3, 1) NOT NULL,
-    "id"          VARCHAR(64 char ) NOT NULL,
-            "scene"       VARCHAR(64 char) NOT NULL,
-            "create_time" TIMESTAMP(6) NOT NULL,
-            "update_time" TIMESTAMP(6) NOT NULL
-        );
-
-CREATE TABLE "MP"."mp_scenepluginflow_scene_config_element"
-(
-    "pk"            INT IDENTITY(5, 1) NOT NULL,
-    "id"            VARCHAR(64 char ) NOT NULL,
-            "scene"         VARCHAR(64 char) NOT NULL,
-            "scene_element" VARCHAR(64 char) NOT NULL,
-            "flows" CLOB NOT NULL,
-            "create_time" TIMESTAMP(6) NOT NULL,
-            "update_time" TIMESTAMP(6) NOT NULL
-        );
-
-CREATE TABLE "MP"."mp_scenepluginflow_scene_config_element_port"
-(
-    "pk"                 INT IDENTITY(1, 1) NOT NULL,
-    "id"                 VARCHAR(64 char ) NOT NULL,
-            "scene"              VARCHAR(64 char) NOT NULL,
-            "scene_element_port" VARCHAR(64 char) NOT NULL,
-            "create_time"        TIMESTAMP(6) NOT NULL,
-            "update_time"        TIMESTAMP(6) NOT NULL
-        );
-
-CREATE TABLE "MP"."mp_scenepluginflow_scene_element"
-(
-    "pk"            INT IDENTITY(3, 1) NOT NULL,
-    "id"            VARCHAR(64 char ) NOT NULL,
-            "scene"         VARCHAR(64 char) NOT NULL,
-            "scene_element" VARCHAR(64 char) NOT NULL,
-            "flows" CLOB NOT NULL,
-            "create_time" TIMESTAMP(6) NOT NULL,
-            "update_time" TIMESTAMP(6) NOT NULL
-        );
-
-CREATE TABLE "MP"."mp_scenepluginflow_scene_element_port"
-(
-    "pk"                 INT IDENTITY(1, 1) NOT NULL,
-    "id"                 VARCHAR(64 char ) NOT NULL,
-            "scene"              VARCHAR(64 char) NOT NULL,
-            "scene_element_port" VARCHAR(64 char) NOT NULL,
-            "create_time"        TIMESTAMP(6) NOT NULL,
-            "update_time"        TIMESTAMP(6) NOT NULL
-        );
-
-CREATE TABLE "MP"."mp_situation_collection_template"
-(
-    "pk"          INT IDENTITY(1, 1) NOT NULL,
-    "id"          VARCHAR(64 char ) NOT NULL,
-            "name"        VARCHAR(200 char) NOT NULL,
-            "creator"     VARCHAR(100 char) NULL,
-            "description" VARCHAR(600 char) NULL,
-            "OS_type"     INT NULL,
-            "create_time" TIMESTAMP(0) NOT NULL,
-            "update_time" TIMESTAMP(0) NOT NULL
-        );
-
-CREATE TABLE "MP"."mp_situation_collection_template_probe"
-(
-    "pk"             INT IDENTITY(1, 1) NOT NULL,
-    "id"             VARCHAR(64 char ) NOT NULL,
-            "template_id"    VARCHAR(64 char) NOT NULL,
-            "probe_id"       VARCHAR(64 char) NOT NULL,
-            "name"           VARCHAR(32 char) NOT NULL,
-            "description"    VARCHAR(400 char) NULL,
-            "probe_category" INT DEFAULT 0 NOT NULL,
-            "type"           INT DEFAULT 0 NOT NULL,
-            "output_format"  VARCHAR(10 char) DEFAULT 'none' NOT NULL,
-            "engine"         VARCHAR(40 char) NULL,
-            "OS_type"        VARCHAR(20 char) NULL,
-            "creator"        VARCHAR(100 char) NULL,
-            "disabled"       INT DEFAULT 0 NOT NULL,
-            "script_type"    INT NOT NULL,
-            "script_url"     VARCHAR(400 char) NULL,
-            "interval_sec"   INT DEFAULT 180 NOT NULL,
-            "config"         VARCHAR(4000 char) NULL,
-            "parameter"      VARCHAR(2000 char) NULL,
-            "create_time"    TIMESTAMP(0) NOT NULL,
-            "update_time"    TIMESTAMP(0) NOT NULL
-        );
-
-CREATE TABLE "MP"."mp_situation_flow_classification"
-(
-    "pk"          BIGINT IDENTITY(43, 1) NOT NULL,
-    "id"          VARCHAR(32 char ) NOT NULL,
-            "name"        VARCHAR(32 char) NOT NULL,
-            "category_en" VARCHAR(255 char) NOT NULL,
-            "category_zh" VARCHAR(255 char) NOT NULL,
-            "severity"    TINYINT NOT NULL,
-            "create_time" TIMESTAMP(0) NOT NULL,
-            "update_time" TIMESTAMP(0) NULL
-        );
-
-CREATE TABLE "MP"."mp_situation_flow_port_protocol"
-(
-    "pk"          BIGINT IDENTITY(539, 1) NOT NULL,
-    "id"          VARCHAR(32 char ) NOT NULL,
-            "port"        INT NOT NULL,
-            "protocol"    VARCHAR(32 char) NOT NULL,
-            "create_time" TIMESTAMP(0) NOT NULL,
-            "update_time" TIMESTAMP(0) NOT NULL
-        );
-
-CREATE TABLE "MP"."mp_situation_probe"
-(
-    "pk"             INT IDENTITY(18, 1) NOT NULL,
-    "id"             VARCHAR(64 char ) NOT NULL,
-            "name"           VARCHAR(200 char) NOT NULL,
-            "description"    VARCHAR(600 char) NULL,
-            "probe_category" INT DEFAULT 0 NOT NULL,
-            "type"           INT DEFAULT 0 NOT NULL,
-            "creator"        VARCHAR(100 char) NULL,
-            "interval_sec"   INT DEFAULT 180 NOT NULL,
-            "output_format"  VARCHAR(10 char) DEFAULT 'none' NOT NULL,
-            "engine"         VARCHAR(40 char) NULL,
-            "is_deleted"     INT DEFAULT 0 NULL,
-            "OS_type"        VARCHAR(20 char) NULL,
-            "create_time"    TIMESTAMP(0) NOT NULL,
-            "update_time"    TIMESTAMP(0) NOT NULL
-        );
-
-CREATE TABLE "MP"."mp_situation_probe_ability"
-(
-    "pk"          INT IDENTITY(178, 1) NOT NULL,
-    "id"          VARCHAR(64 char ) NOT NULL,
-            "probe_id"    VARCHAR(64 char) NOT NULL,
-            "name"        VARCHAR(200 char) NOT NULL,
-            "engine"      VARCHAR(40 char) NULL,
-            "OS_type"     VARCHAR(20 char) NULL,
-            "description" VARCHAR(400 char) NULL,
-            "create_time" TIMESTAMP(0) NOT NULL,
-            "update_time" TIMESTAMP(0) NOT NULL
-        );
-
-ALTER TABLE "MP"."mp_menu_template_info" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_menu_template_role" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_scene_scene" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_scene_scene_area" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_scene_scene_config" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_scene_scene_config_area" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_scene_scene_config_element" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_scene_scene_config_element_plugin" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_scene_scene_config_element_port" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_scene_scene_config_element_port_connection" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_scene_scene_config_node_connection" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_scene_scene_config_piece" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_scene_scene_element" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_scene_scene_element_plugin" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_scene_scene_element_port" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_scene_scene_element_port_connection" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_scene_scene_element_snapshot" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_scene_scene_node_connection" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_scene_scene_piece" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_sceneplugincloud_scene" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_sceneplugincloud_scene_config" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_sceneplugincloud_scene_config_element" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_sceneplugincloud_scene_config_element_port" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_sceneplugincloud_scene_connection" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_sceneplugincloud_scene_element" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_sceneplugincloud_scene_element_network" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_sceneplugincloud_scene_element_port" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_sceneplugincollection_scene" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_sceneplugincollection_scene_config" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_sceneplugincollection_scene_config_element" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_sceneplugincollection_scene_config_element_port" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_sceneplugincollection_scene_data" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_sceneplugincollection_scene_element" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_sceneplugincollection_scene_element_port" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_sceneplugincollection_scene_probe_router_port" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_sceneplugincollection_wazuh_rule" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_sceneplugincollection_wazuh_rule_type" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_sceneplugincollection_wazuh_rule_type_relation" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_scenepluginflow_scene" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_scenepluginflow_scene_config" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_scenepluginflow_scene_config_element" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_scenepluginflow_scene_config_element_port" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_scenepluginflow_scene_element" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_scenepluginflow_scene_element_port" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_situation_collection_template" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_situation_collection_template_probe" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_situation_flow_classification" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_situation_flow_port_protocol" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_situation_probe" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_situation_probe_ability" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-CREATE INDEX "INDEX17508608083300"
-    ON "MP"."mp_sceneplugincollection_scene_data"
-        (
-         "scene",
-         "scene_element"
-            );
-
-ALTER INDEX "MP"."INDEX17508608083300" VISIBLE;
-
-CREATE INDEX "org"
-    ON "MP"."mp_auth_tenant_user"
-        (
-         "org",
-         "user"
-            );
-
-ALTER INDEX "MP"."org" VISIBLE;
-
-CREATE INDEX "user"
-    ON "MP"."mp_auth_tenant_user"
-        (
-         "user",
-         "org"
-            );
-
-ALTER INDEX "MP"."user" VISIBLE;
-
-CREATE INDEX "url" ON "MP"."mp_auth_url_ac"
-    ("url"
-        );
-
-ALTER INDEX "MP"."url" VISIBLE;
-
-CREATE INDEX "target"
-    ON "MP"."mp_auth_url_ac_target"
-        (
-         "target"
-            );
-
-ALTER INDEX "MP"."target" VISIBLE;
-
-CREATE INDEX "urlac_id"
-    ON "MP"."mp_auth_url_ac_target"
-        (
-         "group"
-            );
-
-ALTER INDEX "MP"."urlac_id" VISIBLE;
-
-CREATE INDEX "INDEX17508648634900"
-    ON "MP"."mp_auth_user"
-        (
-         "identifier"
-            );
-
-ALTER INDEX "MP"."INDEX17508648634900" VISIBLE;
-
-CREATE INDEX "update_time"
-    ON "MP"."mp_auth_user"
-        (
-         "update_time"
-            );
-
-ALTER INDEX "MP"."update_time" VISIBLE;
-
-CREATE INDEX "INDEX17508680675000"
-    ON "MP"."mp_auth_user_online_record"
-        (
-         "user"
-            );
-
-ALTER INDEX "MP"."INDEX17508680675000" VISIBLE;
-
-CREATE INDEX "end_time"
-    ON "MP"."mp_auth_user_online_record"
-        (
-         "end_time",
-         "status"
-            );
-
-ALTER INDEX "MP"."end_time" VISIBLE;
-
-CREATE INDEX "start_time"
-    ON "MP"."mp_auth_user_online_record"
-        (
-         "start_time",
-         "end_time",
-         "status"
-            );
-
-ALTER INDEX "MP"."start_time" VISIBLE;
-
-CREATE INDEX "user_2"
-    ON "MP"."mp_auth_user_online_record"
-        (
-         "user",
-         "end_time"
-            );
-
-ALTER INDEX "MP"."user_2" VISIBLE;
-
-CREATE INDEX "INDEX17508694445100"
-    ON "MP"."mp_auth_user_role"
-        (
-         "user",
-         "role"
-            );
-
-ALTER INDEX "MP"."INDEX17508694445100" VISIBLE;
-
-CREATE INDEX "role"
-    ON "MP"."mp_auth_user_role"
-        (
-         "role",
-         "user"
-            );
-
-ALTER INDEX "MP"."role" VISIBLE;
-
-CREATE INDEX "user_id"
-    ON "MP"."mp_cscene_instance_user_count"
-        (
-         "user_id"
-            );
-
-ALTER INDEX "MP"."user_id" VISIBLE;
-
-CREATE INDEX "INDEX17508703488500"
-    ON "MP"."mp_cscene_snapshot"
-        (
-         "cscene_id"
-            );
-
-ALTER INDEX "MP"."INDEX17508703488500" VISIBLE;
-
-CREATE INDEX "INDEX17508710372200"
-    ON "MP"."mp_devops_log_operation"
-        (
-         "user_id",
-         "create_time"
-            );
-
-ALTER INDEX "MP"."INDEX17508710372200" VISIBLE;
-
-CREATE INDEX "op_module_id"
-    ON "MP"."mp_devops_log_operation"
-        (
-         "op_module_id",
-         "op_type_id",
-         "user_name",
-         "op_target",
-         "create_time"
-            );
-
-ALTER INDEX "MP"."op_module_id" VISIBLE;
-
-CREATE INDEX "INDEX17508734538000"
-    ON "MP"."mp_devops_target"
-        (
-         "role"
-            );
-
-ALTER INDEX "MP"."INDEX17508734538000" VISIBLE;
-
-CREATE INDEX "main_category"
-    ON "MP"."mp_devops_target"
-        (
-         "main_category"
-            );
-
-ALTER INDEX "MP"."main_category" VISIBLE;
-
-CREATE INDEX "sub_category"
-    ON "MP"."mp_devops_target"
-        (
-         "sub_category"
-            );
-
-ALTER INDEX "MP"."sub_category" VISIBLE;
-
-CREATE INDEX "INDEX17508749042500"
-    ON "MP"."mp_flow_task_record"
-        (
-         "task_id"
-            );
-
-ALTER INDEX "MP"."INDEX17508749042500" VISIBLE;
-
-CREATE INDEX "create_time"
-    ON "MP"."mp_flow_task_record"
-        (
-         "create_time"
-            );
-
-ALTER INDEX "MP"."create_time" VISIBLE;
-
-CREATE INDEX "task_id_and_create_time"
-    ON "MP"."mp_flow_task_record"
-        (
-         "task_id",
-         "create_time"
-            );
-
-ALTER INDEX "MP"."task_id_and_create_time" VISIBLE;
-
-CREATE INDEX "menu"
-    ON "MP"."mp_front_admin_menu_extra_info"
-        (
-         "menu"
-            );
-
-ALTER INDEX "MP"."menu" VISIBLE;
-
-ALTER TABLE "MP"."mp_flow_collection" ADD CONSTRAINT "MPCONS134218969" CHECK ("type_flag" >= 0) ENABLE;
-
-ALTER TABLE "MP"."mp_flow_pcap" ADD CONSTRAINT "MPCONS134218972" CHECK ("pkt_num" >= 0) ENABLE;
-
-ALTER TABLE "MP"."mp_flow_pcap" ADD CONSTRAINT "MPCONS134218971" CHECK ("pcap_size" >= 0) ENABLE;
-
-ALTER TABLE "MP"."mp_flow_pcap" ADD CONSTRAINT "MPCONS134218970" CHECK ("duration" >= 0) ENABLE;
-
-ALTER TABLE "MP"."mp_flow_protocol" ADD CONSTRAINT "MPCONS134218973" CHECK ("marked" >= 0) ENABLE;
-
-ALTER TABLE "MP"."mp_flow_task" ADD CONSTRAINT "MPCONS134218976" CHECK ("interval_time" >= 0) ENABLE;
-
-ALTER TABLE "MP"."mp_flow_task" ADD CONSTRAINT "MPCONS134218975" CHECK ("delay" >= 0) ENABLE;
-
-ALTER TABLE "MP"."mp_flow_task" ADD CONSTRAINT "MPCONS134218974" CHECK ("count" >= 0) ENABLE;
-
-ALTER TABLE "MP"."mp_flow_task_conf" ADD CONSTRAINT "MPCONS134218979" CHECK ("replay" >= 0) ENABLE;
-
-ALTER TABLE "MP"."mp_flow_task_conf" ADD CONSTRAINT "MPCONS134218978" CHECK ("rate_unlimited" >= 0) ENABLE;
-
-ALTER TABLE "MP"."mp_flow_task_conf" ADD CONSTRAINT "MPCONS134218977" CHECK ("keep_running" >= 0) ENABLE;
-
-ALTER TABLE "MP"."mp_menu_template_info" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_scene_scene" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_scene_scene_area" ADD CONSTRAINT "scene" UNIQUE ("scene", "node_id");
-
-ALTER TABLE "MP"."mp_scene_scene_area" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_scene_scene_config" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_scene_scene_config_area" ADD UNIQUE ("scene", "node_id");
-
-ALTER TABLE "MP"."mp_scene_scene_config_area" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_scene_scene_config_element" ADD UNIQUE ("scene", "node_id");
-
-ALTER TABLE "MP"."mp_scene_scene_config_element" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_scene_scene_config_element_plugin" ADD CONSTRAINT "scene_element" UNIQUE ("scene_element", "plugin_key");
-
-ALTER TABLE "MP"."mp_scene_scene_config_element_plugin" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_scene_scene_config_element_port" ADD UNIQUE ("scene", "port_id");
-
-ALTER TABLE "MP"."mp_scene_scene_config_element_port" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_scene_scene_config_element_port_connection" ADD UNIQUE ("scene", "source_port_id", "target_port_id");
-
-ALTER TABLE "MP"."mp_scene_scene_config_element_port_connection" ADD CONSTRAINT "source_port" UNIQUE ("source_port", "target_port");
-
-ALTER TABLE "MP"."mp_scene_scene_config_element_port_connection" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_scene_scene_config_node_connection" ADD UNIQUE ("scene", "source_node_id", "target_node_id");
-
-ALTER TABLE "MP"."mp_scene_scene_config_node_connection" ADD CONSTRAINT "source_node" UNIQUE ("source_node", "target_node");
-
-ALTER TABLE "MP"."mp_scene_scene_config_node_connection" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_scene_scene_config_piece" ADD UNIQUE ("scene", "node_id");
-
-ALTER TABLE "MP"."mp_scene_scene_config_piece" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_scene_scene_element" ADD UNIQUE ("scene", "node_id");
-
-ALTER TABLE "MP"."mp_scene_scene_element" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_scene_scene_element_plugin" ADD UNIQUE ("scene_element", "plugin_key");
-
-ALTER TABLE "MP"."mp_scene_scene_element_plugin" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_scene_scene_element_port" ADD UNIQUE ("scene_element", "port_id");
-
-ALTER TABLE "MP"."mp_scene_scene_element_port" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_scene_scene_element_port_connection" ADD UNIQUE ("scene", "source_port_id", "target_port_id");
-
-ALTER TABLE "MP"."mp_scene_scene_element_port_connection" ADD UNIQUE ("source_port", "target_port");
-
-ALTER TABLE "MP"."mp_scene_scene_element_port_connection" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_scene_scene_element_snapshot" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_scene_scene_node_connection" ADD UNIQUE ("scene", "source_node_id", "target_node_id");
-
-ALTER TABLE "MP"."mp_scene_scene_node_connection" ADD UNIQUE ("source_node", "target_node");
-
-ALTER TABLE "MP"."mp_scene_scene_node_connection" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_scene_scene_piece" ADD UNIQUE ("scene", "node_id");
-
-ALTER TABLE "MP"."mp_scene_scene_piece" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_sceneplugincloud_scene" ADD UNIQUE ("scene");
-
-ALTER TABLE "MP"."mp_sceneplugincloud_scene" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_sceneplugincloud_scene_config" ADD UNIQUE ("scene");
-
-ALTER TABLE "MP"."mp_sceneplugincloud_scene_config" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_sceneplugincloud_scene_config_element" ADD UNIQUE ("scene", "scene_element");
-
-ALTER TABLE "MP"."mp_sceneplugincloud_scene_config_element" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_sceneplugincloud_scene_config_element_port" ADD UNIQUE ("scene", "scene_element_port");
-
-ALTER TABLE "MP"."mp_sceneplugincloud_scene_config_element_port" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_sceneplugincloud_scene_connection" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_sceneplugincloud_scene_element" ADD UNIQUE ("scene", "scene_element");
-
-ALTER TABLE "MP"."mp_sceneplugincloud_scene_element" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_sceneplugincloud_scene_element_network" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_sceneplugincloud_scene_element_port" ADD UNIQUE ("scene", "scene_element_port");
-
-ALTER TABLE "MP"."mp_sceneplugincloud_scene_element_port" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_sceneplugincollection_scene" ADD UNIQUE ("scene");
-
-ALTER TABLE "MP"."mp_sceneplugincollection_scene" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_sceneplugincollection_scene_config" ADD UNIQUE ("scene");
-
-ALTER TABLE "MP"."mp_sceneplugincollection_scene_config" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_sceneplugincollection_scene_config_element" ADD UNIQUE ("scene", "scene_element");
-
-ALTER TABLE "MP"."mp_sceneplugincollection_scene_config_element" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_sceneplugincollection_scene_config_element_port" ADD UNIQUE ("scene", "scene_element_port");
-
-ALTER TABLE "MP"."mp_sceneplugincollection_scene_config_element_port" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_sceneplugincollection_scene_element" ADD UNIQUE ("scene", "scene_element");
-
-ALTER TABLE "MP"."mp_sceneplugincollection_scene_element" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_sceneplugincollection_scene_element_port" ADD UNIQUE ("scene", "scene_element_port");
-
-ALTER TABLE "MP"."mp_sceneplugincollection_scene_element_port" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_sceneplugincollection_scene_probe_router_port" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_sceneplugincollection_wazuh_rule" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_sceneplugincollection_wazuh_rule_type" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_sceneplugincollection_wazuh_rule_type_relation" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_sceneplugincollection_wazuh_rule_type_relation" ADD CONSTRAINT "rule_id" UNIQUE ("rule_id", "type_id");
-
-ALTER TABLE "MP"."mp_scenepluginflow_scene" ADD UNIQUE ("scene");
-
-ALTER TABLE "MP"."mp_scenepluginflow_scene" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_scenepluginflow_scene_config" ADD UNIQUE ("scene");
-
-ALTER TABLE "MP"."mp_scenepluginflow_scene_config" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_scenepluginflow_scene_config_element" ADD UNIQUE ("scene", "scene_element");
-
-ALTER TABLE "MP"."mp_scenepluginflow_scene_config_element" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_scenepluginflow_scene_config_element_port" ADD UNIQUE ("scene", "scene_element_port");
-
-ALTER TABLE "MP"."mp_scenepluginflow_scene_config_element_port" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_scenepluginflow_scene_element" ADD UNIQUE ("scene", "scene_element");
-
-ALTER TABLE "MP"."mp_scenepluginflow_scene_element" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_scenepluginflow_scene_element_port" ADD UNIQUE ("scene", "scene_element_port");
-
-ALTER TABLE "MP"."mp_scenepluginflow_scene_element_port" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_situation_collection_template" ADD UNIQUE ("name");
-
-ALTER TABLE "MP"."mp_situation_collection_template" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_situation_collection_template_probe" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_situation_flow_classification" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_situation_flow_port_protocol" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_situation_probe" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_situation_probe_ability" ADD UNIQUE ("id");
-
-COMMENT ON TABLE "MP"."mp_menu_template_info"
-IS
-    '菜单模板表';
-    COMMENT ON COLUMN "MP"."mp_menu_template_info"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_menu_template_info"."en_name"
-IS
-    '英文名称';
-    COMMENT ON COLUMN "MP"."mp_menu_template_info"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_menu_template_info"."identifier"
-IS
-    '编号';
-    COMMENT ON COLUMN "MP"."mp_menu_template_info"."menu_id"
-IS
-    '菜单ID';
-    COMMENT ON COLUMN "MP"."mp_menu_template_info"."name"
-IS
-    '中文名称';
-    COMMENT ON COLUMN "MP"."mp_menu_template_info"."parent"
-IS
-    '父权限ID';
-    COMMENT ON COLUMN "MP"."mp_menu_template_info"."path"
-IS
-    '路径';
-    COMMENT ON COLUMN "MP"."mp_menu_template_info"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_menu_template_info"."template_id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_menu_template_info"."tenant"
-IS
-    '所属租户';
-    COMMENT ON COLUMN "MP"."mp_menu_template_info"."type"
-IS
-    '资源类型 1:菜单, 2:API, 3:数据';
-    COMMENT ON COLUMN "MP"."mp_menu_template_info"."update_time"
-IS
-    '更新时间';
-    COMMENT ON COLUMN "MP"."mp_menu_template_info"."visible"
-IS
-    '是否可见 1:可见，0:不可见（受控于激活选项） 默认为可见';
-    COMMENT ON TABLE "MP"."mp_menu_template_role"
-IS
-    '角色关联菜单模板表';
-    COMMENT ON COLUMN "MP"."mp_menu_template_role"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_menu_template_role"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_menu_template_role"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_menu_template_role"."role_id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_menu_template_role"."template_id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_menu_template_role"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_scene_scene"
-IS
-    '场景实例信息表';
-    COMMENT ON COLUMN "MP"."mp_scene_scene"."create_consume_seconds"
-IS
-    '创建消耗时间';
-    COMMENT ON COLUMN "MP"."mp_scene_scene"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_scene_scene"."deleted"
-IS
-    '是否删除';
-    COMMENT ON COLUMN "MP"."mp_scene_scene"."description"
-IS
-    '描述';
-    COMMENT ON COLUMN "MP"."mp_scene_scene"."display_context"
-IS
-    '显示上下文';
-    COMMENT ON COLUMN "MP"."mp_scene_scene"."event"
-IS
-    '当前事件';
-    COMMENT ON COLUMN "MP"."mp_scene_scene"."event_status"
-IS
-    '当前事件状态';
-    COMMENT ON COLUMN "MP"."mp_scene_scene"."file"
-IS
-    '场景文件';
-    COMMENT ON COLUMN "MP"."mp_scene_scene"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_scene_scene"."name"
-IS
-    '名称';
-    COMMENT ON COLUMN "MP"."mp_scene_scene"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_scene_scene"."process"
-IS
-    '当前事件进程';
-    COMMENT ON COLUMN "MP"."mp_scene_scene"."process_message"
-IS
-    '当前事件进程描述';
-    COMMENT ON COLUMN "MP"."mp_scene_scene"."process_status"
-IS
-    '当前事件进程状态';
-    COMMENT ON COLUMN "MP"."mp_scene_scene"."source"
-IS
-    '源场景模板';
-    COMMENT ON COLUMN "MP"."mp_scene_scene"."stage"
-IS
-    '当前阶段';
-    COMMENT ON COLUMN "MP"."mp_scene_scene"."stage_list"
-IS
-    '阶段列表';
-    COMMENT ON COLUMN "MP"."mp_scene_scene"."stage_name"
-IS
-    '当前阶段名称';
-    COMMENT ON COLUMN "MP"."mp_scene_scene"."stage_percentage"
-IS
-    '当前阶段百分比';
-    COMMENT ON COLUMN "MP"."mp_scene_scene"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_scene_scene_area"
-IS
-    '场景实例节点坐标表';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_area"."area"
-IS
-    '所属区域节点id';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_area"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_area"."description"
-IS
-    '描述';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_area"."display_context"
-IS
-    '显示上下文';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_area"."icon2"
-IS
-    '2d图标地址';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_area"."icon3"
-IS
-    '3d图标地址';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_area"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_area"."name"
-IS
-    '名称';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_area"."node_id"
-IS
-    '节点id';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_area"."open"
-IS
-    '是否展开';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_area"."outer_position2"
-IS
-    '外部2d坐标';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_area"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_area"."position2"
-IS
-    '2d坐标';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_area"."position3"
-IS
-    '3d坐标';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_area"."scene"
-IS
-    '场景实例id';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_area"."type"
-IS
-    '区域类型 0:普通区域 1:层级区域';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_area"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_scene_scene_config"
-IS
-    '场景拓扑信息表';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config"."deleted"
-IS
-    '是否删除';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config"."description"
-IS
-    '描述';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config"."display_context"
-IS
-    '显示上下文';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config"."file"
-IS
-    '场景文件';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config"."name"
-IS
-    '名称';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config"."source"
-IS
-    '源实例id';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config"."type"
-IS
-    '模板类型';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_scene_scene_config_area"
-IS
-    '场景拓扑节点坐标表';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_area"."area"
-IS
-    '所属区域节点id';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_area"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_area"."description"
-IS
-    '描述';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_area"."display_context"
-IS
-    '显示上下文';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_area"."icon2"
-IS
-    '2d图标地址';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_area"."icon3"
-IS
-    '3d图标地址';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_area"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_area"."name"
-IS
-    '名称';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_area"."node_id"
-IS
-    '节点id';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_area"."open"
-IS
-    '是否展开';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_area"."outer_position2"
-IS
-    '外部2d坐标';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_area"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_area"."position2"
-IS
-    '2d坐标';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_area"."position3"
-IS
-    '3d坐标';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_area"."scene"
-IS
-    '场景模板id';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_area"."type"
-IS
-    '区域类型 0:普通区域 1:层级区域';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_area"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_scene_scene_config_element"
-IS
-    '场景拓扑节点信息表';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element"."area"
-IS
-    '所属区域节点id';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element"."cpu"
-IS
-    'cpu数量';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element"."description"
-IS
-    '描述';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element"."disk"
-IS
-    '磁盘大小';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element"."display_context"
-IS
-    '显示上下文';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element"."file"
-IS
-    '节点文件';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element"."icon2"
-IS
-    '2d图标地址';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element"."icon3"
-IS
-    '3d图标地址';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element"."init_commands"
-IS
-    '初始化命令';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element"."is_auxiliary"
-IS
-    '是否是辅助节点';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element"."max_port_number"
-IS
-    '最大端口数量';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element"."name"
-IS
-    '名称';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element"."node_id"
-IS
-    '节点id';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element"."outer_position2"
-IS
-    '外部2d坐标';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element"."position2"
-IS
-    '2d坐标';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element"."position3"
-IS
-    '3d坐标';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element"."ram"
-IS
-    '内存大小';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element"."scene"
-IS
-    '场景模板id';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element"."system_architecture"
-IS
-    '系统架构';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element"."system_language"
-IS
-    '系统语言';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element"."system_type"
-IS
-    '系统类型';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element"."type"
-IS
-    '网元类型';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_scene_scene_config_element_plugin"
-IS
-    '场景拓扑节点插件信息表';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element_plugin"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element_plugin"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element_plugin"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element_plugin"."plugin_key"
-IS
-    '插件代号';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element_plugin"."scene"
-IS
-    '场景模板id';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element_plugin"."scene_element"
-IS
-    '所属网元id';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element_plugin"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_scene_scene_config_element_port"
-IS
-    '场景拓扑节点端口信息表';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element_port"."access_modes"
-IS
-    '接入信息列表';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element_port"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element_port"."delay"
-IS
-    '延迟';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element_port"."dhcp"
-IS
-    '是否开启dhcp';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element_port"."dns"
-IS
-    'dns列表';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element_port"."egress"
-IS
-    '上行带宽';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element_port"."gateway"
-IS
-    '网关';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element_port"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element_port"."ingress"
-IS
-    '下行带宽';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element_port"."ip"
-IS
-    'ip地址';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element_port"."is_auxiliary"
-IS
-    '是否是辅助端口';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element_port"."loss"
-IS
-    '丢包';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element_port"."mac_addr"
-IS
-    'mac地址';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element_port"."name"
-IS
-    '名称';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element_port"."netmask"
-IS
-    '子网掩码';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element_port"."order"
-IS
-    '端口排序';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element_port"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element_port"."port_connect_net_cidr"
-IS
-    '路由端口网络cidr';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element_port"."port_id"
-IS
-    '端口id';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element_port"."scene"
-IS
-    '场景模板id';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element_port"."scene_element"
-IS
-    '所属网元id';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element_port"."type"
-IS
-    '端口类型';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element_port"."update_time"
-IS
-    '更新时间';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element_port"."usable"
-IS
-    '是否可用';
-    COMMENT ON TABLE "MP"."mp_scene_scene_config_element_port_connection"
-IS
-    '场景拓扑节点端口连线信息表';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element_port_connection"."connection_id"
-IS
-    '连接id';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element_port_connection"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element_port_connection"."display_context"
-IS
-    '显示上下文';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element_port_connection"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element_port_connection"."info"
-IS
-    '其他信息,前端可自由定义';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element_port_connection"."name"
-IS
-    '名称';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element_port_connection"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element_port_connection"."scene"
-IS
-    '场景模板id';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element_port_connection"."source_element"
-IS
-    '源端口所属网元id';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element_port_connection"."source_port"
-IS
-    '源端口id';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element_port_connection"."source_port_id"
-IS
-    '源端口id(port_id)';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element_port_connection"."target_element"
-IS
-    '目标端口所属网元id';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element_port_connection"."target_port"
-IS
-    '目标端口id';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element_port_connection"."target_port_id"
-IS
-    '目标端口id(port_id)';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element_port_connection"."type"
-IS
-    '连线类型';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element_port_connection"."unidirectional"
-IS
-    '是否单向';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element_port_connection"."update_time"
-IS
-    '更新时间';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_element_port_connection"."vertices"
-IS
-    '路径点';
-    COMMENT ON TABLE "MP"."mp_scene_scene_config_node_connection"
-IS
-    '场景实例节点连线信息表';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_node_connection"."connection_id"
-IS
-    '连接id';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_node_connection"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_node_connection"."display_context"
-IS
-    '显示上下文';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_node_connection"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_node_connection"."name"
-IS
-    '名称';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_node_connection"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_node_connection"."scene"
-IS
-    '场景实例id';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_node_connection"."source_node"
-IS
-    '源节点id';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_node_connection"."source_node_id"
-IS
-    '源节点id(node_id)';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_node_connection"."target_node"
-IS
-    '目标节点id';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_node_connection"."target_node_id"
-IS
-    '目标节点id(node_id)';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_node_connection"."type"
-IS
-    '连线类型';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_node_connection"."update_time"
-IS
-    '更新时间';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_node_connection"."vertices"
-IS
-    '路径点';
-    COMMENT ON TABLE "MP"."mp_scene_scene_config_piece"
-IS
-    '场景拓扑碎片信息表';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_piece"."area"
-IS
-    '所属区域节点id';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_piece"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_piece"."description"
-IS
-    '描述';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_piece"."display_context"
-IS
-    '显示上下文';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_piece"."icon2"
-IS
-    '2d图标地址';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_piece"."icon3"
-IS
-    '3d图标地址';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_piece"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_piece"."name"
-IS
-    '名称';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_piece"."node_id"
-IS
-    '节点id';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_piece"."outer_position2"
-IS
-    '外部2d坐标';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_piece"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_piece"."position2"
-IS
-    '2d坐标';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_piece"."position3"
-IS
-    '3d坐标';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_piece"."scene"
-IS
-    '场景模板id';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_piece"."type"
-IS
-    '碎片类型';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_config_piece"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_scene_scene_element"
-IS
-    '场景实例节点信息表';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element"."area"
-IS
-    '所属区域节点id';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element"."cpu"
-IS
-    'cpu数量';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element"."description"
-IS
-    '描述';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element"."disk"
-IS
-    '磁盘大小';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element"."display_context"
-IS
-    '显示上下文';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element"."event"
-IS
-    '当前事件';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element"."event_status"
-IS
-    '当前事件状态';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element"."file"
-IS
-    '节点文件';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element"."icon2"
-IS
-    '2d图标地址';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element"."icon3"
-IS
-    '3d图标地址';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element"."init_commands"
-IS
-    '初始化命令';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element"."is_auxiliary"
-IS
-    '是否是辅助节点';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element"."max_port_number"
-IS
-    '最大端口数量';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element"."name"
-IS
-    '名称';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element"."node_id"
-IS
-    '节点id';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element"."outer_position2"
-IS
-    '外部2d坐标';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element"."position2"
-IS
-    '2d坐标';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element"."position3"
-IS
-    '3d坐标';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element"."process"
-IS
-    '当前事件进程';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element"."process_message"
-IS
-    '当前事件进程描述';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element"."process_status"
-IS
-    '当前事件进程状态';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element"."ram"
-IS
-    '内存大小';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element"."scene"
-IS
-    '场景实例id';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element"."system_architecture"
-IS
-    '系统架构';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element"."system_language"
-IS
-    '系统语言';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element"."system_type"
-IS
-    '系统类型';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element"."type"
-IS
-    '网元类型';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_scene_scene_element_plugin"
-IS
-    '场景实例节点插件信息表';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_plugin"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_plugin"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_plugin"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_plugin"."plugin_key"
-IS
-    '插件代号';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_plugin"."scene"
-IS
-    '场景实例id';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_plugin"."scene_element"
-IS
-    '所属网元id';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_plugin"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_scene_scene_element_port"
-IS
-    '场景实例节点端口信息表';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_port"."access_modes"
-IS
-    '接入信息列表';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_port"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_port"."delay"
-IS
-    '延迟';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_port"."dhcp"
-IS
-    '是否开启dhcp';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_port"."dns"
-IS
-    'dns列表';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_port"."egress"
-IS
-    '上行带宽';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_port"."gateway"
-IS
-    '网关';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_port"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_port"."ingress"
-IS
-    '下行带宽';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_port"."ip"
-IS
-    'ip地址';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_port"."is_auxiliary"
-IS
-    '是否是辅助端口';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_port"."loss"
-IS
-    '丢包';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_port"."mac_addr"
-IS
-    'mac地址';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_port"."name"
-IS
-    '名称';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_port"."netmask"
-IS
-    '子网掩码';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_port"."order"
-IS
-    '端口排序';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_port"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_port"."port_connect_net_cidr"
-IS
-    '路由端口网络cidr';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_port"."port_id"
-IS
-    '端口id';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_port"."scene"
-IS
-    '场景实例id';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_port"."scene_element"
-IS
-    '所属网元id';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_port"."type"
-IS
-    '端口类型';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_port"."update_time"
-IS
-    '更新时间';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_port"."usable"
-IS
-    '是否可用';
-    COMMENT ON TABLE "MP"."mp_scene_scene_element_port_connection"
-IS
-    '场景实例节点端口连线信息表';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_port_connection"."connection_id"
-IS
-    '连接id';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_port_connection"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_port_connection"."display_context"
-IS
-    '显示上下文';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_port_connection"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_port_connection"."info"
-IS
-    '其他信息,前端可自由定义';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_port_connection"."name"
-IS
-    '名称';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_port_connection"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_port_connection"."scene"
-IS
-    '场景实例id';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_port_connection"."source_element"
-IS
-    '源端口所属网元id';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_port_connection"."source_port"
-IS
-    '源端口id';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_port_connection"."source_port_id"
-IS
-    '源端口id(port_id)';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_port_connection"."target_element"
-IS
-    '目标端口所属网元id';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_port_connection"."target_port"
-IS
-    '目标端口id';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_port_connection"."target_port_id"
-IS
-    '目标端口id(port_id)';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_port_connection"."type"
-IS
-    '连线类型';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_port_connection"."unidirectional"
-IS
-    '是否单向';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_port_connection"."update_time"
-IS
-    '更新时间';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_port_connection"."vertices"
-IS
-    '路径点';
-    COMMENT ON TABLE "MP"."mp_scene_scene_element_snapshot"
-IS
-    '场景实例节点快照信息表';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_snapshot"."address"
-IS
-    '快照地址';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_snapshot"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_snapshot"."description"
-IS
-    '描述';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_snapshot"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_snapshot"."name"
-IS
-    '名称';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_snapshot"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_snapshot"."scene"
-IS
-    '所属场景id';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_snapshot"."scene_element"
-IS
-    '所属网元id';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_snapshot"."source_name"
-IS
-    '源快照名称';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_element_snapshot"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_scene_scene_node_connection"
-IS
-    '场景实例节点连线信息表';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_node_connection"."connection_id"
-IS
-    '连接id';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_node_connection"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_node_connection"."display_context"
-IS
-    '显示上下文';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_node_connection"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_node_connection"."name"
-IS
-    '名称';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_node_connection"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_node_connection"."scene"
-IS
-    '场景实例id';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_node_connection"."source_node"
-IS
-    '源节点id';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_node_connection"."source_node_id"
-IS
-    '源节点id(node_id)';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_node_connection"."target_node"
-IS
-    '目标节点id';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_node_connection"."target_node_id"
-IS
-    '目标节点id(node_id)';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_node_connection"."type"
-IS
-    '连线类型';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_node_connection"."update_time"
-IS
-    '更新时间';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_node_connection"."vertices"
-IS
-    '路径点';
-    COMMENT ON TABLE "MP"."mp_scene_scene_piece"
-IS
-    '场景实例节点碎片信息表';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_piece"."area"
-IS
-    '所属区域节点id';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_piece"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_piece"."description"
-IS
-    '描述';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_piece"."display_context"
-IS
-    '显示上下文';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_piece"."icon2"
-IS
-    '2d图标地址';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_piece"."icon3"
-IS
-    '3d图标地址';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_piece"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_piece"."name"
-IS
-    '名称';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_piece"."node_id"
-IS
-    '节点id';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_piece"."outer_position2"
-IS
-    '外部2d坐标';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_piece"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_piece"."position2"
-IS
-    '2d坐标';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_piece"."position3"
-IS
-    '3d坐标';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_piece"."scene"
-IS
-    '场景实例id';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_piece"."type"
-IS
-    '碎片类型';
-    COMMENT ON COLUMN "MP"."mp_scene_scene_piece"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_sceneplugincloud_scene"
-IS
-    '场景实例云平台插件信息表';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene"."dns_nameservers"
-IS
-    '全局dns设置';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene"."enable_rate"
-IS
-    '是否开启环境总速率统计';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene"."enable_recording"
-IS
-    '是否开启录屏';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene"."scene"
-IS
-    '场景实例id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_sceneplugincloud_scene_config"
-IS
-    '场景拓扑云平台插件信息表';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config"."dns_nameservers"
-IS
-    '全局dns设置';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config"."enable_rate"
-IS
-    '是否开启环境总速率统计';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config"."enable_recording"
-IS
-    '是否开启录屏';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config"."scene"
-IS
-    '场景模板id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_sceneplugincloud_scene_config_element"
-IS
-    '场景拓扑云平台插件节点信息表';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."allocation_pools"
-IS
-    '虚拟交换机地址池';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."auxiliary_network_allocation_pools"
-IS
-    '辅助网络地址池';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."auxiliary_network_cidr"
-IS
-    '辅助网络cidr地址段';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."auxiliary_network_dhcp"
-IS
-    '辅助网络是否开启dhcp';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."auxiliary_network_dns_nameservers"
-IS
-    '辅助网络dns';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."auxiliary_network_gateway"
-IS
-    '辅助网络网关';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."auxiliary_network_host_routes"
-IS
-    '辅助网络静态路由';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."auxiliary_network_id"
-IS
-    '辅助网络id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."auxiliary_network_on"
-IS
-    '是否开启辅助网络';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."auxiliary_network_router_ip"
-IS
-    '辅助网络辅助路由ip';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."auxiliary_network_router_on"
-IS
-    '是否开启辅助网络辅助路由';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."auxiliary_network_router_resource_id"
-IS
-    '辅助网络辅助路由id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."auxiliary_network_vlan"
-IS
-    '辅助网络vlan模式';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."auxiliary_network_vlan_id"
-IS
-    '辅助网络vlanId';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."auxiliary_router_off"
-IS
-    '是否关闭辅助路由';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."category"
-IS
-    '靶标分类';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."category2"
-IS
-    '二级分类';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."category3"
-IS
-    '三级分类';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."cidr"
-IS
-    '虚拟交换机cidr地址段';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."dhcp"
-IS
-    '虚拟交换机是否开启dhcp';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."dns_nameservers"
-IS
-    '虚拟交换机dns';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."docker_params"
-IS
-    'docker参数';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."electric_port_number"
-IS
-    '电口数量';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."electric_port_type"
-IS
-    '电口类型';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."enable_mgmt"
-IS
-    '是否开启管理网络网卡';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."entity_usbs"
-IS
-    '实体usb列表';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."external"
-IS
-    '是否外部引用资源';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."firewall_resource_id"
-IS
-    '虚拟防火墙资源id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."firewall_rules"
-IS
-    '虚拟防火墙规则';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."gateway"
-IS
-    '虚拟交换机网关';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."gateway_off"
-IS
-    '关闭虚拟交换机网关的分配';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."host"
-IS
-    '宿主机名称';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."host_routes"
-IS
-    '虚拟路由静态路由';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."image"
-IS
-    '虚拟机容器镜像名称';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."image_type"
-IS
-    '靶标镜像类型';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."image_uuid"
-IS
-    '靶标id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."init_support"
-IS
-    '是否支持初始化';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."initial_tools"
-IS
-    '终端初始包含工具';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."is_build_in"
-IS
-    '是否云平台內置靶标';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."iso_attach_filename"
-IS
-    '挂载iso文件名';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."iso_tmpdir_uuid"
-IS
-    '挂载iso临时文件地址';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."lan_port_number"
-IS
-    'lan口数量';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."lan_port_type"
-IS
-    'lan口类型';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."mgmt_ip"
-IS
-    '管理网络ip';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."mgmt_mac_addr"
-IS
-    '管理网络mac地址';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."mgmt_port_resource_id"
-IS
-    '管理网络端口资源id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."mib_data"
-IS
-    'mib文件数据';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."net_mode"
-IS
-    '云平台网络类型';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."optical_port_number"
-IS
-    '光口数量';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."optical_port_type"
-IS
-    '光口类型';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."ospf_router_id"
-IS
-    'ospf网络下的routerID';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."platform"
-IS
-    'gns3 platform';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."quick_create_params"
-IS
-    '快速构建参数';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."quick_create_support"
-IS
-    '是否支持快速构建';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."resource_id"
-IS
-    '云平台虚拟化资源id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."rip_loopback"
-IS
-    'rip组网的loopback';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."role"
-IS
-    '靶标角色';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."scene"
-IS
-    '场景模板id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."scene_element"
-IS
-    '节点id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."snmp_config"
-IS
-    'snmp相关配置';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."static_routes"
-IS
-    '虚拟路由静态路由';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."transparent"
-IS
-    '是否透明模式';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."update_time"
-IS
-    '更新时间';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."virtual_type"
-IS
-    '云平台虚拟化类型';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."virtual_usbs"
-IS
-    '虚拟usb列表';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."vlan"
-IS
-    '虚拟交换机vlan模式';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."vlan_id"
-IS
-    '虚拟交换机vlanId';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."wan_port_number"
-IS
-    'wan口数量';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element"."wan_port_type"
-IS
-    'wan口类型';
-    COMMENT ON TABLE "MP"."mp_sceneplugincloud_scene_config_element_port"
-IS
-    '场景拓扑云平台插件节点端口信息表';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element_port"."access_modes"
-IS
-    '接入方式';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element_port"."auxiliary_network_id"
-IS
-    '辅助网络id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element_port"."bgp_as"
-IS
-    'bgp组网下的as';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element_port"."bgp_ip"
-IS
-    'bgp组网下的ip地址';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element_port"."bgp_peer"
-IS
-    'bgp组网下的对端端口ip';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element_port"."bgp_peer_as"
-IS
-    'bgp组网下的对端端口所属AS';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element_port"."connect_mode"
-IS
-    '组网连接模式';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element_port"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element_port"."entity_access_type"
-IS
-    '实体设备接入类型';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element_port"."entity_port"
-IS
-    '实体设备端口';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element_port"."entity_switch_name"
-IS
-    '实体设备端口连接交换机名称';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element_port"."entity_switch_port"
-IS
-    '实体设备端口连接交换机端口';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element_port"."firewall_resource_id"
-IS
-    '虚拟防火墙资源id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element_port"."firewall_rules"
-IS
-    '虚拟防火墙规则';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element_port"."floating_ip"
-IS
-    '浮动ip';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element_port"."floating_ip_id"
-IS
-    '浮动ip的id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element_port"."gateway_port_ips"
-IS
-    '网关端口地址段';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element_port"."gateway_port_type"
-IS
-    '网关端口类型';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element_port"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element_port"."nat"
-IS
-    '是否nat外网';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element_port"."ospf_area"
-IS
-    'ospf组网下的area';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element_port"."ospf_ip"
-IS
-    'ospf组网下的ip地址';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element_port"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element_port"."qos_id"
-IS
-    'qos id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element_port"."resource_id"
-IS
-    '云平台虚拟化资源id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element_port"."rip_ip"
-IS
-    'rip组网的ip';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element_port"."rip_pear"
-IS
-    'rip组网的邻居';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element_port"."scene"
-IS
-    '场景模板id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element_port"."scene_element_port"
-IS
-    '端口id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_config_element_port"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_sceneplugincloud_scene_element"
-IS
-    '场景实例云平台插件节点信息表';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."allocation_pools"
-IS
-    '虚拟交换机地址池';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."auxiliary_network_allocation_pools"
-IS
-    '辅助网络地址池';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."auxiliary_network_cidr"
-IS
-    '辅助网络cidr地址段';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."auxiliary_network_dhcp"
-IS
-    '辅助网络是否开启dhcp';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."auxiliary_network_dns_nameservers"
-IS
-    '辅助网络dns';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."auxiliary_network_gateway"
-IS
-    '辅助网络网关';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."auxiliary_network_host_routes"
-IS
-    '辅助网络静态路由';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."auxiliary_network_id"
-IS
-    '辅助网络id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."auxiliary_network_on"
-IS
-    '是否开启辅助网络';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."auxiliary_network_router_ip"
-IS
-    '辅助网络辅助路由ip';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."auxiliary_network_router_on"
-IS
-    '是否开启辅助网络辅助路由';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."auxiliary_network_router_resource_id"
-IS
-    '辅助网络辅助路由id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."auxiliary_network_vlan"
-IS
-    '辅助网络vlan模式';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."auxiliary_network_vlan_id"
-IS
-    '辅助网络vlanId';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."auxiliary_router_off"
-IS
-    '是否关闭辅助路由';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."category"
-IS
-    '靶标分类';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."category2"
-IS
-    '二级分类';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."category3"
-IS
-    '三级分类';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."cidr"
-IS
-    '虚拟交换机cidr地址段';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."dhcp"
-IS
-    '虚拟交换机是否开启dhcp';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."dns_nameservers"
-IS
-    '虚拟交换机dns';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."docker_params"
-IS
-    'docker参数';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."electric_port_number"
-IS
-    '电口数量';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."electric_port_type"
-IS
-    '电口类型';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."enable_mgmt"
-IS
-    '是否开启管理网络网卡';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."entity_usbs"
-IS
-    '实体usb列表';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."external"
-IS
-    '是否外部引用资源';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."firewall_resource_id"
-IS
-    '虚拟防火墙资源id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."firewall_rules"
-IS
-    '虚拟防火墙规则';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."fwdns_ips"
-IS
-    '云平台用于分布式部署时需要的ip';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."gateway"
-IS
-    '虚拟交换机网关';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."gateway_off"
-IS
-    '关闭虚拟交换机网关的分配';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."host"
-IS
-    '宿主机名称';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."host_routes"
-IS
-    '虚拟路由静态路由';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."image"
-IS
-    '虚拟机容器镜像名称';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."image_type"
-IS
-    '靶标镜像类型';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."image_uuid"
-IS
-    '靶标id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."init_support"
-IS
-    '是否支持初始化';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."initial_tools"
-IS
-    '终端初始包含工具';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."is_build_in"
-IS
-    '是否云平台內置靶标';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."iso_attach_filename"
-IS
-    '挂载iso文件名';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."iso_tmpdir_uuid"
-IS
-    '挂载iso临时文件地址';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."lan_port_number"
-IS
-    'lan口数量';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."lan_port_type"
-IS
-    'lan口类型';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."mgmt_ip"
-IS
-    '管理网络ip';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."mgmt_mac_addr"
-IS
-    '管理网络mac地址';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."mgmt_port_resource_id"
-IS
-    '管理网络端口资源id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."mib_data"
-IS
-    'mib文件数据';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."net_mode"
-IS
-    '云平台网络类型';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."optical_port_number"
-IS
-    '光口数量';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."optical_port_type"
-IS
-    '光口类型';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."ospf_router_id"
-IS
-    'ospf网络下的routerID';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."platform"
-IS
-    'gns3 platform';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."quick_create_params"
-IS
-    '快速构建参数';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."quick_create_support"
-IS
-    '是否支持快速构建';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."resource_id"
-IS
-    '云平台虚拟化资源id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."rip_loopback"
-IS
-    'rip组网的loopback';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."role"
-IS
-    '靶标角色';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."scene"
-IS
-    '场景实例id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."scene_element"
-IS
-    '节点id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."snmp_config"
-IS
-    'snmp相关配置';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."static_routes"
-IS
-    '虚拟路由静态路由';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."transparent"
-IS
-    '是否透明模式';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."update_time"
-IS
-    '更新时间';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."virtual_type"
-IS
-    '云平台虚拟化类型';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."virtual_usbs"
-IS
-    '虚拟usb列表';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."vlan"
-IS
-    '虚拟交换机vlan模式';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."vlan_id"
-IS
-    '虚拟交换机vlanId';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."wan_port_number"
-IS
-    'wan口数量';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element"."wan_port_type"
-IS
-    'wan口类型';
-    COMMENT ON TABLE "MP"."mp_sceneplugincloud_scene_element_port"
-IS
-    '场景实例云平台插件节点端口信息表';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element_port"."access_modes"
-IS
-    '接入方式';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element_port"."auxiliary_network_id"
-IS
-    '辅助网络id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element_port"."bgp_as"
-IS
-    'bgp组网下的as';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element_port"."bgp_ip"
-IS
-    'bgp组网下的ip地址';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element_port"."bgp_peer"
-IS
-    'bgp组网下的对端端口ip';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element_port"."bgp_peer_as"
-IS
-    'bgp组网下的对端端口所属AS';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element_port"."connect_mode"
-IS
-    '组网连接模式';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element_port"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element_port"."distributed_port_mapping_ip"
-IS
-    '分布式端口映射的ip';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element_port"."entity_access_type"
-IS
-    '实体设备接入类型';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element_port"."entity_port"
-IS
-    '实体设备端口';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element_port"."entity_switch_name"
-IS
-    '实体设备端口连接交换机名称';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element_port"."entity_switch_port"
-IS
-    '实体设备端口连接交换机端口';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element_port"."firewall_resource_id"
-IS
-    '虚拟防火墙资源id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element_port"."firewall_rules"
-IS
-    '虚拟防火墙规则';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element_port"."floating_ip"
-IS
-    '浮动ip';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element_port"."floating_ip_id"
-IS
-    '浮动ip的id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element_port"."gateway_port_ips"
-IS
-    '网关端口地址段';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element_port"."gateway_port_type"
-IS
-    '网关端口类型';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element_port"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element_port"."logic_network_id"
-IS
-    '网络id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element_port"."nat"
-IS
-    '是否nat外网';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element_port"."ospf_area"
-IS
-    'ospf组网下的area';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element_port"."ospf_ip"
-IS
-    'ospf组网下的ip地址';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element_port"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element_port"."qos_id"
-IS
-    'qos id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element_port"."resource_id"
-IS
-    '云平台虚拟化资源id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element_port"."rip_ip"
-IS
-    'rip组网的ip';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element_port"."rip_pear"
-IS
-    'rip组网的邻居';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element_port"."scene"
-IS
-    '场景实例id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element_port"."scene_element_port"
-IS
-    '端口id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element_port"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_sceneplugincollection_scene"
-IS
-    '场景实例数据采集插件信息表';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene"."enable_flow_collect"
-IS
-    '开启流量采集';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene"."enable_flow_mirror"
-IS
-    '开启流量流量镜像';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene"."enable_probe_collect"
-IS
-    '开启探针采集';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene"."flow_collector"
-IS
-    '流量采集器id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene"."flow_file"
-IS
-    '流量采集pcap文件地址';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene"."probe_collector"
-IS
-    '流量采集器id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene"."probe_router"
-IS
-    '采集路由id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene"."scene"
-IS
-    '场景实例id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_sceneplugincollection_scene_config"
-IS
-    '场景拓扑数据采集插件信息表';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_config"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_config"."enable_flow_collect"
-IS
-    '开启流量采集';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_config"."enable_flow_mirror"
-IS
-    '开启流量流量镜像';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_config"."enable_probe_collect"
-IS
-    '开启探针采集';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_config"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_config"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_config"."scene"
-IS
-    '场景模板id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_config"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_sceneplugincollection_scene_config_element"
-IS
-    '场景拓扑数据采集插件节点信息表';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_config_element"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_config_element"."edited"
-IS
-    '是否有添加过探针';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_config_element"."enable_probe_collect"
-IS
-    '开启探针采集';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_config_element"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_config_element"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_config_element"."probes"
-IS
-    '探针列表';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_config_element"."scene"
-IS
-    '场景模板id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_config_element"."scene_element"
-IS
-    '节点id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_config_element"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_sceneplugincollection_scene_config_element_port"
-IS
-    '场景拓扑数据采集插件节点端口信息表';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_config_element_port"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_config_element_port"."enable_flow_collect"
-IS
-    '开启流量采集';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_config_element_port"."enable_flow_mirror"
-IS
-    '开启流量流量镜像';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_config_element_port"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_config_element_port"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_config_element_port"."scene"
-IS
-    '场景模板id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_config_element_port"."scene_element_port"
-IS
-    '端口id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_config_element_port"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_sceneplugincollection_scene_data"
-IS
-    '场景实例数据采集插件信息表';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_data"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_data"."data"
-IS
-    '数据';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_data"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_data"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_data"."scene"
-IS
-    '场景实例id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_data"."scene_element"
-IS
-    '节点id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_data"."type"
-IS
-    '数据类型';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_data"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_sceneplugincollection_scene_element"
-IS
-    '场景实例数据采集插件节点信息表';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_element"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_element"."enable_probe_collect"
-IS
-    '开启探针采集';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_element"."id"
-IS
-    'id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_element"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_element"."probes"
-IS
-    '探针列表';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_element"."scene"
-IS
-    '场景实例id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_element"."scene_element"
-IS
-    '节点id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_element"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_sceneplugincollection_scene_element_port"
-IS
-    '场景实例数据采集插件节点端口信息表';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_element_port"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_element_port"."enable_flow_collect"
-IS
-    '开启流量采集';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_element_port"."enable_flow_mirror"
-IS
-    '开启流量流量镜像';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_element_port"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_element_port"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_element_port"."scene"
-IS
-    '场景实例id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_element_port"."scene_element_port"
-IS
-    '端口id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_element_port"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_sceneplugincollection_scene_probe_router_port"
-IS
-    '场景实例数据采集插件探针路由端口表';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_probe_router_port"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_probe_router_port"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_probe_router_port"."ip"
-IS
-    'ip';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_probe_router_port"."network_id"
-IS
-    '网络id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_probe_router_port"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_probe_router_port"."scene"
-IS
-    '场景实例id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_probe_router_port"."scene_element"
-IS
-    '节点id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_scene_probe_router_port"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_sceneplugincollection_wazuh_rule"
-IS
-    'wazuh规则表';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_wazuh_rule"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_wazuh_rule"."description"
-IS
-    '描述';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_wazuh_rule"."details"
-IS
-    '详细描述';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_wazuh_rule"."file"
-IS
-    '文件';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_wazuh_rule"."gdpr"
-IS
-    'gdpr';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_wazuh_rule"."gpg13"
-IS
-    'gpg13';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_wazuh_rule"."groups"
-IS
-    '分组';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_wazuh_rule"."hipaa"
-IS
-    'hipaa';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_wazuh_rule"."id"
-IS
-    '规则id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_wazuh_rule"."level"
-IS
-    '规则等级';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_wazuh_rule"."mitre"
-IS
-    'mitre';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_wazuh_rule"."nist"
-IS
-    'nist_800_53';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_wazuh_rule"."pci_dss"
-IS
-    'pci_dss';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_wazuh_rule"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_wazuh_rule"."relative_dirname"
-IS
-    '相对目录名';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_wazuh_rule"."status"
-IS
-    '状态';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_wazuh_rule"."tsc"
-IS
-    'tsc';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_wazuh_rule"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_sceneplugincollection_wazuh_rule_type"
-IS
-    'wazuh类型表';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_wazuh_rule_type"."code"
-IS
-    '编号';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_wazuh_rule_type"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_wazuh_rule_type"."id"
-IS
-    '类型id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_wazuh_rule_type"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_wazuh_rule_type"."type"
-IS
-    '类型名称';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_wazuh_rule_type"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_sceneplugincollection_wazuh_rule_type_relation"
-IS
-    'wazuh规则类型关系表';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_wazuh_rule_type_relation"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_wazuh_rule_type_relation"."id"
-IS
-    'id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_wazuh_rule_type_relation"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_wazuh_rule_type_relation"."rule_id"
-IS
-    '规则id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_wazuh_rule_type_relation"."type_id"
-IS
-    '类型id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincollection_wazuh_rule_type_relation"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_scenepluginflow_scene"
-IS
-    '场景实例流量插件信息表';
-    COMMENT ON COLUMN "MP"."mp_scenepluginflow_scene"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_scenepluginflow_scene"."executor"
-IS
-    '流量发生器id';
-    COMMENT ON COLUMN "MP"."mp_scenepluginflow_scene"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_scenepluginflow_scene"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_scenepluginflow_scene"."scene"
-IS
-    '场景实例id';
-    COMMENT ON COLUMN "MP"."mp_scenepluginflow_scene"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_scenepluginflow_scene_config"
-IS
-    '场景拓扑流量插件信息表';
-    COMMENT ON COLUMN "MP"."mp_scenepluginflow_scene_config"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_scenepluginflow_scene_config"."id"
-IS
-    'id';
-    COMMENT ON COLUMN "MP"."mp_scenepluginflow_scene_config"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_scenepluginflow_scene_config"."scene"
-IS
-    '场景模板id';
-    COMMENT ON COLUMN "MP"."mp_scenepluginflow_scene_config"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_scenepluginflow_scene_config_element"
-IS
-    '场景拓扑流量插件节点信息表';
-    COMMENT ON COLUMN "MP"."mp_scenepluginflow_scene_config_element"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_scenepluginflow_scene_config_element"."flows"
-IS
-    '流量列表';
-    COMMENT ON COLUMN "MP"."mp_scenepluginflow_scene_config_element"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_scenepluginflow_scene_config_element"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_scenepluginflow_scene_config_element"."scene"
-IS
-    '场景模板id';
-    COMMENT ON COLUMN "MP"."mp_scenepluginflow_scene_config_element"."scene_element"
-IS
-    '节点id';
-    COMMENT ON COLUMN "MP"."mp_scenepluginflow_scene_config_element"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_scenepluginflow_scene_config_element_port"
-IS
-    '场景拓扑流量插件节点端口信息表';
-    COMMENT ON COLUMN "MP"."mp_scenepluginflow_scene_config_element_port"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_scenepluginflow_scene_config_element_port"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_scenepluginflow_scene_config_element_port"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_scenepluginflow_scene_config_element_port"."scene"
-IS
-    '场景模板id';
-    COMMENT ON COLUMN "MP"."mp_scenepluginflow_scene_config_element_port"."scene_element_port"
-IS
-    '端口id';
-    COMMENT ON COLUMN "MP"."mp_scenepluginflow_scene_config_element_port"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_scenepluginflow_scene_element"
-IS
-    '场景实例流量插件节点信息表';
-    COMMENT ON COLUMN "MP"."mp_scenepluginflow_scene_element"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_scenepluginflow_scene_element"."flows"
-IS
-    '流量列表';
-    COMMENT ON COLUMN "MP"."mp_scenepluginflow_scene_element"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_scenepluginflow_scene_element"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_scenepluginflow_scene_element"."scene"
-IS
-    '场景实例id';
-    COMMENT ON COLUMN "MP"."mp_scenepluginflow_scene_element"."scene_element"
-IS
-    '节点id';
-    COMMENT ON COLUMN "MP"."mp_scenepluginflow_scene_element"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_scenepluginflow_scene_element_port"
-IS
-    '场景实例流量插件节点端口信息表';
-    COMMENT ON COLUMN "MP"."mp_scenepluginflow_scene_element_port"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_scenepluginflow_scene_element_port"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_scenepluginflow_scene_element_port"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_scenepluginflow_scene_element_port"."scene"
-IS
-    '场景实例id';
-    COMMENT ON COLUMN "MP"."mp_scenepluginflow_scene_element_port"."scene_element_port"
-IS
-    '端口id';
-    COMMENT ON COLUMN "MP"."mp_scenepluginflow_scene_element_port"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_situation_flow_classification"
-IS
-    '流量分类表';
-    COMMENT ON COLUMN "MP"."mp_situation_flow_classification"."category_en"
-IS
-    '分类英文名称';
-    COMMENT ON COLUMN "MP"."mp_situation_flow_classification"."category_zh"
-IS
-    '分类中文名称';
-    COMMENT ON COLUMN "MP"."mp_situation_flow_classification"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_situation_flow_classification"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_situation_flow_classification"."name"
-IS
-    '名称';
-    COMMENT ON COLUMN "MP"."mp_situation_flow_classification"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_situation_flow_classification"."severity"
-IS
-    '严重性';
-    COMMENT ON COLUMN "MP"."mp_situation_flow_classification"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_situation_flow_port_protocol"
-IS
-    '流量端口协议表';
-    COMMENT ON COLUMN "MP"."mp_situation_flow_port_protocol"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_situation_flow_port_protocol"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_situation_flow_port_protocol"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_situation_flow_port_protocol"."port"
-IS
-    '端口';
-    COMMENT ON COLUMN "MP"."mp_situation_flow_port_protocol"."protocol"
-IS
-    '协议';
-    COMMENT ON COLUMN "MP"."mp_situation_flow_port_protocol"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_situation_probe_ability"
-IS
-    '探针功能项信息';
-    COMMENT ON COLUMN "MP"."mp_situation_probe_ability"."OS_type"
-IS
-    '比探针的os_type种类要多，0:Windows, 1:Unix, 2:Linux, 3:BSD, 5:cisco-ios, 6:HP, 7:junos, 8:openbsd';
-    COMMENT ON COLUMN "MP"."mp_situation_probe_ability"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_situation_probe_ability"."description"
-IS
-    '描述';
-    COMMENT ON COLUMN "MP"."mp_situation_probe_ability"."engine"
-IS
-    '分析引擎';
-    COMMENT ON COLUMN "MP"."mp_situation_probe_ability"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_situation_probe_ability"."name"
-IS
-    '功能名称';
-    COMMENT ON COLUMN "MP"."mp_situation_probe_ability"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_situation_probe_ability"."probe_id"
-IS
-    '探针id';
-    COMMENT ON COLUMN "MP"."mp_situation_probe_ability"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_auth_tenant_user"
-IS
-    '组织用户关系表';
-    COMMENT ON COLUMN "MP"."mp_auth_tenant_user"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_auth_tenant_user"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_auth_tenant_user"."org"
-IS
-    '组织ID';
-    COMMENT ON COLUMN "MP"."mp_auth_tenant_user"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_auth_tenant_user"."tenant"
-IS
-    '所属租户';
-    COMMENT ON COLUMN "MP"."mp_auth_tenant_user"."update_time"
-IS
-    '更新时间';
-    COMMENT ON COLUMN "MP"."mp_auth_tenant_user"."user"
-IS
-    '用户ID';
-    COMMENT ON TABLE "MP"."mp_auth_url_ac"
-IS
-    'URL访问控制表';
-    COMMENT ON COLUMN "MP"."mp_auth_url_ac"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_auth_url_ac"."desc"
-IS
-    '描述';
-    COMMENT ON COLUMN "MP"."mp_auth_url_ac"."group"
-IS
-    '权限组';
-    COMMENT ON COLUMN "MP"."mp_auth_url_ac"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_auth_url_ac"."is_pattern"
-IS
-    '是否包含模式字符 1:是 0:否';
-    COMMENT ON COLUMN "MP"."mp_auth_url_ac"."methods"
-IS
-    '支持的请求方法，如get,post';
-    COMMENT ON COLUMN "MP"."mp_auth_url_ac"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_auth_url_ac"."update_time"
-IS
-    '更新时间';
-    COMMENT ON COLUMN "MP"."mp_auth_url_ac"."url"
-IS
-    'URL pattern';
-    COMMENT ON TABLE "MP"."mp_auth_url_ac_target"
-IS
-    'URL访问控制-权限关系表';
-    COMMENT ON COLUMN "MP"."mp_auth_url_ac_target"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_auth_url_ac_target"."group"
-IS
-    '权限组';
-    COMMENT ON COLUMN "MP"."mp_auth_url_ac_target"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_auth_url_ac_target"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_auth_url_ac_target"."target"
-IS
-    '权限ID';
-    COMMENT ON COLUMN "MP"."mp_auth_url_ac_target"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_auth_user"
-IS
-    '用户表';
-    COMMENT ON COLUMN "MP"."mp_auth_user"."address"
-IS
-    '地址';
-    COMMENT ON COLUMN "MP"."mp_auth_user"."avatar"
-IS
-    '头像';
-    COMMENT ON COLUMN "MP"."mp_auth_user"."birthday"
-IS
-    '生日';
-    COMMENT ON COLUMN "MP"."mp_auth_user"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_auth_user"."date_joined"
-IS
-    '加入时间';
-    COMMENT ON COLUMN "MP"."mp_auth_user"."delay_remind_license_time"
-IS
-    '延期提醒时间';
-    COMMENT ON COLUMN "MP"."mp_auth_user"."description"
-IS
-    '描述';
-    COMMENT ON COLUMN "MP"."mp_auth_user"."email"
-IS
-    '邮箱';
-    COMMENT ON COLUMN "MP"."mp_auth_user"."expired_time"
-IS
-    '过期时间';
-    COMMENT ON COLUMN "MP"."mp_auth_user"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_auth_user"."id_card"
-IS
-    '身份证号';
-    COMMENT ON COLUMN "MP"."mp_auth_user"."identifier"
-IS
-    '编号';
-    COMMENT ON COLUMN "MP"."mp_auth_user"."init_check"
-IS
-    '是否首次登陆需要强制修改密码 0:否，1:是';
-    COMMENT ON COLUMN "MP"."mp_auth_user"."is_audited"
-IS
-    '1:已审核 0：待审核';
-    COMMENT ON COLUMN "MP"."mp_auth_user"."is_enabled"
-IS
-    '1:启用 0：禁用';
-    COMMENT ON COLUMN "MP"."mp_auth_user"."last_login"
-IS
-    '最后登录时间';
-    COMMENT ON COLUMN "MP"."mp_auth_user"."mobile"
-IS
-    '手机号';
-    COMMENT ON COLUMN "MP"."mp_auth_user"."name"
-IS
-    '姓名';
-    COMMENT ON COLUMN "MP"."mp_auth_user"."nickname"
-IS
-    '昵称';
-    COMMENT ON COLUMN "MP"."mp_auth_user"."password"
-IS
-    '密码';
-    COMMENT ON COLUMN "MP"."mp_auth_user"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_auth_user"."tenant"
-IS
-    '原生租户';
-    COMMENT ON COLUMN "MP"."mp_auth_user"."token_secret"
-IS
-    'token密钥';
-    COMMENT ON COLUMN "MP"."mp_auth_user"."update_time"
-IS
-    '更新时间';
-    COMMENT ON COLUMN "MP"."mp_auth_user"."username"
-IS
-    '用户名';
-    COMMENT ON TABLE "MP"."mp_auth_user_online_record"
-IS
-    '用户在线记录表';
-    COMMENT ON COLUMN "MP"."mp_auth_user_online_record"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_auth_user_online_record"."duration_minutes"
-IS
-    '本轮累计在线分钟数';
-    COMMENT ON COLUMN "MP"."mp_auth_user_online_record"."end_time"
-IS
-    '结束时间';
-    COMMENT ON COLUMN "MP"."mp_auth_user_online_record"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_auth_user_online_record"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_auth_user_online_record"."start_time"
-IS
-    '开始时间';
-    COMMENT ON COLUMN "MP"."mp_auth_user_online_record"."status"
-IS
-    '记录完成与否 0:未完成 1:已完成';
-    COMMENT ON COLUMN "MP"."mp_auth_user_online_record"."tenant"
-IS
-    '所属租户';
-    COMMENT ON COLUMN "MP"."mp_auth_user_online_record"."update_time"
-IS
-    '更新时间';
-    COMMENT ON COLUMN "MP"."mp_auth_user_online_record"."user"
-IS
-    '用户ID';
-    COMMENT ON TABLE "MP"."mp_auth_user_role"
-IS
-    '用户角色关系表';
-    COMMENT ON COLUMN "MP"."mp_auth_user_role"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_auth_user_role"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_auth_user_role"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_auth_user_role"."role"
-IS
-    '角色ID';
-    COMMENT ON COLUMN "MP"."mp_auth_user_role"."tenant"
-IS
-    '所属租户';
-    COMMENT ON COLUMN "MP"."mp_auth_user_role"."update_time"
-IS
-    '更新时间';
-    COMMENT ON COLUMN "MP"."mp_auth_user_role"."user"
-IS
-    '用户ID';
-    COMMENT ON TABLE "MP"."mp_cscene_instance_user_count"
-IS
-    '用户场景统计表';
-    COMMENT ON COLUMN "MP"."mp_cscene_instance_user_count"."count"
-IS
-    '场景启动数量';
-    COMMENT ON COLUMN "MP"."mp_cscene_instance_user_count"."create_time"
-IS
-    '更新时间';
-    COMMENT ON COLUMN "MP"."mp_cscene_instance_user_count"."id"
-IS
-    '统计id';
-    COMMENT ON COLUMN "MP"."mp_cscene_instance_user_count"."update_time"
-IS
-    '更新时间';
-    COMMENT ON COLUMN "MP"."mp_cscene_instance_user_count"."user_id"
-IS
-    '用户id';
-    COMMENT ON TABLE "MP"."mp_cscene_snapshot"
-IS
-    '场景快照表';
-    COMMENT ON COLUMN "MP"."mp_cscene_snapshot"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_cscene_snapshot"."cscene_id"
-IS
-    '场景模板';
-    COMMENT ON COLUMN "MP"."mp_cscene_snapshot"."cscene_instance_id"
-IS
-    '场景实例';
-    COMMENT ON COLUMN "MP"."mp_cscene_snapshot"."deleted"
-IS
-    '是否删除';
-    COMMENT ON COLUMN "MP"."mp_cscene_snapshot"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_cscene_snapshot"."name"
-IS
-    '名称';
-    COMMENT ON COLUMN "MP"."mp_cscene_snapshot"."node_id"
-IS
-    '描述';
-    COMMENT ON COLUMN "MP"."mp_cscene_snapshot"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_cscene_snapshot"."snapshot_id"
-IS
-    '场景数据库快照id';
-    COMMENT ON COLUMN "MP"."mp_cscene_snapshot"."snapshot_resource_id"
-IS
-    '快照资源id';
-    COMMENT ON COLUMN "MP"."mp_cscene_snapshot"."source_name"
-IS
-    '源快照名称';
-    COMMENT ON COLUMN "MP"."mp_cscene_snapshot"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_devops_log_operation"
-IS
-    '审计日志表';
-    COMMENT ON COLUMN "MP"."mp_devops_log_operation"."content"
-IS
-    '内容';
-    COMMENT ON COLUMN "MP"."mp_devops_log_operation"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_devops_log_operation"."description"
-IS
-    '描述';
-    COMMENT ON COLUMN "MP"."mp_devops_log_operation"."from"
-IS
-    '日志来源';
-    COMMENT ON COLUMN "MP"."mp_devops_log_operation"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_devops_log_operation"."log_type"
-IS
-    '日志类型：设备日志、系统日志、业务日志、用户日志、场景日志';
-    COMMENT ON COLUMN "MP"."mp_devops_log_operation"."op_ip"
-IS
-    '客户端IP';
-    COMMENT ON COLUMN "MP"."mp_devops_log_operation"."op_module"
-IS
-    '操作模块';
-    COMMENT ON COLUMN "MP"."mp_devops_log_operation"."op_module_id"
-IS
-    '操作模块ID';
-    COMMENT ON COLUMN "MP"."mp_devops_log_operation"."op_target"
-IS
-    '操作对象';
-    COMMENT ON COLUMN "MP"."mp_devops_log_operation"."op_target_id"
-IS
-    '操作对象ID';
-    COMMENT ON COLUMN "MP"."mp_devops_log_operation"."op_time"
-IS
-    '操作时间';
-    COMMENT ON COLUMN "MP"."mp_devops_log_operation"."op_type"
-IS
-    '操作类型';
-    COMMENT ON COLUMN "MP"."mp_devops_log_operation"."op_type_id"
-IS
-    '操作类型ID';
-    COMMENT ON COLUMN "MP"."mp_devops_log_operation"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_devops_log_operation"."site_type"
-IS
-    '站点类型：应用、中台、前端、平台';
-    COMMENT ON COLUMN "MP"."mp_devops_log_operation"."title"
-IS
-    '主题';
-    COMMENT ON COLUMN "MP"."mp_devops_log_operation"."update_time"
-IS
-    '更新时间';
-    COMMENT ON COLUMN "MP"."mp_devops_log_operation"."user_id"
-IS
-    '用户ID';
-    COMMENT ON COLUMN "MP"."mp_devops_log_operation"."user_name"
-IS
-    '用户名';
-    COMMENT ON COLUMN "MP"."mp_devops_log_operation"."user_type"
-IS
-    '用户类型（用户，客户端）';
-    COMMENT ON TABLE "MP"."mp_devops_target"
-IS
-    '靶标信息表';
-    COMMENT ON COLUMN "MP"."mp_devops_target"."base_image_support"
-IS
-    '是否支持基础镜像,0:不支持，1：支持';
-    COMMENT ON COLUMN "MP"."mp_devops_target"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_devops_target"."create_user"
-IS
-    '靶标创建用户';
-    COMMENT ON COLUMN "MP"."mp_devops_target"."create_user_name"
-IS
-    '靶标创建用户名';
-    COMMENT ON COLUMN "MP"."mp_devops_target"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_devops_target"."image_source"
-IS
-    '系统镜像类型，1：基础镜像，2：openstack已有镜像，3：自定义上传';
-    COMMENT ON COLUMN "MP"."mp_devops_target"."image_status"
-IS
-    '镜像状态';
-    COMMENT ON COLUMN "MP"."mp_devops_target"."image_type"
-IS
-    '镜像类型：vm，container,simple, entity';
-    COMMENT ON COLUMN "MP"."mp_devops_target"."in_position"
-IS
-    '在位状态';
-    COMMENT ON COLUMN "MP"."mp_devops_target"."init_support"
-IS
-    '是否支持Cloud init,0:不支持，1：支持';
-    COMMENT ON COLUMN "MP"."mp_devops_target"."instance_create_user"
-IS
-    '靶标实例创建用户';
-    COMMENT ON COLUMN "MP"."mp_devops_target"."instance_state"
-IS
-    '镜像状态 0:没有实例，1：创建中，2创建成功，3创建失败';
-    COMMENT ON COLUMN "MP"."mp_devops_target"."is_hide"
-IS
-    '是否隐藏，0：false,1:true';
-    COMMENT ON COLUMN "MP"."mp_devops_target"."is_import"
-IS
-    '是否导入，0：false,1:true';
-    COMMENT ON COLUMN "MP"."mp_devops_target"."is_init"
-IS
-    '是否初始靶标，0：false，1：true';
-    COMMENT ON COLUMN "MP"."mp_devops_target"."is_public"
-IS
-    '是否公开，0：私有，1：自定义，2：公开';
-    COMMENT ON COLUMN "MP"."mp_devops_target"."language"
-IS
-    '系统语言';
-    COMMENT ON COLUMN "MP"."mp_devops_target"."logo"
-IS
-    '图标地址';
-    COMMENT ON COLUMN "MP"."mp_devops_target"."main_category"
-IS
-    '一级分类';
-    COMMENT ON COLUMN "MP"."mp_devops_target"."name"
-IS
-    '镜像名称';
-    COMMENT ON COLUMN "MP"."mp_devops_target"."parent_system_type"
-IS
-    '一级系统类型';
-    COMMENT ON COLUMN "MP"."mp_devops_target"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_devops_target"."quick_create_support"
-IS
-    '是否支持快速构建，0：不支持，1：支持';
-    COMMENT ON COLUMN "MP"."mp_devops_target"."reference_status"
-IS
-    '引用状态';
-    COMMENT ON COLUMN "MP"."mp_devops_target"."role"
-IS
-    '角色';
-    COMMENT ON COLUMN "MP"."mp_devops_target"."sub_category"
-IS
-    '二级分类';
-    COMMENT ON COLUMN "MP"."mp_devops_target"."support_export"
-IS
-    '是否支持导出，0：false,1:true';
-    COMMENT ON COLUMN "MP"."mp_devops_target"."system_architecure"
-IS
-    '系统架构';
-    COMMENT ON COLUMN "MP"."mp_devops_target"."system_type"
-IS
-    '系统类型';
-    COMMENT ON COLUMN "MP"."mp_devops_target"."third_category"
-IS
-    '三级分类';
-    COMMENT ON COLUMN "MP"."mp_devops_target"."update_time"
-IS
-    '更新时间';
-    COMMENT ON COLUMN "MP"."mp_devops_target"."use_status"
-IS
-    '使用状态';
-    COMMENT ON COLUMN "MP"."mp_devops_target"."uuid"
-IS
-    '镜像UUID';
-    COMMENT ON TABLE "MP"."mp_flow_collection"
-IS
-    '流量集合表';
-    COMMENT ON COLUMN "MP"."mp_flow_collection"."attack_flow_count"
-IS
-    '攻击流量数量';
-    COMMENT ON COLUMN "MP"."mp_flow_collection"."background_flow_count"
-IS
-    '背景流量数量';
-    COMMENT ON COLUMN "MP"."mp_flow_collection"."category"
-IS
-    '集合类型   0:"测试测量",1:"应用升级",2:"网络管理",3:"P2P",4:"金融",5:"邮件",6:"安全工作",7:"分布式计算",8:"手机",9:"移动设备",10:"即时通讯",11:"SCADA",12:"机动",13:"远程控制",14:"音视频",15:"企业应用",16:"社会网络搜索",17:"文件传输",18:"数据库",19:"身份认证",20:"ERP",21:"存储",22:"游戏",23:"安全数据传输"';
-    COMMENT ON COLUMN "MP"."mp_flow_collection"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_flow_collection"."description"
-IS
-    '集合描述';
-    COMMENT ON COLUMN "MP"."mp_flow_collection"."id"
-IS
-    '集合id';
-    COMMENT ON COLUMN "MP"."mp_flow_collection"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_flow_collection"."title"
-IS
-    '集合标题';
-    COMMENT ON COLUMN "MP"."mp_flow_collection"."type_flag"
-IS
-    '集合分类：0背景流量，1攻击流量，2混合流量';
-    COMMENT ON COLUMN "MP"."mp_flow_collection"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_flow_pcap"
-IS
-    '流量包表';
-    COMMENT ON COLUMN "MP"."mp_flow_pcap"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_flow_pcap"."duration"
-IS
-    '时长(单位ms)';
-    COMMENT ON COLUMN "MP"."mp_flow_pcap"."flow_id"
-IS
-    '流量id';
-    COMMENT ON COLUMN "MP"."mp_flow_pcap"."id"
-IS
-    '流量包id';
-    COMMENT ON COLUMN "MP"."mp_flow_pcap"."pcap_file"
-IS
-    'pcap文件地址';
-    COMMENT ON COLUMN "MP"."mp_flow_pcap"."pcap_size"
-IS
-    '大小(单位Byte)';
-    COMMENT ON COLUMN "MP"."mp_flow_pcap"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_flow_pcap"."pkt_num"
-IS
-    '包数(报文数量)';
-    COMMENT ON COLUMN "MP"."mp_flow_pcap"."protocols"
-IS
-    '包含协议';
-    COMMENT ON COLUMN "MP"."mp_flow_pcap"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_flow_protocol"
-IS
-    '流量协议表';
-    COMMENT ON COLUMN "MP"."mp_flow_protocol"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_flow_protocol"."flow_id"
-IS
-    '流量id';
-    COMMENT ON COLUMN "MP"."mp_flow_protocol"."id"
-IS
-    '协议id';
-    COMMENT ON COLUMN "MP"."mp_flow_protocol"."marked"
-IS
-    '是否勾选：0 否，1 是';
-    COMMENT ON COLUMN "MP"."mp_flow_protocol"."protocol_name"
-IS
-    '协议名称';
-    COMMENT ON COLUMN "MP"."mp_flow_protocol"."rate"
-IS
-    '比例';
-    COMMENT ON COLUMN "MP"."mp_flow_protocol"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_flow_task"
-IS
-    '流量任务表';
-    COMMENT ON COLUMN "MP"."mp_flow_task"."actuator_id"
-IS
-    '流量执行器id';
-    COMMENT ON COLUMN "MP"."mp_flow_task"."content"
-IS
-    '流量内容';
-    COMMENT ON COLUMN "MP"."mp_flow_task"."count"
-IS
-    '执行次数';
-    COMMENT ON COLUMN "MP"."mp_flow_task"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_flow_task"."custom_flag"
-IS
-    '自定义流量任务标志 0：否， 1：是';
-    COMMENT ON COLUMN "MP"."mp_flow_task"."delay"
-IS
-    '首次执行延迟时间，单位：秒(可以为0)';
-    COMMENT ON COLUMN "MP"."mp_flow_task"."flow_id"
-IS
-    '流量id';
-    COMMENT ON COLUMN "MP"."mp_flow_task"."flow_platform"
-IS
-    '流量发生平台：0 通用，1 北京流量发生器';
-    COMMENT ON COLUMN "MP"."mp_flow_task"."flow_port_id"
-IS
-    '流量网口id';
-    COMMENT ON COLUMN "MP"."mp_flow_task"."flow_protocol"
-IS
-    '流量协议';
-    COMMENT ON COLUMN "MP"."mp_flow_task"."id"
-IS
-    '任务id';
-    COMMENT ON COLUMN "MP"."mp_flow_task"."interval_time"
-IS
-    '周期执行间隔，单位：秒';
-    COMMENT ON COLUMN "MP"."mp_flow_task"."mult"
-IS
-    '倍数:大于等于1的整数';
-    COMMENT ON COLUMN "MP"."mp_flow_task"."node_id"
-IS
-    '节点id';
-    COMMENT ON COLUMN "MP"."mp_flow_task"."origin_ips"
-IS
-    '源ip范围';
-    COMMENT ON COLUMN "MP"."mp_flow_task"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_flow_task"."running_count"
-IS
-    '实际执行次数';
-    COMMENT ON COLUMN "MP"."mp_flow_task"."target_ips"
-IS
-    '目标ip范围';
-    COMMENT ON COLUMN "MP"."mp_flow_task"."task_desc"
-IS
-    '任务描述';
-    COMMENT ON COLUMN "MP"."mp_flow_task"."task_status"
-IS
-    '任务状态: 0 初始化，1 正在运行，2 正在停止， 3 已停止';
-    COMMENT ON COLUMN "MP"."mp_flow_task"."third_flow_id"
-IS
-    '流量第三方uuid';
-    COMMENT ON COLUMN "MP"."mp_flow_task"."third_flow_name"
-IS
-    '流量第三方名称';
-    COMMENT ON COLUMN "MP"."mp_flow_task"."third_task_id"
-IS
-    '流量任务第三方uuid';
-    COMMENT ON COLUMN "MP"."mp_flow_task"."title"
-IS
-    '任务标题';
-    COMMENT ON COLUMN "MP"."mp_flow_task"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_flow_task_conf"
-IS
-    '流量任务配置表';
-    COMMENT ON COLUMN "MP"."mp_flow_task_conf"."conf"
-IS
-    '配置';
-    COMMENT ON COLUMN "MP"."mp_flow_task_conf"."config"
-IS
-    '是否开启流量重放和速率配置：0 否，1 是';
-    COMMENT ON COLUMN "MP"."mp_flow_task_conf"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_flow_task_conf"."id"
-IS
-    '配置id';
-    COMMENT ON COLUMN "MP"."mp_flow_task_conf"."keep_running"
-IS
-    '持续运行：0 否，1 是';
-    COMMENT ON COLUMN "MP"."mp_flow_task_conf"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_flow_task_conf"."rate_unlimited"
-IS
-    '速率无限制：0 否，1 是';
-    COMMENT ON COLUMN "MP"."mp_flow_task_conf"."replay"
-IS
-    '是否流量重放：0 否，1 是';
-    COMMENT ON COLUMN "MP"."mp_flow_task_conf"."task_id"
-IS
-    '任务id';
-    COMMENT ON COLUMN "MP"."mp_flow_task_conf"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_flow_task_record"
-IS
-    '流量任务记录表';
-    COMMENT ON COLUMN "MP"."mp_flow_task_record"."actuator_id"
-IS
-    '流量执行器id';
-    COMMENT ON COLUMN "MP"."mp_flow_task_record"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_flow_task_record"."drop_rate"
-IS
-    '丢包率(单位bytes)';
-    COMMENT ON COLUMN "MP"."mp_flow_task_record"."id"
-IS
-    '记录id';
-    COMMENT ON COLUMN "MP"."mp_flow_task_record"."jitter"
-IS
-    '抖动(单位ms)';
-    COMMENT ON COLUMN "MP"."mp_flow_task_record"."latency"
-IS
-    '延迟(单位ms)';
-    COMMENT ON COLUMN "MP"."mp_flow_task_record"."obytes"
-IS
-    '发包总大小(单位byte)';
-    COMMENT ON COLUMN "MP"."mp_flow_task_record"."oerrors"
-IS
-    '发包错误数';
-    COMMENT ON COLUMN "MP"."mp_flow_task_record"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_flow_task_record"."queue_full"
-IS
-    '阻塞队列大小(单位byte)';
-    COMMENT ON COLUMN "MP"."mp_flow_task_record"."record_status"
-IS
-    '是否有效：0 无效，1 有效';
-    COMMENT ON COLUMN "MP"."mp_flow_task_record"."task_id"
-IS
-    '任务id';
-    COMMENT ON COLUMN "MP"."mp_flow_task_record"."total_pps"
-IS
-    '总发包数';
-    COMMENT ON COLUMN "MP"."mp_flow_task_record"."total_rx"
-IS
-    '接收速率(单位bytes)';
-    COMMENT ON COLUMN "MP"."mp_flow_task_record"."total_tx_L1"
-IS
-    '发送速率L1(单位bytes)';
-    COMMENT ON COLUMN "MP"."mp_flow_task_record"."total_tx_L2"
-IS
-    '发送速率L2(单位bytes)';
-    COMMENT ON COLUMN "MP"."mp_flow_task_record"."tx_bps"
-IS
-    '实时发送速率(单位bytes)';
-    COMMENT ON COLUMN "MP"."mp_flow_task_record"."tx_pps"
-IS
-    '实时发包数';
-    COMMENT ON COLUMN "MP"."mp_flow_task_record"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_front_admin_menu_extra_info"
-IS
-    '菜单附加信息';
-    COMMENT ON COLUMN "MP"."mp_front_admin_menu_extra_info"."activ_keys"
-IS
-    '系统激活key，多个用逗号隔开';
-    COMMENT ON COLUMN "MP"."mp_front_admin_menu_extra_info"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_front_admin_menu_extra_info"."editions"
-IS
-    '系统激活版本，多个用逗号隔开  0:标准版 1:专业版';
-    COMMENT ON COLUMN "MP"."mp_front_admin_menu_extra_info"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_front_admin_menu_extra_info"."menu"
-IS
-    '菜单id';
-    COMMENT ON COLUMN "MP"."mp_front_admin_menu_extra_info"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_front_admin_menu_extra_info"."tenant"
-IS
-    '所属租户';
-    COMMENT ON COLUMN "MP"."mp_front_admin_menu_extra_info"."update_time"
-IS
-    '更新时间';
-CREATE TABLE "MP"."mp_situation_probe_param"
-(
-    "pk"            INT IDENTITY(1, 1) NOT NULL,
-    "id"            VARCHAR(64 char ) NOT NULL,
-            "probe_id"      VARCHAR(64 char) NULL,
-            "template_id"   VARCHAR(64 char) NULL,
-            "name"          VARCHAR(50 char) NOT NULL,
-            "type"          INT NOT NULL,
-            "default_value" VARCHAR(600 char) NULL,
-            "description"   VARCHAR(600 char) NULL,
-            "create_time"   TIMESTAMP(0) NOT NULL,
-            "update_time"   TIMESTAMP(0) NOT NULL
-        );
-
-CREATE TABLE "MP"."mp_situation_probe_script"
-(
-    "pk"       INT IDENTITY(13, 1) NOT NULL,
-    "id"       VARCHAR(64 char ) NOT NULL,
-            "probe_id" VARCHAR(64 char) NULL,
-            "script_content" BLOB NULL,
-            "script_url"  VARCHAR(400 char) NULL,
-            "script_type" INT NOT NULL,
-            "version"     INT DEFAULT 1 NOT NULL,
-            "status"      INT DEFAULT 1 NOT NULL,
-            "checksum"    VARCHAR(100 char) NULL,
-            "create_time" TIMESTAMP(0) NOT NULL,
-            "update_time" TIMESTAMP(0) NOT NULL
-        );
-
-CREATE TABLE "MP"."mp_situation_suricatarule"
-(
-    "pk"                INT IDENTITY(25116, 1) NOT NULL,
-    "id"                VARCHAR(64 char ) NOT NULL,
-            "action"            VARCHAR(64 char) NOT NULL,
-            "protocol"          VARCHAR(64 char) NOT NULL,
-            "source"            VARCHAR(1024 char) NOT NULL,
-            "source_ports"      VARCHAR(1024 char) NOT NULL,
-            "direction"         VARCHAR(32 char) NOT NULL,
-            "destination"       VARCHAR(1024 char) NOT NULL,
-            "destination_ports" VARCHAR(1024 char) NOT NULL,
-            "rule_msg"          TEXT NOT NULL,
-            "rule_name"         VARCHAR(1024 char) NOT NULL,
-            "sid"               VARCHAR(64 char) NOT NULL,
-            "attck"             VARCHAR(64 char) NULL,
-            "create_time"       TIMESTAMP(6) NOT NULL,
-            "update_time"       TIMESTAMP(6) NOT NULL,
-            "class_type_cn"     VARCHAR(1024 char) DEFAULT '' NOT NULL,
-            "class_type_en"     VARCHAR(1024 char) DEFAULT '' NOT NULL,
-            "rule_gen_type"     INT DEFAULT 0 NOT NULL
-        );
-
-CREATE TABLE "MP"."mp_situation_traffic_group"
-(
-    "pk"               INT IDENTITY(1, 1) NOT NULL,
-    "traffic_group_id" VARCHAR(64 char ) NOT NULL,
-            "create_time"      TIMESTAMP(0) NOT NULL,
-            "del_flag"         INT DEFAULT 0 NULL
-        );
-
-CREATE TABLE "MP"."mp_sys_config"
-(
-    "pk"          INT IDENTITY(19, 1) NOT NULL,
-    "id"          VARCHAR(64 char ) NOT NULL,
-            "tenant"      VARCHAR(64 char) NOT NULL,
-            "key_name"    VARCHAR(100 char) NULL,
-            "value"       VARCHAR(8000 char) NULL,
-            "init_value"  VARCHAR(8000 char) DEFAULT '' NOT NULL,
-            "create_time" TIMESTAMP(0) NOT NULL,
-            "update_time" TIMESTAMP(0) NOT NULL
-        );
-
-CREATE TABLE "MP"."mp_sys_model_version"
-(
-    "pk"            INT IDENTITY(13, 1) NOT NULL,
-    "id"            VARCHAR(64 char ) NOT NULL,
-            "model_name"    VARCHAR(64 char) DEFAULT '' NOT NULL,
-            "model_version" VARCHAR(64 char) DEFAULT '' NOT NULL,
-            "visible"       TINYINT NOT NULL,
-            "create_time"   TIMESTAMP(0) NOT NULL,
-            "update_time"   TIMESTAMP(0) NOT NULL
-        );
-
-CREATE TABLE "MP"."mp_sys_notice"
-(
-    "pk"          INT IDENTITY(1, 1) NOT NULL,
-    "id"          VARCHAR(64 char ) NOT NULL,
-            "tenant"      VARCHAR(64 char) NOT NULL,
-            "content"     TEXT NULL,
-            "title"       VARCHAR(150 char) NOT NULL,
-            "publisher"   VARCHAR(64 char) NOT NULL,
-            "is_public"   INT DEFAULT 0 NOT NULL,
-            "type"        INT DEFAULT 1 NOT NULL,
-            "top"         BIGINT NOT NULL,
-            "create_time" TIMESTAMP(0) NOT NULL,
-            "update_time" TIMESTAMP(0) NOT NULL
-        );
-
-CREATE TABLE "MP"."mp_sys_notice_org"
-(
-    "pk"          INT IDENTITY(1, 1) NOT NULL,
-    "id"          VARCHAR(64 char ) NOT NULL,
-            "tenant"      VARCHAR(64 char) NOT NULL,
-            "notice_id"   VARCHAR(64 char) NOT NULL,
-            "org"         VARCHAR(64 char) NULL,
-            "create_time" TIMESTAMP(0) NOT NULL,
-            "update_time" TIMESTAMP(0) NOT NULL
-        );
-
-CREATE TABLE "MP"."mp_sys_notice_read"
-(
-    "pk"           INT IDENTITY(1, 1) NOT NULL,
-    "id"           VARCHAR(64 char ) NOT NULL,
-            "tenant"       VARCHAR(64 char) NOT NULL,
-            "notice_id"    VARCHAR(64 char) NOT NULL,
-            "user"         VARCHAR(64 char) NULL,
-            "is_readed"    INT DEFAULT 1 NOT NULL,
-            "is_need_push" INT DEFAULT 1 NOT NULL,
-            "read_count"   INT DEFAULT 1 NOT NULL,
-            "create_time"  TIMESTAMP(0) NOT NULL,
-            "update_time"  TIMESTAMP(0) NOT NULL
-        );
-
-CREATE TABLE "MP"."mp_sys_notice_role"
-(
-    "pk"          INT IDENTITY(1, 1) NOT NULL,
-    "id"          VARCHAR(64 char ) NOT NULL,
-            "tenant"      VARCHAR(64 char) NOT NULL,
-            "notice_id"   VARCHAR(64 char) NOT NULL,
-            "role"        VARCHAR(64 char) NULL,
-            "create_time" TIMESTAMP(0) NOT NULL,
-            "update_time" TIMESTAMP(0) NOT NULL
-        );
-
-CREATE TABLE "MP"."mp_sys_notice_user"
-(
-    "pk"          INT IDENTITY(1, 1) NOT NULL,
-    "id"          VARCHAR(64 char ) NOT NULL,
-            "tenant"      VARCHAR(64 char) NOT NULL,
-            "notice_id"   VARCHAR(64 char) NOT NULL,
-            "user"        VARCHAR(64 char) NULL,
-            "create_time" TIMESTAMP(0) NOT NULL,
-            "update_time" TIMESTAMP(0) NOT NULL
-        );
-
-ALTER TABLE "MP"."mp_situation_probe_param" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_situation_probe_script" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_situation_suricatarule" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_situation_traffic_group" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_sys_config" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_sys_model_version" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_sys_notice" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_sys_notice_org" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_sys_notice_read" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_sys_notice_role" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-ALTER TABLE "MP"."mp_sys_notice_user" ADD CONSTRAINT NOT CLUSTER PRIMARY KEY ("pk");
-
-CREATE INDEX "INDEX17511042210299"
-    ON "MP"."mp_sceneplugincloud_scene_connection"
-        (
-         "scene",
-         "access_mode_id",
-         "access_user"
-            );
-
-ALTER INDEX "MP"."INDEX17511042210299" VISIBLE;
-
-CREATE INDEX "INDEX17511051202600"
-    ON "MP"."mp_sceneplugincloud_scene_element_network"
-        (
-         "scene",
-         "scene_element"
-            );
-
-ALTER INDEX "MP"."INDEX17511051202600" VISIBLE;
-
-CREATE INDEX "INDEX17511064432000"
-    ON "MP"."mp_situation_collection_template"
-        (
-         "create_time"
-            );
-
-ALTER INDEX "MP"."INDEX17511064432000" VISIBLE;
-
-CREATE INDEX "OS_type"
-    ON "MP"."mp_situation_collection_template"
-        (
-         "OS_type"
-            );
-
-ALTER INDEX "MP"."OS_type" VISIBLE;
-
-CREATE INDEX "template_id"
-    ON "MP"."mp_situation_collection_template_probe"
-        (
-         "template_id",
-         "probe_id"
-            );
-
-ALTER INDEX "MP"."template_id" VISIBLE;
-
-CREATE INDEX "INDEX17511079402500"
-    ON "MP"."mp_situation_probe"
-        (
-         "name"
-            );
-
-ALTER INDEX "MP"."INDEX17511079402500" VISIBLE;
-
-CREATE INDEX "INDEX17511085242700"
-    ON "MP"."mp_situation_probe"
-        (
-         "create_time"
-            );
-
-ALTER INDEX "MP"."INDEX17511085242700" VISIBLE;
-
-CREATE INDEX "type"
-    ON "MP"."mp_situation_probe"
-        (
-         "type",
-         "probe_category",
-         "create_time"
-            );
-
-ALTER INDEX "MP"."type" VISIBLE;
-
-ALTER TABLE "MP"."mp_situation_probe_param" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_situation_probe_script" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_situation_suricatarule" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_situation_traffic_group" ADD CONSTRAINT "traffic_group_id" UNIQUE ("traffic_group_id");
-
-ALTER TABLE "MP"."mp_sys_config" ADD UNIQUE ("tenant", "key_name");
-
-ALTER TABLE "MP"."mp_sys_config" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_sys_model_version" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_sys_notice" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_sys_notice_org" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_sys_notice_read" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_sys_notice_role" ADD UNIQUE ("id");
-
-ALTER TABLE "MP"."mp_sys_notice_user" ADD UNIQUE ("id");
-
-COMMENT ON TABLE "MP"."mp_situation_traffic_group"
-IS
-    '流量索引表';
-    COMMENT ON COLUMN "MP"."mp_situation_traffic_group"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_situation_traffic_group"."del_flag"
-IS
-    '1:删除 0:未删除';
-    COMMENT ON COLUMN "MP"."mp_situation_traffic_group"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_situation_traffic_group"."traffic_group_id"
-IS
-    '流量索引前缀名';
-    COMMENT ON TABLE "MP"."mp_sys_config"
-IS
-    '系统配置信息表';
-    COMMENT ON COLUMN "MP"."mp_sys_config"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_sys_config"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_sys_config"."init_value"
-IS
-    '初始值';
-    COMMENT ON COLUMN "MP"."mp_sys_config"."key_name"
-IS
-    '键';
-    COMMENT ON COLUMN "MP"."mp_sys_config"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_sys_config"."tenant"
-IS
-    '租户';
-    COMMENT ON COLUMN "MP"."mp_sys_config"."update_time"
-IS
-    '更新时间';
-    COMMENT ON COLUMN "MP"."mp_sys_config"."value"
-IS
-    '值';
-    COMMENT ON TABLE "MP"."mp_sys_model_version"
-IS
-    '模块版本信息表';
-    COMMENT ON COLUMN "MP"."mp_sys_model_version"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_sys_model_version"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_sys_model_version"."model_name"
-IS
-    '模块名称';
-    COMMENT ON COLUMN "MP"."mp_sys_model_version"."model_version"
-IS
-    '模块版本号';
-    COMMENT ON COLUMN "MP"."mp_sys_model_version"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_sys_model_version"."update_time"
-IS
-    '更新时间';
-    COMMENT ON COLUMN "MP"."mp_sys_model_version"."visible"
-IS
-    '是否可见';
-    COMMENT ON TABLE "MP"."mp_sceneplugincloud_scene_connection"
-IS
-    '场景实例云平台插件节点接入信息表';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_connection"."access_ip"
-IS
-    '接入ip';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_connection"."access_mode_id"
-IS
-    '接入id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_connection"."access_pass"
-IS
-    '接入用户密码';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_connection"."access_port"
-IS
-    '接入端口号';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_connection"."access_token"
-IS
-    '接入用户token';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_connection"."access_token_expire_time"
-IS
-    '接入用户token过期时间';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_connection"."access_user"
-IS
-    '接入用户';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_connection"."connection_enable_recording"
-IS
-    '是否开启录屏';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_connection"."connection_id"
-IS
-    '接入id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_connection"."connection_recording_name"
-IS
-    '录屏名称';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_connection"."connection_url"
-IS
-    '接入url';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_connection"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_connection"."disable"
-IS
-    '是否禁用';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_connection"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_connection"."password"
-IS
-    '密码';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_connection"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_connection"."port"
-IS
-    '端口号';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_connection"."protocol"
-IS
-    '协议';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_connection"."scene"
-IS
-    '场景实例id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_connection"."scene_element"
-IS
-    '节点id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_connection"."scene_element_port"
-IS
-    '端口id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_connection"."token"
-IS
-    '协议接入token';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_connection"."update_time"
-IS
-    '更新时间';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_connection"."username"
-IS
-    '用户名';
-    COMMENT ON TABLE "MP"."mp_sceneplugincloud_scene_element_network"
-IS
-    '场景实例云平台插件网络信息表';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element_network"."allocation_pools"
-IS
-    '虚拟网络地址池';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element_network"."auxiliary_network_router_ip"
-IS
-    '辅助网络辅助路由ip';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element_network"."auxiliary_network_router_on"
-IS
-    '是否开启辅助网络辅助路由';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element_network"."auxiliary_network_router_resource_id"
-IS
-    '辅助网络辅助路由id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element_network"."cidr"
-IS
-    '虚拟网络cidr地址段';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element_network"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element_network"."dhcp"
-IS
-    '虚拟网络是否开启dhcp';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element_network"."dhcp_ip"
-IS
-    '指定的dhcp ip';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element_network"."dns_nameservers"
-IS
-    '虚拟网络dns';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element_network"."external"
-IS
-    '虚拟网络vlan模式';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element_network"."gateway"
-IS
-    '虚拟网络网关';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element_network"."gateway_off"
-IS
-    '关闭虚拟交换机网关的分配';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element_network"."host_routes"
-IS
-    '虚拟路由静态路由';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element_network"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element_network"."net_mode"
-IS
-    '云平台网络类型';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element_network"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element_network"."resource_id"
-IS
-    '虚拟网络资源id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element_network"."scene"
-IS
-    '场景实例id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element_network"."scene_element"
-IS
-    '场景实例节点id';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element_network"."update_time"
-IS
-    '更新时间';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element_network"."vlan"
-IS
-    '虚拟网络vlan模式';
-    COMMENT ON COLUMN "MP"."mp_sceneplugincloud_scene_element_network"."vlan_id"
-IS
-    '虚拟网络vlanId';
-    COMMENT ON TABLE "MP"."mp_situation_collection_template"
-IS
-    '采集模板表';
-    COMMENT ON COLUMN "MP"."mp_situation_collection_template"."OS_type"
-IS
-    '(单选) 操作系统类型 0:windows, 1:Unix, 2:Linux, 3:BSD, 4:Other';
-    COMMENT ON COLUMN "MP"."mp_situation_collection_template"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_situation_collection_template"."creator"
-IS
-    '创建者用户名';
-    COMMENT ON COLUMN "MP"."mp_situation_collection_template"."description"
-IS
-    '描述';
-    COMMENT ON COLUMN "MP"."mp_situation_collection_template"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_situation_collection_template"."name"
-IS
-    '模板名称';
-    COMMENT ON COLUMN "MP"."mp_situation_collection_template"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_situation_collection_template"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_situation_collection_template_probe"
-IS
-    '采集模板探针关系表';
-    COMMENT ON COLUMN "MP"."mp_situation_collection_template_probe"."OS_type"
-IS
-    '(可多选)操作系统类型 0:Windows, 1:Unix, 2:Linux, 3:BSD, 4:Other';
-    COMMENT ON COLUMN "MP"."mp_situation_collection_template_probe"."config"
-IS
-    '探针配置，json串，数组';
-    COMMENT ON COLUMN "MP"."mp_situation_collection_template_probe"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_situation_collection_template_probe"."creator"
-IS
-    '创建者用户名';
-    COMMENT ON COLUMN "MP"."mp_situation_collection_template_probe"."description"
-IS
-    '描述';
-    COMMENT ON COLUMN "MP"."mp_situation_collection_template_probe"."disabled"
-IS
-    '0:不启用，1:启用';
-    COMMENT ON COLUMN "MP"."mp_situation_collection_template_probe"."engine"
-IS
-    '分析引擎';
-    COMMENT ON COLUMN "MP"."mp_situation_collection_template_probe"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_situation_collection_template_probe"."interval_sec"
-IS
-    '探针执行间隔，为大于1的数值，单位秒，采集模板该值可以覆盖探针的interval_sec';
-    COMMENT ON COLUMN "MP"."mp_situation_collection_template_probe"."name"
-IS
-    '探针名称';
-    COMMENT ON COLUMN "MP"."mp_situation_collection_template_probe"."output_format"
-IS
-    '自定义探针输出格式: none, json, plain';
-    COMMENT ON COLUMN "MP"."mp_situation_collection_template_probe"."parameter"
-IS
-    '探针参数';
-    COMMENT ON COLUMN "MP"."mp_situation_collection_template_probe"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_situation_collection_template_probe"."probe_category"
-IS
-    '0:信息类 1:事件类 2:日志类 ';
-    COMMENT ON COLUMN "MP"."mp_situation_collection_template_probe"."probe_id"
-IS
-    '探针id';
-    COMMENT ON COLUMN "MP"."mp_situation_collection_template_probe"."script_type"
-IS
-    '0:shell 1:python 2:bat';
-    COMMENT ON COLUMN "MP"."mp_situation_collection_template_probe"."script_url"
-IS
-    '探针脚本内容fdfs地址，采集模板单独存一份，防止自定义探针代码修改之后，影响到采集模板';
-    COMMENT ON COLUMN "MP"."mp_situation_collection_template_probe"."template_id"
-IS
-    '采集模板id';
-    COMMENT ON COLUMN "MP"."mp_situation_collection_template_probe"."type"
-IS
-    '0:通用探针 1:自定义探针';
-    COMMENT ON COLUMN "MP"."mp_situation_collection_template_probe"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_situation_probe"
-IS
-    '探针基本信息';
-    COMMENT ON COLUMN "MP"."mp_situation_probe"."OS_type"
-IS
-    '(可多选)操作系统类型 0:Windows, 1:Unix, 2:Linux, 3:BSD, 4:Other';
-    COMMENT ON COLUMN "MP"."mp_situation_probe"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_situation_probe"."creator"
-IS
-    '创建者用户名';
-    COMMENT ON COLUMN "MP"."mp_situation_probe"."description"
-IS
-    '描述';
-    COMMENT ON COLUMN "MP"."mp_situation_probe"."engine"
-IS
-    '分析引擎';
-    COMMENT ON COLUMN "MP"."mp_situation_probe"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_situation_probe"."interval_sec"
-IS
-    '探针执行间隔，为大于1的数值，单位秒';
-    COMMENT ON COLUMN "MP"."mp_situation_probe"."is_deleted"
-IS
-    '1:删除 0:未删除';
-    COMMENT ON COLUMN "MP"."mp_situation_probe"."name"
-IS
-    '探针名称';
-    COMMENT ON COLUMN "MP"."mp_situation_probe"."output_format"
-IS
-    '自定义探针输出格式: none, json, plain';
-    COMMENT ON COLUMN "MP"."mp_situation_probe"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_situation_probe"."probe_category"
-IS
-    '0:信息类 1:事件类 2:日志类 ';
-    COMMENT ON COLUMN "MP"."mp_situation_probe"."type"
-IS
-    '0:通用探针 1:自定义探针';
-    COMMENT ON COLUMN "MP"."mp_situation_probe"."update_time"
-IS
-    '更新时间';
-CREATE INDEX "INDEX17511415954500"
-    ON "MP"."mp_situation_probe_param"
-        (
-         "template_id",
-         "probe_id"
-            );
-
-ALTER INDEX "MP"."INDEX17511415954500" VISIBLE;
-
-CREATE INDEX "probe_id"
-    ON "MP"."mp_situation_probe_script"
-        (
-         "probe_id",
-         "script_type"
-            );
-
-ALTER INDEX "MP"."probe_id" VISIBLE;
-
-CREATE INDEX "attck"
-    ON "MP"."mp_situation_suricatarule"
-        (
-         "attck"
-            );
-
-ALTER INDEX "MP"."attck" VISIBLE;
-
-CREATE INDEX "protocol"
-    ON "MP"."mp_situation_suricatarule"
-        (
-         "protocol"
-            );
-
-ALTER INDEX "MP"."protocol" VISIBLE;
-
-CREATE INDEX "rule_name"
-    ON "MP"."mp_situation_suricatarule"
-        (
-         "rule_name"
-            );
-
-ALTER INDEX "MP"."rule_name" VISIBLE;
-
-CREATE INDEX "INDEX17511498725599"
-    ON "MP"."mp_sys_notice"
-        (
-         "title"
-            );
-
-ALTER INDEX "MP"."INDEX17511498725599" VISIBLE;
-
-CREATE INDEX "INDEX17511505887399"
-    ON "MP"."mp_sys_notice_org"
-        (
-         "org",
-         "notice_id"
-            );
-
-ALTER INDEX "MP"."INDEX17511505887399" VISIBLE;
-
-CREATE INDEX "INDEX17511512777900"
-    ON "MP"."mp_sys_notice_read"
-        (
-         "user",
-         "notice_id"
-            );
-
-ALTER INDEX "MP"."INDEX17511512777900" VISIBLE;
-
-CREATE INDEX "notice_id"
-    ON "MP"."mp_sys_notice_read"
-        (
-         "notice_id"
-            );
-
-ALTER INDEX "MP"."notice_id" VISIBLE;
-
-CREATE INDEX "INDEX17511524726600"
-    ON "MP"."mp_sys_notice_role"
-        (
-         "role",
-         "notice_id"
-            );
-
-ALTER INDEX "MP"."INDEX17511524726600" VISIBLE;
-
-CREATE INDEX "INDEX17511530697100"
-    ON "MP"."mp_sys_notice_user"
-        (
-         "user",
-         "notice_id"
-            );
-
-ALTER INDEX "MP"."INDEX17511530697100" VISIBLE;
-
-    COMMENT ON TABLE "MP"."mp_situation_probe_param"
-IS
-    '探针或者采集模板的参数';
-    COMMENT ON COLUMN "MP"."mp_situation_probe_param"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_situation_probe_param"."default_value"
-IS
-    '默认值';
-    COMMENT ON COLUMN "MP"."mp_situation_probe_param"."description"
-IS
-    '描述';
-    COMMENT ON COLUMN "MP"."mp_situation_probe_param"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_situation_probe_param"."name"
-IS
-    '探针名称';
-    COMMENT ON COLUMN "MP"."mp_situation_probe_param"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_situation_probe_param"."probe_id"
-IS
-    '探针id';
-    COMMENT ON COLUMN "MP"."mp_situation_probe_param"."template_id"
-IS
-    '采集模板id';
-    COMMENT ON COLUMN "MP"."mp_situation_probe_param"."type"
-IS
-    '参数类型 0:number 1:string 2:bool 3:ip';
-    COMMENT ON COLUMN "MP"."mp_situation_probe_param"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_situation_probe_script"
-IS
-    '探针脚本';
-    COMMENT ON COLUMN "MP"."mp_situation_probe_script"."checksum"
-IS
-    '脚本内容md5';
-    COMMENT ON COLUMN "MP"."mp_situation_probe_script"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_situation_probe_script"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_situation_probe_script"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_situation_probe_script"."probe_id"
-IS
-    '探针id';
-    COMMENT ON COLUMN "MP"."mp_situation_probe_script"."script_content"
-IS
-    '探针脚本内容';
-    COMMENT ON COLUMN "MP"."mp_situation_probe_script"."script_type"
-IS
-    '脚本类型 0:shell 1:python 2:bat';
-    COMMENT ON COLUMN "MP"."mp_situation_probe_script"."script_url"
-IS
-    '探针脚本内容url地址';
-    COMMENT ON COLUMN "MP"."mp_situation_probe_script"."status"
-IS
-    '脚本状态';
-    COMMENT ON COLUMN "MP"."mp_situation_probe_script"."update_time"
-IS
-    '更新时间';
-    COMMENT ON COLUMN "MP"."mp_situation_probe_script"."version"
-IS
-    '脚本版本';
-    COMMENT ON TABLE "MP"."mp_situation_suricatarule"
-IS
-    '流量分析规则表';
-    COMMENT ON COLUMN "MP"."mp_situation_suricatarule"."action"
-IS
-    '匹配规则时进行的操作';
-    COMMENT ON COLUMN "MP"."mp_situation_suricatarule"."attck"
-IS
-    'Att&ck';
-    COMMENT ON COLUMN "MP"."mp_situation_suricatarule"."class_type_cn"
-IS
-    '流量规则分类类型中文';
-    COMMENT ON COLUMN "MP"."mp_situation_suricatarule"."class_type_en"
-IS
-    '流量规则分类类型英文';
-    COMMENT ON COLUMN "MP"."mp_situation_suricatarule"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_situation_suricatarule"."destination"
-IS
-    '目的ip';
-    COMMENT ON COLUMN "MP"."mp_situation_suricatarule"."destination_ports"
-IS
-    '目的端口';
-    COMMENT ON COLUMN "MP"."mp_situation_suricatarule"."direction"
-IS
-    '方向';
-    COMMENT ON COLUMN "MP"."mp_situation_suricatarule"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_situation_suricatarule"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_situation_suricatarule"."protocol"
-IS
-    '协议';
-    COMMENT ON COLUMN "MP"."mp_situation_suricatarule"."rule_gen_type"
-IS
-    '规则生成类型0-预定义，用户不能编辑 1-自定义，用户可以编辑';
-    COMMENT ON COLUMN "MP"."mp_situation_suricatarule"."rule_msg"
-IS
-    '规则体';
-    COMMENT ON COLUMN "MP"."mp_situation_suricatarule"."rule_name"
-IS
-    '规则名称';
-    COMMENT ON COLUMN "MP"."mp_situation_suricatarule"."sid"
-IS
-    '签名id';
-    COMMENT ON COLUMN "MP"."mp_situation_suricatarule"."source"
-IS
-    '源ip';
-    COMMENT ON COLUMN "MP"."mp_situation_suricatarule"."source_ports"
-IS
-    '源端口';
-    COMMENT ON COLUMN "MP"."mp_situation_suricatarule"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_sys_notice"
-IS
-    '系统公告';
-    COMMENT ON COLUMN "MP"."mp_sys_notice"."content"
-IS
-    '公告内容';
-    COMMENT ON COLUMN "MP"."mp_sys_notice"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_sys_notice"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_sys_notice"."is_public"
-IS
-    '是否公开，对所有人可见  0:否 1:是 默认是0';
-    COMMENT ON COLUMN "MP"."mp_sys_notice"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_sys_notice"."publisher"
-IS
-    '发布人';
-    COMMENT ON COLUMN "MP"."mp_sys_notice"."tenant"
-IS
-    '租户';
-    COMMENT ON COLUMN "MP"."mp_sys_notice"."title"
-IS
-    '标题';
-    COMMENT ON COLUMN "MP"."mp_sys_notice"."top"
-IS
-    '置顶数字(采用当前时间戳，越大越靠前)';
-    COMMENT ON COLUMN "MP"."mp_sys_notice"."type"
-IS
-    '公告类型 1:系统、2:课程、3:练习、4:考试';
-    COMMENT ON COLUMN "MP"."mp_sys_notice"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_sys_notice_org"
-IS
-    '系统公告组织关系表';
-    COMMENT ON COLUMN "MP"."mp_sys_notice_org"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_sys_notice_org"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_sys_notice_org"."notice_id"
-IS
-    '公告ID';
-    COMMENT ON COLUMN "MP"."mp_sys_notice_org"."org"
-IS
-    '组织id';
-    COMMENT ON COLUMN "MP"."mp_sys_notice_org"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_sys_notice_org"."tenant"
-IS
-    '租户';
-    COMMENT ON COLUMN "MP"."mp_sys_notice_org"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_sys_notice_read"
-IS
-    '系统公告消息(已读推送)统计表';
-    COMMENT ON COLUMN "MP"."mp_sys_notice_read"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_sys_notice_read"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_sys_notice_read"."is_need_push"
-IS
-    '是否推送本条公告 1:是（需要推送）； 0:否（不再推送）默认为1';
-    COMMENT ON COLUMN "MP"."mp_sys_notice_read"."is_readed"
-IS
-    '是否已读 1:已读 0:未读  首次创建一条数据即为已读';
-    COMMENT ON COLUMN "MP"."mp_sys_notice_read"."notice_id"
-IS
-    '公告ID';
-    COMMENT ON COLUMN "MP"."mp_sys_notice_read"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_sys_notice_read"."read_count"
-IS
-    '已读次数 首次创建一条数据即为已读次数为1';
-    COMMENT ON COLUMN "MP"."mp_sys_notice_read"."tenant"
-IS
-    '租户';
-    COMMENT ON COLUMN "MP"."mp_sys_notice_read"."update_time"
-IS
-    '更新时间';
-    COMMENT ON COLUMN "MP"."mp_sys_notice_read"."user"
-IS
-    '用户ID(读者)';
-    COMMENT ON TABLE "MP"."mp_sys_notice_role"
-IS
-    '系统公告角色关系表';
-    COMMENT ON COLUMN "MP"."mp_sys_notice_role"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_sys_notice_role"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_sys_notice_role"."notice_id"
-IS
-    '公告ID';
-    COMMENT ON COLUMN "MP"."mp_sys_notice_role"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_sys_notice_role"."role"
-IS
-    '角色ID';
-    COMMENT ON COLUMN "MP"."mp_sys_notice_role"."tenant"
-IS
-    '租户';
-    COMMENT ON COLUMN "MP"."mp_sys_notice_role"."update_time"
-IS
-    '更新时间';
-    COMMENT ON TABLE "MP"."mp_sys_notice_user"
-IS
-    '系统公告用户关系表';
-    COMMENT ON COLUMN "MP"."mp_sys_notice_user"."create_time"
-IS
-    '创建时间';
-    COMMENT ON COLUMN "MP"."mp_sys_notice_user"."id"
-IS
-    'ID';
-    COMMENT ON COLUMN "MP"."mp_sys_notice_user"."notice_id"
-IS
-    '公告ID';
-    COMMENT ON COLUMN "MP"."mp_sys_notice_user"."pk"
-IS
-    '主键';
-    COMMENT ON COLUMN "MP"."mp_sys_notice_user"."tenant"
-IS
-    '租户';
-    COMMENT ON COLUMN "MP"."mp_sys_notice_user"."update_time"
-IS
-    '更新时间';
-    COMMENT ON COLUMN "MP"."mp_sys_notice_user"."user"
-IS
-    '用户ID';
+CREATE TABLE "MP_AUTH_CLIENT_DETAILS"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "CLIENT_ID" VARCHAR(128) NULL,
+ "RESOURCE_IDS" VARCHAR(256) NULL,
+ "CLIENT_SECRET" VARCHAR(256) NULL,
+ "TYPE" INT DEFAULT 1
+ NOT NULL,
+ "SCOPE" VARCHAR(256) NULL,
+ "AUTHORIZED_GRANT_TYPES" VARCHAR(256) NULL,
+ "WEB_SERVER_REDIRECT_URI" VARCHAR(256) NULL,
+ "AUTHORITIES" VARCHAR(256) NULL,
+ "ACCESS_TOKEN_VALIDITY" INT NULL,
+ "REFRESH_TOKEN_VALIDITY" INT NULL,
+ "ADDITIONAL_INFORMATION" VARCHAR(4096) NULL,
+ "AUTOAPPROVE" VARCHAR(256) NULL
+);
+CREATE TABLE "MP_AUTH_ORG"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "TENANT" VARCHAR(64) DEFAULT ''
+ NOT NULL,
+ "PARENT" VARCHAR(64) DEFAULT ''
+ NOT NULL,
+ "IDENTIFIER" VARCHAR(64) NOT NULL,
+ "NAME" VARCHAR(64) NOT NULL,
+ "PATH" VARCHAR(180) NULL,
+ "DESCRIPTION" VARCHAR(1024) NOT NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL
+);
+CREATE TABLE "MP_AUTH_ORG_PERMISSION"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "TENANT" VARCHAR(64) NOT NULL,
+ "OWNER" VARCHAR(64) NOT NULL,
+ "TARGET" VARCHAR(64) NOT NULL,
+ "CAN_READ" TINYINT NOT NULL,
+ "CAN_CREATE" TINYINT NOT NULL,
+ "CAN_UPDATE" TINYINT NOT NULL,
+ "CAN_DELETE" TINYINT NOT NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL
+);
+CREATE TABLE "MP_AUTH_ROLE"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "TENANT" VARCHAR(64) DEFAULT ''
+ NOT NULL,
+ "ORG" VARCHAR(64) DEFAULT ''
+ NOT NULL,
+ "IDENTIFIER" VARCHAR(64) NOT NULL,
+ "NAME" VARCHAR(64) NOT NULL,
+ "DESCRIPTION" VARCHAR(1024) NOT NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL,
+ "VISIBLE" TINYINT DEFAULT 1
+ NOT NULL
+);
+CREATE TABLE "MP_AUTH_ROLE_PERMISSION"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "TENANT" VARCHAR(64) NOT NULL,
+ "OWNER" VARCHAR(64) NOT NULL,
+ "TARGET" VARCHAR(64) NOT NULL,
+ "CAN_READ" TINYINT NOT NULL,
+ "CAN_CREATE" TINYINT NOT NULL,
+ "CAN_UPDATE" TINYINT NOT NULL,
+ "CAN_DELETE" TINYINT NOT NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL
+);
+CREATE TABLE "MP_AUTH_TARGET"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "PARENT" VARCHAR(64) NULL,
+ "IDENTIFIER" VARCHAR(64) NOT NULL,
+ "TENANT" VARCHAR(64) NOT NULL,
+ "NAME" VARCHAR(64) NOT NULL,
+ "PATH" VARCHAR(255) NULL,
+ "TYPE" INT NOT NULL,
+ "VISIBLE" INT DEFAULT 1
+ NOT NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL
+);
+CREATE TABLE "MP_AUTH_TENANT"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "IDENTIFIER" VARCHAR(64) NOT NULL,
+ "NAME" VARCHAR(64) NOT NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL
+);
+CREATE TABLE "MP_AUTH_TENANT_USER"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "TENANT" VARCHAR(64) DEFAULT ''
+ NOT NULL,
+ "ORG" VARCHAR(64) NOT NULL,
+ "USER" VARCHAR(64) NOT NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL
+);
+CREATE TABLE "MP_AUTH_URL_AC"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "URL" VARCHAR(500) NOT NULL,
+ "IS_PATTERN" INT DEFAULT 0
+ NOT NULL,
+ "GROUP" VARCHAR(64) NOT NULL,
+ "METHODS" VARCHAR(100) NOT NULL,
+ "DESC" VARCHAR(500) NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL
+);
+CREATE TABLE "MP_AUTH_URL_AC_TARGET"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "GROUP" VARCHAR(64) NOT NULL,
+ "TARGET" VARCHAR(64) NOT NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL
+);
+CREATE TABLE "MP_AUTH_USER"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "TENANT" VARCHAR(64) DEFAULT ''
+ NOT NULL,
+ "USERNAME" VARCHAR(64) NOT NULL,
+ "IDENTIFIER" VARCHAR(64) NULL,
+ "PASSWORD" VARCHAR(128) NOT NULL,
+ "TOKEN_SECRET" VARCHAR(128) NOT NULL,
+ "NAME" VARCHAR(128) NOT NULL,
+ "NICKNAME" VARCHAR(128) NOT NULL,
+ "AVATAR" VARCHAR(2048) NOT NULL,
+ "BIRTHDAY" DATE NOT NULL,
+ "EMAIL" VARCHAR(255) NOT NULL,
+ "MOBILE" VARCHAR(64) NOT NULL,
+ "ID_CARD" VARCHAR(64) NOT NULL,
+ "ADDRESS" VARCHAR(255) NOT NULL,
+ "IS_ENABLED" INT NOT NULL,
+ "IS_AUDITED" INT NOT NULL,
+ "INIT_CHECK" INT DEFAULT 0
+ NOT NULL,
+ "DELAY_REMIND_LICENSE_TIME" TIMESTAMP(0) DEFAULT current_timestamp()
+ NOT NULL,
+ "DESCRIPTION" VARCHAR(1024) NULL,
+ "DATE_JOINED" TIMESTAMP(0) NULL,
+ "EXPIRED_TIME" TIMESTAMP(0) NOT NULL,
+ "LAST_LOGIN" TIMESTAMP(0) NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL
+);
+CREATE TABLE "MP_AUTH_USER_ONLINE_RECORD"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "USER" VARCHAR(64) NOT NULL,
+ "TENANT" VARCHAR(64) NOT NULL,
+ "START_TIME" TIMESTAMP(0) NOT NULL,
+ "END_TIME" TIMESTAMP(0) NULL,
+ "DURATION_MINUTES" INT DEFAULT 0
+ NOT NULL,
+ "STATUS" INT DEFAULT 0
+ NOT NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL
+);
+CREATE TABLE "MP_AUTH_USER_PERMISSION"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "TENANT" VARCHAR(64) NOT NULL,
+ "OWNER" VARCHAR(64) NOT NULL,
+ "TARGET" VARCHAR(64) NOT NULL,
+ "CAN_READ" TINYINT NOT NULL,
+ "CAN_CREATE" TINYINT NOT NULL,
+ "CAN_UPDATE" TINYINT NOT NULL,
+ "CAN_DELETE" TINYINT NOT NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL
+);
+CREATE TABLE "MP_AUTH_USER_ROLE"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "TENANT" VARCHAR(64) NOT NULL,
+ "USER" VARCHAR(64) NOT NULL,
+ "ROLE" VARCHAR(64) NOT NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL
+);
+CREATE TABLE "MP_BASE_LOCAL_FILE_MAPPING"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "GROUP" VARCHAR(64) NOT NULL,
+ "SEQ" INT NOT NULL,
+ "NAME" VARCHAR(255) NOT NULL,
+ "LOCAL_FILE" VARCHAR(2048) NOT NULL,
+ "LOCAL_FILE_MODIFIED_TIME" BIGINT NOT NULL,
+ "REMOTE_FILE" VARCHAR(2048) NOT NULL,
+ "CREATE_TIME" TIMESTAMP(6) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(6) NOT NULL
+);
+CREATE TABLE "MP_COMMON_OPTION"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "CODE" VARCHAR(255) NOT NULL,
+ "PARENT_CODE" VARCHAR(255) NOT NULL,
+ "ZH_NAME" VARCHAR(255) NOT NULL,
+ "EN_NAME" VARCHAR(255) NOT NULL,
+ "SORT" INT NOT NULL,
+ "TYPE" VARCHAR(255) NOT NULL,
+ "META" VARCHAR(2000) NOT NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL
+);
+CREATE TABLE "MP_CSCENE_COMMON_CONFIG"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "KEY" VARCHAR(32) NOT NULL,
+ "CONTENT" TEXT NOT NULL,
+ "CREATE_TIME" TIMESTAMP(6) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(6) NOT NULL
+);
+CREATE TABLE "MP_CSCENE_CSCENE"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "NAME" VARCHAR(255) DEFAULT ''
+ NOT NULL,
+ "TYPE" INT NOT NULL,
+ "AUTH_TYPE" INT NOT NULL,
+ "REFERENCE_TYPE" INT NOT NULL,
+ "REFERENCE_META_DATA" VARCHAR(2048) NOT NULL,
+ "LOGO" VARCHAR(2048) NOT NULL,
+ "SCENE_CONFIG" VARCHAR(64) NOT NULL,
+ "CREATE_USER" VARCHAR(64) NOT NULL,
+ "CREATE_USERNAME" VARCHAR(64) NOT NULL,
+ "DELETED" TINYINT NOT NULL,
+ "CREATE_TIME" TIMESTAMP(6) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(6) NOT NULL,
+ "SUPPORT_PARTIAL_START" TINYINT NOT NULL
+);
+CREATE TABLE "MP_CSCENE_CSCENE_AUTH"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "TENANT" VARCHAR(64) NULL,
+ "OWNER" VARCHAR(64) NOT NULL,
+ "TARGET" VARCHAR(64) NOT NULL,
+ "CAN_READ" TINYINT NULL,
+ "CAN_CREATE" TINYINT NULL,
+ "CAN_UPDATE" TINYINT NULL,
+ "CAN_DELETE" TINYINT NULL,
+ "CREATE_TIME" TIMESTAMP(6) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(6) NOT NULL
+);
+CREATE TABLE "MP_CSCENE_CSCENE_INSTANCE"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "NAME" VARCHAR(255) DEFAULT ''
+ NOT NULL,
+ "CSCENE" VARCHAR(64) NOT NULL,
+ "TYPE" INT NOT NULL,
+ "REFERENCE_TYPE" INT NOT NULL,
+ "REFERENCE_META_DATA" VARCHAR(2048) NOT NULL,
+ "SCENE" VARCHAR(64) NOT NULL,
+ "SCENE_TTL" INT NOT NULL,
+ "SCENE_ATTR" INT NOT NULL,
+ "CREATE_USER" VARCHAR(64) NOT NULL,
+ "CREATE_USERNAME" VARCHAR(64) NOT NULL,
+ "DELETED" TINYINT NOT NULL,
+ "CREATE_TIME" TIMESTAMP(6) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(6) NOT NULL,
+ "PASS_THROUGH" TEXT NULL,
+ "SUPPORT_PARTIAL_START" TINYINT NOT NULL,
+ "LOGO" VARCHAR(2048) NOT NULL
+);
+CREATE TABLE "MP_CSCENE_CSCENE_INSTANCE_ROLE"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "CSCENE" VARCHAR(64) NOT NULL,
+ "PARENT" VARCHAR(64) NOT NULL,
+ "KEY" VARCHAR(64) NOT NULL,
+ "NAME" VARCHAR(64) NOT NULL,
+ "TYPE" VARCHAR(64) NOT NULL,
+ "ASSET_NODES" VARCHAR(2048) NOT NULL,
+ "VISIBLE_NODES" VARCHAR(2048) NOT NULL,
+ "USERS" VARCHAR(2048) NOT NULL,
+ "CREATE_TIME" TIMESTAMP(6) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(6) NOT NULL
+);
+CREATE TABLE "MP_CSCENE_CSCENE_ROLE"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "CSCENE" VARCHAR(64) NOT NULL,
+ "PARENT" VARCHAR(64) NOT NULL,
+ "KEY" VARCHAR(64) NOT NULL,
+ "NAME" VARCHAR(256) NOT NULL,
+ "TYPE" VARCHAR(64) NOT NULL,
+ "ASSET_NODES" VARCHAR(2048) NOT NULL,
+ "VISIBLE_NODES" VARCHAR(2048) NOT NULL,
+ "USERS" VARCHAR(2048) NOT NULL,
+ "CREATE_TIME" TIMESTAMP(6) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(6) NOT NULL
+);
+CREATE TABLE "MP_CSCENE_INSTANCE_USER_COUNT"
+(
+ "PK" BIGINT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "USER_ID" VARCHAR(64) NOT NULL,
+ "COUNT" BIGINT DEFAULT 0
+ NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL
+);
+CREATE TABLE "MP_CSCENE_SNAPSHOT"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "CSCENE_ID" VARCHAR(64) NOT NULL,
+ "CSCENE_INSTANCE_ID" VARCHAR(64) NOT NULL,
+ "NAME" VARCHAR(255) NOT NULL,
+ "SOURCE_NAME" VARCHAR(255) NOT NULL,
+ "NODE_ID" VARCHAR(64) NOT NULL,
+ "SNAPSHOT_ID" VARCHAR(64) NOT NULL,
+ "SNAPSHOT_RESOURCE_ID" VARCHAR(64) NOT NULL,
+ "DELETED" TINYINT NOT NULL,
+ "CREATE_TIME" TIMESTAMP(6) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(6) NOT NULL
+);
+CREATE TABLE "MP_DEVOPS_ALARM_STATISTICS"
+(
+ "PK" BIGINT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "ALARM_TYPE" TINYINT NOT NULL,
+ "ALARM_COUNT" BIGINT NOT NULL,
+ "ALARM_DATE" TIMESTAMP(0) NOT NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL
+);
+CREATE TABLE "MP_DEVOPS_CPNODE_MONITOR_SCRIPT_CONFIG"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "AGENT_NAME" VARCHAR(64) NOT NULL,
+ "HOSTNAME" VARCHAR(64) NOT NULL,
+ "IP" VARCHAR(64) NOT NULL,
+ "CONFIG" VARCHAR(2000) NOT NULL,
+ "STATUS" INT NOT NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL
+);
+CREATE TABLE "MP_DEVOPS_LOG_OPERATION"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "SITE_TYPE" INT NOT NULL,
+ "FROM" VARCHAR(255) NOT NULL,
+ "LOG_TYPE" INT NOT NULL,
+ "OP_MODULE" VARCHAR(255) NOT NULL,
+ "OP_MODULE_ID" INT NOT NULL,
+ "OP_TYPE" VARCHAR(255) NOT NULL,
+ "OP_TYPE_ID" INT NOT NULL,
+ "OP_TARGET" VARCHAR(255) NOT NULL,
+ "OP_TARGET_ID" INT NOT NULL,
+ "TITLE" VARCHAR(255) NOT NULL,
+ "USER_ID" VARCHAR(64) NOT NULL,
+ "USER_NAME" VARCHAR(64) NOT NULL,
+ "USER_TYPE" VARCHAR(64) NOT NULL,
+ "CONTENT" TEXT NOT NULL,
+ "DESCRIPTION" VARCHAR(1024) NOT NULL,
+ "OP_TIME" TIMESTAMP(0) NOT NULL,
+ "OP_IP" VARCHAR(64) NOT NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL
+);
+CREATE TABLE "MP_DEVOPS_SCREENSHOT"
+(
+ "PK" BIGINT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "FILE" VARCHAR(256) NOT NULL,
+ "FILE_NAME" VARCHAR(256) NOT NULL,
+ "FILE_SIZE" BIGINT NOT NULL,
+ "SCENE_NAME" VARCHAR(256) NOT NULL,
+ "USER_ID" VARCHAR(64) NOT NULL,
+ "USER_NAME" VARCHAR(64) NOT NULL,
+ "USER_ORG_NAME" VARCHAR(1024) NOT NULL,
+ "SCENE" VARCHAR(64) DEFAULT ''
+ NOT NULL,
+ "NODE_ID" VARCHAR(64) DEFAULT ''
+ NOT NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL
+);
+CREATE TABLE "MP_DEVOPS_SYSTEM_ALARM"
+(
+ "PK" BIGINT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "ALARM_TYPE" TINYINT NOT NULL,
+ "ALARM_MSG" VARCHAR(256) NOT NULL,
+ "HOSTNAME" VARCHAR(128) NOT NULL,
+ "SERVERNAME" VARCHAR(128) NOT NULL,
+ "RUNNING_TIME" INT NOT NULL,
+ "ALARM_STATUS" TINYINT NOT NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL
+);
+CREATE TABLE "MP_DEVOPS_TARGET"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "UUID" VARCHAR(64) NOT NULL,
+ "NAME" VARCHAR(164) NOT NULL,
+ "LOGO" VARCHAR(255) NULL,
+ "ROLE" TINYINT NULL,
+ "MAIN_CATEGORY" INT NULL,
+ "SUB_CATEGORY" INT NULL,
+ "THIRD_CATEGORY" INT NULL,
+ "IMAGE_TYPE" VARCHAR(32) NULL,
+ "IS_PUBLIC" TINYINT NOT NULL,
+ "QUICK_CREATE_SUPPORT" TINYINT DEFAULT 0
+ NOT NULL,
+ "IN_POSITION" TINYINT NULL,
+ "REFERENCE_STATUS" INT DEFAULT 0
+ NOT NULL,
+ "USE_STATUS" TINYINT DEFAULT 0
+ NOT NULL,
+ "PARENT_SYSTEM_TYPE" INT NULL,
+ "SYSTEM_TYPE" INT NULL,
+ "SYSTEM_ARCHITECURE" VARCHAR(16) NULL,
+ "LANGUAGE" VARCHAR(16) NULL,
+ "IMAGE_STATUS" TINYINT NULL,
+ "BASE_IMAGE_SUPPORT" TINYINT DEFAULT 0
+ NULL,
+ "INIT_SUPPORT" TINYINT DEFAULT 0
+ NOT NULL,
+ "CREATE_TIME" TIMESTAMP(6) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(6) NOT NULL,
+ "IMAGE_SOURCE" TINYINT NULL,
+ "IS_IMPORT" TINYINT DEFAULT 0
+ NOT NULL,
+ "IS_HIDE" TINYINT DEFAULT 0
+ NOT NULL,
+ "INSTANCE_STATE" TINYINT DEFAULT 0
+ NOT NULL,
+ "IS_INIT" TINYINT DEFAULT 0
+ NULL,
+ "INSTANCE_CREATE_USER" VARCHAR(64) NULL,
+ "SUPPORT_EXPORT" TINYINT DEFAULT 0
+ NOT NULL,
+ "CREATE_USER" VARCHAR(128) NOT NULL,
+ "CREATE_USER_NAME" VARCHAR(128) NOT NULL
+);
+CREATE TABLE "MP_DEVOPS_TARGET_AUTH"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "TENANT" VARCHAR(64) NULL,
+ "OWNER" VARCHAR(64) NOT NULL,
+ "TARGET" VARCHAR(64) NOT NULL,
+ "CAN_READ" TINYINT NULL,
+ "CAN_CREATE" TINYINT NULL,
+ "CAN_UPDATE" TINYINT NULL,
+ "CAN_DELETE" TINYINT NULL,
+ "CREATE_TIME" TIMESTAMP(6) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(6) NOT NULL
+);
+CREATE TABLE "MP_EVENT_TRACKING_RECORD"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "MODULE" VARCHAR(256) NOT NULL,
+ "CATEGORY" VARCHAR(256) NOT NULL,
+ "ACTION" VARCHAR(1024) NOT NULL,
+ "TARGET" VARCHAR(1024) NOT NULL,
+ "CREATE_TIME" TIMESTAMP(6) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(6) NOT NULL
+);
+CREATE TABLE "MP_FLOW_ACTUATOR"
+(
+ "PK" BIGINT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "TITLE" VARCHAR(64) NOT NULL,
+ "IP" VARCHAR(32) NOT NULL,
+ "NETWORK_ID" VARCHAR(64) NOT NULL,
+ "INSTANCE_ID" VARCHAR(64) NOT NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL
+);
+CREATE TABLE "MP_FLOW_COLLECTION"
+(
+ "PK" BIGINT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "TITLE" VARCHAR(64) NOT NULL,
+ "DESCRIPTION" VARCHAR(320) NOT NULL,
+ "CATEGORY" TINYINT NOT NULL,
+ "TYPE_FLAG" INT DEFAULT 2
+ NOT NULL,
+ "BACKGROUND_FLOW_COUNT" INT NOT NULL,
+ "ATTACK_FLOW_COUNT" INT NOT NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL
+);
+CREATE TABLE "MP_FLOW_COLLECTION_REL"
+(
+ "PK" BIGINT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "COLLECTION_ID" VARCHAR(64) NOT NULL,
+ "FLOW_ID" VARCHAR(64) NOT NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL
+);
+CREATE TABLE "MP_FLOW_FLOW_INFO"
+(
+ "PK" BIGINT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "TITLE" VARCHAR(64) NOT NULL,
+ "FLOW_DESC" VARCHAR(320) NOT NULL,
+ "INTERACTIVE_TYPE" TINYINT NOT NULL,
+ "RESOURCE_TYPE" TINYINT NOT NULL,
+ "RUN_CMD" VARCHAR(128) NOT NULL,
+ "CATEGORY" TINYINT NOT NULL,
+ "FILE_NAME" VARCHAR(128) NOT NULL,
+ "PCAP_FILE" VARCHAR(255) NOT NULL,
+ "SCRIPT_FILE" VARCHAR(255) NOT NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL
+);
+CREATE TABLE "MP_FLOW_PCAP"
+(
+ "PK" BIGINT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "FLOW_ID" VARCHAR(64) NOT NULL,
+ "DURATION" DECIMAL(20,0) NOT NULL,
+ "PCAP_SIZE" DECIMAL(20,0) NOT NULL,
+ "PKT_NUM" DECIMAL(20,0) NOT NULL,
+ "PROTOCOLS" VARCHAR(128) NOT NULL,
+ "PCAP_FILE" VARCHAR(255) NOT NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL
+);
+CREATE TABLE "MP_FLOW_PORT"
+(
+ "PK" BIGINT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "SERVER_IP" VARCHAR(32) NOT NULL,
+ "SERVER_MAC" VARCHAR(32) NOT NULL,
+ "SERVER_PORT_ID" VARCHAR(40) NOT NULL,
+ "SERVER_GATEWAY" VARCHAR(32) NOT NULL,
+ "CLIENT_IP" VARCHAR(32) NOT NULL,
+ "CLIENT_MAC" VARCHAR(32) NOT NULL,
+ "CLIENT_PORT_ID" VARCHAR(40) NOT NULL,
+ "CLIENT_GATEWAY" VARCHAR(32) NOT NULL,
+ "NETWORK_ID" VARCHAR(64) DEFAULT ''
+ NOT NULL,
+ "ACTUATOR_ID" VARCHAR(64) DEFAULT ''
+ NOT NULL,
+ "PORT_TYPE" TINYINT DEFAULT 0
+ NOT NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL
+);
+CREATE TABLE "MP_FLOW_PROTOCOL"
+(
+ "PK" BIGINT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "FLOW_ID" VARCHAR(64) NOT NULL,
+ "PROTOCOL_NAME" VARCHAR(64) NOT NULL,
+ "RATE" REAL NOT NULL,
+ "MARKED" INT NOT NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL
+);
+CREATE TABLE "MP_FLOW_SCRIPT_DEMO"
+(
+ "PK" BIGINT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "SCRIPT_NAME" VARCHAR(64) NOT NULL,
+ "URL" VARCHAR(1024) NOT NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL,
+ "TYPE" INT DEFAULT 1
+ NULL
+);
+CREATE TABLE "MP_FLOW_SCRIPT_PARAM"
+(
+ "PK" BIGINT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "FLOW_ID" VARCHAR(64) NOT NULL,
+ "PARAM_KEY" VARCHAR(50) NOT NULL,
+ "PARAM_VALUE" VARCHAR(64) NOT NULL,
+ "PARAM_TYPE" TINYINT NOT NULL,
+ "PARAM_DESC" VARCHAR(2048) NOT NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL
+);
+CREATE TABLE "MP_FLOW_TASK"
+(
+ "PK" BIGINT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "TITLE" VARCHAR(64) NOT NULL,
+ "TASK_DESC" VARCHAR(320) NOT NULL,
+ "ACTUATOR_ID" VARCHAR(64) NOT NULL,
+ "FLOW_ID" VARCHAR(64) NOT NULL,
+ "FLOW_PORT_ID" VARCHAR(64) NOT NULL,
+ "FLOW_PLATFORM" TINYINT NOT NULL,
+ "THIRD_FLOW_ID" VARCHAR(64) NOT NULL,
+ "THIRD_FLOW_NAME" VARCHAR(128) NOT NULL,
+ "THIRD_TASK_ID" VARCHAR(64) NOT NULL,
+ "COUNT" BIGINT NOT NULL,
+ "DELAY" BIGINT NOT NULL,
+ "INTERVAL_TIME" BIGINT NOT NULL,
+ "TASK_STATUS" TINYINT DEFAULT 0
+ NOT NULL,
+ "RUNNING_COUNT" INT DEFAULT 0
+ NOT NULL,
+ "ORIGIN_IPS" VARCHAR(32) NOT NULL,
+ "TARGET_IPS" VARCHAR(32) NOT NULL,
+ "NODE_ID" VARCHAR(64) NOT NULL,
+ "CUSTOM_FLAG" TINYINT DEFAULT 0
+ NOT NULL,
+ "FLOW_PROTOCOL" VARCHAR(512) NOT NULL,
+ "CONTENT" VARCHAR(1024) NOT NULL,
+ "MULT" INT DEFAULT 1
+ NOT NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL
+);
+CREATE TABLE "MP_FLOW_TASK_CONF"
+(
+ "PK" BIGINT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "TASK_ID" VARCHAR(64) NOT NULL,
+ "KEEP_RUNNING" INT NOT NULL,
+ "RATE_UNLIMITED" INT NOT NULL,
+ "REPLAY" INT NOT NULL,
+ "CONF" TEXT NOT NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL,
+ "CONFIG" INT DEFAULT 0
+ NOT NULL
+);
+CREATE TABLE "MP_FLOW_TASK_PORT"
+(
+ "PK" BIGINT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "NETWORK_ID" VARCHAR(64) DEFAULT ''
+ NOT NULL,
+ "ACTUATOR_ID" VARCHAR(64) DEFAULT ''
+ NOT NULL,
+ "MAC" VARCHAR(64) NOT NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL
+);
+CREATE TABLE "MP_FLOW_TASK_RECORD"
+(
+ "PK" BIGINT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "ACTUATOR_ID" VARCHAR(64) NOT NULL,
+ "TASK_ID" VARCHAR(64) NOT NULL,
+ "TX_BPS" BIGINT NOT NULL,
+ "TX_PPS" BIGINT NOT NULL,
+ "LATENCY" BIGINT NOT NULL,
+ "JITTER" BIGINT NOT NULL,
+ "OBYTES" BIGINT NOT NULL,
+ "OERRORS" BIGINT NOT NULL,
+ "TOTAL_TX_L2" BIGINT NOT NULL,
+ "TOTAL_TX_L1" BIGINT NOT NULL,
+ "TOTAL_PPS" BIGINT NOT NULL,
+ "TOTAL_RX" BIGINT NOT NULL,
+ "QUEUE_FULL" BIGINT NOT NULL,
+ "DROP_RATE" BIGINT NOT NULL,
+ "RECORD_STATUS" TINYINT NOT NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL
+);
+CREATE TABLE "MP_FLOW_TASK_TASK"
+(
+ "PK" BIGINT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "SCENE_ID" VARCHAR(64) NOT NULL,
+ "ACTUATOR_ID" VARCHAR(64) NOT NULL,
+ "RESOURCE_TYPE" TINYINT NOT NULL,
+ "INTERACTIVE_TYPE" TINYINT NOT NULL,
+ "FLOW_ID" VARCHAR(64) NOT NULL,
+ "PORT_ID" VARCHAR(64) NOT NULL,
+ "SUCCESS_COUNT" INT DEFAULT 0
+ NOT NULL,
+ "ERROR_COUNT" INT DEFAULT 0
+ NOT NULL,
+ "TASK_STATUS" TINYINT DEFAULT 0
+ NOT NULL,
+ "MSG" VARCHAR(1024) DEFAULT ''
+ NOT NULL,
+ "NODE_ID" VARCHAR(64) NOT NULL,
+ "NODE_IP" VARCHAR(24) NOT NULL,
+ "NODE_NAME" VARCHAR(64) NOT NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL
+);
+CREATE TABLE "MP_FRONT_ADMIN_ACTIV_CTL"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "TENANT" VARCHAR(64) DEFAULT ''
+ NOT NULL,
+ "SALT" VARCHAR(64) NULL,
+ "SUFFIX" VARCHAR(10) NULL,
+ "LICENSE_CODE" VARCHAR(256) NULL,
+ "FIRST_ACTIVE_DATE" VARCHAR(256) NULL,
+ "LAST_ACTIVE_DATE" VARCHAR(256) NULL,
+ "EXPIRE_DATE" VARCHAR(256) NULL,
+ "ACTIVE_COUNT" INT DEFAULT 1
+ NOT NULL,
+ "SYS_TIMESTAMP" CLOB NULL,
+ "SYS_RUN_SECONDS" VARCHAR(256) DEFAULT '0'
+ NULL,
+ "SYS_LIFETIME" VARCHAR(256) NULL,
+ "STATUS" INT DEFAULT 1
+ NOT NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL
+);
+CREATE TABLE "MP_FRONT_ADMIN_MENU_EXTRA_INFO"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "TENANT" VARCHAR(64) DEFAULT ''
+ NOT NULL,
+ "MENU" VARCHAR(64) NOT NULL,
+ "EDITIONS" VARCHAR(200) NOT NULL,
+ "ACTIV_KEYS" VARCHAR(1024) NOT NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL
+);
+CREATE TABLE "MP_LOG_LEVEL"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(256) NULL,
+ "LOG_NAME" VARCHAR(256) NOT NULL,
+ "LOG_LEVEL" VARCHAR(8) NOT NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL
+);
+CREATE TABLE "MP_LOG_REPORT"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(32) NOT NULL,
+ "FILE_NAME" VARCHAR(32) NOT NULL,
+ "TYPE" VARCHAR(20) NOT NULL,
+ "FILE_SIZE" BIGINT NOT NULL,
+ "DOWNLOAD_URL" VARCHAR(255) NOT NULL,
+ "HOST_IP" VARCHAR(20) DEFAULT ''
+ NOT NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL
+);
+ALTER TABLE "MP_AUTH_CLIENT_DETAILS" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_AUTH_ORG" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_AUTH_ORG_PERMISSION" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_AUTH_ROLE" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_AUTH_ROLE_PERMISSION" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_AUTH_TARGET" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_AUTH_TENANT" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_AUTH_TENANT_USER" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_AUTH_URL_AC" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_AUTH_URL_AC_TARGET" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_AUTH_USER" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_AUTH_USER_ONLINE_RECORD" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_AUTH_USER_PERMISSION" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_AUTH_USER_ROLE" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_BASE_LOCAL_FILE_MAPPING" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_COMMON_OPTION" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_CSCENE_COMMON_CONFIG" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_CSCENE_CSCENE" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_CSCENE_CSCENE_AUTH" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_CSCENE_CSCENE_INSTANCE" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_CSCENE_CSCENE_INSTANCE_ROLE" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_CSCENE_CSCENE_ROLE" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_CSCENE_INSTANCE_USER_COUNT" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_CSCENE_SNAPSHOT" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_DEVOPS_ALARM_STATISTICS" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_DEVOPS_CPNODE_MONITOR_SCRIPT_CONFIG" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_DEVOPS_LOG_OPERATION" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_DEVOPS_SCREENSHOT" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_DEVOPS_SYSTEM_ALARM" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_DEVOPS_TARGET" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_DEVOPS_TARGET_AUTH" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_EVENT_TRACKING_RECORD" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_FLOW_ACTUATOR" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_FLOW_COLLECTION" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_FLOW_COLLECTION_REL" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_FLOW_FLOW_INFO" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_FLOW_PCAP" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_FLOW_PORT" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_FLOW_PROTOCOL" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_FLOW_SCRIPT_DEMO" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_FLOW_SCRIPT_PARAM" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_FLOW_TASK" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_FLOW_TASK_CONF" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_FLOW_TASK_PORT" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_FLOW_TASK_RECORD" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_FLOW_TASK_TASK" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_FRONT_ADMIN_ACTIV_CTL" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_FRONT_ADMIN_MENU_EXTRA_INFO" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_LOG_LEVEL" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_LOG_REPORT" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+CREATE INDEX "MODULE_CAT"
+ON "MP_EVENT_TRACKING_RECORD"("MODULE","CATEGORY");
+ALTER INDEX "MODULE_CAT" VISIBLE;
+
+ALTER TABLE "MP_CSCENE_INSTANCE_USER_COUNT" ADD  CONSTRAINT "CONS134220923" CHECK("COUNT" >= 0) ENABLE ;
+
+ALTER TABLE "MP_AUTH_CLIENT_DETAILS" ADD CONSTRAINT "CLIENT_ID" UNIQUE("CLIENT_ID") ;
+
+ALTER TABLE "MP_AUTH_ORG" ADD CONSTRAINT "TENANT" UNIQUE("TENANT","IDENTIFIER") ;
+
+ALTER TABLE "MP_AUTH_ORG" ADD CONSTRAINT "ID" UNIQUE("ID") ;
+
+ALTER TABLE "MP_AUTH_ORG_PERMISSION" ADD UNIQUE("TENANT","OWNER","TARGET") ;
+
+ALTER TABLE "MP_AUTH_ORG_PERMISSION" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_AUTH_ROLE" ADD CONSTRAINT "TENANT_2" UNIQUE("TENANT","NAME") ;
+
+ALTER TABLE "MP_AUTH_ROLE" ADD UNIQUE("TENANT","IDENTIFIER") ;
+
+ALTER TABLE "MP_AUTH_ROLE" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_AUTH_ROLE_PERMISSION" ADD UNIQUE("TENANT","OWNER","TARGET") ;
+
+ALTER TABLE "MP_AUTH_ROLE_PERMISSION" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_AUTH_TARGET" ADD CONSTRAINT "IDENTIFIER" UNIQUE("IDENTIFIER") ;
+
+ALTER TABLE "MP_AUTH_TARGET" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_AUTH_TENANT" ADD UNIQUE("IDENTIFIER") ;
+
+ALTER TABLE "MP_AUTH_TENANT" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_AUTH_TENANT_USER" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_AUTH_URL_AC" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_AUTH_URL_AC_TARGET" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_AUTH_USER" ADD CONSTRAINT "USERNAME" UNIQUE("USERNAME") ;
+
+ALTER TABLE "MP_AUTH_USER" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_AUTH_USER_ONLINE_RECORD" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_AUTH_USER_PERMISSION" ADD UNIQUE("TENANT","OWNER","TARGET") ;
+
+ALTER TABLE "MP_AUTH_USER_PERMISSION" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_AUTH_USER_ROLE" ADD UNIQUE("TENANT","USER","ROLE") ;
+
+ALTER TABLE "MP_AUTH_USER_ROLE" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_BASE_LOCAL_FILE_MAPPING" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_COMMON_OPTION" ADD CONSTRAINT "CODE" UNIQUE("CODE","TYPE") ;
+
+ALTER TABLE "MP_COMMON_OPTION" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_CSCENE_COMMON_CONFIG" ADD CONSTRAINT "KEY" UNIQUE("KEY") ;
+
+ALTER TABLE "MP_CSCENE_COMMON_CONFIG" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_CSCENE_CSCENE" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_CSCENE_CSCENE_AUTH" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_CSCENE_CSCENE_INSTANCE" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_CSCENE_CSCENE_INSTANCE_ROLE" ADD CONSTRAINT "CSCENE_ID" UNIQUE("CSCENE","ID") ;
+
+ALTER TABLE "MP_CSCENE_CSCENE_ROLE" ADD UNIQUE("CSCENE","ID") ;
+
+ALTER TABLE "MP_CSCENE_SNAPSHOT" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_DEVOPS_ALARM_STATISTICS" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_DEVOPS_CPNODE_MONITOR_SCRIPT_CONFIG" ADD CONSTRAINT "AGENT_NAME" UNIQUE("AGENT_NAME") ;
+
+ALTER TABLE "MP_DEVOPS_CPNODE_MONITOR_SCRIPT_CONFIG" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_DEVOPS_LOG_OPERATION" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_DEVOPS_SCREENSHOT" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_DEVOPS_SYSTEM_ALARM" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_DEVOPS_TARGET" ADD CONSTRAINT "NAME" UNIQUE("NAME") ;
+
+ALTER TABLE "MP_DEVOPS_TARGET" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_DEVOPS_TARGET_AUTH" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_FLOW_ACTUATOR" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_FLOW_COLLECTION" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_FLOW_COLLECTION_REL" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_FLOW_COLLECTION_REL" ADD CONSTRAINT "COLLECTION_ID" UNIQUE("COLLECTION_ID","FLOW_ID") ;
+
+ALTER TABLE "MP_FLOW_FLOW_INFO" ADD CONSTRAINT "TITLE" UNIQUE("TITLE") ;
+
+ALTER TABLE "MP_FLOW_FLOW_INFO" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_FLOW_PCAP" ADD CONSTRAINT "FLOW_ID" UNIQUE("FLOW_ID") ;
+
+ALTER TABLE "MP_FLOW_PCAP" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_FLOW_PORT" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_FLOW_PROTOCOL" ADD CONSTRAINT "FLOW_PROTOCOL_ID" UNIQUE("ID","FLOW_ID") ;
+
+ALTER TABLE "MP_FLOW_SCRIPT_DEMO" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_FLOW_SCRIPT_PARAM" ADD UNIQUE("ID","FLOW_ID") ;
+
+ALTER TABLE "MP_FLOW_TASK" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_FLOW_TASK_CONF" ADD CONSTRAINT "TASK_ID" UNIQUE("TASK_ID") ;
+
+ALTER TABLE "MP_FLOW_TASK_CONF" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_FLOW_TASK_PORT" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_FLOW_TASK_RECORD" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_FLOW_TASK_TASK" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_FRONT_ADMIN_ACTIV_CTL" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_FRONT_ADMIN_MENU_EXTRA_INFO" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_LOG_LEVEL" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_LOG_LEVEL" ADD CONSTRAINT "LOG_NAME" UNIQUE("LOG_NAME") ;
+
+ALTER TABLE "MP_LOG_REPORT" ADD UNIQUE("ID") ;
+
+COMMENT ON TABLE "MP_AUTH_CLIENT_DETAILS" IS '客户端认证配置表';
+
+COMMENT ON COLUMN "MP_AUTH_CLIENT_DETAILS"."ACCESS_TOKEN_VALIDITY" IS 'access_token的有效期（秒）';
+
+COMMENT ON COLUMN "MP_AUTH_CLIENT_DETAILS"."ADDITIONAL_INFORMATION" IS '预留字段';
+
+COMMENT ON COLUMN "MP_AUTH_CLIENT_DETAILS"."AUTHORITIES" IS '权限';
+
+COMMENT ON COLUMN "MP_AUTH_CLIENT_DETAILS"."AUTHORIZED_GRANT_TYPES" IS '授权类型';
+
+COMMENT ON COLUMN "MP_AUTH_CLIENT_DETAILS"."AUTOAPPROVE" IS '设置用户是否自动approve操作';
+
+COMMENT ON COLUMN "MP_AUTH_CLIENT_DETAILS"."CLIENT_ID" IS '客户端ID';
+
+COMMENT ON COLUMN "MP_AUTH_CLIENT_DETAILS"."CLIENT_SECRET" IS '客户端秘钥';
+
+COMMENT ON COLUMN "MP_AUTH_CLIENT_DETAILS"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_AUTH_CLIENT_DETAILS"."REFRESH_TOKEN_VALIDITY" IS 'refresh_token的有效期（秒）';
+
+COMMENT ON COLUMN "MP_AUTH_CLIENT_DETAILS"."RESOURCE_IDS" IS '资源id';
+
+COMMENT ON COLUMN "MP_AUTH_CLIENT_DETAILS"."SCOPE" IS '权限范围';
+
+COMMENT ON COLUMN "MP_AUTH_CLIENT_DETAILS"."TYPE" IS '类型 1:Oauth2渠道 2:免认证渠道';
+
+COMMENT ON COLUMN "MP_AUTH_CLIENT_DETAILS"."WEB_SERVER_REDIRECT_URI" IS '回跳地址';
+
+COMMENT ON TABLE "MP_AUTH_ORG" IS '组织表';
+
+COMMENT ON COLUMN "MP_AUTH_ORG"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_AUTH_ORG"."DESCRIPTION" IS '描述';
+
+COMMENT ON COLUMN "MP_AUTH_ORG"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_AUTH_ORG"."IDENTIFIER" IS '编号';
+
+COMMENT ON COLUMN "MP_AUTH_ORG"."NAME" IS '名称';
+
+COMMENT ON COLUMN "MP_AUTH_ORG"."PARENT" IS '父组织';
+
+COMMENT ON COLUMN "MP_AUTH_ORG"."PATH" IS '组织结构路径';
+
+COMMENT ON COLUMN "MP_AUTH_ORG"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_AUTH_ORG"."TENANT" IS '所属租户';
+
+COMMENT ON COLUMN "MP_AUTH_ORG"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_AUTH_ORG_PERMISSION" IS '组织权限关系表';
+
+COMMENT ON COLUMN "MP_AUTH_ORG_PERMISSION"."CAN_CREATE" IS '创建权限';
+
+COMMENT ON COLUMN "MP_AUTH_ORG_PERMISSION"."CAN_DELETE" IS '删除权限';
+
+COMMENT ON COLUMN "MP_AUTH_ORG_PERMISSION"."CAN_READ" IS '读权限';
+
+COMMENT ON COLUMN "MP_AUTH_ORG_PERMISSION"."CAN_UPDATE" IS '更新权限';
+
+COMMENT ON COLUMN "MP_AUTH_ORG_PERMISSION"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_AUTH_ORG_PERMISSION"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_AUTH_ORG_PERMISSION"."OWNER" IS '权限所有者(组织)';
+
+COMMENT ON COLUMN "MP_AUTH_ORG_PERMISSION"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_AUTH_ORG_PERMISSION"."TARGET" IS '资源目标';
+
+COMMENT ON COLUMN "MP_AUTH_ORG_PERMISSION"."TENANT" IS '所属租户';
+
+COMMENT ON COLUMN "MP_AUTH_ORG_PERMISSION"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_AUTH_ROLE" IS '角色表';
+
+COMMENT ON COLUMN "MP_AUTH_ROLE"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_AUTH_ROLE"."DESCRIPTION" IS '描述';
+
+COMMENT ON COLUMN "MP_AUTH_ROLE"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_AUTH_ROLE"."IDENTIFIER" IS '编号';
+
+COMMENT ON COLUMN "MP_AUTH_ROLE"."NAME" IS '名称';
+
+COMMENT ON COLUMN "MP_AUTH_ROLE"."ORG" IS '所属组织';
+
+COMMENT ON COLUMN "MP_AUTH_ROLE"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_AUTH_ROLE"."TENANT" IS '所属租户';
+
+COMMENT ON COLUMN "MP_AUTH_ROLE"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON COLUMN "MP_AUTH_ROLE"."VISIBLE" IS '是否可见 1:可见，0:不可见';
+
+COMMENT ON TABLE "MP_AUTH_ROLE_PERMISSION" IS '角色权限关系表';
+
+COMMENT ON COLUMN "MP_AUTH_ROLE_PERMISSION"."CAN_CREATE" IS '创建权限';
+
+COMMENT ON COLUMN "MP_AUTH_ROLE_PERMISSION"."CAN_DELETE" IS '删除权限';
+
+COMMENT ON COLUMN "MP_AUTH_ROLE_PERMISSION"."CAN_READ" IS '读权限';
+
+COMMENT ON COLUMN "MP_AUTH_ROLE_PERMISSION"."CAN_UPDATE" IS '更新权限';
+
+COMMENT ON COLUMN "MP_AUTH_ROLE_PERMISSION"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_AUTH_ROLE_PERMISSION"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_AUTH_ROLE_PERMISSION"."OWNER" IS '权限所有者(角色ID)';
+
+COMMENT ON COLUMN "MP_AUTH_ROLE_PERMISSION"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_AUTH_ROLE_PERMISSION"."TARGET" IS '权限ID';
+
+COMMENT ON COLUMN "MP_AUTH_ROLE_PERMISSION"."TENANT" IS '所属租户';
+
+COMMENT ON COLUMN "MP_AUTH_ROLE_PERMISSION"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_AUTH_TARGET" IS '权限（资源）表';
+
+COMMENT ON COLUMN "MP_AUTH_TARGET"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_AUTH_TARGET"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_AUTH_TARGET"."IDENTIFIER" IS '编号';
+
+COMMENT ON COLUMN "MP_AUTH_TARGET"."NAME" IS '名称';
+
+COMMENT ON COLUMN "MP_AUTH_TARGET"."PARENT" IS '父权限ID';
+
+COMMENT ON COLUMN "MP_AUTH_TARGET"."PATH" IS '路径';
+
+COMMENT ON COLUMN "MP_AUTH_TARGET"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_AUTH_TARGET"."TENANT" IS '所属租户';
+
+COMMENT ON COLUMN "MP_AUTH_TARGET"."TYPE" IS '资源类型 1:菜单, 2:API, 3:数据';
+
+COMMENT ON COLUMN "MP_AUTH_TARGET"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON COLUMN "MP_AUTH_TARGET"."VISIBLE" IS '是否可见 1:可见，0:不可见（受控于激活选项） 默认为可见';
+
+COMMENT ON TABLE "MP_AUTH_TENANT" IS '租户表';
+
+COMMENT ON COLUMN "MP_AUTH_TENANT"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_AUTH_TENANT"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_AUTH_TENANT"."IDENTIFIER" IS '编号';
+
+COMMENT ON COLUMN "MP_AUTH_TENANT"."NAME" IS '名称';
+
+COMMENT ON COLUMN "MP_AUTH_TENANT"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_AUTH_TENANT"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_AUTH_USER_PERMISSION" IS '用户权限关系表';
+
+COMMENT ON COLUMN "MP_AUTH_USER_PERMISSION"."CAN_CREATE" IS '创建权限';
+
+COMMENT ON COLUMN "MP_AUTH_USER_PERMISSION"."CAN_DELETE" IS '删除权限';
+
+COMMENT ON COLUMN "MP_AUTH_USER_PERMISSION"."CAN_READ" IS '读权限';
+
+COMMENT ON COLUMN "MP_AUTH_USER_PERMISSION"."CAN_UPDATE" IS '更新权限';
+
+COMMENT ON COLUMN "MP_AUTH_USER_PERMISSION"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_AUTH_USER_PERMISSION"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_AUTH_USER_PERMISSION"."OWNER" IS '权限所有者(用户ID)';
+
+COMMENT ON COLUMN "MP_AUTH_USER_PERMISSION"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_AUTH_USER_PERMISSION"."TARGET" IS '资源目标';
+
+COMMENT ON COLUMN "MP_AUTH_USER_PERMISSION"."TENANT" IS '所属租户';
+
+COMMENT ON COLUMN "MP_AUTH_USER_PERMISSION"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON COLUMN "MP_BASE_LOCAL_FILE_MAPPING"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_BASE_LOCAL_FILE_MAPPING"."GROUP" IS '分组';
+
+COMMENT ON COLUMN "MP_BASE_LOCAL_FILE_MAPPING"."ID" IS 'id';
+
+COMMENT ON COLUMN "MP_BASE_LOCAL_FILE_MAPPING"."LOCAL_FILE" IS '本地文件路径';
+
+COMMENT ON COLUMN "MP_BASE_LOCAL_FILE_MAPPING"."LOCAL_FILE_MODIFIED_TIME" IS '本地文件修改时间';
+
+COMMENT ON COLUMN "MP_BASE_LOCAL_FILE_MAPPING"."NAME" IS '名称';
+
+COMMENT ON COLUMN "MP_BASE_LOCAL_FILE_MAPPING"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_BASE_LOCAL_FILE_MAPPING"."REMOTE_FILE" IS '远程文件路径';
+
+COMMENT ON COLUMN "MP_BASE_LOCAL_FILE_MAPPING"."SEQ" IS '序号';
+
+COMMENT ON COLUMN "MP_BASE_LOCAL_FILE_MAPPING"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_COMMON_OPTION" IS '选项表';
+
+COMMENT ON COLUMN "MP_COMMON_OPTION"."CODE" IS '选项编码';
+
+COMMENT ON COLUMN "MP_COMMON_OPTION"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_COMMON_OPTION"."EN_NAME" IS '选项英文名称';
+
+COMMENT ON COLUMN "MP_COMMON_OPTION"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_COMMON_OPTION"."META" IS '元数据';
+
+COMMENT ON COLUMN "MP_COMMON_OPTION"."PARENT_CODE" IS '父级选项编码';
+
+COMMENT ON COLUMN "MP_COMMON_OPTION"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_COMMON_OPTION"."SORT" IS '排序字段';
+
+COMMENT ON COLUMN "MP_COMMON_OPTION"."TYPE" IS '选项类型';
+
+COMMENT ON COLUMN "MP_COMMON_OPTION"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON COLUMN "MP_COMMON_OPTION"."ZH_NAME" IS '选项中文名称';
+
+COMMENT ON TABLE "MP_CSCENE_COMMON_CONFIG" IS '场景通用配置表';
+
+COMMENT ON COLUMN "MP_CSCENE_COMMON_CONFIG"."CONTENT" IS '配置内容';
+
+COMMENT ON COLUMN "MP_CSCENE_COMMON_CONFIG"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_CSCENE_COMMON_CONFIG"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_CSCENE_COMMON_CONFIG"."KEY" IS '配置对应key';
+
+COMMENT ON COLUMN "MP_CSCENE_COMMON_CONFIG"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_CSCENE_COMMON_CONFIG"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_CSCENE_CSCENE" IS '场景信息表';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE"."AUTH_TYPE" IS '授权类型';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE"."CREATE_USER" IS '创建用户id';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE"."CREATE_USERNAME" IS '创建用户名称';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE"."DELETED" IS '是否删除';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE"."LOGO" IS '综合场景模板logo';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE"."NAME" IS '名称';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE"."REFERENCE_META_DATA" IS '综合场景模板引用元数据';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE"."REFERENCE_TYPE" IS '综合场景模板引用类型';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE"."SCENE_CONFIG" IS '场景模板id';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE"."SUPPORT_PARTIAL_START" IS '是否支持部分启动';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE"."TYPE" IS '综合场景模板类型';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_CSCENE_CSCENE_AUTH" IS '场景模板授权信息表';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE_AUTH"."CAN_CREATE" IS '可创建';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE_AUTH"."CAN_DELETE" IS '可删除';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE_AUTH"."CAN_READ" IS '可读';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE_AUTH"."CAN_UPDATE" IS '可更新';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE_AUTH"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE_AUTH"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE_AUTH"."OWNER" IS '用户ID';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE_AUTH"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE_AUTH"."TARGET" IS '场景模板id';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE_AUTH"."TENANT" IS '租户';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE_AUTH"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_CSCENE_CSCENE_INSTANCE" IS '场景实例表';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE_INSTANCE"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE_INSTANCE"."CREATE_USER" IS '创建用户id';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE_INSTANCE"."CREATE_USERNAME" IS '创建用户名称';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE_INSTANCE"."CSCENE" IS '综合场景id';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE_INSTANCE"."DELETED" IS '是否删除';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE_INSTANCE"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE_INSTANCE"."LOGO" IS '综合场景模板logo';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE_INSTANCE"."NAME" IS '名称';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE_INSTANCE"."PASS_THROUGH" IS '透传字段';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE_INSTANCE"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE_INSTANCE"."REFERENCE_META_DATA" IS '综合场景实例引用元数据';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE_INSTANCE"."REFERENCE_TYPE" IS '综合场景实例引用类型';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE_INSTANCE"."SCENE" IS '场景实例id';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE_INSTANCE"."SCENE_ATTR" IS '场景实例属性';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE_INSTANCE"."SCENE_TTL" IS '场景实例存活时间';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE_INSTANCE"."SUPPORT_PARTIAL_START" IS '是否支持部分启动';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE_INSTANCE"."TYPE" IS '综合场景实例类型';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE_INSTANCE"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_CSCENE_CSCENE_INSTANCE_ROLE" IS '场景实例角色表';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE_INSTANCE_ROLE"."ASSET_NODES" IS '资产节点';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE_INSTANCE_ROLE"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE_INSTANCE_ROLE"."CSCENE" IS '综合场景实例id';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE_INSTANCE_ROLE"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE_INSTANCE_ROLE"."KEY" IS '角色key';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE_INSTANCE_ROLE"."NAME" IS '名称';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE_INSTANCE_ROLE"."PARENT" IS '父角色id';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE_INSTANCE_ROLE"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE_INSTANCE_ROLE"."TYPE" IS '类型';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE_INSTANCE_ROLE"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE_INSTANCE_ROLE"."USERS" IS '包含用户';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE_INSTANCE_ROLE"."VISIBLE_NODES" IS '可见节点';
+
+COMMENT ON TABLE "MP_CSCENE_CSCENE_ROLE" IS '场景角色表';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE_ROLE"."ASSET_NODES" IS '资产节点';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE_ROLE"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE_ROLE"."CSCENE" IS '综合场景id';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE_ROLE"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE_ROLE"."KEY" IS '角色key';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE_ROLE"."NAME" IS '名称';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE_ROLE"."PARENT" IS '父角色id';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE_ROLE"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE_ROLE"."TYPE" IS '类型';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE_ROLE"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE_ROLE"."USERS" IS '包含用户';
+
+COMMENT ON COLUMN "MP_CSCENE_CSCENE_ROLE"."VISIBLE_NODES" IS '可见节点';
+
+COMMENT ON TABLE "MP_DEVOPS_ALARM_STATISTICS" IS '告警统计信息表';
+
+COMMENT ON COLUMN "MP_DEVOPS_ALARM_STATISTICS"."ALARM_COUNT" IS '告警数量';
+
+COMMENT ON COLUMN "MP_DEVOPS_ALARM_STATISTICS"."ALARM_DATE" IS '告警日期';
+
+COMMENT ON COLUMN "MP_DEVOPS_ALARM_STATISTICS"."ALARM_TYPE" IS '告警类型：0 云平台服务, 1 业务服务 2 服务器';
+
+COMMENT ON COLUMN "MP_DEVOPS_ALARM_STATISTICS"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_DEVOPS_ALARM_STATISTICS"."ID" IS '告警统计id';
+
+COMMENT ON COLUMN "MP_DEVOPS_ALARM_STATISTICS"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_DEVOPS_ALARM_STATISTICS"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_DEVOPS_CPNODE_MONITOR_SCRIPT_CONFIG" IS '云平台节点探针监控脚本安装信息表';
+
+COMMENT ON COLUMN "MP_DEVOPS_CPNODE_MONITOR_SCRIPT_CONFIG"."AGENT_NAME" IS '探针名称';
+
+COMMENT ON COLUMN "MP_DEVOPS_CPNODE_MONITOR_SCRIPT_CONFIG"."CONFIG" IS '脚本配置JSON字符串，包括launchid, interval，scriptUrl等信息';
+
+COMMENT ON COLUMN "MP_DEVOPS_CPNODE_MONITOR_SCRIPT_CONFIG"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_DEVOPS_CPNODE_MONITOR_SCRIPT_CONFIG"."HOSTNAME" IS '主机名称';
+
+COMMENT ON COLUMN "MP_DEVOPS_CPNODE_MONITOR_SCRIPT_CONFIG"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_DEVOPS_CPNODE_MONITOR_SCRIPT_CONFIG"."IP" IS 'IP地址';
+
+COMMENT ON COLUMN "MP_DEVOPS_CPNODE_MONITOR_SCRIPT_CONFIG"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_DEVOPS_CPNODE_MONITOR_SCRIPT_CONFIG"."STATUS" IS '1:已完成安装 2:已发送指令-待确认安装成功 3:安装失败';
+
+COMMENT ON COLUMN "MP_DEVOPS_CPNODE_MONITOR_SCRIPT_CONFIG"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_DEVOPS_SCREENSHOT" IS '截屏文件管理表';
+
+COMMENT ON COLUMN "MP_DEVOPS_SCREENSHOT"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_DEVOPS_SCREENSHOT"."FILE" IS '截屏文件地址';
+
+COMMENT ON COLUMN "MP_DEVOPS_SCREENSHOT"."FILE_NAME" IS '截屏文件名称';
+
+COMMENT ON COLUMN "MP_DEVOPS_SCREENSHOT"."FILE_SIZE" IS '截屏文件大小，单位:B';
+
+COMMENT ON COLUMN "MP_DEVOPS_SCREENSHOT"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_DEVOPS_SCREENSHOT"."NODE_ID" IS '节点id';
+
+COMMENT ON COLUMN "MP_DEVOPS_SCREENSHOT"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_DEVOPS_SCREENSHOT"."SCENE" IS '场景id';
+
+COMMENT ON COLUMN "MP_DEVOPS_SCREENSHOT"."SCENE_NAME" IS '场景名称';
+
+COMMENT ON COLUMN "MP_DEVOPS_SCREENSHOT"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON COLUMN "MP_DEVOPS_SCREENSHOT"."USER_ID" IS '用户id';
+
+COMMENT ON COLUMN "MP_DEVOPS_SCREENSHOT"."USER_NAME" IS '用户名称';
+
+COMMENT ON COLUMN "MP_DEVOPS_SCREENSHOT"."USER_ORG_NAME" IS '组织名称';
+
+COMMENT ON TABLE "MP_DEVOPS_SYSTEM_ALARM" IS '告警信息表';
+
+COMMENT ON COLUMN "MP_DEVOPS_SYSTEM_ALARM"."ALARM_MSG" IS '告警信息';
+
+COMMENT ON COLUMN "MP_DEVOPS_SYSTEM_ALARM"."ALARM_STATUS" IS '告警状态：0 生效， 1失效';
+
+COMMENT ON COLUMN "MP_DEVOPS_SYSTEM_ALARM"."ALARM_TYPE" IS '告警类型：0 云平台服务, 1 业务服务 2 服务器';
+
+COMMENT ON COLUMN "MP_DEVOPS_SYSTEM_ALARM"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_DEVOPS_SYSTEM_ALARM"."HOSTNAME" IS '节点名称';
+
+COMMENT ON COLUMN "MP_DEVOPS_SYSTEM_ALARM"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_DEVOPS_SYSTEM_ALARM"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_DEVOPS_SYSTEM_ALARM"."RUNNING_TIME" IS '持续时间';
+
+COMMENT ON COLUMN "MP_DEVOPS_SYSTEM_ALARM"."SERVERNAME" IS '设备名称';
+
+COMMENT ON COLUMN "MP_DEVOPS_SYSTEM_ALARM"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_DEVOPS_TARGET_AUTH" IS '靶标授权表';
+
+COMMENT ON COLUMN "MP_DEVOPS_TARGET_AUTH"."CAN_CREATE" IS '可创建';
+
+COMMENT ON COLUMN "MP_DEVOPS_TARGET_AUTH"."CAN_DELETE" IS '可删除';
+
+COMMENT ON COLUMN "MP_DEVOPS_TARGET_AUTH"."CAN_READ" IS '可读';
+
+COMMENT ON COLUMN "MP_DEVOPS_TARGET_AUTH"."CAN_UPDATE" IS '可更新';
+
+COMMENT ON COLUMN "MP_DEVOPS_TARGET_AUTH"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_DEVOPS_TARGET_AUTH"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_DEVOPS_TARGET_AUTH"."OWNER" IS '用户ID';
+
+COMMENT ON COLUMN "MP_DEVOPS_TARGET_AUTH"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_DEVOPS_TARGET_AUTH"."TARGET" IS '镜像UUID';
+
+COMMENT ON COLUMN "MP_DEVOPS_TARGET_AUTH"."TENANT" IS '租户';
+
+COMMENT ON COLUMN "MP_DEVOPS_TARGET_AUTH"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_EVENT_TRACKING_RECORD" IS '埋点表';
+
+COMMENT ON COLUMN "MP_EVENT_TRACKING_RECORD"."ACTION" IS '动作';
+
+COMMENT ON COLUMN "MP_EVENT_TRACKING_RECORD"."CATEGORY" IS '分类';
+
+COMMENT ON COLUMN "MP_EVENT_TRACKING_RECORD"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_EVENT_TRACKING_RECORD"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_EVENT_TRACKING_RECORD"."MODULE" IS '模块';
+
+COMMENT ON COLUMN "MP_EVENT_TRACKING_RECORD"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_EVENT_TRACKING_RECORD"."TARGET" IS '操作目标';
+
+COMMENT ON COLUMN "MP_EVENT_TRACKING_RECORD"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_FLOW_ACTUATOR" IS '流量执行器表';
+
+COMMENT ON COLUMN "MP_FLOW_ACTUATOR"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_FLOW_ACTUATOR"."ID" IS '执行器id';
+
+COMMENT ON COLUMN "MP_FLOW_ACTUATOR"."INSTANCE_ID" IS '实例id';
+
+COMMENT ON COLUMN "MP_FLOW_ACTUATOR"."IP" IS '执行器ip地址';
+
+COMMENT ON COLUMN "MP_FLOW_ACTUATOR"."NETWORK_ID" IS '网络id';
+
+COMMENT ON COLUMN "MP_FLOW_ACTUATOR"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_FLOW_ACTUATOR"."TITLE" IS '执行器名称';
+
+COMMENT ON COLUMN "MP_FLOW_ACTUATOR"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_FLOW_COLLECTION_REL" IS '流量关联集合表';
+
+COMMENT ON COLUMN "MP_FLOW_COLLECTION_REL"."COLLECTION_ID" IS '流量集合id';
+
+COMMENT ON COLUMN "MP_FLOW_COLLECTION_REL"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_FLOW_COLLECTION_REL"."FLOW_ID" IS '流量id';
+
+COMMENT ON COLUMN "MP_FLOW_COLLECTION_REL"."ID" IS '关联id';
+
+COMMENT ON COLUMN "MP_FLOW_COLLECTION_REL"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_FLOW_COLLECTION_REL"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_FLOW_FLOW_INFO" IS '流量信息表';
+
+COMMENT ON COLUMN "MP_FLOW_FLOW_INFO"."CATEGORY" IS '分类   0:"测试测量",1:"应用升级",2:"网络管理",3:"P2P",4:"金融",5:"邮件",6:"安全工作",7:"分布式计算",8:"手机",9:"移动设备",10:"即时通讯",11:"SCADA",12:"机动",13:"远程控制",14:"音视频",15:"企业应用",16:"社会网络搜索",17:"文件传输",18:"数据库",19:"身份认证",20:"ERP",21:"存储",22:"游戏",23:"安全数据传输"';
+
+COMMENT ON COLUMN "MP_FLOW_FLOW_INFO"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_FLOW_FLOW_INFO"."FILE_NAME" IS '文件名称';
+
+COMMENT ON COLUMN "MP_FLOW_FLOW_INFO"."FLOW_DESC" IS '流量描述';
+
+COMMENT ON COLUMN "MP_FLOW_FLOW_INFO"."ID" IS '流量id';
+
+COMMENT ON COLUMN "MP_FLOW_FLOW_INFO"."INTERACTIVE_TYPE" IS '交互类型：0 背景流量，1 攻击流量，2 全流量';
+
+COMMENT ON COLUMN "MP_FLOW_FLOW_INFO"."PCAP_FILE" IS 'pcap文件地址';
+
+COMMENT ON COLUMN "MP_FLOW_FLOW_INFO"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_FLOW_FLOW_INFO"."RESOURCE_TYPE" IS '资源类型：0 pcap包，1 脚本';
+
+COMMENT ON COLUMN "MP_FLOW_FLOW_INFO"."RUN_CMD" IS '攻击脚本运行命令';
+
+COMMENT ON COLUMN "MP_FLOW_FLOW_INFO"."SCRIPT_FILE" IS '脚本文件地址';
+
+COMMENT ON COLUMN "MP_FLOW_FLOW_INFO"."TITLE" IS '流量标题';
+
+COMMENT ON COLUMN "MP_FLOW_FLOW_INFO"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_FLOW_PORT" IS '流量执行网口表';
+
+COMMENT ON COLUMN "MP_FLOW_PORT"."ACTUATOR_ID" IS '流量执行器id';
+
+COMMENT ON COLUMN "MP_FLOW_PORT"."CLIENT_GATEWAY" IS '客户端网关';
+
+COMMENT ON COLUMN "MP_FLOW_PORT"."CLIENT_IP" IS '客户端ip';
+
+COMMENT ON COLUMN "MP_FLOW_PORT"."CLIENT_MAC" IS '客户端mac';
+
+COMMENT ON COLUMN "MP_FLOW_PORT"."CLIENT_PORT_ID" IS '客户端portId';
+
+COMMENT ON COLUMN "MP_FLOW_PORT"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_FLOW_PORT"."ID" IS '网口id';
+
+COMMENT ON COLUMN "MP_FLOW_PORT"."NETWORK_ID" IS '网络id';
+
+COMMENT ON COLUMN "MP_FLOW_PORT"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_FLOW_PORT"."PORT_TYPE" IS '网口类型：0 pcap包，1 脚本';
+
+COMMENT ON COLUMN "MP_FLOW_PORT"."SERVER_GATEWAY" IS '服务端网关';
+
+COMMENT ON COLUMN "MP_FLOW_PORT"."SERVER_IP" IS '服务端ip';
+
+COMMENT ON COLUMN "MP_FLOW_PORT"."SERVER_MAC" IS '服务端mac';
+
+COMMENT ON COLUMN "MP_FLOW_PORT"."SERVER_PORT_ID" IS '服务端portId';
+
+COMMENT ON COLUMN "MP_FLOW_PORT"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_FLOW_SCRIPT_DEMO" IS '流量脚本模板表';
+
+COMMENT ON COLUMN "MP_FLOW_SCRIPT_DEMO"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_FLOW_SCRIPT_DEMO"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_FLOW_SCRIPT_DEMO"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_FLOW_SCRIPT_DEMO"."SCRIPT_NAME" IS '脚本名称';
+
+COMMENT ON COLUMN "MP_FLOW_SCRIPT_DEMO"."TYPE" IS '示例脚本类型 1:流量 2:探针';
+
+COMMENT ON COLUMN "MP_FLOW_SCRIPT_DEMO"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON COLUMN "MP_FLOW_SCRIPT_DEMO"."URL" IS '脚本url';
+
+COMMENT ON TABLE "MP_FLOW_SCRIPT_PARAM" IS '流量脚本参数表';
+
+COMMENT ON COLUMN "MP_FLOW_SCRIPT_PARAM"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_FLOW_SCRIPT_PARAM"."FLOW_ID" IS '流量id';
+
+COMMENT ON COLUMN "MP_FLOW_SCRIPT_PARAM"."ID" IS '脚本参数id';
+
+COMMENT ON COLUMN "MP_FLOW_SCRIPT_PARAM"."PARAM_DESC" IS '参数说明';
+
+COMMENT ON COLUMN "MP_FLOW_SCRIPT_PARAM"."PARAM_KEY" IS '参数名';
+
+COMMENT ON COLUMN "MP_FLOW_SCRIPT_PARAM"."PARAM_TYPE" IS '参数类型：0 string,1 IP,2 number,3 bool';
+
+COMMENT ON COLUMN "MP_FLOW_SCRIPT_PARAM"."PARAM_VALUE" IS '参数值';
+
+COMMENT ON COLUMN "MP_FLOW_SCRIPT_PARAM"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_FLOW_SCRIPT_PARAM"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_FLOW_TASK_PORT" IS '流量任务网口表';
+
+COMMENT ON COLUMN "MP_FLOW_TASK_PORT"."ACTUATOR_ID" IS '流量执行器id';
+
+COMMENT ON COLUMN "MP_FLOW_TASK_PORT"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_FLOW_TASK_PORT"."ID" IS '网口id';
+
+COMMENT ON COLUMN "MP_FLOW_TASK_PORT"."MAC" IS '网口mac';
+
+COMMENT ON COLUMN "MP_FLOW_TASK_PORT"."NETWORK_ID" IS '网络id';
+
+COMMENT ON COLUMN "MP_FLOW_TASK_PORT"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_FLOW_TASK_PORT"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_FLOW_TASK_TASK" IS '流量执行任务表';
+
+COMMENT ON COLUMN "MP_FLOW_TASK_TASK"."ACTUATOR_ID" IS '流量执行器id';
+
+COMMENT ON COLUMN "MP_FLOW_TASK_TASK"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_FLOW_TASK_TASK"."ERROR_COUNT" IS '失败执行次数';
+
+COMMENT ON COLUMN "MP_FLOW_TASK_TASK"."FLOW_ID" IS '流量id';
+
+COMMENT ON COLUMN "MP_FLOW_TASK_TASK"."ID" IS '任务id';
+
+COMMENT ON COLUMN "MP_FLOW_TASK_TASK"."INTERACTIVE_TYPE" IS '交互类型：0 背景流量，1 攻击流量';
+
+COMMENT ON COLUMN "MP_FLOW_TASK_TASK"."MSG" IS '错误信息';
+
+COMMENT ON COLUMN "MP_FLOW_TASK_TASK"."NODE_ID" IS '目标节点id';
+
+COMMENT ON COLUMN "MP_FLOW_TASK_TASK"."NODE_IP" IS '目标节点ip';
+
+COMMENT ON COLUMN "MP_FLOW_TASK_TASK"."NODE_NAME" IS '目标节点名称';
+
+COMMENT ON COLUMN "MP_FLOW_TASK_TASK"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_FLOW_TASK_TASK"."PORT_ID" IS '网口id';
+
+COMMENT ON COLUMN "MP_FLOW_TASK_TASK"."RESOURCE_TYPE" IS '资源类型：0 pcap包，1 脚本';
+
+COMMENT ON COLUMN "MP_FLOW_TASK_TASK"."SCENE_ID" IS '场景实例id';
+
+COMMENT ON COLUMN "MP_FLOW_TASK_TASK"."SUCCESS_COUNT" IS '成功执行次数';
+
+COMMENT ON COLUMN "MP_FLOW_TASK_TASK"."TASK_STATUS" IS '任务状态: 0 初始化，1 正在运行，2 正在停止， 3 已停止, 4 失败';
+
+COMMENT ON COLUMN "MP_FLOW_TASK_TASK"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_FRONT_ADMIN_ACTIV_CTL" IS '系统激活信息表';
+
+COMMENT ON COLUMN "MP_FRONT_ADMIN_ACTIV_CTL"."ACTIVE_COUNT" IS '同一个激活码的激活次数';
+
+COMMENT ON COLUMN "MP_FRONT_ADMIN_ACTIV_CTL"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_FRONT_ADMIN_ACTIV_CTL"."EXPIRE_DATE" IS '（密文）过期日期';
+
+COMMENT ON COLUMN "MP_FRONT_ADMIN_ACTIV_CTL"."FIRST_ACTIVE_DATE" IS '（密文）系统首次激活日期。如果同一个license_code多次激活，最终的过期日期以第一次激活日期为准';
+
+COMMENT ON COLUMN "MP_FRONT_ADMIN_ACTIV_CTL"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_FRONT_ADMIN_ACTIV_CTL"."LAST_ACTIVE_DATE" IS '（密文）系统最近一次激活日期，同一个激活码的情况下';
+
+COMMENT ON COLUMN "MP_FRONT_ADMIN_ACTIV_CTL"."LICENSE_CODE" IS '（密文）激活码';
+
+COMMENT ON COLUMN "MP_FRONT_ADMIN_ACTIV_CTL"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_FRONT_ADMIN_ACTIV_CTL"."SALT" IS '随机盐';
+
+COMMENT ON COLUMN "MP_FRONT_ADMIN_ACTIV_CTL"."STATUS" IS '状态 1:有效 0:无效';
+
+COMMENT ON COLUMN "MP_FRONT_ADMIN_ACTIV_CTL"."SUFFIX" IS '6位随机数字+字母，当前表中每次新增一条数据，则随机产生一个suffix';
+
+COMMENT ON COLUMN "MP_FRONT_ADMIN_ACTIV_CTL"."SYS_LIFETIME" IS '系统寿命';
+
+COMMENT ON COLUMN "MP_FRONT_ADMIN_ACTIV_CTL"."SYS_RUN_SECONDS" IS '系统运行秒数';
+
+COMMENT ON COLUMN "MP_FRONT_ADMIN_ACTIV_CTL"."SYS_TIMESTAMP" IS '定时任务记录的系统时间戳，发生时间回拨，则该值也回到回拨时间，用于累计系统运行秒数';
+
+COMMENT ON COLUMN "MP_FRONT_ADMIN_ACTIV_CTL"."TENANT" IS '所属租户';
+
+COMMENT ON COLUMN "MP_FRONT_ADMIN_ACTIV_CTL"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_LOG_LEVEL" IS '系统日志级别配置表';
+
+COMMENT ON COLUMN "MP_LOG_LEVEL"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_LOG_LEVEL"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_LOG_LEVEL"."LOG_LEVEL" IS '日志级别(DEBUG/INFO/WARN/ERROR)';
+
+COMMENT ON COLUMN "MP_LOG_LEVEL"."LOG_NAME" IS '日志名称(一般为包路径)';
+
+COMMENT ON COLUMN "MP_LOG_LEVEL"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_LOG_LEVEL"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_LOG_REPORT" IS '日志上报表';
+
+COMMENT ON COLUMN "MP_LOG_REPORT"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_LOG_REPORT"."DOWNLOAD_URL" IS '文件下载地址';
+
+COMMENT ON COLUMN "MP_LOG_REPORT"."FILE_NAME" IS '文件名称';
+
+COMMENT ON COLUMN "MP_LOG_REPORT"."FILE_SIZE" IS '文件大小';
+
+COMMENT ON COLUMN "MP_LOG_REPORT"."HOST_IP" IS '节点ip';
+
+COMMENT ON COLUMN "MP_LOG_REPORT"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_LOG_REPORT"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_LOG_REPORT"."TYPE" IS '日志类型（CR/MP/AD/CP)';
+
+COMMENT ON COLUMN "MP_LOG_REPORT"."UPDATE_TIME" IS '更新时间';
+
+CREATE TABLE "MP_MENU_TEMPLATE_INFO"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "TEMPLATE_ID" VARCHAR(64) NOT NULL,
+ "MENU_ID" VARCHAR(64) NOT NULL,
+ "PARENT" VARCHAR(64) NULL,
+ "IDENTIFIER" VARCHAR(64) NOT NULL,
+ "TENANT" VARCHAR(64) NOT NULL,
+ "TYPE" INT NOT NULL,
+ "VISIBLE" INT DEFAULT 1
+ NOT NULL,
+ "NAME" VARCHAR(64) NOT NULL,
+ "EN_NAME" VARCHAR(64) NOT NULL,
+ "PATH" VARCHAR(255) NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL
+);
+CREATE TABLE "MP_MENU_TEMPLATE_ROLE"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "TEMPLATE_ID" VARCHAR(64) NOT NULL,
+ "ROLE_ID" VARCHAR(64) NOT NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL
+);
+CREATE TABLE "MP_SCENE_SCENE"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "SOURCE" VARCHAR(64) NOT NULL,
+ "NAME" VARCHAR(255) NOT NULL,
+ "DESCRIPTION" VARCHAR(2048) NOT NULL,
+ "FILE" VARCHAR(2048) NOT NULL,
+ "DISPLAY_CONTEXT" TEXT NOT NULL,
+ "EVENT" INT NOT NULL,
+ "EVENT_STATUS" INT NOT NULL,
+ "PROCESS" VARCHAR(64) NOT NULL,
+ "PROCESS_STATUS" INT NOT NULL,
+ "PROCESS_MESSAGE" VARCHAR(2048) NOT NULL,
+ "CREATE_CONSUME_SECONDS" INT NOT NULL,
+ "DELETED" TINYINT NOT NULL,
+ "CREATE_TIME" TIMESTAMP(6) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(6) NOT NULL,
+ "STAGE" VARCHAR(64) NOT NULL,
+ "STAGE_NAME" VARCHAR(64) NOT NULL,
+ "STAGE_PERCENTAGE" INT NOT NULL,
+ "STAGE_LIST" VARCHAR(2048) NOT NULL
+);
+CREATE TABLE "MP_SCENE_SCENE_AREA"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "SCENE" VARCHAR(64) NOT NULL,
+ "NODE_ID" VARCHAR(64) NOT NULL,
+ "AREA" VARCHAR(64) NOT NULL,
+ "ICON2" VARCHAR(2048) NOT NULL,
+ "POSITION2" VARCHAR(128) NOT NULL,
+ "ICON3" VARCHAR(2048) NOT NULL,
+ "POSITION3" VARCHAR(128) NOT NULL,
+ "NAME" VARCHAR(255) NOT NULL,
+ "DESCRIPTION" VARCHAR(1024) NOT NULL,
+ "OPEN" TINYINT NOT NULL,
+ "TYPE" TINYINT DEFAULT 0
+ NULL,
+ "CREATE_TIME" TIMESTAMP(6) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(6) NOT NULL,
+ "DISPLAY_CONTEXT" VARCHAR(2048) NOT NULL,
+ "OUTER_POSITION2" VARCHAR(1024) NOT NULL
+);
+CREATE TABLE "MP_SCENE_SCENE_CONFIG"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "TYPE" INT NOT NULL,
+ "SOURCE" VARCHAR(64) NOT NULL,
+ "NAME" VARCHAR(255) NOT NULL,
+ "DESCRIPTION" VARCHAR(2048) NOT NULL,
+ "FILE" VARCHAR(2048) NOT NULL,
+ "DISPLAY_CONTEXT" TEXT NOT NULL,
+ "DELETED" TINYINT NOT NULL,
+ "CREATE_TIME" TIMESTAMP(6) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(6) NOT NULL
+);
+CREATE TABLE "MP_SCENE_SCENE_CONFIG_AREA"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "SCENE" VARCHAR(64) NOT NULL,
+ "NODE_ID" VARCHAR(64) NOT NULL,
+ "AREA" VARCHAR(64) NOT NULL,
+ "ICON2" VARCHAR(2048) NOT NULL,
+ "POSITION2" VARCHAR(128) NOT NULL,
+ "ICON3" VARCHAR(2048) NOT NULL,
+ "POSITION3" VARCHAR(128) NOT NULL,
+ "NAME" VARCHAR(255) NOT NULL,
+ "DESCRIPTION" VARCHAR(1024) NOT NULL,
+ "OPEN" TINYINT NOT NULL,
+ "TYPE" TINYINT DEFAULT 0
+ NULL,
+ "CREATE_TIME" TIMESTAMP(6) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(6) NOT NULL,
+ "DISPLAY_CONTEXT" VARCHAR(2048) NOT NULL,
+ "OUTER_POSITION2" VARCHAR(1024) NOT NULL
+);
+CREATE TABLE "MP_SCENE_SCENE_CONFIG_ELEMENT"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "SCENE" VARCHAR(64) NOT NULL,
+ "NODE_ID" VARCHAR(64) NOT NULL,
+ "AREA" VARCHAR(64) NOT NULL,
+ "ICON2" VARCHAR(2048) NOT NULL,
+ "POSITION2" VARCHAR(64) NOT NULL,
+ "ICON3" VARCHAR(2048) NOT NULL,
+ "POSITION3" VARCHAR(64) NOT NULL,
+ "NAME" VARCHAR(255) NOT NULL,
+ "DESCRIPTION" VARCHAR(1024) NOT NULL,
+ "TYPE" INT NOT NULL,
+ "FILE" VARCHAR(2048) NOT NULL,
+ "SYSTEM_TYPE" VARCHAR(64) NOT NULL,
+ "SYSTEM_ARCHITECTURE" VARCHAR(16) NOT NULL,
+ "SYSTEM_LANGUAGE" VARCHAR(8) NOT NULL,
+ "CPU" INT NOT NULL,
+ "RAM" INT NOT NULL,
+ "DISK" INT NOT NULL,
+ "INIT_COMMANDS" CLOB NOT NULL,
+ "MAX_PORT_NUMBER" INT NOT NULL,
+ "CREATE_TIME" TIMESTAMP(6) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(6) NOT NULL,
+ "DISPLAY_CONTEXT" VARCHAR(2048) NOT NULL,
+ "IS_AUXILIARY" TINYINT NOT NULL,
+ "OUTER_POSITION2" VARCHAR(1024) NOT NULL
+);
+CREATE TABLE "MP_SCENE_SCENE_CONFIG_ELEMENT_PLUGIN"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "SCENE" VARCHAR(64) NOT NULL,
+ "SCENE_ELEMENT" VARCHAR(64) NOT NULL,
+ "PLUGIN_KEY" VARCHAR(32) NOT NULL,
+ "CREATE_TIME" TIMESTAMP(6) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(6) NOT NULL
+);
+CREATE TABLE "MP_SCENE_SCENE_CONFIG_ELEMENT_PORT"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "SCENE" VARCHAR(64) NOT NULL,
+ "SCENE_ELEMENT" VARCHAR(64) NOT NULL,
+ "PORT_ID" VARCHAR(64) NOT NULL,
+ "NAME" VARCHAR(255) NOT NULL,
+ "TYPE" INT NOT NULL,
+ "USABLE" TINYINT DEFAULT 1
+ NULL,
+ "MAC_ADDR" VARCHAR(32) NOT NULL,
+ "IP" VARCHAR(32) NOT NULL,
+ "NETMASK" VARCHAR(32) NOT NULL,
+ "GATEWAY" VARCHAR(32) NOT NULL,
+ "DHCP" TINYINT NOT NULL,
+ "DNS" VARCHAR(255) NOT NULL,
+ "EGRESS" INT NOT NULL,
+ "INGRESS" INT NOT NULL,
+ "DELAY" INT NOT NULL,
+ "LOSS" INT NOT NULL,
+ "ACCESS_MODES" TEXT NOT NULL,
+ "CREATE_TIME" TIMESTAMP(6) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(6) NOT NULL,
+ "ORDER" INT DEFAULT 0
+ NOT NULL,
+ "IS_AUXILIARY" TINYINT NOT NULL,
+ "PORT_CONNECT_NET_CIDR" VARCHAR(20) NULL
+);
+CREATE TABLE "MP_SCENE_SCENE_CONFIG_ELEMENT_PORT_CONNECTION"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "SCENE" VARCHAR(64) NOT NULL,
+ "SOURCE_ELEMENT" VARCHAR(64) NOT NULL,
+ "TARGET_ELEMENT" VARCHAR(64) NOT NULL,
+ "SOURCE_PORT" VARCHAR(64) NOT NULL,
+ "TARGET_PORT" VARCHAR(64) NOT NULL,
+ "CONNECTION_ID" VARCHAR(64) NOT NULL,
+ "SOURCE_PORT_ID" VARCHAR(64) NOT NULL,
+ "TARGET_PORT_ID" VARCHAR(64) NOT NULL,
+ "NAME" VARCHAR(255) NOT NULL,
+ "UNIDIRECTIONAL" TINYINT NOT NULL,
+ "CREATE_TIME" TIMESTAMP(6) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(6) NOT NULL,
+ "DISPLAY_CONTEXT" VARCHAR(2048) NOT NULL,
+ "TYPE" VARCHAR(64) NULL,
+ "VERTICES" TEXT NULL,
+ "INFO" TEXT NULL
+);
+CREATE TABLE "MP_SCENE_SCENE_CONFIG_NODE_CONNECTION"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "SCENE" VARCHAR(64) NOT NULL,
+ "SOURCE_NODE_ID" VARCHAR(64) NOT NULL,
+ "TARGET_NODE_ID" VARCHAR(64) NOT NULL,
+ "SOURCE_NODE" VARCHAR(64) NOT NULL,
+ "TARGET_NODE" VARCHAR(64) NOT NULL,
+ "CONNECTION_ID" VARCHAR(64) NOT NULL,
+ "NAME" VARCHAR(255) NOT NULL,
+ "CREATE_TIME" TIMESTAMP(6) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(6) NOT NULL,
+ "DISPLAY_CONTEXT" VARCHAR(2048) NOT NULL,
+ "TYPE" VARCHAR(64) NULL,
+ "VERTICES" TEXT NULL
+);
+CREATE TABLE "MP_SCENE_SCENE_CONFIG_PIECE"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "SCENE" VARCHAR(64) NOT NULL,
+ "NODE_ID" VARCHAR(64) NOT NULL,
+ "AREA" VARCHAR(64) NOT NULL,
+ "ICON2" VARCHAR(2048) NOT NULL,
+ "POSITION2" VARCHAR(128) NOT NULL,
+ "ICON3" VARCHAR(2048) NOT NULL,
+ "POSITION3" VARCHAR(128) NOT NULL,
+ "NAME" VARCHAR(64) NOT NULL,
+ "DESCRIPTION" VARCHAR(1024) NOT NULL,
+ "TYPE" VARCHAR(64) NOT NULL,
+ "DISPLAY_CONTEXT" VARCHAR(2048) NOT NULL,
+ "CREATE_TIME" TIMESTAMP(6) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(6) NOT NULL,
+ "OUTER_POSITION2" VARCHAR(1024) NOT NULL
+);
+CREATE TABLE "MP_SCENE_SCENE_ELEMENT"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "SCENE" VARCHAR(64) NOT NULL,
+ "NODE_ID" VARCHAR(64) NOT NULL,
+ "AREA" VARCHAR(64) NOT NULL,
+ "ICON2" VARCHAR(2048) NOT NULL,
+ "POSITION2" VARCHAR(64) NOT NULL,
+ "ICON3" VARCHAR(2048) NOT NULL,
+ "POSITION3" VARCHAR(64) NOT NULL,
+ "NAME" VARCHAR(255) NOT NULL,
+ "DESCRIPTION" VARCHAR(1024) NOT NULL,
+ "TYPE" INT NOT NULL,
+ "FILE" VARCHAR(2048) NOT NULL,
+ "SYSTEM_TYPE" VARCHAR(64) NOT NULL,
+ "SYSTEM_ARCHITECTURE" VARCHAR(16) NOT NULL,
+ "SYSTEM_LANGUAGE" VARCHAR(8) NOT NULL,
+ "CPU" INT NOT NULL,
+ "RAM" INT NOT NULL,
+ "DISK" INT NOT NULL,
+ "INIT_COMMANDS" CLOB NOT NULL,
+ "MAX_PORT_NUMBER" INT NOT NULL,
+ "EVENT" INT NOT NULL,
+ "EVENT_STATUS" INT NOT NULL,
+ "PROCESS" VARCHAR(64) NOT NULL,
+ "PROCESS_STATUS" INT NOT NULL,
+ "PROCESS_MESSAGE" VARCHAR(2048) NOT NULL,
+ "CREATE_TIME" TIMESTAMP(6) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(6) NOT NULL,
+ "DISPLAY_CONTEXT" VARCHAR(2048) NOT NULL,
+ "IS_AUXILIARY" TINYINT NOT NULL,
+ "OUTER_POSITION2" VARCHAR(1024) NOT NULL
+);
+CREATE TABLE "MP_SCENE_SCENE_ELEMENT_PLUGIN"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "SCENE" VARCHAR(64) NOT NULL,
+ "SCENE_ELEMENT" VARCHAR(64) NOT NULL,
+ "PLUGIN_KEY" VARCHAR(32) NOT NULL,
+ "CREATE_TIME" TIMESTAMP(6) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(6) NOT NULL
+);
+CREATE TABLE "MP_SCENE_SCENE_ELEMENT_PORT"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "SCENE" VARCHAR(64) NOT NULL,
+ "SCENE_ELEMENT" VARCHAR(64) NOT NULL,
+ "PORT_ID" VARCHAR(64) NOT NULL,
+ "NAME" VARCHAR(255) NOT NULL,
+ "TYPE" INT NOT NULL,
+ "USABLE" TINYINT DEFAULT 1
+ NULL,
+ "MAC_ADDR" VARCHAR(32) NOT NULL,
+ "IP" VARCHAR(32) NOT NULL,
+ "NETMASK" VARCHAR(32) NOT NULL,
+ "GATEWAY" VARCHAR(32) NOT NULL,
+ "DHCP" TINYINT NOT NULL,
+ "DNS" VARCHAR(255) NOT NULL,
+ "EGRESS" INT NOT NULL,
+ "INGRESS" INT NOT NULL,
+ "DELAY" INT NOT NULL,
+ "LOSS" INT NOT NULL,
+ "ACCESS_MODES" TEXT NOT NULL,
+ "CREATE_TIME" TIMESTAMP(6) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(6) NOT NULL,
+ "ORDER" INT DEFAULT 0
+ NOT NULL,
+ "IS_AUXILIARY" TINYINT NOT NULL,
+ "PORT_CONNECT_NET_CIDR" VARCHAR(20) NULL
+);
+CREATE TABLE "MP_SCENE_SCENE_ELEMENT_PORT_CONNECTION"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "SCENE" VARCHAR(64) NOT NULL,
+ "SOURCE_ELEMENT" VARCHAR(64) NOT NULL,
+ "TARGET_ELEMENT" VARCHAR(64) NOT NULL,
+ "SOURCE_PORT" VARCHAR(64) NOT NULL,
+ "TARGET_PORT" VARCHAR(64) NOT NULL,
+ "CONNECTION_ID" VARCHAR(64) NOT NULL,
+ "SOURCE_PORT_ID" VARCHAR(64) NOT NULL,
+ "TARGET_PORT_ID" VARCHAR(64) NOT NULL,
+ "NAME" VARCHAR(255) NOT NULL,
+ "UNIDIRECTIONAL" TINYINT NOT NULL,
+ "CREATE_TIME" TIMESTAMP(6) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(6) NOT NULL,
+ "DISPLAY_CONTEXT" VARCHAR(2048) NOT NULL,
+ "TYPE" VARCHAR(64) NULL,
+ "VERTICES" TEXT NULL,
+ "INFO" TEXT NULL
+);
+CREATE TABLE "MP_SCENE_SCENE_ELEMENT_SNAPSHOT"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "SCENE_ELEMENT" VARCHAR(64) NOT NULL,
+ "NAME" VARCHAR(255) NOT NULL,
+ "DESCRIPTION" VARCHAR(2048) NOT NULL,
+ "ADDRESS" VARCHAR(512) NOT NULL,
+ "CREATE_TIME" TIMESTAMP(6) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(6) NOT NULL,
+ "SCENE" VARCHAR(64) NOT NULL,
+ "SOURCE_NAME" VARCHAR(255) NOT NULL
+);
+CREATE TABLE "MP_SCENE_SCENE_NODE_CONNECTION"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "SCENE" VARCHAR(64) NOT NULL,
+ "SOURCE_NODE_ID" VARCHAR(64) NOT NULL,
+ "TARGET_NODE_ID" VARCHAR(64) NOT NULL,
+ "SOURCE_NODE" VARCHAR(64) NOT NULL,
+ "TARGET_NODE" VARCHAR(64) NOT NULL,
+ "CONNECTION_ID" VARCHAR(64) NOT NULL,
+ "NAME" VARCHAR(255) NOT NULL,
+ "CREATE_TIME" TIMESTAMP(6) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(6) NOT NULL,
+ "DISPLAY_CONTEXT" VARCHAR(2048) NOT NULL,
+ "TYPE" VARCHAR(64) NULL,
+ "VERTICES" TEXT NULL
+);
+CREATE TABLE "MP_SCENE_SCENE_PIECE"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "SCENE" VARCHAR(64) NOT NULL,
+ "NODE_ID" VARCHAR(64) NOT NULL,
+ "AREA" VARCHAR(64) NOT NULL,
+ "ICON2" VARCHAR(2048) NOT NULL,
+ "POSITION2" VARCHAR(128) NOT NULL,
+ "ICON3" VARCHAR(2048) NOT NULL,
+ "POSITION3" VARCHAR(128) NOT NULL,
+ "NAME" VARCHAR(64) NOT NULL,
+ "DESCRIPTION" VARCHAR(1024) NOT NULL,
+ "TYPE" VARCHAR(64) NOT NULL,
+ "DISPLAY_CONTEXT" VARCHAR(2048) NOT NULL,
+ "CREATE_TIME" TIMESTAMP(6) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(6) NOT NULL,
+ "OUTER_POSITION2" VARCHAR(1024) NOT NULL
+);
+CREATE TABLE "MP_SCENEPLUGINCLOUD_SCENE"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "SCENE" VARCHAR(64) NOT NULL,
+ "CREATE_TIME" TIMESTAMP(6) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(6) NOT NULL,
+ "ENABLE_RECORDING" TINYINT NOT NULL,
+ "ENABLE_RATE" TINYINT NOT NULL,
+ "DNS_NAMESERVERS" TEXT NULL
+);
+CREATE TABLE "MP_SCENEPLUGINCLOUD_SCENE_CONFIG"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "SCENE" VARCHAR(64) NOT NULL,
+ "CREATE_TIME" TIMESTAMP(6) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(6) NOT NULL,
+ "ENABLE_RECORDING" TINYINT NOT NULL,
+ "ENABLE_RATE" TINYINT NOT NULL,
+ "DNS_NAMESERVERS" TEXT NULL
+);
+CREATE TABLE "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "SCENE" VARCHAR(64) NOT NULL,
+ "SCENE_ELEMENT" VARCHAR(64) NOT NULL,
+ "EXTERNAL" TINYINT NOT NULL,
+ "VIRTUAL_TYPE" INT NOT NULL,
+ "TRANSPARENT" TINYINT NOT NULL,
+ "RESOURCE_ID" VARCHAR(64) NOT NULL,
+ "ELECTRIC_PORT_NUMBER" INT NOT NULL,
+ "ELECTRIC_PORT_TYPE" VARCHAR(8) NOT NULL,
+ "OPTICAL_PORT_NUMBER" INT NOT NULL,
+ "OPTICAL_PORT_TYPE" VARCHAR(8) NOT NULL,
+ "CIDR" VARCHAR(32) NOT NULL,
+ "GATEWAY" VARCHAR(32) NOT NULL,
+ "GATEWAY_OFF" TINYINT NOT NULL,
+ "DNS_NAMESERVERS" VARCHAR(255) NOT NULL,
+ "DHCP" TINYINT NOT NULL,
+ "ALLOCATION_POOLS" VARCHAR(1024) NOT NULL,
+ "VLAN" TINYINT NOT NULL,
+ "VLAN_ID" INT NOT NULL,
+ "STATIC_ROUTES" TEXT NOT NULL,
+ "FIREWALL_RULES" TEXT NOT NULL,
+ "IMAGE" VARCHAR(255) NOT NULL,
+ "INITIAL_TOOLS" VARCHAR(2048) NOT NULL,
+ "ROLE" INT NOT NULL,
+ "IMAGE_TYPE" VARCHAR(64) NOT NULL,
+ "CATEGORY" INT NOT NULL,
+ "INIT_SUPPORT" TINYINT NOT NULL,
+ "QUICK_CREATE_SUPPORT" TINYINT NOT NULL,
+ "QUICK_CREATE_PARAMS" CLOB NOT NULL,
+ "AUXILIARY_NETWORK_ON" TINYINT NOT NULL,
+ "AUXILIARY_NETWORK_ID" VARCHAR(64) NOT NULL,
+ "AUXILIARY_NETWORK_CIDR" VARCHAR(32) NOT NULL,
+ "AUXILIARY_NETWORK_GATEWAY" VARCHAR(32) NOT NULL,
+ "AUXILIARY_NETWORK_DNS_NAMESERVERS" VARCHAR(255) NOT NULL,
+ "AUXILIARY_NETWORK_DHCP" TINYINT NOT NULL,
+ "AUXILIARY_NETWORK_ALLOCATION_POOLS" VARCHAR(1024) NOT NULL,
+ "AUXILIARY_NETWORK_VLAN" TINYINT NOT NULL,
+ "AUXILIARY_NETWORK_VLAN_ID" INT NOT NULL,
+ "ENABLE_MGMT" TINYINT NOT NULL,
+ "MGMT_PORT_RESOURCE_ID" VARCHAR(64) NOT NULL,
+ "MGMT_IP" VARCHAR(32) NOT NULL,
+ "MGMT_MAC_ADDR" VARCHAR(32) NOT NULL,
+ "CREATE_TIME" TIMESTAMP(6) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(6) NOT NULL,
+ "WAN_PORT_NUMBER" INT NOT NULL,
+ "WAN_PORT_TYPE" VARCHAR(8) NOT NULL,
+ "LAN_PORT_NUMBER" INT NOT NULL,
+ "LAN_PORT_TYPE" VARCHAR(8) NOT NULL,
+ "HOST" VARCHAR(64) DEFAULT ''
+ NOT NULL,
+ "CATEGORY2" INT NOT NULL,
+ "CATEGORY3" INT NOT NULL,
+ "AUXILIARY_NETWORK_ROUTER_ON" TINYINT NOT NULL,
+ "AUXILIARY_NETWORK_ROUTER_RESOURCE_ID" VARCHAR(64) NOT NULL,
+ "AUXILIARY_NETWORK_ROUTER_IP" VARCHAR(32) NOT NULL,
+ "FIREWALL_RESOURCE_ID" VARCHAR(64) NOT NULL,
+ "HOST_ROUTES" TEXT NOT NULL,
+ "AUXILIARY_NETWORK_HOST_ROUTES" TEXT NOT NULL,
+ "IS_BUILD_IN" TINYINT NOT NULL,
+ "AUXILIARY_ROUTER_OFF" TINYINT NOT NULL,
+ "OSPF_ROUTER_ID" VARCHAR(16) NOT NULL,
+ "IMAGE_UUID" VARCHAR(64) NOT NULL,
+ "RIP_LOOPBACK" VARCHAR(64) NOT NULL,
+ "NET_MODE" INT NOT NULL,
+ "ISO_ATTACH_FILENAME" VARCHAR(64) NOT NULL,
+ "ISO_TMPDIR_UUID" VARCHAR(64) NOT NULL,
+ "VIRTUAL_USBS" VARCHAR(512) NOT NULL,
+ "ENTITY_USBS" VARCHAR(512) NOT NULL,
+ "DOCKER_PARAMS" TEXT NOT NULL,
+ "PLATFORM" VARCHAR(64) NOT NULL,
+ "SNMP_CONFIG" TEXT NULL,
+ "MIB_DATA" TEXT NULL
+);
+CREATE TABLE "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT_PORT"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "SCENE" VARCHAR(64) NOT NULL,
+ "SCENE_ELEMENT_PORT" VARCHAR(64) NOT NULL,
+ "RESOURCE_ID" VARCHAR(64) NOT NULL,
+ "NAT" TINYINT NOT NULL,
+ "ENTITY_ACCESS_TYPE" VARCHAR(64) NOT NULL,
+ "ENTITY_SWITCH_NAME" VARCHAR(64) NOT NULL,
+ "ENTITY_SWITCH_PORT" VARCHAR(64) NOT NULL,
+ "GATEWAY_PORT_TYPE" INT NOT NULL,
+ "GATEWAY_PORT_IPS" VARCHAR(64) NOT NULL,
+ "AUXILIARY_NETWORK_ID" VARCHAR(64) NOT NULL,
+ "QOS_ID" VARCHAR(64) NOT NULL,
+ "ACCESS_MODES" TEXT NOT NULL,
+ "FLOATING_IP" VARCHAR(32) NOT NULL,
+ "FLOATING_IP_ID" VARCHAR(64) NOT NULL,
+ "CREATE_TIME" TIMESTAMP(6) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(6) NOT NULL,
+ "FIREWALL_RULES" TEXT NOT NULL,
+ "FIREWALL_RESOURCE_ID" VARCHAR(64) NOT NULL,
+ "OSPF_IP" VARCHAR(64) NOT NULL,
+ "OSPF_AREA" VARCHAR(16) NOT NULL,
+ "BGP_AS" VARCHAR(16) NOT NULL,
+ "BGP_IP" VARCHAR(64) NOT NULL,
+ "BGP_PEER" VARCHAR(64) NOT NULL,
+ "BGP_PEER_AS" VARCHAR(16) NOT NULL,
+ "ENTITY_PORT" VARCHAR(128) NOT NULL,
+ "CONNECT_MODE" VARCHAR(32) NOT NULL,
+ "RIP_IP" VARCHAR(32) NOT NULL,
+ "RIP_PEAR" VARCHAR(32) NOT NULL
+);
+CREATE TABLE "MP_SCENEPLUGINCLOUD_SCENE_CONNECTION"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "SCENE" VARCHAR(64) NOT NULL,
+ "SCENE_ELEMENT" VARCHAR(64) NOT NULL,
+ "SCENE_ELEMENT_PORT" VARCHAR(64) NOT NULL,
+ "ACCESS_MODE_ID" VARCHAR(32) NOT NULL,
+ "PROTOCOL" VARCHAR(64) NOT NULL,
+ "PORT" INT NOT NULL,
+ "USERNAME" VARCHAR(255) NOT NULL,
+ "PASSWORD" VARCHAR(255) NOT NULL,
+ "TOKEN" VARCHAR(2048) NOT NULL,
+ "ACCESS_IP" VARCHAR(32) NOT NULL,
+ "ACCESS_PORT" INT NOT NULL,
+ "ACCESS_USER" VARCHAR(255) NOT NULL,
+ "ACCESS_PASS" VARCHAR(255) NOT NULL,
+ "ACCESS_TOKEN" VARCHAR(2048) NOT NULL,
+ "ACCESS_TOKEN_EXPIRE_TIME" TIMESTAMP(6) NOT NULL,
+ "CONNECTION_ID" VARCHAR(64) NOT NULL,
+ "CONNECTION_URL" VARCHAR(2048) NOT NULL,
+ "CREATE_TIME" TIMESTAMP(6) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(6) NOT NULL,
+ "CONNECTION_ENABLE_RECORDING" TINYINT NOT NULL,
+ "CONNECTION_RECORDING_NAME" VARCHAR(255) NOT NULL,
+ "DISABLE" TINYINT NOT NULL
+);
+CREATE TABLE "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "SCENE" VARCHAR(64) NOT NULL,
+ "SCENE_ELEMENT" VARCHAR(64) NOT NULL,
+ "EXTERNAL" TINYINT NOT NULL,
+ "VIRTUAL_TYPE" INT NOT NULL,
+ "TRANSPARENT" TINYINT NOT NULL,
+ "RESOURCE_ID" VARCHAR(64) NOT NULL,
+ "ELECTRIC_PORT_NUMBER" INT NOT NULL,
+ "ELECTRIC_PORT_TYPE" VARCHAR(8) NOT NULL,
+ "OPTICAL_PORT_NUMBER" INT NOT NULL,
+ "OPTICAL_PORT_TYPE" VARCHAR(8) NOT NULL,
+ "CIDR" VARCHAR(32) NOT NULL,
+ "GATEWAY" VARCHAR(32) NOT NULL,
+ "GATEWAY_OFF" TINYINT NOT NULL,
+ "DNS_NAMESERVERS" VARCHAR(255) NOT NULL,
+ "DHCP" TINYINT NOT NULL,
+ "ALLOCATION_POOLS" VARCHAR(1024) NOT NULL,
+ "VLAN" TINYINT NOT NULL,
+ "VLAN_ID" INT NOT NULL,
+ "STATIC_ROUTES" TEXT NOT NULL,
+ "FIREWALL_RULES" TEXT NOT NULL,
+ "IMAGE" VARCHAR(255) NOT NULL,
+ "INITIAL_TOOLS" VARCHAR(2048) NOT NULL,
+ "ROLE" INT NOT NULL,
+ "IMAGE_TYPE" VARCHAR(64) NOT NULL,
+ "CATEGORY" INT NOT NULL,
+ "INIT_SUPPORT" TINYINT NOT NULL,
+ "QUICK_CREATE_SUPPORT" TINYINT NOT NULL,
+ "QUICK_CREATE_PARAMS" CLOB NOT NULL,
+ "AUXILIARY_NETWORK_ON" TINYINT NOT NULL,
+ "AUXILIARY_NETWORK_ID" VARCHAR(64) NOT NULL,
+ "AUXILIARY_NETWORK_CIDR" VARCHAR(32) NOT NULL,
+ "AUXILIARY_NETWORK_GATEWAY" VARCHAR(32) NOT NULL,
+ "AUXILIARY_NETWORK_DNS_NAMESERVERS" VARCHAR(255) NOT NULL,
+ "AUXILIARY_NETWORK_DHCP" TINYINT NOT NULL,
+ "AUXILIARY_NETWORK_ALLOCATION_POOLS" VARCHAR(1024) NOT NULL,
+ "AUXILIARY_NETWORK_VLAN" TINYINT NOT NULL,
+ "AUXILIARY_NETWORK_VLAN_ID" INT NOT NULL,
+ "ENABLE_MGMT" TINYINT NOT NULL,
+ "MGMT_PORT_RESOURCE_ID" VARCHAR(64) NOT NULL,
+ "MGMT_IP" VARCHAR(32) NOT NULL,
+ "MGMT_MAC_ADDR" VARCHAR(32) NOT NULL,
+ "CREATE_TIME" TIMESTAMP(6) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(6) NOT NULL,
+ "WAN_PORT_NUMBER" INT NOT NULL,
+ "WAN_PORT_TYPE" VARCHAR(8) NOT NULL,
+ "LAN_PORT_NUMBER" INT NOT NULL,
+ "LAN_PORT_TYPE" VARCHAR(8) NOT NULL,
+ "HOST" VARCHAR(64) DEFAULT ''
+ NOT NULL,
+ "CATEGORY2" INT NOT NULL,
+ "CATEGORY3" INT NOT NULL,
+ "AUXILIARY_NETWORK_ROUTER_ON" TINYINT NOT NULL,
+ "AUXILIARY_NETWORK_ROUTER_RESOURCE_ID" VARCHAR(64) NOT NULL,
+ "AUXILIARY_NETWORK_ROUTER_IP" VARCHAR(32) NOT NULL,
+ "FIREWALL_RESOURCE_ID" VARCHAR(64) NOT NULL,
+ "HOST_ROUTES" TEXT NOT NULL,
+ "AUXILIARY_NETWORK_HOST_ROUTES" TEXT NOT NULL,
+ "IS_BUILD_IN" TINYINT NOT NULL,
+ "AUXILIARY_ROUTER_OFF" TINYINT NOT NULL,
+ "OSPF_ROUTER_ID" VARCHAR(64) NOT NULL,
+ "IMAGE_UUID" VARCHAR(64) NOT NULL,
+ "RIP_LOOPBACK" VARCHAR(64) NOT NULL,
+ "NET_MODE" INT NOT NULL,
+ "ISO_ATTACH_FILENAME" VARCHAR(64) NOT NULL,
+ "ISO_TMPDIR_UUID" VARCHAR(64) NOT NULL,
+ "VIRTUAL_USBS" VARCHAR(512) NOT NULL,
+ "ENTITY_USBS" VARCHAR(512) NOT NULL,
+ "DOCKER_PARAMS" TEXT NOT NULL,
+ "PLATFORM" VARCHAR(64) NOT NULL,
+ "SNMP_CONFIG" TEXT NULL,
+ "MIB_DATA" TEXT NULL,
+ "FWDNS_IPS" TEXT NULL
+);
+CREATE TABLE "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_NETWORK"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "SCENE" VARCHAR(64) NOT NULL,
+ "SCENE_ELEMENT" VARCHAR(64) NOT NULL,
+ "CIDR" VARCHAR(32) NOT NULL,
+ "GATEWAY" VARCHAR(32) NOT NULL,
+ "GATEWAY_OFF" TINYINT NOT NULL,
+ "DNS_NAMESERVERS" VARCHAR(255) NOT NULL,
+ "DHCP" TINYINT NOT NULL,
+ "DHCP_IP" VARCHAR(32) NOT NULL,
+ "ALLOCATION_POOLS" VARCHAR(1024) NOT NULL,
+ "VLAN" TINYINT NOT NULL,
+ "VLAN_ID" INT NOT NULL,
+ "HOST_ROUTES" TEXT NOT NULL,
+ "RESOURCE_ID" VARCHAR(64) NOT NULL,
+ "EXTERNAL" TINYINT NOT NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL,
+ "AUXILIARY_NETWORK_ROUTER_ON" TINYINT NOT NULL,
+ "AUXILIARY_NETWORK_ROUTER_RESOURCE_ID" VARCHAR(64) NOT NULL,
+ "AUXILIARY_NETWORK_ROUTER_IP" VARCHAR(32) NOT NULL,
+ "NET_MODE" INT NOT NULL
+);
+CREATE TABLE "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_PORT"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "SCENE" VARCHAR(64) NOT NULL,
+ "SCENE_ELEMENT_PORT" VARCHAR(64) NOT NULL,
+ "RESOURCE_ID" VARCHAR(64) NOT NULL,
+ "NAT" TINYINT NOT NULL,
+ "ENTITY_ACCESS_TYPE" VARCHAR(64) NOT NULL,
+ "ENTITY_SWITCH_NAME" VARCHAR(64) NOT NULL,
+ "ENTITY_SWITCH_PORT" VARCHAR(64) NOT NULL,
+ "GATEWAY_PORT_TYPE" INT NOT NULL,
+ "GATEWAY_PORT_IPS" VARCHAR(64) NOT NULL,
+ "AUXILIARY_NETWORK_ID" VARCHAR(64) NOT NULL,
+ "QOS_ID" VARCHAR(64) NOT NULL,
+ "ACCESS_MODES" TEXT NOT NULL,
+ "DISTRIBUTED_PORT_MAPPING_IP" VARCHAR(32) NOT NULL,
+ "FLOATING_IP" VARCHAR(32) NOT NULL,
+ "FLOATING_IP_ID" VARCHAR(64) NOT NULL,
+ "CREATE_TIME" TIMESTAMP(6) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(6) NOT NULL,
+ "FIREWALL_RULES" TEXT NOT NULL,
+ "FIREWALL_RESOURCE_ID" VARCHAR(64) NOT NULL,
+ "LOGIC_NETWORK_ID" VARCHAR(64) NOT NULL,
+ "OSPF_IP" VARCHAR(64) NOT NULL,
+ "OSPF_AREA" VARCHAR(16) NOT NULL,
+ "BGP_AS" VARCHAR(16) NOT NULL,
+ "BGP_IP" VARCHAR(64) NOT NULL,
+ "BGP_PEER" VARCHAR(64) NOT NULL,
+ "BGP_PEER_AS" VARCHAR(16) NOT NULL,
+ "ENTITY_PORT" VARCHAR(128) NOT NULL,
+ "CONNECT_MODE" VARCHAR(32) NOT NULL,
+ "RIP_IP" VARCHAR(32) NOT NULL,
+ "RIP_PEAR" VARCHAR(32) NOT NULL
+);
+CREATE TABLE "MP_SCENEPLUGINCOLLECTION_SCENE"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "SCENE" VARCHAR(64) NOT NULL,
+ "ENABLE_FLOW_COLLECT" TINYINT NOT NULL,
+ "FLOW_COLLECTOR" VARCHAR(64) NOT NULL,
+ "CREATE_TIME" TIMESTAMP(6) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(6) NOT NULL,
+ "PROBE_COLLECTOR" VARCHAR(64) NOT NULL,
+ "ENABLE_PROBE_COLLECT" TINYINT NOT NULL,
+ "PROBE_ROUTER" VARCHAR(64) NOT NULL,
+ "FLOW_FILE" VARCHAR(256) DEFAULT ''
+ NOT NULL,
+ "ENABLE_FLOW_MIRROR" TINYINT NOT NULL
+);
+CREATE TABLE "MP_SCENEPLUGINCOLLECTION_SCENE_CONFIG"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "SCENE" VARCHAR(64) NOT NULL,
+ "ENABLE_FLOW_COLLECT" TINYINT NOT NULL,
+ "CREATE_TIME" TIMESTAMP(6) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(6) NOT NULL,
+ "ENABLE_PROBE_COLLECT" TINYINT NOT NULL,
+ "ENABLE_FLOW_MIRROR" TINYINT NOT NULL
+);
+CREATE TABLE "MP_SCENEPLUGINCOLLECTION_SCENE_CONFIG_ELEMENT"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "SCENE" VARCHAR(64) NOT NULL,
+ "SCENE_ELEMENT" VARCHAR(64) NOT NULL,
+ "PROBES" CLOB NOT NULL,
+ "CREATE_TIME" TIMESTAMP(6) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(6) NOT NULL,
+ "ENABLE_PROBE_COLLECT" TINYINT NOT NULL,
+ "EDITED" TINYINT DEFAULT 0
+ NOT NULL
+);
+CREATE TABLE "MP_SCENEPLUGINCOLLECTION_SCENE_CONFIG_ELEMENT_PORT"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "SCENE" VARCHAR(64) NOT NULL,
+ "SCENE_ELEMENT_PORT" VARCHAR(64) NOT NULL,
+ "ENABLE_FLOW_COLLECT" TINYINT NOT NULL,
+ "CREATE_TIME" TIMESTAMP(6) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(6) NOT NULL,
+ "ENABLE_FLOW_MIRROR" TINYINT NOT NULL
+);
+CREATE TABLE "MP_SCENEPLUGINCOLLECTION_SCENE_DATA"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "SCENE" VARCHAR(64) NOT NULL,
+ "SCENE_ELEMENT" VARCHAR(64) NOT NULL,
+ "TYPE" INT NOT NULL,
+ "DATA" TEXT NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(6) NOT NULL,
+ "CREATE_TIME" TIMESTAMP(6) NOT NULL
+);
+CREATE TABLE "MP_SCENEPLUGINCOLLECTION_SCENE_ELEMENT"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "SCENE" VARCHAR(64) NOT NULL,
+ "SCENE_ELEMENT" VARCHAR(64) NOT NULL,
+ "PROBES" CLOB NOT NULL,
+ "CREATE_TIME" TIMESTAMP(6) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(6) NOT NULL,
+ "ENABLE_PROBE_COLLECT" TINYINT NOT NULL
+);
+CREATE TABLE "MP_SCENEPLUGINCOLLECTION_SCENE_ELEMENT_PORT"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "SCENE" VARCHAR(64) NOT NULL,
+ "SCENE_ELEMENT_PORT" VARCHAR(64) NOT NULL,
+ "ENABLE_FLOW_COLLECT" TINYINT NOT NULL,
+ "CREATE_TIME" TIMESTAMP(6) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(6) NOT NULL,
+ "ENABLE_FLOW_MIRROR" TINYINT NOT NULL
+);
+CREATE TABLE "MP_SCENEPLUGINCOLLECTION_SCENE_PROBE_ROUTER_PORT"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "SCENE" VARCHAR(64) NOT NULL,
+ "SCENE_ELEMENT" VARCHAR(64) NOT NULL,
+ "NETWORK_ID" VARCHAR(64) NOT NULL,
+ "IP" VARCHAR(32) NOT NULL,
+ "CREATE_TIME" TIMESTAMP(6) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(6) NOT NULL
+);
+CREATE TABLE "MP_SCENEPLUGINCOLLECTION_WAZUH_RULE"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "FILE" VARCHAR(64) NOT NULL,
+ "RELATIVE_DIRNAME" VARCHAR(64) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "LEVEL" INT NOT NULL,
+ "STATUS" VARCHAR(64) NOT NULL,
+ "DETAILS" VARCHAR(256) NULL,
+ "PCI_DSS" VARCHAR(256) NULL,
+ "GPG13" VARCHAR(256) NULL,
+ "GDPR" VARCHAR(256) NULL,
+ "HIPAA" VARCHAR(256) NULL,
+ "NIST" VARCHAR(256) NULL,
+ "TSC" VARCHAR(256) NULL,
+ "MITRE" VARCHAR(256) NULL,
+ "GROUPS" VARCHAR(256) NOT NULL,
+ "DESCRIPTION" VARCHAR(256) NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL
+);
+CREATE TABLE "MP_SCENEPLUGINCOLLECTION_WAZUH_RULE_TYPE"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "TYPE" VARCHAR(64) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "CODE" VARCHAR(64) NOT NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL
+);
+CREATE TABLE "MP_SCENEPLUGINCOLLECTION_WAZUH_RULE_TYPE_RELATION"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NULL,
+ "RULE_ID" VARCHAR(64) NOT NULL,
+ "TYPE_ID" VARCHAR(64) NOT NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL
+);
+CREATE TABLE "MP_SCENEPLUGINFLOW_SCENE"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "SCENE" VARCHAR(64) NOT NULL,
+ "EXECUTOR" VARCHAR(64) NOT NULL,
+ "CREATE_TIME" TIMESTAMP(6) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(6) NOT NULL
+);
+CREATE TABLE "MP_SCENEPLUGINFLOW_SCENE_CONFIG"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "SCENE" VARCHAR(64) NOT NULL,
+ "CREATE_TIME" TIMESTAMP(6) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(6) NOT NULL
+);
+CREATE TABLE "MP_SCENEPLUGINFLOW_SCENE_CONFIG_ELEMENT"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "SCENE" VARCHAR(64) NOT NULL,
+ "SCENE_ELEMENT" VARCHAR(64) NOT NULL,
+ "FLOWS" CLOB NOT NULL,
+ "CREATE_TIME" TIMESTAMP(6) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(6) NOT NULL
+);
+CREATE TABLE "MP_SCENEPLUGINFLOW_SCENE_CONFIG_ELEMENT_PORT"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "SCENE" VARCHAR(64) NOT NULL,
+ "SCENE_ELEMENT_PORT" VARCHAR(64) NOT NULL,
+ "CREATE_TIME" TIMESTAMP(6) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(6) NOT NULL
+);
+CREATE TABLE "MP_SCENEPLUGINFLOW_SCENE_ELEMENT"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "SCENE" VARCHAR(64) NOT NULL,
+ "SCENE_ELEMENT" VARCHAR(64) NOT NULL,
+ "FLOWS" CLOB NOT NULL,
+ "CREATE_TIME" TIMESTAMP(6) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(6) NOT NULL
+);
+CREATE TABLE "MP_SCENEPLUGINFLOW_SCENE_ELEMENT_PORT"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "SCENE" VARCHAR(64) NOT NULL,
+ "SCENE_ELEMENT_PORT" VARCHAR(64) NOT NULL,
+ "CREATE_TIME" TIMESTAMP(6) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(6) NOT NULL
+);
+CREATE TABLE "MP_SITUATION_COLLECTION_TEMPLATE"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "NAME" VARCHAR(200) NOT NULL,
+ "CREATOR" VARCHAR(100) NULL,
+ "DESCRIPTION" VARCHAR(600) NULL,
+ "OS_TYPE" INT NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL
+);
+CREATE TABLE "MP_SITUATION_COLLECTION_TEMPLATE_PROBE"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "TEMPLATE_ID" VARCHAR(64) NOT NULL,
+ "PROBE_ID" VARCHAR(64) NOT NULL,
+ "NAME" VARCHAR(32) NOT NULL,
+ "DESCRIPTION" VARCHAR(400) NULL,
+ "PROBE_CATEGORY" INT DEFAULT 0
+ NOT NULL,
+ "TYPE" INT DEFAULT 0
+ NOT NULL,
+ "OUTPUT_FORMAT" VARCHAR(10) DEFAULT 'none'
+ NOT NULL,
+ "ENGINE" VARCHAR(40) NULL,
+ "OS_TYPE" VARCHAR(20) NULL,
+ "CREATOR" VARCHAR(100) NULL,
+ "DISABLED" INT DEFAULT 0
+ NOT NULL,
+ "SCRIPT_TYPE" INT NOT NULL,
+ "SCRIPT_URL" VARCHAR(400) NULL,
+ "INTERVAL_SEC" INT DEFAULT 180
+ NOT NULL,
+ "CONFIG" VARCHAR(4000) NULL,
+ "PARAMETER" VARCHAR(2000) NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL
+);
+CREATE TABLE "MP_SITUATION_FLOW_CLASSIFICATION"
+(
+ "PK" BIGINT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(32) NOT NULL,
+ "NAME" VARCHAR(32) NOT NULL,
+ "CATEGORY_EN" VARCHAR(255) NOT NULL,
+ "CATEGORY_ZH" VARCHAR(255) NOT NULL,
+ "SEVERITY" TINYINT NOT NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NULL
+);
+CREATE TABLE "MP_SITUATION_FLOW_PORT_PROTOCOL"
+(
+ "PK" BIGINT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(32) NOT NULL,
+ "PORT" INT NOT NULL,
+ "PROTOCOL" VARCHAR(32) NOT NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL
+);
+CREATE TABLE "MP_SITUATION_PROBE"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "NAME" VARCHAR(200) NOT NULL,
+ "DESCRIPTION" VARCHAR(600) NULL,
+ "PROBE_CATEGORY" INT DEFAULT 0
+ NOT NULL,
+ "TYPE" INT DEFAULT 0
+ NOT NULL,
+ "CREATOR" VARCHAR(100) NULL,
+ "INTERVAL_SEC" INT DEFAULT 180
+ NOT NULL,
+ "OUTPUT_FORMAT" VARCHAR(10) DEFAULT 'none'
+ NOT NULL,
+ "ENGINE" VARCHAR(40) NULL,
+ "IS_DELETED" INT DEFAULT 0
+ NULL,
+ "OS_TYPE" VARCHAR(20) NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL
+);
+CREATE TABLE "MP_SITUATION_PROBE_ABILITY"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "PROBE_ID" VARCHAR(64) NOT NULL,
+ "NAME" VARCHAR(200) NOT NULL,
+ "ENGINE" VARCHAR(40) NULL,
+ "OS_TYPE" VARCHAR(20) NULL,
+ "DESCRIPTION" VARCHAR(400) NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL
+);
+ALTER TABLE "MP_MENU_TEMPLATE_INFO" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_MENU_TEMPLATE_ROLE" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SCENE_SCENE" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SCENE_SCENE_AREA" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SCENE_SCENE_CONFIG" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SCENE_SCENE_CONFIG_AREA" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SCENE_SCENE_CONFIG_ELEMENT" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SCENE_SCENE_CONFIG_ELEMENT_PLUGIN" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SCENE_SCENE_CONFIG_ELEMENT_PORT" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SCENE_SCENE_CONFIG_ELEMENT_PORT_CONNECTION" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SCENE_SCENE_CONFIG_NODE_CONNECTION" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SCENE_SCENE_CONFIG_PIECE" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SCENE_SCENE_ELEMENT" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SCENE_SCENE_ELEMENT_PLUGIN" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SCENE_SCENE_ELEMENT_PORT" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SCENE_SCENE_ELEMENT_PORT_CONNECTION" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SCENE_SCENE_ELEMENT_SNAPSHOT" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SCENE_SCENE_NODE_CONNECTION" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SCENE_SCENE_PIECE" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SCENEPLUGINCLOUD_SCENE" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SCENEPLUGINCLOUD_SCENE_CONFIG" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT_PORT" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SCENEPLUGINCLOUD_SCENE_CONNECTION" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_NETWORK" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_PORT" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SCENEPLUGINCOLLECTION_SCENE" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SCENEPLUGINCOLLECTION_SCENE_CONFIG" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SCENEPLUGINCOLLECTION_SCENE_CONFIG_ELEMENT" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SCENEPLUGINCOLLECTION_SCENE_CONFIG_ELEMENT_PORT" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SCENEPLUGINCOLLECTION_SCENE_DATA" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SCENEPLUGINCOLLECTION_SCENE_ELEMENT" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SCENEPLUGINCOLLECTION_SCENE_ELEMENT_PORT" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SCENEPLUGINCOLLECTION_SCENE_PROBE_ROUTER_PORT" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SCENEPLUGINCOLLECTION_WAZUH_RULE" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SCENEPLUGINCOLLECTION_WAZUH_RULE_TYPE" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SCENEPLUGINCOLLECTION_WAZUH_RULE_TYPE_RELATION" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SCENEPLUGINFLOW_SCENE" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SCENEPLUGINFLOW_SCENE_CONFIG" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SCENEPLUGINFLOW_SCENE_CONFIG_ELEMENT" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SCENEPLUGINFLOW_SCENE_CONFIG_ELEMENT_PORT" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SCENEPLUGINFLOW_SCENE_ELEMENT" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SCENEPLUGINFLOW_SCENE_ELEMENT_PORT" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SITUATION_COLLECTION_TEMPLATE" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SITUATION_COLLECTION_TEMPLATE_PROBE" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SITUATION_FLOW_CLASSIFICATION" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SITUATION_FLOW_PORT_PROTOCOL" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SITUATION_PROBE" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SITUATION_PROBE_ABILITY" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+CREATE INDEX "SCENE"
+ON "MP_SCENEPLUGINCOLLECTION_SCENE_DATA"("SCENE","SCENE_ELEMENT");
+ALTER INDEX "SCENE" VISIBLE;
+
+CREATE INDEX "ORG"
+ON "MP_AUTH_TENANT_USER"("ORG","USER");
+ALTER INDEX "ORG" VISIBLE;
+
+CREATE INDEX "USER"
+ON "MP_AUTH_TENANT_USER"("USER","ORG");
+ALTER INDEX "USER" VISIBLE;
+
+CREATE INDEX "URL"
+ON "MP_AUTH_URL_AC"("URL");
+ALTER INDEX "URL" VISIBLE;
+
+CREATE INDEX "TARGET"
+ON "MP_AUTH_URL_AC_TARGET"("TARGET");
+ALTER INDEX "TARGET" VISIBLE;
+
+CREATE INDEX "URLAC_ID"
+ON "MP_AUTH_URL_AC_TARGET"("GROUP");
+ALTER INDEX "URLAC_ID" VISIBLE;
+
+CREATE INDEX "INDEX1758058876337500"
+ON "MP_AUTH_USER"("IDENTIFIER");
+ALTER INDEX "INDEX1758058876337500" VISIBLE;
+
+CREATE INDEX "UPDATE_TIME"
+ON "MP_AUTH_USER"("UPDATE_TIME");
+ALTER INDEX "UPDATE_TIME" VISIBLE;
+
+CREATE INDEX "END_TIME"
+ON "MP_AUTH_USER_ONLINE_RECORD"("END_TIME","STATUS");
+ALTER INDEX "END_TIME" VISIBLE;
+
+CREATE INDEX "INDEX1758058939479800"
+ON "MP_AUTH_USER_ONLINE_RECORD"("USER");
+ALTER INDEX "INDEX1758058939479800" VISIBLE;
+
+CREATE INDEX "START_TIME"
+ON "MP_AUTH_USER_ONLINE_RECORD"("START_TIME","END_TIME","STATUS");
+ALTER INDEX "START_TIME" VISIBLE;
+
+CREATE INDEX "USER_2"
+ON "MP_AUTH_USER_ONLINE_RECORD"("USER","END_TIME");
+ALTER INDEX "USER_2" VISIBLE;
+
+CREATE INDEX "INDEX1758058962419100"
+ON "MP_AUTH_USER_ROLE"("USER","ROLE");
+ALTER INDEX "INDEX1758058962419100" VISIBLE;
+
+CREATE INDEX "ROLE"
+ON "MP_AUTH_USER_ROLE"("ROLE","USER");
+ALTER INDEX "ROLE" VISIBLE;
+
+CREATE INDEX "USER_ID"
+ON "MP_CSCENE_INSTANCE_USER_COUNT"("USER_ID");
+ALTER INDEX "USER_ID" VISIBLE;
+
+CREATE INDEX "INDEX1758058988230500"
+ON "MP_CSCENE_SNAPSHOT"("CSCENE_ID");
+ALTER INDEX "INDEX1758058988230500" VISIBLE;
+
+CREATE INDEX "INDEX1758058999595100"
+ON "MP_DEVOPS_LOG_OPERATION"("USER_ID","CREATE_TIME");
+ALTER INDEX "INDEX1758058999595100" VISIBLE;
+
+CREATE INDEX "OP_MODULE_ID"
+ON "MP_DEVOPS_LOG_OPERATION"("OP_MODULE_ID","OP_TYPE_ID","USER_NAME","OP_TARGET","CREATE_TIME");
+ALTER INDEX "OP_MODULE_ID" VISIBLE;
+
+CREATE INDEX "INDEX1758059044356400"
+ON "MP_DEVOPS_TARGET"("ROLE");
+ALTER INDEX "INDEX1758059044356400" VISIBLE;
+
+CREATE INDEX "MAIN_CATEGORY"
+ON "MP_DEVOPS_TARGET"("MAIN_CATEGORY");
+ALTER INDEX "MAIN_CATEGORY" VISIBLE;
+
+CREATE INDEX "SUB_CATEGORY"
+ON "MP_DEVOPS_TARGET"("SUB_CATEGORY");
+ALTER INDEX "SUB_CATEGORY" VISIBLE;
+
+CREATE INDEX "CREATE_TIME"
+ON "MP_FLOW_TASK_RECORD"("CREATE_TIME");
+ALTER INDEX "CREATE_TIME" VISIBLE;
+
+CREATE INDEX "INDEX1758059070639700"
+ON "MP_FLOW_TASK_RECORD"("TASK_ID");
+ALTER INDEX "INDEX1758059070639700" VISIBLE;
+
+CREATE INDEX "TASK_ID_AND_CREATE_TIME"
+ON "MP_FLOW_TASK_RECORD"("TASK_ID","CREATE_TIME");
+ALTER INDEX "TASK_ID_AND_CREATE_TIME" VISIBLE;
+
+CREATE INDEX "MENU"
+ON "MP_FRONT_ADMIN_MENU_EXTRA_INFO"("MENU");
+ALTER INDEX "MENU" VISIBLE;
+
+ALTER TABLE "MP_FLOW_COLLECTION" ADD  CONSTRAINT "CONS134221040" CHECK("TYPE_FLAG" >= 0) ENABLE ;
+
+ALTER TABLE "MP_FLOW_PCAP" ADD  CONSTRAINT "CONS134221043" CHECK("PKT_NUM" >= 0) ENABLE ;
+
+ALTER TABLE "MP_FLOW_PCAP" ADD  CONSTRAINT "CONS134221042" CHECK("PCAP_SIZE" >= 0) ENABLE ;
+
+ALTER TABLE "MP_FLOW_PCAP" ADD  CONSTRAINT "CONS134221041" CHECK("DURATION" >= 0) ENABLE ;
+
+ALTER TABLE "MP_FLOW_PROTOCOL" ADD  CONSTRAINT "CONS134221044" CHECK("MARKED" >= 0) ENABLE ;
+
+ALTER TABLE "MP_FLOW_TASK" ADD  CONSTRAINT "CONS134221047" CHECK("INTERVAL_TIME" >= 0) ENABLE ;
+
+ALTER TABLE "MP_FLOW_TASK" ADD  CONSTRAINT "CONS134221046" CHECK("DELAY" >= 0) ENABLE ;
+
+ALTER TABLE "MP_FLOW_TASK" ADD  CONSTRAINT "CONS134221045" CHECK("COUNT" >= 0) ENABLE ;
+
+ALTER TABLE "MP_FLOW_TASK_CONF" ADD  CONSTRAINT "CONS134221050" CHECK("REPLAY" >= 0) ENABLE ;
+
+ALTER TABLE "MP_FLOW_TASK_CONF" ADD  CONSTRAINT "CONS134221049" CHECK("RATE_UNLIMITED" >= 0) ENABLE ;
+
+ALTER TABLE "MP_FLOW_TASK_CONF" ADD  CONSTRAINT "CONS134221048" CHECK("KEEP_RUNNING" >= 0) ENABLE ;
+
+ALTER TABLE "MP_MENU_TEMPLATE_INFO" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_SCENE_SCENE" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_SCENE_SCENE_AREA" ADD UNIQUE("SCENE","NODE_ID") ;
+
+ALTER TABLE "MP_SCENE_SCENE_AREA" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_SCENE_SCENE_CONFIG" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_SCENE_SCENE_CONFIG_AREA" ADD UNIQUE("SCENE","NODE_ID") ;
+
+ALTER TABLE "MP_SCENE_SCENE_CONFIG_AREA" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_SCENE_SCENE_CONFIG_ELEMENT" ADD UNIQUE("SCENE","NODE_ID") ;
+
+ALTER TABLE "MP_SCENE_SCENE_CONFIG_ELEMENT" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_SCENE_SCENE_CONFIG_ELEMENT_PLUGIN" ADD CONSTRAINT "SCENE_ELEMENT" UNIQUE("SCENE_ELEMENT","PLUGIN_KEY") ;
+
+ALTER TABLE "MP_SCENE_SCENE_CONFIG_ELEMENT_PLUGIN" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_SCENE_SCENE_CONFIG_ELEMENT_PORT" ADD UNIQUE("SCENE","PORT_ID") ;
+
+ALTER TABLE "MP_SCENE_SCENE_CONFIG_ELEMENT_PORT" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_SCENE_SCENE_CONFIG_ELEMENT_PORT_CONNECTION" ADD UNIQUE("SCENE","SOURCE_PORT_ID","TARGET_PORT_ID") ;
+
+ALTER TABLE "MP_SCENE_SCENE_CONFIG_ELEMENT_PORT_CONNECTION" ADD CONSTRAINT "SOURCE_PORT" UNIQUE("SOURCE_PORT","TARGET_PORT") ;
+
+ALTER TABLE "MP_SCENE_SCENE_CONFIG_ELEMENT_PORT_CONNECTION" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_SCENE_SCENE_CONFIG_NODE_CONNECTION" ADD UNIQUE("SCENE","SOURCE_NODE_ID","TARGET_NODE_ID") ;
+
+ALTER TABLE "MP_SCENE_SCENE_CONFIG_NODE_CONNECTION" ADD CONSTRAINT "SOURCE_NODE" UNIQUE("SOURCE_NODE","TARGET_NODE") ;
+
+ALTER TABLE "MP_SCENE_SCENE_CONFIG_NODE_CONNECTION" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_SCENE_SCENE_CONFIG_PIECE" ADD UNIQUE("SCENE","NODE_ID") ;
+
+ALTER TABLE "MP_SCENE_SCENE_CONFIG_PIECE" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_SCENE_SCENE_ELEMENT" ADD UNIQUE("SCENE","NODE_ID") ;
+
+ALTER TABLE "MP_SCENE_SCENE_ELEMENT" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_SCENE_SCENE_ELEMENT_PLUGIN" ADD UNIQUE("SCENE_ELEMENT","PLUGIN_KEY") ;
+
+ALTER TABLE "MP_SCENE_SCENE_ELEMENT_PLUGIN" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_SCENE_SCENE_ELEMENT_PORT" ADD UNIQUE("SCENE_ELEMENT","PORT_ID") ;
+
+ALTER TABLE "MP_SCENE_SCENE_ELEMENT_PORT" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_SCENE_SCENE_ELEMENT_PORT_CONNECTION" ADD UNIQUE("SCENE","SOURCE_PORT_ID","TARGET_PORT_ID") ;
+
+ALTER TABLE "MP_SCENE_SCENE_ELEMENT_PORT_CONNECTION" ADD UNIQUE("SOURCE_PORT","TARGET_PORT") ;
+
+ALTER TABLE "MP_SCENE_SCENE_ELEMENT_PORT_CONNECTION" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_SCENE_SCENE_ELEMENT_SNAPSHOT" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_SCENE_SCENE_NODE_CONNECTION" ADD UNIQUE("SCENE","SOURCE_NODE_ID","TARGET_NODE_ID") ;
+
+ALTER TABLE "MP_SCENE_SCENE_NODE_CONNECTION" ADD UNIQUE("SOURCE_NODE","TARGET_NODE") ;
+
+ALTER TABLE "MP_SCENE_SCENE_NODE_CONNECTION" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_SCENE_SCENE_PIECE" ADD UNIQUE("SCENE","NODE_ID") ;
+
+ALTER TABLE "MP_SCENE_SCENE_PIECE" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_SCENEPLUGINCLOUD_SCENE" ADD UNIQUE("SCENE") ;
+
+ALTER TABLE "MP_SCENEPLUGINCLOUD_SCENE" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_SCENEPLUGINCLOUD_SCENE_CONFIG" ADD UNIQUE("SCENE") ;
+
+ALTER TABLE "MP_SCENEPLUGINCLOUD_SCENE_CONFIG" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT" ADD UNIQUE("SCENE","SCENE_ELEMENT") ;
+
+ALTER TABLE "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT_PORT" ADD UNIQUE("SCENE","SCENE_ELEMENT_PORT") ;
+
+ALTER TABLE "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT_PORT" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_SCENEPLUGINCLOUD_SCENE_CONNECTION" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT" ADD UNIQUE("SCENE","SCENE_ELEMENT") ;
+
+ALTER TABLE "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_NETWORK" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_PORT" ADD UNIQUE("SCENE","SCENE_ELEMENT_PORT") ;
+
+ALTER TABLE "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_PORT" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_SCENEPLUGINCOLLECTION_SCENE" ADD UNIQUE("SCENE") ;
+
+ALTER TABLE "MP_SCENEPLUGINCOLLECTION_SCENE" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_SCENEPLUGINCOLLECTION_SCENE_CONFIG" ADD UNIQUE("SCENE") ;
+
+ALTER TABLE "MP_SCENEPLUGINCOLLECTION_SCENE_CONFIG" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_SCENEPLUGINCOLLECTION_SCENE_CONFIG_ELEMENT" ADD UNIQUE("SCENE","SCENE_ELEMENT") ;
+
+ALTER TABLE "MP_SCENEPLUGINCOLLECTION_SCENE_CONFIG_ELEMENT" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_SCENEPLUGINCOLLECTION_SCENE_CONFIG_ELEMENT_PORT" ADD UNIQUE("SCENE","SCENE_ELEMENT_PORT") ;
+
+ALTER TABLE "MP_SCENEPLUGINCOLLECTION_SCENE_CONFIG_ELEMENT_PORT" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_SCENEPLUGINCOLLECTION_SCENE_ELEMENT" ADD UNIQUE("SCENE","SCENE_ELEMENT") ;
+
+ALTER TABLE "MP_SCENEPLUGINCOLLECTION_SCENE_ELEMENT" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_SCENEPLUGINCOLLECTION_SCENE_ELEMENT_PORT" ADD UNIQUE("SCENE","SCENE_ELEMENT_PORT") ;
+
+ALTER TABLE "MP_SCENEPLUGINCOLLECTION_SCENE_ELEMENT_PORT" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_SCENEPLUGINCOLLECTION_SCENE_PROBE_ROUTER_PORT" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_SCENEPLUGINCOLLECTION_WAZUH_RULE" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_SCENEPLUGINCOLLECTION_WAZUH_RULE_TYPE" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_SCENEPLUGINCOLLECTION_WAZUH_RULE_TYPE_RELATION" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_SCENEPLUGINCOLLECTION_WAZUH_RULE_TYPE_RELATION" ADD CONSTRAINT "RULE_ID" UNIQUE("RULE_ID","TYPE_ID") ;
+
+ALTER TABLE "MP_SCENEPLUGINFLOW_SCENE" ADD UNIQUE("SCENE") ;
+
+ALTER TABLE "MP_SCENEPLUGINFLOW_SCENE" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_SCENEPLUGINFLOW_SCENE_CONFIG" ADD UNIQUE("SCENE") ;
+
+ALTER TABLE "MP_SCENEPLUGINFLOW_SCENE_CONFIG" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_SCENEPLUGINFLOW_SCENE_CONFIG_ELEMENT" ADD UNIQUE("SCENE","SCENE_ELEMENT") ;
+
+ALTER TABLE "MP_SCENEPLUGINFLOW_SCENE_CONFIG_ELEMENT" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_SCENEPLUGINFLOW_SCENE_CONFIG_ELEMENT_PORT" ADD UNIQUE("SCENE","SCENE_ELEMENT_PORT") ;
+
+ALTER TABLE "MP_SCENEPLUGINFLOW_SCENE_CONFIG_ELEMENT_PORT" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_SCENEPLUGINFLOW_SCENE_ELEMENT" ADD UNIQUE("SCENE","SCENE_ELEMENT") ;
+
+ALTER TABLE "MP_SCENEPLUGINFLOW_SCENE_ELEMENT" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_SCENEPLUGINFLOW_SCENE_ELEMENT_PORT" ADD UNIQUE("SCENE","SCENE_ELEMENT_PORT") ;
+
+ALTER TABLE "MP_SCENEPLUGINFLOW_SCENE_ELEMENT_PORT" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_SITUATION_COLLECTION_TEMPLATE" ADD UNIQUE("NAME") ;
+
+ALTER TABLE "MP_SITUATION_COLLECTION_TEMPLATE" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_SITUATION_COLLECTION_TEMPLATE_PROBE" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_SITUATION_FLOW_CLASSIFICATION" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_SITUATION_FLOW_PORT_PROTOCOL" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_SITUATION_PROBE" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_SITUATION_PROBE_ABILITY" ADD UNIQUE("ID") ;
+
+COMMENT ON TABLE "MP_MENU_TEMPLATE_INFO" IS '菜单模板表';
+
+COMMENT ON COLUMN "MP_MENU_TEMPLATE_INFO"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_MENU_TEMPLATE_INFO"."EN_NAME" IS '英文名称';
+
+COMMENT ON COLUMN "MP_MENU_TEMPLATE_INFO"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_MENU_TEMPLATE_INFO"."IDENTIFIER" IS '编号';
+
+COMMENT ON COLUMN "MP_MENU_TEMPLATE_INFO"."MENU_ID" IS '菜单ID';
+
+COMMENT ON COLUMN "MP_MENU_TEMPLATE_INFO"."NAME" IS '中文名称';
+
+COMMENT ON COLUMN "MP_MENU_TEMPLATE_INFO"."PARENT" IS '父权限ID';
+
+COMMENT ON COLUMN "MP_MENU_TEMPLATE_INFO"."PATH" IS '路径';
+
+COMMENT ON COLUMN "MP_MENU_TEMPLATE_INFO"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_MENU_TEMPLATE_INFO"."TEMPLATE_ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_MENU_TEMPLATE_INFO"."TENANT" IS '所属租户';
+
+COMMENT ON COLUMN "MP_MENU_TEMPLATE_INFO"."TYPE" IS '资源类型 1:菜单, 2:API, 3:数据';
+
+COMMENT ON COLUMN "MP_MENU_TEMPLATE_INFO"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON COLUMN "MP_MENU_TEMPLATE_INFO"."VISIBLE" IS '是否可见 1:可见，0:不可见（受控于激活选项） 默认为可见';
+
+COMMENT ON TABLE "MP_MENU_TEMPLATE_ROLE" IS '角色关联菜单模板表';
+
+COMMENT ON COLUMN "MP_MENU_TEMPLATE_ROLE"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_MENU_TEMPLATE_ROLE"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_MENU_TEMPLATE_ROLE"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_MENU_TEMPLATE_ROLE"."ROLE_ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_MENU_TEMPLATE_ROLE"."TEMPLATE_ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_MENU_TEMPLATE_ROLE"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_SCENE_SCENE" IS '场景实例信息表';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE"."CREATE_CONSUME_SECONDS" IS '创建消耗时间';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE"."DELETED" IS '是否删除';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE"."DESCRIPTION" IS '描述';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE"."DISPLAY_CONTEXT" IS '显示上下文';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE"."EVENT" IS '当前事件';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE"."EVENT_STATUS" IS '当前事件状态';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE"."FILE" IS '场景文件';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE"."NAME" IS '名称';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE"."PROCESS" IS '当前事件进程';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE"."PROCESS_MESSAGE" IS '当前事件进程描述';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE"."PROCESS_STATUS" IS '当前事件进程状态';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE"."SOURCE" IS '源场景模板';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE"."STAGE" IS '当前阶段';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE"."STAGE_LIST" IS '阶段列表';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE"."STAGE_NAME" IS '当前阶段名称';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE"."STAGE_PERCENTAGE" IS '当前阶段百分比';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_SCENE_SCENE_AREA" IS '场景实例节点坐标表';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_AREA"."AREA" IS '所属区域节点id';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_AREA"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_AREA"."DESCRIPTION" IS '描述';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_AREA"."DISPLAY_CONTEXT" IS '显示上下文';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_AREA"."ICON2" IS '2d图标地址';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_AREA"."ICON3" IS '3d图标地址';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_AREA"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_AREA"."NAME" IS '名称';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_AREA"."NODE_ID" IS '节点id';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_AREA"."OPEN" IS '是否展开';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_AREA"."OUTER_POSITION2" IS '外部2d坐标';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_AREA"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_AREA"."POSITION2" IS '2d坐标';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_AREA"."POSITION3" IS '3d坐标';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_AREA"."SCENE" IS '场景实例id';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_AREA"."TYPE" IS '区域类型 0:普通区域 1:层级区域';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_AREA"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_SCENE_SCENE_CONFIG" IS '场景拓扑信息表';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG"."DELETED" IS '是否删除';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG"."DESCRIPTION" IS '描述';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG"."DISPLAY_CONTEXT" IS '显示上下文';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG"."FILE" IS '场景文件';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG"."NAME" IS '名称';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG"."SOURCE" IS '源实例id';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG"."TYPE" IS '模板类型';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_SCENE_SCENE_CONFIG_AREA" IS '场景拓扑节点坐标表';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_AREA"."AREA" IS '所属区域节点id';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_AREA"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_AREA"."DESCRIPTION" IS '描述';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_AREA"."DISPLAY_CONTEXT" IS '显示上下文';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_AREA"."ICON2" IS '2d图标地址';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_AREA"."ICON3" IS '3d图标地址';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_AREA"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_AREA"."NAME" IS '名称';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_AREA"."NODE_ID" IS '节点id';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_AREA"."OPEN" IS '是否展开';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_AREA"."OUTER_POSITION2" IS '外部2d坐标';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_AREA"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_AREA"."POSITION2" IS '2d坐标';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_AREA"."POSITION3" IS '3d坐标';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_AREA"."SCENE" IS '场景模板id';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_AREA"."TYPE" IS '区域类型 0:普通区域 1:层级区域';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_AREA"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_SCENE_SCENE_CONFIG_ELEMENT" IS '场景拓扑节点信息表';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT"."AREA" IS '所属区域节点id';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT"."CPU" IS 'cpu数量';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT"."DESCRIPTION" IS '描述';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT"."DISK" IS '磁盘大小';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT"."DISPLAY_CONTEXT" IS '显示上下文';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT"."FILE" IS '节点文件';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT"."ICON2" IS '2d图标地址';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT"."ICON3" IS '3d图标地址';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT"."INIT_COMMANDS" IS '初始化命令';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT"."IS_AUXILIARY" IS '是否是辅助节点';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT"."MAX_PORT_NUMBER" IS '最大端口数量';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT"."NAME" IS '名称';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT"."NODE_ID" IS '节点id';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT"."OUTER_POSITION2" IS '外部2d坐标';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT"."POSITION2" IS '2d坐标';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT"."POSITION3" IS '3d坐标';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT"."RAM" IS '内存大小';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT"."SCENE" IS '场景模板id';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT"."SYSTEM_ARCHITECTURE" IS '系统架构';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT"."SYSTEM_LANGUAGE" IS '系统语言';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT"."SYSTEM_TYPE" IS '系统类型';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT"."TYPE" IS '网元类型';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_SCENE_SCENE_CONFIG_ELEMENT_PLUGIN" IS '场景拓扑节点插件信息表';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT_PLUGIN"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT_PLUGIN"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT_PLUGIN"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT_PLUGIN"."PLUGIN_KEY" IS '插件代号';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT_PLUGIN"."SCENE" IS '场景模板id';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT_PLUGIN"."SCENE_ELEMENT" IS '所属网元id';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT_PLUGIN"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_SCENE_SCENE_CONFIG_ELEMENT_PORT" IS '场景拓扑节点端口信息表';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT_PORT"."ACCESS_MODES" IS '接入信息列表';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT_PORT"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT_PORT"."DELAY" IS '延迟';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT_PORT"."DHCP" IS '是否开启dhcp';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT_PORT"."DNS" IS 'dns列表';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT_PORT"."EGRESS" IS '上行带宽';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT_PORT"."GATEWAY" IS '网关';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT_PORT"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT_PORT"."INGRESS" IS '下行带宽';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT_PORT"."IP" IS 'ip地址';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT_PORT"."IS_AUXILIARY" IS '是否是辅助端口';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT_PORT"."LOSS" IS '丢包';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT_PORT"."MAC_ADDR" IS 'mac地址';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT_PORT"."NAME" IS '名称';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT_PORT"."NETMASK" IS '子网掩码';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT_PORT"."ORDER" IS '端口排序';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT_PORT"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT_PORT"."PORT_CONNECT_NET_CIDR" IS '路由端口网络cidr';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT_PORT"."PORT_ID" IS '端口id';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT_PORT"."SCENE" IS '场景模板id';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT_PORT"."SCENE_ELEMENT" IS '所属网元id';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT_PORT"."TYPE" IS '端口类型';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT_PORT"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT_PORT"."USABLE" IS '是否可用';
+
+COMMENT ON TABLE "MP_SCENE_SCENE_CONFIG_ELEMENT_PORT_CONNECTION" IS '场景拓扑节点端口连线信息表';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT_PORT_CONNECTION"."CONNECTION_ID" IS '连接id';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT_PORT_CONNECTION"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT_PORT_CONNECTION"."DISPLAY_CONTEXT" IS '显示上下文';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT_PORT_CONNECTION"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT_PORT_CONNECTION"."INFO" IS '其他信息,前端可自由定义';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT_PORT_CONNECTION"."NAME" IS '名称';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT_PORT_CONNECTION"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT_PORT_CONNECTION"."SCENE" IS '场景模板id';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT_PORT_CONNECTION"."SOURCE_ELEMENT" IS '源端口所属网元id';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT_PORT_CONNECTION"."SOURCE_PORT" IS '源端口id';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT_PORT_CONNECTION"."SOURCE_PORT_ID" IS '源端口id(port_id)';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT_PORT_CONNECTION"."TARGET_ELEMENT" IS '目标端口所属网元id';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT_PORT_CONNECTION"."TARGET_PORT" IS '目标端口id';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT_PORT_CONNECTION"."TARGET_PORT_ID" IS '目标端口id(port_id)';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT_PORT_CONNECTION"."TYPE" IS '连线类型';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT_PORT_CONNECTION"."UNIDIRECTIONAL" IS '是否单向';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT_PORT_CONNECTION"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_ELEMENT_PORT_CONNECTION"."VERTICES" IS '路径点';
+
+COMMENT ON TABLE "MP_SCENE_SCENE_CONFIG_NODE_CONNECTION" IS '场景实例节点连线信息表';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_NODE_CONNECTION"."CONNECTION_ID" IS '连接id';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_NODE_CONNECTION"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_NODE_CONNECTION"."DISPLAY_CONTEXT" IS '显示上下文';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_NODE_CONNECTION"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_NODE_CONNECTION"."NAME" IS '名称';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_NODE_CONNECTION"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_NODE_CONNECTION"."SCENE" IS '场景实例id';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_NODE_CONNECTION"."SOURCE_NODE" IS '源节点id';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_NODE_CONNECTION"."SOURCE_NODE_ID" IS '源节点id(node_id)';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_NODE_CONNECTION"."TARGET_NODE" IS '目标节点id';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_NODE_CONNECTION"."TARGET_NODE_ID" IS '目标节点id(node_id)';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_NODE_CONNECTION"."TYPE" IS '连线类型';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_NODE_CONNECTION"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_NODE_CONNECTION"."VERTICES" IS '路径点';
+
+COMMENT ON TABLE "MP_SCENE_SCENE_CONFIG_PIECE" IS '场景拓扑碎片信息表';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_PIECE"."AREA" IS '所属区域节点id';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_PIECE"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_PIECE"."DESCRIPTION" IS '描述';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_PIECE"."DISPLAY_CONTEXT" IS '显示上下文';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_PIECE"."ICON2" IS '2d图标地址';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_PIECE"."ICON3" IS '3d图标地址';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_PIECE"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_PIECE"."NAME" IS '名称';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_PIECE"."NODE_ID" IS '节点id';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_PIECE"."OUTER_POSITION2" IS '外部2d坐标';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_PIECE"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_PIECE"."POSITION2" IS '2d坐标';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_PIECE"."POSITION3" IS '3d坐标';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_PIECE"."SCENE" IS '场景模板id';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_PIECE"."TYPE" IS '碎片类型';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_CONFIG_PIECE"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_SCENE_SCENE_ELEMENT" IS '场景实例节点信息表';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT"."AREA" IS '所属区域节点id';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT"."CPU" IS 'cpu数量';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT"."DESCRIPTION" IS '描述';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT"."DISK" IS '磁盘大小';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT"."DISPLAY_CONTEXT" IS '显示上下文';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT"."EVENT" IS '当前事件';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT"."EVENT_STATUS" IS '当前事件状态';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT"."FILE" IS '节点文件';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT"."ICON2" IS '2d图标地址';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT"."ICON3" IS '3d图标地址';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT"."INIT_COMMANDS" IS '初始化命令';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT"."IS_AUXILIARY" IS '是否是辅助节点';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT"."MAX_PORT_NUMBER" IS '最大端口数量';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT"."NAME" IS '名称';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT"."NODE_ID" IS '节点id';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT"."OUTER_POSITION2" IS '外部2d坐标';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT"."POSITION2" IS '2d坐标';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT"."POSITION3" IS '3d坐标';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT"."PROCESS" IS '当前事件进程';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT"."PROCESS_MESSAGE" IS '当前事件进程描述';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT"."PROCESS_STATUS" IS '当前事件进程状态';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT"."RAM" IS '内存大小';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT"."SCENE" IS '场景实例id';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT"."SYSTEM_ARCHITECTURE" IS '系统架构';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT"."SYSTEM_LANGUAGE" IS '系统语言';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT"."SYSTEM_TYPE" IS '系统类型';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT"."TYPE" IS '网元类型';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_SCENE_SCENE_ELEMENT_PLUGIN" IS '场景实例节点插件信息表';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_PLUGIN"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_PLUGIN"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_PLUGIN"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_PLUGIN"."PLUGIN_KEY" IS '插件代号';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_PLUGIN"."SCENE" IS '场景实例id';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_PLUGIN"."SCENE_ELEMENT" IS '所属网元id';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_PLUGIN"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_SCENE_SCENE_ELEMENT_PORT" IS '场景实例节点端口信息表';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_PORT"."ACCESS_MODES" IS '接入信息列表';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_PORT"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_PORT"."DELAY" IS '延迟';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_PORT"."DHCP" IS '是否开启dhcp';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_PORT"."DNS" IS 'dns列表';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_PORT"."EGRESS" IS '上行带宽';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_PORT"."GATEWAY" IS '网关';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_PORT"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_PORT"."INGRESS" IS '下行带宽';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_PORT"."IP" IS 'ip地址';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_PORT"."IS_AUXILIARY" IS '是否是辅助端口';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_PORT"."LOSS" IS '丢包';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_PORT"."MAC_ADDR" IS 'mac地址';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_PORT"."NAME" IS '名称';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_PORT"."NETMASK" IS '子网掩码';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_PORT"."ORDER" IS '端口排序';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_PORT"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_PORT"."PORT_CONNECT_NET_CIDR" IS '路由端口网络cidr';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_PORT"."PORT_ID" IS '端口id';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_PORT"."SCENE" IS '场景实例id';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_PORT"."SCENE_ELEMENT" IS '所属网元id';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_PORT"."TYPE" IS '端口类型';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_PORT"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_PORT"."USABLE" IS '是否可用';
+
+COMMENT ON TABLE "MP_SCENE_SCENE_ELEMENT_PORT_CONNECTION" IS '场景实例节点端口连线信息表';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_PORT_CONNECTION"."CONNECTION_ID" IS '连接id';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_PORT_CONNECTION"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_PORT_CONNECTION"."DISPLAY_CONTEXT" IS '显示上下文';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_PORT_CONNECTION"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_PORT_CONNECTION"."INFO" IS '其他信息,前端可自由定义';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_PORT_CONNECTION"."NAME" IS '名称';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_PORT_CONNECTION"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_PORT_CONNECTION"."SCENE" IS '场景实例id';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_PORT_CONNECTION"."SOURCE_ELEMENT" IS '源端口所属网元id';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_PORT_CONNECTION"."SOURCE_PORT" IS '源端口id';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_PORT_CONNECTION"."SOURCE_PORT_ID" IS '源端口id(port_id)';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_PORT_CONNECTION"."TARGET_ELEMENT" IS '目标端口所属网元id';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_PORT_CONNECTION"."TARGET_PORT" IS '目标端口id';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_PORT_CONNECTION"."TARGET_PORT_ID" IS '目标端口id(port_id)';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_PORT_CONNECTION"."TYPE" IS '连线类型';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_PORT_CONNECTION"."UNIDIRECTIONAL" IS '是否单向';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_PORT_CONNECTION"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_PORT_CONNECTION"."VERTICES" IS '路径点';
+
+COMMENT ON TABLE "MP_SCENE_SCENE_ELEMENT_SNAPSHOT" IS '场景实例节点快照信息表';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_SNAPSHOT"."ADDRESS" IS '快照地址';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_SNAPSHOT"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_SNAPSHOT"."DESCRIPTION" IS '描述';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_SNAPSHOT"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_SNAPSHOT"."NAME" IS '名称';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_SNAPSHOT"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_SNAPSHOT"."SCENE" IS '所属场景id';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_SNAPSHOT"."SCENE_ELEMENT" IS '所属网元id';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_SNAPSHOT"."SOURCE_NAME" IS '源快照名称';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_ELEMENT_SNAPSHOT"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_SCENE_SCENE_NODE_CONNECTION" IS '场景实例节点连线信息表';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_NODE_CONNECTION"."CONNECTION_ID" IS '连接id';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_NODE_CONNECTION"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_NODE_CONNECTION"."DISPLAY_CONTEXT" IS '显示上下文';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_NODE_CONNECTION"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_NODE_CONNECTION"."NAME" IS '名称';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_NODE_CONNECTION"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_NODE_CONNECTION"."SCENE" IS '场景实例id';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_NODE_CONNECTION"."SOURCE_NODE" IS '源节点id';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_NODE_CONNECTION"."SOURCE_NODE_ID" IS '源节点id(node_id)';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_NODE_CONNECTION"."TARGET_NODE" IS '目标节点id';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_NODE_CONNECTION"."TARGET_NODE_ID" IS '目标节点id(node_id)';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_NODE_CONNECTION"."TYPE" IS '连线类型';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_NODE_CONNECTION"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_NODE_CONNECTION"."VERTICES" IS '路径点';
+
+COMMENT ON TABLE "MP_SCENE_SCENE_PIECE" IS '场景实例节点碎片信息表';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_PIECE"."AREA" IS '所属区域节点id';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_PIECE"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_PIECE"."DESCRIPTION" IS '描述';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_PIECE"."DISPLAY_CONTEXT" IS '显示上下文';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_PIECE"."ICON2" IS '2d图标地址';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_PIECE"."ICON3" IS '3d图标地址';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_PIECE"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_PIECE"."NAME" IS '名称';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_PIECE"."NODE_ID" IS '节点id';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_PIECE"."OUTER_POSITION2" IS '外部2d坐标';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_PIECE"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_PIECE"."POSITION2" IS '2d坐标';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_PIECE"."POSITION3" IS '3d坐标';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_PIECE"."SCENE" IS '场景实例id';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_PIECE"."TYPE" IS '碎片类型';
+
+COMMENT ON COLUMN "MP_SCENE_SCENE_PIECE"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_SCENEPLUGINCLOUD_SCENE" IS '场景实例云平台插件信息表';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE"."DNS_NAMESERVERS" IS '全局dns设置';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE"."ENABLE_RATE" IS '是否开启环境总速率统计';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE"."ENABLE_RECORDING" IS '是否开启录屏';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE"."SCENE" IS '场景实例id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_SCENEPLUGINCLOUD_SCENE_CONFIG" IS '场景拓扑云平台插件信息表';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG"."DNS_NAMESERVERS" IS '全局dns设置';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG"."ENABLE_RATE" IS '是否开启环境总速率统计';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG"."ENABLE_RECORDING" IS '是否开启录屏';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG"."SCENE" IS '场景模板id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT" IS '场景拓扑云平台插件节点信息表';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."ALLOCATION_POOLS" IS '虚拟交换机地址池';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."AUXILIARY_NETWORK_ALLOCATION_POOLS" IS '辅助网络地址池';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."AUXILIARY_NETWORK_CIDR" IS '辅助网络cidr地址段';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."AUXILIARY_NETWORK_DHCP" IS '辅助网络是否开启dhcp';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."AUXILIARY_NETWORK_DNS_NAMESERVERS" IS '辅助网络dns';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."AUXILIARY_NETWORK_GATEWAY" IS '辅助网络网关';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."AUXILIARY_NETWORK_HOST_ROUTES" IS '辅助网络静态路由';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."AUXILIARY_NETWORK_ID" IS '辅助网络id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."AUXILIARY_NETWORK_ON" IS '是否开启辅助网络';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."AUXILIARY_NETWORK_ROUTER_IP" IS '辅助网络辅助路由ip';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."AUXILIARY_NETWORK_ROUTER_ON" IS '是否开启辅助网络辅助路由';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."AUXILIARY_NETWORK_ROUTER_RESOURCE_ID" IS '辅助网络辅助路由id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."AUXILIARY_NETWORK_VLAN" IS '辅助网络vlan模式';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."AUXILIARY_NETWORK_VLAN_ID" IS '辅助网络vlanId';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."AUXILIARY_ROUTER_OFF" IS '是否关闭辅助路由';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."CATEGORY" IS '靶标分类';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."CATEGORY2" IS '二级分类';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."CATEGORY3" IS '三级分类';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."CIDR" IS '虚拟交换机cidr地址段';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."DHCP" IS '虚拟交换机是否开启dhcp';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."DNS_NAMESERVERS" IS '虚拟交换机dns';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."DOCKER_PARAMS" IS 'docker参数';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."ELECTRIC_PORT_NUMBER" IS '电口数量';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."ELECTRIC_PORT_TYPE" IS '电口类型';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."ENABLE_MGMT" IS '是否开启管理网络网卡';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."ENTITY_USBS" IS '实体usb列表';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."EXTERNAL" IS '是否外部引用资源';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."FIREWALL_RESOURCE_ID" IS '虚拟防火墙资源id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."FIREWALL_RULES" IS '虚拟防火墙规则';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."GATEWAY" IS '虚拟交换机网关';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."GATEWAY_OFF" IS '关闭虚拟交换机网关的分配';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."HOST" IS '宿主机名称';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."HOST_ROUTES" IS '虚拟路由静态路由';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."IMAGE" IS '虚拟机/容器镜像名称';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."IMAGE_TYPE" IS '靶标镜像类型';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."IMAGE_UUID" IS '靶标id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."INIT_SUPPORT" IS '是否支持初始化';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."INITIAL_TOOLS" IS '终端初始包含工具';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."IS_BUILD_IN" IS '是否云平台內置靶标';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."ISO_ATTACH_FILENAME" IS '挂载iso文件名';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."ISO_TMPDIR_UUID" IS '挂载iso临时文件地址';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."LAN_PORT_NUMBER" IS 'lan口数量';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."LAN_PORT_TYPE" IS 'lan口类型';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."MGMT_IP" IS '管理网络ip';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."MGMT_MAC_ADDR" IS '管理网络mac地址';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."MGMT_PORT_RESOURCE_ID" IS '管理网络端口资源id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."MIB_DATA" IS 'mib文件数据';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."NET_MODE" IS '云平台网络类型';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."OPTICAL_PORT_NUMBER" IS '光口数量';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."OPTICAL_PORT_TYPE" IS '光口类型';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."OSPF_ROUTER_ID" IS 'ospf网络下的routerID';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."PLATFORM" IS 'gns3 platform';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."QUICK_CREATE_PARAMS" IS '快速构建参数';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."QUICK_CREATE_SUPPORT" IS '是否支持快速构建';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."RESOURCE_ID" IS '云平台虚拟化资源id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."RIP_LOOPBACK" IS 'rip组网的loopback';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."ROLE" IS '靶标角色';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."SCENE" IS '场景模板id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."SCENE_ELEMENT" IS '节点id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."SNMP_CONFIG" IS 'snmp相关配置';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."STATIC_ROUTES" IS '虚拟路由静态路由';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."TRANSPARENT" IS '是否透明模式';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."VIRTUAL_TYPE" IS '云平台虚拟化类型';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."VIRTUAL_USBS" IS '虚拟usb列表';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."VLAN" IS '虚拟交换机vlan模式';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."VLAN_ID" IS '虚拟交换机vlanId';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."WAN_PORT_NUMBER" IS 'wan口数量';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT"."WAN_PORT_TYPE" IS 'wan口类型';
+
+COMMENT ON TABLE "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT_PORT" IS '场景拓扑云平台插件节点端口信息表';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT_PORT"."ACCESS_MODES" IS '接入方式';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT_PORT"."AUXILIARY_NETWORK_ID" IS '辅助网络id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT_PORT"."BGP_AS" IS 'bgp组网下的as';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT_PORT"."BGP_IP" IS 'bgp组网下的ip地址';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT_PORT"."BGP_PEER" IS 'bgp组网下的对端端口ip';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT_PORT"."BGP_PEER_AS" IS 'bgp组网下的对端端口所属AS';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT_PORT"."CONNECT_MODE" IS '组网连接模式';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT_PORT"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT_PORT"."ENTITY_ACCESS_TYPE" IS '实体设备接入类型';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT_PORT"."ENTITY_PORT" IS '实体设备端口';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT_PORT"."ENTITY_SWITCH_NAME" IS '实体设备端口连接交换机名称';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT_PORT"."ENTITY_SWITCH_PORT" IS '实体设备端口连接交换机端口';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT_PORT"."FIREWALL_RESOURCE_ID" IS '虚拟防火墙资源id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT_PORT"."FIREWALL_RULES" IS '虚拟防火墙规则';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT_PORT"."FLOATING_IP" IS '浮动ip';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT_PORT"."FLOATING_IP_ID" IS '浮动ip的id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT_PORT"."GATEWAY_PORT_IPS" IS '网关端口地址段';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT_PORT"."GATEWAY_PORT_TYPE" IS '网关端口类型';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT_PORT"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT_PORT"."NAT" IS '是否nat外网';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT_PORT"."OSPF_AREA" IS 'ospf组网下的area';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT_PORT"."OSPF_IP" IS 'ospf组网下的ip地址';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT_PORT"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT_PORT"."QOS_ID" IS 'qos id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT_PORT"."RESOURCE_ID" IS '云平台虚拟化资源id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT_PORT"."RIP_IP" IS 'rip组网的ip';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT_PORT"."RIP_PEAR" IS 'rip组网的邻居';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT_PORT"."SCENE" IS '场景模板id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT_PORT"."SCENE_ELEMENT_PORT" IS '端口id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONFIG_ELEMENT_PORT"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT" IS '场景实例云平台插件节点信息表';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."ALLOCATION_POOLS" IS '虚拟交换机地址池';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."AUXILIARY_NETWORK_ALLOCATION_POOLS" IS '辅助网络地址池';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."AUXILIARY_NETWORK_CIDR" IS '辅助网络cidr地址段';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."AUXILIARY_NETWORK_DHCP" IS '辅助网络是否开启dhcp';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."AUXILIARY_NETWORK_DNS_NAMESERVERS" IS '辅助网络dns';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."AUXILIARY_NETWORK_GATEWAY" IS '辅助网络网关';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."AUXILIARY_NETWORK_HOST_ROUTES" IS '辅助网络静态路由';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."AUXILIARY_NETWORK_ID" IS '辅助网络id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."AUXILIARY_NETWORK_ON" IS '是否开启辅助网络';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."AUXILIARY_NETWORK_ROUTER_IP" IS '辅助网络辅助路由ip';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."AUXILIARY_NETWORK_ROUTER_ON" IS '是否开启辅助网络辅助路由';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."AUXILIARY_NETWORK_ROUTER_RESOURCE_ID" IS '辅助网络辅助路由id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."AUXILIARY_NETWORK_VLAN" IS '辅助网络vlan模式';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."AUXILIARY_NETWORK_VLAN_ID" IS '辅助网络vlanId';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."AUXILIARY_ROUTER_OFF" IS '是否关闭辅助路由';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."CATEGORY" IS '靶标分类';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."CATEGORY2" IS '二级分类';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."CATEGORY3" IS '三级分类';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."CIDR" IS '虚拟交换机cidr地址段';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."DHCP" IS '虚拟交换机是否开启dhcp';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."DNS_NAMESERVERS" IS '虚拟交换机dns';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."DOCKER_PARAMS" IS 'docker参数';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."ELECTRIC_PORT_NUMBER" IS '电口数量';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."ELECTRIC_PORT_TYPE" IS '电口类型';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."ENABLE_MGMT" IS '是否开启管理网络网卡';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."ENTITY_USBS" IS '实体usb列表';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."EXTERNAL" IS '是否外部引用资源';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."FIREWALL_RESOURCE_ID" IS '虚拟防火墙资源id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."FIREWALL_RULES" IS '虚拟防火墙规则';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."FWDNS_IPS" IS '云平台用于分布式部署时需要的ip';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."GATEWAY" IS '虚拟交换机网关';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."GATEWAY_OFF" IS '关闭虚拟交换机网关的分配';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."HOST" IS '宿主机名称';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."HOST_ROUTES" IS '虚拟路由静态路由';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."IMAGE" IS '虚拟机/容器镜像名称';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."IMAGE_TYPE" IS '靶标镜像类型';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."IMAGE_UUID" IS '靶标id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."INIT_SUPPORT" IS '是否支持初始化';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."INITIAL_TOOLS" IS '终端初始包含工具';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."IS_BUILD_IN" IS '是否云平台內置靶标';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."ISO_ATTACH_FILENAME" IS '挂载iso文件名';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."ISO_TMPDIR_UUID" IS '挂载iso临时文件地址';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."LAN_PORT_NUMBER" IS 'lan口数量';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."LAN_PORT_TYPE" IS 'lan口类型';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."MGMT_IP" IS '管理网络ip';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."MGMT_MAC_ADDR" IS '管理网络mac地址';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."MGMT_PORT_RESOURCE_ID" IS '管理网络端口资源id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."MIB_DATA" IS 'mib文件数据';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."NET_MODE" IS '云平台网络类型';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."OPTICAL_PORT_NUMBER" IS '光口数量';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."OPTICAL_PORT_TYPE" IS '光口类型';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."OSPF_ROUTER_ID" IS 'ospf网络下的routerID';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."PLATFORM" IS 'gns3 platform';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."QUICK_CREATE_PARAMS" IS '快速构建参数';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."QUICK_CREATE_SUPPORT" IS '是否支持快速构建';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."RESOURCE_ID" IS '云平台虚拟化资源id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."RIP_LOOPBACK" IS 'rip组网的loopback';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."ROLE" IS '靶标角色';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."SCENE" IS '场景实例id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."SCENE_ELEMENT" IS '节点id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."SNMP_CONFIG" IS 'snmp相关配置';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."STATIC_ROUTES" IS '虚拟路由静态路由';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."TRANSPARENT" IS '是否透明模式';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."VIRTUAL_TYPE" IS '云平台虚拟化类型';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."VIRTUAL_USBS" IS '虚拟usb列表';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."VLAN" IS '虚拟交换机vlan模式';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."VLAN_ID" IS '虚拟交换机vlanId';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."WAN_PORT_NUMBER" IS 'wan口数量';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT"."WAN_PORT_TYPE" IS 'wan口类型';
+
+COMMENT ON TABLE "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_PORT" IS '场景实例云平台插件节点端口信息表';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_PORT"."ACCESS_MODES" IS '接入方式';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_PORT"."AUXILIARY_NETWORK_ID" IS '辅助网络id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_PORT"."BGP_AS" IS 'bgp组网下的as';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_PORT"."BGP_IP" IS 'bgp组网下的ip地址';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_PORT"."BGP_PEER" IS 'bgp组网下的对端端口ip';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_PORT"."BGP_PEER_AS" IS 'bgp组网下的对端端口所属AS';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_PORT"."CONNECT_MODE" IS '组网连接模式';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_PORT"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_PORT"."DISTRIBUTED_PORT_MAPPING_IP" IS '分布式端口映射的ip';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_PORT"."ENTITY_ACCESS_TYPE" IS '实体设备接入类型';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_PORT"."ENTITY_PORT" IS '实体设备端口';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_PORT"."ENTITY_SWITCH_NAME" IS '实体设备端口连接交换机名称';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_PORT"."ENTITY_SWITCH_PORT" IS '实体设备端口连接交换机端口';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_PORT"."FIREWALL_RESOURCE_ID" IS '虚拟防火墙资源id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_PORT"."FIREWALL_RULES" IS '虚拟防火墙规则';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_PORT"."FLOATING_IP" IS '浮动ip';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_PORT"."FLOATING_IP_ID" IS '浮动ip的id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_PORT"."GATEWAY_PORT_IPS" IS '网关端口地址段';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_PORT"."GATEWAY_PORT_TYPE" IS '网关端口类型';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_PORT"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_PORT"."LOGIC_NETWORK_ID" IS '网络id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_PORT"."NAT" IS '是否nat外网';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_PORT"."OSPF_AREA" IS 'ospf组网下的area';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_PORT"."OSPF_IP" IS 'ospf组网下的ip地址';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_PORT"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_PORT"."QOS_ID" IS 'qos id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_PORT"."RESOURCE_ID" IS '云平台虚拟化资源id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_PORT"."RIP_IP" IS 'rip组网的ip';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_PORT"."RIP_PEAR" IS 'rip组网的邻居';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_PORT"."SCENE" IS '场景实例id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_PORT"."SCENE_ELEMENT_PORT" IS '端口id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_PORT"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_SCENEPLUGINCOLLECTION_SCENE" IS '场景实例数据采集插件信息表';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE"."ENABLE_FLOW_COLLECT" IS '开启流量采集';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE"."ENABLE_FLOW_MIRROR" IS '开启流量流量镜像';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE"."ENABLE_PROBE_COLLECT" IS '开启探针采集';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE"."FLOW_COLLECTOR" IS '流量采集器id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE"."FLOW_FILE" IS '流量采集pcap文件地址';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE"."PROBE_COLLECTOR" IS '流量采集器id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE"."PROBE_ROUTER" IS '采集路由id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE"."SCENE" IS '场景实例id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_SCENEPLUGINCOLLECTION_SCENE_CONFIG" IS '场景拓扑数据采集插件信息表';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_CONFIG"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_CONFIG"."ENABLE_FLOW_COLLECT" IS '开启流量采集';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_CONFIG"."ENABLE_FLOW_MIRROR" IS '开启流量流量镜像';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_CONFIG"."ENABLE_PROBE_COLLECT" IS '开启探针采集';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_CONFIG"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_CONFIG"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_CONFIG"."SCENE" IS '场景模板id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_CONFIG"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_SCENEPLUGINCOLLECTION_SCENE_CONFIG_ELEMENT" IS '场景拓扑数据采集插件节点信息表';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_CONFIG_ELEMENT"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_CONFIG_ELEMENT"."EDITED" IS '是否有添加过探针';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_CONFIG_ELEMENT"."ENABLE_PROBE_COLLECT" IS '开启探针采集';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_CONFIG_ELEMENT"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_CONFIG_ELEMENT"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_CONFIG_ELEMENT"."PROBES" IS '探针列表';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_CONFIG_ELEMENT"."SCENE" IS '场景模板id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_CONFIG_ELEMENT"."SCENE_ELEMENT" IS '节点id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_CONFIG_ELEMENT"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_SCENEPLUGINCOLLECTION_SCENE_CONFIG_ELEMENT_PORT" IS '场景拓扑数据采集插件节点端口信息表';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_CONFIG_ELEMENT_PORT"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_CONFIG_ELEMENT_PORT"."ENABLE_FLOW_COLLECT" IS '开启流量采集';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_CONFIG_ELEMENT_PORT"."ENABLE_FLOW_MIRROR" IS '开启流量流量镜像';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_CONFIG_ELEMENT_PORT"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_CONFIG_ELEMENT_PORT"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_CONFIG_ELEMENT_PORT"."SCENE" IS '场景模板id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_CONFIG_ELEMENT_PORT"."SCENE_ELEMENT_PORT" IS '端口id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_CONFIG_ELEMENT_PORT"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_SCENEPLUGINCOLLECTION_SCENE_DATA" IS '场景实例数据采集插件信息表';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_DATA"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_DATA"."DATA" IS '数据';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_DATA"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_DATA"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_DATA"."SCENE" IS '场景实例id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_DATA"."SCENE_ELEMENT" IS '节点id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_DATA"."TYPE" IS '数据类型';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_DATA"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_SCENEPLUGINCOLLECTION_SCENE_ELEMENT" IS '场景实例数据采集插件节点信息表';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_ELEMENT"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_ELEMENT"."ENABLE_PROBE_COLLECT" IS '开启探针采集';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_ELEMENT"."ID" IS 'id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_ELEMENT"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_ELEMENT"."PROBES" IS '探针列表';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_ELEMENT"."SCENE" IS '场景实例id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_ELEMENT"."SCENE_ELEMENT" IS '节点id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_ELEMENT"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_SCENEPLUGINCOLLECTION_SCENE_ELEMENT_PORT" IS '场景实例数据采集插件节点端口信息表';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_ELEMENT_PORT"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_ELEMENT_PORT"."ENABLE_FLOW_COLLECT" IS '开启流量采集';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_ELEMENT_PORT"."ENABLE_FLOW_MIRROR" IS '开启流量流量镜像';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_ELEMENT_PORT"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_ELEMENT_PORT"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_ELEMENT_PORT"."SCENE" IS '场景实例id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_ELEMENT_PORT"."SCENE_ELEMENT_PORT" IS '端口id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_ELEMENT_PORT"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_SCENEPLUGINCOLLECTION_SCENE_PROBE_ROUTER_PORT" IS '场景实例数据采集插件探针路由端口表';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_PROBE_ROUTER_PORT"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_PROBE_ROUTER_PORT"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_PROBE_ROUTER_PORT"."IP" IS 'ip';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_PROBE_ROUTER_PORT"."NETWORK_ID" IS '网络id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_PROBE_ROUTER_PORT"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_PROBE_ROUTER_PORT"."SCENE" IS '场景实例id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_PROBE_ROUTER_PORT"."SCENE_ELEMENT" IS '节点id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_SCENE_PROBE_ROUTER_PORT"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_SCENEPLUGINCOLLECTION_WAZUH_RULE" IS 'wazuh规则表';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_WAZUH_RULE"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_WAZUH_RULE"."DESCRIPTION" IS '描述';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_WAZUH_RULE"."DETAILS" IS '详细描述';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_WAZUH_RULE"."FILE" IS '文件';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_WAZUH_RULE"."GDPR" IS 'gdpr';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_WAZUH_RULE"."GPG13" IS 'gpg13';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_WAZUH_RULE"."GROUPS" IS '分组';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_WAZUH_RULE"."HIPAA" IS 'hipaa';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_WAZUH_RULE"."ID" IS '规则id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_WAZUH_RULE"."LEVEL" IS '规则等级';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_WAZUH_RULE"."MITRE" IS 'mitre';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_WAZUH_RULE"."NIST" IS 'nist_800_53';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_WAZUH_RULE"."PCI_DSS" IS 'pci_dss';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_WAZUH_RULE"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_WAZUH_RULE"."RELATIVE_DIRNAME" IS '相对目录名';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_WAZUH_RULE"."STATUS" IS '状态';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_WAZUH_RULE"."TSC" IS 'tsc';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_WAZUH_RULE"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_SCENEPLUGINCOLLECTION_WAZUH_RULE_TYPE" IS 'wazuh类型表';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_WAZUH_RULE_TYPE"."CODE" IS '编号';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_WAZUH_RULE_TYPE"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_WAZUH_RULE_TYPE"."ID" IS '类型id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_WAZUH_RULE_TYPE"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_WAZUH_RULE_TYPE"."TYPE" IS '类型名称';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_WAZUH_RULE_TYPE"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_SCENEPLUGINCOLLECTION_WAZUH_RULE_TYPE_RELATION" IS 'wazuh规则类型关系表';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_WAZUH_RULE_TYPE_RELATION"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_WAZUH_RULE_TYPE_RELATION"."ID" IS 'id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_WAZUH_RULE_TYPE_RELATION"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_WAZUH_RULE_TYPE_RELATION"."RULE_ID" IS '规则id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_WAZUH_RULE_TYPE_RELATION"."TYPE_ID" IS '类型id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCOLLECTION_WAZUH_RULE_TYPE_RELATION"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_SCENEPLUGINFLOW_SCENE" IS '场景实例流量插件信息表';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINFLOW_SCENE"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINFLOW_SCENE"."EXECUTOR" IS '流量发生器id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINFLOW_SCENE"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINFLOW_SCENE"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINFLOW_SCENE"."SCENE" IS '场景实例id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINFLOW_SCENE"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_SCENEPLUGINFLOW_SCENE_CONFIG" IS '场景拓扑流量插件信息表';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINFLOW_SCENE_CONFIG"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINFLOW_SCENE_CONFIG"."ID" IS 'id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINFLOW_SCENE_CONFIG"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINFLOW_SCENE_CONFIG"."SCENE" IS '场景模板id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINFLOW_SCENE_CONFIG"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_SCENEPLUGINFLOW_SCENE_CONFIG_ELEMENT" IS '场景拓扑流量插件节点信息表';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINFLOW_SCENE_CONFIG_ELEMENT"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINFLOW_SCENE_CONFIG_ELEMENT"."FLOWS" IS '流量列表';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINFLOW_SCENE_CONFIG_ELEMENT"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINFLOW_SCENE_CONFIG_ELEMENT"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINFLOW_SCENE_CONFIG_ELEMENT"."SCENE" IS '场景模板id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINFLOW_SCENE_CONFIG_ELEMENT"."SCENE_ELEMENT" IS '节点id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINFLOW_SCENE_CONFIG_ELEMENT"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_SCENEPLUGINFLOW_SCENE_CONFIG_ELEMENT_PORT" IS '场景拓扑流量插件节点端口信息表';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINFLOW_SCENE_CONFIG_ELEMENT_PORT"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINFLOW_SCENE_CONFIG_ELEMENT_PORT"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINFLOW_SCENE_CONFIG_ELEMENT_PORT"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINFLOW_SCENE_CONFIG_ELEMENT_PORT"."SCENE" IS '场景模板id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINFLOW_SCENE_CONFIG_ELEMENT_PORT"."SCENE_ELEMENT_PORT" IS '端口id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINFLOW_SCENE_CONFIG_ELEMENT_PORT"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_SCENEPLUGINFLOW_SCENE_ELEMENT" IS '场景实例流量插件节点信息表';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINFLOW_SCENE_ELEMENT"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINFLOW_SCENE_ELEMENT"."FLOWS" IS '流量列表';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINFLOW_SCENE_ELEMENT"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINFLOW_SCENE_ELEMENT"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINFLOW_SCENE_ELEMENT"."SCENE" IS '场景实例id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINFLOW_SCENE_ELEMENT"."SCENE_ELEMENT" IS '节点id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINFLOW_SCENE_ELEMENT"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_SCENEPLUGINFLOW_SCENE_ELEMENT_PORT" IS '场景实例流量插件节点端口信息表';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINFLOW_SCENE_ELEMENT_PORT"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINFLOW_SCENE_ELEMENT_PORT"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINFLOW_SCENE_ELEMENT_PORT"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINFLOW_SCENE_ELEMENT_PORT"."SCENE" IS '场景实例id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINFLOW_SCENE_ELEMENT_PORT"."SCENE_ELEMENT_PORT" IS '端口id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINFLOW_SCENE_ELEMENT_PORT"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_SITUATION_FLOW_CLASSIFICATION" IS '流量分类表';
+
+COMMENT ON COLUMN "MP_SITUATION_FLOW_CLASSIFICATION"."CATEGORY_EN" IS '分类英文名称';
+
+COMMENT ON COLUMN "MP_SITUATION_FLOW_CLASSIFICATION"."CATEGORY_ZH" IS '分类中文名称';
+
+COMMENT ON COLUMN "MP_SITUATION_FLOW_CLASSIFICATION"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SITUATION_FLOW_CLASSIFICATION"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_SITUATION_FLOW_CLASSIFICATION"."NAME" IS '名称';
+
+COMMENT ON COLUMN "MP_SITUATION_FLOW_CLASSIFICATION"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SITUATION_FLOW_CLASSIFICATION"."SEVERITY" IS '严重性';
+
+COMMENT ON COLUMN "MP_SITUATION_FLOW_CLASSIFICATION"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_SITUATION_FLOW_PORT_PROTOCOL" IS '流量端口协议表';
+
+COMMENT ON COLUMN "MP_SITUATION_FLOW_PORT_PROTOCOL"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SITUATION_FLOW_PORT_PROTOCOL"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_SITUATION_FLOW_PORT_PROTOCOL"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SITUATION_FLOW_PORT_PROTOCOL"."PORT" IS '端口';
+
+COMMENT ON COLUMN "MP_SITUATION_FLOW_PORT_PROTOCOL"."PROTOCOL" IS '协议';
+
+COMMENT ON COLUMN "MP_SITUATION_FLOW_PORT_PROTOCOL"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_SITUATION_PROBE_ABILITY" IS '探针功能项信息';
+
+COMMENT ON COLUMN "MP_SITUATION_PROBE_ABILITY"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SITUATION_PROBE_ABILITY"."DESCRIPTION" IS '描述';
+
+COMMENT ON COLUMN "MP_SITUATION_PROBE_ABILITY"."ENGINE" IS '分析引擎';
+
+COMMENT ON COLUMN "MP_SITUATION_PROBE_ABILITY"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_SITUATION_PROBE_ABILITY"."NAME" IS '功能名称';
+
+COMMENT ON COLUMN "MP_SITUATION_PROBE_ABILITY"."OS_TYPE" IS '比探针的os_type种类要多，0:Windows, 1:Unix, 2:Linux, 3:BSD, 5:cisco-ios, 6:HP, 7:junos, 8:openbsd';
+
+COMMENT ON COLUMN "MP_SITUATION_PROBE_ABILITY"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SITUATION_PROBE_ABILITY"."PROBE_ID" IS '探针id';
+
+COMMENT ON COLUMN "MP_SITUATION_PROBE_ABILITY"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_AUTH_TENANT_USER" IS '组织用户关系表';
+
+COMMENT ON COLUMN "MP_AUTH_TENANT_USER"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_AUTH_TENANT_USER"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_AUTH_TENANT_USER"."ORG" IS '组织ID';
+
+COMMENT ON COLUMN "MP_AUTH_TENANT_USER"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_AUTH_TENANT_USER"."TENANT" IS '所属租户';
+
+COMMENT ON COLUMN "MP_AUTH_TENANT_USER"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON COLUMN "MP_AUTH_TENANT_USER"."USER" IS '用户ID';
+
+COMMENT ON TABLE "MP_AUTH_URL_AC" IS 'URL访问控制表';
+
+COMMENT ON COLUMN "MP_AUTH_URL_AC"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_AUTH_URL_AC"."DESC" IS '描述';
+
+COMMENT ON COLUMN "MP_AUTH_URL_AC"."GROUP" IS '权限组';
+
+COMMENT ON COLUMN "MP_AUTH_URL_AC"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_AUTH_URL_AC"."IS_PATTERN" IS '是否包含模式字符 1:是 0:否';
+
+COMMENT ON COLUMN "MP_AUTH_URL_AC"."METHODS" IS '支持的请求方法，如get,post';
+
+COMMENT ON COLUMN "MP_AUTH_URL_AC"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_AUTH_URL_AC"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON COLUMN "MP_AUTH_URL_AC"."URL" IS 'URL pattern';
+
+COMMENT ON TABLE "MP_AUTH_URL_AC_TARGET" IS 'URL访问控制-权限关系表';
+
+COMMENT ON COLUMN "MP_AUTH_URL_AC_TARGET"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_AUTH_URL_AC_TARGET"."GROUP" IS '权限组';
+
+COMMENT ON COLUMN "MP_AUTH_URL_AC_TARGET"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_AUTH_URL_AC_TARGET"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_AUTH_URL_AC_TARGET"."TARGET" IS '权限ID';
+
+COMMENT ON COLUMN "MP_AUTH_URL_AC_TARGET"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_AUTH_USER" IS '用户表';
+
+COMMENT ON COLUMN "MP_AUTH_USER"."ADDRESS" IS '地址';
+
+COMMENT ON COLUMN "MP_AUTH_USER"."AVATAR" IS '头像';
+
+COMMENT ON COLUMN "MP_AUTH_USER"."BIRTHDAY" IS '生日';
+
+COMMENT ON COLUMN "MP_AUTH_USER"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_AUTH_USER"."DATE_JOINED" IS '加入时间';
+
+COMMENT ON COLUMN "MP_AUTH_USER"."DELAY_REMIND_LICENSE_TIME" IS '延期提醒时间';
+
+COMMENT ON COLUMN "MP_AUTH_USER"."DESCRIPTION" IS '描述';
+
+COMMENT ON COLUMN "MP_AUTH_USER"."EMAIL" IS '邮箱';
+
+COMMENT ON COLUMN "MP_AUTH_USER"."EXPIRED_TIME" IS '过期时间';
+
+COMMENT ON COLUMN "MP_AUTH_USER"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_AUTH_USER"."ID_CARD" IS '身份证号';
+
+COMMENT ON COLUMN "MP_AUTH_USER"."IDENTIFIER" IS '编号';
+
+COMMENT ON COLUMN "MP_AUTH_USER"."INIT_CHECK" IS '是否首次登陆需要强制修改密码 0:否，1:是';
+
+COMMENT ON COLUMN "MP_AUTH_USER"."IS_AUDITED" IS '1:已审核 0：待审核';
+
+COMMENT ON COLUMN "MP_AUTH_USER"."IS_ENABLED" IS '1:启用 0：禁用';
+
+COMMENT ON COLUMN "MP_AUTH_USER"."LAST_LOGIN" IS '最后登录时间';
+
+COMMENT ON COLUMN "MP_AUTH_USER"."MOBILE" IS '手机号';
+
+COMMENT ON COLUMN "MP_AUTH_USER"."NAME" IS '姓名';
+
+COMMENT ON COLUMN "MP_AUTH_USER"."NICKNAME" IS '昵称';
+
+COMMENT ON COLUMN "MP_AUTH_USER"."PASSWORD" IS '密码';
+
+COMMENT ON COLUMN "MP_AUTH_USER"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_AUTH_USER"."TENANT" IS '原生租户';
+
+COMMENT ON COLUMN "MP_AUTH_USER"."TOKEN_SECRET" IS 'token密钥';
+
+COMMENT ON COLUMN "MP_AUTH_USER"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON COLUMN "MP_AUTH_USER"."USERNAME" IS '用户名';
+
+COMMENT ON TABLE "MP_AUTH_USER_ONLINE_RECORD" IS '用户在线记录表';
+
+COMMENT ON COLUMN "MP_AUTH_USER_ONLINE_RECORD"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_AUTH_USER_ONLINE_RECORD"."DURATION_MINUTES" IS '本轮累计在线分钟数';
+
+COMMENT ON COLUMN "MP_AUTH_USER_ONLINE_RECORD"."END_TIME" IS '结束时间';
+
+COMMENT ON COLUMN "MP_AUTH_USER_ONLINE_RECORD"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_AUTH_USER_ONLINE_RECORD"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_AUTH_USER_ONLINE_RECORD"."START_TIME" IS '开始时间';
+
+COMMENT ON COLUMN "MP_AUTH_USER_ONLINE_RECORD"."STATUS" IS '记录完成与否 0:未完成 1:已完成';
+
+COMMENT ON COLUMN "MP_AUTH_USER_ONLINE_RECORD"."TENANT" IS '所属租户';
+
+COMMENT ON COLUMN "MP_AUTH_USER_ONLINE_RECORD"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON COLUMN "MP_AUTH_USER_ONLINE_RECORD"."USER" IS '用户ID';
+
+COMMENT ON TABLE "MP_AUTH_USER_ROLE" IS '用户角色关系表';
+
+COMMENT ON COLUMN "MP_AUTH_USER_ROLE"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_AUTH_USER_ROLE"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_AUTH_USER_ROLE"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_AUTH_USER_ROLE"."ROLE" IS '角色ID';
+
+COMMENT ON COLUMN "MP_AUTH_USER_ROLE"."TENANT" IS '所属租户';
+
+COMMENT ON COLUMN "MP_AUTH_USER_ROLE"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON COLUMN "MP_AUTH_USER_ROLE"."USER" IS '用户ID';
+
+COMMENT ON TABLE "MP_CSCENE_INSTANCE_USER_COUNT" IS '用户场景统计表';
+
+COMMENT ON COLUMN "MP_CSCENE_INSTANCE_USER_COUNT"."COUNT" IS '场景启动数量';
+
+COMMENT ON COLUMN "MP_CSCENE_INSTANCE_USER_COUNT"."CREATE_TIME" IS '更新时间';
+
+COMMENT ON COLUMN "MP_CSCENE_INSTANCE_USER_COUNT"."ID" IS '统计id';
+
+COMMENT ON COLUMN "MP_CSCENE_INSTANCE_USER_COUNT"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON COLUMN "MP_CSCENE_INSTANCE_USER_COUNT"."USER_ID" IS '用户id';
+
+COMMENT ON TABLE "MP_CSCENE_SNAPSHOT" IS '场景快照表';
+
+COMMENT ON COLUMN "MP_CSCENE_SNAPSHOT"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_CSCENE_SNAPSHOT"."CSCENE_ID" IS '场景模板';
+
+COMMENT ON COLUMN "MP_CSCENE_SNAPSHOT"."CSCENE_INSTANCE_ID" IS '场景实例';
+
+COMMENT ON COLUMN "MP_CSCENE_SNAPSHOT"."DELETED" IS '是否删除';
+
+COMMENT ON COLUMN "MP_CSCENE_SNAPSHOT"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_CSCENE_SNAPSHOT"."NAME" IS '名称';
+
+COMMENT ON COLUMN "MP_CSCENE_SNAPSHOT"."NODE_ID" IS '描述';
+
+COMMENT ON COLUMN "MP_CSCENE_SNAPSHOT"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_CSCENE_SNAPSHOT"."SNAPSHOT_ID" IS '场景数据库快照id';
+
+COMMENT ON COLUMN "MP_CSCENE_SNAPSHOT"."SNAPSHOT_RESOURCE_ID" IS '快照资源id';
+
+COMMENT ON COLUMN "MP_CSCENE_SNAPSHOT"."SOURCE_NAME" IS '源快照名称';
+
+COMMENT ON COLUMN "MP_CSCENE_SNAPSHOT"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_DEVOPS_LOG_OPERATION" IS '审计日志表';
+
+COMMENT ON COLUMN "MP_DEVOPS_LOG_OPERATION"."CONTENT" IS '内容';
+
+COMMENT ON COLUMN "MP_DEVOPS_LOG_OPERATION"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_DEVOPS_LOG_OPERATION"."DESCRIPTION" IS '描述';
+
+COMMENT ON COLUMN "MP_DEVOPS_LOG_OPERATION"."FROM" IS '日志来源';
+
+COMMENT ON COLUMN "MP_DEVOPS_LOG_OPERATION"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_DEVOPS_LOG_OPERATION"."LOG_TYPE" IS '日志类型：设备日志、系统日志、业务日志、用户日志、场景日志';
+
+COMMENT ON COLUMN "MP_DEVOPS_LOG_OPERATION"."OP_IP" IS '客户端IP';
+
+COMMENT ON COLUMN "MP_DEVOPS_LOG_OPERATION"."OP_MODULE" IS '操作模块';
+
+COMMENT ON COLUMN "MP_DEVOPS_LOG_OPERATION"."OP_MODULE_ID" IS '操作模块ID';
+
+COMMENT ON COLUMN "MP_DEVOPS_LOG_OPERATION"."OP_TARGET" IS '操作对象';
+
+COMMENT ON COLUMN "MP_DEVOPS_LOG_OPERATION"."OP_TARGET_ID" IS '操作对象ID';
+
+COMMENT ON COLUMN "MP_DEVOPS_LOG_OPERATION"."OP_TIME" IS '操作时间';
+
+COMMENT ON COLUMN "MP_DEVOPS_LOG_OPERATION"."OP_TYPE" IS '操作类型';
+
+COMMENT ON COLUMN "MP_DEVOPS_LOG_OPERATION"."OP_TYPE_ID" IS '操作类型ID';
+
+COMMENT ON COLUMN "MP_DEVOPS_LOG_OPERATION"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_DEVOPS_LOG_OPERATION"."SITE_TYPE" IS '站点类型：应用、中台、前端、平台';
+
+COMMENT ON COLUMN "MP_DEVOPS_LOG_OPERATION"."TITLE" IS '主题';
+
+COMMENT ON COLUMN "MP_DEVOPS_LOG_OPERATION"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON COLUMN "MP_DEVOPS_LOG_OPERATION"."USER_ID" IS '用户ID';
+
+COMMENT ON COLUMN "MP_DEVOPS_LOG_OPERATION"."USER_NAME" IS '用户名';
+
+COMMENT ON COLUMN "MP_DEVOPS_LOG_OPERATION"."USER_TYPE" IS '用户类型（用户，客户端）';
+
+COMMENT ON TABLE "MP_DEVOPS_TARGET" IS '靶标信息表';
+
+COMMENT ON COLUMN "MP_DEVOPS_TARGET"."BASE_IMAGE_SUPPORT" IS '是否支持基础镜像,0:不支持，1：支持';
+
+COMMENT ON COLUMN "MP_DEVOPS_TARGET"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_DEVOPS_TARGET"."CREATE_USER" IS '靶标创建用户';
+
+COMMENT ON COLUMN "MP_DEVOPS_TARGET"."CREATE_USER_NAME" IS '靶标创建用户名';
+
+COMMENT ON COLUMN "MP_DEVOPS_TARGET"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_DEVOPS_TARGET"."IMAGE_SOURCE" IS '系统镜像类型，1：基础镜像，2：openstack已有镜像，3：自定义上传';
+
+COMMENT ON COLUMN "MP_DEVOPS_TARGET"."IMAGE_STATUS" IS '镜像状态';
+
+COMMENT ON COLUMN "MP_DEVOPS_TARGET"."IMAGE_TYPE" IS '镜像类型：vm，container,simple, entity';
+
+COMMENT ON COLUMN "MP_DEVOPS_TARGET"."IN_POSITION" IS '在位状态';
+
+COMMENT ON COLUMN "MP_DEVOPS_TARGET"."INIT_SUPPORT" IS '是否支持Cloud init,0:不支持，1：支持';
+
+COMMENT ON COLUMN "MP_DEVOPS_TARGET"."INSTANCE_CREATE_USER" IS '靶标实例创建用户';
+
+COMMENT ON COLUMN "MP_DEVOPS_TARGET"."INSTANCE_STATE" IS '镜像状态 0:没有实例，1：创建中，2创建成功，3创建失败';
+
+COMMENT ON COLUMN "MP_DEVOPS_TARGET"."IS_HIDE" IS '是否隐藏，0：false,1:true';
+
+COMMENT ON COLUMN "MP_DEVOPS_TARGET"."IS_IMPORT" IS '是否导入，0：false,1:true';
+
+COMMENT ON COLUMN "MP_DEVOPS_TARGET"."IS_INIT" IS '是否初始靶标，0：false，1：true';
+
+COMMENT ON COLUMN "MP_DEVOPS_TARGET"."IS_PUBLIC" IS '是否公开，0：私有，1：自定义，2：公开';
+
+COMMENT ON COLUMN "MP_DEVOPS_TARGET"."LANGUAGE" IS '系统语言';
+
+COMMENT ON COLUMN "MP_DEVOPS_TARGET"."LOGO" IS '图标地址';
+
+COMMENT ON COLUMN "MP_DEVOPS_TARGET"."MAIN_CATEGORY" IS '一级分类';
+
+COMMENT ON COLUMN "MP_DEVOPS_TARGET"."NAME" IS '镜像名称';
+
+COMMENT ON COLUMN "MP_DEVOPS_TARGET"."PARENT_SYSTEM_TYPE" IS '一级系统类型';
+
+COMMENT ON COLUMN "MP_DEVOPS_TARGET"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_DEVOPS_TARGET"."QUICK_CREATE_SUPPORT" IS '是否支持快速构建，0：不支持，1：支持';
+
+COMMENT ON COLUMN "MP_DEVOPS_TARGET"."REFERENCE_STATUS" IS '引用状态';
+
+COMMENT ON COLUMN "MP_DEVOPS_TARGET"."ROLE" IS '角色';
+
+COMMENT ON COLUMN "MP_DEVOPS_TARGET"."SUB_CATEGORY" IS '二级分类';
+
+COMMENT ON COLUMN "MP_DEVOPS_TARGET"."SUPPORT_EXPORT" IS '是否支持导出，0：false,1:true';
+
+COMMENT ON COLUMN "MP_DEVOPS_TARGET"."SYSTEM_ARCHITECURE" IS '系统架构';
+
+COMMENT ON COLUMN "MP_DEVOPS_TARGET"."SYSTEM_TYPE" IS '系统类型';
+
+COMMENT ON COLUMN "MP_DEVOPS_TARGET"."THIRD_CATEGORY" IS '三级分类';
+
+COMMENT ON COLUMN "MP_DEVOPS_TARGET"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON COLUMN "MP_DEVOPS_TARGET"."USE_STATUS" IS '使用状态';
+
+COMMENT ON COLUMN "MP_DEVOPS_TARGET"."UUID" IS '镜像UUID';
+
+COMMENT ON TABLE "MP_FLOW_COLLECTION" IS '流量集合表';
+
+COMMENT ON COLUMN "MP_FLOW_COLLECTION"."ATTACK_FLOW_COUNT" IS '攻击流量数量';
+
+COMMENT ON COLUMN "MP_FLOW_COLLECTION"."BACKGROUND_FLOW_COUNT" IS '背景流量数量';
+
+COMMENT ON COLUMN "MP_FLOW_COLLECTION"."CATEGORY" IS '集合类型   0:"测试测量",1:"应用升级",2:"网络管理",3:"P2P",4:"金融",5:"邮件",6:"安全工作",7:"分布式计算",8:"手机",9:"移动设备",10:"即时通讯",11:"SCADA",12:"机动",13:"远程控制",14:"音视频",15:"企业应用",16:"社会网络搜索",17:"文件传输",18:"数据库",19:"身份认证",20:"ERP",21:"存储",22:"游戏",23:"安全数据传输"';
+
+COMMENT ON COLUMN "MP_FLOW_COLLECTION"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_FLOW_COLLECTION"."DESCRIPTION" IS '集合描述';
+
+COMMENT ON COLUMN "MP_FLOW_COLLECTION"."ID" IS '集合id';
+
+COMMENT ON COLUMN "MP_FLOW_COLLECTION"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_FLOW_COLLECTION"."TITLE" IS '集合标题';
+
+COMMENT ON COLUMN "MP_FLOW_COLLECTION"."TYPE_FLAG" IS '集合分类：0背景流量，1攻击流量，2混合流量';
+
+COMMENT ON COLUMN "MP_FLOW_COLLECTION"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_FLOW_PCAP" IS '流量包表';
+
+COMMENT ON COLUMN "MP_FLOW_PCAP"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_FLOW_PCAP"."DURATION" IS '时长(单位ms)';
+
+COMMENT ON COLUMN "MP_FLOW_PCAP"."FLOW_ID" IS '流量id';
+
+COMMENT ON COLUMN "MP_FLOW_PCAP"."ID" IS '流量包id';
+
+COMMENT ON COLUMN "MP_FLOW_PCAP"."PCAP_FILE" IS 'pcap文件地址';
+
+COMMENT ON COLUMN "MP_FLOW_PCAP"."PCAP_SIZE" IS '大小(单位Byte)';
+
+COMMENT ON COLUMN "MP_FLOW_PCAP"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_FLOW_PCAP"."PKT_NUM" IS '包数(报文数量)';
+
+COMMENT ON COLUMN "MP_FLOW_PCAP"."PROTOCOLS" IS '包含协议';
+
+COMMENT ON COLUMN "MP_FLOW_PCAP"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_FLOW_PROTOCOL" IS '流量协议表';
+
+COMMENT ON COLUMN "MP_FLOW_PROTOCOL"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_FLOW_PROTOCOL"."FLOW_ID" IS '流量id';
+
+COMMENT ON COLUMN "MP_FLOW_PROTOCOL"."ID" IS '协议id';
+
+COMMENT ON COLUMN "MP_FLOW_PROTOCOL"."MARKED" IS '是否勾选：0 否，1 是';
+
+COMMENT ON COLUMN "MP_FLOW_PROTOCOL"."PROTOCOL_NAME" IS '协议名称';
+
+COMMENT ON COLUMN "MP_FLOW_PROTOCOL"."RATE" IS '比例';
+
+COMMENT ON COLUMN "MP_FLOW_PROTOCOL"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_FLOW_TASK" IS '流量任务表';
+
+COMMENT ON COLUMN "MP_FLOW_TASK"."ACTUATOR_ID" IS '流量执行器id';
+
+COMMENT ON COLUMN "MP_FLOW_TASK"."CONTENT" IS '流量内容';
+
+COMMENT ON COLUMN "MP_FLOW_TASK"."COUNT" IS '执行次数';
+
+COMMENT ON COLUMN "MP_FLOW_TASK"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_FLOW_TASK"."CUSTOM_FLAG" IS '自定义流量任务标志 0：否， 1：是';
+
+COMMENT ON COLUMN "MP_FLOW_TASK"."DELAY" IS '首次执行延迟时间，单位：秒(可以为0)';
+
+COMMENT ON COLUMN "MP_FLOW_TASK"."FLOW_ID" IS '流量id';
+
+COMMENT ON COLUMN "MP_FLOW_TASK"."FLOW_PLATFORM" IS '流量发生平台：0 通用，1 北京流量发生器';
+
+COMMENT ON COLUMN "MP_FLOW_TASK"."FLOW_PORT_ID" IS '流量网口id';
+
+COMMENT ON COLUMN "MP_FLOW_TASK"."FLOW_PROTOCOL" IS '流量协议';
+
+COMMENT ON COLUMN "MP_FLOW_TASK"."ID" IS '任务id';
+
+COMMENT ON COLUMN "MP_FLOW_TASK"."INTERVAL_TIME" IS '周期执行间隔，单位：秒';
+
+COMMENT ON COLUMN "MP_FLOW_TASK"."MULT" IS '倍数:大于等于1的整数';
+
+COMMENT ON COLUMN "MP_FLOW_TASK"."NODE_ID" IS '节点id';
+
+COMMENT ON COLUMN "MP_FLOW_TASK"."ORIGIN_IPS" IS '源ip范围';
+
+COMMENT ON COLUMN "MP_FLOW_TASK"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_FLOW_TASK"."RUNNING_COUNT" IS '实际执行次数';
+
+COMMENT ON COLUMN "MP_FLOW_TASK"."TARGET_IPS" IS '目标ip范围';
+
+COMMENT ON COLUMN "MP_FLOW_TASK"."TASK_DESC" IS '任务描述';
+
+COMMENT ON COLUMN "MP_FLOW_TASK"."TASK_STATUS" IS '任务状态: 0 初始化，1 正在运行，2 正在停止， 3 已停止';
+
+COMMENT ON COLUMN "MP_FLOW_TASK"."THIRD_FLOW_ID" IS '流量第三方uuid';
+
+COMMENT ON COLUMN "MP_FLOW_TASK"."THIRD_FLOW_NAME" IS '流量第三方名称';
+
+COMMENT ON COLUMN "MP_FLOW_TASK"."THIRD_TASK_ID" IS '流量任务第三方uuid';
+
+COMMENT ON COLUMN "MP_FLOW_TASK"."TITLE" IS '任务标题';
+
+COMMENT ON COLUMN "MP_FLOW_TASK"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_FLOW_TASK_CONF" IS '流量任务配置表';
+
+COMMENT ON COLUMN "MP_FLOW_TASK_CONF"."CONF" IS '配置';
+
+COMMENT ON COLUMN "MP_FLOW_TASK_CONF"."CONFIG" IS '是否开启流量重放和速率配置：0 否，1 是';
+
+COMMENT ON COLUMN "MP_FLOW_TASK_CONF"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_FLOW_TASK_CONF"."ID" IS '配置id';
+
+COMMENT ON COLUMN "MP_FLOW_TASK_CONF"."KEEP_RUNNING" IS '持续运行：0 否，1 是';
+
+COMMENT ON COLUMN "MP_FLOW_TASK_CONF"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_FLOW_TASK_CONF"."RATE_UNLIMITED" IS '速率无限制：0 否，1 是';
+
+COMMENT ON COLUMN "MP_FLOW_TASK_CONF"."REPLAY" IS '是否流量重放：0 否，1 是';
+
+COMMENT ON COLUMN "MP_FLOW_TASK_CONF"."TASK_ID" IS '任务id';
+
+COMMENT ON COLUMN "MP_FLOW_TASK_CONF"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_FLOW_TASK_RECORD" IS '流量任务记录表';
+
+COMMENT ON COLUMN "MP_FLOW_TASK_RECORD"."ACTUATOR_ID" IS '流量执行器id';
+
+COMMENT ON COLUMN "MP_FLOW_TASK_RECORD"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_FLOW_TASK_RECORD"."DROP_RATE" IS '丢包率(单位byte/s)';
+
+COMMENT ON COLUMN "MP_FLOW_TASK_RECORD"."ID" IS '记录id';
+
+COMMENT ON COLUMN "MP_FLOW_TASK_RECORD"."JITTER" IS '抖动(单位ms)';
+
+COMMENT ON COLUMN "MP_FLOW_TASK_RECORD"."LATENCY" IS '延迟(单位ms)';
+
+COMMENT ON COLUMN "MP_FLOW_TASK_RECORD"."OBYTES" IS '发包总大小(单位byte)';
+
+COMMENT ON COLUMN "MP_FLOW_TASK_RECORD"."OERRORS" IS '发包错误数';
+
+COMMENT ON COLUMN "MP_FLOW_TASK_RECORD"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_FLOW_TASK_RECORD"."QUEUE_FULL" IS '阻塞队列大小(单位byte)';
+
+COMMENT ON COLUMN "MP_FLOW_TASK_RECORD"."RECORD_STATUS" IS '是否有效：0 无效，1 有效';
+
+COMMENT ON COLUMN "MP_FLOW_TASK_RECORD"."TASK_ID" IS '任务id';
+
+COMMENT ON COLUMN "MP_FLOW_TASK_RECORD"."TOTAL_PPS" IS '总发包数';
+
+COMMENT ON COLUMN "MP_FLOW_TASK_RECORD"."TOTAL_RX" IS '接收速率(单位byte/s)';
+
+COMMENT ON COLUMN "MP_FLOW_TASK_RECORD"."TOTAL_TX_L1" IS '发送速率L1(单位byte/s)';
+
+COMMENT ON COLUMN "MP_FLOW_TASK_RECORD"."TOTAL_TX_L2" IS '发送速率L2(单位byte/s)';
+
+COMMENT ON COLUMN "MP_FLOW_TASK_RECORD"."TX_BPS" IS '实时发送速率(单位byte/s)';
+
+COMMENT ON COLUMN "MP_FLOW_TASK_RECORD"."TX_PPS" IS '实时发包数';
+
+COMMENT ON COLUMN "MP_FLOW_TASK_RECORD"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_FRONT_ADMIN_MENU_EXTRA_INFO" IS '菜单附加信息';
+
+COMMENT ON COLUMN "MP_FRONT_ADMIN_MENU_EXTRA_INFO"."ACTIV_KEYS" IS '系统激活key，多个用逗号隔开';
+
+COMMENT ON COLUMN "MP_FRONT_ADMIN_MENU_EXTRA_INFO"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_FRONT_ADMIN_MENU_EXTRA_INFO"."EDITIONS" IS '系统激活版本，多个用逗号隔开  0:标准版 1:专业版';
+
+COMMENT ON COLUMN "MP_FRONT_ADMIN_MENU_EXTRA_INFO"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_FRONT_ADMIN_MENU_EXTRA_INFO"."MENU" IS '菜单id';
+
+COMMENT ON COLUMN "MP_FRONT_ADMIN_MENU_EXTRA_INFO"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_FRONT_ADMIN_MENU_EXTRA_INFO"."TENANT" IS '所属租户';
+
+COMMENT ON COLUMN "MP_FRONT_ADMIN_MENU_EXTRA_INFO"."UPDATE_TIME" IS '更新时间';
+
+CREATE TABLE "MP_SITUATION_PROBE_PARAM"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "PROBE_ID" VARCHAR(64) NULL,
+ "TEMPLATE_ID" VARCHAR(64) NULL,
+ "NAME" VARCHAR(50) NOT NULL,
+ "TYPE" INT NOT NULL,
+ "DEFAULT_VALUE" VARCHAR(600) NULL,
+ "DESCRIPTION" VARCHAR(600) NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL
+);
+CREATE TABLE "MP_SITUATION_PROBE_SCRIPT"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "PROBE_ID" VARCHAR(64) NULL,
+ "SCRIPT_CONTENT" BLOB NULL,
+ "SCRIPT_URL" VARCHAR(400) NULL,
+ "SCRIPT_TYPE" INT NOT NULL,
+ "VERSION" INT DEFAULT 1
+ NOT NULL,
+ "STATUS" INT DEFAULT 1
+ NOT NULL,
+ "CHECKSUM" VARCHAR(100) NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL
+);
+CREATE TABLE "MP_SITUATION_SURICATARULE"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "ACTION" VARCHAR(64) NOT NULL,
+ "PROTOCOL" VARCHAR(64) NOT NULL,
+ "SOURCE" VARCHAR(1024) NOT NULL,
+ "SOURCE_PORTS" VARCHAR(1024) NOT NULL,
+ "DIRECTION" VARCHAR(32) NOT NULL,
+ "DESTINATION" VARCHAR(1024) NOT NULL,
+ "DESTINATION_PORTS" VARCHAR(1024) NOT NULL,
+ "RULE_MSG" TEXT NOT NULL,
+ "RULE_NAME" VARCHAR(1024) NOT NULL,
+ "SID" VARCHAR(64) NOT NULL,
+ "ATTCK" VARCHAR(64) NULL,
+ "CREATE_TIME" TIMESTAMP(6) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(6) NOT NULL,
+ "CLASS_TYPE_CN" VARCHAR(1024) DEFAULT ''
+ NOT NULL,
+ "CLASS_TYPE_EN" VARCHAR(1024) DEFAULT ''
+ NOT NULL,
+ "RULE_GEN_TYPE" INT DEFAULT 0
+ NOT NULL
+);
+CREATE TABLE "MP_SITUATION_TRAFFIC_GROUP"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "TRAFFIC_GROUP_ID" VARCHAR(64) NOT NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "DEL_FLAG" INT DEFAULT 0
+ NULL
+);
+CREATE TABLE "MP_SYS_CONFIG"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "TENANT" VARCHAR(64) NOT NULL,
+ "KEY_NAME" VARCHAR(100) NULL,
+ "VALUE" VARCHAR(8000) NULL,
+ "INIT_VALUE" VARCHAR(8000) DEFAULT ''
+ NOT NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL
+);
+CREATE TABLE "MP_SYS_MODEL_VERSION"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "MODEL_NAME" VARCHAR(64) DEFAULT ''
+ NOT NULL,
+ "MODEL_VERSION" VARCHAR(64) DEFAULT ''
+ NOT NULL,
+ "VISIBLE" TINYINT NOT NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL
+);
+CREATE TABLE "MP_SYS_NOTICE"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "TENANT" VARCHAR(64) NOT NULL,
+ "CONTENT" TEXT NULL,
+ "TITLE" VARCHAR(150) NOT NULL,
+ "PUBLISHER" VARCHAR(64) NOT NULL,
+ "IS_PUBLIC" INT DEFAULT 0
+ NOT NULL,
+ "TYPE" INT DEFAULT 1
+ NOT NULL,
+ "TOP" BIGINT NOT NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL
+);
+CREATE TABLE "MP_SYS_NOTICE_ORG"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "TENANT" VARCHAR(64) NOT NULL,
+ "NOTICE_ID" VARCHAR(64) NOT NULL,
+ "ORG" VARCHAR(64) NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL
+);
+CREATE TABLE "MP_SYS_NOTICE_READ"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "TENANT" VARCHAR(64) NOT NULL,
+ "NOTICE_ID" VARCHAR(64) NOT NULL,
+ "USER" VARCHAR(64) NULL,
+ "IS_READED" INT DEFAULT 1
+ NOT NULL,
+ "IS_NEED_PUSH" INT DEFAULT 1
+ NOT NULL,
+ "READ_COUNT" INT DEFAULT 1
+ NOT NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL
+);
+CREATE TABLE "MP_SYS_NOTICE_ROLE"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "TENANT" VARCHAR(64) NOT NULL,
+ "NOTICE_ID" VARCHAR(64) NOT NULL,
+ "ROLE" VARCHAR(64) NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL
+);
+CREATE TABLE "MP_SYS_NOTICE_USER"
+(
+ "PK" INT IDENTITY(1,1) NOT NULL,
+ "ID" VARCHAR(64) NOT NULL,
+ "TENANT" VARCHAR(64) NOT NULL,
+ "NOTICE_ID" VARCHAR(64) NOT NULL,
+ "USER" VARCHAR(64) NULL,
+ "CREATE_TIME" TIMESTAMP(0) NOT NULL,
+ "UPDATE_TIME" TIMESTAMP(0) NOT NULL
+);
+ALTER TABLE "MP_SITUATION_PROBE_PARAM" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SITUATION_PROBE_SCRIPT" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SITUATION_SURICATARULE" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SITUATION_TRAFFIC_GROUP" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SYS_CONFIG" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SYS_MODEL_VERSION" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SYS_NOTICE" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SYS_NOTICE_ORG" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SYS_NOTICE_READ" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SYS_NOTICE_ROLE" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+ALTER TABLE "MP_SYS_NOTICE_USER" ADD CONSTRAINT  NOT CLUSTER  PRIMARY KEY("PK") ;
+
+CREATE INDEX "INDEX1758065757762600"
+ON "MP_SCENEPLUGINCLOUD_SCENE_CONNECTION"("SCENE","ACCESS_MODE_ID","ACCESS_USER");
+ALTER INDEX "INDEX1758065757762600" VISIBLE;
+
+CREATE INDEX "INDEX1758065768064400"
+ON "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_NETWORK"("SCENE","SCENE_ELEMENT");
+ALTER INDEX "INDEX1758065768064400" VISIBLE;
+
+CREATE INDEX "INDEX1758065788026500"
+ON "MP_SITUATION_COLLECTION_TEMPLATE"("CREATE_TIME");
+ALTER INDEX "INDEX1758065788026500" VISIBLE;
+
+CREATE INDEX "OS_TYPE"
+ON "MP_SITUATION_COLLECTION_TEMPLATE"("OS_TYPE");
+ALTER INDEX "OS_TYPE" VISIBLE;
+
+CREATE INDEX "TEMPLATE_ID"
+ON "MP_SITUATION_COLLECTION_TEMPLATE_PROBE"("TEMPLATE_ID","PROBE_ID");
+ALTER INDEX "TEMPLATE_ID" VISIBLE;
+
+CREATE INDEX "INDEX1758065812979400"
+ON "MP_SITUATION_PROBE"("NAME");
+ALTER INDEX "INDEX1758065812979400" VISIBLE;
+
+CREATE INDEX "INDEX1758065824004100"
+ON "MP_SITUATION_PROBE"("CREATE_TIME");
+ALTER INDEX "INDEX1758065824004100" VISIBLE;
+
+CREATE INDEX "TYPE"
+ON "MP_SITUATION_PROBE"("TYPE","PROBE_CATEGORY","CREATE_TIME");
+ALTER INDEX "TYPE" VISIBLE;
+
+ALTER TABLE "MP_SITUATION_PROBE_PARAM" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_SITUATION_PROBE_SCRIPT" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_SITUATION_SURICATARULE" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_SITUATION_TRAFFIC_GROUP" ADD CONSTRAINT "TRAFFIC_GROUP_ID" UNIQUE("TRAFFIC_GROUP_ID") ;
+
+ALTER TABLE "MP_SYS_CONFIG" ADD UNIQUE("TENANT","KEY_NAME") ;
+
+ALTER TABLE "MP_SYS_CONFIG" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_SYS_MODEL_VERSION" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_SYS_NOTICE" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_SYS_NOTICE_ORG" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_SYS_NOTICE_READ" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_SYS_NOTICE_ROLE" ADD UNIQUE("ID") ;
+
+ALTER TABLE "MP_SYS_NOTICE_USER" ADD UNIQUE("ID") ;
+
+COMMENT ON TABLE "MP_SITUATION_TRAFFIC_GROUP" IS '流量索引表';
+
+COMMENT ON COLUMN "MP_SITUATION_TRAFFIC_GROUP"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SITUATION_TRAFFIC_GROUP"."DEL_FLAG" IS '1:删除 0:未删除';
+
+COMMENT ON COLUMN "MP_SITUATION_TRAFFIC_GROUP"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SITUATION_TRAFFIC_GROUP"."TRAFFIC_GROUP_ID" IS '流量索引前缀名';
+
+COMMENT ON TABLE "MP_SYS_CONFIG" IS '系统配置信息表';
+
+COMMENT ON COLUMN "MP_SYS_CONFIG"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SYS_CONFIG"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_SYS_CONFIG"."INIT_VALUE" IS '初始值';
+
+COMMENT ON COLUMN "MP_SYS_CONFIG"."KEY_NAME" IS '键';
+
+COMMENT ON COLUMN "MP_SYS_CONFIG"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SYS_CONFIG"."TENANT" IS '租户';
+
+COMMENT ON COLUMN "MP_SYS_CONFIG"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON COLUMN "MP_SYS_CONFIG"."VALUE" IS '值';
+
+COMMENT ON TABLE "MP_SYS_MODEL_VERSION" IS '模块版本信息表';
+
+COMMENT ON COLUMN "MP_SYS_MODEL_VERSION"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SYS_MODEL_VERSION"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_SYS_MODEL_VERSION"."MODEL_NAME" IS '模块名称';
+
+COMMENT ON COLUMN "MP_SYS_MODEL_VERSION"."MODEL_VERSION" IS '模块版本号';
+
+COMMENT ON COLUMN "MP_SYS_MODEL_VERSION"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SYS_MODEL_VERSION"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON COLUMN "MP_SYS_MODEL_VERSION"."VISIBLE" IS '是否可见';
+
+COMMENT ON TABLE "MP_SCENEPLUGINCLOUD_SCENE_CONNECTION" IS '场景实例云平台插件节点接入信息表';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONNECTION"."ACCESS_IP" IS '接入ip';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONNECTION"."ACCESS_MODE_ID" IS '接入id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONNECTION"."ACCESS_PASS" IS '接入用户密码';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONNECTION"."ACCESS_PORT" IS '接入端口号';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONNECTION"."ACCESS_TOKEN" IS '接入用户token';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONNECTION"."ACCESS_TOKEN_EXPIRE_TIME" IS '接入用户token过期时间';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONNECTION"."ACCESS_USER" IS '接入用户';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONNECTION"."CONNECTION_ENABLE_RECORDING" IS '是否开启录屏';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONNECTION"."CONNECTION_ID" IS '接入id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONNECTION"."CONNECTION_RECORDING_NAME" IS '录屏名称';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONNECTION"."CONNECTION_URL" IS '接入url';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONNECTION"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONNECTION"."DISABLE" IS '是否禁用';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONNECTION"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONNECTION"."PASSWORD" IS '密码';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONNECTION"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONNECTION"."PORT" IS '端口号';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONNECTION"."PROTOCOL" IS '协议';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONNECTION"."SCENE" IS '场景实例id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONNECTION"."SCENE_ELEMENT" IS '节点id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONNECTION"."SCENE_ELEMENT_PORT" IS '端口id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONNECTION"."TOKEN" IS '协议接入token';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONNECTION"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_CONNECTION"."USERNAME" IS '用户名';
+
+COMMENT ON TABLE "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_NETWORK" IS '场景实例云平台插件网络信息表';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_NETWORK"."ALLOCATION_POOLS" IS '虚拟网络地址池';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_NETWORK"."AUXILIARY_NETWORK_ROUTER_IP" IS '辅助网络辅助路由ip';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_NETWORK"."AUXILIARY_NETWORK_ROUTER_ON" IS '是否开启辅助网络辅助路由';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_NETWORK"."AUXILIARY_NETWORK_ROUTER_RESOURCE_ID" IS '辅助网络辅助路由id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_NETWORK"."CIDR" IS '虚拟网络cidr地址段';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_NETWORK"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_NETWORK"."DHCP" IS '虚拟网络是否开启dhcp';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_NETWORK"."DHCP_IP" IS '指定的dhcp ip';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_NETWORK"."DNS_NAMESERVERS" IS '虚拟网络dns';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_NETWORK"."EXTERNAL" IS '虚拟网络vlan模式';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_NETWORK"."GATEWAY" IS '虚拟网络网关';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_NETWORK"."GATEWAY_OFF" IS '关闭虚拟交换机网关的分配';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_NETWORK"."HOST_ROUTES" IS '虚拟路由静态路由';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_NETWORK"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_NETWORK"."NET_MODE" IS '云平台网络类型';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_NETWORK"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_NETWORK"."RESOURCE_ID" IS '虚拟网络资源id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_NETWORK"."SCENE" IS '场景实例id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_NETWORK"."SCENE_ELEMENT" IS '场景实例节点id';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_NETWORK"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_NETWORK"."VLAN" IS '虚拟网络vlan模式';
+
+COMMENT ON COLUMN "MP_SCENEPLUGINCLOUD_SCENE_ELEMENT_NETWORK"."VLAN_ID" IS '虚拟网络vlanId';
+
+COMMENT ON TABLE "MP_SITUATION_COLLECTION_TEMPLATE" IS '采集模板表';
+
+COMMENT ON COLUMN "MP_SITUATION_COLLECTION_TEMPLATE"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SITUATION_COLLECTION_TEMPLATE"."CREATOR" IS '创建者用户名';
+
+COMMENT ON COLUMN "MP_SITUATION_COLLECTION_TEMPLATE"."DESCRIPTION" IS '描述';
+
+COMMENT ON COLUMN "MP_SITUATION_COLLECTION_TEMPLATE"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_SITUATION_COLLECTION_TEMPLATE"."NAME" IS '模板名称';
+
+COMMENT ON COLUMN "MP_SITUATION_COLLECTION_TEMPLATE"."OS_TYPE" IS '(单选) 操作系统类型 0:windows, 1:Unix, 2:Linux, 3:BSD, 4:Other';
+
+COMMENT ON COLUMN "MP_SITUATION_COLLECTION_TEMPLATE"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SITUATION_COLLECTION_TEMPLATE"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_SITUATION_COLLECTION_TEMPLATE_PROBE" IS '采集模板探针关系表';
+
+COMMENT ON COLUMN "MP_SITUATION_COLLECTION_TEMPLATE_PROBE"."CONFIG" IS '探针配置，json串，数组';
+
+COMMENT ON COLUMN "MP_SITUATION_COLLECTION_TEMPLATE_PROBE"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SITUATION_COLLECTION_TEMPLATE_PROBE"."CREATOR" IS '创建者用户名';
+
+COMMENT ON COLUMN "MP_SITUATION_COLLECTION_TEMPLATE_PROBE"."DESCRIPTION" IS '描述';
+
+COMMENT ON COLUMN "MP_SITUATION_COLLECTION_TEMPLATE_PROBE"."DISABLED" IS '0:不启用，1:启用';
+
+COMMENT ON COLUMN "MP_SITUATION_COLLECTION_TEMPLATE_PROBE"."ENGINE" IS '分析引擎';
+
+COMMENT ON COLUMN "MP_SITUATION_COLLECTION_TEMPLATE_PROBE"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_SITUATION_COLLECTION_TEMPLATE_PROBE"."INTERVAL_SEC" IS '探针执行间隔，为大于1的数值，单位秒，采集模板该值可以覆盖探针的interval_sec';
+
+COMMENT ON COLUMN "MP_SITUATION_COLLECTION_TEMPLATE_PROBE"."NAME" IS '探针名称';
+
+COMMENT ON COLUMN "MP_SITUATION_COLLECTION_TEMPLATE_PROBE"."OS_TYPE" IS '(可多选)操作系统类型 0:Windows, 1:Unix, 2:Linux, 3:BSD, 4:Other';
+
+COMMENT ON COLUMN "MP_SITUATION_COLLECTION_TEMPLATE_PROBE"."OUTPUT_FORMAT" IS '自定义探针输出格式: none, json, plain';
+
+COMMENT ON COLUMN "MP_SITUATION_COLLECTION_TEMPLATE_PROBE"."PARAMETER" IS '探针参数';
+
+COMMENT ON COLUMN "MP_SITUATION_COLLECTION_TEMPLATE_PROBE"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SITUATION_COLLECTION_TEMPLATE_PROBE"."PROBE_CATEGORY" IS '0:信息类 1:事件类 2:日志类 ';
+
+COMMENT ON COLUMN "MP_SITUATION_COLLECTION_TEMPLATE_PROBE"."PROBE_ID" IS '探针id';
+
+COMMENT ON COLUMN "MP_SITUATION_COLLECTION_TEMPLATE_PROBE"."SCRIPT_TYPE" IS '0:shell 1:python 2:bat';
+
+COMMENT ON COLUMN "MP_SITUATION_COLLECTION_TEMPLATE_PROBE"."SCRIPT_URL" IS '探针脚本内容fdfs地址，采集模板单独存一份，防止自定义探针代码修改之后，影响到采集模板';
+
+COMMENT ON COLUMN "MP_SITUATION_COLLECTION_TEMPLATE_PROBE"."TEMPLATE_ID" IS '采集模板id';
+
+COMMENT ON COLUMN "MP_SITUATION_COLLECTION_TEMPLATE_PROBE"."TYPE" IS '0:通用探针 1:自定义探针';
+
+COMMENT ON COLUMN "MP_SITUATION_COLLECTION_TEMPLATE_PROBE"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_SITUATION_PROBE" IS '探针基本信息';
+
+COMMENT ON COLUMN "MP_SITUATION_PROBE"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SITUATION_PROBE"."CREATOR" IS '创建者用户名';
+
+COMMENT ON COLUMN "MP_SITUATION_PROBE"."DESCRIPTION" IS '描述';
+
+COMMENT ON COLUMN "MP_SITUATION_PROBE"."ENGINE" IS '分析引擎';
+
+COMMENT ON COLUMN "MP_SITUATION_PROBE"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_SITUATION_PROBE"."INTERVAL_SEC" IS '探针执行间隔，为大于1的数值，单位秒';
+
+COMMENT ON COLUMN "MP_SITUATION_PROBE"."IS_DELETED" IS '1:删除 0:未删除';
+
+COMMENT ON COLUMN "MP_SITUATION_PROBE"."NAME" IS '探针名称';
+
+COMMENT ON COLUMN "MP_SITUATION_PROBE"."OS_TYPE" IS '(可多选)操作系统类型 0:Windows, 1:Unix, 2:Linux, 3:BSD, 4:Other';
+
+COMMENT ON COLUMN "MP_SITUATION_PROBE"."OUTPUT_FORMAT" IS '自定义探针输出格式: none, json, plain';
+
+COMMENT ON COLUMN "MP_SITUATION_PROBE"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SITUATION_PROBE"."PROBE_CATEGORY" IS '0:信息类 1:事件类 2:日志类 ';
+
+COMMENT ON COLUMN "MP_SITUATION_PROBE"."TYPE" IS '0:通用探针 1:自定义探针';
+
+COMMENT ON COLUMN "MP_SITUATION_PROBE"."UPDATE_TIME" IS '更新时间';
+
+CREATE INDEX "INDEX1758066555381400"
+ON "MP_SITUATION_PROBE_PARAM"("TEMPLATE_ID","PROBE_ID");
+ALTER INDEX "INDEX1758066555381400" VISIBLE;
+
+CREATE INDEX "PROBE_ID"
+ON "MP_SITUATION_PROBE_SCRIPT"("PROBE_ID","SCRIPT_TYPE");
+ALTER INDEX "PROBE_ID" VISIBLE;
+
+CREATE INDEX "ATTCK"
+ON "MP_SITUATION_SURICATARULE"("ATTCK");
+ALTER INDEX "ATTCK" VISIBLE;
+
+CREATE INDEX "PROTOCOL"
+ON "MP_SITUATION_SURICATARULE"("PROTOCOL");
+ALTER INDEX "PROTOCOL" VISIBLE;
+
+CREATE INDEX "RULE_NAME"
+ON "MP_SITUATION_SURICATARULE"("RULE_NAME");
+ALTER INDEX "RULE_NAME" VISIBLE;
+
+CREATE INDEX "INDEX1758066791355800"
+ON "MP_SYS_NOTICE"("TITLE");
+ALTER INDEX "INDEX1758066791355800" VISIBLE;
+
+CREATE INDEX "INDEX1758066802066200"
+ON "MP_SYS_NOTICE_ORG"("ORG","NOTICE_ID");
+ALTER INDEX "INDEX1758066802066200" VISIBLE;
+
+CREATE INDEX "INDEX1758066812996500"
+ON "MP_SYS_NOTICE_READ"("USER","NOTICE_ID");
+ALTER INDEX "INDEX1758066812996500" VISIBLE;
+
+CREATE INDEX "NOTICE_ID"
+ON "MP_SYS_NOTICE_READ"("NOTICE_ID");
+ALTER INDEX "NOTICE_ID" VISIBLE;
+
+CREATE INDEX "INDEX1758066830814100"
+ON "MP_SYS_NOTICE_ROLE"("ROLE","NOTICE_ID");
+ALTER INDEX "INDEX1758066830814100" VISIBLE;
+
+CREATE INDEX "INDEX1758066840695400"
+ON "MP_SYS_NOTICE_USER"("USER","NOTICE_ID");
+ALTER INDEX "INDEX1758066840695400" VISIBLE;
+
+COMMENT ON TABLE "MP_SITUATION_PROBE_PARAM" IS '探针或者采集模板的参数';
+
+COMMENT ON COLUMN "MP_SITUATION_PROBE_PARAM"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SITUATION_PROBE_PARAM"."DEFAULT_VALUE" IS '默认值';
+
+COMMENT ON COLUMN "MP_SITUATION_PROBE_PARAM"."DESCRIPTION" IS '描述';
+
+COMMENT ON COLUMN "MP_SITUATION_PROBE_PARAM"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_SITUATION_PROBE_PARAM"."NAME" IS '探针名称';
+
+COMMENT ON COLUMN "MP_SITUATION_PROBE_PARAM"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SITUATION_PROBE_PARAM"."PROBE_ID" IS '探针id';
+
+COMMENT ON COLUMN "MP_SITUATION_PROBE_PARAM"."TEMPLATE_ID" IS '采集模板id';
+
+COMMENT ON COLUMN "MP_SITUATION_PROBE_PARAM"."TYPE" IS '参数类型 0:number 1:string 2:bool 3:ip';
+
+COMMENT ON COLUMN "MP_SITUATION_PROBE_PARAM"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_SITUATION_PROBE_SCRIPT" IS '探针脚本';
+
+COMMENT ON COLUMN "MP_SITUATION_PROBE_SCRIPT"."CHECKSUM" IS '脚本内容md5';
+
+COMMENT ON COLUMN "MP_SITUATION_PROBE_SCRIPT"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SITUATION_PROBE_SCRIPT"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_SITUATION_PROBE_SCRIPT"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SITUATION_PROBE_SCRIPT"."PROBE_ID" IS '探针id';
+
+COMMENT ON COLUMN "MP_SITUATION_PROBE_SCRIPT"."SCRIPT_CONTENT" IS '探针脚本内容';
+
+COMMENT ON COLUMN "MP_SITUATION_PROBE_SCRIPT"."SCRIPT_TYPE" IS '脚本类型 0:shell 1:python 2:bat';
+
+COMMENT ON COLUMN "MP_SITUATION_PROBE_SCRIPT"."SCRIPT_URL" IS '探针脚本内容url地址';
+
+COMMENT ON COLUMN "MP_SITUATION_PROBE_SCRIPT"."STATUS" IS '脚本状态';
+
+COMMENT ON COLUMN "MP_SITUATION_PROBE_SCRIPT"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON COLUMN "MP_SITUATION_PROBE_SCRIPT"."VERSION" IS '脚本版本';
+
+COMMENT ON TABLE "MP_SITUATION_SURICATARULE" IS '流量分析规则表';
+
+COMMENT ON COLUMN "MP_SITUATION_SURICATARULE"."ACTION" IS '匹配规则时进行的操作';
+
+COMMENT ON COLUMN "MP_SITUATION_SURICATARULE"."ATTCK" IS 'Att&ck';
+
+COMMENT ON COLUMN "MP_SITUATION_SURICATARULE"."CLASS_TYPE_CN" IS '流量规则分类类型中文';
+
+COMMENT ON COLUMN "MP_SITUATION_SURICATARULE"."CLASS_TYPE_EN" IS '流量规则分类类型英文';
+
+COMMENT ON COLUMN "MP_SITUATION_SURICATARULE"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SITUATION_SURICATARULE"."DESTINATION" IS '目的ip';
+
+COMMENT ON COLUMN "MP_SITUATION_SURICATARULE"."DESTINATION_PORTS" IS '目的端口';
+
+COMMENT ON COLUMN "MP_SITUATION_SURICATARULE"."DIRECTION" IS '方向';
+
+COMMENT ON COLUMN "MP_SITUATION_SURICATARULE"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_SITUATION_SURICATARULE"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SITUATION_SURICATARULE"."PROTOCOL" IS '协议';
+
+COMMENT ON COLUMN "MP_SITUATION_SURICATARULE"."RULE_GEN_TYPE" IS '规则生成类型0-预定义，用户不能编辑 1-自定义，用户可以编辑';
+
+COMMENT ON COLUMN "MP_SITUATION_SURICATARULE"."RULE_MSG" IS '规则体';
+
+COMMENT ON COLUMN "MP_SITUATION_SURICATARULE"."RULE_NAME" IS '规则名称';
+
+COMMENT ON COLUMN "MP_SITUATION_SURICATARULE"."SID" IS '签名id';
+
+COMMENT ON COLUMN "MP_SITUATION_SURICATARULE"."SOURCE" IS '源ip';
+
+COMMENT ON COLUMN "MP_SITUATION_SURICATARULE"."SOURCE_PORTS" IS '源端口';
+
+COMMENT ON COLUMN "MP_SITUATION_SURICATARULE"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_SYS_NOTICE" IS '系统公告';
+
+COMMENT ON COLUMN "MP_SYS_NOTICE"."CONTENT" IS '公告内容';
+
+COMMENT ON COLUMN "MP_SYS_NOTICE"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SYS_NOTICE"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_SYS_NOTICE"."IS_PUBLIC" IS '是否公开，对所有人可见  0:否 1:是 默认是0';
+
+COMMENT ON COLUMN "MP_SYS_NOTICE"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SYS_NOTICE"."PUBLISHER" IS '发布人';
+
+COMMENT ON COLUMN "MP_SYS_NOTICE"."TENANT" IS '租户';
+
+COMMENT ON COLUMN "MP_SYS_NOTICE"."TITLE" IS '标题';
+
+COMMENT ON COLUMN "MP_SYS_NOTICE"."TOP" IS '置顶数字(采用当前时间戳，越大越靠前)';
+
+COMMENT ON COLUMN "MP_SYS_NOTICE"."TYPE" IS '公告类型 1:系统、2:课程、3:练习、4:考试';
+
+COMMENT ON COLUMN "MP_SYS_NOTICE"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_SYS_NOTICE_ORG" IS '系统公告组织关系表';
+
+COMMENT ON COLUMN "MP_SYS_NOTICE_ORG"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SYS_NOTICE_ORG"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_SYS_NOTICE_ORG"."NOTICE_ID" IS '公告ID';
+
+COMMENT ON COLUMN "MP_SYS_NOTICE_ORG"."ORG" IS '组织id';
+
+COMMENT ON COLUMN "MP_SYS_NOTICE_ORG"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SYS_NOTICE_ORG"."TENANT" IS '租户';
+
+COMMENT ON COLUMN "MP_SYS_NOTICE_ORG"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_SYS_NOTICE_READ" IS '系统公告消息(已读/推送)统计表';
+
+COMMENT ON COLUMN "MP_SYS_NOTICE_READ"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SYS_NOTICE_READ"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_SYS_NOTICE_READ"."IS_NEED_PUSH" IS '是否推送本条公告 1:是（需要推送）； 0:否（不再推送）默认为1';
+
+COMMENT ON COLUMN "MP_SYS_NOTICE_READ"."IS_READED" IS '是否已读 1:已读 0:未读  首次创建一条数据即为已读';
+
+COMMENT ON COLUMN "MP_SYS_NOTICE_READ"."NOTICE_ID" IS '公告ID';
+
+COMMENT ON COLUMN "MP_SYS_NOTICE_READ"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SYS_NOTICE_READ"."READ_COUNT" IS '已读次数 首次创建一条数据即为已读次数为1';
+
+COMMENT ON COLUMN "MP_SYS_NOTICE_READ"."TENANT" IS '租户';
+
+COMMENT ON COLUMN "MP_SYS_NOTICE_READ"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON COLUMN "MP_SYS_NOTICE_READ"."USER" IS '用户ID(读者)';
+
+COMMENT ON TABLE "MP_SYS_NOTICE_ROLE" IS '系统公告角色关系表';
+
+COMMENT ON COLUMN "MP_SYS_NOTICE_ROLE"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SYS_NOTICE_ROLE"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_SYS_NOTICE_ROLE"."NOTICE_ID" IS '公告ID';
+
+COMMENT ON COLUMN "MP_SYS_NOTICE_ROLE"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SYS_NOTICE_ROLE"."ROLE" IS '角色ID';
+
+COMMENT ON COLUMN "MP_SYS_NOTICE_ROLE"."TENANT" IS '租户';
+
+COMMENT ON COLUMN "MP_SYS_NOTICE_ROLE"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON TABLE "MP_SYS_NOTICE_USER" IS '系统公告用户关系表';
+
+COMMENT ON COLUMN "MP_SYS_NOTICE_USER"."CREATE_TIME" IS '创建时间';
+
+COMMENT ON COLUMN "MP_SYS_NOTICE_USER"."ID" IS 'ID';
+
+COMMENT ON COLUMN "MP_SYS_NOTICE_USER"."NOTICE_ID" IS '公告ID';
+
+COMMENT ON COLUMN "MP_SYS_NOTICE_USER"."PK" IS '主键';
+
+COMMENT ON COLUMN "MP_SYS_NOTICE_USER"."TENANT" IS '租户';
+
+COMMENT ON COLUMN "MP_SYS_NOTICE_USER"."UPDATE_TIME" IS '更新时间';
+
+COMMENT ON COLUMN "MP_SYS_NOTICE_USER"."USER" IS '用户ID';
+
