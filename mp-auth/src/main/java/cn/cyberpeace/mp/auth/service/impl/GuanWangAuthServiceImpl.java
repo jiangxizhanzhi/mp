@@ -48,7 +48,11 @@ public class GuanWangAuthServiceImpl {
         GetTokenRes getTokenRes = this.getToken(code, request, response);
         ThirdUser userInfo = this.getThirdUser(getTokenRes.getAccessToken());
 
-        HumanCondition condition = new HumanCondition().filterEqual(UserModel::getThirdAccountNo, userInfo.getAccount_no());
+        HumanCondition condition = new HumanCondition()
+                .filterOrStart()
+                .orEqual(UserModel::getThirdAccountNo, userInfo.getAccount_no())
+                .orEqual(UserModel::getUsername,userInfo.getAccount_no())
+                .filterOrEnd();
         UserModel userModel = BeanCommon.getBean(UserMapper.class).first(condition);
         if (Objects.isNull(userModel)) {
             log.info("用户不存在 , username is {}", userInfo.getAccount_no());
