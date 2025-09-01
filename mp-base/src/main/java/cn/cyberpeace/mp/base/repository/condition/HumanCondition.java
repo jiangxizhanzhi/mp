@@ -59,7 +59,7 @@ public class HumanCondition {
     }
 
     public String genLinkFieldName(String linkName, String fieldName) {
-        return StringUtils.joinWith(".", linkName, "\""+fieldName+"\"");
+        return StringUtils.joinWith(".", linkName, fieldName);
     }
 
     public String genLinkFieldName(Class<?> model, String fieldName) {

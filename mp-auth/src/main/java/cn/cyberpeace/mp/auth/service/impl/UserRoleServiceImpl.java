@@ -35,7 +35,6 @@ import cn.cyberpeace.mp.base.service.result.ObjResult;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
@@ -393,41 +392,23 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
         HumanCondition orgCondition = new HumanCondition()
                 .filterIn(TenantUserModel::getUser, uIds.toArray())
                 .select(TenantUserModel::getUser)
-                .selectAs(TenantUserModel::getOrg, "orgs");
+                .selectAs(GroupConcat.f(TenantUserModel::getOrg).distinct(), "orgs")
+                .groupBy(TenantUserModel::getUser);
         List<Map<String, Object>> userOrgMaps = tenantUserMapper.originList(orgCondition);
-
-        Map<String, List<String>> userOrgsMap = new HashMap<>();
-        for (Map<String, Object> userOrg : userOrgMaps) {
-            String userId = (String) userOrg.get(UserOrgRoleBo.FIELD_USER);
-            String orgId = (String) userOrg.get(UserOrgRoleBo.FIELD_ORGS);
-            List<String> userOrgs = userOrgsMap.getOrDefault(userId, new ArrayList<>());
-            userOrgs.add(orgId);
-            userOrgsMap.put(userId, userOrgs);
-        }
-
         Map<String, String> userOrgMap = new HashMap<>(userOrgMaps.size());
-        for (Map.Entry<String, List<String>> entry : userOrgsMap.entrySet()) {
-            userOrgMap.put(entry.getKey(), StringUtils.join(entry.getValue(), ","));
+        for (Map<String, Object> stringObjectMap : userOrgMaps) {
+            userOrgMap.put((String) stringObjectMap.get("user"), (String) stringObjectMap.getOrDefault("orgs", ""));
         }
 
         HumanCondition roleCondition = new HumanCondition()
                 .filterIn(UserRoleModel::getUser, uIds.toArray())
                 .select(UserRoleModel::getUser)
-                .selectAs(UserRoleModel::getRole, "roles");
+                .selectAs(GroupConcat.f(UserRoleModel::getRole).distinct(), "roles")
+                .groupBy(UserRoleModel::getUser);
         List<Map<String, Object>> userRoleMaps = getModelMapper().originList(roleCondition);
-
-        Map<String, List<String>> userRolesMap = new HashMap<>();
-        for (Map<String, Object> userRole : userRoleMaps) {
-            String userId = (String) userRole.get(UserOrgRoleBo.FIELD_USER);
-            String roleIdx = (String) userRole.get(UserOrgRoleBo.FIELD_ORGS);
-            List<String> userRoles = userRolesMap.getOrDefault(userId, new ArrayList<>());
-            userRoles.add(roleIdx);
-            userRolesMap.put(userId, userRoles);
-        }
-
         Map<String, String> userRoleMap = new HashMap<>(userRoleMaps.size());
-        for (Map.Entry<String, List<String>> entry : userRolesMap.entrySet()) {
-            userRoleMap.put(entry.getKey(), StringUtils.join(entry.getValue(), ","));
+        for (Map<String, Object> map : userRoleMaps) {
+            userRoleMap.put((String) map.get("user"), (String) map.getOrDefault("roles", ""));
         }
 
         List<UserOrgRoleBo> UserOrgRoleBos = new ArrayList<>(userModels.size());
@@ -468,41 +449,23 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
         HumanCondition orgCondition = new HumanCondition()
                 .filterIn(TenantUserModel::getUser, uIds.toArray())
                 .select(TenantUserModel::getUser)
-                .selectAs(TenantUserModel::getOrg, "orgs");
+                .selectAs(GroupConcat.f(TenantUserModel::getOrg).distinct(), "orgs")
+                .groupBy(TenantUserModel::getUser);
         List<Map<String, Object>> userOrgMaps = tenantUserMapper.originList(orgCondition);
-
-        Map<String, List<String>> userOrgsMap = new HashMap<>();
-        for (Map<String, Object> userOrg : userOrgMaps) {
-            String userId = (String) userOrg.get(UserOrgRoleBo.FIELD_USER);
-            String orgId = (String) userOrg.get(UserOrgRoleBo.FIELD_ORGS);
-            List<String> userOrgs = userOrgsMap.getOrDefault(userId, new ArrayList<>());
-            userOrgs.add(orgId);
-            userOrgsMap.put(userId, userOrgs);
-        }
-
         Map<String, String> userOrgMap = new HashMap<>(userOrgMaps.size());
-        for (Map.Entry<String, List<String>> entry : userOrgsMap.entrySet()) {
-            userOrgMap.put(entry.getKey(), StringUtils.join(entry.getValue(), ","));
+        for (Map<String, Object> stringObjectMap : userOrgMaps) {
+            userOrgMap.put((String) stringObjectMap.get("user"), (String) stringObjectMap.getOrDefault("orgs", ""));
         }
 
         HumanCondition roleCondition = new HumanCondition()
                 .filterIn(UserRoleModel::getUser, uIds.toArray())
                 .select(UserRoleModel::getUser)
-                .selectAs(UserRoleModel::getRole, "roles");
+                .selectAs(GroupConcat.f(UserRoleModel::getRole).distinct(), "roles")
+                .groupBy(UserRoleModel::getUser);
         List<Map<String, Object>> userRoleMaps = getModelMapper().originList(roleCondition);
-
-        Map<String, List<String>> userRolesMap = new HashMap<>();
-        for (Map<String, Object> userRole : userRoleMaps) {
-            String userId = (String) userRole.get(UserOrgRoleBo.FIELD_USER);
-            String roleIdX = (String) userRole.get(UserOrgRoleBo.FIELD_ORGS);
-            List<String> userRoles = userRolesMap.getOrDefault(userId, new ArrayList<>());
-            userRoles.add(roleIdX);
-            userRolesMap.put(userId, userRoles);
-        }
-
         Map<String, String> userRoleMap = new HashMap<>(userRoleMaps.size());
-        for (Map.Entry<String, List<String>> entry : userRolesMap.entrySet()) {
-            userRoleMap.put(entry.getKey(), StringUtils.join(entry.getValue(), ","));
+        for (Map<String, Object> map : userRoleMaps) {
+            userRoleMap.put((String) map.get("user"), (String) map.getOrDefault("roles", ""));
         }
 
         List<UserOrgRoleBo> userOrgRoleBos = new ArrayList<>(userModels.size());

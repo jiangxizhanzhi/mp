@@ -1304,3 +1304,32 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return new ArrayList<>();
     }
 }
+
+@Deprecated
+class GroupConcat extends Aggregation<GroupConcat> {
+
+    public static Function<String, String> genDistinct() {
+        return column -> String.format("distinct (%s)", column);
+    }
+
+    public GroupConcat distinct() {
+        addCalc(genDistinct());
+        return this;
+    }
+
+    public static GroupConcat f(String fieldName) {
+        GroupConcat aggregation = new GroupConcat();
+        aggregation.setFieldName(fieldName);
+        return aggregation;
+    }
+
+    public static <T> GroupConcat f(SerializableFunction<T> getter) {
+        String fieldName = BeanUtils.getBeanGetterFieldName(getter);
+        return f(fieldName);
+    }
+
+    @Override
+    public String getFuncName() {
+        return "group_concat";
+    }
+}

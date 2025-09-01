@@ -25,4 +25,5 @@ public interface UserOnlineRecordMapper extends BaseModelMapper<UserOnlineRecord
                                                       @Param("priorityUserIds") List<String> priorityUserIds,
                                                       @Param("startTime") LocalDateTime startTime,
                                                       @Param("endTime") LocalDateTime endTime);
+
 }

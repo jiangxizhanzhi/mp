@@ -85,21 +85,6 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
         }
 
         PageHelper.startPage(req.getPage(), req.getPageSize());
-        // 查询时需要排前面的用户id
-        List<String> frontUserIds = onlinedUserIds;
-        // 排后面的userid
-        List<String> behindUserIds = req.getUserIds() == null ? new ArrayList<>() : new ArrayList<>(req.getUserIds());
-        behindUserIds.removeAll(frontUserIds);
-        if (CollectionUtils.isNotEmpty(frontUserIds) && CollectionUtils.isNotEmpty(behindUserIds)) {
-            // 先查front中的 再查behind中的 ， union之后分页
-        } else if (CollectionUtils.isNotEmpty(frontUserIds)) {
-
-        } else if (CollectionUtils.isNotEmpty(behindUserIds)) {
-
-        } else {
-
-        }
-
         List<UserOnlineRecordSummaryBo> recordSummaryDtoList = getModelMapper().listRecordSummary(req.getUserIds(), onlinedUserIds, req.getStartTime(), req.getEndTime());
         PageInfo pageInfo = new PageInfo(recordSummaryDtoList);
         List<UserOnlineRecordSummaryBo> summaryDtos = pageInfo.getList();

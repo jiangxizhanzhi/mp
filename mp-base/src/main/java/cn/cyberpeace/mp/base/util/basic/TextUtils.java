@@ -86,44 +86,6 @@ public class TextUtils {
         return sb.toString();
     }
 
-    public static String[] lineToHumpV2(String[] strs) {
-        if (strs == null) {
-            return new String[0];
-        }
-
-        String[] result = new String[strs.length];
-        for (int i = 0; i < strs.length; i++) {
-            result[i] = lineToHump(strs[i]);
-        }
-        return result;
-    }
-
-    public static String humpToLineV2(String str) {
-        if (str == null) {
-            return null;
-        }
-
-        StringBuilder sb = new StringBuilder();
-        Matcher matcher = humpPattern.matcher(str);
-        while (matcher.find()) {
-            matcher.appendReplacement(sb, "_" + matcher.group(0).toLowerCase());
-        }
-        matcher.appendTail(sb);
-        return "\"" + sb.toString() + "\"";
-    }
-
-    public static String[] humpToLineV2(String[] strs) {
-        if (strs == null) {
-            return new String[0];
-        }
-
-        String[] result = new String[strs.length];
-        for (int i = 0; i < strs.length; i++) {
-            result[i] = humpToLineV2(strs[i]);
-        }
-        return result;
-    }
-
     public static String[] humpToLine(String[] strs) {
         if (strs == null) {
             return new String[0];
