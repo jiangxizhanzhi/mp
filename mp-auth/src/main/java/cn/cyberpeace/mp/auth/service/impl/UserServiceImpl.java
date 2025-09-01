@@ -1238,41 +1238,23 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         HumanCondition orgUserCondition = new HumanCondition()
                 .filterIn(TenantUserModel::getUser, userIds)
                 .select(TenantUserModel::getUser)
-                .selectAs(TenantUserModel::getOrg, UserOrgRoleBo.FIELD_ORGS);
+                .selectAs(GroupConcat.f(TenantUserModel::getOrg).distinct(), UserOrgRoleBo.FIELD_ORGS)
+                .groupBy(TenantUserModel::getUser);
         List<Map<String, Object>> orgs = tenantUserMapper.originList(orgUserCondition);
-
-        Map<String, List<String>> userOrgsMap = new HashMap<>();
-        for (Map<String, Object> userOrg : orgs) {
-            String userId = (String) userOrg.get(UserOrgRoleBo.FIELD_USER);
-            String orgId = (String) userOrg.get(UserOrgRoleBo.FIELD_ORGS);
-            List<String> userOrgs = userOrgsMap.getOrDefault(userId, new ArrayList<>());
-            userOrgs.add(orgId);
-            userOrgsMap.put(userId, userOrgs);
-        }
-
         Map<String, String> orgMap = new HashMap<>();
-        for (Map.Entry<String, List<String>> entry : userOrgsMap.entrySet()) {
-            orgMap.put(entry.getKey(), StringUtils.join(entry.getValue(), ","));
+        for (Map<String, Object> userOrg : orgs) {
+            orgMap.put((String) userOrg.get(UserOrgRoleBo.FIELD_USER), (String) userOrg.get(UserOrgRoleBo.FIELD_ORGS));
         }
 
         HumanCondition userRoleCondition = new HumanCondition()
                 .filterIn(UserRoleModel::getUser, userIds)
                 .select(UserRoleModel::getUser)
-                .selectAs(UserRoleModel::getRole, UserOrgRoleBo.FIELD_ROLES);
+                .selectAs(GroupConcat.f(UserRoleModel::getRole).distinct(), UserOrgRoleBo.FIELD_ROLES)
+                .groupBy(UserRoleModel::getUser);
         List<Map<String, Object>> roles = userRoleMapper.originList(userRoleCondition);
-
-        Map<String, List<String>> userRolesMap = new HashMap<>();
-        for (Map<String, Object> userRole : roles) {
-            String userId = (String) userRole.get(UserOrgRoleBo.FIELD_USER);
-            String roleId = (String) userRole.get(UserOrgRoleBo.FIELD_ORGS);
-            List<String> userRoles = userRolesMap.getOrDefault(userId, new ArrayList<>());
-            userRoles.add(roleId);
-            userRolesMap.put(userId, userRoles);
-        }
-
         Map<String, String> roleMap = new HashMap<>();
-        for (Map.Entry<String, List<String>> entry : userRolesMap.entrySet()) {
-            roleMap.put(entry.getKey(), StringUtils.join(entry.getValue(), ","));
+        for (Map<String, Object> userRole : roles) {
+            roleMap.put((String) userRole.get(UserOrgRoleBo.FIELD_USER), (String) userRole.get(UserOrgRoleBo.FIELD_ROLES));
         }
 
         List<UserOrgRoleBo> userOrgRoleBos = new ArrayList<>();
@@ -1305,7 +1287,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 }
 
-@Deprecated
 class GroupConcat extends Aggregation<GroupConcat> {
 
     public static Function<String, String> genDistinct() {

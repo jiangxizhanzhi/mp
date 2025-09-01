@@ -13,7 +13,6 @@ import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.base.util.basic.CollectionUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
-import dm.jdbc.driver.DmdbNClob;
 import lombok.Data;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -91,18 +90,7 @@ public interface BaseModelMapper<M extends BaseModel> {
 
             if (mapFieldName != null) {
                 Object fieldValue = handleRawFieldValue(fieldType, map.get(mapFieldName));
-                if (objWrapper.getPropertyType(fieldName) == Boolean.class && fieldValue instanceof Byte) {
-                    // 达梦数据库 需要把byte手动转成boolean
-                    objWrapper.setPropertyValue(fieldName, Byte.valueOf((byte) 1).equals(fieldValue));
-                } else if (objWrapper.getPropertyType(fieldName) == String.class && fieldValue instanceof DmdbNClob) {
-                    String value = ((DmdbNClob)fieldValue).data;
-                    objWrapper.setPropertyValue(fieldName, value);
-                }else if (objWrapper.getPropertyType(fieldName) == Long.class && fieldValue instanceof DmdbNClob) {
-                    String value = ((DmdbNClob)fieldValue).data;
-                    objWrapper.setPropertyValue(fieldName, Long.valueOf(value));
-                } else {
-                    objWrapper.setPropertyValue(fieldName, fieldValue);
-                }
+                objWrapper.setPropertyValue(fieldName, fieldValue);
             }
         }
 
