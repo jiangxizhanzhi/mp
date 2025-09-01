@@ -137,6 +137,9 @@ public class UserController {
     @GetMapping("/current")
     public ServiceResult<UserBo> getCurrentUser() {
         UserBo userBo = userService.getCurrentUserDto();
+        if (userBo != null && userBo.getIsAdmin() != null && userBo.getIsAdmin() == 1) {
+            userBo.setIsSuperUser(1);
+        }
         return ResultCommon.success(userBo);
     }
 
