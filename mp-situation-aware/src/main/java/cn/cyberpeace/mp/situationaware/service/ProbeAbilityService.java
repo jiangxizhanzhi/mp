@@ -49,18 +49,8 @@ public class ProbeAbilityService {
         }
         ProbeSearchCondition condition = new ProbeSearchCondition();
         BeanUtils.copyProperties(pageRequest, condition);
+        PageHelper.startPage(pageRequest.getPage(), pageRequest.getPageSize());
         List<ProbeAbilityDto> dtos = probeAbilityMapper.listProbeAbilityDtos(condition);
-
-        int page = pageRequest.getPage() == null ? 1 : pageRequest.getPage();
-        int pageSize = pageRequest.getPageSize() == null ? 10 : pageRequest.getPageSize();
-        int start = (page - 1) * pageSize;
-        int end = start + pageSize;
-        if (dtos.size() == 0 || start > dtos.size() - 1) {
-            dtos = new ArrayList<>();
-        } else {
-            dtos = dtos.subList(start, Math.min(end, dtos.size()));
-        }
-
         PageInfo<ProbeAbilityDto> pageInfo = new PageInfo(dtos);
         dtos.forEach(dto -> {
             processProbeDtoOsTypes(dto);
