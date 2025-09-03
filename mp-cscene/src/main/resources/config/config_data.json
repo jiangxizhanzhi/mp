@@ -1,0 +1,14 @@
+[
+  {
+    "content": "找到下列符合条件的节点",
+    "type": "update_config",
+    "button": "",
+    "url": ""
+  },
+  {
+    "content": "节点{name},原配置{origin_cpu}核cpu/{origin_ram}M内存/{origin_disk}G磁盘,修改后{cpu}核cpu/{ram}M内存/{disk}G磁盘",
+    "type": "update_config",
+    "button": "应用",
+    "url": ""
+  }
+]

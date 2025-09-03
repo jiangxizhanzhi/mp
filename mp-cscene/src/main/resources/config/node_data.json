@@ -1,0 +1,26 @@
+[
+  {
+    "content": "从仿真资源库中搜索资源",
+    "type": "add_node",
+    "button": "",
+    "url": ""
+  },
+  {
+    "content": "  节点类型一： 仿真资源\\网络域设备\\网络设备\\C3725",
+    "type": "add_node",
+    "button": "使用该设备",
+    "url": "/api/mp/devops/cluster/images/search/356baef1-be60-43f7-8497-9c47dda20001"
+  },
+  {
+    "content": "  节点类型二： 仿真资源\\网络域设备\\安防设备\\ 飞塔 3725防火墙",
+    "type": "add_node",
+    "button": "使用该设备",
+    "url": "/api/mp/devops/cluster/images/search/356baef1-be60-43f7-8497-9c47dda20002"
+  },
+  {
+    "content": "  节点类型三： 硬件资源\\思科 3725路由器实物设备",
+    "type": "add_node",
+    "button": "使用该设备",
+    "url": "/api/mp/devops/cluster/images/search/356baef1-be60-43f7-8497-9c47dda20003"
+  }
+]

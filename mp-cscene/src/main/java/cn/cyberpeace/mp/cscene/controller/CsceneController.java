@@ -61,6 +61,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -363,6 +364,34 @@ public class CsceneController implements BaseModelListControllerBase {
         res.getTopology().setOutAreaElementNum(this.modelService.getOutAreaElementNum(id, request.getAreaId(), res));
         CsceneDataModifier.correctReturnCsceneData(csceneBO);
         return new ServiceResult<>(csceneBO).asResult();
+    }
+
+
+    @ApiOperation("更新场景拓扑()")
+    @GetMapping("/ai_sync_with_template")
+    public ServiceResult<SceneConfigDataBO> syncWithTemplate2(@RequestParam("id") String id , @RequestParam("template_id") String templateId) {
+
+        String sceneId = this.modelService.get(id).getSource().getObj().getSceneConfig();
+        String templateSceneId = this.modelService.get(templateId).getSource().getObj().getSceneConfig();
+
+        SceneConfigService sceneConfigService = BeanCommon.getBean(SceneConfigService.class);
+
+        var originSceneConfig = sceneConfigService.get(sceneId, false, null, null).getSource();
+        var templateSceneConfig = sceneConfigService.get(templateSceneId, false, null, null).getSource();
+
+        this.removeId(templateSceneConfig);
+        this.updateOldId(templateSceneConfig);
+        this.modifyAreaId(templateSceneConfig, "");
+        templateSceneConfig.getTopology().setAreaId("");
+        CsceneDataModifier.handlerReturnPosition(templateSceneConfig);
+        this.mergeSceneConfig(originSceneConfig, templateSceneConfig);
+        sceneConfigService.sync(originSceneConfig, false, null);
+        var res = sceneConfigService.get(sceneId, true, "", null).getSource();
+        var csceneBO = new CsceneBO();
+        csceneBO.setSceneConfig(res);
+        res.getTopology().setOutAreaElementNum(this.modelService.getOutAreaElementNum(sceneId, "", res));
+        CsceneDataModifier.correctReturnCsceneData(csceneBO);
+        return new ServiceResult<>(csceneBO.getSceneConfig()).asResult();
     }
 
     private void modifyAreaId(SceneConfigDataBO sceneConfigDataBO, String areaId) {

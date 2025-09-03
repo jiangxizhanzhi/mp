@@ -1,0 +1,14 @@
+[
+  {
+    "content": "已生成所需验证环境的配置。",
+    "type": "add_topo",
+    "button": "",
+    "url": ""
+  },
+  {
+    "content": "{url}",
+    "type": "add_topo",
+    "button": "添加到当前拓扑",
+    "url": "/api/mp/cscene/cscenes/ai_sync_with_template?id={id}&template_id={template_id}"
+  }
+]
