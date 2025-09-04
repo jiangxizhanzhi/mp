@@ -161,9 +161,13 @@ public class AiController {
         private String type;
         @ApiModelProperty(value = "点击按钮使用的url")
         private String url;
+        @ApiModelProperty(value = "更改配置时，指定的节点id")
         private String nodeId;
+        @ApiModelProperty(value = "更改配置时，指定的cpu")
         private int cpu;
+        @ApiModelProperty(value = "更改配置时，指定的磁盘")
         private int disk;
+        @ApiModelProperty(value = "更改配置时，指定的内存")
         private int ram;
     }
 
