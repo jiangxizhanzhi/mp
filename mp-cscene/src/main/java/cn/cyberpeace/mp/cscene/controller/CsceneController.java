@@ -98,7 +98,6 @@ import java.util.regex.Pattern;
 @AuthTarget({TargetEnum.CT_AD_LIST, TargetEnum.CT_CFS_LIST, TargetEnum.CT_OPERATION_LIST, TargetEnum.CR_INDIVIDUAL_TRAINING, TargetEnum.CR_TEAM_TRAINING, TargetEnum.RED_BLUE, TargetEnum.RANGE_TEST_SELF })
 public class CsceneController implements BaseModelListControllerBase {
 
-
     private CsceneService modelService;
 
     private CsceneSpecialService csceneSpecialService;
