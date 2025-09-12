@@ -15,11 +15,12 @@ apply from: 'mp/config.gradle'
 allprojects {
     repositories {
         maven {
-            url 'http://10.100.3.3:8081/repository/maven-public/'
-        }
-        maven {
             url 'https://maven.aliyun.com/repository/public/'
         }
+        maven {
+            url 'http://10.100.3.3:8081/repository/maven-public/'
+        }
+
         mavenLocal()
         mavenCentral()
     }

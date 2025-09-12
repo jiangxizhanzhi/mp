@@ -5,7 +5,10 @@ import cn.cyberpeace.mp.auth.bo.user.UserSimpleBo;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.model.UserOnlineRecordModel;
+import cn.cyberpeace.mp.auth.request.user.OnlineUserReq;
 import cn.cyberpeace.mp.auth.request.user.UserRequest;
+import cn.cyberpeace.mp.auth.service.UserOnlineRecordService;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.annotation.AuthTarget;
@@ -23,6 +26,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -36,8 +40,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @Description: 用户管理接口
@@ -52,6 +58,8 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+    @Autowired
+    private UserOnlineRecordService userOnlineRecordService;
 
     @AuthTarget(TargetEnum.USER_MANAGE)
     @ApiOperation("删除指定id用户")
@@ -92,6 +100,19 @@ public class UserController {
     public ObjServiceResult<UserBo> get(@PathVariable String id, @RequestParam(required = false) String[] fields) {
         UserBo userBo = userService.getUserDto(id);
         return ResultUtils.obj2ObjServiceResult(userBo);
+    }
+
+
+    @ApiOperation(value="查询当前在线的用户ids")
+    @PostMapping("/online")
+    public ServiceResult<List<String>> listOnlineIds(@RequestBody OnlineUserReq onlineUserReq) {
+        List<UserOnlineRecordModel> userOnlineRecordModels = userOnlineRecordService.listCurrentOnlined(onlineUserReq.getIds());
+        if (CollectionUtils.isEmpty(userOnlineRecordModels)) {
+            return new ServiceResult<>(Collections.emptyList());
+        } else {
+            return new ServiceResult<>(userOnlineRecordModels.stream()
+                    .map(UserOnlineRecordModel::getUser).collect(Collectors.toList()));
+        }
     }
 
 
