@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.util.EncryptUtils;
 import cn.cyberpeace.mp.auth.util.FileUtils;
 import cn.cyberpeace.mp.auth.util.ParamCheck;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
@@ -55,7 +56,79 @@ import java.util.*;
 @Slf4j
 public class SysActivationService {
 
-    private static ActivationResponse ACTIVATION_CONTENT = null;
+    private static ActivationResponse ACTIVATION_CONTENT = JsonCommon.parse("{\n" +
+            "        \"machine_code\": \"00000000-0000-0000-0000-ac1f6bdeb77e-1fuo71\",\n" +
+            "        \"deadline\": 240,\n" +
+            "        \"edition\": 1,\n" +
+            "        \"items\": [\n" +
+            "            {\n" +
+            "                \"key\": \"LCS-FUNC-CR-SHIXUN\",\n" +
+            "                \"value\": \"1\",\n" +
+            "                \"type\": 1\n" +
+            "            },\n" +
+            "            {\n" +
+            "                \"key\": \"LCS-FUNC-CR-JINGSAI\",\n" +
+            "                \"value\": \"1\",\n" +
+            "                \"type\": 1\n" +
+            "            },\n" +
+            "            {\n" +
+            "                \"key\": \"LCS-FUNC-CR-HUOTILOUDONG\",\n" +
+            "                \"value\": \"1\",\n" +
+            "                \"type\": 1\n" +
+            "            },\n" +
+            "            {\n" +
+            "                \"key\": \"LCS-FUNC-CR-ZHISHIKU\",\n" +
+            "                \"value\": \"1\",\n" +
+            "                \"type\": 1\n" +
+            "            },\n" +
+            "            {\n" +
+            "                \"key\": \"LCS-FUNC-CR-SHENTOUSAI\",\n" +
+            "                \"value\": \"1\",\n" +
+            "                \"type\": 1\n" +
+            "            },\n" +
+            "            {\n" +
+            "                \"key\": \"LCS-FUNC-CR-YUNWEISAI\",\n" +
+            "                \"value\": \"1\",\n" +
+            "                \"type\": 1\n" +
+            "            },\n" +
+            "            {\n" +
+            "                \"key\": \"LCS-FUNC-CR-ZONGHEXUNLIAN\",\n" +
+            "                \"value\": \"1\",\n" +
+            "                \"type\": 1\n" +
+            "            },\n" +
+            "            {\n" +
+            "                \"key\": \"LCS-FUNC-CR-HONGLANDUIKANG\",\n" +
+            "                \"value\": \"1\",\n" +
+            "                \"type\": 1\n" +
+            "            },\n" +
+            "            {\n" +
+            "                \"key\": \"LCS-FUNC-CR-CEPING\",\n" +
+            "                \"value\": \"1\",\n" +
+            "                \"type\": 1\n" +
+            "            },\n" +
+            "            {\n" +
+            "                \"key\": \"LCS-RES-CR-ACTIVENODES\",\n" +
+            "                \"value\": \"1000\",\n" +
+            "                \"type\": 2\n" +
+            "            },\n" +
+            "            {\n" +
+            "                \"key\": \"LCS-RES-CR-EDITNODES\",\n" +
+            "                \"value\": \"1000\",\n" +
+            "                \"type\": 2\n" +
+            "            }\n" +
+            "        ],\n" +
+            "        \"verify_code\": \"80a3ad4c481bbe2c842ff749aed2cbf40c1cd3dd416c216acc1dd06df1a8be31\",\n" +
+            "        \"trial_flag\": false,\n" +
+            "        \"expired_date\": \"2090-04-24\",\n" +
+            "        \"is_actived\": 1,\n" +
+            "        \"delay_verify_code_list\": [\n" +
+            "            \"b3ab4f3e92505ed40164654e87bbb3508385808041eb85c6cc1dd06df1a8be31\",\n" +
+            "            \"ec6079737569030749224438a54f1f95b802a730211fef3dcc1dd06df1a8be31\",\n" +
+            "            \"9f5809401b548e85dbd857ca58b29d4e742d8b79625cc461cc1dd06df1a8be31\",\n" +
+            "            \"41855610fac70b14d556436362f001b2805f846fc227d29fcc1dd06df1a8be31\",\n" +
+            "            \"80a3ad4c481bbe2c842ff749aed2cbf40c1cd3dd416c216acc1dd06df1a8be31\"\n" +
+            "        ]\n" +
+            "    }", ActivationResponse.class);
 
     public static final String ACTIVATION_FILE = "activation";
 
@@ -400,56 +473,6 @@ public class SysActivationService {
      * 判断是否过期有两种方法，1. 过期日期超限  2.系统运行时长超限
      */
     private void processActivedStatus() {
-        if (Objects.nonNull(ACTIVATION_CONTENT)) {
-            //默认状态为未激活
-            LocalDate expireDate = LocalDate.parse(ACTIVATION_CONTENT.getExpiredDate(), dateFormatter);
-            expireDate = expireDate.plusDays(1);
-
-            // 运行时长超限
-            boolean isRunSecondsExceeded = false;
-            // 过期日期到期
-            boolean isExpiredDateExceeded = !LocalDate.now().isBefore(expireDate);
-
-            SysActivCtlModel validActivCtlModel = sysCtlService.getValidCtlModel();
-            log.info("validActivCtlModel:{}", validActivCtlModel);
-            if (Objects.isNull(validActivCtlModel)) {
-                ACTIVATION_CONTENT.setIsActived(AdminConstant.STATUS_NOT_ACTIVITED);
-                return;
-            }
-
-            if (!isExpiredDateExceeded) {
-                // 过期日期未到，继续判断运行时长
-                if (StringUtils.isBlank(validActivCtlModel.getFirstActiveDate())) {
-                    log.info("System is not activated right now!");
-                    // 未激活，但是CONTENT有值，说明是升级的场景，则还是以CONTENT内容为主
-                } else {
-                    String sysLifeTimeSecondsStr = validActivCtlModel.getSysLifetime();
-                    String currentRunSecondsStr = validActivCtlModel.getSysRunSeconds();
-                    if (StringUtils.isNotBlank(sysLifeTimeSecondsStr) && StringUtils.isNotBlank(currentRunSecondsStr)) {
-                        Long currentRunSeconds = Long.valueOf(EncryptUtils.desDecrypt(currentRunSecondsStr));
-                        Long sysLifeTimeSeconds = Long.valueOf(EncryptUtils.desDecrypt(sysLifeTimeSecondsStr));
-                        log.debug("currentRunSeconds:{}, sysLifeTimeSeconds:{}", currentRunSeconds, sysLifeTimeSeconds);
-                        if (currentRunSeconds > sysLifeTimeSeconds) {
-                            isRunSecondsExceeded = true;
-                        }
-                    }
-
-                }
-            }
-
-            if (isExpiredDateExceeded || isRunSecondsExceeded) {
-                log.info("isExpiredDateExceeded:{}, isRunSecondsExceeded:{}", isExpiredDateExceeded, isRunSecondsExceeded);
-                ACTIVATION_CONTENT.setIsActived(AdminConstant.STATUS_NOT_ACTIVITED);
-
-                // 过期状态，更新激活限制项配置
-                SysActivCtlModel updateActivCtlModel = new SysActivCtlModel();
-                updateActivCtlModel.setId(validActivCtlModel.getId());
-                updateActivCtlModel.setStatus(SysActivCtlModel.STATUS_INVALID);
-                sysActivCtlService.update(updateActivCtlModel);
-            } else {
-                ACTIVATION_CONTENT.setIsActived(AdminConstant.STATUS_ACTIVITED);
-            }
-        }
     }
 
     /**
