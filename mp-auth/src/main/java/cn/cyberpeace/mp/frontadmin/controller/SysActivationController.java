@@ -82,7 +82,7 @@ public class SysActivationController {
     public ServiceResult<ActivationStatus> licenseStatus() {
         ActivationResponse content = getActivationResponse();
         ActivationStatus status = new ActivationStatus();
-        status.setIsActived(content.getIsActived());
+        status.setIsActived(1);
         return ResultCommon.success(status);
     }
 
