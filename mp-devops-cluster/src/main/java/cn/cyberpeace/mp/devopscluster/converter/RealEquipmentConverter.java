@@ -34,11 +34,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
@@ -93,9 +89,13 @@ public class RealEquipmentConverter implements BaseConverter{
         }
         List<DeviceTargetPO> deviceTargetPOS = devopsTargetService.page(dto);
         List<String> list = new ArrayList<>();
+        Map<String, String> name2CreateUserMap = new HashMap<>();
+        Map<String, String> name2CreateUserNameMap = new HashMap<>();
         for (DeviceTargetPO targetPO : deviceTargetPOS) {
             String deviceTargetPO1Name = targetPO.getName();
             list.add(deviceTargetPO1Name);
+            name2CreateUserMap.put(targetPO.getName(), targetPO.getCreateUser());
+            name2CreateUserNameMap.put(targetPO.getName(), targetPO.getCreateUserName());
         }
         String[] imageNames = list.toArray(new String[0]);
         Map<String, List<DeviceReferCsceneStat>> referStateMap = csceneSpecialService.statDeviceReferCscenes(imageNames).getSource();
@@ -122,6 +122,10 @@ public class RealEquipmentConverter implements BaseConverter{
         for (Device device : model.getList()) {
             RealEquipmentBO realEquipmentBO = getRealEquipmentBO(referStateMap, useStateMap, device);
             modelList.add(realEquipmentBO);
+        }
+        for (RealEquipmentBO temp : modelList) {
+            temp.setCreateUser(name2CreateUserMap.get(temp.getName()));
+            temp.setCreateUserName(name2CreateUserNameMap.get(temp.getName()));
         }
 
         convertModel.setList(modelList);

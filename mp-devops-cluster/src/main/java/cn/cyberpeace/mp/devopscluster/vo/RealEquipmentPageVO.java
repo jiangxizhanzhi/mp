@@ -138,4 +138,16 @@ public class RealEquipmentPageVO extends BaseVO {
      */
     @ApiModelProperty("是否可登录")
     private Boolean loginEnable;
+
+    /**
+     * 靶标创建用户
+     */
+    @ApiModelProperty("靶标创建用户")
+    private String createUser ;
+
+    /**
+     * 靶标创建用户名
+     */
+    @ApiModelProperty("靶标创建用户名")
+    private String createUserName;
 }

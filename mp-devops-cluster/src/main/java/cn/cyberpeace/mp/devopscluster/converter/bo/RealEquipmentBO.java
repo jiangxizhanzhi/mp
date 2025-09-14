@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devopscluster.converter.bo;
 
+import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devopscluster.converter.model.BasePageConvertModel;
 import cn.cyberpeace.mp.devopscluster.enums.PublicEnum;
@@ -135,4 +136,14 @@ public class RealEquipmentBO extends BasePageConvertModel {
      * 实体USB信息
      */
     private EntityUsb extEntityUsb;
+
+    /**
+     * 靶标创建用户
+     */
+    private String createUser ;
+
+    /**
+     * 靶标创建用户名
+     */
+    private String createUserName;
 }

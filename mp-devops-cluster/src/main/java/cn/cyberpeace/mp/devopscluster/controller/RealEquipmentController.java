@@ -117,7 +117,8 @@ public class RealEquipmentController {
         RealEquipmentPageVO response = RealEquipmentPageVO.builder().id(v.getUuid()).name(v.getName())
                 .category(v.getMainCategory()).subCategory(v.getSubCategory()).thirdCategory(v.getThirdCategory())
                 .description(v.getDescription()).useStatus(v.getUseStatus()).referenceStatus(v.getReferenceStatus())
-                .inPosition(v.getInPosition()).extEntityUsb(v.getExtEntityUsb()).loginEnable(loginEnable).build();
+                .inPosition(v.getInPosition()).extEntityUsb(v.getExtEntityUsb()).loginEnable(loginEnable)
+                .createUser(v.getCreateUser()).createUserName(v.getCreateUserName()).build();
         if (Objects.nonNull(l1AndL2AndL3Type)){
            List<String> firstTypeList;
             if (CollectionUtils.isEmpty(l1AndL2AndL3Type.getFirstTypeList())) {
