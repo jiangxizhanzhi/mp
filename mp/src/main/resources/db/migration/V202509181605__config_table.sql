@@ -3,4 +3,4 @@ insert into mp_sys_config(id, tenant, key_name, value, init_value, create_time, 
  17:46:58", "2025-09-18 16:00:44");
 
 
-alter table mp_auth_role add column biz_role not null default 0 comment '业务角色0-学生 1-老师';
+alter table mp_auth_role add column biz_role int not null default 0 comment '业务角色0-学生 1-老师';
