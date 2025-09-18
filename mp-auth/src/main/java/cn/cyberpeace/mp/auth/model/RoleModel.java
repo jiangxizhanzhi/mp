@@ -43,19 +43,24 @@ public class RoleModel extends BaseModel {
     @DefaultStr
     private String description;
 
+    @ApiModelProperty(value = "业务角色 0：学生 1：老师")
+    @DefaultInt(0)
+    private Integer bizRole;
+
     @ApiModelProperty(value = "可见性 1：可见 0：不可见")
     @DefaultInt(1)
     private Integer visible;
 
 
     @Builder
-    public RoleModel(String id, LocalDateTime createTime, LocalDateTime updateTime, String tenant, String org, String identifier, String name, String description) {
+    public RoleModel(String id, LocalDateTime createTime, LocalDateTime updateTime, String tenant, String org, String identifier, String name, String description, Integer bizRole) {
         super(id, createTime, updateTime);
         this.tenant = tenant;
         this.org = org;
         this.identifier = identifier;
         this.name = name;
         this.description = description;
+        this.bizRole = bizRole;
     }
 
     @Override

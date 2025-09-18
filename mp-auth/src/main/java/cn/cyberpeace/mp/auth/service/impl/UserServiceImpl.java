@@ -1053,7 +1053,19 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             boolean isSuperUser = Objects.equals(userModel.getId(), AuthConstant.ROOT_USER_ID);
 
             processIsAdminSuperUser(userBo, isAdmin, isSuperUser);
+
+
+            if (CollectionUtils.isNotEmpty(roles)) {
+                for (RoleModel role : roles) {
+                    if (Objects.nonNull(role.getBizRole()) && role.getBizRole() > 0) {
+                        userBo.setTeacherFlag(1);
+                        break;
+                    }
+                }
+            }
         }
+
+
 
         return userBo;
     }

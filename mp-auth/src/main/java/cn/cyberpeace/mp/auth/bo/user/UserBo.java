@@ -40,4 +40,7 @@ public class UserBo extends UserModel {
     @ApiModelProperty(value = "角色集合")
     List<RoleModel> roles;
 
+    @ApiModelProperty(value = "是否是老师0-不是 1-是")
+    private Integer teacherFlag = 0;
+
 }
