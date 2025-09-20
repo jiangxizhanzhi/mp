@@ -53,6 +53,11 @@ import cn.cyberpeace.mp.scene.model.SceneConfigAreaModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneAreaModel;
 import cn.cyberpeace.mp.scene.repository.SceneConfigAreaMapper;
 import cn.cyberpeace.mp.scene.service.SceneConfigService;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
+import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudSceneConfigPluginHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -81,12 +86,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -897,6 +897,22 @@ public class CsceneController implements BaseModelListControllerBase {
         ServiceResult<CsceneInstanceBO> result = modelService.createAppInstance(request.getId(), false, request.toCsceneInstanceCreateContextBO()).asResult();
         CsceneLogUtils.recordSceneInstanceLog(result == null ? null : result.getData(), OpTypeEnums.START, CsceneLogUtils.START_SCENE, request.getContext());
         return result;
+    }
+
+    @ApiOperation("获取场景模板中实体设备的id集合")
+    @GetMapping(value = "/entity_device/list")
+    public ServiceResult<Set<String>> listEntityDeviceIds(@RequestParam(required = true) String id) {
+        log.info("listEntityDeviceIds params,id:{}", id);
+        String sceneId = this.modelService.get(id).getSource().getObj().getSceneConfig();
+        SceneConfigHandler sceneConfigHandler = new SceneConfigHandler(sceneId, "", null);
+        CloudSceneConfigPluginHandler cloudSceneConfigPluginHandler = sceneConfigHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+        Set<String> entityDeviceIds = new HashSet<>();
+        for (CloudPluginSceneConfigElementBO cloudConfigElement : cloudSceneConfigPluginHandler.getElementMap().values()) {
+            if (BaseCloudPluginSceneElementModel.ImageType.ENTITY.equals(cloudConfigElement.getImageType())) {
+                entityDeviceIds.add(cloudConfigElement.getImageUuid());
+            }
+        }
+        return new ServiceResult<>(entityDeviceIds).asResult();
     }
 
     @ApiOperation("获取场景模板统计数据")
