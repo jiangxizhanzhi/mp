@@ -80,10 +80,12 @@ public class InitRegisterService extends BaseCpService {
         }
         List<DeviceTargetPO> deviceTargetPOS = deviceTargetMapper.findByUuids(uuids);
         POLogoUtils.changeLogoPathToUrl(deviceTargetPOS);
+        Map<String, String> uuid2ImageType = new HashMap<>();
         List<String> existedUuids = new ArrayList<>();
         for (DeviceTargetPO p : deviceTargetPOS) {
             String uuid = p.getUuid();
             existedUuids.add(uuid);
+            uuid2ImageType.put(uuid, p.getImageType());
         }
         List<Device> notExistedList = new ArrayList<>();
         List<Device> existedList = new ArrayList<>();
@@ -113,6 +115,7 @@ public class InitRegisterService extends BaseCpService {
         }
         if (CollectionUtils.isNotEmpty(existedList)) {
             for (Device e : existedList) {
+                e.setImageType(uuid2ImageType.get(e.getUuid()));
                 devopsTargetService.updateById(e);
             }
             res += existedList.size();
