@@ -54,4 +54,10 @@ public class RealEquipmentPageRequest extends BasePageRequest{
      */
     @ApiModelProperty(value = "精确查找名称")
     private String exactName;
+
+    /**
+     * imageType entity v2r
+     */
+    @ApiModelProperty("imageType")
+    private String imageType;
 }

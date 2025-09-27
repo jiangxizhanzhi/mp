@@ -20,6 +20,8 @@ public enum ImageTypeEnum {
 
     ENTITY,
 
+    V2R,
+
     SIMPLE;
 
 

@@ -97,4 +97,10 @@ public class RealEquipmentRequest extends BaseRequest{
      */
     @ApiModelProperty("描述")
     private String description;
+
+    /**
+     * imageType entity v2r
+     */
+    @ApiModelProperty("imageType")
+    private String imageType;
 }

@@ -221,7 +221,11 @@ public class ImagePageDTO extends BasePageDTO{
         this.setMainCategory(request.getCategory());
         this.setSubCategory(request.getSecondCategory());
         this.setThirdCategory(request.getThirdCategory());
-        this.setImageType(ImageTypeEnum.ENTITY.toValue());
+        if (StringUtils.isNotEmpty(request.getImageType())) {
+            this.setImageType(request.getImageType());
+        } else {
+            this.setImageType(ImageTypeEnum.ENTITY.toValue());
+        }
         this.setUseStatus(request.getUseStatus());
         if (StringUtils.isNotEmpty(request.getExactName())) {
             this.setName(request.getExactName());

@@ -20,6 +20,7 @@ import cn.cyberpeace.mp.devopscluster.enums.ImageTypeEnum;
 import cn.cyberpeace.mp.devopscluster.enums.StatusEnum;
 import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
+import cn.cyberpeace.mp.devopscluster.repository.DeviceTargetMapper;
 import cn.cyberpeace.mp.devopscluster.request.RealEquipmentDeleteRequest;
 import cn.cyberpeace.mp.devopscluster.request.RealEquipmentPageRequest;
 import cn.cyberpeace.mp.devopscluster.request.RealEquipmentRequest;
@@ -28,6 +29,7 @@ import cn.cyberpeace.mp.devopscluster.service.DevopsTargetService;
 import cn.cyberpeace.mp.devopscluster.utils.POLogoUtils;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -44,6 +46,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class RealEquipmentConverter implements BaseConverter{
     private static long IN_POSITION_UPDATE_TIME = System.currentTimeMillis();
 
@@ -60,6 +63,8 @@ public class RealEquipmentConverter implements BaseConverter{
     private final TargetConverter targetConverter;
 
     private final CsceneSpecialService csceneSpecialService;
+
+    private final DeviceTargetMapper deviceTargetMapper;
 
     /**
      * 获取实装总数
@@ -121,6 +126,10 @@ public class RealEquipmentConverter implements BaseConverter{
         List<RealEquipmentBO> modelList = new ArrayList<>();
         for (Device device : model.getList()) {
             RealEquipmentBO realEquipmentBO = getRealEquipmentBO(referStateMap, useStateMap, device);
+            DeviceTargetPO oldDeviceTargetPO = deviceTargetMapper.findByUuid(device.getUuid());
+            if (StringUtils.isNotEmpty(oldDeviceTargetPO.getImageType())) {
+                realEquipmentBO.setImageType(oldDeviceTargetPO.getImageType());
+            }
             modelList.add(realEquipmentBO);
         }
         for (RealEquipmentBO temp : modelList) {
@@ -157,6 +166,10 @@ public class RealEquipmentConverter implements BaseConverter{
      */
     public RealEquipmentBO findByUuid(String uuid) {
         Device device = deviceService.findByUuid(uuid);
+        DeviceTargetPO oldDeviceTargetPO = deviceTargetMapper.findByUuid(device.getUuid());
+        if (StringUtils.isNotEmpty(oldDeviceTargetPO.getImageType())) {
+            device.setImageType(oldDeviceTargetPO.getImageType());
+        }
         return convertDevice(device);
     }
 
@@ -176,6 +189,9 @@ public class RealEquipmentConverter implements BaseConverter{
         if (Objects.isNull(result) || !result.isSuccess()){
             return result;
         }
+        if (ImageTypeEnum.V2R.toValue().equals(request.getImageType())) {
+            result.setImageType(ImageTypeEnum.V2R.toValue());
+        }
         devopsTargetService.insert(Arrays.asList(result));
         return result;
     }
@@ -190,6 +206,9 @@ public class RealEquipmentConverter implements BaseConverter{
         validRealEquipmentRequest(request);
         Device device = convertRequest(request);
         Device result = realEquipmentService.update(request.getUuid(),device);
+        if (ImageTypeEnum.V2R.toValue().equals(request.getImageType())) {
+            result.setImageType(ImageTypeEnum.V2R.toValue());
+        }
         devopsTargetService.updateById(result);
         return result;
     }
@@ -232,6 +251,7 @@ public class RealEquipmentConverter implements BaseConverter{
         convertModel.setExtSystemInfo(device.getExtSystemInfo());
         convertModel.setExtGateway(device.getExtGateway());
         convertModel.setExtEntityUsb(device.getExtEntityUsb());
+        convertModel.setImageType(device.getImageType());
         ExtEntity extEntity = device.getExtEntity();
         if (Objects.nonNull(extEntity)){
             convertModel.setInPosition(extEntity.getEntityStatus() ? StatusEnum.YES : StatusEnum.NO);
@@ -257,6 +277,7 @@ public class RealEquipmentConverter implements BaseConverter{
         device.setExtEntity(request.getExtEntity());
         device.setExtSystemInfo(request.getSystemInfo());
         device.setExtEntityUsb(request.getExtEntityUsb());
+        device.setImageType(request.getImageType());
         return device;
     }
 

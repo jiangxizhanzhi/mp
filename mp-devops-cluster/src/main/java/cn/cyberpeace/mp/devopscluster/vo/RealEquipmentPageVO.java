@@ -150,4 +150,9 @@ public class RealEquipmentPageVO extends BaseVO {
      */
     @ApiModelProperty("靶标创建用户名")
     private String createUserName;
+
+    /**
+     * 镜像类型
+     */
+    private String imageType;
 }

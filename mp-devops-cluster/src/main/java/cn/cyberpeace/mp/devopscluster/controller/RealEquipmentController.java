@@ -118,7 +118,7 @@ public class RealEquipmentController {
                 .category(v.getMainCategory()).subCategory(v.getSubCategory()).thirdCategory(v.getThirdCategory())
                 .description(v.getDescription()).useStatus(v.getUseStatus()).referenceStatus(v.getReferenceStatus())
                 .inPosition(v.getInPosition()).extEntityUsb(v.getExtEntityUsb()).loginEnable(loginEnable)
-                .createUser(v.getCreateUser()).createUserName(v.getCreateUserName()).build();
+                .createUser(v.getCreateUser()).createUserName(v.getCreateUserName()).imageType(v.getImageType()).build();
         if (Objects.nonNull(l1AndL2AndL3Type)){
            List<String> firstTypeList;
             if (CollectionUtils.isEmpty(l1AndL2AndL3Type.getFirstTypeList())) {
@@ -243,7 +243,7 @@ public class RealEquipmentController {
         RealEquipmentByIdVO response = RealEquipmentByIdVO.builder().uuid(realEquipmentBO.getUuid())
                 .name(realEquipmentBO.getName()).logo(realEquipmentBO.getLogo()).role(realEquipmentBO.getRole())
                 .mainCategory(realEquipmentBO.getMainCategory()).subCategory(realEquipmentBO.getSubCategory()).thirdCategory(realEquipmentBO.getThirdCategory())
-                .systemInfo(realEquipmentBO.getExtSystemInfo()).extEntity(realEquipmentBO.getExtEntity())
+                .systemInfo(realEquipmentBO.getExtSystemInfo()).extEntity(realEquipmentBO.getExtEntity()).imageType(realEquipmentBO.getImageType())
                 .description(realEquipmentBO.getDescription()).extEntityAccess(extEntityAccess).extEntityUsb(realEquipmentBO.getExtEntityUsb()).build();
         return new Result(response);
     }
