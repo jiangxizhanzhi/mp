@@ -31,6 +31,8 @@ public class AuthCacheConfig {
     // default 6h
     public static final String CACHE_MANAGER_6H = "authCacheManager_6H";
 
+    public static final String CACHE_MANAGER_10M = "autCacheManager_10M";
+
     // default 5min
     public static final String LOGIN_FAILURE = "login_failure";
 
@@ -74,6 +76,14 @@ public class AuthCacheConfig {
     public CacheManager authCacheManager6H() {
         CaffeineCacheManager caffeineCacheManager = new CaffeineCacheManager();
         Caffeine caffeine = Caffeine.newBuilder().expireAfterWrite(6, TimeUnit.HOURS).recordStats();
+        caffeineCacheManager.setCaffeine(caffeine);
+        return caffeineCacheManager;
+    }
+
+    @Bean(name = CACHE_MANAGER_10M)
+    public CacheManager authCacheManagerHalfHour() {
+        CaffeineCacheManager caffeineCacheManager = new CaffeineCacheManager();
+        Caffeine caffeine = Caffeine.newBuilder().expireAfterWrite(10, TimeUnit.MINUTES).recordStats();
         caffeineCacheManager.setCaffeine(caffeine);
         return caffeineCacheManager;
     }

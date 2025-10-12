@@ -34,6 +34,8 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.Objects;
 
+import static cn.cyberpeace.mp.auth.config.AuthCacheConfig.CACHE_MANAGER_10M;
+
 /**
  * @Description:
  * @Author zhouxinghuai
@@ -43,7 +45,7 @@ import java.util.Objects;
 @Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    @Resource(name = "authCacheManager_6H")
+    @Resource(name = CACHE_MANAGER_10M)
     private CacheManager cacheManager;
 
     private final ObjectMapper mapper;
@@ -103,8 +105,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
             LocalDateTime expiredTime = LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
             LocalDateTime now = LocalDateTime.now();
-            if (now.isAfter(expiredTime.minusHours(6)) && now.isBefore(expiredTime)) {
-                log.warn("token is expired in less than 6 hours, auto refresh token...");
+            if (now.isAfter(expiredTime.minusMinutes(10L)) && now.isBefore(expiredTime)) {
+                log.warn("token is expired in less than 10 minutes, auto refresh token...");
                 newJwt = JwtUtils.generateToken(new JwtUtils.UserInfo(userModel.getId(), userModel.getUsername(), userModel.getTokenSecret()));
                 tokenCache.put(token, newJwt);
             }
