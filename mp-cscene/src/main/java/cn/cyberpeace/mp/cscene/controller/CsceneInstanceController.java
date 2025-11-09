@@ -65,6 +65,7 @@ import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams
 import cn.cyberpeace.mp.sceneplugincollection.service.param.QueryCollectionDataCountParams;
 import cn.cyberpeace.mp.scenepluginflow.service.response.SceneFlowRecordsResponse;
 import cn.cyberpeace.mp.situationaware.model.enums.FileEventType;
+import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -1029,7 +1030,19 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @AuthTarget({TargetEnum.FRONT_ALL, TargetEnum.INSTANCE_MONITORING})
     @GetMapping("/types")
     @ApiOperation(value = "查询靶场监控的场景实例类型")
-    public ServiceResult<List<OptionBO>> getSceneType() {
-        return optionService.getIntOptions(CsceneConstant.MP_COMMON_OPTION_TYPE_CSCENE_INSTANCE_TYPE);
+    public ServiceResult getSceneType() {
+        OptionBO<Integer> praOption = new OptionBO<Integer>();
+        praOption.setCode(401);
+        praOption.setName("科目");
+
+        OptionBO<Integer> expOption = new OptionBO<Integer>();
+        expOption.setCode(402);
+        expOption.setName("实验");
+
+        OptionBO<Integer> trainOption = new OptionBO<Integer>();
+        trainOption.setCode(403);
+        trainOption.setName("综合演训");
+
+        return new ServiceResult<>(Lists.newArrayList(praOption, expOption, trainOption)).asResult();
     }
 }
