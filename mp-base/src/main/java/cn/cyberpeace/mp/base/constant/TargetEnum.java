@@ -58,6 +58,7 @@ public enum TargetEnum {
     RANGE_TEST_SELF(new String[]{"range-test-self"}), //前台靶场测评
     REAL_EQUIPMENT_MANAGEMENT(new String[]{"real-equipment-management"}),
     PLATFORM_MANAGEMENT(new String[]{"platform-management"}),
+    INTERFACE_MANAGEMENT(new String[]{"interface-management"}),
     REAL_MANAGE(new String[]{"real-manage"}),
     RED_VS_BLUE(new String[]{"red-vs-blue"}), // 前台红蓝对抗
     RED_BLUE(new String[]{"red-blue"}), // 后台红蓝对抗

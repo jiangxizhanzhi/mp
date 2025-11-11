@@ -27,6 +27,7 @@ public enum DevopsClusterErrorCode implements ErrorCode {
     USB_NUM_EXCEEDS_LIMIT("MP-110617", "usb_num_exceeds_limit"),
     USB_REFERENCED_SCENE("MP-110618", "usb_referenced_scene"),
     PLATFORM_NOT_EXIST("MP-110620", "platform_not_exist"),
+    INTERFACE_NOT_EXIST("MP-110621", "interface_not_exist"),
     CLOUD_ERROR("MP-110619", "cloud_error");
 
     DevopsClusterErrorCode(String code, String message) {
