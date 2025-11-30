@@ -30,6 +30,9 @@ public class BaseSceneElementModel extends BaseSceneNodeModel {
     @DefaultBool
     private Boolean isAuxiliary;
 
+    @DefaultInt(value = 0)
+    private Integer vendor;
+
     public static class Type {
         public static final int OTHER = 0;
         public static final int SWITCH = 1;

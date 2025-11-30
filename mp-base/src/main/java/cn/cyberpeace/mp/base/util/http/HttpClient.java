@@ -11,6 +11,9 @@ import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.*;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.TrustAllStrategy;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.ContentBody;
@@ -18,9 +21,11 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicHeader;
+import org.apache.http.ssl.SSLContexts;
 import org.springframework.http.MediaType;
 import org.springframework.util.StreamUtils;
 
+import javax.net.ssl.SSLContext;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -218,26 +223,46 @@ public class HttpClient {
     }
 
     private HttpClient(String server, Integer timeout, Integer maxConnPerRoute, Integer maxConnTotal,
-                      String username, String password) {
-        this.server = server;
-        org.apache.http.impl.client.HttpClientBuilder clientBuilder = HttpClients.custom().disableAutomaticRetries();
-        if (maxConnPerRoute != null) {
-            clientBuilder.setMaxConnPerRoute(maxConnPerRoute);
-        }
-        if (maxConnTotal != null) {
-            clientBuilder.setMaxConnTotal(maxConnTotal);
-        }
-        if (username != null && password != null) {
-            BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-            UsernamePasswordCredentials usernamePasswordCredentials = new UsernamePasswordCredentials(username, password);
-            credentialsProvider.setCredentials(AuthScope.ANY, usernamePasswordCredentials);
-            clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
-        }
-        innerHttpClient = clientBuilder.build();
-        if (timeout != null) {
-            this.timeout = timeout;
+                  String username, String password) {
+    this.server = server;
+    org.apache.http.impl.client.HttpClientBuilder clientBuilder = HttpClients.custom().disableAutomaticRetries();
+
+    // 如果是HTTPS协议，跳过SSL验证
+    if (server != null && server.startsWith("https")) {
+        try {
+            // 创建信任所有证书的SSLContext
+            SSLContext sslContext = SSLContexts.custom()
+                    .loadTrustMaterial(null, new TrustAllStrategy())
+                    .build();
+
+            // 创建SSL连接工厂，忽略主机名验证
+            SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(
+                    sslContext, NoopHostnameVerifier.INSTANCE);
+
+            clientBuilder.setSSLSocketFactory(sslSocketFactory);
+
+        } catch (Exception e) {
+            throw new RuntimeException("创建SSL上下文失败", e);
         }
     }
+
+    if (maxConnPerRoute != null) {
+        clientBuilder.setMaxConnPerRoute(maxConnPerRoute);
+    }
+    if (maxConnTotal != null) {
+        clientBuilder.setMaxConnTotal(maxConnTotal);
+    }
+    if (username != null && password != null) {
+        BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+        UsernamePasswordCredentials usernamePasswordCredentials = new UsernamePasswordCredentials(username, password);
+        credentialsProvider.setCredentials(AuthScope.ANY, usernamePasswordCredentials);
+        clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
+    }
+    innerHttpClient = clientBuilder.build();
+    if (timeout != null) {
+        this.timeout = timeout;
+    }
+}
 
     public static HttpClientBuilder builder() {
         return new HttpClientBuilder();

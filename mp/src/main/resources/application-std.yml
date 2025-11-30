@@ -107,6 +107,7 @@ mp:
     file-server: ${mp.base.ext-var.file-server}
     lfs-inner-http-url-template: ${mp.base.ext-var.lfs-inner-http-url}
     lfs-outer-http-url-template: ${mp.base.ext-var.lfs-outer-http-url}
+    cloud-urls: ${mp.base.ext-var.cloud-urls}
   #    run-init: true
   # mp-devops-cluster模块
   devopscluster:

@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.CollectionUtils;
 import cn.cyberpeace.mp.base.util.basic.IntUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.base.util.http.MultiCloudClient;
 import cn.cyberpeace.mp.base.util.mptool.CollectionUtil;
 import cn.cyberpeace.mp.base.util.mptool.FileNameUtil;
 import cn.cyberpeace.mp.scene.constant.SceneSingleton;
@@ -42,6 +43,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.CreateTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
+import cn.cyberpeace.mp.service.MultiCloudService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -205,7 +207,7 @@ public class CreateHandler extends HandlerCommon {
             subnet.setGatewayIp(TextUtils.emptyNull(connectedNetwork.network.getGateway()));
             subnet.setDhcpPortIp(TextUtils.emptyNull(connectedNetwork.network.getDhcpIp()));
             // 默认开启dhcp
-            var dhcp =  Objects.nonNull(subnet.getDhcpPortIp()) || Boolean.TRUE.equals(connectedNetwork.network.getDhcp());
+            var dhcp = Objects.nonNull(subnet.getDhcpPortIp()) || Boolean.TRUE.equals(connectedNetwork.network.getDhcp());
             if (Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getDhcpControl())) {
                 subnet.setEnableDhcp(dhcp);
             } else {
@@ -492,9 +494,9 @@ public class CreateHandler extends HandlerCommon {
     }
 
     /**
-     * @description: 生成实体设备网口
      * @param cloudElement
      * @return List<Interface>
+     * @description: 生成实体设备网口
      */
     private List<EntityNodeCreateData.Interface> genEntityInterfaces(CloudPluginSceneElementBO cloudElement) {
         List<EntityNodeCreateData.Interface> entityInterfaces = new ArrayList<>();
@@ -547,7 +549,7 @@ public class CreateHandler extends HandlerCommon {
                 }).collect(Collectors.toList()));
             }
             //不存在任何接入方式则初始化一个空的
-            if(CollectionUtil.isEmpty(entityInterface.getAccessModes())){
+            if (CollectionUtil.isEmpty(entityInterface.getAccessModes())) {
                 entityInterface.setAccessModes(new ArrayList<>());
             }
             //配置勾选了snmp，则单独处理snmp协议
@@ -765,16 +767,16 @@ public class CreateHandler extends HandlerCommon {
 
                         try {
                             // 安装探针失败要重试
-                            List<String> checks = new ArrayList<>(){{
+                            List<String> checks = new ArrayList<>() {{
                                 this.add("sleep 180 ;");
                                 this.add("if [ -e /var/ossec/bin/tools/09ffcc4a67ef4accb407a1555629d0f8.py ] ;");
                                 this.add("then echo \"wazuh ok\"");
                                 this.add("else sh install_wazuh.sh ;");
                                 this.add("fi");
                             }};
-                            containerClient.executeCommand(containerId, "echo \"" + StringUtils.join(checks,"\n") + "\" >>" + " " + "/tmp/tmp_installers" + "/check_wazuh.sh");
+                            containerClient.executeCommand(containerId, "echo \"" + StringUtils.join(checks, "\n") + "\" >>" + " " + "/tmp/tmp_installers" + "/check_wazuh.sh");
                             containerClient.executeCommand(containerId, "nohup sh /tmp/tmp_installers/check_wazuh.sh > nohup.out 2>&1 &");
-                        }catch (Exception e){
+                        } catch (Exception e) {
                             log.error("failed to add wazuh check script ");
                         }
                     } else {
@@ -1029,6 +1031,41 @@ public class CreateHandler extends HandlerCommon {
     }
 
     protected void createVirtualMachine(CloudPluginSceneElementBO cloudElement) {
+        if (Objects.nonNull(cloudElement.getSrcElement().getVendor())) {
+            for (MultiCloudService cloudService : BeanCommon.getBeanType(MultiCloudService.class).values()) {
+                if (cloudService.getVendor() == cloudElement.getSrcElement().getVendor()) {
+                    String resourceId = cloudService.createVm(cloudElement.getImageUuid());
+                    cloudElement.setResourceId(resourceId);
+
+                    String[] ipAndMac = null;
+                    int tryCount = 20;
+
+                    do {
+                        ipAndMac = cloudService.getVmIpAndMac(resourceId);
+
+                        if (ipAndMac == null) {
+                            try {
+                                Thread.sleep(5000);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        tryCount--;
+                    } while (ipAndMac == null || tryCount > 0);
+
+                    if (ipAndMac != null) {
+                        if (org.apache.commons.collections.CollectionUtils.isNotEmpty(cloudElement.getSrcElement().getPorts())) {
+                            cloudElement.getSrcElement().getPorts().get(0).setIp(ipAndMac[0]);
+                            cloudElement.getSrcElement().getPorts().get(0).setMacAddr(ipAndMac[1]);
+                        }
+                    }
+                    return;
+                }
+
+            }
+        }
+
+
         if (ElementTypeUtils.isExternal(cloudElement)) {
             // 外部虚拟机 需要连接网络
             List<VirtualNic> nics = CollectionUtils.emptyNull(genVirutalNics(cloudElement));
@@ -1090,6 +1127,7 @@ public class CreateHandler extends HandlerCommon {
         }
 
         checkAccessModes(cloudElement);
+
     }
 
     protected void createContainer(CloudPluginSceneElementBO cloudElement) {
@@ -1124,7 +1162,7 @@ public class CreateHandler extends HandlerCommon {
 
         // 容器参数
         if (cloudElement.getDockerParams() != null && !Boolean.FALSE.equals(cloudElement.getDockerParams()
-                                                                                  .getOptions())) {
+                .getOptions())) {
             DockerParams dockerParams = cloudElement.getDockerParams();
             createData.setInteractive(dockerParams.getInteractive());
             createData.setPrivileged(dockerParams.getPrivileged());
@@ -1206,9 +1244,9 @@ public class CreateHandler extends HandlerCommon {
     }
 
     /**
-     * @description: 创建实体设备
      * @param cloudElement 云平台场景节点业务信息
      * @return void
+     * @description: 创建实体设备
      */
     protected void createEntityNode(CloudPluginSceneElementBO cloudElement) {
         EntityNodeCreateData createData = new EntityNodeCreateData();
@@ -1424,7 +1462,7 @@ public class CreateHandler extends HandlerCommon {
         if (Boolean.TRUE.equals(getPluginHandler().getScene().getEnableRate())) {
             List<String> portIds = new ArrayList<>();
             Map<String, CloudPluginSceneElementPortBO> portMap = getPluginHandler().getElementPortMap();
-            portMap.forEach((key,value) -> {
+            portMap.forEach((key, value) -> {
                 if (StringUtils.isNotEmpty(value.getResourceId())) {
                     portIds.add(value.getResourceId());
                 }

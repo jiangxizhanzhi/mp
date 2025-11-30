@@ -20,6 +20,9 @@ import java.util.Objects;
 @AllArgsConstructor
 public class Device extends BaseCloudPlatformResult {
 
+    @ApiModelProperty(value = "云厂商")
+    private Integer vendor = 0;
+
     /**
      * ID
      */

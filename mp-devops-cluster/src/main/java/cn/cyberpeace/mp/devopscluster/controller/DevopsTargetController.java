@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.devopscluster.controller;
 import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.FsCommon;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -35,6 +36,7 @@ import cn.cyberpeace.mp.devopscluster.vo.common.ListResult;
 import cn.cyberpeace.mp.devopscluster.vo.common.PageResult;
 import cn.cyberpeace.mp.devopscluster.vo.common.Result;
 import cn.cyberpeace.mp.devopscluster.vo.convert.DeviceVoConverter;
+import cn.cyberpeace.mp.service.MultiCloudService;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -49,6 +51,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 靶标管理类
@@ -181,6 +184,17 @@ public class DevopsTargetController {
     @ApiOperation("查询所有靶标信息(带过滤条件)")
     @GetMapping("/listAll")
     public ServiceResult<Device> listAll(TargetSceneRequest request){
+        if (Objects.nonNull(request.getVendor())) {
+            var cloudMap = BeanCommon.getBeanType(MultiCloudService.class);
+            for (MultiCloudService cloudService : cloudMap.values()) {
+                if (cloudService.getVendor() == (request.getVendor())) {
+                    return new Result(new ListResult<>(cloudService.listAllDevices().stream().map(str ->
+                            JsonCommon.snakeParse(str, Device.class)).collect(Collectors.toList())));
+                }
+            }
+        }
+
+
         TypeAllConvertModel l1AndL2AndL3Type = typeConverter.findL1AndL2AndL3Type();
         List<TypeConvertModel> firstTypeList = l1AndL2AndL3Type.getFirstTypeList();
         List<TypeConvertModel> secondTypeList = l1AndL2AndL3Type.getSecondTypeList();

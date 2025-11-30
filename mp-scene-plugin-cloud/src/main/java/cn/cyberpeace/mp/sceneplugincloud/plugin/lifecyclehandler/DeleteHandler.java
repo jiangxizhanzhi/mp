@@ -24,6 +24,7 @@ import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConnectionMa
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementMapper;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.SceneInstanceLinkCacheUtil;
+import cn.cyberpeace.mp.service.MultiCloudService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -194,6 +195,14 @@ public class DeleteHandler extends HandlerCommon {
     }
 
     protected boolean deleteVirtualMachine(CloudPluginSceneElementBO cloudElement) {
+        if (Objects.nonNull(cloudElement.getSrcElement().getVendor())) {
+            for (MultiCloudService cloudService : BeanCommon.getBeanType(MultiCloudService.class).values()) {
+                if (cloudService.getVendor() == cloudElement.getSrcElement().getVendor()) {
+                    cloudService.deleteVm(cloudElement.getResourceId());
+                    return true;
+                }
+            }
+        }
         if (ElementTypeUtils.isExternal(cloudElement)) {
             if (cloudElement.getSrcElement().getPorts() != null) {
                 cloudElement.getSrcElement().getPorts().forEach(p -> {

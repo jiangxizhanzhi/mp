@@ -30,6 +30,9 @@ public class BaseAppConfig {
     @Autowired
     private ServerProperties serverProperties;
 
+    @Value("${mp.base.cloud-urls}")
+    private String cloudUrls;
+
     @Value("${mp.base.project-name:mp}")
     private String projectName;
 
