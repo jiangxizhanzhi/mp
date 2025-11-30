@@ -53,6 +53,8 @@ mp:
     authenticate-exclude-urls: /unauth/**,/sys/activation,/sys/activation/reset_menu_visibility,/sys/activation/license_status,/sys/activation/status,/sys/activation/machinecode,/sys/config/public,/config/single_ip,/file/**,/suricata/rule/file_path,/devops/cluster/out_interface/**
   frontbusiness:
     url-ac-filter-exclude-urls: /api/mp/actuator/info,/api/mp/actuator/health,/api/mp/config/single_ip,/api/mp/file/**,/api/mp/actuator/**,/api/mp/error,/api/mp/suricata/rule/file_path
+  xdapp:
+    xd-one-server: ${XD_ONE_SERVER:http://8.159.138.178:81}
 
 ---
 spring:
