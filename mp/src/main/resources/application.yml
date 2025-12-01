@@ -54,7 +54,7 @@ mp:
   frontbusiness:
     url-ac-filter-exclude-urls: /api/mp/actuator/info,/api/mp/actuator/health,/api/mp/config/single_ip,/api/mp/file/**,/api/mp/actuator/**,/api/mp/error,/api/mp/suricata/rule/file_path
   xdapp:
-    xd-one-server: ${XD_ONE_SERVER:http://8.159.138.178:81}
+    xd-one-server: ${XD_ONE_SERVER:http://192.168.140.4:10060}
 
 ---
 spring:
