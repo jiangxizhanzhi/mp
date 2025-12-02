@@ -792,6 +792,8 @@ public class XdSourceController {
                             JSONObject jsonObject2 = jsonArray2.getJSONObject(j);
                             if (jsonObject2.getJSONObject("metric") != null) {
                                 XdPhyVO xdPhyVO = new XdPhyVO();
+                                xdPhyVO.setCompany("1");
+                                xdPhyVO.setCompany_name("华网创新");
                                 xdPhyVO.setNodeName(jsonObject2.getJSONObject("metric").getString("nodename"));
                                 xdPhyVO.setSysName(jsonObject2.getJSONObject("metric").getString("sysname"));
                                 String instance = jsonObject2.getJSONObject("metric").getString("instance");
@@ -830,12 +832,20 @@ public class XdSourceController {
                                                 ValueUnitVO temp = new ValueUnitVO();
                                                 temp.setValue(tempObject.getJSONObject("used").getString("value"));
                                                 temp.setUnit(tempObject.getJSONObject("used").getString("unit"));
+                                                if (StringUtils.isNotEmpty(temp.getUnit()) && StringUtils.isNotEmpty(temp.getValue()) && "bytes".equals(temp.getUnit().toLowerCase())) {
+                                                    temp.setValue(String.format("%.2f",Double.parseDouble(temp.getValue())/(1024*1024*1024)));
+                                                    temp.setUnit("GB");
+                                                }
                                                 xdPhyFileSystem.setUsedFileSystem(temp);
                                             }
                                             if (tempObject.getJSONObject("total") != null) {
                                                 ValueUnitVO temp = new ValueUnitVO();
                                                 temp.setValue(tempObject.getJSONObject("total").getString("value"));
                                                 temp.setUnit(tempObject.getJSONObject("total").getString("unit"));
+                                                if (StringUtils.isNotEmpty(temp.getUnit()) && StringUtils.isNotEmpty(temp.getValue()) && "bytes".equals(temp.getUnit().toLowerCase())) {
+                                                    temp.setValue(String.format("%.2f",Double.parseDouble(temp.getValue())/(1024*1024*1024)));
+                                                    temp.setUnit("GB");
+                                                }
                                                 xdPhyFileSystem.setTotalFileSystem(temp);
                                             }
                                             xdPhyFileSystemList.add(xdPhyFileSystem);
@@ -1870,6 +1880,8 @@ public class XdSourceController {
                 if (resultsArray !=null && resultsArray.size() > 0) {
                     for (int i = 0; i < resultsArray.size(); i++) {
                         XdVirVO xdVirVO = new XdVirVO();
+                        xdVirVO.setCompany("1");
+                        xdVirVO.setCompany_name("华网创新");
                         xdVirVO.setName(resultsArray.getJSONObject(i).getString("name"));
                         xdVirVO.setId(resultsArray.getJSONObject(i).getString("uuid"));
                         xdVirVO.setStatus(resultsArray.getJSONObject(i).getString("status"));
@@ -1911,19 +1923,21 @@ public class XdSourceController {
     public ServiceResult<PlatformVO> upShut(@RequestBody XdVirUpShut xdVirUpShut) {
         log.info("XdSourceController.virList begin. xdVirUpShut:{}", xdVirUpShut);
         try {
-            xdOneHttpClient.init();
-            HttpResult clusterResult = xdOneHttpClient.xdGet("/clusters?detail=true&tenantId=2", null);
-            ObjectMapper objectMapper = new ObjectMapper();
-            Cluster cluster = objectMapper.readValue(clusterResult.getResult(), Cluster.class);
-            if (cluster != null && CollectionUtils.isNotEmpty(cluster.getResults()) && StringUtils.isNotEmpty(cluster.getResults().get(0).getUuid())) {
-                Action action = new Action();
-                action.setAction(xdVirUpShut.getAction());
-                HttpResult actionResult = xdOneHttpClient.xdPost("/instances/" + xdVirUpShut.getId() + "/action/?cluster=" + cluster.getResults().get(0).getUuid(), null, action);
-                JSONObject jsonObject = JSON.parseObject(actionResult.getResult());
-                if (jsonObject.getBoolean("success")!=null && jsonObject.getBoolean("success")) {
-                    return ResultCommon.success();
-                } else if (StringUtils.isNotEmpty(jsonObject.getString("message"))) {
-                    return ResultCommon.fail(jsonObject.getString("message"));
+            if ("1".equals(xdVirUpShut.getCompany())) {
+                xdOneHttpClient.init();
+                HttpResult clusterResult = xdOneHttpClient.xdGet("/clusters?detail=true&tenantId=2", null);
+                ObjectMapper objectMapper = new ObjectMapper();
+                Cluster cluster = objectMapper.readValue(clusterResult.getResult(), Cluster.class);
+                if (cluster != null && CollectionUtils.isNotEmpty(cluster.getResults()) && StringUtils.isNotEmpty(cluster.getResults().get(0).getUuid())) {
+                    Action action = new Action();
+                    action.setAction(xdVirUpShut.getAction());
+                    HttpResult actionResult = xdOneHttpClient.xdPost("/instances/" + xdVirUpShut.getId() + "/action/?cluster=" + cluster.getResults().get(0).getUuid(), null, action);
+                    JSONObject jsonObject = JSON.parseObject(actionResult.getResult());
+                    if (jsonObject.getBoolean("success")!=null && jsonObject.getBoolean("success")) {
+                        return ResultCommon.success();
+                    } else if (StringUtils.isNotEmpty(jsonObject.getString("message"))) {
+                        return ResultCommon.fail(jsonObject.getString("message"));
+                    }
                 }
             }
         } catch (Exception e) {

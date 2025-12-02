@@ -51,6 +51,13 @@ public class PlatformModel extends BaseModel {
     private String systemType;
 
     /**
+     * 远程连接地址
+     */
+    @ApiModelProperty(value = "远程连接地址")
+    @DefaultStr
+    private String url;
+
+    /**
      * 告警信息
      */
     @ApiModelProperty(value = "在位状态：0 否，1 是")

@@ -1,0 +1,1 @@
+alter table mp_platform add url varchar(512) default '' NOT NULL comment '远程连接地址';
