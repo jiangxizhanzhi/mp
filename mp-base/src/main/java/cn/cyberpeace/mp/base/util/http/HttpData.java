@@ -14,6 +14,10 @@ public interface HttpData {
         return JsonUtils.stringify(httpData);
     }
 
+    static String allPropertyToContent(Object httpData) {
+        return JsonUtils.allPropertiesStringify(httpData);
+    }
+
     static Map<String, Object> toMultipart(Object httpData) {
         return BeanUtils.getMap(httpData);
     }

@@ -11,6 +11,6 @@ public class VendorFirstVmCreateHttpData implements HttpData {
 
     @Override
     public String toContent() {
-        return HttpData.toContent(this.jsonObject);
+        return HttpData.allPropertyToContent(this.jsonObject);
     }
 }

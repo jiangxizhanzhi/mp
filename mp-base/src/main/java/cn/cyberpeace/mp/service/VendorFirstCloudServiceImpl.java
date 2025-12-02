@@ -3,9 +3,11 @@ package cn.cyberpeace.mp.service;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.http.HttpClient;
 import cn.cyberpeace.mp.base.util.http.MultiCloudClient;
+import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -77,6 +79,8 @@ public class VendorFirstCloudServiceImpl implements MultiCloudService {
             "  \"server_group\": null\n" +
             "}";
 
+    private static  String TOKEN = "";
+
     @Override
     public Map<String, String> getHeaders() {
         HashMap<String, String> headers = new HashMap<>();
@@ -87,6 +91,20 @@ public class VendorFirstCloudServiceImpl implements MultiCloudService {
         headers.put("x-mix-user-id", "2");
         headers.put("x-mix-user-name", "admin");
         return headers;
+    }
+
+    private Map<String, String> addAuthTokenToHeader(Map<String, String> header, boolean refreshToken) {
+        if (StringUtils.isEmpty(TOKEN) || refreshToken) {
+            JSONObject vendorObject = JSONObject.parseObject(getClient().post("/api/uc/auth/token",
+                    new VendorFirstTokenHttpData("{\"username\":\"admin\",\"password\":\"e86f78a8a3caf0b60d8e74e5942aa6d86dc150cd3c03338aef25b7d2d7e3acc7\",\"platform\":false}"), null, null, 30000).getResult());
+
+            String token = vendorObject.getString("token");
+            TOKEN = token;
+            header.put("Authorization", "Bearer " + token);
+        } else {
+            header.put("Authorization", "Bearer " + TOKEN);
+        }
+        return header;
     }
 
     @Override
@@ -104,7 +122,7 @@ public class VendorFirstCloudServiceImpl implements MultiCloudService {
             for (Object results : vendorObject.getJSONArray("results")) {
                 JSONObject result = (JSONObject) results;
                 String imageUuid = result.getString("uuid");
-                boolean isActive = DEVICE_ACTIVE.equals(result.getString("active"));
+                boolean isActive = DEVICE_ACTIVE.equals(result.getString("status"));
                 boolean isImage = "image".equals(result.getString("image_type"));
                 String name = result.getString("name");
                 String osType = result.getString("os_type");
@@ -147,6 +165,14 @@ public class VendorFirstCloudServiceImpl implements MultiCloudService {
 
     @Override
     public String createVm(String imageUuid) {
+        try {
+            return realCreateVm(imageUuid, false);
+        } catch (JSONException e) {
+            return realCreateVm(imageUuid, true);
+        }
+    }
+
+    private String realCreateVm(String imageUuid, boolean freshToken) {
         JSONObject jsonObject = JSONObject.parseObject(IMAGE_CREATE_TEMPLATE);
         jsonObject.put("name", "MP_" + TextUtils.uuid());
         jsonObject.put("image_id", imageUuid);
@@ -154,7 +180,7 @@ public class VendorFirstCloudServiceImpl implements MultiCloudService {
 
         VendorFirstVmCreateHttpData vendorFirstVmCreateHttpData = new VendorFirstVmCreateHttpData(jsonObject);
 
-        String result = getClient().post("/api/cloud/instances/?cluster=382ee7c7-336a-41ae-b71e-9c14365bdcd3", vendorFirstVmCreateHttpData, null, getHeaders(), 30000)
+        String result = getClient().post("/api/cloud/instances/?cluster=382ee7c7-336a-41ae-b71e-9c14365bdcd3", vendorFirstVmCreateHttpData, null, addAuthTokenToHeader(getHeaders(), false), 30000)
                 .getResult();
         if (result != null) {
             JSONObject createResult = JSONObject.parseObject(result);
@@ -179,7 +205,8 @@ public class VendorFirstCloudServiceImpl implements MultiCloudService {
     @Override
     public String[] getVmIpAndMac(String vmUuid) {
         try {
-            String result = getClient().get("/api/cloud/instances/?page=1&page_size=1000&cluster=382ee7c7-336a-41ae-b71e-9c14365bdcd3", null, getHeaders(), 30000)
+            String result = getClient().get("/api/cloud/instances/?page=1&page_size=1000&cluster=382ee7c7-336a-41ae-b71e-9c14365bdcd3", null, addAuthTokenToHeader(
+                    getHeaders(), false), 30000)
                     .getResult();
             JSONObject jsonObject = JSONObject.parseObject(result);
             for (Object vmObject : jsonObject.getJSONArray("results")) {
@@ -202,11 +229,16 @@ public class VendorFirstCloudServiceImpl implements MultiCloudService {
 
     @Override
     public void deleteVm(String vmUuid) {
-        try {
-            getClient().delete("/api/cloud/instances/" + vmUuid + "/?cluster=382ee7c7-336a-41ae-b71e-9c14365bdcd3", null, null, getHeaders(), 30000);
-        } catch (Exception e) {
-            log.error("删除vm异常: " + e.getMessage(), e);
+        String result = realDeleteVm(vmUuid, false);
+        if (result.contains("401 Authorization Required")) {
+            realDeleteVm(vmUuid, true);
         }
+    }
+
+    private String realDeleteVm(String vmUuid, boolean freshToken)  {
+        return getClient().delete("/api/cloud/instances/" + vmUuid + "/?cluster=382ee7c7-336a-41ae-b71e-9c14365bdcd3", null, null,
+                addAuthTokenToHeader(getHeaders(), freshToken), 30000).getResult();
+
     }
 
 

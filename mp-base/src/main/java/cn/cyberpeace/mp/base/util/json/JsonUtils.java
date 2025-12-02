@@ -28,6 +28,8 @@ public class JsonUtils {
 
     private static final JsonHandler jsonHandler = new JsonHandler(createDefaultObjectMapper());
 
+    private static final JsonHandler ALL_PROPERTY_JSON_HANDLER = new JsonHandler(createAllPropertiesObjectMapper());
+
     private static final JsonHandler snakeJsonHandler = new JsonHandler(createDefaultSnakeObjectMapper());
 
     private JsonUtils() {}
@@ -45,6 +47,12 @@ public class JsonUtils {
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        return objectMapper;
+    }
+
+    private static ObjectMapper createAllPropertiesObjectMapper() {
+        ObjectMapper objectMapper = createDefaultObjectMapper();
+        objectMapper.setSerializationInclusion(JsonInclude.Include.ALWAYS);
         return objectMapper;
     }
 
@@ -76,6 +84,10 @@ public class JsonUtils {
 
     public static String stringify(Object obj) {
         return jsonHandler.stringify(obj);
+    }
+
+    public static String allPropertiesStringify(Object obj) {
+        return ALL_PROPERTY_JSON_HANDLER.stringify(obj);
     }
 
     public static <T> T mapToBean(Map<String, Object> map, Class<T> beanClass) {

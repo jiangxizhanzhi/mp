@@ -18,9 +18,11 @@ public class MultiCloudClient {
     public HttpClient getClient(int order) {
 
         return CLOUD_CLIENT_MAP.computeIfAbsent(order, k -> {
-            return HttpClient.builder()
+            HttpClient httpClient =  HttpClient.builder()
                     .configServer(getServer(order))
                     .build();
+            httpClient.setLogRequest(true);
+            return httpClient;
         });
     }
 
