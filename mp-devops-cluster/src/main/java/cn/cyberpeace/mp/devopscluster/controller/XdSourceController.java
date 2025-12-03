@@ -1947,4 +1947,960 @@ public class XdSourceController {
     }
 
 
+
+
+    @ApiOperation("物理资源列表")
+    @GetMapping("/phy_statics")
+    public ServiceResult<XdPhyStatistics> phyStatics() {
+        List<XdPhyVO> result = new ArrayList<>();
+
+        try {
+            xdOneHttpClient.init();
+            HttpResult clusterResult = xdOneHttpClient.xdGet("/clusters?detail=true&tenantId=2", null);
+//            HttpResult clusterResult = xdOneHttpClient.xdGet("/api/mp/devops/cluster/out_interface/page_real_equipment", null);
+            ObjectMapper objectMapper = new ObjectMapper();
+//            clusterResult.setResult("{\n" +
+//                    "    \"count\": 1,\n" +
+//                    "    \"next\": null,\n" +
+//                    "    \"previous\": null,\n" +
+//                    "    \"results\": [\n" +
+//                    "        {\n" +
+//                    "            \"uuid\": \"382ee7c7-336a-41ae-b71e-9c14365bdcd3\",\n" +
+//                    "            \"created_at\": \"2025-11-19 17:14\",\n" +
+//                    "            \"updated_at\": \"2025-11-19 17:14\",\n" +
+//                    "            \"name\": \"root-cluster-382e\",\n" +
+//                    "            \"provider\": \"openstack\",\n" +
+//                    "            \"description\": null,\n" +
+//                    "            \"external\": false,\n" +
+//                    "            \"is_local\": true,\n" +
+//                    "            \"properties\": {},\n" +
+//                    "            \"default_cluster\": true,\n" +
+//                    "            \"disaster_recovery\": {},\n" +
+//                    "            \"services\": [\n" +
+//                    "                {\n" +
+//                    "                    \"uuid\": \"e9fc3317-7758-4837-82f2-f5c275692fe2\",\n" +
+//                    "                    \"name\": \"ops\",\n" +
+//                    "                    \"type\": \"ops\",\n" +
+//                    "                    \"host\": \"192.168.140.4\",\n" +
+//                    "                    \"port\": 10040,\n" +
+//                    "                    \"auth\": null,\n" +
+//                    "                    \"created_at\": \"2025-11-19 17:14\",\n" +
+//                    "                    \"updated_at\": \"2025-11-19 17:14\"\n" +
+//                    "                },\n" +
+//                    "                {\n" +
+//                    "                    \"uuid\": \"4a2080ff-d560-4e12-bf89-4e03679bc517\",\n" +
+//                    "                    \"name\": \"monitor\",\n" +
+//                    "                    \"type\": \"monitor\",\n" +
+//                    "                    \"host\": \"192.168.140.4\",\n" +
+//                    "                    \"port\": 10080,\n" +
+//                    "                    \"auth\": null,\n" +
+//                    "                    \"created_at\": \"2025-11-19 17:14\",\n" +
+//                    "                    \"updated_at\": \"2025-11-19 17:14\"\n" +
+//                    "                },\n" +
+//                    "                {\n" +
+//                    "                    \"uuid\": \"ce257510-d573-4b22-b1e3-bb0ff1811180\",\n" +
+//                    "                    \"name\": \"openstack\",\n" +
+//                    "                    \"type\": \"openstack\",\n" +
+//                    "                    \"host\": \"192.168.140.4\",\n" +
+//                    "                    \"port\": 5000,\n" +
+//                    "                    \"auth\": {\n" +
+//                    "                        \"username\": \"admin\",\n" +
+//                    "                        \"domain_name\": \"Default\",\n" +
+//                    "                        \"auth_url\": \"http://192.168.140.4:5000\",\n" +
+//                    "                        \"project_name\": \"admin\",\n" +
+//                    "                        \"region_name\": \"RegionOne\",\n" +
+//                    "                        \"password\": \"FHgL3AfMOi9SXXzaOt9Nu8aJ3G5UJ4t0AVFKISQN\"\n" +
+//                    "                    },\n" +
+//                    "                    \"created_at\": \"2025-11-19 17:14\",\n" +
+//                    "                    \"updated_at\": \"2025-11-19 17:14\"\n" +
+//                    "                },\n" +
+//                    "                {\n" +
+//                    "                    \"uuid\": \"d86fc778-c48d-412b-af51-6188cd727669\",\n" +
+//                    "                    \"name\": \"rabbitmq\",\n" +
+//                    "                    \"type\": \"rabbitmq\",\n" +
+//                    "                    \"host\": \"192.168.140.4\",\n" +
+//                    "                    \"port\": 5672,\n" +
+//                    "                    \"auth\": {\n" +
+//                    "                        \"username\": \"openstack\",\n" +
+//                    "                        \"password\": \"sqV3CZUeCm76sGLjPKMOAfjR4h7NIr1RL9gavFyt\"\n" +
+//                    "                    },\n" +
+//                    "                    \"created_at\": \"2025-11-19 17:14\",\n" +
+//                    "                    \"updated_at\": \"2025-11-19 17:14\"\n" +
+//                    "                },\n" +
+//                    "                {\n" +
+//                    "                    \"uuid\": \"98ff59f4-4713-4090-a2d4-c145ab91c41c\",\n" +
+//                    "                    \"name\": \"octopus\",\n" +
+//                    "                    \"type\": \"octopus\",\n" +
+//                    "                    \"host\": \"192.168.140.4\",\n" +
+//                    "                    \"port\": 10101,\n" +
+//                    "                    \"auth\": null,\n" +
+//                    "                    \"created_at\": \"2025-11-19 17:14\",\n" +
+//                    "                    \"updated_at\": \"2025-11-19 17:14\"\n" +
+//                    "                }\n" +
+//                    "            ]\n" +
+//                    "        }\n" +
+//                    "    ]\n" +
+//                    "}");
+            Cluster cluster = objectMapper.readValue(clusterResult.getResult(), Cluster.class);
+            if (cluster != null && CollectionUtils.isNotEmpty(cluster.getResults()) && StringUtils.isNotEmpty(cluster.getResults().get(0).getUuid())) {
+                HttpResult phyStaResult = xdOneHttpClient.xdGet("/proxy/monitor/nodes?cluster=" + cluster.getResults().get(0).getUuid(), null);
+//                HttpResult phyStaResult = xdOneHttpClient.xdGet("/api/mp/devops/cluster/out_interface/page_real_equipment", null);
+//                phyStaResult.setResult("{\n" +
+//                        "    \"192.168.140.5\": {\n" +
+//                        "        \"cpu\": {\n" +
+//                        "            \"util\": {\n" +
+//                        "                \"value\": \"3.58\",\n" +
+//                        "                \"unit\": \"%\"\n" +
+//                        "            }\n" +
+//                        "        },\n" +
+//                        "        \"memory\": {\n" +
+//                        "            \"used\": {\n" +
+//                        "                \"value\": \"41\",\n" +
+//                        "                \"unit\": \"GB\"\n" +
+//                        "            },\n" +
+//                        "            \"total\": {\n" +
+//                        "                \"value\": \"754\",\n" +
+//                        "                \"unit\": \"GB\"\n" +
+//                        "            }\n" +
+//                        "        },\n" +
+//                        "        \"filesystems\": {\n" +
+//                        "            \"/dev/sda1\": {\n" +
+//                        "                \"used\": {\n" +
+//                        "                    \"value\": \"6782976\",\n" +
+//                        "                    \"unit\": \"Bytes\"\n" +
+//                        "                },\n" +
+//                        "                \"total\": {\n" +
+//                        "                    \"value\": \"523968512\",\n" +
+//                        "                    \"unit\": \"Bytes\"\n" +
+//                        "                }\n" +
+//                        "            },\n" +
+//                        "            \"/dev/sda2\": {\n" +
+//                        "                \"used\": {\n" +
+//                        "                    \"value\": \"196136960\",\n" +
+//                        "                    \"unit\": \"Bytes\"\n" +
+//                        "                },\n" +
+//                        "                \"total\": {\n" +
+//                        "                    \"value\": \"1020702720\",\n" +
+//                        "                    \"unit\": \"Bytes\"\n" +
+//                        "                }\n" +
+//                        "            },\n" +
+//                        "            \"/dev/sda3\": {\n" +
+//                        "                \"used\": {\n" +
+//                        "                    \"value\": \"155982388565.33\",\n" +
+//                        "                    \"unit\": \"Bytes\"\n" +
+//                        "                },\n" +
+//                        "                \"total\": {\n" +
+//                        "                    \"value\": \"1769341595648\",\n" +
+//                        "                    \"unit\": \"Bytes\"\n" +
+//                        "                }\n" +
+//                        "            }\n" +
+//                        "        },\n" +
+//                        "        \"network\": {\n" +
+//                        "            \"enp125s0f0\": {\n" +
+//                        "                \"receive_rate\": {\n" +
+//                        "                    \"value\": \"0\",\n" +
+//                        "                    \"unit\": \"KB/s\"\n" +
+//                        "                },\n" +
+//                        "                \"transmit_rate\": {\n" +
+//                        "                    \"value\": \"0\",\n" +
+//                        "                    \"unit\": \"KB/s\"\n" +
+//                        "                }\n" +
+//                        "            },\n" +
+//                        "            \"enp125s0f1\": {\n" +
+//                        "                \"receive_rate\": {\n" +
+//                        "                    \"value\": \"0\",\n" +
+//                        "                    \"unit\": \"KB/s\"\n" +
+//                        "                },\n" +
+//                        "                \"transmit_rate\": {\n" +
+//                        "                    \"value\": \"0\",\n" +
+//                        "                    \"unit\": \"KB/s\"\n" +
+//                        "                }\n" +
+//                        "            },\n" +
+//                        "            \"enp125s0f2\": {\n" +
+//                        "                \"receive_rate\": {\n" +
+//                        "                    \"value\": \"0\",\n" +
+//                        "                    \"unit\": \"KB/s\"\n" +
+//                        "                },\n" +
+//                        "                \"transmit_rate\": {\n" +
+//                        "                    \"value\": \"0\",\n" +
+//                        "                    \"unit\": \"KB/s\"\n" +
+//                        "                }\n" +
+//                        "            },\n" +
+//                        "            \"enp125s0f3\": {\n" +
+//                        "                \"receive_rate\": {\n" +
+//                        "                    \"value\": \"0\",\n" +
+//                        "                    \"unit\": \"KB/s\"\n" +
+//                        "                },\n" +
+//                        "                \"transmit_rate\": {\n" +
+//                        "                    \"value\": \"0\",\n" +
+//                        "                    \"unit\": \"KB/s\"\n" +
+//                        "                }\n" +
+//                        "            },\n" +
+//                        "            \"enp189s0f0\": {\n" +
+//                        "                \"receive_rate\": {\n" +
+//                        "                    \"value\": \"0\",\n" +
+//                        "                    \"unit\": \"KB/s\"\n" +
+//                        "                },\n" +
+//                        "                \"transmit_rate\": {\n" +
+//                        "                    \"value\": \"0\",\n" +
+//                        "                    \"unit\": \"KB/s\"\n" +
+//                        "                }\n" +
+//                        "            },\n" +
+//                        "            \"enp189s0f1\": {\n" +
+//                        "                \"receive_rate\": {\n" +
+//                        "                    \"value\": \"0\",\n" +
+//                        "                    \"unit\": \"KB/s\"\n" +
+//                        "                },\n" +
+//                        "                \"transmit_rate\": {\n" +
+//                        "                    \"value\": \"0\",\n" +
+//                        "                    \"unit\": \"KB/s\"\n" +
+//                        "                }\n" +
+//                        "            },\n" +
+//                        "            \"enp189s0f2\": {\n" +
+//                        "                \"receive_rate\": {\n" +
+//                        "                    \"value\": \"1\",\n" +
+//                        "                    \"unit\": \"KB/s\"\n" +
+//                        "                },\n" +
+//                        "                \"transmit_rate\": {\n" +
+//                        "                    \"value\": \"0\",\n" +
+//                        "                    \"unit\": \"KB/s\"\n" +
+//                        "                }\n" +
+//                        "            },\n" +
+//                        "            \"enp189s0f3\": {\n" +
+//                        "                \"receive_rate\": {\n" +
+//                        "                    \"value\": \"397\",\n" +
+//                        "                    \"unit\": \"KB/s\"\n" +
+//                        "                },\n" +
+//                        "                \"transmit_rate\": {\n" +
+//                        "                    \"value\": \"461\",\n" +
+//                        "                    \"unit\": \"KB/s\"\n" +
+//                        "                }\n" +
+//                        "            }\n" +
+//                        "        }\n" +
+//                        "    },\n" +
+//                        "    \"192.168.140.6\": {\n" +
+//                        "        \"cpu\": {\n" +
+//                        "            \"util\": {\n" +
+//                        "                \"value\": \"2.8\",\n" +
+//                        "                \"unit\": \"%\"\n" +
+//                        "            }\n" +
+//                        "        },\n" +
+//                        "        \"memory\": {\n" +
+//                        "            \"used\": {\n" +
+//                        "                \"value\": \"36\",\n" +
+//                        "                \"unit\": \"GB\"\n" +
+//                        "            },\n" +
+//                        "            \"total\": {\n" +
+//                        "                \"value\": \"754\",\n" +
+//                        "                \"unit\": \"GB\"\n" +
+//                        "            }\n" +
+//                        "        },\n" +
+//                        "        \"filesystems\": {\n" +
+//                        "            \"/dev/sdd1\": {\n" +
+//                        "                \"used\": {\n" +
+//                        "                    \"value\": \"6782976\",\n" +
+//                        "                    \"unit\": \"Bytes\"\n" +
+//                        "                },\n" +
+//                        "                \"total\": {\n" +
+//                        "                    \"value\": \"523968512\",\n" +
+//                        "                    \"unit\": \"Bytes\"\n" +
+//                        "                }\n" +
+//                        "            },\n" +
+//                        "            \"/dev/sdd2\": {\n" +
+//                        "                \"used\": {\n" +
+//                        "                    \"value\": \"196136960\",\n" +
+//                        "                    \"unit\": \"Bytes\"\n" +
+//                        "                },\n" +
+//                        "                \"total\": {\n" +
+//                        "                    \"value\": \"1020702720\",\n" +
+//                        "                    \"unit\": \"Bytes\"\n" +
+//                        "                }\n" +
+//                        "            },\n" +
+//                        "            \"/dev/sdd3\": {\n" +
+//                        "                \"used\": {\n" +
+//                        "                    \"value\": \"46340962304\",\n" +
+//                        "                    \"unit\": \"Bytes\"\n" +
+//                        "                },\n" +
+//                        "                \"total\": {\n" +
+//                        "                    \"value\": \"1769341595648\",\n" +
+//                        "                    \"unit\": \"Bytes\"\n" +
+//                        "                }\n" +
+//                        "            }\n" +
+//                        "        },\n" +
+//                        "        \"network\": {\n" +
+//                        "            \"enp125s0f0\": {\n" +
+//                        "                \"receive_rate\": {\n" +
+//                        "                    \"value\": \"0\",\n" +
+//                        "                    \"unit\": \"KB/s\"\n" +
+//                        "                },\n" +
+//                        "                \"transmit_rate\": {\n" +
+//                        "                    \"value\": \"0\",\n" +
+//                        "                    \"unit\": \"KB/s\"\n" +
+//                        "                }\n" +
+//                        "            },\n" +
+//                        "            \"enp125s0f1\": {\n" +
+//                        "                \"receive_rate\": {\n" +
+//                        "                    \"value\": \"0\",\n" +
+//                        "                    \"unit\": \"KB/s\"\n" +
+//                        "                },\n" +
+//                        "                \"transmit_rate\": {\n" +
+//                        "                    \"value\": \"0\",\n" +
+//                        "                    \"unit\": \"KB/s\"\n" +
+//                        "                }\n" +
+//                        "            },\n" +
+//                        "            \"enp125s0f2\": {\n" +
+//                        "                \"receive_rate\": {\n" +
+//                        "                    \"value\": \"0\",\n" +
+//                        "                    \"unit\": \"KB/s\"\n" +
+//                        "                },\n" +
+//                        "                \"transmit_rate\": {\n" +
+//                        "                    \"value\": \"0\",\n" +
+//                        "                    \"unit\": \"KB/s\"\n" +
+//                        "                }\n" +
+//                        "            },\n" +
+//                        "            \"enp125s0f3\": {\n" +
+//                        "                \"receive_rate\": {\n" +
+//                        "                    \"value\": \"0\",\n" +
+//                        "                    \"unit\": \"KB/s\"\n" +
+//                        "                },\n" +
+//                        "                \"transmit_rate\": {\n" +
+//                        "                    \"value\": \"0\",\n" +
+//                        "                    \"unit\": \"KB/s\"\n" +
+//                        "                }\n" +
+//                        "            },\n" +
+//                        "            \"enp189s0f0\": {\n" +
+//                        "                \"receive_rate\": {\n" +
+//                        "                    \"value\": \"0\",\n" +
+//                        "                    \"unit\": \"KB/s\"\n" +
+//                        "                },\n" +
+//                        "                \"transmit_rate\": {\n" +
+//                        "                    \"value\": \"0\",\n" +
+//                        "                    \"unit\": \"KB/s\"\n" +
+//                        "                }\n" +
+//                        "            },\n" +
+//                        "            \"enp189s0f1\": {\n" +
+//                        "                \"receive_rate\": {\n" +
+//                        "                    \"value\": \"0\",\n" +
+//                        "                    \"unit\": \"KB/s\"\n" +
+//                        "                },\n" +
+//                        "                \"transmit_rate\": {\n" +
+//                        "                    \"value\": \"0\",\n" +
+//                        "                    \"unit\": \"KB/s\"\n" +
+//                        "                }\n" +
+//                        "            },\n" +
+//                        "            \"enp189s0f2\": {\n" +
+//                        "                \"receive_rate\": {\n" +
+//                        "                    \"value\": \"1\",\n" +
+//                        "                    \"unit\": \"KB/s\"\n" +
+//                        "                },\n" +
+//                        "                \"transmit_rate\": {\n" +
+//                        "                    \"value\": \"0\",\n" +
+//                        "                    \"unit\": \"KB/s\"\n" +
+//                        "                }\n" +
+//                        "            },\n" +
+//                        "            \"enp189s0f3\": {\n" +
+//                        "                \"receive_rate\": {\n" +
+//                        "                    \"value\": \"335\",\n" +
+//                        "                    \"unit\": \"KB/s\"\n" +
+//                        "                },\n" +
+//                        "                \"transmit_rate\": {\n" +
+//                        "                    \"value\": \"313\",\n" +
+//                        "                    \"unit\": \"KB/s\"\n" +
+//                        "                }\n" +
+//                        "            },\n" +
+//                        "            \"vxlan_sys_4789\": {\n" +
+//                        "                \"receive_rate\": {\n" +
+//                        "                    \"value\": \"0\",\n" +
+//                        "                    \"unit\": \"KB/s\"\n" +
+//                        "                },\n" +
+//                        "                \"transmit_rate\": {\n" +
+//                        "                    \"value\": \"0\",\n" +
+//                        "                    \"unit\": \"KB/s\"\n" +
+//                        "                }\n" +
+//                        "            }\n" +
+//                        "        }\n" +
+//                        "    },\n" +
+//                        "    \"192.168.140.7\": {\n" +
+//                        "        \"cpu\": {\n" +
+//                        "            \"util\": {\n" +
+//                        "                \"value\": \"3.52\",\n" +
+//                        "                \"unit\": \"%\"\n" +
+//                        "            }\n" +
+//                        "        },\n" +
+//                        "        \"memory\": {\n" +
+//                        "            \"used\": {\n" +
+//                        "                \"value\": \"34\",\n" +
+//                        "                \"unit\": \"GB\"\n" +
+//                        "            },\n" +
+//                        "            \"total\": {\n" +
+//                        "                \"value\": \"754\",\n" +
+//                        "                \"unit\": \"GB\"\n" +
+//                        "            }\n" +
+//                        "        },\n" +
+//                        "        \"filesystems\": {\n" +
+//                        "            \"/dev/sda1\": {\n" +
+//                        "                \"used\": {\n" +
+//                        "                    \"value\": \"6782976\",\n" +
+//                        "                    \"unit\": \"Bytes\"\n" +
+//                        "                },\n" +
+//                        "                \"total\": {\n" +
+//                        "                    \"value\": \"523968512\",\n" +
+//                        "                    \"unit\": \"Bytes\"\n" +
+//                        "                }\n" +
+//                        "            },\n" +
+//                        "            \"/dev/sda2\": {\n" +
+//                        "                \"used\": {\n" +
+//                        "                    \"value\": \"196136960\",\n" +
+//                        "                    \"unit\": \"Bytes\"\n" +
+//                        "                },\n" +
+//                        "                \"total\": {\n" +
+//                        "                    \"value\": \"1020702720\",\n" +
+//                        "                    \"unit\": \"Bytes\"\n" +
+//                        "                }\n" +
+//                        "            },\n" +
+//                        "            \"/dev/sda3\": {\n" +
+//                        "                \"used\": {\n" +
+//                        "                    \"value\": \"47302253226.67\",\n" +
+//                        "                    \"unit\": \"Bytes\"\n" +
+//                        "                },\n" +
+//                        "                \"total\": {\n" +
+//                        "                    \"value\": \"1769341595648\",\n" +
+//                        "                    \"unit\": \"Bytes\"\n" +
+//                        "                }\n" +
+//                        "            }\n" +
+//                        "        },\n" +
+//                        "        \"network\": {\n" +
+//                        "            \"enp125s0f0\": {\n" +
+//                        "                \"receive_rate\": {\n" +
+//                        "                    \"value\": \"0\",\n" +
+//                        "                    \"unit\": \"KB/s\"\n" +
+//                        "                },\n" +
+//                        "                \"transmit_rate\": {\n" +
+//                        "                    \"value\": \"0\",\n" +
+//                        "                    \"unit\": \"KB/s\"\n" +
+//                        "                }\n" +
+//                        "            },\n" +
+//                        "            \"enp125s0f1\": {\n" +
+//                        "                \"receive_rate\": {\n" +
+//                        "                    \"value\": \"0\",\n" +
+//                        "                    \"unit\": \"KB/s\"\n" +
+//                        "                },\n" +
+//                        "                \"transmit_rate\": {\n" +
+//                        "                    \"value\": \"0\",\n" +
+//                        "                    \"unit\": \"KB/s\"\n" +
+//                        "                }\n" +
+//                        "            },\n" +
+//                        "            \"enp125s0f2\": {\n" +
+//                        "                \"receive_rate\": {\n" +
+//                        "                    \"value\": \"0\",\n" +
+//                        "                    \"unit\": \"KB/s\"\n" +
+//                        "                },\n" +
+//                        "                \"transmit_rate\": {\n" +
+//                        "                    \"value\": \"0\",\n" +
+//                        "                    \"unit\": \"KB/s\"\n" +
+//                        "                }\n" +
+//                        "            },\n" +
+//                        "            \"enp125s0f3\": {\n" +
+//                        "                \"receive_rate\": {\n" +
+//                        "                    \"value\": \"0\",\n" +
+//                        "                    \"unit\": \"KB/s\"\n" +
+//                        "                },\n" +
+//                        "                \"transmit_rate\": {\n" +
+//                        "                    \"value\": \"0\",\n" +
+//                        "                    \"unit\": \"KB/s\"\n" +
+//                        "                }\n" +
+//                        "            },\n" +
+//                        "            \"enp189s0f0\": {\n" +
+//                        "                \"receive_rate\": {\n" +
+//                        "                    \"value\": \"0\",\n" +
+//                        "                    \"unit\": \"KB/s\"\n" +
+//                        "                },\n" +
+//                        "                \"transmit_rate\": {\n" +
+//                        "                    \"value\": \"0\",\n" +
+//                        "                    \"unit\": \"KB/s\"\n" +
+//                        "                }\n" +
+//                        "            },\n" +
+//                        "            \"enp189s0f1\": {\n" +
+//                        "                \"receive_rate\": {\n" +
+//                        "                    \"value\": \"0\",\n" +
+//                        "                    \"unit\": \"KB/s\"\n" +
+//                        "                },\n" +
+//                        "                \"transmit_rate\": {\n" +
+//                        "                    \"value\": \"0\",\n" +
+//                        "                    \"unit\": \"KB/s\"\n" +
+//                        "                }\n" +
+//                        "            },\n" +
+//                        "            \"enp189s0f2\": {\n" +
+//                        "                \"receive_rate\": {\n" +
+//                        "                    \"value\": \"424\",\n" +
+//                        "                    \"unit\": \"KB/s\"\n" +
+//                        "                },\n" +
+//                        "                \"transmit_rate\": {\n" +
+//                        "                    \"value\": \"427\",\n" +
+//                        "                    \"unit\": \"KB/s\"\n" +
+//                        "                }\n" +
+//                        "            },\n" +
+//                        "            \"enp189s0f3\": {\n" +
+//                        "                \"receive_rate\": {\n" +
+//                        "                    \"value\": \"1\",\n" +
+//                        "                    \"unit\": \"KB/s\"\n" +
+//                        "                },\n" +
+//                        "                \"transmit_rate\": {\n" +
+//                        "                    \"value\": \"0\",\n" +
+//                        "                    \"unit\": \"KB/s\"\n" +
+//                        "                }\n" +
+//                        "            },\n" +
+//                        "            \"vxlan_sys_4789\": {\n" +
+//                        "                \"receive_rate\": {\n" +
+//                        "                    \"value\": \"0\",\n" +
+//                        "                    \"unit\": \"KB/s\"\n" +
+//                        "                },\n" +
+//                        "                \"transmit_rate\": {\n" +
+//                        "                    \"value\": \"0\",\n" +
+//                        "                    \"unit\": \"KB/s\"\n" +
+//                        "                }\n" +
+//                        "            }\n" +
+//                        "        }\n" +
+//                        "    }\n" +
+//                        "}");
+                JSONObject phyStaJson = JSON.parseObject(phyStaResult.getResult());
+
+                HttpResult phyResult = xdOneHttpClient.xdGet("/proxy/monitor/prometheus/measures?cluster=" + cluster.getResults().get(0).getUuid() + "&queries[]=max_over_time(node_dmi_info[1y])&queries[]=max_over_time(node_os_info[1y])&queries[]=max_over_time(node_uname_info[1y])", null);
+//                HttpResult phyResult = xdOneHttpClient.xdGet("/api/mp/devops/cluster/out_interface/page_real_equipment", null);
+//                phyResult.setResult("[\n" +
+//                        "    {\n" +
+//                        "        \"data\": [\n" +
+//                        "            {\n" +
+//                        "                \"metric\": {\n" +
+//                        "                    \"bios_date\": \"01/04/2025\",\n" +
+//                        "                    \"bios_release\": \"7.38\",\n" +
+//                        "                    \"bios_vendor\": \"Huawei Corp.\",\n" +
+//                        "                    \"bios_version\": \"7.38\",\n" +
+//                        "                    \"board_asset_tag\": \"To be filled by O.E.M.\",\n" +
+//                        "                    \"board_name\": \"BC82AMDDUA\",\n" +
+//                        "                    \"board_vendor\": \"PowerLeader\",\n" +
+//                        "                    \"board_version\": \"V200R023C10\",\n" +
+//                        "                    \"chassis_asset_tag\": \"To be filled by O.E.M.\",\n" +
+//                        "                    \"chassis_vendor\": \"PowerLeader\",\n" +
+//                        "                    \"chassis_version\": \"To be filled by O.E.M.\",\n" +
+//                        "                    \"instance\": \"192.168.140.5:9100\",\n" +
+//                        "                    \"job\": \"node\",\n" +
+//                        "                    \"product_family\": \"To be filled by O.E.M.\",\n" +
+//                        "                    \"product_name\": \"PR210K\",\n" +
+//                        "                    \"product_sku\": \"To be filled by O.E.M.\",\n" +
+//                        "                    \"product_version\": \"To be filled by O.E.M.\",\n" +
+//                        "                    \"system_vendor\": \"PowerLeader\"\n" +
+//                        "                },\n" +
+//                        "                \"value\": [\n" +
+//                        "                    1764476065.736,\n" +
+//                        "                    \"1\"\n" +
+//                        "                ]\n" +
+//                        "            },\n" +
+//                        "            {\n" +
+//                        "                \"metric\": {\n" +
+//                        "                    \"bios_date\": \"01/04/2025\",\n" +
+//                        "                    \"bios_release\": \"7.38\",\n" +
+//                        "                    \"bios_vendor\": \"Huawei Corp.\",\n" +
+//                        "                    \"bios_version\": \"7.38\",\n" +
+//                        "                    \"board_asset_tag\": \"To be filled by O.E.M.\",\n" +
+//                        "                    \"board_name\": \"BC82AMDDUA\",\n" +
+//                        "                    \"board_vendor\": \"PowerLeader\",\n" +
+//                        "                    \"board_version\": \"V200R023C10\",\n" +
+//                        "                    \"chassis_asset_tag\": \"To be filled by O.E.M.\",\n" +
+//                        "                    \"chassis_vendor\": \"PowerLeader\",\n" +
+//                        "                    \"chassis_version\": \"To be filled by O.E.M.\",\n" +
+//                        "                    \"instance\": \"192.168.140.6:9100\",\n" +
+//                        "                    \"job\": \"node\",\n" +
+//                        "                    \"product_family\": \"To be filled by O.E.M.\",\n" +
+//                        "                    \"product_name\": \"PR210K\",\n" +
+//                        "                    \"product_sku\": \"To be filled by O.E.M.\",\n" +
+//                        "                    \"product_version\": \"To be filled by O.E.M.\",\n" +
+//                        "                    \"system_vendor\": \"PowerLeader\"\n" +
+//                        "                },\n" +
+//                        "                \"value\": [\n" +
+//                        "                    1764476065.736,\n" +
+//                        "                    \"1\"\n" +
+//                        "                ]\n" +
+//                        "            },\n" +
+//                        "            {\n" +
+//                        "                \"metric\": {\n" +
+//                        "                    \"bios_date\": \"01/04/2025\",\n" +
+//                        "                    \"bios_release\": \"7.38\",\n" +
+//                        "                    \"bios_vendor\": \"Huawei Corp.\",\n" +
+//                        "                    \"bios_version\": \"7.38\",\n" +
+//                        "                    \"board_asset_tag\": \"To be filled by O.E.M.\",\n" +
+//                        "                    \"board_name\": \"BC82AMDDUA\",\n" +
+//                        "                    \"board_vendor\": \"PowerLeader\",\n" +
+//                        "                    \"board_version\": \"V200R023C10\",\n" +
+//                        "                    \"chassis_asset_tag\": \"To be filled by O.E.M.\",\n" +
+//                        "                    \"chassis_vendor\": \"PowerLeader\",\n" +
+//                        "                    \"chassis_version\": \"To be filled by O.E.M.\",\n" +
+//                        "                    \"instance\": \"192.168.140.7:9100\",\n" +
+//                        "                    \"job\": \"node\",\n" +
+//                        "                    \"product_family\": \"To be filled by O.E.M.\",\n" +
+//                        "                    \"product_name\": \"PR210K\",\n" +
+//                        "                    \"product_sku\": \"To be filled by O.E.M.\",\n" +
+//                        "                    \"product_version\": \"To be filled by O.E.M.\",\n" +
+//                        "                    \"system_vendor\": \"PowerLeader\"\n" +
+//                        "                },\n" +
+//                        "                \"value\": [\n" +
+//                        "                    1764476065.736,\n" +
+//                        "                    \"1\"\n" +
+//                        "                ]\n" +
+//                        "            }\n" +
+//                        "        ],\n" +
+//                        "        \"unit\": null,\n" +
+//                        "        \"metric\": \"max_over_time(node_dmi_info[1y])\"\n" +
+//                        "    },\n" +
+//                        "    {\n" +
+//                        "        \"data\": [\n" +
+//                        "            {\n" +
+//                        "                \"metric\": {\n" +
+//                        "                    \"id\": \"openEuler\",\n" +
+//                        "                    \"instance\": \"192.168.140.5:9100\",\n" +
+//                        "                    \"job\": \"node\",\n" +
+//                        "                    \"name\": \"openEuler\",\n" +
+//                        "                    \"pretty_name\": \"openEuler 24.03 (LTS-SP2)\",\n" +
+//                        "                    \"version\": \"24.03 (LTS-SP2)\",\n" +
+//                        "                    \"version_id\": \"24.03\"\n" +
+//                        "                },\n" +
+//                        "                \"value\": [\n" +
+//                        "                    1764476065.769,\n" +
+//                        "                    \"1\"\n" +
+//                        "                ]\n" +
+//                        "            },\n" +
+//                        "            {\n" +
+//                        "                \"metric\": {\n" +
+//                        "                    \"id\": \"openEuler\",\n" +
+//                        "                    \"instance\": \"192.168.140.6:9100\",\n" +
+//                        "                    \"job\": \"node\",\n" +
+//                        "                    \"name\": \"openEuler\",\n" +
+//                        "                    \"pretty_name\": \"openEuler 24.03 (LTS-SP2)\",\n" +
+//                        "                    \"version\": \"24.03 (LTS-SP2)\",\n" +
+//                        "                    \"version_id\": \"24.03\"\n" +
+//                        "                },\n" +
+//                        "                \"value\": [\n" +
+//                        "                    1764476065.769,\n" +
+//                        "                    \"1\"\n" +
+//                        "                ]\n" +
+//                        "            },\n" +
+//                        "            {\n" +
+//                        "                \"metric\": {\n" +
+//                        "                    \"id\": \"openEuler\",\n" +
+//                        "                    \"instance\": \"192.168.140.7:9100\",\n" +
+//                        "                    \"job\": \"node\",\n" +
+//                        "                    \"name\": \"openEuler\",\n" +
+//                        "                    \"pretty_name\": \"openEuler 24.03 (LTS-SP2)\",\n" +
+//                        "                    \"version\": \"24.03 (LTS-SP2)\",\n" +
+//                        "                    \"version_id\": \"24.03\"\n" +
+//                        "                },\n" +
+//                        "                \"value\": [\n" +
+//                        "                    1764476065.769,\n" +
+//                        "                    \"1\"\n" +
+//                        "                ]\n" +
+//                        "            }\n" +
+//                        "        ],\n" +
+//                        "        \"unit\": null,\n" +
+//                        "        \"metric\": \"max_over_time(node_os_info[1y])\"\n" +
+//                        "    },\n" +
+//                        "    {\n" +
+//                        "        \"data\": [\n" +
+//                        "            {\n" +
+//                        "                \"metric\": {\n" +
+//                        "                    \"domainname\": \"(none)\",\n" +
+//                        "                    \"instance\": \"192.168.140.5:9100\",\n" +
+//                        "                    \"job\": \"node\",\n" +
+//                        "                    \"machine\": \"aarch64\",\n" +
+//                        "                    \"nodename\": \"control-1\",\n" +
+//                        "                    \"release\": \"6.6.0-98.0.0.103.oe2403sp2.aarch64\",\n" +
+//                        "                    \"sysname\": \"Linux\",\n" +
+//                        "                    \"version\": \"#1 SMP Wed Jun 25 23:19:26 CST 2025\"\n" +
+//                        "                },\n" +
+//                        "                \"value\": [\n" +
+//                        "                    1764476065.797,\n" +
+//                        "                    \"1\"\n" +
+//                        "                ]\n" +
+//                        "            },\n" +
+//                        "            {\n" +
+//                        "                \"metric\": {\n" +
+//                        "                    \"domainname\": \"(none)\",\n" +
+//                        "                    \"instance\": \"192.168.140.6:9100\",\n" +
+//                        "                    \"job\": \"node\",\n" +
+//                        "                    \"machine\": \"aarch64\",\n" +
+//                        "                    \"nodename\": \"control-2\",\n" +
+//                        "                    \"release\": \"6.6.0-98.0.0.103.oe2403sp2.aarch64\",\n" +
+//                        "                    \"sysname\": \"Linux\",\n" +
+//                        "                    \"version\": \"#1 SMP Wed Jun 25 23:19:26 CST 2025\"\n" +
+//                        "                },\n" +
+//                        "                \"value\": [\n" +
+//                        "                    1764476065.797,\n" +
+//                        "                    \"1\"\n" +
+//                        "                ]\n" +
+//                        "            },\n" +
+//                        "            {\n" +
+//                        "                \"metric\": {\n" +
+//                        "                    \"domainname\": \"(none)\",\n" +
+//                        "                    \"instance\": \"192.168.140.7:9100\",\n" +
+//                        "                    \"job\": \"node\",\n" +
+//                        "                    \"machine\": \"aarch64\",\n" +
+//                        "                    \"nodename\": \"control-3\",\n" +
+//                        "                    \"release\": \"6.6.0-98.0.0.103.oe2403sp2.aarch64\",\n" +
+//                        "                    \"sysname\": \"Linux\",\n" +
+//                        "                    \"version\": \"#1 SMP Wed Jun 25 23:19:26 CST 2025\"\n" +
+//                        "                },\n" +
+//                        "                \"value\": [\n" +
+//                        "                    1764476065.797,\n" +
+//                        "                    \"1\"\n" +
+//                        "                ]\n" +
+//                        "            }\n" +
+//                        "        ],\n" +
+//                        "        \"unit\": null,\n" +
+//                        "        \"metric\": \"max_over_time(node_uname_info[1y])\"\n" +
+//                        "    },\n" +
+//                        "    {\n" +
+//                        "        \"data\": [\n" +
+//                        "            {\n" +
+//                        "                \"metric\": {\n" +
+//                        "                    \"__name__\": \"up\",\n" +
+//                        "                    \"instance\": \"192.168.140.5:9100\",\n" +
+//                        "                    \"job\": \"node\"\n" +
+//                        "                },\n" +
+//                        "                \"value\": [\n" +
+//                        "                    1764476065.828,\n" +
+//                        "                    \"1\"\n" +
+//                        "                ]\n" +
+//                        "            },\n" +
+//                        "            {\n" +
+//                        "                \"metric\": {\n" +
+//                        "                    \"__name__\": \"up\",\n" +
+//                        "                    \"instance\": \"192.168.140.6:9100\",\n" +
+//                        "                    \"job\": \"node\"\n" +
+//                        "                },\n" +
+//                        "                \"value\": [\n" +
+//                        "                    1764476065.828,\n" +
+//                        "                    \"1\"\n" +
+//                        "                ]\n" +
+//                        "            },\n" +
+//                        "            {\n" +
+//                        "                \"metric\": {\n" +
+//                        "                    \"__name__\": \"up\",\n" +
+//                        "                    \"instance\": \"192.168.140.7:9100\",\n" +
+//                        "                    \"job\": \"node\"\n" +
+//                        "                },\n" +
+//                        "                \"value\": [\n" +
+//                        "                    1764476065.828,\n" +
+//                        "                    \"1\"\n" +
+//                        "                ]\n" +
+//                        "            }\n" +
+//                        "        ],\n" +
+//                        "        \"unit\": null,\n" +
+//                        "        \"metric\": \"up\"\n" +
+//                        "    }\n" +
+//                        "]");
+                JSONArray jsonArray = JSON.parseArray(phyResult.getResult());
+                for (int i = 0; i < jsonArray.size(); i++) {
+                    JSONObject jsonObject = jsonArray.getJSONObject(i);
+                    if ("max_over_time(node_uname_info[1y])".equals(jsonObject.getString("metric"))
+                            && jsonObject.getJSONArray("data") != null
+                            && jsonObject.getJSONArray("data").size() > 0) {
+                        JSONArray jsonArray2 = jsonObject.getJSONArray("data");
+                        for (int j = 0; j < jsonArray2.size(); j++) {
+                            JSONObject jsonObject2 = jsonArray2.getJSONObject(j);
+                            if (jsonObject2.getJSONObject("metric") != null) {
+                                XdPhyVO xdPhyVO = new XdPhyVO();
+                                xdPhyVO.setCompany("1");
+                                xdPhyVO.setCompany_name("华网创新");
+                                xdPhyVO.setNodeName(jsonObject2.getJSONObject("metric").getString("nodename"));
+                                xdPhyVO.setSysName(jsonObject2.getJSONObject("metric").getString("sysname"));
+                                String instance = jsonObject2.getJSONObject("metric").getString("instance");
+                                xdPhyVO.setInstance(instance);
+                                if (phyStaJson.getJSONObject(instance.split(":")[0]) != null) {
+                                    JSONObject instanceJson = phyStaJson.getJSONObject(instance.split(":")[0]);
+                                    JSONObject cpuJson = instanceJson.getJSONObject("cpu");
+                                    JSONObject memoryJson = instanceJson.getJSONObject("memory");
+                                    JSONObject filesystemsJson = instanceJson.getJSONObject("filesystems");
+                                    if (cpuJson != null) {
+                                        if (cpuJson.getJSONObject("util") != null) {
+                                            xdPhyVO.setCpuPercent(cpuJson.getJSONObject("util").getString("value") + cpuJson.getJSONObject("util").getString("unit"));
+                                        }
+                                    }
+                                    if (memoryJson != null) {
+                                        if (memoryJson.getJSONObject("used") != null) {
+                                            ValueUnitVO temp = new ValueUnitVO();
+                                            temp.setValue(memoryJson.getJSONObject("used").getString("value"));
+                                            temp.setUnit(memoryJson.getJSONObject("used").getString("unit"));
+                                            xdPhyVO.setUsedMemory(temp);
+                                        }
+                                        if (memoryJson.getJSONObject("total") != null) {
+                                            ValueUnitVO temp = new ValueUnitVO();
+                                            temp.setValue(memoryJson.getJSONObject("total").getString("value"));
+                                            temp.setUnit(memoryJson.getJSONObject("total").getString("unit"));
+                                            xdPhyVO.setTotalMemory(temp);
+                                        }
+                                    }
+                                    if (filesystemsJson != null) {
+                                        List<XdPhyFileSystem> xdPhyFileSystemList = new ArrayList<>();
+                                        for (String key : filesystemsJson.keySet()) {
+                                            XdPhyFileSystem xdPhyFileSystem = new XdPhyFileSystem();
+                                            xdPhyFileSystem.setName(key);
+                                            JSONObject tempObject = filesystemsJson.getJSONObject(key);
+                                            if (tempObject.getJSONObject("used") != null) {
+                                                ValueUnitVO temp = new ValueUnitVO();
+                                                temp.setValue(tempObject.getJSONObject("used").getString("value"));
+                                                temp.setUnit(tempObject.getJSONObject("used").getString("unit"));
+                                                if (StringUtils.isNotEmpty(temp.getUnit()) && StringUtils.isNotEmpty(temp.getValue()) && "bytes".equals(temp.getUnit().toLowerCase())) {
+                                                    temp.setValue(String.format("%.2f",Double.parseDouble(temp.getValue())/(1024*1024*1024)));
+                                                    temp.setUnit("GB");
+                                                }
+                                                xdPhyFileSystem.setUsedFileSystem(temp);
+                                            }
+                                            if (tempObject.getJSONObject("total") != null) {
+                                                ValueUnitVO temp = new ValueUnitVO();
+                                                temp.setValue(tempObject.getJSONObject("total").getString("value"));
+                                                temp.setUnit(tempObject.getJSONObject("total").getString("unit"));
+                                                if (StringUtils.isNotEmpty(temp.getUnit()) && StringUtils.isNotEmpty(temp.getValue()) && "bytes".equals(temp.getUnit().toLowerCase())) {
+                                                    temp.setValue(String.format("%.2f",Double.parseDouble(temp.getValue())/(1024*1024*1024)));
+                                                    temp.setUnit("GB");
+                                                }
+                                                xdPhyFileSystem.setTotalFileSystem(temp);
+                                            }
+                                            xdPhyFileSystemList.add(xdPhyFileSystem);
+                                        }
+                                        xdPhyVO.setFileSystems(xdPhyFileSystemList);
+                                    }
+                                }
+                                result.add(xdPhyVO);
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error("XdSourceController.phyList error.",  e);
+        }
+
+        XdPhyStatistics xdPhyStatistics = new XdPhyStatistics();
+        xdPhyStatistics.setCompanyName1("华网创新");
+        xdPhyStatistics.setCompanyName2("深信服");
+        xdPhyStatistics.setCompanyName3("信大网域");
+        Double cpuPercent1 = 0.00D;
+        Integer cpuNum1 = 0;
+        Double memoryUsed1 = 0.00D;
+        Double memoryTotal1 = 0.00D;
+        Double fileSystemUsed1 = 0.00D;
+        Double fileSystemTotal1 = 0.00D;
+        Double cpuPercent2 = 0.00D;
+        Integer cpuNum2 = 0;
+        Double memoryUsed2 = 0.00D;
+        Double memoryTotal2 = 0.00D;
+        Double fileSystemUsed2 = 0.00D;
+        Double fileSystemTotal2 = 0.00D;
+        Double cpuPercent3 = 0.00D;
+        Integer cpuNum3 = 0;
+        Double memoryUsed3 = 0.00D;
+        Double memoryTotal3 = 0.00D;
+        Double fileSystemUsed3 = 0.00D;
+        Double fileSystemTotal3 = 0.00D;
+        if (CollectionUtils.isNotEmpty(result)) {
+            for (XdPhyVO temp : result) {
+                if ("1".equals(temp.getCompany())) {
+                    if (StringUtils.isNotEmpty(temp.getCpuPercent())) {
+                        cpuPercent1 += Double.parseDouble(temp.getCpuPercent().replace("%", ""));
+                        cpuNum1++;
+                    }
+                    if (temp.getUsedMemory() != null && StringUtils.isNotEmpty(temp.getUsedMemory().getValue())) {
+                        memoryUsed1 += Double.parseDouble(temp.getUsedMemory().getValue());
+                    }
+                    if (temp.getTotalMemory() != null && StringUtils.isNotEmpty(temp.getTotalMemory().getValue())) {
+                        memoryTotal1 += Double.parseDouble(temp.getTotalMemory().getValue());
+                    }
+                    if (CollectionUtils.isNotEmpty(temp.getFileSystems())) {
+                        for (XdPhyFileSystem xdPhyFileSystem : temp.getFileSystems()) {
+                            if (xdPhyFileSystem.getUsedFileSystem() != null && StringUtils.isNotEmpty(xdPhyFileSystem.getUsedFileSystem().getValue())) {
+                                fileSystemUsed1 += Double.parseDouble(xdPhyFileSystem.getUsedFileSystem().getValue());
+                            }
+                            if (xdPhyFileSystem.getTotalFileSystem() != null && StringUtils.isNotEmpty(xdPhyFileSystem.getTotalFileSystem().getValue())) {
+                                fileSystemTotal1 += Double.parseDouble(xdPhyFileSystem.getTotalFileSystem().getValue());
+                            }
+                        }
+                    }
+                } else if ("2".equals(temp.getCompany())) {
+                    if (StringUtils.isNotEmpty(temp.getCpuPercent())) {
+                        cpuPercent2 += Double.parseDouble(temp.getCpuPercent().replace("%", ""));
+                        cpuNum2++;
+                    }
+                    if (temp.getUsedMemory() != null && StringUtils.isNotEmpty(temp.getUsedMemory().getValue())) {
+                        memoryUsed2 += Double.parseDouble(temp.getUsedMemory().getValue());
+                    }
+                    if (temp.getTotalMemory() != null && StringUtils.isNotEmpty(temp.getTotalMemory().getValue())) {
+                        memoryTotal2 += Double.parseDouble(temp.getTotalMemory().getValue());
+                    }
+                    if (CollectionUtils.isNotEmpty(temp.getFileSystems())) {
+                        for (XdPhyFileSystem xdPhyFileSystem : temp.getFileSystems()) {
+                            if (xdPhyFileSystem.getUsedFileSystem() != null && StringUtils.isNotEmpty(xdPhyFileSystem.getUsedFileSystem().getValue())) {
+                                fileSystemUsed2 += Double.parseDouble(xdPhyFileSystem.getUsedFileSystem().getValue());
+                            }
+                            if (xdPhyFileSystem.getTotalFileSystem() != null && StringUtils.isNotEmpty(xdPhyFileSystem.getTotalFileSystem().getValue())) {
+                                fileSystemTotal2 += Double.parseDouble(xdPhyFileSystem.getTotalFileSystem().getValue());
+                            }
+                        }
+                    }
+                } else if ("3".equals(temp.getCompany())) {
+                    if (StringUtils.isNotEmpty(temp.getCpuPercent())) {
+                        cpuPercent3 += Double.parseDouble(temp.getCpuPercent().replace("%", ""));
+                        cpuNum3++;
+                    }
+                    if (temp.getUsedMemory() != null && StringUtils.isNotEmpty(temp.getUsedMemory().getValue())) {
+                        memoryUsed3 += Double.parseDouble(temp.getUsedMemory().getValue());
+                    }
+                    if (temp.getTotalMemory() != null && StringUtils.isNotEmpty(temp.getTotalMemory().getValue())) {
+                        memoryTotal3 += Double.parseDouble(temp.getTotalMemory().getValue());
+                    }
+                    if (CollectionUtils.isNotEmpty(temp.getFileSystems())) {
+                        for (XdPhyFileSystem xdPhyFileSystem : temp.getFileSystems()) {
+                            if (xdPhyFileSystem.getUsedFileSystem() != null && StringUtils.isNotEmpty(xdPhyFileSystem.getUsedFileSystem().getValue())) {
+                                fileSystemUsed3 += Double.parseDouble(xdPhyFileSystem.getUsedFileSystem().getValue());
+                            }
+                            if (xdPhyFileSystem.getTotalFileSystem() != null && StringUtils.isNotEmpty(xdPhyFileSystem.getTotalFileSystem().getValue())) {
+                                fileSystemTotal3 += Double.parseDouble(xdPhyFileSystem.getTotalFileSystem().getValue());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (cpuPercent1 > 0 && cpuNum1 > 0) {
+            xdPhyStatistics.setCpuPercent1(Double.parseDouble(String.format("%.2f",cpuPercent1/cpuNum1)));
+        }
+        if (memoryTotal1 > 0) {
+            xdPhyStatistics.setMemoryPercent1(Double.parseDouble(String.format("%.2f",memoryUsed1*100/memoryTotal1)));
+        }
+        if (fileSystemTotal1 > 0) {
+            xdPhyStatistics.setFileSystemPercent1(Double.parseDouble(String.format("%.2f",fileSystemUsed1*100/fileSystemTotal1)));
+        }
+
+        if (cpuPercent2 > 0 && cpuNum2 > 0) {
+            xdPhyStatistics.setCpuPercent2(Double.parseDouble(String.format("%.2f",cpuPercent2/cpuNum2)));
+        }
+        if (memoryTotal2 > 0) {
+            xdPhyStatistics.setMemoryPercent2(Double.parseDouble(String.format("%.2f",memoryUsed2*100/memoryTotal2)));
+        }
+        if (fileSystemTotal2 > 0) {
+            xdPhyStatistics.setFileSystemPercent2(Double.parseDouble(String.format("%.2f",fileSystemUsed2*100/fileSystemTotal2)));
+        }
+
+        if (cpuPercent3 > 0 && cpuNum3 > 0) {
+            xdPhyStatistics.setCpuPercent3(Double.parseDouble(String.format("%.2f",cpuPercent3/cpuNum3)));
+        }
+        if (memoryTotal3 > 0) {
+            xdPhyStatistics.setMemoryPercent3(Double.parseDouble(String.format("%.2f",memoryUsed3*100/memoryTotal3)));
+        }
+        if (fileSystemTotal3 > 0) {
+            xdPhyStatistics.setFileSystemPercent3(Double.parseDouble(String.format("%.2f",fileSystemUsed3*100/fileSystemTotal3)));
+        }
+
+        return new ServiceResult<>(xdPhyStatistics).asResult();
+    }
+
+
 }
