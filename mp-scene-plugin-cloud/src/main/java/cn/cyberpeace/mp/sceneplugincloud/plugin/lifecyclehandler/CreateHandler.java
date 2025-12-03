@@ -45,6 +45,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.Create
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.cyberpeace.mp.service.MultiCloudService;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.google.common.collect.Lists;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -1059,6 +1060,28 @@ public class CreateHandler extends HandlerCommon {
                             cloudElement.getSrcElement().getPorts().get(0).setMacAddr(ipAndMac[1]);
                         }
                     }
+
+                    AccessMode accessMode = new AccessMode();
+                    accessMode.setProxy(true);
+                    accessMode.setProtocol("vnc");
+                    accessMode.setUsername("");
+                    accessMode.setPassword("");
+                    if (org.apache.commons.collections.CollectionUtils.isNotEmpty(cloudElement.getSrcElement().getPorts())) {
+                        cloudElement.getSrcElement().getPorts().get(0).setAccessModes(Lists.newArrayList(accessMode));
+                    }
+
+                    var cloudPorts = getPluginHandler().getPorts(cloudElement);
+                    if (org.apache.commons.collections.CollectionUtils.isNotEmpty(cloudPorts)) {
+                        CloudAccessMode cloudAccessMode = new CloudAccessMode();
+                        BeanUtils.copyProperties(accessMode, cloudAccessMode);
+                        cloudAccessMode.setAvailable(true);
+                        cloudAccessMode.setAccessIp(ipAndMac[0]);
+                        cloudAccessMode.setId(TextUtils.uuid());
+                        cloudPorts.get(0).setAccessModes(Lists.newArrayList(cloudAccessMode));
+                    }
+
+
+
                     return;
                 }
 
