@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.UserUtils;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
@@ -32,6 +33,7 @@ import cn.cyberpeace.mp.cscene.bo.ElementModifyBO;
 import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.context.CsceneContextHolder;
+import cn.cyberpeace.mp.cscene.controller.request.VendorNodeConnectionReq;
 import cn.cyberpeace.mp.cscene.core.BcSceneInstanceHandler;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.dto.element.ConnectionState;
@@ -88,6 +90,7 @@ import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementM
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginContext;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.modelhandler.CloudScenePluginModelHandler;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConnectionMapper;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneConfigService;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
@@ -112,6 +115,7 @@ import cn.cyberpeace.mp.sceneplugincollection.service.param.TimeListPageInfoQuer
 import cn.cyberpeace.mp.scenepluginflow.plugin.params.FlowIdWithSourceIp;
 import cn.cyberpeace.mp.scenepluginflow.service.ScenePluginFlowSceneService;
 import cn.cyberpeace.mp.scenepluginflow.service.response.SceneFlowRecordsResponse;
+import cn.cyberpeace.mp.service.MultiCloudService;
 import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
 import cn.cyberpeace.mp.situationaware.model.WazuhProbeCommonModel;
 import cn.cyberpeace.mp.situationaware.model.enums.FileEventType;
@@ -1210,6 +1214,37 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         }
 
         return new ServiceResult<>(null);
+    }
+
+    public ServiceResult<NodeConnectionBO> getConnectionByVendor(VendorNodeConnectionReq req) {
+        if (StringUtils.isEmpty(req.getVmId())) {
+            String sceneInstanceId = getSceneId(req.getId());
+            SceneHandler sceneHandler = new SceneHandler(sceneInstanceId, "", null);
+            CloudScenePluginHandler cloudScenePluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
+            var cloudElement = cloudScenePluginHandler.getElement(req.getNodeId());
+            req.setVmId(cloudElement.getResourceId());
+
+            if (Objects.nonNull(cloudElement.getSrcElement().getVendor())) {
+                for (MultiCloudService cloudService : BeanCommon.getBeanType(MultiCloudService.class).values()) {
+                    if (cloudService.getVendor() == cloudElement.getSrcElement().getVendor()) {
+                        NodeConnectionBO nodeConnectionBO = new NodeConnectionBO();
+                        nodeConnectionBO.setConnectionUrl(cloudService.getConnection(cloudElement.getResourceId()));
+                        return new ServiceResult<>(nodeConnectionBO);
+                    }
+                }
+            }
+        }
+        if (StringUtils.isNoneBlank(req.getVmId()) && req.getVendor() > 0) {
+            for (MultiCloudService cloudService : BeanCommon.getBeanType(MultiCloudService.class).values()) {
+                if (cloudService.getVendor() == req.getVendor()) {
+                    NodeConnectionBO nodeConnectionBO = new NodeConnectionBO();
+                    nodeConnectionBO.setConnectionUrl(cloudService.getConnection(req.getVmId()));
+                    return new ServiceResult<>(nodeConnectionBO);
+                }
+            }
+        }
+
+        throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("获取链接异常"));
     }
 
     public ServiceResult<NodeConnectionBO> getRemoteConnection(String id, String nodeId, String accessModeId, CsceneContextBO context) {

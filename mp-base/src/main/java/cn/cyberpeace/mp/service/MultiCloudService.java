@@ -144,5 +144,7 @@ public interface MultiCloudService {
 
     void deleteVm(String vmUuid);
 
+    String getConnection(String vmUuid);
+
 
 }

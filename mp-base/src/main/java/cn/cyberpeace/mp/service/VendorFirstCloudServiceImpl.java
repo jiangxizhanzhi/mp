@@ -235,6 +235,24 @@ public class VendorFirstCloudServiceImpl implements MultiCloudService {
         }
     }
 
+    @Override
+    public String getConnection(String vmUuid) {
+        try {
+            return realGetConnection(vmUuid, false);
+        } catch (Exception e) {
+            log.error("获取vm连接异常: " + e.getMessage(), e);
+            return realGetConnection(vmUuid, true);
+        }
+    }
+
+    private String realGetConnection(String vmUuid, boolean freshToken) {
+        String result = getClient().get("/api/cloud/instances/" + vmUuid + "/vnc-console/?cluster=382ee7c7-336a-41ae-b71e-9c14365bdcd3", null, addAuthTokenToHeader(
+                getHeaders(), freshToken), 30000)
+                .getResult();
+        JSONObject jsonObject = JSONObject.parseObject(result);
+        return jsonObject.getString("vnc_url");
+    }
+
     private String realDeleteVm(String vmUuid, boolean freshToken)  {
         return getClient().delete("/api/cloud/instances/" + vmUuid + "/?cluster=382ee7c7-336a-41ae-b71e-9c14365bdcd3", null, null,
                 addAuthTokenToHeader(getHeaders(), freshToken), 30000).getResult();
