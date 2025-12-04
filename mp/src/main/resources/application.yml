@@ -55,6 +55,9 @@ mp:
     url-ac-filter-exclude-urls: /api/mp/actuator/info,/api/mp/actuator/health,/api/mp/config/single_ip,/api/mp/file/**,/api/mp/actuator/**,/api/mp/error,/api/mp/suricata/rule/file_path
   xdapp:
     xd-one-server: ${XD_ONE_SERVER:http://192.168.140.4:10060}
+    xd-two-server: ${XD_TWO_SERVER:https://192.168.140.15}
+    xd-two-access-key: ${XD_TWO_ACCESS_KEY:5d83a38630884f6eadb659144695dbcb}
+    xd-two-secret-key: ${XD_TWO_SECRET_KEY:ea51d2c0760f4e82a0a7e2bc4d94199f}
 
 ---
 spring:
