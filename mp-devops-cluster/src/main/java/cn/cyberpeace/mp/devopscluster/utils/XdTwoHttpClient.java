@@ -19,6 +19,13 @@ import java.util.Map;
 @Service
 public class XdTwoHttpClient {
 
+
+    private static final String region = "cn-south-1";
+    private static final String service = "DSP-Client";
+    private static final String strSignedHeader = "path;";
+    // 认证范围,为了配合scp端，可以指定，不指定的话自动生成
+    private static final String credentialScope = region + "/" + service + "/" + "dmp_request";
+
     private HttpClient httpClient;
 
     @Autowired
@@ -35,17 +42,21 @@ public class XdTwoHttpClient {
     }
 
     public HttpResult xdGet(String url, HttpParam param) {
-        return httpClient.get(url, param, this.getHeaders(), null);
+        return httpClient.get(url, param, this.getHeaders(url, "GET"), null);
     }
 
     public HttpResult xdPost(String url, HttpParam param, HttpData data) {
-        return httpClient.post(url, data, param, this.getHeaders(), null);
+        return httpClient.post(url, data, param, this.getHeaders(url, "POST"), null);
     }
 
-    private Map<String, String> getHeaders() {
+    private Map<String, String> getHeaders(String url, String method) {
         Ec2Signer ec2Signer = new Ec2Signer.Builder(xdAppConfig.getAccessKey(), xdAppConfig.getSecretKey())
-                .regionName("cn-south-1")
-                .serviceName("DSP-Client")
+                .regionName(region)
+                .serviceName(service)
+                .httpMethodName(method)
+                .canonicalURI(url)
+                .strSignedHeader(strSignedHeader)
+                .credentialScope(credentialScope)
                 .debug()  //开启打印
                 .build();
         Map<String, String> headers = ec2Signer.getHeaders();
