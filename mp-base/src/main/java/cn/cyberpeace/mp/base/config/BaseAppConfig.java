@@ -33,6 +33,9 @@ public class BaseAppConfig {
     @Value("${mp.base.cloud-urls}")
     private String cloudUrls;
 
+    @Value("${mp.base.proxy-client}")
+    private String proxyClient;
+
     @Value("${mp.base.project-name:mp}")
     private String projectName;
 

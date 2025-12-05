@@ -1506,6 +1506,27 @@ public class CreateHandler extends HandlerCommon {
         for (CloudPluginSceneElementBO e : getPluginHandler().getTerminalElementMap().values()) {
             if (e.getVirtualType() != null && e.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.NPC) {
                 e.setResourceId(HandlerUtils.genResourceName(e.getSrcElement().getEid()));
+
+                if (StringUtils.isNotEmpty(e.getSrcElement().getNpcProtocol())) {
+                    AccessMode accessMode = new AccessMode();
+                    accessMode.setProxy(true);
+                    accessMode.setProtocol(e.getSrcElement().getNpcProtocol());
+                    accessMode.setUsername(e.getSrcElement().getNpcUsername());
+                    accessMode.setPassword(e.getSrcElement().getNpcPassword());
+                    if (org.apache.commons.collections.CollectionUtils.isNotEmpty(e.getSrcElement().getPorts())) {
+                        e.getSrcElement().getPorts().get(0).setAccessModes(Lists.newArrayList(accessMode));
+                    }
+
+                    var cloudPorts = getPluginHandler().getPorts(e);
+                    if (org.apache.commons.collections.CollectionUtils.isNotEmpty(cloudPorts)) {
+                        CloudAccessMode cloudAccessMode = new CloudAccessMode();
+                        BeanUtils.copyProperties(accessMode, cloudAccessMode);
+                        cloudAccessMode.setAvailable(true);
+                        cloudAccessMode.setAccessIp(e.getSrcElement().getPorts().get(0).getIp());
+                        cloudAccessMode.setId(TextUtils.uuid());
+                        cloudPorts.get(0).setAccessModes(Lists.newArrayList(cloudAccessMode));
+                    }
+                }
             }
         }
     }

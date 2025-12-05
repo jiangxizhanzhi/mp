@@ -21,6 +21,8 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.base.util.define.SerializableFunction;
 import cn.cyberpeace.mp.base.util.http.HttpResult;
+import cn.cyberpeace.mp.base.util.http.ProtocolProxyClient;
+import cn.cyberpeace.mp.base.util.http.ProtocolProxyHttpData;
 import cn.cyberpeace.mp.base.util.http.XdTwoHttpClient;
 import cn.cyberpeace.mp.base.util.mptool.CacheUtil;
 import cn.cyberpeace.mp.base.util.mptool.CollUtil;
@@ -1307,6 +1309,33 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("获取链接异常"));
     }
 
+    public ServiceResult<NodeConnectionBO> getConnectionByNpc(VendorNodeConnectionReq req) {
+        String sceneInstanceId = getSceneId(req.getId());
+        SceneHandler sceneHandler = new SceneHandler(sceneInstanceId, "", null);
+        var element = sceneHandler.getElement(req.getNodeId());
+        if ("http".equals(element.getNpcProtocol()) || "https".equals(element.getNpcProtocol())) {
+            NodeConnectionBO nodeConnectionBO = new NodeConnectionBO();
+            nodeConnectionBO.setConnectionUrl(element.getNpcUrl());
+            return new ServiceResult<>(nodeConnectionBO);
+        } else {
+            if (CollectionUtils.isEmpty(element.getPorts())) {
+                throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("当前节点缺少ip信息"));
+            }
+            ProtocolProxyClient protocolProxyClient = BeanCommon.getBean(ProtocolProxyClient.class);
+            ProtocolProxyHttpData protocolProxyHttpData = new ProtocolProxyHttpData();
+            protocolProxyHttpData.setHost(element.getPorts().get(0).getIp());
+            protocolProxyHttpData.setUsername(element.getNpcUsername());
+            protocolProxyHttpData.setPassword(element.getNpcPassword());
+            protocolProxyHttpData.setProtocol(element.getNpcProtocol());
+            protocolProxyHttpData.setPort(element.getNpcPort());
+
+            String url = protocolProxyClient.getProxyLink(protocolProxyHttpData);
+
+            NodeConnectionBO nodeConnectionBO = new NodeConnectionBO();
+            nodeConnectionBO.setConnectionUrl(url);
+            return new ServiceResult<>(nodeConnectionBO);
+        }
+    }
     public ServiceResult<NodeConnectionBO> getRemoteConnection(String id, String nodeId, String accessModeId, CsceneContextBO context) {
         try {
             CsceneContextHolder.setCsceneInstanceId(id);

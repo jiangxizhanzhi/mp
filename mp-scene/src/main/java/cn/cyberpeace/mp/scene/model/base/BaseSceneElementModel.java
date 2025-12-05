@@ -33,6 +33,17 @@ public class BaseSceneElementModel extends BaseSceneNodeModel {
     @DefaultInt(value = 0)
     private Integer vendor;
 
+    @DefaultStr
+    private String npcProtocol;
+    @DefaultStr
+    private String npcUrl;
+    @DefaultStr
+    private String npcPort;
+    @DefaultStr
+    private String npcUsername;
+    @DefaultStr
+    private String npcPassword;
+
     public static class Type {
         public static final int OTHER = 0;
         public static final int SWITCH = 1;
@@ -91,5 +102,12 @@ public class BaseSceneElementModel extends BaseSceneNodeModel {
         public static final String AR = "ar";
 
         private SystemLanguage() {}
+    }
+
+    public static class SupportNpcProtocol {
+        public static final String HTTP = "http";
+        public static final String HTTPS = "https";
+        public static final String SSH = "ssh";
+        public static final String TELNET = "telnet";
     }
 }

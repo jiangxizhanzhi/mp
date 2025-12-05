@@ -540,6 +540,12 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         return modelService.getConnectionByVendor(req).asResult();
     }
 
+    @PostMapping(value = "/get_connection_by_npc")
+    public ServiceResult<NodeConnectionBO> getConnectionByNpc(@RequestBody VendorNodeConnectionReq req) {
+        log.info("获取npc虚拟机连接: {}", req);
+        return modelService.getConnectionByNpc(req).asResult();
+    }
+
 
     @ApiOperation("获取容器console连接,仅支持非neutron网络的容器")
     @ApiImplicitParams({

@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.scene.core.bo.base;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.define.SerializableFunction;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
@@ -47,6 +48,12 @@ public abstract class BaseSceneElementBO<M extends BaseSceneElementModel, P exte
     private Boolean isAuxiliary;
     @ApiModelProperty(value = "云供应商 0-sn 1-厂商一 2-厂商二 3-厂商3")
     private Integer vendor;
+
+    private String npcProtocol;
+    private String npcUrl;
+    private String npcPort;
+    private String npcUsername;
+    private String npcPassword;
 
 
     @Override
