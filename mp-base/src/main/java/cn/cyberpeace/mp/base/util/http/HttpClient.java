@@ -60,6 +60,8 @@ public class HttpClient {
 
     private String contentType = DEFAULT_CONTENT_TYPE;
 
+    private boolean notSetCharset = false;
+
     private String formatUrl(String url, HttpParam param) {
         String serverUrl = StringUtils.join(server, url);
         if (param == null) {
@@ -129,7 +131,9 @@ public class HttpClient {
                 entity = multipartEntity.build();
             } else {
                 StringEntity stringEntity = new StringEntity(data.toContent(), charset);
-                stringEntity.setContentEncoding(charset.toString());
+                if (!notSetCharset){
+                    stringEntity.setContentEncoding(charset.toString());
+                }
                 if(!StringUtils.isEmpty(data.contentType())){
                     stringEntity.setContentType(data.contentType());
                 }else{

@@ -27,6 +27,7 @@ public class ProtocolProxyClient {
                             .configServer(baseAppConfig.getProxyClient())
                             .build();
                     httpClient.setLogRequest(true);
+                    httpClient.setNotSetCharset(true);
                 }
             }
         }
@@ -36,7 +37,6 @@ public class ProtocolProxyClient {
 
     public String getProxyLink(ProtocolProxyHttpData protocolProxyHttpData) {
         Map<String, String> headers = new HashMap<>();
-        headers.put("Content-Type", "application/json");
         String result = getHttpClient().post("/api/connect", protocolProxyHttpData, null, headers, 10000)
                 .getResult();
         return JSONObject.parseObject(result).getString("url").replace("http://localhost:3000", baseAppConfig.getProxyClient());
