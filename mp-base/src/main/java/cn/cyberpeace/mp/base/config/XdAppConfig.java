@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.devopscluster.config;
+package cn.cyberpeace.mp.base.config;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;

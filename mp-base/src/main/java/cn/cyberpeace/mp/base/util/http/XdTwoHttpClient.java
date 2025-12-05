@@ -1,12 +1,9 @@
-package cn.cyberpeace.mp.devopscluster.utils;
+package cn.cyberpeace.mp.base.util.http;
 
 import cn.cyberpeace.mp.base.context.SysContextHolder;
-import cn.cyberpeace.mp.base.util.http.HttpClient;
-import cn.cyberpeace.mp.base.util.http.HttpData;
-import cn.cyberpeace.mp.base.util.http.HttpParam;
-import cn.cyberpeace.mp.base.util.http.HttpResult;
 import cn.cyberpeace.mp.common.util.Ec2Signer;
-import cn.cyberpeace.mp.devopscluster.config.XdAppConfig;
+import cn.cyberpeace.mp.base.config.XdAppConfig;
+import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -42,23 +39,39 @@ public class XdTwoHttpClient {
     }
 
     public HttpResult xdGet(String url, HttpParam param) {
-        return httpClient.get(url, param, this.getHeaders(url, "GET"), null);
+        return httpClient.get(url, param, this.getHeaders(url, "GET", null), null);
     }
 
     public HttpResult xdPost(String url, HttpParam param, HttpData data) {
-        return httpClient.post(url, data, param, this.getHeaders(url, "POST"), null);
+        return httpClient.post(url, data, param, this.getHeaders(url, "POST", data), null);
     }
 
-    private Map<String, String> getHeaders(String url, String method) {
-        Ec2Signer ec2Signer = new Ec2Signer.Builder(xdAppConfig.getAccessKey(), xdAppConfig.getSecretKey())
-                .regionName(region)
-                .serviceName(service)
-                .httpMethodName(method)
-                .canonicalURI(url)
-                .strSignedHeader(strSignedHeader)
-                .credentialScope(credentialScope)
-                .debug()  //开启打印
-                .build();
+    private Map<String, String> getHeaders(String url, String method, HttpData data) {
+        Ec2Signer ec2Signer;
+        if (data == null) {
+            ec2Signer = new Ec2Signer.Builder(xdAppConfig.getAccessKey(), xdAppConfig.getSecretKey())
+                    .regionName(region)
+                    .serviceName(service)
+                    .httpMethodName(method)
+                    .canonicalURI(url)
+                    .strSignedHeader(strSignedHeader)
+                    .credentialScope(credentialScope)
+                    .debug()  //开启打印
+                    .build();
+        } else {
+            JSONObject jsonObject = new JSONObject(data.toMultipart());
+            String payload = jsonObject.toString();
+            ec2Signer = new Ec2Signer.Builder(xdAppConfig.getAccessKey(), xdAppConfig.getSecretKey())
+                    .regionName(region)
+                    .serviceName(service)
+                    .httpMethodName(method)
+                    .canonicalURI(url)
+                    .payload(payload)
+                    .strSignedHeader(strSignedHeader)
+                    .credentialScope(credentialScope)
+                    .debug()  //开启打印
+                    .build();
+        }
         Map<String, String> headers = ec2Signer.getHeaders();
         // 国际化header的处理
         Locale locale = LocaleContextHolder.getLocale();

@@ -1,16 +1,10 @@
-package cn.cyberpeace.mp.devopscluster.utils;
+package cn.cyberpeace.mp.base.util.http;
 
-import cn.cyberpeace.mp.base.config.Swagger2Config;
 import cn.cyberpeace.mp.base.context.SysContextHolder;
-import cn.cyberpeace.mp.base.util.http.HttpClient;
-import cn.cyberpeace.mp.base.util.http.HttpData;
-import cn.cyberpeace.mp.base.util.http.HttpParam;
-import cn.cyberpeace.mp.base.util.http.HttpResult;
-import cn.cyberpeace.mp.devopscluster.config.XdAppConfig;
+import cn.cyberpeace.mp.base.config.XdAppConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;

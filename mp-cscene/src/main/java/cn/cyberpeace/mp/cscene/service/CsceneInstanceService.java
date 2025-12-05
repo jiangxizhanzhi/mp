@@ -20,6 +20,8 @@ import cn.cyberpeace.mp.base.service.result.ObjResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.base.util.define.SerializableFunction;
+import cn.cyberpeace.mp.base.util.http.HttpResult;
+import cn.cyberpeace.mp.base.util.http.XdTwoHttpClient;
 import cn.cyberpeace.mp.base.util.mptool.CacheUtil;
 import cn.cyberpeace.mp.base.util.mptool.CollUtil;
 import cn.cyberpeace.mp.cscene.bo.CsceneCollectionFlowBO;
@@ -60,6 +62,8 @@ import cn.cyberpeace.mp.cscene.service.impl.ScreenshotServiceImpl;
 import cn.cyberpeace.mp.cscene.service.taskpool.CsceneReportTaskPool;
 import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
 import cn.cyberpeace.mp.base.util.ReentrantLockUtils;
+import cn.cyberpeace.mp.cscene.vo.RemoteConsole;
+import cn.cyberpeace.mp.cscene.vo.XdTwoRemoteRequest;
 import cn.cyberpeace.mp.scene.core.bo.SceneBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
@@ -125,6 +129,7 @@ import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.SystemUser;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
 import cn.cyberpeace.mp.situationaware.service.ProbeService;
 import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.cache.Cache;
 import com.google.common.collect.Lists;
 import lombok.Data;
@@ -224,6 +229,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     @Resource
     private SceneService sceneService ;
+
+    @Autowired
+    private XdTwoHttpClient xdTwoHttpClient;
 
     // expires in 10 minutes
     private Cache<String, String> TIMED_CACHE = CacheUtil.newTimedCache(10 * 60 * 1000);
@@ -1225,21 +1233,73 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             req.setVmId(cloudElement.getResourceId());
 
             if (Objects.nonNull(cloudElement.getSrcElement().getVendor())) {
-                for (MultiCloudService cloudService : BeanCommon.getBeanType(MultiCloudService.class).values()) {
-                    if (cloudService.getVendor() == cloudElement.getSrcElement().getVendor()) {
-                        NodeConnectionBO nodeConnectionBO = new NodeConnectionBO();
-                        nodeConnectionBO.setConnectionUrl(cloudService.getConnection(cloudElement.getResourceId()));
-                        return new ServiceResult<>(nodeConnectionBO);
+                if (cloudElement.getSrcElement().getVendor() == 2) {
+                    try {
+                        xdTwoHttpClient.init();
+                        XdTwoRemoteRequest xdTwoRemoteRequest = new XdTwoRemoteRequest();
+                        RemoteConsole remote_console = new RemoteConsole();
+                        remote_console.setProtocol("vnc");
+                        remote_console.setType("novnc");
+                        xdTwoRemoteRequest.setRemote_console(remote_console);
+                        HttpResult httpResult = xdTwoHttpClient.xdPost("/janus/20180725/servers/" + req.getVmId() + "/remote-consoles", null, xdTwoRemoteRequest);
+                        JSONObject jsonObject = JSONObject.parseObject(httpResult.getResult());
+                        if (jsonObject.getJSONObject("data") != null
+                                && jsonObject.getJSONObject("data").getJSONObject("remote_console") != null
+                                && StringUtils.isNotEmpty(jsonObject.getJSONObject("data").getJSONObject("remote_console").getString("url"))) {
+                            NodeConnectionBO nodeConnectionBO = new NodeConnectionBO();
+                            nodeConnectionBO.setConnectionUrl(jsonObject.getJSONObject("data").getJSONObject("remote_console").getString("url"));
+                            return new ServiceResult<>(nodeConnectionBO);
+                        } else {
+                            log.error("xd two get remote connection error. jsonObject:{}", jsonObject);
+                            throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("获取链接异常"));
+                        }
+                    } catch (Exception e) {
+                        log.error("xd two get remote connection error.", e);
+                        throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("获取链接异常"));
+                    }
+                } else {
+                    for (MultiCloudService cloudService : BeanCommon.getBeanType(MultiCloudService.class).values()) {
+                        if (cloudService.getVendor() == cloudElement.getSrcElement().getVendor()) {
+                            NodeConnectionBO nodeConnectionBO = new NodeConnectionBO();
+                            nodeConnectionBO.setConnectionUrl(cloudService.getConnection(cloudElement.getResourceId()));
+                            return new ServiceResult<>(nodeConnectionBO);
+                        }
                     }
                 }
             }
         }
         if (StringUtils.isNoneBlank(req.getVmId()) && req.getVendor() > 0) {
-            for (MultiCloudService cloudService : BeanCommon.getBeanType(MultiCloudService.class).values()) {
-                if (cloudService.getVendor() == req.getVendor()) {
-                    NodeConnectionBO nodeConnectionBO = new NodeConnectionBO();
-                    nodeConnectionBO.setConnectionUrl(cloudService.getConnection(req.getVmId()));
-                    return new ServiceResult<>(nodeConnectionBO);
+            if (req.getVendor() == 2) {
+                try {
+                    xdTwoHttpClient.init();
+                    XdTwoRemoteRequest xdTwoRemoteRequest = new XdTwoRemoteRequest();
+                    RemoteConsole remote_console = new RemoteConsole();
+                    remote_console.setProtocol("vnc");
+                    remote_console.setType("novnc");
+                    xdTwoRemoteRequest.setRemote_console(remote_console);
+                    HttpResult httpResult = xdTwoHttpClient.xdPost("/janus/20180725/servers/" + req.getVmId() + "/remote-consoles", null, xdTwoRemoteRequest);
+                    JSONObject jsonObject = JSONObject.parseObject(httpResult.getResult());
+                    if (jsonObject.getJSONObject("data") != null
+                            && jsonObject.getJSONObject("data").getJSONObject("remote_console") != null
+                            && StringUtils.isNotEmpty(jsonObject.getJSONObject("data").getJSONObject("remote_console").getString("url"))) {
+                        NodeConnectionBO nodeConnectionBO = new NodeConnectionBO();
+                        nodeConnectionBO.setConnectionUrl(jsonObject.getJSONObject("data").getJSONObject("remote_console").getString("url"));
+                        return new ServiceResult<>(nodeConnectionBO);
+                    } else {
+                        log.error("xd two get remote connection error. jsonObject:{}", jsonObject);
+                        throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("获取链接异常"));
+                    }
+                } catch (Exception e) {
+                    log.error("xd two get remote connection error.", e);
+                    throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("获取链接异常"));
+                }
+            } else {
+                for (MultiCloudService cloudService : BeanCommon.getBeanType(MultiCloudService.class).values()) {
+                    if (cloudService.getVendor() == req.getVendor()) {
+                        NodeConnectionBO nodeConnectionBO = new NodeConnectionBO();
+                        nodeConnectionBO.setConnectionUrl(cloudService.getConnection(req.getVmId()));
+                        return new ServiceResult<>(nodeConnectionBO);
+                    }
                 }
             }
         }
