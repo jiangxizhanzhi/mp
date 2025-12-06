@@ -1134,7 +1134,7 @@ public class XdSourceController {
                     for (int i = 0; i < jsonArray.size(); i++) {
                         XdPhyVO xdPhyVO = new XdPhyVO();
                         xdPhyVO.setCompany("3");
-                        xdPhyVO.setCompany_name("信大网域");
+                        xdPhyVO.setCompany_name("信大网御");
                         xdPhyVO.setNodeName(jsonArray.getJSONObject(i).getString("id"));
                         xdPhyVO.setSysName(jsonArray.getJSONObject(i).getString("arch"));
                         xdPhyVO.setInstance("");
@@ -4011,7 +4011,7 @@ public class XdSourceController {
                     for (int i = 0; i < jsonArray.size(); i++) {
                         XdVirVO xdVirVO = new XdVirVO();
                         xdVirVO.setCompany("3");
-                        xdVirVO.setCompany_name("信大网域");
+                        xdVirVO.setCompany_name("信大网御");
                         xdVirVO.setId(jsonArray.getJSONObject(i).getString("vmid"));
                         xdVirVO.setName(jsonArray.getJSONObject(i).getString("name"));
                         xdVirVO.setNode(jsonArray.getJSONObject(i).getString("node"));
@@ -5189,7 +5189,7 @@ public class XdSourceController {
                     for (int i = 0; i < jsonArray.size(); i++) {
                         XdPhyVO xdPhyVO = new XdPhyVO();
                         xdPhyVO.setCompany("3");
-                        xdPhyVO.setCompany_name("信大网域");
+                        xdPhyVO.setCompany_name("信大网御");
                         xdPhyVO.setNodeName(jsonArray.getJSONObject(i).getString("id"));
                         xdPhyVO.setSysName(jsonArray.getJSONObject(i).getString("arch"));
                         xdPhyVO.setInstance("");
@@ -5230,7 +5230,7 @@ public class XdSourceController {
         XdPhyStatistics xdPhyStatistics = new XdPhyStatistics();
         xdPhyStatistics.setCompanyName1("华网创新");
         xdPhyStatistics.setCompanyName2("深信服");
-        xdPhyStatistics.setCompanyName3("信大网域");
+        xdPhyStatistics.setCompanyName3("信大网御");
         Double cpuPercent1 = 0.00D;
         Integer cpuNum1 = 0;
         Double memoryUsed1 = 0.00D;

@@ -20,7 +20,7 @@ public class XdPhyVO {
     private ValueUnitVO totalMemory;
     //磁盘信息
     private List<XdPhyFileSystem> fileSystems;
-    //厂商 1华网创新 2深信服 3信大网域
+    //厂商 1华网创新 2深信服 3信大网御
     private String company;
     //厂商名称
     private String company_name;

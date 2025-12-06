@@ -19,7 +19,7 @@ public class XdVirVO {
     private String imageId;
     //镜像名称
     private String imageName;
-    //厂商 1华网创新 2深信服 3信大网域
+    //厂商 1华网创新 2深信服 3信大网御
     private String company;
     //厂商名称
     private String company_name;
