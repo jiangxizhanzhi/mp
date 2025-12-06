@@ -1,8 +1,11 @@
 package cn.cyberpeace.mp.devopscluster.controller;
 
+import cn.cyberpeace.mp.base.config.XdAppConfig;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.http.HttpResult;
+import cn.cyberpeace.mp.base.util.http.XdThreeHttpClient;
+import cn.cyberpeace.mp.common.xd.XdThreeCookieRequest;
 import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.base.util.http.XdOneHttpClient;
 import cn.cyberpeace.mp.base.util.http.XdTwoHttpClient;
@@ -35,6 +38,10 @@ public class XdSourceController {
     private XdOneHttpClient xdOneHttpClient;
     @Autowired
     private XdTwoHttpClient xdTwoHttpClient;
+    @Autowired
+    private XdThreeHttpClient xdThreeHttpClient;
+    @Autowired
+    private XdAppConfig xdAppConfig;
 
     @ApiOperation("物理资源列表")
     @GetMapping("/phy_list")
@@ -1053,6 +1060,116 @@ public class XdSourceController {
             }
         } catch (Exception e) {
             log.error("XdSourceController.phyList two error.",  e);
+        }
+        try {
+            xdThreeHttpClient.init();
+            XdThreeCookieRequest xdThreeCookieRequest = new XdThreeCookieRequest();
+            HttpResult cookieResult = xdThreeHttpClient.xdPost("/api2/json/access/ticket", null, xdThreeCookieRequest, null);
+//            HttpResult cookieResult = xdThreeHttpClient.xdGet("/api/mp/devops/cluster/out_interface/page_real_equipment", null, null);
+//            cookieResult.setResult("{\n" +
+//                    "    \"data\": {\n" +
+//                    "        \"clustername\": \"TJJS\",\n" +
+//                    "        \"username\": \"Admin@hci\",\n" +
+//                    "        \"ticket\": \"eyJhbGciOiJIUzI1NiJ9.eyJub3ciOjE3NjUwMDc5NTEsInVzZXJuYW1lIjoiQWRtaW5AaGNpIiwiZXhwIjoxNzY1MDE1MTUxLCJzZXEiOm51bGx9.vineMebX-pwUBC1SIk7WKJ1k7Kkv2hf4kHxJ1du0ee0\"\n" +
+//                    "    },\n" +
+//                    "    \"success\": 1\n" +
+//                    "}");
+            JSONObject jsonObject = JSON.parseObject(cookieResult.getResult());
+            if (jsonObject.getJSONObject("data") != null && StringUtils.isNotEmpty(jsonObject.getJSONObject("data").getString("ticket"))) {
+                String cookie = "HCICookie=" + jsonObject.getJSONObject("data").getString("ticket");
+                HttpResult phyResult = xdThreeHttpClient.xdGet("/api2/json/cluster/resources/?type=node", null, cookie);
+//                HttpResult phyResult = xdThreeHttpClient.xdGet("/api/mp/devops/cluster/out_interface/page_real_equipment", null, null);
+//                phyResult.setResult("{\n" +
+//                        "    \"data\": [\n" +
+//                        "        {\n" +
+//                        "            \"arch\": \"x86_64\",\n" +
+//                        "            \"maxmem\": 540959698944,\n" +
+//                        "            \"id\": \"node/hci22\",\n" +
+//                        "            \"maxdisk\": 160982630400,\n" +
+//                        "            \"cpu\": 0.00204995051338955,\n" +
+//                        "            \"disk\": 6143717376,\n" +
+//                        "            \"node\": \"hci22\",\n" +
+//                        "            \"mem\": 15922630656,\n" +
+//                        "            \"status\": \"online\",\n" +
+//                        "            \"maxcpu\": 128,\n" +
+//                        "            \"uptime\": 344950,\n" +
+//                        "            \"level\": \"\",\n" +
+//                        "            \"type\": \"node\"\n" +
+//                        "        },\n" +
+//                        "        {\n" +
+//                        "            \"id\": \"node/hci21\",\n" +
+//                        "            \"maxmem\": 540959588352,\n" +
+//                        "            \"arch\": \"x86_64\",\n" +
+//                        "            \"type\": \"node\",\n" +
+//                        "            \"level\": \"\",\n" +
+//                        "            \"uptime\": 344936,\n" +
+//                        "            \"maxcpu\": 128,\n" +
+//                        "            \"status\": \"online\",\n" +
+//                        "            \"mem\": 14509387776,\n" +
+//                        "            \"node\": \"hci21\",\n" +
+//                        "            \"disk\": 6138044416,\n" +
+//                        "            \"cpu\": 0.00143032212044556,\n" +
+//                        "            \"maxdisk\": 160982630400\n" +
+//                        "        },\n" +
+//                        "        {\n" +
+//                        "            \"maxmem\": 540959698944,\n" +
+//                        "            \"id\": \"node/hci20\",\n" +
+//                        "            \"arch\": \"x86_64\",\n" +
+//                        "            \"mem\": 22210772992,\n" +
+//                        "            \"status\": \"online\",\n" +
+//                        "            \"type\": \"node\",\n" +
+//                        "            \"level\": \"\",\n" +
+//                        "            \"maxcpu\": 128,\n" +
+//                        "            \"uptime\": 344949,\n" +
+//                        "            \"maxdisk\": 160982630400,\n" +
+//                        "            \"cpu\": 0.00199670131147776,\n" +
+//                        "            \"node\": \"hci20\",\n" +
+//                        "            \"disk\": 6138470400\n" +
+//                        "        }\n" +
+//                        "    ],\n" +
+//                        "    \"success\": 1\n" +
+//                        "}");
+                if (CollectionUtils.isNotEmpty(JSON.parseObject(phyResult.getResult()).getJSONArray("data"))) {
+                    JSONArray jsonArray = JSON.parseObject(phyResult.getResult()).getJSONArray("data");
+                    for (int i = 0; i < jsonArray.size(); i++) {
+                        XdPhyVO xdPhyVO = new XdPhyVO();
+                        xdPhyVO.setCompany("3");
+                        xdPhyVO.setCompany_name("信大网域");
+                        xdPhyVO.setNodeName(jsonArray.getJSONObject(i).getString("id"));
+                        xdPhyVO.setSysName(jsonArray.getJSONObject(i).getString("arch"));
+                        xdPhyVO.setInstance("");
+                        xdPhyVO.setCpuPercent(String.format("%.2f",jsonArray.getJSONObject(i).getDouble("cpu")*100) + "%");
+                        if (jsonArray.getJSONObject(i).getDouble("mem") != null) {
+                            ValueUnitVO valueUnitVOUsed = new ValueUnitVO();
+                            valueUnitVOUsed.setValue(String.format("%.2f",jsonArray.getJSONObject(i).getDouble("mem")/(1024*1024*1024)));
+                            valueUnitVOUsed.setUnit("GB");
+                            xdPhyVO.setUsedMemory(valueUnitVOUsed);
+                            ValueUnitVO valueUnitVOTotal = new ValueUnitVO();
+                            valueUnitVOTotal.setValue(String.format("%.2f",jsonArray.getJSONObject(i).getDouble("maxmem")/(1024*1024*1024)));
+                            valueUnitVOTotal.setUnit("GB");
+                            xdPhyVO.setTotalMemory(valueUnitVOTotal);
+                        }
+                        if (jsonArray.getJSONObject(i).getDouble("maxdisk") != null) {
+                            ValueUnitVO valueUnitVOTotal = new ValueUnitVO();
+                            valueUnitVOTotal.setValue(String.format("%.2f",jsonArray.getJSONObject(i).getDouble("maxdisk")/(1024*1024*1024)));
+                            valueUnitVOTotal.setUnit("GB");
+                            ValueUnitVO valueUnitVOUsed = new ValueUnitVO();
+                            valueUnitVOUsed.setValue(String.format("%.2f",jsonArray.getJSONObject(i).getDouble("disk")/(1024*1024*1024)));
+                            valueUnitVOUsed.setUnit("GB");
+                            XdPhyFileSystem xdPhyFileSystem = new XdPhyFileSystem();
+                            xdPhyFileSystem.setName("总量");
+                            xdPhyFileSystem.setTotalFileSystem(valueUnitVOTotal);
+                            xdPhyFileSystem.setUsedFileSystem(valueUnitVOUsed);
+                            List<XdPhyFileSystem> xdPhyFileSystemList = new ArrayList<>();
+                            xdPhyFileSystemList.add(xdPhyFileSystem);
+                            xdPhyVO.setFileSystems(xdPhyFileSystemList);
+                        }
+                        result.add(xdPhyVO);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error("XdSourceController.phyList three error.",  e);
         }
 
         return new ServiceResult<>(result).asResult();
@@ -3740,6 +3857,182 @@ public class XdSourceController {
         } catch (Exception e) {
             log.error("XdSourceController.phyList two error.",  e);
         }
+        try {
+            xdThreeHttpClient.init();
+            XdThreeCookieRequest xdThreeCookieRequest = new XdThreeCookieRequest();
+            HttpResult cookieResult = xdThreeHttpClient.xdPost("/api2/json/access/ticket", null, xdThreeCookieRequest, null);
+//            HttpResult cookieResult = xdThreeHttpClient.xdGet("/api/mp/devops/cluster/out_interface/page_real_equipment", null, null);
+//            cookieResult.setResult("{\n" +
+//                    "    \"data\": {\n" +
+//                    "        \"clustername\": \"TJJS\",\n" +
+//                    "        \"username\": \"Admin@hci\",\n" +
+//                    "        \"ticket\": \"eyJhbGciOiJIUzI1NiJ9.eyJub3ciOjE3NjUwMDc5NTEsInVzZXJuYW1lIjoiQWRtaW5AaGNpIiwiZXhwIjoxNzY1MDE1MTUxLCJzZXEiOm51bGx9.vineMebX-pwUBC1SIk7WKJ1k7Kkv2hf4kHxJ1du0ee0\"\n" +
+//                    "    },\n" +
+//                    "    \"success\": 1\n" +
+//                    "}");
+            JSONObject jsonObject = JSON.parseObject(cookieResult.getResult());
+            if (jsonObject.getJSONObject("data") != null && StringUtils.isNotEmpty(jsonObject.getJSONObject("data").getString("ticket"))) {
+                String cookie = "HCICookie=" + jsonObject.getJSONObject("data").getString("ticket");
+                HttpResult virResult = xdThreeHttpClient.xdGet("/api2/json/cluster/resources/?type=vm", null, cookie);
+//                HttpResult virResult = xdThreeHttpClient.xdGet("/api/mp/devops/cluster/out_interface/page_real_equipment", null, null);
+//                virResult.setResult("{\n" +
+//                        "    \"data\": [\n" +
+//                        "        {\n" +
+//                        "            \"diskread\": 0,\n" +
+//                        "            \"id\": \"qemu/105\",\n" +
+//                        "            \"vmid\": 105,\n" +
+//                        "            \"maxmem\": 4294967296,\n" +
+//                        "            \"diskwrite\": 0,\n" +
+//                        "            \"name\": \"model\",\n" +
+//                        "            \"disk\": 0,\n" +
+//                        "            \"netin\": 0,\n" +
+//                        "            \"node\": \"hci21\",\n" +
+//                        "            \"maxdisk\": 42949672960,\n" +
+//                        "            \"cpu\": 0,\n" +
+//                        "            \"secrets\": 0,\n" +
+//                        "            \"netout\": 0,\n" +
+//                        "            \"template\": 1,\n" +
+//                        "            \"maxcpu\": 2,\n" +
+//                        "            \"uptime\": 0,\n" +
+//                        "            \"type\": \"qemu\",\n" +
+//                        "            \"mem\": 0,\n" +
+//                        "            \"status\": \"stopped\"\n" +
+//                        "        },\n" +
+//                        "        {\n" +
+//                        "            \"name\": \"KylinV10\",\n" +
+//                        "            \"diskwrite\": 0,\n" +
+//                        "            \"maxmem\": 17179869184,\n" +
+//                        "            \"vmid\": 100,\n" +
+//                        "            \"id\": \"qemu/100\",\n" +
+//                        "            \"diskread\": 0,\n" +
+//                        "            \"status\": \"stopped\",\n" +
+//                        "            \"mem\": 0,\n" +
+//                        "            \"type\": \"qemu\",\n" +
+//                        "            \"uptime\": 0,\n" +
+//                        "            \"maxcpu\": 8,\n" +
+//                        "            \"template\": 1,\n" +
+//                        "            \"secrets\": 0,\n" +
+//                        "            \"netout\": 0,\n" +
+//                        "            \"cpu\": 0,\n" +
+//                        "            \"maxdisk\": 536870912000,\n" +
+//                        "            \"netin\": 0,\n" +
+//                        "            \"node\": \"hci20\",\n" +
+//                        "            \"disk\": 0\n" +
+//                        "        },\n" +
+//                        "        {\n" +
+//                        "            \"diskread\": 6039151984,\n" +
+//                        "            \"vmid\": 102,\n" +
+//                        "            \"id\": \"qemu/102\",\n" +
+//                        "            \"name\": \"p3靶标ddos\",\n" +
+//                        "            \"maxmem\": 4294967296,\n" +
+//                        "            \"diskwrite\": 9418036736,\n" +
+//                        "            \"uptime\": 82709,\n" +
+//                        "            \"maxcpu\": 4,\n" +
+//                        "            \"template\": 0,\n" +
+//                        "            \"type\": \"qemu\",\n" +
+//                        "            \"status\": \"running\",\n" +
+//                        "            \"mem\": 1519468544,\n" +
+//                        "            \"disk\": 0,\n" +
+//                        "            \"node\": \"hci20\",\n" +
+//                        "            \"netin\": 1315268738,\n" +
+//                        "            \"cpu\": 0.0100989067109763,\n" +
+//                        "            \"maxdisk\": 34359738368,\n" +
+//                        "            \"netout\": 1053530115,\n" +
+//                        "            \"secrets\": 0\n" +
+//                        "        },\n" +
+//                        "        {\n" +
+//                        "            \"type\": \"qemu\",\n" +
+//                        "            \"template\": 0,\n" +
+//                        "            \"maxcpu\": 1,\n" +
+//                        "            \"uptime\": 259837,\n" +
+//                        "            \"mem\": 1679880192,\n" +
+//                        "            \"status\": \"running\",\n" +
+//                        "            \"netin\": 1045207,\n" +
+//                        "            \"node\": \"hci20\",\n" +
+//                        "            \"disk\": 0,\n" +
+//                        "            \"netout\": 43642,\n" +
+//                        "            \"secrets\": 0,\n" +
+//                        "            \"maxdisk\": 34359738368,\n" +
+//                        "            \"cpu\": 0.043281028761327,\n" +
+//                        "            \"id\": \"qemu/104\",\n" +
+//                        "            \"vmid\": 104,\n" +
+//                        "            \"diskread\": 5820068740,\n" +
+//                        "            \"maxmem\": 4294967296,\n" +
+//                        "            \"diskwrite\": 9711790080,\n" +
+//                        "            \"name\": \"11\"\n" +
+//                        "        },\n" +
+//                        "        {\n" +
+//                        "            \"node\": \"hci22\",\n" +
+//                        "            \"netin\": 0,\n" +
+//                        "            \"disk\": 0,\n" +
+//                        "            \"secrets\": 0,\n" +
+//                        "            \"netout\": 0,\n" +
+//                        "            \"cpu\": 0,\n" +
+//                        "            \"maxdisk\": 42949672960,\n" +
+//                        "            \"type\": \"qemu\",\n" +
+//                        "            \"uptime\": 0,\n" +
+//                        "            \"template\": 0,\n" +
+//                        "            \"maxcpu\": 2,\n" +
+//                        "            \"status\": \"stopped\",\n" +
+//                        "            \"mem\": 0,\n" +
+//                        "            \"vmid\": 106,\n" +
+//                        "            \"id\": \"qemu/106\",\n" +
+//                        "            \"diskread\": 0,\n" +
+//                        "            \"name\": \"test\",\n" +
+//                        "            \"diskwrite\": 0,\n" +
+//                        "            \"maxmem\": 4294967296\n" +
+//                        "        },\n" +
+//                        "        {\n" +
+//                        "            \"name\": \"kylin1\",\n" +
+//                        "            \"diskwrite\": 441214464,\n" +
+//                        "            \"maxmem\": 17179869184,\n" +
+//                        "            \"diskread\": 682871296,\n" +
+//                        "            \"vmid\": 101,\n" +
+//                        "            \"id\": \"qemu/101\",\n" +
+//                        "            \"cpu\": 0.00516992111142972,\n" +
+//                        "            \"maxdisk\": 536870912000,\n" +
+//                        "            \"netout\": 17511,\n" +
+//                        "            \"secrets\": 0,\n" +
+//                        "            \"disk\": 0,\n" +
+//                        "            \"node\": \"hci22\",\n" +
+//                        "            \"netin\": 1330574,\n" +
+//                        "            \"status\": \"running\",\n" +
+//                        "            \"mem\": 1805234176,\n" +
+//                        "            \"uptime\": 340808,\n" +
+//                        "            \"template\": 0,\n" +
+//                        "            \"maxcpu\": 8,\n" +
+//                        "            \"type\": \"qemu\"\n" +
+//                        "        }\n" +
+//                        "    ],\n" +
+//                        "    \"success\": 1\n" +
+//                        "}");
+                if (CollectionUtils.isNotEmpty(JSON.parseObject(virResult.getResult()).getJSONArray("data"))) {
+                    JSONArray jsonArray = JSON.parseObject(virResult.getResult()).getJSONArray("data");
+                    for (int i = 0; i < jsonArray.size(); i++) {
+                        XdVirVO xdVirVO = new XdVirVO();
+                        xdVirVO.setCompany("3");
+                        xdVirVO.setCompany_name("信大网域");
+                        xdVirVO.setId(jsonArray.getJSONObject(i).getString("vmid"));
+                        xdVirVO.setName(jsonArray.getJSONObject(i).getString("name"));
+                        xdVirVO.setNode(jsonArray.getJSONObject(i).getString("node"));
+                        xdVirVO.setRemoteUrl(xdAppConfig.getXdThreeServer() + "/?console=kvm&novnc=1&vmid=" + jsonArray.getJSONObject(i).getString("vmid") + "&node=" + jsonArray.getJSONObject(i).getString("node") + "&resize=off&cmd=&token=" + jsonObject.getJSONObject("data").getString("ticket"));
+                        xdVirVO.setImageId("");
+                        xdVirVO.setImageName("");
+                        if ("running".equals(jsonArray.getJSONObject(i).getString("status"))) {
+                            xdVirVO.setStatus("ACTIVE");
+                            xdVirVO.setStatusDisplay("可用");
+                        } else {
+                            xdVirVO.setStatus("SHUTOFF");
+                            xdVirVO.setStatusDisplay("关机");
+                        }
+                        xdVirVO.setAddr("");
+                        result.add(xdVirVO);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error("XdSourceController.phyList three error.",  e);
+        }
         return new ServiceResult<>(result).asResult();
     }
 
@@ -3777,15 +4070,33 @@ public class XdSourceController {
                 HttpResult actionResult = xdTwoHttpClient.xdPost(url, null, null);
                 JSONObject jsonObject = JSON.parseObject(actionResult.getResult());
                 return ResultCommon.success();
+            } else if ("3".equals(xdVirUpShut.getCompany())) {
+                xdThreeHttpClient.init();
+                XdThreeCookieRequest xdThreeCookieRequest = new XdThreeCookieRequest();
+                HttpResult cookieResult = xdThreeHttpClient.xdPost("/api2/json/access/ticket", null, xdThreeCookieRequest, null);
+                JSONObject jsonObject = JSON.parseObject(cookieResult.getResult());
+                if (jsonObject.getJSONObject("data") != null && StringUtils.isNotEmpty(jsonObject.getJSONObject("data").getString("ticket"))) {
+                    String cookie = "HCICookie=" + jsonObject.getJSONObject("data").getString("ticket");
+                    String url = "";
+                    if ("power_on".equals(xdVirUpShut.getAction())) {
+                        url = "/api2/json/nodes/" + xdVirUpShut.getNode() + "/qemu/" + xdVirUpShut.getId() + "/status/start";
+                    } else if ("power_off".equals(xdVirUpShut.getAction())) {
+                        url = "/api2/json/nodes/" + xdVirUpShut.getNode() + "/qemu/" + xdVirUpShut.getId() + "/status/stop";
+                    }
+                    HttpResult actionResult = xdThreeHttpClient.xdPost(url, null, null, cookie);
+                    JSONObject actionObject = JSON.parseObject(actionResult.getResult());
+                    if (actionObject.getInteger("success") == 1) {
+                        return ResultCommon.success();
+                    } else {
+                        return ResultCommon.fail("失败");
+                    }
+                }
             }
         } catch (Exception e) {
             log.error("XdSourceController.upShut error.",  e);
         }
         return ResultCommon.success();
     }
-
-
-
 
     @ApiOperation("物理资源统计")
     @GetMapping("/phy_statics")
@@ -4614,7 +4925,7 @@ public class XdSourceController {
                 }
             }
         } catch (Exception e) {
-            log.error("XdSourceController.phyList error.",  e);
+            log.error("XdSourceController.phyList one error.",  e);
         }
         try {
             xdTwoHttpClient.init();
@@ -4804,6 +5115,116 @@ public class XdSourceController {
             }
         } catch (Exception e) {
             log.error("XdSourceController.phyList two error.",  e);
+        }
+        try {
+            xdThreeHttpClient.init();
+            XdThreeCookieRequest xdThreeCookieRequest = new XdThreeCookieRequest();
+            HttpResult cookieResult = xdThreeHttpClient.xdPost("/api2/json/access/ticket", null, xdThreeCookieRequest, null);
+//            HttpResult cookieResult = xdThreeHttpClient.xdGet("/api/mp/devops/cluster/out_interface/page_real_equipment", null, null);
+//            cookieResult.setResult("{\n" +
+//                    "    \"data\": {\n" +
+//                    "        \"clustername\": \"TJJS\",\n" +
+//                    "        \"username\": \"Admin@hci\",\n" +
+//                    "        \"ticket\": \"eyJhbGciOiJIUzI1NiJ9.eyJub3ciOjE3NjUwMDc5NTEsInVzZXJuYW1lIjoiQWRtaW5AaGNpIiwiZXhwIjoxNzY1MDE1MTUxLCJzZXEiOm51bGx9.vineMebX-pwUBC1SIk7WKJ1k7Kkv2hf4kHxJ1du0ee0\"\n" +
+//                    "    },\n" +
+//                    "    \"success\": 1\n" +
+//                    "}");
+            JSONObject jsonObject = JSON.parseObject(cookieResult.getResult());
+            if (jsonObject.getJSONObject("data") != null && StringUtils.isNotEmpty(jsonObject.getJSONObject("data").getString("ticket"))) {
+                String cookie = "HCICookie=" + jsonObject.getJSONObject("data").getString("ticket");
+                HttpResult phyResult = xdThreeHttpClient.xdGet("/api2/json/cluster/resources/?type=node", null, cookie);
+//                HttpResult phyResult = xdThreeHttpClient.xdGet("/api/mp/devops/cluster/out_interface/page_real_equipment", null, null);
+//                phyResult.setResult("{\n" +
+//                        "    \"data\": [\n" +
+//                        "        {\n" +
+//                        "            \"arch\": \"x86_64\",\n" +
+//                        "            \"maxmem\": 540959698944,\n" +
+//                        "            \"id\": \"node/hci22\",\n" +
+//                        "            \"maxdisk\": 160982630400,\n" +
+//                        "            \"cpu\": 0.00204995051338955,\n" +
+//                        "            \"disk\": 6143717376,\n" +
+//                        "            \"node\": \"hci22\",\n" +
+//                        "            \"mem\": 15922630656,\n" +
+//                        "            \"status\": \"online\",\n" +
+//                        "            \"maxcpu\": 128,\n" +
+//                        "            \"uptime\": 344950,\n" +
+//                        "            \"level\": \"\",\n" +
+//                        "            \"type\": \"node\"\n" +
+//                        "        },\n" +
+//                        "        {\n" +
+//                        "            \"id\": \"node/hci21\",\n" +
+//                        "            \"maxmem\": 540959588352,\n" +
+//                        "            \"arch\": \"x86_64\",\n" +
+//                        "            \"type\": \"node\",\n" +
+//                        "            \"level\": \"\",\n" +
+//                        "            \"uptime\": 344936,\n" +
+//                        "            \"maxcpu\": 128,\n" +
+//                        "            \"status\": \"online\",\n" +
+//                        "            \"mem\": 14509387776,\n" +
+//                        "            \"node\": \"hci21\",\n" +
+//                        "            \"disk\": 6138044416,\n" +
+//                        "            \"cpu\": 0.00143032212044556,\n" +
+//                        "            \"maxdisk\": 160982630400\n" +
+//                        "        },\n" +
+//                        "        {\n" +
+//                        "            \"maxmem\": 540959698944,\n" +
+//                        "            \"id\": \"node/hci20\",\n" +
+//                        "            \"arch\": \"x86_64\",\n" +
+//                        "            \"mem\": 22210772992,\n" +
+//                        "            \"status\": \"online\",\n" +
+//                        "            \"type\": \"node\",\n" +
+//                        "            \"level\": \"\",\n" +
+//                        "            \"maxcpu\": 128,\n" +
+//                        "            \"uptime\": 344949,\n" +
+//                        "            \"maxdisk\": 160982630400,\n" +
+//                        "            \"cpu\": 0.00199670131147776,\n" +
+//                        "            \"node\": \"hci20\",\n" +
+//                        "            \"disk\": 6138470400\n" +
+//                        "        }\n" +
+//                        "    ],\n" +
+//                        "    \"success\": 1\n" +
+//                        "}");
+                if (CollectionUtils.isNotEmpty(JSON.parseObject(phyResult.getResult()).getJSONArray("data"))) {
+                    JSONArray jsonArray = JSON.parseObject(phyResult.getResult()).getJSONArray("data");
+                    for (int i = 0; i < jsonArray.size(); i++) {
+                        XdPhyVO xdPhyVO = new XdPhyVO();
+                        xdPhyVO.setCompany("3");
+                        xdPhyVO.setCompany_name("信大网域");
+                        xdPhyVO.setNodeName(jsonArray.getJSONObject(i).getString("id"));
+                        xdPhyVO.setSysName(jsonArray.getJSONObject(i).getString("arch"));
+                        xdPhyVO.setInstance("");
+                        xdPhyVO.setCpuPercent(String.format("%.2f",jsonArray.getJSONObject(i).getDouble("cpu")*100) + "%");
+                        if (jsonArray.getJSONObject(i).getDouble("mem") != null) {
+                            ValueUnitVO valueUnitVOUsed = new ValueUnitVO();
+                            valueUnitVOUsed.setValue(String.format("%.2f",jsonArray.getJSONObject(i).getDouble("mem")/(1024*1024*1024)));
+                            valueUnitVOUsed.setUnit("GB");
+                            xdPhyVO.setUsedMemory(valueUnitVOUsed);
+                            ValueUnitVO valueUnitVOTotal = new ValueUnitVO();
+                            valueUnitVOTotal.setValue(String.format("%.2f",jsonArray.getJSONObject(i).getDouble("maxmem")/(1024*1024*1024)));
+                            valueUnitVOTotal.setUnit("GB");
+                            xdPhyVO.setTotalMemory(valueUnitVOTotal);
+                        }
+                        if (jsonArray.getJSONObject(i).getDouble("maxdisk") != null) {
+                            ValueUnitVO valueUnitVOTotal = new ValueUnitVO();
+                            valueUnitVOTotal.setValue(String.format("%.2f",jsonArray.getJSONObject(i).getDouble("maxdisk")/(1024*1024*1024)));
+                            valueUnitVOTotal.setUnit("GB");
+                            ValueUnitVO valueUnitVOUsed = new ValueUnitVO();
+                            valueUnitVOUsed.setValue(String.format("%.2f",jsonArray.getJSONObject(i).getDouble("disk")/(1024*1024*1024)));
+                            valueUnitVOUsed.setUnit("GB");
+                            XdPhyFileSystem xdPhyFileSystem = new XdPhyFileSystem();
+                            xdPhyFileSystem.setName("总量");
+                            xdPhyFileSystem.setTotalFileSystem(valueUnitVOTotal);
+                            xdPhyFileSystem.setUsedFileSystem(valueUnitVOUsed);
+                            List<XdPhyFileSystem> xdPhyFileSystemList = new ArrayList<>();
+                            xdPhyFileSystemList.add(xdPhyFileSystem);
+                            xdPhyVO.setFileSystems(xdPhyFileSystemList);
+                        }
+                        result.add(xdPhyVO);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error("XdSourceController.phyList three error.",  e);
         }
 
         XdPhyStatistics xdPhyStatistics = new XdPhyStatistics();

@@ -58,6 +58,7 @@ mp:
     xd-two-server: ${XD_TWO_SERVER:https://192.168.140.15}
     xd-two-access-key: ${XD_TWO_ACCESS_KEY:5d83a38630884f6eadb659144695dbcb}
     xd-two-secret-key: ${XD_TWO_SECRET_KEY:ea51d2c0760f4e82a0a7e2bc4d94199f}
+    xd-three-server: ${XD_THREE_SERVER:http://192.168.140.20:5701}
 
 ---
 spring:

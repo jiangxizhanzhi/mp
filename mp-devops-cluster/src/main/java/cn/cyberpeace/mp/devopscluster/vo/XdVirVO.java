@@ -24,4 +24,8 @@ public class XdVirVO {
     //厂商名称
     private String company_name;
 
+    private String node;
+
+    private String remoteUrl;
+
 }
