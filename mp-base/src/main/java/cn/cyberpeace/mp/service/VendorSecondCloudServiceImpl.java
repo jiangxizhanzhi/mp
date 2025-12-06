@@ -3,10 +3,7 @@ package cn.cyberpeace.mp.service;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
-import cn.cyberpeace.mp.base.util.http.HttpClient;
-import cn.cyberpeace.mp.base.util.http.HttpResult;
-import cn.cyberpeace.mp.base.util.http.MultiCloudClient;
-import cn.cyberpeace.mp.base.util.http.XdTwoHttpClient;
+import cn.cyberpeace.mp.base.util.http.*;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import lombok.AllArgsConstructor;
@@ -241,12 +238,34 @@ public class VendorSecondCloudServiceImpl implements MultiCloudService {
 
     @Override
     public void deleteVm(String vmUuid) {
+        // 先关机再删除
+        closeVm(vmUuid);
+
         try {
+            try {
+                Thread.sleep(90000);
+            } catch (Exception e) {
+                log.error("等待关机异常: " + e.getMessage(), e);
+
+            }
+
             String url = "/janus/20180725/servers/" + vmUuid;
             VendorSecondVmDeleteHttpData req = new VendorSecondVmDeleteHttpData();
             vendorClientContext.set(new VendorSecondClientContext(url, METHOD_DELETE, req));
             HttpResult httpResult = getClient().delete(url, req, null, getHeaders(), 30000);
             log.info("delete vm result = {}", httpResult.getResult());
+        } finally {
+            vendorClientContext.remove();
+        }
+    }
+
+    private void closeVm(String vmUuid) {
+        try {
+            String url = "/janus/20180725/servers/" + vmUuid + "/stop";
+            HttpData body = new VendorSecondVmDeleteHttpData();
+            vendorClientContext.set(new VendorSecondClientContext(url, METHOD_POST, body));
+            HttpResult httpResult = getClient().post(url, body, null, getHeaders(), 30000);
+            log.info("close vm result = {}", httpResult.getResult());
         } finally {
             vendorClientContext.remove();
         }
