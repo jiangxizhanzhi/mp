@@ -118,7 +118,7 @@ mp:
       file-server: ${FILE_SERVER:lfs}
       lfs-inner-http-url: ${LFS_INNER_HTTP_PROTOCOL:http}://${MP_API_IP:10.100.27.1}${LFS_INNER_HTTP_URL:/api/mp/file/%s}
       lfs-outer-http-url: ${LFS_OUTER_HTTP_URL:/api/mp/file/%s}
-      cloud-urls: ${CLOUD_URLS:厂商一,https://192.168.140.4}
+      cloud-urls: ${CLOUD_URLS:厂商一,https://192.168.140.4,https://192.168.140.15}
       proxy-client: ${MP_PROXY_CLIENT:http://192.168.142.10:3000}
   # mp-situationaware 模块配置
   situationaware:

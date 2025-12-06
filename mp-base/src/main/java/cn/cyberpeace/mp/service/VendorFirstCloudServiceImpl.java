@@ -142,6 +142,13 @@ public class VendorFirstCloudServiceImpl implements MultiCloudService {
                                 .put("parent_system_type", 2);
                         device.getJSONObject("ext_system_info")
                                 .put("system_type", 306);
+                    } else {
+                        device.put("second_category", 1);
+                        device.put("l3_category", 106);
+                        device.getJSONObject("ext_system_info")
+                                .put("parent_system_type", 1);
+                        device.getJSONObject("ext_system_info")
+                                .put("system_type", 106);
                     }
                     device.getJSONObject("ext_vm").put("access_protocols", new ArrayList<>());
                     device.getJSONObject("ext_image_info").put("uuid", imageUuid);

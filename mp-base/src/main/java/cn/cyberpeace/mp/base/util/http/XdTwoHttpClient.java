@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.base.util.http;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.context.SysContextHolder;
 import cn.cyberpeace.mp.common.util.Ec2Signer;
 import cn.cyberpeace.mp.base.config.XdAppConfig;
@@ -46,10 +47,11 @@ public class XdTwoHttpClient {
         return httpClient.post(url, data, param, this.getHeaders(url, "POST", data), null);
     }
 
-    private Map<String, String> getHeaders(String url, String method, HttpData data) {
+    public static Map<String, String> getHeaders(String url, String method, HttpData data) {
         Ec2Signer ec2Signer;
+        XdAppConfig innerConfig = BeanCommon.getBean(XdAppConfig.class);
         if (data == null) {
-            ec2Signer = new Ec2Signer.Builder(xdAppConfig.getAccessKey(), xdAppConfig.getSecretKey())
+            ec2Signer = new Ec2Signer.Builder(innerConfig.getAccessKey(), innerConfig.getSecretKey())
                     .regionName(region)
                     .serviceName(service)
                     .httpMethodName(method)
@@ -59,9 +61,8 @@ public class XdTwoHttpClient {
                     .debug()  //开启打印
                     .build();
         } else {
-            JSONObject jsonObject = new JSONObject(data.toMultipart());
-            String payload = jsonObject.toString();
-            ec2Signer = new Ec2Signer.Builder(xdAppConfig.getAccessKey(), xdAppConfig.getSecretKey())
+            String payload = data.toContent();
+            ec2Signer = new Ec2Signer.Builder(innerConfig.getAccessKey(), innerConfig.getSecretKey())
                     .regionName(region)
                     .serviceName(service)
                     .httpMethodName(method)
