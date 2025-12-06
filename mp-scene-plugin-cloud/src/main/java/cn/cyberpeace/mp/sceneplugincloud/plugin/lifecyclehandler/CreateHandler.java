@@ -1082,7 +1082,7 @@ public class CreateHandler extends HandlerCommon {
                         CloudAccessMode cloudAccessMode = new CloudAccessMode();
                         BeanUtils.copyProperties(accessMode, cloudAccessMode);
                         cloudAccessMode.setAvailable(true);
-                        cloudAccessMode.setAccessIp(ipAndMac[0]);
+                        cloudAccessMode.setAccessIp(cloudElement.getSrcElement().getPorts().get(0).getIp());
                         cloudAccessMode.setId(TextUtils.uuid());
                         cloudPorts.get(0).setAccessModes(Lists.newArrayList(cloudAccessMode));
                     }
