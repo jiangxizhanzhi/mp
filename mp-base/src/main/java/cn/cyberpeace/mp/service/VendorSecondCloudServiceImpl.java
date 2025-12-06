@@ -11,12 +11,10 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @AllArgsConstructor
@@ -168,6 +166,21 @@ public class VendorSecondCloudServiceImpl implements MultiCloudService {
             }
             createVmObject.put("disks", vmDisks);
 
+            if (StringUtils.isNotEmpty(IP_THREADLOCAL.get())) {
+                String ipManualSet = IP_THREADLOCAL.get();
+                if (ipManualSet.startsWith("192.168.140")) {
+                    ((JSONObject) createVmObject.getJSONArray("networks").get(0))
+                            .getJSONObject("ip_info").put("ip_address", ipManualSet);
+                } else {
+                    Random random = new Random();
+                    random.nextInt(100);
+                    String ip = "192.168.140." + (random.nextInt(100) + 1 + IP_POOL_START);
+
+                    ((JSONObject) createVmObject.getJSONArray("networks").get(0))
+                            .getJSONObject("ip_info").put("ip_address", ip);
+                }
+            }
+
             StringHttpData body = new StringHttpData(createVmObject.toJSONString());
             String url = "/janus/20180725/servers";
             vendorClientContext.set(new VendorSecondClientContext(url, METHOD_POST, body));
@@ -253,5 +266,10 @@ public class VendorSecondCloudServiceImpl implements MultiCloudService {
         } finally {
             vendorClientContext.remove();
         }
+    }
+
+    @Override
+    public boolean ipAutoGen() {
+        return false;
     }
 }

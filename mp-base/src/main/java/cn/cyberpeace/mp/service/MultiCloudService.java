@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Map;
 
 public interface MultiCloudService {
+    public static final ThreadLocal<String> IP_THREADLOCAL = new ThreadLocal<>();
+
+
     public static final String DEVICE_TEMPLATE = "{\n" +
             "                \"success\": false,\n" +
             "                \"request_id\": null,\n" +
@@ -145,6 +148,10 @@ public interface MultiCloudService {
     void deleteVm(String vmUuid);
 
     String getConnection(String vmUuid);
+
+    default boolean ipAutoGen() {
+        return true;
+    }
 
 
 }

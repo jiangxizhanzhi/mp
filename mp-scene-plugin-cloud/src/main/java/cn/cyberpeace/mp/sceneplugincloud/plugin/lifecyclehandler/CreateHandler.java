@@ -1035,29 +1035,36 @@ public class CreateHandler extends HandlerCommon {
         if (Objects.nonNull(cloudElement.getSrcElement().getVendor())) {
             for (MultiCloudService cloudService : BeanCommon.getBeanType(MultiCloudService.class).values()) {
                 if (cloudService.getVendor() == cloudElement.getSrcElement().getVendor()) {
+
+                    MultiCloudService.IP_THREADLOCAL.set(cloudElement.getSrcElement().getPorts().get(0).getIp());
                     String resourceId = cloudService.createVm(cloudElement.getImageUuid());
+                    MultiCloudService.IP_THREADLOCAL.remove();
+
+
                     cloudElement.setResourceId(resourceId);
 
-                    String[] ipAndMac = null;
-                    int tryCount = 20;
 
-                    do {
-                        ipAndMac = cloudService.getVmIpAndMac(resourceId);
+                    if (cloudService.ipAutoGen()) {
+                        String[] ipAndMac = null;
+                        int tryCount = 20;
+                        do {
+                            ipAndMac = cloudService.getVmIpAndMac(resourceId);
 
-                        if (ipAndMac == null) {
-                            try {
-                                Thread.sleep(5000);
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
+                            if (ipAndMac == null) {
+                                try {
+                                    Thread.sleep(5000);
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
                             }
-                        }
-                        tryCount--;
-                    } while (ipAndMac == null || tryCount > 0);
+                            tryCount--;
+                        } while (ipAndMac == null || tryCount > 0);
 
-                    if (ipAndMac != null) {
-                        if (org.apache.commons.collections.CollectionUtils.isNotEmpty(cloudElement.getSrcElement().getPorts())) {
-                            cloudElement.getSrcElement().getPorts().get(0).setIp(ipAndMac[0]);
-                            cloudElement.getSrcElement().getPorts().get(0).setMacAddr(ipAndMac[1]);
+                        if (ipAndMac != null) {
+                            if (org.apache.commons.collections.CollectionUtils.isNotEmpty(cloudElement.getSrcElement().getPorts())) {
+                                cloudElement.getSrcElement().getPorts().get(0).setIp(ipAndMac[0]);
+                                cloudElement.getSrcElement().getPorts().get(0).setMacAddr(ipAndMac[1]);
+                            }
                         }
                     }
 
