@@ -44,12 +44,13 @@ public class VendorThirdCloudServiceImpl implements MultiCloudService {
 
             for (Object o : jsonObject.getJSONArray("data")) {
                 JSONObject image = (JSONObject) o;
-                boolean isTemplate = 1 == image.getInteger("template");
-                String name = image.getString("name");
-                int vmId = image.getInteger("vmid");
-                this.maxId = Math.max(this.maxId, vmId);
+                boolean isTemplate = 1 == Optional.ofNullable(image.getInteger("template")).orElse(0);
+                String name = Optional.ofNullable(image.getString("name")).orElse("");
+
 
                 if (isTemplate) {
+                    int vmId = image.getInteger("vmid");
+                    maxId = Math.max(maxId, vmId);
                     JSONObject device = JSONObject.parseObject(DEVICE_TEMPLATE);
                     device.put("id", index++);
                     device.put("vendor", getVendor());
