@@ -16,8 +16,8 @@ import java.util.*;
 @AllArgsConstructor
 public class VendorThirdCloudServiceImpl implements MultiCloudService {
     private final MultiCloudClient multiCloudClient;
-    private String TOKEN = "";
-    private int maxId = 1000;
+    private static String TOKEN = "";
+    private static int maxId = 1000;
 
     @Override
     public Map<String, String> getHeaders() {
