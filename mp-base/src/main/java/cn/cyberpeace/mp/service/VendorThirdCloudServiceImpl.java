@@ -46,7 +46,7 @@ public class VendorThirdCloudServiceImpl implements MultiCloudService {
                 JSONObject image = (JSONObject) o;
                 boolean isTemplate = 1 == image.getInteger("template");
                 String name = image.getString("name");
-                int vmId = image.getInteger("vmId");
+                int vmId = image.getInteger("vmid");
                 this.maxId = Math.max(this.maxId, vmId);
 
                 if (isTemplate) {
@@ -131,7 +131,7 @@ public class VendorThirdCloudServiceImpl implements MultiCloudService {
         String result = getClient().get("/api2/json/cluster/resources/?type=vm", null, getHeaders(), 30000).getResult();
         for (Object o : JSONObject.parseObject(result).getJSONArray("data")) {
             JSONObject vm = (JSONObject) o;
-            if (vm.getInteger("vmId").equals(Integer.parseInt(vmId))) {
+            if (vm.getInteger("vmid").equals(Integer.parseInt(vmId))) {
                 return vm.getString("node");
             }
         }
