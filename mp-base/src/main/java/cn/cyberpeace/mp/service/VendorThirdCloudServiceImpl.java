@@ -93,12 +93,8 @@ public class VendorThirdCloudServiceImpl implements MultiCloudService {
     public String createVm(String imageUuid) {
         this.listAllDevices();
         int newId = this.maxId + 1;
-        String[] data = imageUuid.split(":");
-        String node = data[0];
-        String vmId = data[1];
 
-
-        String url = "/api2/json/nodes/hci/qemu/" + vmId + "/clone";
+        String url = "/api2/json/nodes/hci/qemu/" + imageUuid + "/clone";
         JSONObject body = JSONObject.parseObject("{\n" +
                 "\"newid\": 104,\n" +
                 "\"name\": \"temp-2\",\n" +
@@ -106,15 +102,13 @@ public class VendorThirdCloudServiceImpl implements MultiCloudService {
                 "\"full\": 1\n" +
                 "}");
         body.put("name", "MP_CREATE_" + TextUtils.uuid());
-        body.put("target", node);
-        body.put("full", 1);
         body.put("newid", newId);
 
 
         StringHttpData createVmObject = new StringHttpData(body.toJSONString());
         String result = getClient().post(url, createVmObject, null, getHeaders(), 30000).getResult();
 
-        String vmNode = getVmNode(vmId);
+        String vmNode = getVmNode(String.valueOf(newId));
 
         String networkStr = "{\n" +
                 "\"digest\":\"bf32258f75683cc73d3041ecfd81904df165066d\",\n" +
