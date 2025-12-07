@@ -93,6 +93,7 @@ public class VendorThirdCloudServiceImpl implements MultiCloudService {
     public String createVm(String imageUuid) {
         this.listAllDevices();
         int newId = this.maxId + 1;
+        String templateNode = getTemplateNode(imageUuid);
 
         String url = "/api2/json/nodes/hci/qemu/" + imageUuid + "/clone";
         JSONObject body = JSONObject.parseObject("{\n" +
@@ -103,6 +104,7 @@ public class VendorThirdCloudServiceImpl implements MultiCloudService {
                 "}");
         body.put("name", "MP_CREATE_" + TextUtils.uuid());
         body.put("newid", newId);
+        body.put("target", templateNode);
 
 
         StringHttpData createVmObject = new StringHttpData(body.toJSONString());
@@ -130,7 +132,19 @@ public class VendorThirdCloudServiceImpl implements MultiCloudService {
                 return vm.getString("node");
             }
         }
-        return "hci";
+        return "hci22";
+    }
+
+    private String getTemplateNode(String vmId) {
+        String result = getClient().get("/api2/json/cluster/resources/", null, getHeaders(), 30000).getResult();
+        for (Object o : JSONObject.parseObject(result).getJSONArray("data")) {
+            JSONObject vm = (JSONObject) o;
+            boolean isTemplate = 1 == Optional.ofNullable(vm.getInteger("template")).orElse(0);
+            if (isTemplate && vm.getInteger("vmid").equals(Integer.parseInt(vmId))) {
+                return vm.getString("node");
+            }
+        }
+        return "hci22";
     }
 
     @Override
