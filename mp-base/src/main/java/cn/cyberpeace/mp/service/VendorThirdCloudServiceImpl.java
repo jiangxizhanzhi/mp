@@ -173,7 +173,7 @@ public class VendorThirdCloudServiceImpl implements MultiCloudService {
     public String getConnection(String vmUuid) {
         String node = getVmNode(vmUuid);
 
-        return getClient().getServer() + "/?console=kvm&novnc=1&vmid=" + vmUuid + "&node=" + node + "&resize=off&cmd=&token=" + TOKEN;
+        return getClient().getServer() + "/?console=kvm&novnc=1&vmid=" + vmUuid + "&node=" + node + "&resize=off&cmd=&token=" + Base64.getEncoder().encodeToString(TOKEN.getBytes());
     }
 
     @Override

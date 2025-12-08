@@ -26,6 +26,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 @Api(value = "超融合平台资源监控", tags = "超融合平台资源监控")
@@ -4015,7 +4016,7 @@ public class XdSourceController {
                         xdVirVO.setId(jsonArray.getJSONObject(i).getString("vmid"));
                         xdVirVO.setName(jsonArray.getJSONObject(i).getString("name"));
                         xdVirVO.setNode(jsonArray.getJSONObject(i).getString("node"));
-                        xdVirVO.setRemoteUrl(xdAppConfig.getXdThreeServer() + "/?console=kvm&novnc=1&vmid=" + jsonArray.getJSONObject(i).getString("vmid") + "&node=" + jsonArray.getJSONObject(i).getString("node") + "&resize=off&cmd=&token=" + jsonObject.getJSONObject("data").getString("ticket"));
+                        xdVirVO.setRemoteUrl(xdAppConfig.getXdThreeServer() + "/?console=kvm&novnc=1&vmid=" + jsonArray.getJSONObject(i).getString("vmid") + "&node=" + jsonArray.getJSONObject(i).getString("node") + "&resize=off&cmd=&token=" + Base64.getEncoder().encodeToString(jsonObject.getJSONObject("data").getString("ticket").getBytes()));
                         xdVirVO.setImageId("");
                         xdVirVO.setImageName("");
                         if ("running".equals(jsonArray.getJSONObject(i).getString("status"))) {
