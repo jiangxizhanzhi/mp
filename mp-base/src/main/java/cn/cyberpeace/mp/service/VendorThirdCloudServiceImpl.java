@@ -95,7 +95,7 @@ public class VendorThirdCloudServiceImpl implements MultiCloudService {
         int newId = this.maxId + 1;
         String templateNode = getTemplateNode(imageUuid);
 
-        String url = "/api2/json/nodes/hci/qemu/" + imageUuid + "/clone";
+        String url = "/api2/json/nodes/" + templateNode + "/qemu/" + imageUuid + "/clone";
         JSONObject body = JSONObject.parseObject("{\n" +
                 "\"newid\": 104,\n" +
                 "\"name\": \"temp-2\",\n" +
