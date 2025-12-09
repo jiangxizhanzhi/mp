@@ -123,18 +123,18 @@ public class VendorThirdCloudServiceImpl implements MultiCloudService {
 //
 //
 //        getClient().put("/api2/json/nodes/" + vmNode + "/qemu/" + this.maxId + "/config", new StringHttpData(networkStr), null, getHeaders(), 30000);
-        this.maxId = newId;
+
 
         synchronized (lock) {
             try {
-                Thread.sleep(300*1000);
+                Thread.sleep(600*1000);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
         }
 
-        getClient().put("/api2/json/nodes/" + vmNode + "/qemu/" + newId + "/status/start", null, null, getHeaders(), 30000);
-
+        getClient().post("/api2/json/nodes/" + vmNode + "/qemu/" + newId + "/status/start", null, null, getHeaders(), 30000);
+        this.maxId = newId;
 
         return newId + "";
     }
