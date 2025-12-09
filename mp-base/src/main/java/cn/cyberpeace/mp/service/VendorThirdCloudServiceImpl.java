@@ -89,6 +89,8 @@ public class VendorThirdCloudServiceImpl implements MultiCloudService {
         return 3;
     }
 
+    private final Object lock = new Object();
+
     @Override
     public String createVm(String imageUuid) {
         this.listAllDevices();
@@ -112,14 +114,27 @@ public class VendorThirdCloudServiceImpl implements MultiCloudService {
 
         String vmNode = getVmNode(String.valueOf(newId));
 
-        String networkStr = "{\n" +
-                "\"digest\":\"bf32258f75683cc73d3041ecfd81904df165066d\",\n" +
-                "\"vnet0\":\"network=4e04ecf6-490f-4d20-a861-05f865e404df,ip=192.168.141.200\"\n" +
-                "}";
 
 
-        getClient().put("/api2/json/nodes/" + vmNode + "/qemu/" + this.maxId + "/config", new StringHttpData(networkStr), null, getHeaders(), 30000);
+//        String networkStr = "{\n" +
+//                "\"digest\":\"bf32258f75683cc73d3041ecfd81904df165066d\",\n" +
+//                "\"vnet0\":\"network=4e04ecf6-490f-4d20-a861-05f865e404df,ip=192.168.141.200\"\n" +
+//                "}";
+//
+//
+//        getClient().put("/api2/json/nodes/" + vmNode + "/qemu/" + this.maxId + "/config", new StringHttpData(networkStr), null, getHeaders(), 30000);
         this.maxId = newId;
+
+        synchronized (lock) {
+            try {
+                Thread.sleep(300*1000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        getClient().put("/api2/json/nodes/" + vmNode + "/qemu/" + newId + "/status/start", null, null, getHeaders(), 30000);
+
 
         return newId + "";
     }
