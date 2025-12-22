@@ -7,9 +7,11 @@ import cn.cyberpeace.mp.common.xd.XdThreeCookieRequest;
 import com.alibaba.fastjson.JSONObject;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @Slf4j
@@ -17,7 +19,7 @@ import java.util.*;
 public class VendorThirdCloudServiceImpl implements MultiCloudService {
     private final MultiCloudClient multiCloudClient;
     private static String TOKEN = "";
-    private static int maxId = 1000;
+    private static AtomicInteger maxId = new AtomicInteger(1000);
 
     @Override
     public Map<String, String> getHeaders() {
@@ -34,7 +36,7 @@ public class VendorThirdCloudServiceImpl implements MultiCloudService {
     }
 
     @Override
-    public List<String> listAllDevices() {
+    public synchronized List<String> listAllDevices() {
 
         try {
             int index = 0;
@@ -50,7 +52,7 @@ public class VendorThirdCloudServiceImpl implements MultiCloudService {
 
                 if (isTemplate) {
                     int vmId = image.getInteger("vmid");
-                    maxId = Math.max(maxId, vmId);
+                    maxId = new AtomicInteger(Math.max(maxId.get(), vmId));
                     JSONObject device = JSONObject.parseObject(DEVICE_TEMPLATE);
                     device.put("id", index++);
                     device.put("vendor", getVendor());
@@ -94,7 +96,7 @@ public class VendorThirdCloudServiceImpl implements MultiCloudService {
     @Override
     public String createVm(String imageUuid) {
         this.listAllDevices();
-        int newId = this.maxId + 1;
+        int newId = maxId.incrementAndGet();
         String templateNode = getTemplateNode(imageUuid);
 
         String url = "/api2/json/nodes/" + templateNode + "/qemu/" + imageUuid + "/clone";
@@ -112,7 +114,15 @@ public class VendorThirdCloudServiceImpl implements MultiCloudService {
         StringHttpData createVmObject = new StringHttpData(body.toJSONString());
         String result = getClient().post(url, createVmObject, null, getHeaders(), 30000).getResult();
 
+        log.info("创建虚机结果： {}", result);
+
         String vmNode = getVmNode(String.valueOf(newId));
+
+        try {
+            Thread.sleep(600*1000);
+        } catch (InterruptedException e) {
+            log.error(e.getMessage(), e);
+        }
 
 
 
@@ -125,17 +135,7 @@ public class VendorThirdCloudServiceImpl implements MultiCloudService {
 //        getClient().put("/api2/json/nodes/" + vmNode + "/qemu/" + this.maxId + "/config", new StringHttpData(networkStr), null, getHeaders(), 30000);
 
 
-        synchronized (lock) {
-            try {
-                Thread.sleep(600*1000);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
         getClient().post("/api2/json/nodes/" + vmNode + "/qemu/" + newId + "/status/start", null, null, getHeaders(), 30000);
-        this.maxId = newId;
-
         return newId + "";
     }
 
