@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.common.xd.XdThreeCookieRequest;
 import com.alibaba.fastjson.JSONObject;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.units.qual.A;
 import org.springframework.stereotype.Service;
 
@@ -119,23 +120,32 @@ public class VendorThirdCloudServiceImpl implements MultiCloudService {
         String vmNode = getVmNode(String.valueOf(newId));
 
         try {
-            Thread.sleep(600*1000);
+            Thread.sleep(1200*1000);
         } catch (InterruptedException e) {
             log.error(e.getMessage(), e);
         }
 
-
-
-//        String networkStr = "{\n" +
-//                "\"digest\":\"bf32258f75683cc73d3041ecfd81904df165066d\",\n" +
-//                "\"vnet0\":\"network=4e04ecf6-490f-4d20-a861-05f865e404df,ip=192.168.141.200\"\n" +
-//                "}";
-//
-//
-//        getClient().put("/api2/json/nodes/" + vmNode + "/qemu/" + this.maxId + "/config", new StringHttpData(networkStr), null, getHeaders(), 30000);
-
-
         getClient().post("/api2/json/nodes/" + vmNode + "/qemu/" + newId + "/status/start", null, null, getHeaders(), 30000);
+
+        try {
+            Thread.sleep(180*1000);
+        } catch (InterruptedException e) {
+            log.error(e.getMessage(), e);
+        }
+
+        String resultConfig = getClient().get("/api2/json/nodes/" + vmNode + "/qemu/" + newId + "/config", null, getHeaders(), 30000).getResult();
+        log.info("查询config的结果： {}", resultConfig);
+
+        if (JSONObject.parseObject(resultConfig).getJSONObject("data") != null && StringUtils.isNotEmpty(JSONObject.parseObject(resultConfig).getJSONObject("data").getString("digest"))) {
+            String digest = JSONObject.parseObject(resultConfig).getJSONObject("data").getString("digest");
+
+            String networkStr = "{\"digest\":\"" + digest + "\",\"vnet0\":\"virtio,network=36eca7b1-5fe7-48a5-be8e-19f1a01017d2\"}";
+
+            String putConfigResult = getClient().put("/api2/json/nodes/" + vmNode + "/qemu/" + newId + "/config", new StringHttpData(networkStr), null, getHeaders(), 30000).getResult();
+            log.info("配置config的结果： {}", putConfigResult);
+        }
+
+
         return newId + "";
     }
 
