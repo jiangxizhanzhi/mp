@@ -104,8 +104,7 @@ public class VendorThirdCloudServiceImpl implements MultiCloudService {
         JSONObject body = JSONObject.parseObject("{\n" +
                 "\"newid\": 104,\n" +
                 "\"name\": \"temp-2\",\n" +
-                "\"target\": \"hci\",\n" +
-                "\"full\": 1\n" +
+                "\"target\": \"hci\"\n" +
                 "}");
         body.put("name", "MP_CREATE_" + TextUtils.uuid());
         body.put("newid", newId);
@@ -120,18 +119,18 @@ public class VendorThirdCloudServiceImpl implements MultiCloudService {
         String vmNode = getVmNode(String.valueOf(newId));
 
         try {
-            Thread.sleep(1200*1000);
+            Thread.sleep(120*1000);
         } catch (InterruptedException e) {
             log.error(e.getMessage(), e);
         }
 
         getClient().post("/api2/json/nodes/" + vmNode + "/qemu/" + newId + "/status/start", null, null, getHeaders(), 30000);
 
-        try {
-            Thread.sleep(180*1000);
-        } catch (InterruptedException e) {
-            log.error(e.getMessage(), e);
-        }
+//        try {
+//            Thread.sleep(180*1000);
+//        } catch (InterruptedException e) {
+//            log.error(e.getMessage(), e);
+//        }
 
         String resultConfig = getClient().get("/api2/json/nodes/" + vmNode + "/qemu/" + newId + "/config", null, getHeaders(), 30000).getResult();
         log.info("查询config的结果： {}", resultConfig);
