@@ -3752,8 +3752,8 @@ public class XdSourceController {
                         valueUnitVOTotal.setValue(String.format("%.2f",jsonArray.getJSONObject(i).getJSONObject("storage").getDouble("total_mb")/1024));
                         valueUnitVOTotal.setUnit("GB");
                         ValueUnitVO valueUnitVOUsed = new ValueUnitVO();
-                        valueUnitVOUsed.setValue("");
-                        valueUnitVOUsed.setUnit("");
+                        valueUnitVOUsed.setValue("0");
+                        valueUnitVOUsed.setUnit("GB");
                         XdPhyFileSystem xdPhyFileSystem = new XdPhyFileSystem();
                         xdPhyFileSystem.setName("总量");
                         xdPhyFileSystem.setTotalFileSystem(valueUnitVOTotal);
@@ -4162,8 +4162,8 @@ public class XdSourceController {
                         valueUnitVOTotal.setValue(String.format("%.2f",jsonArray.getJSONObject(i).getJSONObject("storage").getDouble("total_mb")/1024));
                         valueUnitVOTotal.setUnit("GB");
                         ValueUnitVO valueUnitVOUsed = new ValueUnitVO();
-                        valueUnitVOUsed.setValue("");
-                        valueUnitVOUsed.setUnit("");
+                        valueUnitVOUsed.setValue("0");
+                        valueUnitVOUsed.setUnit("GB");
                         XdPhyFileSystem xdPhyFileSystem = new XdPhyFileSystem();
                         xdPhyFileSystem.setName("总量");
                         xdPhyFileSystem.setTotalFileSystem(valueUnitVOTotal);
@@ -4492,8 +4492,8 @@ public class XdSourceController {
                         valueUnitVOTotal.setValue(String.format("%.2f",jsonArray.getJSONObject(i).getJSONObject("storage").getDouble("total_mb")/1024));
                         valueUnitVOTotal.setUnit("GB");
                         ValueUnitVO valueUnitVOUsed = new ValueUnitVO();
-                        valueUnitVOUsed.setValue("");
-                        valueUnitVOUsed.setUnit("");
+                        valueUnitVOUsed.setValue("0");
+                        valueUnitVOUsed.setUnit("GB");
                         XdPhyFileSystem xdPhyFileSystem = new XdPhyFileSystem();
                         xdPhyFileSystem.setName("总量");
                         xdPhyFileSystem.setTotalFileSystem(valueUnitVOTotal);
