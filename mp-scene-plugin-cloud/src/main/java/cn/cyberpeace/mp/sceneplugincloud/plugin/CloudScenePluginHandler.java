@@ -55,16 +55,9 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 @Component
 @PluginKey(value = PluginConstant.PLUGIN_KEY, priority = PluginConstant.PLUGIN_PRIORITY)
@@ -278,7 +271,8 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
 
     @Override
     public void initiate() {
-        HardwareLimitUtils.check(new ArrayList<>(getSceneHandler().getElementMap().values()));
+        HardwareLimitUtils.check(new ArrayList<>(getSceneHandler().getElementMap().values().stream().filter(element -> Objects.isNull(element.getVendor()) || element.getVendor() == 0)
+                .collect(Collectors.toList())));
         initiateHandler.initiate();
     }
 
