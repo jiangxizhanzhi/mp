@@ -47,4 +47,6 @@ public interface UserRoleService extends BaseModelService<UserRoleModel, QueryPa
      */
     List<UserRoleStatisticBo> getUserRoleStatistics();
 
+    List<String> getUsersByRoleName(String roleName);
+
 }

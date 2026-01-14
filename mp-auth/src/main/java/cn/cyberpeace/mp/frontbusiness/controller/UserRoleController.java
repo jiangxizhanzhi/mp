@@ -58,6 +58,14 @@ public class UserRoleController {
         return result;
     }
 
+    @ApiOperation(value = "根据角色名称查询角色绑定的所有用户", notes = "")
+    @GetMapping("/users/page/byrolename")
+    public ServiceResult<List<String>> getUsersByRoleName(@RequestParam String roleName) {
+        log.info("UserRoleController.getUsersByRoleName begin. roleName={}", roleName);
+        List<String> userIds = userRoleService.getUsersByRoleName(roleName);
+        return new ServiceResult<>(userIds).asResult();
+    }
+
     @ApiOperation(value = "[用户角色管理] 查询所有角色以及绑定的用户数量", notes = "")
     @AuthTarget(TargetEnum.DASHBOARD)
     @GetMapping("/statistics")

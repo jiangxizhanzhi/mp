@@ -13,4 +13,7 @@ public class UserRolePageRequest extends PageRequest {
     @ApiModelProperty(value = "用户ID")
     private String userId;
 
+    @ApiModelProperty(value = "角色名称")
+    private String roleName;
+
 }

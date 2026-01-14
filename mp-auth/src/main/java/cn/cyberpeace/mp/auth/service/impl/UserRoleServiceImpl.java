@@ -481,4 +481,26 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
         return result;
     }
 
+    @Override
+    public List<String> getUsersByRoleName(String roleName) {
+        log.info("UserRoleServiceImpl.getUsersByRoleName begin. roleName={}", roleName);
+        HumanCondition roleCondition = new HumanCondition().filterEqual(RoleModel::getName, roleName);
+        List<RoleModel> roleModels = roleMapper.list(roleCondition);
+        if (CollectionUtils.isEmpty(roleModels)) {
+            return new ArrayList<>();
+        }
+
+        HumanCondition roleIdCondition = new HumanCondition()
+                .filterEqual(UserRoleModel::getRole, roleModels.get(0).getId())
+                .select(UserRoleModel::getUser)
+                .distinct();
+        List<UserRoleModel> userRoleModels = getModelMapper().list(roleIdCondition);
+        List<String> uIds = new ArrayList<>();
+        for (UserRoleModel userRoleModel : userRoleModels) {
+            String user = userRoleModel.getUser();
+            uIds.add(user);
+        }
+        return uIds;
+    }
+
 }
