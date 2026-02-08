@@ -33,6 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -83,7 +84,7 @@ public class RealEquipmentConverter implements BaseConverter{
      * @return
      */
     public BasePageBO<RealEquipmentBO> page(ImagePageDTO dto) {
-        this.refreshIfNecessary();
+//        this.refreshIfNecessary();
         Integer total = devopsTargetService.totalCount(dto);
 
         BasePageBO<RealEquipmentBO> convertModel = new BasePageBO<>();
@@ -96,11 +97,13 @@ public class RealEquipmentConverter implements BaseConverter{
         List<String> list = new ArrayList<>();
         Map<String, String> name2CreateUserMap = new HashMap<>();
         Map<String, String> name2CreateUserNameMap = new HashMap<>();
+        Map<String, StatusEnum> name2InPositionMap = new HashMap<>();
         for (DeviceTargetPO targetPO : deviceTargetPOS) {
             String deviceTargetPO1Name = targetPO.getName();
             list.add(deviceTargetPO1Name);
             name2CreateUserMap.put(targetPO.getName(), targetPO.getCreateUser());
             name2CreateUserNameMap.put(targetPO.getName(), targetPO.getCreateUserName());
+            name2InPositionMap.put(targetPO.getName(), targetPO.getInPosition());
         }
         String[] imageNames = list.toArray(new String[0]);
         Map<String, List<DeviceReferCsceneStat>> referStateMap = csceneSpecialService.statDeviceReferCscenes(imageNames).getSource();
@@ -135,6 +138,7 @@ public class RealEquipmentConverter implements BaseConverter{
         for (RealEquipmentBO temp : modelList) {
             temp.setCreateUser(name2CreateUserMap.get(temp.getName()));
             temp.setCreateUserName(name2CreateUserNameMap.get(temp.getName()));
+            temp.setInPosition(name2InPositionMap.get(temp.getName()));
         }
 
         convertModel.setList(modelList);
@@ -295,7 +299,9 @@ public class RealEquipmentConverter implements BaseConverter{
         }
     }
 
-    private void refreshIfNecessary() {
+    @Scheduled(cron = "0 0/10 * * * ?")
+    public void refreshIfNecessary() {
+        log.info("开始执行refreshIfNecessary刷新在位状态");
         // 20秒没更新 尝试更新
         if (System.currentTimeMillis() - IN_POSITION_UPDATE_TIME > 20000) {
             //  拿到锁就更新下,没拿到就使用旧的数据

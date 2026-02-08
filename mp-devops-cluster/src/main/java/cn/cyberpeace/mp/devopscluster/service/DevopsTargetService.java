@@ -4,12 +4,7 @@ import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Device;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtDocker;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtEntity;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtImageInfo;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtSystemInfo;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtVm;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devopscluster.converter.SupportExportConvert;
 import cn.cyberpeace.mp.devopscluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devopscluster.converter.model.ImageConvertModel;
@@ -21,7 +16,9 @@ import cn.cyberpeace.mp.devopscluster.enums.StatusEnum;
 import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
 import cn.cyberpeace.mp.devopscluster.repository.DeviceTargetMapper;
 import cn.cyberpeace.mp.devopscluster.utils.POLogoUtils;
+import cn.cyberpeace.mp.devopscluster.utils.PingTest1;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -40,6 +37,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class DevopsTargetService {
 
     private final DeviceTargetMapper deviceTargetMapper;
@@ -117,7 +115,32 @@ public class DevopsTargetService {
             if (l.getExtEntity() != null) {
                 DeviceTargetPO deviceTargetPO = new DeviceTargetPO();
                 deviceTargetPO.setUuid(l.getUuid());
-                deviceTargetPO.setInPosition(Boolean.TRUE.equals(l.getExtEntity().getEntityStatus()) ? StatusEnum.YES : StatusEnum.NO);
+
+                String ip = "";
+                List<ExtEntityAccess> extEntityAccessList = l.getExtEntityAccess();
+                if (CollectionUtils.isNotEmpty(extEntityAccessList)) {
+                    for (ExtEntityAccess extEntityAccess :  extEntityAccessList) {
+                        List<AccessProtocol> accessProtocolList = extEntityAccess.getAccessProtocols();
+                        if (CollectionUtils.isNotEmpty(accessProtocolList)) {
+                            for (AccessProtocol accessProtocol : accessProtocolList) {
+                                if ("ssh".equals(accessProtocol.getProtocol())) {
+                                    ip = accessProtocol.getHostname();
+                                    break;
+                                }
+                            }
+                        }
+                        if (!"".equals(ip)) {
+                            break;
+                        }
+                    }
+                }
+                deviceTargetPO.setInPosition(StatusEnum.NO);
+                if (StringUtils.isNotEmpty(ip)) {
+                    boolean isTong = PingTest1.ping(ip);
+                    deviceTargetPO.setInPosition(isTong ? StatusEnum.YES : StatusEnum.NO);
+                }
+
+//                deviceTargetPO.setInPosition(Boolean.TRUE.equals(l.getExtEntity().getEntityStatus()) ? StatusEnum.YES : StatusEnum.NO);
                 update.add(deviceTargetPO);
             }
         }
@@ -220,9 +243,32 @@ public class DevopsTargetService {
 
         deviceTargetPO.setCreateTime(TimeUtils.utcStringToLocalDateTime(device.getCreatedAt()));
         deviceTargetPO.setUpdateTime(TimeUtils.utcStringToLocalDateTime(device.getUpdatedAt()));
-        ExtEntity extEntity = device.getExtEntity();
-        if (Objects.nonNull(extEntity)) {
-            deviceTargetPO.setInPosition(extEntity.getEntityStatus() ? StatusEnum.YES : StatusEnum.NO);
+//        ExtEntity extEntity = device.getExtEntity();
+//        if (Objects.nonNull(extEntity)) {
+//            deviceTargetPO.setInPosition(extEntity.getEntityStatus() ? StatusEnum.YES : StatusEnum.NO);
+//        }
+        String ip = "";
+        List<ExtEntityAccess> extEntityAccessList = device.getExtEntityAccess();
+        if (CollectionUtils.isNotEmpty(extEntityAccessList)) {
+            for (ExtEntityAccess extEntityAccess :  extEntityAccessList) {
+                List<AccessProtocol> accessProtocolList = extEntityAccess.getAccessProtocols();
+                if (CollectionUtils.isNotEmpty(accessProtocolList)) {
+                    for (AccessProtocol accessProtocol : accessProtocolList) {
+                        if ("ssh".equals(accessProtocol.getProtocol())) {
+                            ip = accessProtocol.getHostname();
+                            break;
+                        }
+                    }
+                }
+                if (!"".equals(ip)) {
+                    break;
+                }
+            }
+        }
+        deviceTargetPO.setInPosition(StatusEnum.NO);
+        if (StringUtils.isNotEmpty(ip)) {
+            boolean isTong = PingTest1.ping(ip);
+            deviceTargetPO.setInPosition(isTong ? StatusEnum.YES : StatusEnum.NO);
         }
 
         ExtImageInfo extImageInfo = device.getExtImageInfo();

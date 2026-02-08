@@ -1,12 +1,15 @@
 package cn.cyberpeace.mp.devopscluster.controller;
 
 import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.http.ProtocolProxyClient;
+import cn.cyberpeace.mp.base.util.http.ProtocolProxyHttpData;
 import cn.cyberpeace.mp.common.bo.OptionBO;
 import cn.cyberpeace.mp.common.service.OptionService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
@@ -22,6 +25,7 @@ import cn.cyberpeace.mp.devopscluster.converter.model.TypeAllConvertModel;
 import cn.cyberpeace.mp.devopscluster.converter.model.TypeConvertModel;
 import cn.cyberpeace.mp.devopscluster.converter.model.TypeIdStringConvertModel;
 import cn.cyberpeace.mp.devopscluster.dto.ImagePageDTO;
+import cn.cyberpeace.mp.devopscluster.enums.StatusEnum;
 import cn.cyberpeace.mp.devopscluster.model.*;
 import cn.cyberpeace.mp.devopscluster.model.common.Hypervisor;
 import cn.cyberpeace.mp.devopscluster.model.common.TargetConnection;
@@ -29,6 +33,7 @@ import cn.cyberpeace.mp.devopscluster.request.RealEquipmentDeleteRequest;
 import cn.cyberpeace.mp.devopscluster.request.RealEquipmentNetworkCardPageRequest;
 import cn.cyberpeace.mp.devopscluster.request.RealEquipmentPageRequest;
 import cn.cyberpeace.mp.devopscluster.request.RealEquipmentRequest;
+import cn.cyberpeace.mp.devopscluster.utils.PingTest1;
 import cn.cyberpeace.mp.devopscluster.vo.*;
 import cn.cyberpeace.mp.devopscluster.vo.common.PageResult;
 import cn.cyberpeace.mp.devopscluster.vo.common.Result;
@@ -246,6 +251,45 @@ public class RealEquipmentController {
                 .systemInfo(realEquipmentBO.getExtSystemInfo()).extEntity(realEquipmentBO.getExtEntity()).imageType(realEquipmentBO.getImageType())
                 .description(realEquipmentBO.getDescription()).extEntityAccess(extEntityAccess).extEntityUsb(realEquipmentBO.getExtEntityUsb()).build();
         return new Result(response);
+    }
+
+    @ApiOperation("获取实体设备登录地址")
+    @GetMapping("/get_connection")
+    public Result<String> getConnection(@RequestParam String id){
+        RealEquipmentBO realEquipmentBO = realEquipmentConverter.findByUuid(id);
+        List<ExtEntityAccess> extEntityAccessList = realEquipmentBO.getExtEntityAccess();
+        log.info("extEntityAccessList = " + extEntityAccessList);
+        String url = "";
+        if (CollectionUtils.isNotEmpty(extEntityAccessList)) {
+            for (ExtEntityAccess extEntityAccess :  extEntityAccessList) {
+                List<AccessProtocol> accessProtocolList = extEntityAccess.getAccessProtocols();
+                if (CollectionUtils.isNotEmpty(accessProtocolList)) {
+                    for (AccessProtocol accessProtocol : accessProtocolList) {
+                        if ("ssh".equals(accessProtocol.getProtocol())
+                                && StringUtils.isNotEmpty(accessProtocol.getHostname())
+                                && StringUtils.isNotEmpty(accessProtocol.getUsername())
+                                && StringUtils.isNotEmpty(accessProtocol.getPassword())
+                                && accessProtocol.getPort() != null) {
+                            ProtocolProxyClient protocolProxyClient = BeanCommon.getBean(ProtocolProxyClient.class);
+                            ProtocolProxyHttpData protocolProxyHttpData = new ProtocolProxyHttpData();
+                            protocolProxyHttpData.setHost(accessProtocol.getHostname());
+                            protocolProxyHttpData.setUsername(accessProtocol.getUsername());
+                            protocolProxyHttpData.setPassword(accessProtocol.getPassword());
+                            protocolProxyHttpData.setProtocol(accessProtocol.getProtocol());
+                            protocolProxyHttpData.setPort(String.valueOf(accessProtocol.getPort()));
+                            log.info("protocolProxyHttpData====" + protocolProxyHttpData);
+                            url = protocolProxyClient.getProxyLink(protocolProxyHttpData);
+                            log.info("url====" + url);
+                            break;
+                        }
+                    }
+                }
+                if (!"".equals(url)) {
+                    break;
+                }
+            }
+        }
+        return new Result(url);
     }
 
     private static ExtEntityAccess getExtEntityAccess(ExtEntityAccess v) {
