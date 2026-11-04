@@ -29,6 +29,7 @@ public class XdThreeHttpClient {
                 .configMaxConnPerRoute(20)
                 .build();
         httpClient.setLogRequest(true);
+        httpClient.setLogResponse(true);
     }
 
     public HttpResult xdGet(String url, HttpParam param, String cookie) {

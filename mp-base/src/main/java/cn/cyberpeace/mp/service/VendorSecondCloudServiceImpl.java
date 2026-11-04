@@ -204,6 +204,7 @@ public class VendorSecondCloudServiceImpl implements MultiCloudService {
                 }
 
             }
+            log.warn("厂商二镜像查询未命中 - imageUuid: {}", imageUuid);
             throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("未找到指定镜像"));
 
         } finally {

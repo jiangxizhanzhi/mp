@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 @Slf4j
 @Data
@@ -46,7 +47,15 @@ public class HttpClient {
 
     public static final String DEFAULT_CONTENT_TYPE = "application/json";
 
+    private static final String LOG_SECRET_KEYS = "(?:password|passwd|j_password|token|access_token|refresh_token|secret|secret_key|api_key|ticket|session_id)";
+    private static final Pattern LOG_SECRET_HEADER = Pattern.compile("auth|cookie|token|secret|password|signature|api[-_]?key", Pattern.CASE_INSENSITIVE);
+    private static final Pattern LOG_SECRET_JSON = Pattern.compile("(\"" + LOG_SECRET_KEYS + "\"\\s*:\\s*\")(?:\\\\.|[^\"\\\\])+", Pattern.CASE_INSENSITIVE);
+    private static final Pattern LOG_SECRET_PARAM = Pattern.compile("((?:^|[?&])" + LOG_SECRET_KEYS + "=)[^&\\s\"']+", Pattern.CASE_INSENSITIVE);
+
     private boolean logRequest;
+
+    // 厂商客户端开启响应日志，并对请求与响应中的认证信息脱敏。
+    private boolean logResponse;
 
     private org.apache.http.client.HttpClient innerHttpClient;
 
@@ -146,6 +155,27 @@ public class HttpClient {
         return request;
     }
 
+    private String formatLogContent(String content) {
+        if (!logResponse || StringUtils.isEmpty(content)) {
+            return content;
+        }
+        String masked = LOG_SECRET_JSON.matcher(content).replaceAll("$1***");
+        return LOG_SECRET_PARAM.matcher(masked).replaceAll("$1***");
+    }
+
+    private Header[] formatLogHeaders(Header[] headers) {
+        if (!logResponse) {
+            return headers;
+        }
+        Header[] masked = new Header[headers.length];
+        for (int i = 0; i < headers.length; i++) {
+            Header header = headers[i];
+            masked[i] = new BasicHeader(header.getName(), LOG_SECRET_HEADER.matcher(header.getName()).find()
+                    ? "***" : header.getValue());
+        }
+        return masked;
+    }
+
     private <T extends HttpRequestBase> HttpResult request(Class<T> requestClass, String url, HttpData data,
                                                            HttpParam param, Map<String, String> headers,
                                                            Integer timeout, boolean loadResult) {
@@ -154,15 +184,15 @@ public class HttpClient {
         result.setRequest(request);
         HttpResponse response;
         if (logRequest) {
-            log.info("Http {} - url: {}, header: {}, body: {}", request.getMethod(), request.getURI(),
-                    request.getAllHeaders(), data == null ? StringUtils.EMPTY : data.toContent());
+            log.info("Http {} - url: {}, header: {}, body: {}", request.getMethod(), formatLogContent(request.getURI().toString()),
+                    formatLogHeaders(request.getAllHeaders()), formatLogContent(data == null ? StringUtils.EMPTY : data.toContent()));
         }
         try {
             response = innerHttpClient.execute(request);
         } catch (IOException e) {
             log.error("Http {} exception - url: {}, header: {}, body: {}, error: {}", request.getMethod(),
-                    request.getURI(), request.getAllHeaders(),
-                    data == null ? StringUtils.EMPTY : data.toContent(), e);
+                    formatLogContent(request.getURI().toString()), formatLogHeaders(request.getAllHeaders()),
+                    formatLogContent(data == null ? StringUtils.EMPTY : data.toContent()), formatLogContent(e.getMessage()), e);
             result.setException(e);
             return result;
         }
@@ -170,17 +200,24 @@ public class HttpClient {
 
         if (!result.isSuccess()) {
             log.error("Http {} status error - url: {}, header: {}, body: {}, http code: {}, error: {}", request.getMethod(),
-                    request.getURI(), request.getAllHeaders(),
-                    data == null ? StringUtils.EMPTY : data.toContent(), response.getStatusLine().getStatusCode(), response.getStatusLine().getReasonPhrase());
+                    formatLogContent(request.getURI().toString()), formatLogHeaders(request.getAllHeaders()),
+                    formatLogContent(data == null ? StringUtils.EMPTY : data.toContent()), response.getStatusLine().getStatusCode(), response.getStatusLine().getReasonPhrase());
         }
 
-        if (loadResult) {
-            try {
+        try {
+            if (loadResult) {
                 result.loadResult(charset);
-            } catch (IOException e) {
-                log.error("Http {} receive exception - url: {}, header: {}, body: {}, error: {}", request.getMethod(),
-                        request.getURI(), request.getAllHeaders(), data == null ? StringUtils.EMPTY : data.toContent(), e);
-                result.setException(e);
+            }
+        } catch (IOException e) {
+            log.error("Http {} receive exception - url: {}, header: {}, body: {}, error: {}", request.getMethod(),
+                    formatLogContent(request.getURI().toString()), formatLogHeaders(request.getAllHeaders()),
+                    formatLogContent(data == null ? StringUtils.EMPTY : data.toContent()), formatLogContent(e.getMessage()), e);
+            result.setException(e);
+        } finally {
+            if (logResponse) {
+                log.info("Http {} response - url: {}, status: {}, header: {}, body: {}", request.getMethod(),
+                        formatLogContent(request.getURI().toString()), response.getStatusLine(),
+                        formatLogHeaders(response.getAllHeaders()), formatLogContent(result.getResult()));
             }
         }
 

@@ -22,6 +22,7 @@ public class MultiCloudClient {
                     .configServer(getServer(order))
                     .build();
             httpClient.setLogRequest(true);
+            httpClient.setLogResponse(true);
             return httpClient;
         });
     }
