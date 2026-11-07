@@ -58,6 +58,8 @@ mp:
     xd-two-server: ${XD_TWO_SERVER:https://192.168.140.15}
     xd-two-access-key: ${XD_TWO_ACCESS_KEY:e2a21753c0904c299512408b8ea97372}
     xd-two-secret-key: ${XD_TWO_SECRET_KEY:769ce2d564fa4399b1ade854daccde19}
+    xd-two-device-id: ${XD_TWO_DEVICE_ID:90008441-524e-4502-b7d2-c32f94f4734d}
+    xd-two-port-id: ${XD_TWO_PORT_ID:8121cd49-cbdf-485f-beal-53609c33ee29}
     xd-three-server: ${XD_THREE_SERVER:http://192.168.140.20:5701}
 
 ---

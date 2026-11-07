@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.service;
 
+import cn.cyberpeace.mp.base.config.XdAppConfig;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
@@ -18,6 +19,7 @@ import java.util.*;
 @Slf4j
 public class VendorSecondCloudServiceImpl implements MultiCloudService {
     private final MultiCloudClient multiCloudClient;
+    private final XdAppConfig xdAppConfig;
 
     private static final ThreadLocal<VendorSecondClientContext> vendorClientContext = new ThreadLocal<>();
     private static final String METHOD_GET = "GET";
@@ -46,13 +48,11 @@ public class VendorSecondCloudServiceImpl implements MultiCloudService {
             "            \"host_tso\": 0,\n" +
             "            \"model\": \"virtio\",\n" +
             "            \"vif_id\": \"net0\",\n" +
-            "            \"device_id\": \"c7fbd868-e1f6-480c-851d-7b387cee13ea\",\n" +
             "            \"ip_info\": {\n" +
             "                \"ip_address\": \"192.168.140.199\",\n" +
             "                \"netmask\": \"255.255.255.0\",\n" +
             "                \"gateway\": \"192.168.140.254\"\n" +
-            "            },\n" +
-            "            \"port_id\": \"b2bf40b4-2637-4849-b2f2-e3b37236d16b\"\n" +
+            "            }\n" +
             "        }\n" +
             "    ],\n" +
             "    \"power_on\": 1,\n" +
@@ -137,6 +137,9 @@ public class VendorSecondCloudServiceImpl implements MultiCloudService {
         try {
             JSONObject createVmObject = JSONObject.parseObject(VM_CREATE_TEMPLATE);
             createVmObject.put("image_id", imageUuid);
+            JSONObject network = createVmObject.getJSONArray("networks").getJSONObject(0);
+            network.put("device_id", xdAppConfig.getXdTwoDeviceId());
+            network.put("port_id", xdAppConfig.getXdTwoPortId());
 
             JSONObject image = getTargetImage(imageUuid);
             createVmObject.put("name", "MP_" + TextUtils.uuid());
