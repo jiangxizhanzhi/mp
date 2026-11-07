@@ -1355,8 +1355,17 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 return new ServiceResult<>(null);
             }
             CloudScenePluginContext cloudScenePluginContext = context.toCloudScenePluginContext();
-            ServiceResult<NodeConnectionBO> result = scenePluginCloudSceneService.getSceneRemoteConnection(sceneId, nodeId, accessModeId,
-                    context.getAccessUserId(), cloudScenePluginContext);
+            List<SceneElementModel> elements = listCsceneInstanceNodes(sceneId, new String[]{nodeId}, SceneElementModel::getVendor);
+            ServiceResult<NodeConnectionBO> result;
+            if (!elements.isEmpty() && elements.get(0).getVendor() != null && elements.get(0).getVendor() > 0) {
+                VendorNodeConnectionReq request = new VendorNodeConnectionReq();
+                request.setId(id);
+                request.setNodeId(nodeId);
+                result = getConnectionByVendor(request);
+            } else {
+                result = scenePluginCloudSceneService.getSceneRemoteConnection(sceneId, nodeId, accessModeId,
+                        context.getAccessUserId(), cloudScenePluginContext);
+            }
 
             this.reportElementAccessUser(sceneId, nodeId);
             return result;
