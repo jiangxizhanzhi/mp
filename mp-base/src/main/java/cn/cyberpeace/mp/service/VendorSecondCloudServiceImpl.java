@@ -95,6 +95,7 @@ public class VendorSecondCloudServiceImpl implements MultiCloudService {
                     device.put("name", name);
                     device.put("image", name);
                     device.put("description", name);
+                    device.put("default_launch_image_name", name);
                     if (!isWin) {
                         device.put("second_category", 2);
                         device.put("l3_category", 306);
