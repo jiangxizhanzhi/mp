@@ -188,8 +188,13 @@ public class DevopsTargetController {
             var cloudMap = BeanCommon.getBeanType(MultiCloudService.class);
             for (MultiCloudService cloudService : cloudMap.values()) {
                 if (cloudService.getVendor() == (request.getVendor())) {
-                    return new Result(new ListResult<>(cloudService.listAllDevices().stream().map(str ->
-                            JsonCommon.snakeParse(str, Device.class)).collect(Collectors.toList())));
+                    return new Result(new ListResult<>(cloudService.listAllDevices().stream()
+                            .map(str -> JsonCommon.snakeParse(str, Device.class))
+                            .filter(device -> StringUtils.isEmpty(request.getName())
+                                    || (Boolean.FALSE.equals(request.getLikeName())
+                                    ? StringUtils.equalsIgnoreCase(device.getName(), request.getName())
+                                    : StringUtils.containsIgnoreCase(device.getName(), request.getName())))
+                            .collect(Collectors.toList())));
                 }
             }
         }
