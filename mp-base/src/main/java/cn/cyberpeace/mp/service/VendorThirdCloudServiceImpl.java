@@ -1,17 +1,19 @@
 package cn.cyberpeace.mp.service;
 
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.http.HttpClient;
+import cn.cyberpeace.mp.base.util.http.HttpResult;
 import cn.cyberpeace.mp.base.util.http.MultiCloudClient;
 import cn.cyberpeace.mp.common.xd.XdThreeCookieRequest;
 import com.alibaba.fastjson.JSONObject;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
@@ -101,51 +103,88 @@ public class VendorThirdCloudServiceImpl implements MultiCloudService {
         String templateNode = getTemplateNode(imageUuid);
 
         String url = "/api2/json/nodes/" + templateNode + "/qemu/" + imageUuid + "/clone";
-        JSONObject body = JSONObject.parseObject("{\n" +
-                "\"newid\": 104,\n" +
-                "\"name\": \"temp-2\",\n" +
-                "\"target\": \"hci\"\n" +
-                "}");
+        JSONObject body = new JSONObject();
         body.put("name", "MP_CREATE_" + TextUtils.uuid());
         body.put("newid", newId);
         body.put("target", templateNode);
 
 
         StringHttpData createVmObject = new StringHttpData(body.toJSONString());
-        String result = getClient().post(url, createVmObject, null, getHeaders(), 30000).getResult();
+        JSONObject result = requireSuccess(getClient().post(url, createVmObject, null, getHeaders(), 30000), "提交克隆", newId);
+        log.info("厂商三 VM {} 克隆请求已提交，node={}, UPID={}", newId, templateNode, result.getString("data"));
 
-        log.info("创建虚机结果： {}", result);
+        waitForVmState(newId, templateNode, "stopped", TimeUnit.MINUTES.toMillis(10));
 
-        String vmNode = getVmNode(String.valueOf(newId));
-
-        try {
-            Thread.sleep(120*1000);
-        } catch (InterruptedException e) {
-            log.error(e.getMessage(), e);
+        String vmUrl = "/api2/json/nodes/" + templateNode + "/qemu/" + newId;
+        JSONObject config = requireSuccess(getClient().get(vmUrl + "/config", null, getHeaders(), 30000), "读取配置", newId).getJSONObject("data");
+        if (config == null || StringUtils.isEmpty(config.getString("digest"))) {
+            throw new MpRuntimeException("厂商三 VM " + newId + " 配置缺少 digest");
         }
+        String networkId = "36eca7b1-5fe7-48a5-be8e-19f1a01017d2";
+        JSONObject network = new JSONObject();
+        network.put("digest", config.getString("digest"));
+        network.put("vnet0", "virtio,network=" + networkId);
+        requireSuccess(getClient().put(vmUrl + "/config", new StringHttpData(network.toJSONString()), null, getHeaders(), 30000), "配置网卡", newId);
 
-        getClient().post("/api2/json/nodes/" + vmNode + "/qemu/" + newId + "/status/start", null, null, getHeaders(), 30000);
-
-//        try {
-//            Thread.sleep(180*1000);
-//        } catch (InterruptedException e) {
-//            log.error(e.getMessage(), e);
-//        }
-
-        String resultConfig = getClient().get("/api2/json/nodes/" + vmNode + "/qemu/" + newId + "/config", null, getHeaders(), 30000).getResult();
-        log.info("查询config的结果： {}", resultConfig);
-
-        if (JSONObject.parseObject(resultConfig).getJSONObject("data") != null && StringUtils.isNotEmpty(JSONObject.parseObject(resultConfig).getJSONObject("data").getString("digest"))) {
-            String digest = JSONObject.parseObject(resultConfig).getJSONObject("data").getString("digest");
-
-            String networkStr = "{\"digest\":\"" + digest + "\",\"vnet0\":\"virtio,network=36eca7b1-5fe7-48a5-be8e-19f1a01017d2\"}";
-
-            String putConfigResult = getClient().put("/api2/json/nodes/" + vmNode + "/qemu/" + newId + "/config", new StringHttpData(networkStr), null, getHeaders(), 30000).getResult();
-            log.info("配置config的结果： {}", putConfigResult);
+        JSONObject configured = requireSuccess(getClient().get(vmUrl + "/config", null, getHeaders(), 30000), "回读配置", newId).getJSONObject("data");
+        String vnet0 = configured == null ? null : configured.getString("vnet0");
+        if (StringUtils.isEmpty(vnet0) || !(vnet0.startsWith("virtio=") || vnet0.startsWith("virtio,"))
+                || !Arrays.asList(vnet0.split(",")).contains("network=" + networkId)) {
+            throw new MpRuntimeException("厂商三 VM " + newId + " 网卡配置回读与目标配置不一致");
         }
+        log.info("厂商三 VM {} 网卡配置已回读：{}", newId, vnet0);
 
-
+        JSONObject startResult = requireSuccess(getClient().post(vmUrl + "/status/start", null, null, getHeaders(), 30000), "提交启动", newId);
+        log.info("厂商三 VM {} 启动请求已提交，node={}, UPID={}", newId, templateNode, startResult.getString("data"));
+        waitForVmState(newId, templateNode, "running", TimeUnit.MINUTES.toMillis(10));
         return newId + "";
+    }
+
+    void waitForVmState(int vmId, String node, String expectedStatus, long timeoutMillis) {
+        String stage = "stopped".equals(expectedStatus) ? "等待克隆关机就绪" : "等待启动运行";
+        long started = System.nanoTime();
+        while (true) {
+            JSONObject vm = null;
+            JSONObject resources = requireSuccess(getClient().get("/api2/json/cluster/resources/?type=vm", null, getHeaders(), 30000), stage, vmId);
+            for (Object item : resources.getJSONArray("data")) {
+                JSONObject resource = (JSONObject) item;
+                if (resource.getIntValue("vmid") == vmId) {
+                    vm = resource;
+                    break;
+                }
+            }
+            String status = vm == null ? null : vm.getString("status");
+            String vmLock = vm == null ? null : vm.getString("lock");
+            if (expectedStatus.equals(status) && (!"stopped".equals(expectedStatus) || StringUtils.isEmpty(vmLock))) {
+                log.info("厂商三 VM {} {}完成，node={}, status={}, lock={}", vmId, stage, node, status, vmLock);
+                return;
+            }
+            long elapsed = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - started);
+            if (elapsed >= timeoutMillis) {
+                log.warn("厂商三 VM {} {}超时，继续后续流程，node={}, elapsedMs={}, found={}, status={}, lock={}；目标状态尚未确认",
+                        vmId, stage, node, elapsed, vm != null, status, vmLock);
+                return;
+            }
+            try {
+                Thread.sleep(Math.min(2000, timeoutMillis - elapsed));
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new MpRuntimeException("厂商三 VM " + vmId + " " + stage + "被中断").e(e);
+            }
+        }
+    }
+
+    private JSONObject requireSuccess(HttpResult result, String stage, int vmId) {
+        if (result.getException() != null || !result.isSuccess()) {
+            throw new MpRuntimeException("厂商三 VM " + vmId + " " + stage + "请求失败，HTTP="
+                    + (result.getResponse() == null ? "无响应" : result.getResponse().getStatusLine().getStatusCode())).e(result.getException());
+        }
+        JSONObject response = JSONObject.parseObject(result.getResult());
+        if (response == null || response.getIntValue("success") != 1) {
+            throw new MpRuntimeException("厂商三 VM " + vmId + " " + stage + "业务失败："
+                    + (response == null ? "无有效响应" : response.getString("message")));
+        }
+        return response;
     }
 
     private String getVmNode(String vmId) {

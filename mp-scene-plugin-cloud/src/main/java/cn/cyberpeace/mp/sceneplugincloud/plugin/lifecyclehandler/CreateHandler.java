@@ -1037,8 +1037,12 @@ public class CreateHandler extends HandlerCommon {
                 if (cloudService.getVendor() == cloudElement.getSrcElement().getVendor()) {
 
                     MultiCloudService.IP_THREADLOCAL.set(cloudElement.getSrcElement().getPorts().get(0).getIp());
-                    String resourceId = cloudService.createVm(cloudElement.getImageUuid());
-                    MultiCloudService.IP_THREADLOCAL.remove();
+                    String resourceId;
+                    try {
+                        resourceId = cloudService.createVm(cloudElement.getImageUuid());
+                    } finally {
+                        MultiCloudService.IP_THREADLOCAL.remove();
+                    }
 
 
                     cloudElement.setResourceId(resourceId);
