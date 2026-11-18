@@ -1088,6 +1088,22 @@ public class CreateHandler extends HandlerCommon {
                         cloudAccessMode.setAvailable(true);
                         cloudAccessMode.setAccessIp(cloudElement.getSrcElement().getPorts().get(0).getIp());
                         cloudAccessMode.setId(TextUtils.uuid());
+                        // 拓扑数据会下发给普通用户，仅使用非管理接入的账号密码。
+                        cloudPorts.stream()
+                                .map(CloudPluginSceneElementPortBO::getAccessModes)
+                                .filter(Objects::nonNull)
+                                .flatMap(Collection::stream)
+                                .filter(mode -> StringUtils.isNotBlank(mode.getProtocol()))
+                                .map(mode -> Objects.requireNonNullElse(mode.getDisplayCredentials(), mode))
+                                .filter(mode -> !Boolean.TRUE.equals(mode.getManageMode()))
+                                .filter(mode -> StringUtils.isNoneBlank(mode.getUsername(), mode.getPassword()))
+                                .findFirst()
+                                .ifPresent(mode -> {
+                                    AccessMode credentials = new AccessMode();
+                                    credentials.setUsername(mode.getUsername());
+                                    credentials.setPassword(mode.getPassword());
+                                    cloudAccessMode.setDisplayCredentials(credentials);
+                                });
                         cloudPorts.get(0).setAccessModes(Lists.newArrayList(cloudAccessMode));
                     }
 

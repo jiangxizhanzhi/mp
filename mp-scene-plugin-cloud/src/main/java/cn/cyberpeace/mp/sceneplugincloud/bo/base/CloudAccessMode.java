@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincloud.bo.base;
 
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -40,4 +41,8 @@ public class CloudAccessMode extends AccessMode {
 
     @ApiModelProperty(value = "创建端口映射的id")
     private String fwdId;
+
+    @ApiModelProperty(value = "厂商靶标展示用账号密码")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private AccessMode displayCredentials;
 }
