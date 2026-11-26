@@ -128,6 +128,24 @@ class AuditTests(unittest.TestCase):
             result = self.ns['delete_selected'](report)
         return result, cmds
 
+    def test_default_compact_output_only_candidates_and_all_includes_protected(self):
+        self.add('nova.instances', uuid=OTHER, display_name='unrelated', hostname='unrelated',
+                 host='compute-fixture', project_id='project-fixture', vm_state='active',
+                 memory_mb='2048', deleted='0', locked='0', disable_terminate='0')
+        with contextlib.redirect_stdout(io.StringIO()) as out:
+            self.ns['write_report'](self.report())
+        lines = out.getvalue().splitlines()
+        self.assertEqual(2, len(lines))
+        self.assertIn(VID, lines[1])
+        self.assertNotIn(OTHER, out.getvalue())
+        self.assertNotIn('project_id', lines[0])
+        self.ns['options'].all = True
+        with contextlib.redirect_stdout(io.StringIO()) as out:
+            self.ns['write_report'](self.report())
+        self.assertEqual(3, len(out.getvalue().splitlines()))
+        self.assertIn(OTHER, out.getvalue())
+        self.assertIn('project_id', out.getvalue().splitlines()[0])
+
     def test_dry_run_never_deletes(self):
         result, cmds = self.execute_mocked_delete(dry=True)
         self.assertEqual(0, result)

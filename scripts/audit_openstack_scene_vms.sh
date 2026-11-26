@@ -14,16 +14,19 @@ import subprocess
 import sys
 import uuid
 
-HELP = """默认只读审计全部虚拟机。使用 --candidates-only 筛选建议回收及疑似残留。
+HELP = """默认只读列出建议回收及疑似残留的虚拟机，不需要 MySQL 用户名或密码。
+使用 --all 查看全部虚拟机及详细资源统计，--candidates-only 查看候选的完整字段。
 删除必须指定完整 UUID，经实时数据库及 OpenStack 双重核对，并在终端输入确认。
 归属不明或非MP资源、仍在用、正在操作、外部接入或 Nova 已删除的实例不会被脚本删除。
-历史快照只支持审计，禁止删除。MySQL 连接参数可放在 -- 之后（兼容原来的 -u root -p）。
+历史快照只支持审计，禁止删除。默认直接使用本机 mysql 认证；特殊环境才需要在 -- 后提供连接参数。
 环境变量：MYSQL_BIN（默认 mysql），OPENSTACK_BIN（默认 openstack），
 LIBVIRT_ACTIVE_UUIDS（可选 UUID 文件，只用于活动实例核对），MP_RESOURCE_PREFIX（默认 MP_SCENE）。
 """
 parser = argparse.ArgumentParser(prog='audit_openstack_scene_vms.sh', description=HELP, formatter_class=argparse.RawDescriptionHelpFormatter)
 parser.add_argument('--dump', metavar='SQL', help='离线分析 SQL 或 SQL.gz 快照')
-parser.add_argument('--candidates-only', action='store_true', help='仅输出建议回收和需人工核对的疑似残留')
+report_options = parser.add_mutually_exclusive_group()
+report_options.add_argument('--all', action='store_true', help='输出所有虚拟机及详细资源统计')
+report_options.add_argument('--candidates-only', action='store_true', help='输出候选虚拟机的完整审计字段')
 parser.add_argument('--delete', nargs='+', metavar='UUID', help='指定待回收的完整 Nova UUID（空格分隔多个）')
 parser.add_argument('--allow-reviewed', action='store_true', help='管理员已另行确认归属的 REVIEW 疑似残留')
 parser.add_argument('--dry-run', action='store_true', help='核对所选 UUID，不发送删除请求')
@@ -387,12 +390,20 @@ fields = ['cleanup_status', 'cleanup_reason', 'classification', 'association', '
 
 
 def write_report(report):
-    writer = csv.DictWriter(sys.stdout, fieldnames=fields, delimiter='\t', lineterminator='\n')
+    # The default on-site workflow is deliberately short: show candidates and their UUIDs only.
+    cols = fields if options.all or options.candidates_only else [
+        'cleanup_status', 'nova_uuid', 'vm_name', 'host', 'memory_mib', 'scene_name', 'cleanup_reason']
+    writer = csv.DictWriter(sys.stdout, fieldnames=cols, delimiter='\t', lineterminator='\n')
     writer.writeheader()
+    count = 0
     for out in report:
-        if options.candidates_only and out['cleanup_status'] not in CANDIDATES:
+        if not options.all and out['cleanup_status'] not in CANDIDATES:
             continue
-        writer.writerow({k: str(v).replace('\r', ' ').replace('\n', ' ').replace('\t', ' ') if v is not None else '' for k, v in out.items()})
+        writer.writerow({k: str(out[k]).replace('\r', ' ').replace('\n', ' ').replace('\t', ' ')
+                         if out.get(k) is not None else '' for k in cols})
+        count += 1
+    if not options.all and count == 0:
+        warn('没有建议回收或疑似残留的虚拟机。可使用 --all 查看完整清单。')
 
 
 def print_summary(report, mp_vm_ids):
@@ -404,6 +415,9 @@ def print_summary(report, mp_vm_ids):
     for status, count in collections.Counter(x['cleanup_status'] for x in report).most_common():
         capacity = sum(int(x.get('memory_mib') or 0) for x in report if x['cleanup_status'] == status)
         warn(f'{status}: {count} 台, {capacity} MiB')
+    if not (options.all or options.candidates_only):
+        warn('提示：ELIGIBLE 为建议回收；REVIEW 须人工核实；其他状态不进入默认清单。')
+        return
     warn('=== VM 分类（配置内存 MiB，非实际宿主机 RSS） ===')
     for category, count in summary.most_common():
         warn(f'{category}: {count} 台, {ram[category]} MiB')
@@ -538,10 +552,10 @@ def main():
     warn('数据来源: 历史 SQL 快照，非实时现场状态' if options.dump else '数据来源: 现场数据库只读一致性查询')
     read_data()
     report, mp_vm_ids = audit(active_uuids())
-    write_report(report)
-    print_summary(report, mp_vm_ids)
     if options.delete:
         return delete_selected(report)
+    write_report(report)
+    print_summary(report, mp_vm_ids)
     return 0
 
 
