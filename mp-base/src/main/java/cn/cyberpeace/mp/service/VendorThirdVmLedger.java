@@ -170,6 +170,25 @@ public class VendorThirdVmLedger {
         return current;
     }
 
+    /** Re-open only the original, positively observed identity during closed-scene reclamation. */
+    Lease prepareOrphanReclaim(Lease lease, long cutoffMillis) {
+        if (CREATING.equals(lease.status)) {
+            throw new MpRuntimeException("厂商三仍有创建任务关联，暂不执行兜底回收");
+        }
+        if (DELETED.equals(lease.status) || REJECTED.equals(lease.status) || DELETING.equals(lease.status)) {
+            if (DELETING.equals(lease.status) && (lease.updatedAt == null || lease.updatedAt.getTime() >= cutoffMillis)) {
+                throw new MpRuntimeException("厂商三回收仍在确认窗口内");
+            }
+            if (write("UPDATE " + TABLE + " SET status=?,stage=?,observed=1,updated_at=CURRENT_TIMESTAMP "
+                            + "WHERE vmid=? AND request_name=? AND status=? AND updated_at=?",
+                    DELETING, "ORPHAN_RECONFIRMED", lease.vmid, lease.requestName, lease.status, lease.updatedAt) != 1) {
+                throw new MpRuntimeException("厂商三资源回收状态已变化");
+            }
+            return byId(lease.vmid);
+        }
+        return lease;
+    }
+
     boolean claimDeleteAction(Lease lease, String action, Set<String> blockedStages) {
         Lease current = byId(lease.vmid);
         if (current == null || !lease.requestName.equals(current.requestName)

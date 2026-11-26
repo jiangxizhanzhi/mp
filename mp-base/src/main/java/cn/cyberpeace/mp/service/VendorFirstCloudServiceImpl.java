@@ -242,8 +242,13 @@ public class VendorFirstCloudServiceImpl extends AbstractVendorCloudService {
 
     private JSONObject findInstance(String vmUuid) {
         requireVmId(vmUuid);
+        return readInstances(vmUuid).get(vmUuid);
+    }
+
+    /** A null target reads the complete inventory; ordinary status queries may stop at the exact UUID. */
+    private Map<String, JSONObject> readInstances(String target) {
         final int size = 1000;
-        Set<String> seen = new HashSet<>();
+        Map<String, JSONObject> seen = new LinkedHashMap<>();
         for (int page = 1; page <= 100; page++) {
             String url = INSTANCE_PATH + "?page=" + page + "&page_size=" + size + "&" + CLUSTER_QUERY;
             JSONObject result = requireResponse(authenticated(headers -> getClient().get(url, null, headers, 30000)), "状态查询");
@@ -253,22 +258,46 @@ public class VendorFirstCloudServiceImpl extends AbstractVendorCloudService {
                 if (!(entry instanceof JSONObject)) throw new MpRuntimeException("厂商一虚拟机清单格式异常");
                 JSONObject instance = (JSONObject) entry;
                 String id = instance.getString("uuid");
-                if (StringUtils.isBlank(id) || !seen.add(id)) throw new MpRuntimeException("厂商一虚拟机清单不完整或存在重复记录");
-                if (vmUuid.equals(id)) return instance;
+                if (StringUtils.isBlank(id) || seen.putIfAbsent(id, instance) != null) throw new MpRuntimeException("厂商一虚拟机清单不完整或存在重复记录");
+                if (target != null && target.equals(id)) return seen;
             }
             Integer count = result.getInteger("count");
             boolean more = StringUtils.isNotBlank(result.getString("next"));
             if (count != null) {
                 if (count < seen.size()) throw new MpRuntimeException("厂商一虚拟机清单数量异常");
-                if (count == seen.size() && !more) return null;
+                if (count == seen.size() && !more) return seen;
                 if (instances.isEmpty()) throw new MpRuntimeException("厂商一虚拟机清单不完整");
             } else if (!more && instances.size() < size) {
-                return null;
+                return seen;
             } else if (instances.isEmpty()) {
                 throw new MpRuntimeException("厂商一虚拟机清单不完整");
             }
         }
         throw new MpRuntimeException("厂商一虚拟机清单未完整读取");
+    }
+
+    @Override
+    public Map<String, String> readReclaimInventory() {
+        Map<String, String> names = new LinkedHashMap<>();
+        readInstances(null).forEach((id, vm) -> names.put(id, vm.getString("name")));
+        return names;
+    }
+
+    @Override
+    public boolean matchesReclaimIdentity(String vmUuid, String name, String sceneId, String elementId) {
+        return MultiCloudService.isProviderUuid(vmUuid) && MultiCloudService.isMpCreatedName(name);
+    }
+
+    @Override
+    public void reclaimClosedVm(String vmUuid, String name, String sceneId, String elementId) {
+        if (!matchesReclaimIdentity(vmUuid, name, sceneId, elementId))
+            throw new MpRuntimeException("厂商一残留资源身份未确认");
+        Map<String, String> current = readReclaimInventory();
+        long sameName = current.values().stream().filter(name::equals).count();
+        if (!current.containsKey(vmUuid) && sameName == 0) return;
+        if (!name.equals(current.get(vmUuid)) || sameName != 1)
+            throw new MpRuntimeException("厂商一残留资源身份已变化或名称不唯一");
+        deleteManagedVm(vmUuid, sceneId, elementId);
     }
 
     @Override

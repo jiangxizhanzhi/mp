@@ -71,6 +71,12 @@ public class XdAppConfig {
     @Value("${mp.xdapp.xd-three-poll-ms:3000}")
     private long xdThreePollMs = 3000;
 
+    @Value("${mp.xdapp.xd-vendor-reclaim-enabled:true}")
+    private boolean xdVendorReclaimEnabled = true;
+    @Value("${mp.xdapp.xd-vendor-reclaim-closed-grace-minutes:10}")
+    private int xdVendorReclaimClosedGraceMinutes = 10;
+    @Value("${mp.xdapp.xd-vendor-reclaim-max-per-run:20}")
+    private int xdVendorReclaimMaxPerRun = 20;
 
 
 }

@@ -290,6 +290,18 @@ public class VendorSecondAddressPool {
         }
     }
 
+    boolean matchesReclaimIdentity(String uuid, String name, String sceneId, String elementId) {
+        validateManagedOwner(uuid, sceneId, elementId);
+        for (Lease row : list()) {
+            if (!uuid.equals(row.vmUuid)) continue;
+            // A standalone reservation or a different original request must not
+            // be mistaken for the historical scene's resource.
+            if (row.owner != null && (row.sceneId == null || row.elementId == null)) return false;
+            if (row.requestName != null && !name.equals(row.requestName)) return false;
+        }
+        return true;
+    }
+
     String resolveManagedVmForDelete(String sceneId, String elementId, VendorSecondInventory inventory) {
         if (sceneId == null || sceneId.isEmpty() || elementId == null || elementId.isEmpty()) {
             throw new MpRuntimeException("厂商二场景或节点标识缺失，无法核对原虚拟机");

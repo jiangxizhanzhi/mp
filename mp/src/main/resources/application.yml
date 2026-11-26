@@ -81,6 +81,9 @@ mp:
     xd-three-ready-timeout-ms: ${XD_THREE_READY_TIMEOUT_MS:600000}
     xd-three-delete-timeout-ms: ${XD_THREE_DELETE_TIMEOUT_MS:300000}
     xd-three-poll-ms: ${XD_THREE_POLL_MS:3000}
+    xd-vendor-reclaim-enabled: ${XD_VENDOR_RECLAIM_ENABLED:true}
+    xd-vendor-reclaim-closed-grace-minutes: ${XD_VENDOR_RECLAIM_CLOSED_GRACE_MINUTES:10}
+    xd-vendor-reclaim-max-per-run: ${XD_VENDOR_RECLAIM_MAX_PER_RUN:20}
 
 ---
 spring:

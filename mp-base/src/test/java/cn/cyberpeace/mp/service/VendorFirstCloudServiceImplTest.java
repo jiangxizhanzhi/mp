@@ -125,6 +125,22 @@ class VendorFirstCloudServiceImplTest {
         verify(client, never()).delete(anyString(), any(), any(), anyMap(), anyInt());
     }
 
+    @Test void reclaimVerifiesCurrentIdentityBeforeDeleting() {
+        String id = "11111111-2222-3333-4444-555555555555";
+        String name = "MP_0123456789abcdef0123456789abcdef";
+        when(client.get(startsWith(INSTANCES + "?"), isNull(), anyMap(), eq(30000)))
+                .thenReturn(response(200, "{\"count\":1,\"results\":[{\"uuid\":\"" + id + "\",\"name\":\"renamed\"}]}"));
+        assertThrows(MpRuntimeException.class, () -> service.reclaimClosedVm(id, name, "scene", "node"));
+        verify(client, never()).delete(anyString(), any(), any(), anyMap(), anyInt());
+        when(client.get(startsWith(INSTANCES + "?"), isNull(), anyMap(), eq(30000)))
+                .thenReturn(response(200, "{\"count\":1,\"results\":[{\"uuid\":\"" + id + "\",\"name\":\"" + name + "\"}]}"),
+                        response(200, "{\"count\":0,\"results\":[]}"));
+        when(client.delete(startsWith(INSTANCES + id + "/?"), isNull(), isNull(), anyMap(), eq(30000)))
+                .thenReturn(response(200, "{\"success\":true}"));
+        assertDoesNotThrow(() -> service.reclaimClosedVm(id, name, "scene", "node"));
+        verify(client).delete(startsWith(INSTANCES + id + "/?"), isNull(), isNull(), anyMap(), eq(30000));
+    }
+
     private String instance(String status, String ip, String mac) {
         return "{\"results\":[{\"uuid\":\"fixture-id\",\"status\":\"" + status
                 + "\",\"address\":{\"network1\":{\"fixed\":[{\"addr\":\"" + ip

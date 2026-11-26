@@ -604,6 +604,39 @@ public class VendorThirdCloudServiceImpl extends AbstractVendorCloudService {
         if (readInventory(true).find(id) != null) throw new MpRuntimeException("厂商三资源身份未确认，未提交删除");
     }
 
+    @Override
+    public Map<String, String> readReclaimInventory() {
+        Map<String, String> names = new LinkedHashMap<>();
+        readInventory(true).vms.forEach((id, vm) -> {
+            if (VendorThirdInventory.isQemu(vm) && vm.getIntValue("template") != 1) {
+                names.put(String.valueOf(id), vm.getString("name"));
+            }
+        });
+        return names;
+    }
+
+    @Override
+    public boolean matchesReclaimIdentity(String vmUuid, String name, String sceneId, String elementId) {
+        if (StringUtils.isBlank(name) || sceneId == null || elementId == null) return false;
+        VendorThirdVmLedger.Lease lease = ledger.byId(parseVmid(vmUuid));
+        return lease != null && name.equals(lease.getRequestName())
+                && sceneId.equals(lease.getSceneId()) && elementId.equals(lease.getElementId())
+                && !VendorThirdVmLedger.CREATING.equals(lease.getStatus());
+    }
+
+    @Override
+    public void reclaimClosedVm(String vmUuid, String name, String sceneId, String elementId) {
+        if (!matchesReclaimIdentity(vmUuid, name, sceneId, elementId))
+            throw new MpRuntimeException("厂商三残留资源无可核实的原始台账");
+        VendorThirdVmLedger.Lease lease = ledger.byId(parseVmid(vmUuid));
+        VendorThirdInventory inventory = readInventory(true);
+        JSONObject vm = inventory.find(lease.getVmid());
+        if (vm == null && !inventory.hasName(name)) return;
+        if (!inventory.owns(lease, vm)) throw new MpRuntimeException("厂商三残留资源身份已变化");
+        lease = ledger.prepareOrphanReclaim(lease, System.currentTimeMillis() - TimeUnit.HOURS.toMillis(1));
+        recycle(lease);
+    }
+
     /** Read-only reconciliation of provider resources; never starts, clones or deletes a VM. */
     public void reconcileVmLedger() {
         List<VendorThirdVmLedger.Lease> rows = ledger.list();

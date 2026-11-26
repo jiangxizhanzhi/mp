@@ -407,6 +407,33 @@ public class VendorSecondCloudServiceImpl extends AbstractVendorCloudService {
         addressPool.reconcile(readInventorySafely(), releasing);
     }
 
+    @Override
+    public Map<String, String> readReclaimInventory() {
+        VendorSecondInventory inventory = readInventory();
+        if (!inventory.complete) throw new MpRuntimeException("厂商二资源清单不完整，本轮不执行兜底回收");
+        Map<String, String> names = new LinkedHashMap<>();
+        inventory.vms.forEach((id, vm) -> names.put(id, vm.getString("name")));
+        return names;
+    }
+
+    @Override
+    public boolean matchesReclaimIdentity(String vmUuid, String name, String sceneId, String elementId) {
+        return MultiCloudService.isProviderUuid(vmUuid) && MultiCloudService.isMpCreatedName(name)
+                && addressPool.matchesReclaimIdentity(vmUuid, name, sceneId, elementId);
+    }
+
+    @Override
+    public void reclaimClosedVm(String vmUuid, String name, String sceneId, String elementId) {
+        if (!matchesReclaimIdentity(vmUuid, name, sceneId, elementId))
+            throw new MpRuntimeException("厂商二残留资源身份未确认");
+        Map<String, String> current = readReclaimInventory();
+        long sameName = current.values().stream().filter(name::equals).count();
+        if (!current.containsKey(vmUuid) && sameName == 0) return;
+        if (!name.equals(current.get(vmUuid)) || sameName != 1)
+            throw new MpRuntimeException("厂商二残留资源身份已变化或名称不唯一");
+        deleteManagedVm(vmUuid, sceneId, elementId);
+    }
+
     private JSONObject getTargetImage(String imageUuid) {
         try {
             String url = "/janus/20180725/images";

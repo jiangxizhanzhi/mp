@@ -251,6 +251,35 @@ class VendorThirdCloudServiceImplTest {
         assertEquals(0, count("delete"));
     }
 
+    @Test void orphanReclaimRequiresLedgerIdentityAndCanReopenRetiredResource() {
+        assertFalse(service.matchesReclaimIdentity("9000", "unrelated", "scene", "element"));
+        assertTrue(create().isReady());
+        service.deleteManagedVm(String.valueOf(id), "scene", "element");
+        assertEquals(DELETED, row().getStatus());
+        exists = true; // Simulate a late reappearance of the original provider resource.
+        assertFalse(service.matchesReclaimIdentity(String.valueOf(id), name, "other-scene", "element"));
+        assertThrows(MpRuntimeException.class,
+                () -> service.reclaimClosedVm(String.valueOf(id), "wrong-name", "scene", "element"));
+        service.reclaimClosedVm(String.valueOf(id), name, "scene", "element");
+        assertEquals(DELETED, row().getStatus());
+        assertEquals(2, count("delete"));
+    }
+
+    @Test void orphanReclaimRetriesAnOldAcceptedDeleteOnlyAfterConfirmationWindow() {
+        assertTrue(create().isReady());
+        holdDelete = true;
+        assertThrows(MpRuntimeException.class, () -> service.deleteManagedVm(String.valueOf(id), "scene", "element"));
+        assertEquals(DELETING, row().getStatus());
+        assertThrows(MpRuntimeException.class, () -> service.reclaimClosedVm(String.valueOf(id), name, "scene", "element"));
+        assertEquals(1, count("delete"));
+        db.jdbc.update("UPDATE mp_vendor_third_vm_ledger SET updated_at=? WHERE vmid=?",
+                new java.sql.Timestamp(System.currentTimeMillis() - java.util.concurrent.TimeUnit.HOURS.toMillis(2)), id);
+        holdDelete = false;
+        service.reclaimClosedVm(String.valueOf(id), name, "scene", "element");
+        assertEquals(DELETED, row().getStatus());
+        assertEquals(2, count("delete"));
+    }
+
     @Test void incompleteInventoryCannotConfirmAbsence() {
         assertTrue(create().isReady());
         noInventory = true;

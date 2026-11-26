@@ -166,6 +166,29 @@ public interface MultiCloudService {
         // existing lifecycle behaviour.
     }
 
+    /** Complete provider-side VM identifier/name inventory, for closed-scene resource reconciliation only. */
+    default Map<String, String> readReclaimInventory() {
+        throw new UnsupportedOperationException("Provider reclaim inventory is not supported");
+    }
+
+    /** Local identity/ownership check; a name prefix alone is never a deletion decision. */
+    default boolean matchesReclaimIdentity(String vmUuid, String name, String sceneId, String elementId) {
+        return false;
+    }
+
+    /** Re-read provider identity before invoking the normal VM deletion path. */
+    default void reclaimClosedVm(String vmUuid, String name, String sceneId, String elementId) {
+        throw new UnsupportedOperationException("Provider reclaim is not supported");
+    }
+
+    static boolean isMpCreatedName(String name) {
+        return name != null && name.matches("MP_[0-9a-fA-F]{32}");
+    }
+
+    static boolean isProviderUuid(String value) {
+        return value != null && value.matches("(?i)([0-9a-f]{32}|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})");
+    }
+
     VmPowerState getVmPowerState(String vmUuid);
 
     /** Return only once the requested provider-side power state has been confirmed. */

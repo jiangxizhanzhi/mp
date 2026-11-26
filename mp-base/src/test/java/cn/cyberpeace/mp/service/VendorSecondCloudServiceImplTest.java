@@ -429,4 +429,14 @@ class VendorSecondCloudServiceImplTest {
         verify(client, never()).post(anyString(), any(), any(), anyMap(), anyInt());
         verify(client, never()).delete(anyString(), any(), any(), anyMap(), anyInt());
     }
+
+    @Test void reclaimNeverDeletesWhenCurrentProviderIdentityDiffersOrListIsPartial() {
+        String id = "11111111-2222-3333-4444-555555555555", name = "MP_0123456789abcdef0123456789abcdef";
+        when(pool.matchesReclaimIdentity(id, name, "scene", "node")).thenReturn(true);
+        when(client.get(eq(SERVERS), isNull(), anyMap(), eq(30000)))
+                .thenReturn(listResponse(1, vm(id, "renamed", A)), listResponse(2, vm(id, name, A)));
+        assertThrows(MpRuntimeException.class, () -> service.reclaimClosedVm(id, name, "scene", "node"));
+        assertThrows(MpRuntimeException.class, () -> service.reclaimClosedVm(id, name, "scene", "node"));
+        verify(client, never()).delete(anyString(), any(), any(), anyMap(), anyInt());
+    }
 }
