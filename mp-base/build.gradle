@@ -1,3 +1,8 @@
 dependencies {
 
 }
+
+// In-memory database for address-ledger transaction and concurrency tests.
+dependencies {
+    testImplementation 'com.h2database:h2'
+}

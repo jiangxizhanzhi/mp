@@ -143,6 +143,12 @@ public interface MultiCloudService {
 
     String createVm(String imageUuid);
 
+    default ManagedVmCreationResult createManagedVm(String imageUuid, String sceneId, String elementId,
+                                                     String portId, String requestedIp) {
+        throw new UnsupportedOperationException("Managed address allocation is not supported by this provider");
+    }
+
+
     String[] getVmIpAndMac(String vmUuid);
 
     void deleteVm(String vmUuid);

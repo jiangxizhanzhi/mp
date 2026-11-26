@@ -85,6 +85,11 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         firewallElementMap.clear();
         terminalElementMap.clear();
         getElementMap().forEach((nodeId, element) -> {
+            if (Integer.valueOf(2).equals(element.getSrcElement().getVendor()) && StringUtils.isNotBlank(element.getResourceId())) {
+                // Reconciliation may have corrected the runtime port after the creation request returned.
+                // Use the runtime port address for the vendor resource's VNC display, not stale plugin JSON.
+                getPorts(element).forEach(CloudScenePluginHandler::syncVendorSecondAccessIp);
+            }
             Integer elementType = element.getSrcElement().getType();
             if (elementType == null) {
                 terminalElementMap.put(nodeId, element);
@@ -105,6 +110,13 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
                 element.setTransparent(true);
             }
         });
+    }
+
+    static void syncVendorSecondAccessIp(CloudPluginSceneElementPortBO port) {
+        if (port.getSrcPort() == null || CollectionUtils.isEmpty(port.getAccessModes())) return;
+        port.getAccessModes().stream()
+                .filter(mode -> mode != null && "vnc".equalsIgnoreCase(mode.getProtocol()))
+                .forEach(mode -> mode.setAccessIp(StringUtils.defaultString(port.getSrcPort().getIp())));
     }
 
     @Override

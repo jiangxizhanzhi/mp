@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
@@ -44,6 +45,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.common.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.CreateTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.cyberpeace.mp.service.MultiCloudService;
+import cn.cyberpeace.mp.service.ManagedVmCreationResult;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Lists;
 import lombok.Data;
@@ -1036,19 +1038,32 @@ public class CreateHandler extends HandlerCommon {
             for (MultiCloudService cloudService : BeanCommon.getBeanType(MultiCloudService.class).values()) {
                 if (cloudService.getVendor() == cloudElement.getSrcElement().getVendor()) {
 
-                    MultiCloudService.IP_THREADLOCAL.set(cloudElement.getSrcElement().getPorts().get(0).getIp());
                     String resourceId;
-                    try {
-                        resourceId = cloudService.createVm(cloudElement.getImageUuid());
-                    } finally {
-                        MultiCloudService.IP_THREADLOCAL.remove();
+                    if (cloudService.getVendor() == 2) {
+                        if (org.apache.commons.collections.CollectionUtils.isEmpty(cloudElement.getSrcElement().getPorts())) {
+                            throw new MpRuntimeException("厂商二虚拟机缺少网口，无法管理地址");
+                        }
+                        var port = cloudElement.getSrcElement().getPorts().get(0);
+                        ManagedVmCreationResult managed = cloudService.createManagedVm(cloudElement.getImageUuid(),
+                                getPluginHandler().getSceneHandler().getSceneId(), cloudElement.getSrcElement().getEid(),
+                                port.getEid(), port.getIp());
+                        resourceId = managed.getResourceId();
+                        // An unconfirmed provider address must not be displayed as the original template address.
+                        port.setIp(StringUtils.defaultString(managed.getActualIp()));
+                        port.setMacAddr(StringUtils.defaultString(managed.getMacAddress()));
+                        port.setNetmask(managed.getNetmask());
+                        port.setGateway(managed.getGateway());
+                    } else {
+                        MultiCloudService.IP_THREADLOCAL.set(cloudElement.getSrcElement().getPorts().get(0).getIp());
+                        try {
+                            resourceId = cloudService.createVm(cloudElement.getImageUuid());
+                        } finally {
+                            MultiCloudService.IP_THREADLOCAL.remove();
+                        }
                     }
-
-
                     cloudElement.setResourceId(resourceId);
 
-
-                    if (cloudService.ipAutoGen()) {
+                    if (cloudService.getVendor() != 2 && cloudService.ipAutoGen()) {
                         String[] ipAndMac = null;
                         int tryCount = 20;
                         do {

@@ -24,6 +24,22 @@ public class XdAppConfig {
     private String xdTwoDeviceId;
     @Value("${mp.xdapp.xd-two-port-id}")
     private String xdTwoPortId;
+    @Value("${mp.xdapp.xd-two-ip-pool-start:192.168.140.126}")
+    private String xdTwoIpPoolStart = "192.168.140.126";
+    @Value("${mp.xdapp.xd-two-ip-pool-end:192.168.140.225}")
+    private String xdTwoIpPoolEnd = "192.168.140.225";
+    @Value("${mp.xdapp.xd-two-ip-netmask:255.255.255.0}")
+    private String xdTwoIpNetmask = "255.255.255.0";
+    @Value("${mp.xdapp.xd-two-ip-gateway:192.168.140.254}")
+    private String xdTwoIpGateway = "192.168.140.254";
+    // Only initial, manually reviewed free addresses are opened. Never resets existing leases.
+    @Value("${mp.xdapp.xd-two-ip-reviewed-free:}")
+    private String xdTwoIpReviewedFree = "";
+    @Value("${mp.xdapp.xd-two-ip-probe-enabled:true}")
+    private boolean xdTwoIpProbeEnabled = true;
+    @Value("${mp.xdapp.xd-two-ip-probe-timeout-ms:1000}")
+    private int xdTwoIpProbeTimeoutMs = 1000;
+
     @Value("${mp.xdapp.xd-three-server:http://192.168.140.20:5701}")
     private String xdThreeServer;
 
