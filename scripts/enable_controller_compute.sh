@@ -26,6 +26,8 @@ HOST = 'controller01'
 OTHER = 'compute01'
 UNIT = 'nova-compute.service'
 CONF = Path('/etc/nova/nova.conf')
+ADMIN_RC = Path('/root/admin.openrc')
+CINDER_DATA = Path('/data/nfs_data/cinder')
 GIB = 1024 ** 3
 RC = {0: 'VCPU', 1: 'MEMORY_MB', 2: 'DISK_GB'}
 EXPECTED_MAPPINGS = {'ex_provider': 'br-ex', 'vlanprovider': 'br-vlan'}
@@ -44,9 +46,9 @@ def safe_text(value):
     value = str(value)
     for key in ('OS_PASSWORD', 'OS_TOKEN', 'OS_AUTH_TOKEN',
                 'OS_APPLICATION_CREDENTIAL_SECRET', 'MYSQL_PWD'):
-        secret = os.environ.get(key)
-        if secret:
-            value = value.replace(secret, '[REDACTED]')
+        for secret in {os.environ.get(key), ENV.get(key)}:
+            if secret:
+                value = value.replace(secret, '[REDACTED]')
     value = re.sub(r'([A-Za-z][A-Za-z0-9+.-]*://)[^/\s@]+@',
                    r'\1[REDACTED]@', value)
     return re.sub(r'(?i)(\b(?:password|token|secret)\s*=\s*)[^\s,;]+',
@@ -93,8 +95,35 @@ def run(*argv, timeout=60, check=True):
     return result.stdout.strip()
 
 
+def ensure_openstack_auth():
+    # CPCloud's own image/volume commands source /root/admin.openrc.
+    # Respect inherited credentials or clouds.yaml; load the site's RC only
+    # when the caller has not already selected an authentication environment.
+    if ENV.get('OS_AUTH_URL') or ENV.get('OS_CLOUD') or not ADMIN_RC.is_file():
+        return
+    try:
+        result = subprocess.run(
+            ['bash', '--noprofile', '--norc', '-c',
+             'set -a; source "$1" >/dev/null 2>&1 || exit $?; env -0',
+             'bash', str(ADMIN_RC)],
+            stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL,
+            timeout=30, env=ENV, check=False)
+    except subprocess.TimeoutExpired:
+        fail(f'加载 {ADMIN_RC} 超时（30 秒），请核查管理员环境文件')
+    if result.returncode:
+        fail(f'加载 {ADMIN_RC} 失败，退出码={result.returncode}（不输出凭据文件内容）')
+    for item in result.stdout.split(b'\0'):
+        name, sep, value = item.partition(b'=')
+        if sep and (name.startswith(b'OS_') or name == b'PATH'):
+            ENV[os.fsdecode(name)] = os.fsdecode(value)
+    if not ENV.get('OS_AUTH_URL') and not ENV.get('OS_CLOUD'):
+        fail(f'{ADMIN_RC} 未加载 OS_AUTH_URL 或 OS_CLOUD，请核查管理员环境文件')
+    print(f'已自动加载现场 OpenStack 管理员环境：{ADMIN_RC}（不输出认证信息）', flush=True)
+
+
 def osc(*argv):
-    client = os.environ.get('OPENSTACK_BIN') or shutil.which('openstack')
+    ensure_openstack_auth()
+    client = os.environ.get('OPENSTACK_BIN') or shutil.which('openstack', path=ENV.get('PATH'))
     if not client:
         client = '/opt/openstack_project/bin/openstack'
     return run(client, *argv)
@@ -114,6 +143,45 @@ def service():
     if len(rows) != 1 or rows[0]['Host'] != HOST or rows[0]['Binary'] != 'nova-compute':
         fail(f'controller01 未唯一注册 nova-compute，实际返回：{rows!r}')
     return rows[0]
+
+
+def check_cinder_services():
+    # All 43 existing VMs in the site snapshot used Cinder snapshot-backed
+    # root volumes; a healthy Nova Compute alone does not guarantee a boot.
+    rows = json.loads(osc('volume', 'service', 'list', '-f', 'json'))
+    for binary, host in (('cinder-scheduler', HOST), ('cinder-volume', HOST + '@nfs')):
+        matched = [row for row in rows if row.get('Binary') == binary and row.get('Host') == host]
+        if len(matched) != 1:
+            fail(f'未唯一找到现场 Cinder 服务 {binary}/{host}；实际服务={rows!r}')
+        row = matched[0]
+        print(f'{binary}/{host}: {row.get("State")}/{row.get("Status")}')
+        if row.get('State') != 'up' or row.get('Status') != 'enabled':
+            fail(f'Cinder 服务未正常运行：{binary}/{host}，'
+                 f'State={row.get("State")}, Status={row.get("Status")}')
+
+
+def report_volume_backing(path):
+    rows = query("""
+        SELECT COUNT(DISTINCT i.uuid),
+            COUNT(DISTINCT CASE WHEN b.destination_type='volume' AND b.boot_index=0 THEN i.uuid END),
+            COALESCE(SUM(CASE WHEN b.destination_type='volume' THEN b.volume_size ELSE 0 END),0)
+        FROM nova.instances i LEFT JOIN nova.block_device_mapping b
+            ON b.instance_uuid=i.uuid AND b.deleted=0
+        WHERE i.deleted=0
+    """)
+    total, booted, logical = map(int, rows[0])
+    print(f'集群现有 Nova 实例 {total} 台，其中 Cinder 卷启动 {booted} 台，'
+          f'关联卷逻辑容量 {logical} GiB。')
+    if CINDER_DATA.is_dir() and CINDER_DATA.stat().st_dev == path.stat().st_dev:
+        count, capacity = query("SELECT COUNT(*),COALESCE(SUM(size),0) FROM cinder.volumes WHERE deleted=0")[0]
+        print(f'注意：Cinder NFS 与 Nova 共用根盘，现有卷 {count} 个，逻辑容量 {capacity} GiB。')
+        print('卷启动的虚拟机根盘由 Cinder 分配，不受本脚本 Nova DISK_GB 限制；'
+              'Nova 预留也不限制镜像缓存或其他业务数据增长。')
+        print('共享磁盘无法仅靠 Nova 保证硬性预留。请定期执行 guard；'
+              '严格磁盘隔离需要独立存储或集群级 Cinder 容量管理。')
+    else:
+        print(f'当前未确认历史 Cinder 目录 {CINDER_DATA} 与 Nova 位于同一文件系统，'
+              '仍需关注 Cinder 后端独立容量。')
 
 
 def disable():
@@ -375,11 +443,7 @@ def plan(args, cfg, path, observed=None):
     free_gib = shutil.disk_usage(path).free // GIB
     inv = inventory()
     print(f'采样峰值：CPU={peak_cpu:.2f} 核，RAM={peak_ram/1024:.2f} GiB；倍率={args.factor}')
-    cinder = Path('/data/nfs_data/cinder')
-    if cinder.is_dir() and cinder.stat().st_dev == path.stat().st_dev:
-        count, logical = query("SELECT COUNT(*),COALESCE(SUM(size),0) FROM cinder.volumes WHERE deleted=0")[0]
-        print(f'注意：Cinder NFS 与 Nova 共用根盘，现有卷 {count} 个，逻辑容量 {logical} GiB。')
-        print('Nova DISK_GB 预留不限制 Cinder 卷写入、镜像缓存或其他业务数据增长。')
+    report_volume_backing(path)
     return calculate(inv, peak_cpu, peak_ram, free_gib, args, cfg), observed
 
 
@@ -413,6 +477,7 @@ def check(args, path):
     print(f'检查主机={socket.gethostname()}，时间={time.strftime("%Y-%m-%d %H:%M:%S %z")}，'
           f'Nova 配置={path}，采样时长={args.sample_seconds}s，预留系数={args.factor}', flush=True)
     step('本机 Nova Compute systemd 服务', lambda: run('systemctl', 'is-active', UNIT))
+    step('本机 libvirt 虚拟化服务', lambda: run('systemctl', 'is-active', 'libvirtd.service'))
     cfg = step('读取 Nova 配置文件', lambda: read_conf(path))
     disk_path = None
     if cfg is not None:
@@ -420,6 +485,7 @@ def check(args, path):
     else:
         print('[SKIP] Nova 磁盘目录检查：依赖配置文件读取成功', flush=True)
     step('OpenStack 管理员 API 与 Compute 服务心跳', check_service)
+    step('Cinder Scheduler 与 NFS Volume 服务', check_cinder_services)
     step('Nova Cell 及计算节点注册', registered)
     step('Placement 资源容量及分配记录', inventory)
     step('Neutron 网络映射、Agent、网桥、上联和 IP 地址池', check_network)
@@ -519,6 +585,8 @@ def apply(args, path, observed=None):
     try:
         cfg = read_conf(path)
         disk_path = instance_path(cfg)
+        run('systemctl', 'is-active', 'libvirtd.service')
+        check_cinder_services()
         check_network()
         expected, _ = plan(args, cfg, disk_path, observed=observed)
         values = dict(zip(KEYS, (expected['VCPU'], expected['MEMORY_MB'],
@@ -529,6 +597,7 @@ def apply(args, path, observed=None):
         atomic_write(path, updated.encode('utf-8'))
         run('systemctl', 'restart', UNIT, timeout=120)
         wait_for_inventory(expected, args.verify_timeout)
+        check_cinder_services()
         check_network()
         # Recheck physical space: Cinder and other services may have used it
         # while the Compute service was restarting.

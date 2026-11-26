@@ -3,6 +3,7 @@ import configparser
 import contextlib
 import io
 import json
+import os
 import subprocess
 import tempfile
 import types
@@ -210,7 +211,8 @@ class ControllerSchedulingTests(unittest.TestCase):
         sample = Mock()
         with tempfile.TemporaryDirectory() as temp, \
                 patch.multiple(mod, registered=Mock(return_value=0),
-                               inventory=Mock(return_value=old_inventory()), sample=sample), \
+                               inventory=Mock(return_value=old_inventory()), sample=sample,
+                               report_volume_backing=Mock()), \
                 patch.object(mod.shutil, "disk_usage", return_value=types.SimpleNamespace(free=512 * mod.GIB)):
             result, returned = mod.plan(mod.parse_args([]), config(), Path(temp), observed=observed)
         self.assertEqual(returned, observed)
@@ -224,10 +226,11 @@ class ControllerSchedulingTests(unittest.TestCase):
         output = io.StringIO()
         plan = Mock()
         with patch.multiple(
-            mod, run=Mock(side_effect=error), read_conf=Mock(return_value=config()),
+            mod, run=Mock(side_effect=[error, "active"]), read_conf=Mock(return_value=config()),
             instance_path=Mock(return_value=Path("/data/nova_instances")),
             service=Mock(return_value={"State": "up", "Status": "disabled"}),
             registered=Mock(return_value=0), inventory=Mock(return_value=old_inventory()),
+            check_cinder_services=Mock(),
             check_network=Mock(side_effect=RuntimeError("br-vlan missing")), plan=plan,
         ), contextlib.redirect_stderr(output):
             with self.assertRaisesRegex(RuntimeError, "共 2 项"):
@@ -251,6 +254,46 @@ class ControllerSchedulingTests(unittest.TestCase):
         self.assertNotIn("database-secret", output.getvalue())
         self.assertIn("[REDACTED]", output.getvalue())
 
+    def test_auto_loads_existing_admin_openrc_if_no_auth_selected(self):
+        with tempfile.TemporaryDirectory() as temp:
+            rc = Path(temp) / "admin.openrc"
+            rc.write_text("export OS_AUTH_URL=https://example.invalid/v3\n"
+                          "export OS_PASSWORD=mock-rc-secret\n"
+                          "echo mock-rc-secret\n")
+            env = {"PATH": os.environ["PATH"], "LC_ALL": "C"}
+            with patch.multiple(mod, ADMIN_RC=rc, ENV=env):
+                mod.ensure_openstack_auth()
+                self.assertEqual(env["OS_AUTH_URL"], "https://example.invalid/v3")
+                self.assertEqual(env["OS_PASSWORD"], "mock-rc-secret")
+                self.assertNotIn("mock-rc-secret", self.output.getvalue())
+                self.assertNotIn("mock-rc-secret", mod.safe_text("mock-rc-secret"))
+
+    def test_preserves_inherited_admin_environment(self):
+        with patch.multiple(mod, ENV={"OS_CLOUD": "site"}), \
+                patch.object(mod.subprocess, "run") as run:
+            mod.ensure_openstack_auth()
+        run.assert_not_called()
+
+    def test_checks_cinder_services_used_by_volume_backed_vms(self):
+        rows = [{"Binary": "cinder-scheduler", "Host": "controller01", "State": "up", "Status": "enabled"},
+                {"Binary": "cinder-volume", "Host": "controller01@nfs", "State": "up", "Status": "enabled"}]
+        with patch.object(mod, "osc", return_value=json.dumps(rows)):
+            mod.check_cinder_services()
+        rows[1]["State"] = "down"
+        with patch.object(mod, "osc", return_value=json.dumps(rows)), \
+                self.assertRaisesRegex(RuntimeError, "cinder-volume/controller01@nfs"):
+            mod.check_cinder_services()
+
+    def test_volume_backed_storage_report_matches_historical_snapshot(self):
+        with tempfile.TemporaryDirectory() as temp, \
+                patch.multiple(mod, CINDER_DATA=Path(temp),
+                               query=Mock(side_effect=[[["43", "43", "3090"]], [["119", "7778"]]])):
+            mod.report_volume_backing(Path(temp))
+        result = self.output.getvalue()
+        self.assertIn("Cinder 卷启动 43 台", result)
+        self.assertIn("7778 GiB", result)
+        self.assertIn("不受本脚本 Nova DISK_GB 限制", result)
+
     def run_apply(self, verification_failure=None):
         events = []
         expected = {"VCPU": 26, "MEMORY_MB": 122880, "DISK_GB": 1580}
@@ -271,11 +314,13 @@ class ControllerSchedulingTests(unittest.TestCase):
                 mod, service=Mock(),
                 disable=Mock(side_effect=lambda: events.append("disable")),
                 instance_path=Mock(return_value=path.parent),
+                check_cinder_services=Mock(side_effect=lambda: events.append("cinder")),
                 check_network=Mock(side_effect=lambda: events.append("network")),
                 plan=Mock(return_value=(expected, (Decimal("10.2"), Decimal(48 * 1024)))),
                 backup_config=Mock(side_effect=lambda p: (events.append("backup"), p)[1]),
                 atomic_write=Mock(side_effect=lambda *a: events.append("write")),
-                run=Mock(side_effect=lambda *a, **kw: events.append("restart")),
+                run=Mock(side_effect=lambda *a, **kw: events.append(
+                    "restart" if "restart" in a else "libvirt")),
                 wait_for_inventory=wait, inventory=Mock(return_value=inv),
                 disabled_trait=Mock(return_value=True),
                 osc=Mock(side_effect=lambda *a: events.append("enable")),
@@ -288,8 +333,9 @@ class ControllerSchedulingTests(unittest.TestCase):
         return events
 
     def test_apply_sequence_verifies_before_and_after_enabling(self):
-        self.assertEqual(self.run_apply(), ["disable", "network", "backup", "write", "restart",
-                                            "verify-disabled", "network", "enable", "verify-enabled"])
+        self.assertEqual(self.run_apply(), ["disable", "libvirt", "cinder", "network", "backup",
+                                            "write", "restart", "verify-disabled", "cinder", "network",
+                                            "enable", "verify-enabled"])
 
     def test_failed_apply_never_leaves_controller_enabled(self):
         self.assertEqual(self.run_apply(False)[-2:], ["verify-disabled", "disable"])
