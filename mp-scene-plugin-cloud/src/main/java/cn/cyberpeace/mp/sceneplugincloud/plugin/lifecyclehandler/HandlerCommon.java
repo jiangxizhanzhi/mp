@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
 import cn.cyberpeace.mp.base.common.TaskCommon;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.NetworkUtils;
 import cn.cyberpeace.mp.base.util.thread.taskpool.TaskPool;
@@ -16,6 +17,7 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudmessageconvert.CloudMessageConvertUtil;
+import cn.cyberpeace.mp.service.MultiCloudService;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -36,6 +38,36 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CloudScenePlugi
     public HandlerCommon(CloudScenePluginHandler pluginHandler, TaskPool taskPool, int event) {
         super(pluginHandler, taskPool, event);
         handlerUtils = pluginHandler.getHandlerUtils();
+    }
+
+    /** Only vendor 0/null uses cpcloud; an unrecognized external vendor must not fall through. */
+    protected MultiCloudService getVendorCloudService(CloudPluginSceneElementBO element) {
+        Integer vendor = element.getSrcElement().getVendor();
+        if (vendor == null || vendor == 0) return null;
+        return BeanCommon.getBeanType(MultiCloudService.class).values().stream()
+                .filter(service -> service.getVendor() == vendor)
+                .findFirst().orElseThrow(() -> new MpRuntimeException("未找到厂商" + vendor + "虚拟机生命周期服务"));
+    }
+
+    protected void validateVendorVm(MultiCloudService vendor, CloudPluginSceneElementBO element) {
+        if (vendor.getVendor() == 2 || vendor.getVendor() == 3) {
+            vendor.validateManagedVm(element.getResourceId(), getPluginHandler().getSceneHandler().getSceneId(),
+                    element.getSrcElement().getEid());
+        }
+    }
+
+    /** Provider console availability follows the confirmed power state, not guest ICMP. */
+    protected void setVendorConsoleAvailable(CloudPluginSceneElementBO element, boolean available) {
+        List<CloudPluginSceneElementPortBO> ports = getPluginHandler().getPorts(element);
+        if (ports == null) return;
+        for (CloudPluginSceneElementPortBO port : ports) {
+            if (port.getAccessModes() == null) continue;
+            for (CloudAccessMode mode : port.getAccessModes()) {
+                if (AccessMode.Protocol.VNC.equals(mode.getProtocol()) || AccessMode.Protocol.CONSOLE.equals(mode.getProtocol())) {
+                    mode.setAvailable(available);
+                }
+            }
+        }
     }
 
     /**

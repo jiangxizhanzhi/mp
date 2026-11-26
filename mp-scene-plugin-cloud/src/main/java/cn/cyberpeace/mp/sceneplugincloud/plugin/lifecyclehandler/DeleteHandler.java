@@ -195,13 +195,11 @@ public class DeleteHandler extends HandlerCommon {
     }
 
     protected boolean deleteVirtualMachine(CloudPluginSceneElementBO cloudElement) {
-        if (Objects.nonNull(cloudElement.getSrcElement().getVendor())) {
-            for (MultiCloudService cloudService : BeanCommon.getBeanType(MultiCloudService.class).values()) {
-                if (cloudService.getVendor() == cloudElement.getSrcElement().getVendor()) {
-                    cloudService.deleteVm(cloudElement.getResourceId());
-                    return true;
-                }
-            }
+        MultiCloudService cloudService = getVendorCloudService(cloudElement);
+        if (cloudService != null) {
+            cloudService.deleteManagedVm(cloudElement.getResourceId(),
+                    getPluginHandler().getSceneHandler().getSceneId(), cloudElement.getSrcElement().getEid());
+            return true;
         }
         if (ElementTypeUtils.isExternal(cloudElement)) {
             if (cloudElement.getSrcElement().getPorts() != null) {

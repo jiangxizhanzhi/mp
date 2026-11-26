@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualDynamips;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.StopTaskPool;
+import cn.cyberpeace.mp.service.MultiCloudService;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Arrays;
@@ -65,6 +66,13 @@ public class StopHandler extends HandlerCommon{
             getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.STOP, Arrays.asList(
                 StopHandler.ElementProcess.STOP_VIRTUAL_MACHINE));
             runElementProgress(nodeId, SceneElementModel.Event.STOP, StopHandler.ElementProcess.STOP_VIRTUAL_MACHINE, () -> {
+                MultiCloudService vendor = getVendorCloudService(element);
+                if (vendor != null) {
+                    validateVendorVm(vendor, element);
+                    setVendorConsoleAvailable(element, false);
+                    vendor.stopVm(instanceId);
+                    return;
+                }
                 //关闭接入方式可用
                 closeAccessModes(element);
                 virtualMachine.stop(instanceId);

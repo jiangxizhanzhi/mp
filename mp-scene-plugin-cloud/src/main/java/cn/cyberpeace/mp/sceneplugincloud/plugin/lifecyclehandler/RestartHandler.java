@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ConsoleInfoGetResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineAttachISOData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.RestartTaskPool;
+import cn.cyberpeace.mp.service.MultiCloudService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -49,6 +50,14 @@ public class RestartHandler extends HandlerCommon {
         if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
             getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.RESTART, Arrays.asList(ElementProcess.RESTART_VIRTUAL_MACHINE));
             runElementProgress(nodeId, SceneElementModel.Event.RESTART, ElementProcess.RESTART_VIRTUAL_MACHINE, () -> {
+                MultiCloudService vendor = getVendorCloudService(element);
+                if (vendor != null) {
+                    validateVendorVm(vendor, element);
+                    setVendorConsoleAvailable(element, false);
+                    vendor.restartVm(instanceId);
+                    setVendorConsoleAvailable(element, true);
+                    return;
+                }
                 closeAccessModes(element);
                 // 先判断下虚拟机的真实状态
                 ConsoleInfoGetResult info = virtualMachine.getConsoleInfo(instanceId, element.getHost());

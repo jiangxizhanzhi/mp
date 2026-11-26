@@ -59,17 +59,28 @@ final class VendorSecondIpRange {
     }
 
     Set<String> reviewedFree(String configured) {
+        return configuredAddresses(configured, true);
+    }
+
+    /** Only the intersection with the effective pool is eligible, including
+     * deployments that still explicitly configure the old pool start. */
+    Set<String> onDemandScope(String configured) {
+        return configuredAddresses(configured, false);
+    }
+
+    private Set<String> configuredAddresses(String configured, boolean requireInsidePool) {
         Set<String> result = new LinkedHashSet<>();
         if (configured == null || configured.trim().isEmpty()) return result;
         for (String entry : configured.split(",")) {
             String[] ends = entry.trim().split("-", -1);
-            if (ends.length > 2 || !contains(ends[0].trim()) || !contains(ends[ends.length - 1].trim())) {
-                throw new IllegalArgumentException("厂商二已核对空闲地址超出授权地址池");
-            }
+            if (ends.length > 2) throw new IllegalArgumentException("厂商二地址范围无效");
             long start = number(ends[0].trim());
             long end = number(ends[ends.length - 1].trim());
-            if (start > end) throw new IllegalArgumentException("厂商二已核对空闲地址范围无效");
-            for (long n = start; n <= end; n++) result.add(address(n));
+            if (start > end) throw new IllegalArgumentException("厂商二地址范围无效");
+            if (requireInsidePool && (start < first || end > last)) {
+                throw new IllegalArgumentException("厂商二已核对空闲地址超出授权地址池");
+            }
+            for (long n = Math.max(start, first); n <= Math.min(end, last); n++) result.add(address(n));
         }
         return result;
     }

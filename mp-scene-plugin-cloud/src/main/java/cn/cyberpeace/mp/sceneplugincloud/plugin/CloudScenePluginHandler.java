@@ -85,7 +85,8 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         firewallElementMap.clear();
         terminalElementMap.clear();
         getElementMap().forEach((nodeId, element) -> {
-            if (Integer.valueOf(2).equals(element.getSrcElement().getVendor()) && StringUtils.isNotBlank(element.getResourceId())) {
+            if ((Integer.valueOf(2).equals(element.getSrcElement().getVendor()) || Integer.valueOf(3).equals(element.getSrcElement().getVendor()))
+                    && StringUtils.isNotBlank(element.getResourceId())) {
                 // Reconciliation may have corrected the runtime port after the creation request returned.
                 // Use the runtime port address for the vendor resource's VNC display, not stale plugin JSON.
                 getPorts(element).forEach(CloudScenePluginHandler::syncVendorSecondAccessIp);

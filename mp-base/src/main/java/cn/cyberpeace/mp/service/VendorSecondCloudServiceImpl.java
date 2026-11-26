@@ -13,14 +13,17 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 
 @Service
 @AllArgsConstructor
 @Slf4j
-public class VendorSecondCloudServiceImpl implements MultiCloudService {
+public class VendorSecondCloudServiceImpl extends AbstractVendorCloudService {
     private final MultiCloudClient multiCloudClient;
     private final XdAppConfig xdAppConfig;
     private final VendorSecondAddressPool addressPool;
+    private final ReentrantLock allocationRecoveryLock = new ReentrantLock();
 
     private static final ThreadLocal<VendorSecondClientContext> vendorClientContext = new ThreadLocal<>();
     private static final String METHOD_GET = "GET";
@@ -135,7 +138,9 @@ public class VendorSecondCloudServiceImpl implements MultiCloudService {
 
     @Override
     public String createVm(String imageUuid) {
-        return createManagedVm(imageUuid, null, null, null, IP_THREADLOCAL.get()).getResourceId();
+        ManagedVmCreationResult result = createManagedVm(imageUuid, null, null, null, IP_THREADLOCAL.get());
+        if (!result.isReady()) throw new MpRuntimeException(result.pendingMessage());
+        return result.getResourceId();
     }
 
     @Override
@@ -178,7 +183,7 @@ public class VendorSecondCloudServiceImpl implements MultiCloudService {
             String owner = StringUtils.isNotBlank(elementId) ? elementId : TextUtils.uuid();
             while (true) {
                 String requestName = "MP_" + TextUtils.uuid();
-                VendorSecondAddressPool.Lease lease = addressPool.reserve(sceneId, elementId, portId, requestedIp, owner, requestName);
+                VendorSecondAddressPool.Lease lease = reserveWithRecovery(sceneId, elementId, portId, requestedIp, owner, requestName);
                 StringHttpData body;
                 try {
                     createVmObject.put("name", requestName);
@@ -191,7 +196,7 @@ public class VendorSecondCloudServiceImpl implements MultiCloudService {
                     addressPool.rejectBeforeCreation(lease, false);
                     throw e;
                 }
-                String uuid;
+                String uuid, taskId;
                 try {
                     String url = "/janus/20180725/servers";
                     vendorClientContext.set(new VendorSecondClientContext(url, METHOD_POST, body));
@@ -215,6 +220,7 @@ public class VendorSecondCloudServiceImpl implements MultiCloudService {
                         throw new MpRuntimeException("厂商二创建结果未确认，地址已保留待核查");
                     }
                     JSONObject data = result.getJSONObject("data");
+                    taskId = data == null ? null : data.getString("task_id");
                     JSONArray uuids = data == null ? null : data.getJSONArray("uuids");
                     uuid = uuids == null || uuids.size() != 1 ? null : uuids.getString(0);
                     if (StringUtils.isBlank(uuid)) throw new MpRuntimeException("厂商二创建响应缺少唯一虚拟机UUID，地址待核查");
@@ -222,30 +228,124 @@ public class VendorSecondCloudServiceImpl implements MultiCloudService {
                     addressPool.uncertainCreation(lease);
                     throw e;
                 }
-                // The provider returned a UUID: preserve it even if the subsequent verification fails.
-                String[] actual = null;
-                try {
-                    addressPool.recordCreated(lease, uuid);
-                    for (int attempt = 0; attempt < 3; attempt++) {
-                        if (attempt > 0) Thread.sleep(2000);
-                        VendorSecondInventory observed = readInventorySafely();
-                        addressPool.prepare(observed);
-                        actual = addressPool.confirm(lease, uuid, observed);
-                        if (actual != null || (observed.primaryAddress(uuid) != null && StringUtils.isNotBlank(observed.primaryAddress(uuid)[0]))) break;
-                    }
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    log.warn("厂商二已创建虚拟机，地址回读被中断，uuid={}", uuid);
-                } catch (RuntimeException e) {
-                    log.error("厂商二已创建虚拟机，地址回读或台账关联待核查，uuid={}", uuid, e);
-                }
-                if (actual == null) log.warn("厂商二虚拟机已接收创建请求，实际地址尚待核查，uuid={}", uuid);
-                return new ManagedVmCreationResult(uuid, actual == null ? null : actual[0],
-                        actual == null ? null : actual[1], xdAppConfig.getXdTwoIpNetmask(), xdAppConfig.getXdTwoIpGateway());
+                log.info("厂商二创建请求已受理，uuid={}, task_id={}", uuid, taskId);
+                // Preserve the resource association even if readiness cannot be confirmed.
+                return confirmCreatedVm(lease, uuid, taskId);
             }
         } finally {
             vendorClientContext.remove();
         }
+    }
+
+    protected long createConfirmTimeoutMillis() {
+        return Math.max(1000, Math.min(TimeUnit.MINUTES.toMillis(30), xdAppConfig.getXdTwoCreateConfirmTimeoutMs()));
+    }
+
+    protected long allocationRecoveryTimeoutMillis() {
+        return Math.max(1000, Math.min(300000, xdAppConfig.getXdTwoAllocationRecoveryTimeoutMs()));
+    }
+
+    protected long recoveryPollMillis() {
+        return Math.max(1000, Math.min(30000, xdAppConfig.getXdTwoRecoveryPollMs()));
+    }
+
+    private VendorSecondAddressPool.Lease reserveWithRecovery(String sceneId, String elementId, String portId,
+                                                               String requestedIp, String owner, String requestName) {
+        try {
+            return addressPool.reserve(sceneId, elementId, portId, requestedIp, owner, requestName);
+        } catch (VendorSecondAddressPool.Exhausted exhausted) {
+            log.info("厂商二 FREE 不足，尝试即时核对回收中的地址，scene={}, element={}", sceneId, elementId);
+        }
+        long deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(allocationRecoveryTimeoutMillis());
+        Set<String> triedOnDemand = new HashSet<>();
+        do {
+            boolean recovered = allocationRecoveryLock.tryLock();
+            if (recovered) {
+                try {
+                    List<VendorSecondAddressPool.Lease> releasing = addressPool.releasingLeases();
+                    VendorSecondInventory inventory = readInventorySafely();
+                    addressPool.recoverForAllocation(releasing, inventory);
+                    try {
+                        return addressPool.reserve(sceneId, elementId, portId, requestedIp, owner, requestName);
+                    } catch (VendorSecondAddressPool.Exhausted exhausted) {
+                        // Initial-pending fallback is limited to an explicitly
+                        // assigned exclusive scope, with current inventory evidence.
+                        VendorSecondAddressPool.Lease provisional = addressPool.reserveOnDemand(sceneId, elementId,
+                                portId, requestedIp, owner, requestName, inventory, triedOnDemand);
+                        if (provisional != null) return provisional;
+                    }
+                } finally {
+                    allocationRecoveryLock.unlock();
+                }
+                if (!addressPool.hasReleasingAddressInPool() && !addressPool.hasOnDemandCandidate(triedOnDemand)) break;
+            } else {
+                // Another request is reconciling; it may have freed addresses.
+                try {
+                    return addressPool.reserve(sceneId, elementId, portId, requestedIp, owner, requestName);
+                } catch (VendorSecondAddressPool.Exhausted exhausted) {
+                    // Wait for the shared recovery path within the same deadline.
+                }
+            }
+            if (!waitForRecoveryPoll(deadline)) break;
+        } while (System.nanoTime() < deadline);
+        throw new VendorSecondAddressPool.Exhausted("厂商二无已确认可用的IP地址（已尝试即时核对及可回收候选地址检查），"
+                + "地址池状态=" + addressPool.statusSummary() + "，请核对已确认空闲范围");
+    }
+
+    private boolean waitForRecoveryPoll(long deadline) {
+        long remaining = TimeUnit.NANOSECONDS.toMillis(deadline - System.nanoTime());
+        if (remaining <= 0) return false;
+        try {
+            Thread.sleep(Math.min(recoveryPollMillis(), remaining));
+            return System.nanoTime() < deadline;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new MpRuntimeException("厂商二地址或回收状态确认被中断，结果待核查").e(e);
+        }
+    }
+
+    protected long createConfirmPollMillis() {
+        return Math.max(1000, Math.min(30000, xdAppConfig.getXdTwoCreateConfirmPollMs()));
+    }
+
+    private ManagedVmCreationResult confirmCreatedVm(VendorSecondAddressPool.Lease lease, String uuid, String taskId) {
+        boolean running = false;
+        String[] actual = null;
+        try {
+            addressPool.recordCreated(lease, uuid);
+            long deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(createConfirmTimeoutMillis());
+            do {
+                VendorSecondInventory observed = readInventorySafely();
+                running = observed.powerState(uuid) == VmPowerState.RUNNING;
+                // The lease was already initialized/reserved. Confirming this UUID does
+                // not require re-running pool initialization for every readiness poll.
+                actual = addressPool.confirm(lease, uuid, observed);
+                if (!observed.complete) actual = null;
+                if (running && observed.complete && actual != null && StringUtils.isNoneBlank(actual[0], actual[1])) {
+                    log.info("厂商二创建已确认运行且地址回读一致，uuid={}, task_id={}, ip={}", uuid, taskId, actual[0]);
+                    return creationResult(uuid, taskId, true, actual);
+                }
+                long remaining = TimeUnit.NANOSECONDS.toMillis(deadline - System.nanoTime());
+                if (remaining <= 0) break;
+                Thread.sleep(Math.min(createConfirmPollMillis(), remaining));
+            } while (System.nanoTime() < deadline);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            running = false;
+            log.warn("厂商二创建确认被中断，uuid={}, task_id={}", uuid, taskId);
+        } catch (RuntimeException e) {
+            running = false;
+            log.error("厂商二创建确认或台账关联待核查，uuid={}, task_id={}", uuid, taskId, e);
+        }
+        ManagedVmCreationResult result = creationResult(uuid, taskId, running, actual);
+        log.warn("{}", result.pendingMessage());
+        return result;
+    }
+
+    private ManagedVmCreationResult creationResult(String uuid, String taskId, boolean running, String[] actual) {
+        return new ManagedVmCreationResult(uuid, actual == null ? null : actual[0],
+                actual == null ? null : actual[1], xdAppConfig.getXdTwoIpNetmask(),
+                xdAppConfig.getXdTwoIpGateway(), taskId, running);
     }
 
     private static boolean successful(HttpResult response, JSONObject result) {
@@ -280,8 +380,14 @@ public class VendorSecondCloudServiceImpl implements MultiCloudService {
     private VendorSecondInventory readInventory() {
         try {
             String url = "/janus/20180725/servers";
-            vendorClientContext.set(new VendorSecondClientContext(url, METHOD_GET, null));
-            return VendorSecondInventory.parse(getClient().get(url, null, getHeaders(), 30000));
+            return VendorSecondInventory.readAll(page -> {
+                // SCP's existing signer signs the URI path without query parameters.
+                vendorClientContext.set(new VendorSecondClientContext(url, METHOD_GET, null));
+                HttpParam params = page == 0 ? null : new HttpParam() {
+                    @Override public String toPathString() { return "page_num=" + page; }
+                };
+                return getClient().get(url, params, getHeaders(), 30000);
+            });
         } finally {
             vendorClientContext.remove();
         }
@@ -297,7 +403,8 @@ public class VendorSecondCloudServiceImpl implements MultiCloudService {
     }
 
     public void reconcileAddressPool() {
-        addressPool.reconcile(readInventorySafely());
+        List<VendorSecondAddressPool.Lease> releasing = addressPool.releasingLeases();
+        addressPool.reconcile(readInventorySafely(), releasing);
     }
 
     private JSONObject getTargetImage(String imageUuid) {
@@ -330,68 +437,184 @@ public class VendorSecondCloudServiceImpl implements MultiCloudService {
     }
 
     @Override
-    public void deleteVm(String vmUuid) {
-        if (StringUtils.isBlank(vmUuid)) {
-            throw new MpRuntimeException("厂商二虚拟机UUID为空，不能确认原资源已回收");
+    public VmPowerState getVmPowerState(String vmUuid) {
+        requireVmId(vmUuid);
+        return readInventory().powerState(vmUuid);
+    }
+
+    @Override
+    protected void submitPowerAction(String vmUuid, VmPowerState target) {
+        requireVmId(vmUuid);
+        String url = "/janus/20180725/servers/" + vmUuid + (target == VmPowerState.RUNNING ? "/start" : "/stop");
+        try {
+            vendorClientContext.set(new VendorSecondClientContext(url, METHOD_POST, null));
+            HttpResult response = getClient().post(url, null, null, getHeaders(), 30000);
+            JSONObject result = response == null ? null : JSONObject.parseObject(response.getResult());
+            if (!successful(response, result)) throw new MpRuntimeException("厂商二电源操作未受理，uuid=" + vmUuid);
+            JSONObject data = result.getJSONObject("data");
+            log.info("厂商二电源操作已受理，uuid={}, target={}, task_id={}", vmUuid, target,
+                    data == null ? null : data.getString("task_id"));
+        } finally {
+            vendorClientContext.remove();
         }
+    }
+
+    protected long recycleStopTimeoutMillis() {
+        return Math.max(1000, Math.min(300000, xdAppConfig.getXdTwoRecycleStopTimeoutMs()));
+    }
+
+    protected long recycleDeleteTimeoutMillis() {
+        return Math.max(1000, Math.min(300000, xdAppConfig.getXdTwoRecycleDeleteTimeoutMs()));
+    }
+
+    @Override
+    public void deleteManagedVm(String vmUuid, String sceneId, String elementId) {
+        if (StringUtils.isBlank(vmUuid)) {
+            vmUuid = addressPool.resolveManagedVmForDelete(sceneId, elementId, readInventorySafely());
+            log.info("厂商二从地址台账恢复待回收虚拟机关联，scene={}, element={}, uuid={}", sceneId, elementId, vmUuid);
+        }
+        validateManagedVm(vmUuid, sceneId, elementId);
+        deleteVm(vmUuid);
+    }
+
+    @Override
+    public void validateManagedVm(String vmUuid, String sceneId, String elementId) {
+        requireVmId(vmUuid);
+        addressPool.validateManagedOwner(vmUuid, sceneId, elementId);
+    }
+
+    @Override
+    public void deleteVm(String vmUuid) {
+        // A blank or malformed UUID must never reach /servers//stop or /servers/.
+        requireVmId(vmUuid);
         VendorSecondInventory before = readInventorySafely();
         addressPool.prepare(before);
         addressPool.beginDelete(vmUuid, before);
-        // An already absent VM is a successful idempotent delete only with a complete resource list.
-        if (before.complete && !before.vms.containsKey(vmUuid)) {
-            addressPool.deleteSubmitted(vmUuid, true);
-            if (addressPool.reconcileDeleted(vmUuid, before)) return;
-            // A create accepted but never observed is not safe to release merely because it is absent.
-            // Continue the existing provider delete flow and keep the address blocked until verified.
-            addressPool.beginDelete(vmUuid, before);
-        }
-        boolean accepted = false;
+        boolean recorded = false;
         try {
-            // Preserve the current provider stop/delete behavior, but verify the actual result.
-            closeVm(vmUuid);
-            waitForStop();
-            String url = "/janus/20180725/servers/" + vmUuid;
-            VendorSecondVmDeleteHttpData req = new VendorSecondVmDeleteHttpData();
-            vendorClientContext.set(new VendorSecondClientContext(url, METHOD_DELETE, req));
-            HttpResult response = getClient().delete(url, req, null, getHeaders(), 30000);
-            JSONObject result = response == null ? null : JSONObject.parseObject(response.getResult());
-            accepted = successful(response, result);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new MpRuntimeException("厂商二回收中断，地址保留待核查");
-        } finally {
-            vendorClientContext.remove();
-            addressPool.deleteSubmitted(vmUuid, accepted);
-        }
-        for (int attempt = 0; attempt < 3; attempt++) {
-            if (addressPool.reconcileDeleted(vmUuid, readInventorySafely())) return;
-            if (attempt < 2) {
-                try {
-                    Thread.sleep(2000);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    break;
+            if (!before.vms.containsKey(vmUuid)) {
+                // A missing resource can be a legitimate idempotent delete or an
+                // accepted creation still not visible. Recheck instead of guessing.
+                addressPool.deleteSubmitted(vmUuid, false);
+                recorded = true;
+                long deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(recycleDeleteTimeoutMillis());
+                do {
+                    List<VendorSecondAddressPool.Lease> releasing = addressPool.releasingLeases();
+                    before = readInventorySafely();
+                    if (before.vms.containsKey(vmUuid)) break;
+                    if (addressPool.reconcileDeleted(vmUuid, before, releasing)) return;
+                    if (!waitForRecoveryPoll(deadline)) break;
+                } while (System.nanoTime() < deadline);
+                if (!before.vms.containsKey(vmUuid)) {
+                    throw new MpRuntimeException("厂商二虚拟机尚不可确认存在或已删除，uuid=" + vmUuid + "，地址保留待核查");
+                }
+                addressPool.beginDelete(vmUuid, before);
+                recorded = false;
+            }
+
+            if (before.powerState(vmUuid) != VmPowerState.STOPPED) {
+                HttpResult stop = submitDeleteOperation(vmUuid, true);
+                boolean stopAccepted = operationAccepted(stop);
+                log.info("厂商二回收关机请求，uuid={}, {}", vmUuid, operationResult(stop));
+                VendorSecondInventory stopped = waitForRecycleStop(vmUuid, stopAccepted || ambiguousOperation(stop));
+                if (!stopped.vms.containsKey(vmUuid) && stopped.complete) {
+                    // Resource disappeared during stop; confirm absence again after
+                    // recording the outcome, without issuing another mutation.
+                    addressPool.deleteSubmitted(vmUuid, false);
+                    recorded = true;
+                    if (waitForDeletionConfirmation(vmUuid, true)) return;
+                    throw new MpRuntimeException("厂商二资源消失但回收结果尚未确认，uuid=" + vmUuid);
+                }
+                // A verified stopped state is sufficient even if the stop
+                // request was rejected as already stopped.
+                if (stopped.powerState(vmUuid) != VmPowerState.STOPPED) {
+                    throw new MpRuntimeException("厂商二关机尚未确认，不提交删除，uuid=" + vmUuid + "，" + operationResult(stop));
                 }
             }
+
+            HttpResult response = submitDeleteOperation(vmUuid, false);
+            boolean accepted = operationAccepted(response);
+            addressPool.deleteSubmitted(vmUuid, accepted);
+            recorded = true;
+            log.info("厂商二回收删除请求，uuid={}, {}", vmUuid, operationResult(response));
+            if (waitForDeletionConfirmation(vmUuid, accepted || ambiguousOperation(response))) return;
+            throw new MpRuntimeException("厂商二删除结果尚未确认，地址暂不释放，uuid=" + vmUuid + "，" + operationResult(response));
+        } finally {
+            // Failed/ambiguous stop or delete never releases an IP. Reconciliation
+            // can subsequently prove absence using an observed resource association.
+            if (!recorded) addressPool.deleteSubmitted(vmUuid, false);
+            vendorClientContext.remove();
         }
-        throw new MpRuntimeException("厂商二资源删除结果尚未确认，地址暂不释放");
     }
 
-    void waitForStop() throws InterruptedException {
-        Thread.sleep(90000);
+    private VendorSecondInventory waitForRecycleStop(String uuid, boolean wait) {
+        long deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(recycleStopTimeoutMillis());
+        VendorSecondInventory observed;
+        do {
+            observed = readInventorySafely();
+            if (observed.powerState(uuid) == VmPowerState.STOPPED
+                    || (observed.complete && !observed.vms.containsKey(uuid))) return observed;
+            if (!wait || !waitForRecoveryPoll(deadline)) return observed;
+        } while (System.nanoTime() < deadline);
+        return observed;
     }
 
-    private void closeVm(String vmUuid) {
+    private boolean waitForDeletionConfirmation(String uuid, boolean wait) {
+        long deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(recycleDeleteTimeoutMillis());
+        do {
+            List<VendorSecondAddressPool.Lease> releasing = addressPool.releasingLeases();
+            if (addressPool.reconcileDeleted(uuid, readInventorySafely(), releasing)) return true;
+            if (!wait || !waitForRecoveryPoll(deadline)) break;
+        } while (System.nanoTime() < deadline);
+        return false;
+    }
+
+    private HttpResult submitDeleteOperation(String uuid, boolean stop) {
+        String url = "/janus/20180725/servers/" + uuid + (stop ? "/stop" : "");
+        VendorSecondVmDeleteHttpData req = new VendorSecondVmDeleteHttpData();
         try {
-            String url = "/janus/20180725/servers/" + vmUuid + "/stop";
-            VendorSecondVmDeleteHttpData req = new VendorSecondVmDeleteHttpData();
-            vendorClientContext.set(new VendorSecondClientContext(url, METHOD_POST, req));
-            HttpResult response = getClient().post(url, req, null, getHeaders(), 30000);
-            // A non-running VM is already stopped; only deletion and the resource list decide release.
-            if (response == null || !response.isSuccess()) log.warn("厂商二停止虚拟机响应未确认，uuid={}", vmUuid);
+            vendorClientContext.set(new VendorSecondClientContext(url, stop ? METHOD_POST : METHOD_DELETE, req));
+            return stop ? getClient().post(url, req, null, getHeaders(), 30000)
+                    : getClient().delete(url, req, null, getHeaders(), 30000);
         } finally {
             vendorClientContext.remove();
         }
+    }
+
+    private JSONObject operationBody(HttpResult response) {
+        try {
+            return response == null ? null : JSONObject.parseObject(response.getResult());
+        } catch (RuntimeException e) {
+            return null;
+        }
+    }
+
+    private boolean operationAccepted(HttpResult response) {
+        try {
+            return successful(response, operationBody(response));
+        } catch (RuntimeException e) {
+            return false;
+        }
+    }
+
+    private boolean ambiguousOperation(HttpResult response) {
+        if (response == null || response.getException() != null || response.getResponse() == null) return true;
+        int status = response.getResponse().getStatusLine().getStatusCode();
+        if (status >= 500) return true;
+        JSONObject body = operationBody(response);
+        if (!response.isSuccess()) return false;
+        try {
+            return body == null || body.getInteger("code") == null;
+        } catch (RuntimeException e) {
+            return true;
+        }
+    }
+
+    private String operationResult(HttpResult response) {
+        JSONObject body = operationBody(response);
+        String status = response == null || response.getResponse() == null ? "无响应"
+                : String.valueOf(response.getResponse().getStatusLine().getStatusCode());
+        return "HTTP=" + status + ", code=" + (body == null ? null : body.get("code"));
     }
 
     @Override

@@ -67,6 +67,11 @@ public class VendorSecondAddressPool {
 
     enum ProbeResult { REACHABLE, NO_REPLY, UNAVAILABLE }
 
+    /** Distinguish exhaustion from duplicate owner, database or configuration errors. */
+    static final class Exhausted extends MpRuntimeException {
+        Exhausted(String message) { super(message); }
+    }
+
     public List<Lease> list() {
         return Objects.requireNonNull(storeTransaction.execute(tx -> jdbc.query("SELECT ip,status,owner_key,scene_id,element_id,port_id,request_name,vm_uuid,mac_addr,reason,seen_in_inventory,updated_at FROM " + TABLE,
                 (rs, n) -> new Lease(rs.getString("ip"), rs.getString("status"), rs.getString("owner_key"),
@@ -116,7 +121,8 @@ public class VendorSecondAddressPool {
             String[] observed = inventory.primaryAddress(uuid);
             String ip = observed != null && range.contains(observed[0]) ? observed[0] : row[3];
             if (!range.contains(ip)) continue;
-            boolean verified = observed != null && ip.equals(observed[0]) && owners.getOrDefault(ip, Collections.emptySet()).size() == 1;
+            boolean verified = inventory.complete && observed != null && ip.equals(observed[0])
+                    && owners.getOrDefault(ip, Collections.emptySet()).size() == 1;
             write("UPDATE " + TABLE + " SET status=?,reason=?,scene_id=?,element_id=?,port_id=?,vm_uuid=?,mac_addr=?,seen_in_inventory=?,updated_at=CURRENT_TIMESTAMP "
                             + "WHERE ip=? AND status=? AND reason=? AND owner_key IS NULL AND vm_uuid IS NULL",
                     verified ? USED : PENDING, verified ? "LEGACY_VERIFIED" : "LEGACY_RECORD", row[0], row[1], row[2], uuid,
@@ -194,11 +200,13 @@ public class VendorSecondAddressPool {
             log.info("厂商二预占 ip={}, scene={}, element={}", ip, sceneId, elementId);
             return lease;
         }
-        throw new MpRuntimeException("厂商二无已确认可用的IP地址，请核对地址池占用及初始已核对空闲地址配置");
+        throw new Exhausted("厂商二无已确认可用的IP地址，请核对地址池占用及初始已核对空闲地址配置");
     }
 
     void rejectBeforeCreation(Lease lease, boolean occupied) {
-        clearOwnership(lease, occupied ? PENDING : FREE, occupied ? "PROVIDER_IP_CONFLICT" : "CREATE_REJECTED", RESERVED);
+        boolean provisional = "CREATE_IN_FLIGHT_ON_DEMAND".equals(lease.reason);
+        clearOwnership(lease, occupied || provisional ? PENDING : FREE,
+                occupied ? "PROVIDER_IP_CONFLICT" : provisional ? INITIAL : "CREATE_REJECTED", RESERVED);
     }
 
     private void clearOwnership(Lease lease, String status, String reason, String expected) {
@@ -232,6 +240,8 @@ public class VendorSecondAddressPool {
         if (actual == null || actual[0] == null || actual[0].isEmpty()) return null;
         Set<String> owners = inventory.ownersByAddress().getOrDefault(original.ip, Collections.emptySet());
         boolean matches = original.ip.equals(actual[0]) && owners.size() == 1 && owners.contains(uuid);
+        // A partial list may prove a mismatch or occupation, but not global uniqueness.
+        if (matches && !inventory.complete) return null;
         int changed = write("UPDATE " + TABLE + " SET status=?,reason=?,mac_addr=?,updated_at=CURRENT_TIMESTAMP WHERE ip=? AND vm_uuid=? AND "
                         + "(status=? OR (status=? AND reason IN ('CREATED_UNVERIFIED','ADDRESS_MISMATCH','LEGACY_RECORD','OBSERVED_RESOURCE')))",
                 matches ? USED : PENDING, matches ? "VERIFIED" : "ADDRESS_MISMATCH", matches ? actual[1] : null,
@@ -259,30 +269,168 @@ public class VendorSecondAddressPool {
                 accepted ? "DELETE_REQUESTED" : "DELETE_UNCERTAIN", uuid, RELEASING, "DELETE_IN_FLIGHT");
     }
 
+    List<Lease> releasingLeases() {
+        List<Lease> leases = new ArrayList<>();
+        for (Lease row : list()) {
+            if (RELEASING.equals(row.status) && row.vmUuid != null) leases.add(row);
+        }
+        return leases;
+    }
+
+    /** Refuse a stale scene reference when the persistent lease identifies a different owner. */
+    void validateManagedOwner(String uuid, String sceneId, String elementId) {
+        if (sceneId == null || elementId == null) return;
+        for (Lease row : list()) {
+            if (row.sceneId == null || row.elementId == null || FREE.equals(row.status) || row.vmUuid == null) continue;
+            boolean sameOwner = sceneId.equals(row.sceneId) && elementId.equals(row.elementId);
+            boolean sameVm = uuid.equals(row.vmUuid);
+            if (sameOwner != sameVm) {
+                throw new MpRuntimeException("厂商二场景节点与地址台账虚拟机关联不一致，禁止操作");
+            }
+        }
+    }
+
+    String resolveManagedVmForDelete(String sceneId, String elementId, VendorSecondInventory inventory) {
+        if (sceneId == null || sceneId.isEmpty() || elementId == null || elementId.isEmpty()) {
+            throw new MpRuntimeException("厂商二场景或节点标识缺失，无法核对原虚拟机");
+        }
+        List<Lease> matches = new ArrayList<>();
+        for (Lease row : list()) {
+            if (sceneId.equals(row.sceneId) && elementId.equals(row.elementId) && !FREE.equals(row.status)) {
+                matches.add(row);
+            }
+        }
+        if (matches.size() != 1) {
+            throw new MpRuntimeException("厂商二虚拟机UUID为空且无法唯一关联地址台账，未提交回收请求");
+        }
+        Lease lease = matches.get(0);
+        if (lease.vmUuid != null && !lease.vmUuid.isEmpty()) return lease.vmUuid;
+        // Only a previously recorded uncertain creation may be resolved by its
+        // unique request name. Never infer a resource identity from its IP alone.
+        if (inventory.complete && PENDING.equals(lease.status) && "CREATE_UNCERTAIN".equals(lease.reason)) {
+            String found = inventory.byName(lease.requestName);
+            if (found != null) {
+                recordCreated(lease, found);
+                return found;
+            }
+        }
+        throw new MpRuntimeException("厂商二创建结果尚未核实，无法确认待回收的虚拟机UUID");
+    }
+
+    boolean hasReleasingAddressInPool() {
+        VendorSecondIpRange range = new VendorSecondIpRange(config);
+        return releasingLeases().stream().anyMatch(row -> range.contains(row.ip));
+    }
+
+    boolean hasOnDemandCandidate(Set<String> tried) {
+        VendorSecondIpRange range = new VendorSecondIpRange(config);
+        Set<String> approved = range.onDemandScope(config.getXdTwoIpOnDemandProbeRange());
+        return config.isXdTwoIpProbeEnabled() && list().stream().anyMatch(row ->
+                approved.contains(row.ip) && !tried.contains(row.ip) && PENDING.equals(row.status)
+                        && INITIAL.equals(row.reason) && row.owner == null && row.vmUuid == null);
+    }
+
+    /**
+     * A separately approved exclusive assignment is necessary for addresses
+     * not individually reviewed. Never use this path for conflict or unknown-owner
+     * records. Claim only the selected address, not the entire unreviewed pool.
+     */
+    Lease reserveOnDemand(String sceneId, String elementId, String portId, String preferred,
+                          String owner, String requestName, VendorSecondInventory inventory, Set<String> tried) {
+        VendorSecondIpRange range = new VendorSecondIpRange(config);
+        Set<String> approved = range.onDemandScope(config.getXdTwoIpOnDemandProbeRange());
+        if (approved.isEmpty() || !config.isXdTwoIpProbeEnabled() || !inventory.complete) return null;
+        Set<String> occupied = inventory.ownersByAddress().keySet();
+        Set<String> runtimeClaims = new HashSet<>(jdbc.query(
+                "SELECT p.ip,p.scene,p.scene_element FROM mp_scene_scene_element_port p "
+                        + "JOIN mp_scene_scene s ON s.id=p.scene WHERE s.deleted=0 AND p.ip<>''",
+                (rs, n) -> Objects.equals(sceneId, rs.getString("scene"))
+                        && Objects.equals(elementId, rs.getString("scene_element")) ? "" : rs.getString("ip")));
+        List<Lease> snapshot = list();
+        if (snapshot.stream().anyMatch(row -> owner.equals(row.owner)
+                || (elementId != null && elementId.equals(row.elementId) && row.vmUuid != null))) {
+            throw new MpRuntimeException("厂商二节点已有地址分配或待核查资源，请先确认原资源状态");
+        }
+        snapshot.sort(Comparator.comparingLong(row -> VendorSecondIpRange.number(row.ip)));
+        if (range.contains(preferred)) {
+            snapshot.sort(Comparator.comparing(row -> !preferred.equals(row.ip)));
+        }
+        int checked = 0;
+        for (Lease row : snapshot) {
+            if (!approved.contains(row.ip) || !PENDING.equals(row.status) || !INITIAL.equals(row.reason)
+                    || row.owner != null || row.vmUuid != null || !tried.add(row.ip)) continue;
+            if (occupied.contains(row.ip) || runtimeClaims.contains(row.ip)) continue;
+            try {
+                int changed = write("UPDATE " + TABLE + " SET status=?,owner_key=?,scene_id=?,element_id=?,port_id=?,request_name=?,reason=?,updated_at=CURRENT_TIMESTAMP "
+                                + "WHERE ip=? AND status=? AND reason=? AND owner_key IS NULL AND vm_uuid IS NULL",
+                        RESERVED, owner, sceneId, elementId, portId, requestName, "CREATE_IN_FLIGHT_ON_DEMAND", row.ip, PENDING, INITIAL);
+                if (changed == 0) continue;
+            } catch (DuplicateKeyException e) {
+                throw new MpRuntimeException("厂商二节点存在并发分配请求");
+            }
+            Lease lease = read(row.ip);
+            ProbeResult result = probe(row.ip);
+            if (result == ProbeResult.NO_REPLY) {
+                log.info("厂商二紧缺时核对并预占已划归专属范围的候选地址，ip={}, scene={}, element={}",
+                        row.ip, sceneId, elementId);
+                return lease;
+            }
+            clearOwnership(lease, PENDING, result == ProbeResult.REACHABLE ? "PROBE_OCCUPIED" : INITIAL, RESERVED);
+            if (++checked >= 12) break;
+        }
+        return null;
+    }
+
+    /** Reuse only addresses with positive release evidence, not merely a silent probe. */
+    void recoverForAllocation(List<Lease> beforeRead, VendorSecondInventory inventory) {
+        prepare(inventory);
+        if (!inventory.complete) return;
+        VendorSecondIpRange range = new VendorSecondIpRange(config);
+        Set<String> checked = new HashSet<>();
+        for (Lease row : beforeRead) {
+            // Recover a bounded batch so concurrent creators can reuse one inventory
+            // read; do not perform an unrestricted sweep of the management network.
+            if (range.contains(row.ip) && row.seenInInventory && !inventory.vms.containsKey(row.vmUuid)
+                    && (!"DELETE_IN_FLIGHT".equals(row.reason) || stale(row)) && checked.add(row.vmUuid)) {
+                reconcileDeleted(row.vmUuid, inventory, beforeRead);
+                if (checked.size() >= 12) return;
+            }
+        }
+    }
+
     /** Absence is only actionable after a delete attempt and a complete VM-list response. */
     boolean reconcileDeleted(String uuid, VendorSecondInventory inventory) {
+        return reconcileDeleted(uuid, inventory, releasingLeases());
+    }
+
+    boolean reconcileDeleted(String uuid, VendorSecondInventory inventory, List<Lease> beforeRead) {
         if (inventory.vms.containsKey(uuid)) {
             write("UPDATE " + TABLE + " SET seen_in_inventory=1 WHERE vm_uuid=? AND status=?", uuid, RELEASING);
             return false;
         }
         if (!inventory.complete) return false;
         Map<String, Set<String>> occupied = inventory.ownersByAddress();
-        for (Lease row : list()) {
+        for (Lease row : beforeRead) {
             if (!uuid.equals(row.vmUuid) || !RELEASING.equals(row.status)) continue;
             // An accepted create can be missing from a list while the provider is still creating it.
             // Do not infer that its address is released if that resource was never observed.
             if (!row.seenInInventory || ("DELETE_IN_FLIGHT".equals(row.reason) && !stale(row))) return false;
+            // Do not release a lease changed by a concurrent deletion/recovery since
+            // the inventory request began. The CAS also protects against concurrent probes.
+            Lease current = read(row.ip);
+            if (!uuid.equals(current.vmUuid) || !RELEASING.equals(current.status)) continue;
+            if (!Objects.equals(row.reason, current.reason) || !Objects.equals(row.updatedAt, current.updatedAt)) return false;
             if (occupied.containsKey(row.ip) || probe(row.ip) == ProbeResult.REACHABLE) {
-                write("UPDATE " + TABLE + " SET status=?,reason=?,updated_at=CURRENT_TIMESTAMP WHERE ip=? AND vm_uuid=? AND status=?",
-                        PENDING, "POST_DELETE_OCCUPIED", row.ip, uuid, RELEASING);
+                write("UPDATE " + TABLE + " SET status=?,reason=?,updated_at=CURRENT_TIMESTAMP WHERE ip=? AND vm_uuid=? AND status=? AND reason=? AND updated_at=?",
+                        PENDING, "POST_DELETE_OCCUPIED", row.ip, uuid, RELEASING, row.reason, row.updatedAt);
             } else {
                 int released = write("UPDATE " + TABLE + " SET status=?,reason=?,owner_key=NULL,scene_id=NULL,element_id=NULL,port_id=NULL,request_name=NULL,vm_uuid=NULL,mac_addr=NULL,seen_in_inventory=0,updated_at=CURRENT_TIMESTAMP "
-                                + "WHERE ip=? AND vm_uuid=? AND status=?",
-                        FREE, "DELETE_CONFIRMED", row.ip, uuid, RELEASING);
+                                + "WHERE ip=? AND vm_uuid=? AND status=? AND reason=? AND updated_at=? AND seen_in_inventory=1",
+                        FREE, "DELETE_CONFIRMED", row.ip, uuid, RELEASING, row.reason, row.updatedAt);
                 if (released == 1) log.info("厂商二已确认资源不存在，释放 ip={}, uuid={}", row.ip, uuid);
             }
         }
-        return true;
+        return releasingLeases().stream().noneMatch(row -> uuid.equals(row.vmUuid));
     }
 
     private boolean stale(Lease lease) {
@@ -290,18 +438,24 @@ public class VendorSecondAddressPool {
     }
 
     void reconcile(VendorSecondInventory inventory) {
+        reconcile(inventory, releasingLeases());
+    }
+
+    void reconcile(VendorSecondInventory inventory, List<Lease> beforeRead) {
         prepare(inventory);
         Set<String> deleting = new HashSet<>();
         for (Lease row : list()) {
             if (RELEASING.equals(row.status) && row.vmUuid != null && deleting.add(row.vmUuid)) {
-                reconcileDeleted(row.vmUuid, inventory);
+                reconcileDeleted(row.vmUuid, inventory, beforeRead);
                 continue;
             }
             if (RESERVED.equals(row.status) && stale(row)) uncertainCreation(row);
             boolean pendingCreate = (PENDING.equals(row.status) && "CREATE_UNCERTAIN".equals(row.reason))
                     || (RESERVED.equals(row.status) && stale(row));
             String uuid = row.vmUuid;
-            if (pendingCreate && uuid == null) {
+            // Association by request name needs global uniqueness, which a
+            // partially returned inventory cannot establish.
+            if (pendingCreate && uuid == null && inventory.complete) {
                 uuid = inventory.byName(row.requestName);
                 if (uuid != null) recordCreated(row, uuid);
             }
@@ -312,6 +466,16 @@ public class VendorSecondAddressPool {
                 if (actual != null) syncRuntimePort(row, uuid, actual);
             }
         }
+        log.info("厂商二地址池核对汇总，inventoryComplete={}, status/reason={}", inventory.complete, statusSummary());
+    }
+
+    Map<String, Long> statusSummary() {
+        Map<String, Long> summary = new TreeMap<>();
+        VendorSecondIpRange range = new VendorSecondIpRange(config);
+        for (Lease row : list()) {
+            if (range.contains(row.ip)) summary.merge(row.status + "/" + row.reason, 1L, Long::sum);
+        }
+        return summary;
     }
 
     private void syncRuntimePort(Lease lease, String uuid, String[] actual) {

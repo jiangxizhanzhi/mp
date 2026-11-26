@@ -14,6 +14,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.AttachEntityUsbsD
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.AttachVirtualUsbsData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineAttachISOData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.StartTaskPool;
+import cn.cyberpeace.mp.service.MultiCloudService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -79,6 +80,14 @@ public class StartHandler extends HandlerCommon{
                 StartHandler.ElementProcess.START_VIRTUAL_MACHINE));
             //执行过程
             runElementProgress(nodeId, SceneElementModel.Event.START, StartHandler.ElementProcess.START_VIRTUAL_MACHINE, () -> {
+                MultiCloudService vendor = getVendorCloudService(element);
+                if (vendor != null) {
+                    validateVendorVm(vendor, element);
+                    setVendorConsoleAvailable(element, false);
+                    vendor.startVm(instanceId);
+                    setVendorConsoleAvailable(element, true);
+                    return;
+                }
                 //启动
                 virtualMachine.start(instanceId);
                 if (StringUtils.isNotEmpty(element.getIsoAttachFilename()) && StringUtils.isNotEmpty(element.getIsoTmpdirUuid())) {

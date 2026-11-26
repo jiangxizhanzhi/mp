@@ -1,9 +1,11 @@
 package cn.cyberpeace.mp.service;
 
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.http.HttpClient;
+import cn.cyberpeace.mp.base.util.http.HttpResult;
 import cn.cyberpeace.mp.base.util.http.MultiCloudClient;
-import com.alibaba.fastjson.JSONException;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,13 +13,17 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 
 @Service
 @AllArgsConstructor
 @Slf4j
-public class VendorFirstCloudServiceImpl implements MultiCloudService {
+public class VendorFirstCloudServiceImpl extends AbstractVendorCloudService {
     private final MultiCloudClient multiCloudClient;
+    private static final String INSTANCE_PATH = "/api/cloud/instances/";
+    private static final String CLUSTER_QUERY = "cluster=382ee7c7-336a-41ae-b71e-9c14365bdcd3";
     public static final String DEVICE_ACTIVE = "active";
     public static final String IMAGE_CREATE_TEMPLATE = "{\n" +
             "  \"name\": \"sn_test4\",\n" +
@@ -79,7 +85,8 @@ public class VendorFirstCloudServiceImpl implements MultiCloudService {
             "  \"server_group\": null\n" +
             "}";
 
-    private static  String TOKEN = "";
+    private static volatile String TOKEN = "";
+    private static final Object TOKEN_LOCK = new Object();
 
     @Override
     public Map<String, String> getHeaders() {
@@ -93,18 +100,33 @@ public class VendorFirstCloudServiceImpl implements MultiCloudService {
         return headers;
     }
 
-    private Map<String, String> addAuthTokenToHeader(Map<String, String> header, boolean refreshToken) {
-        if (StringUtils.isEmpty(TOKEN) || refreshToken) {
-            JSONObject vendorObject = JSONObject.parseObject(getClient().post("/api/uc/auth/token",
-                    new VendorFirstTokenHttpData("{\"username\":\"admin\",\"password\":\"e86f78a8a3caf0b60d8e74e5942aa6d86dc150cd3c03338aef25b7d2d7e3acc7\",\"platform\":false}"), null, null, 30000).getResult());
-
-            String token = vendorObject.getString("token");
+    private String authToken(String rejectedToken) {
+        synchronized (TOKEN_LOCK) {
+            if (StringUtils.isNotBlank(TOKEN) && !Objects.equals(TOKEN, rejectedToken)) return TOKEN;
+            HttpResult result = getClient().post("/api/uc/auth/token",
+                    new VendorFirstTokenHttpData("{\"username\":\"admin\",\"password\":\"e86f78a8a3caf0b60d8e74e5942aa6d86dc150cd3c03338aef25b7d2d7e3acc7\",\"platform\":false}"), null, null, 30000);
+            JSONObject body = requireResponse(result, "认证");
+            String token = body.getString("token");
+            if (StringUtils.isBlank(token)) throw new MpRuntimeException("厂商一认证响应缺少Token");
             TOKEN = token;
-            header.put("Authorization", "Bearer " + token);
-        } else {
-            header.put("Authorization", "Bearer " + TOKEN);
+            return token;
         }
-        return header;
+    }
+
+    private Map<String, String> authenticatedHeaders(String token) {
+        Map<String, String> headers = new HashMap<>(getHeaders());
+        headers.put("Authorization", "Bearer " + token);
+        return headers;
+    }
+
+    /** Retry authentication only after an explicit HTTP 401, not after an ambiguous write. */
+    private HttpResult authenticated(Function<Map<String, String>, HttpResult> request) {
+        String token = authToken(null);
+        HttpResult response = request.apply(authenticatedHeaders(token));
+        if (httpStatus(response) == 401) {
+            response = request.apply(authenticatedHeaders(authToken(token)));
+        }
+        return response;
     }
 
     @Override
@@ -116,8 +138,8 @@ public class VendorFirstCloudServiceImpl implements MultiCloudService {
     public List<String> listAllDevices() {
         try {
             int index = 0;
-             JSONObject vendorObject = JSONObject.parseObject(getClient().get("/api/cloud/images/?page=1&page_size=10000&cluster=382ee7c7-336a-41ae-b71e-9c14365bdcd3",
-                    null, getHeaders(), 30000).getResult());
+             JSONObject vendorObject = requireResponse(getClient().get("/api/cloud/images/?page=1&page_size=10000&" + CLUSTER_QUERY,
+                    null, getHeaders(), 30000), "镜像查询");
              List<String> images = new ArrayList<>();
             for (Object results : vendorObject.getJSONArray("results")) {
                 JSONObject result = (JSONObject) results;
@@ -172,99 +194,204 @@ public class VendorFirstCloudServiceImpl implements MultiCloudService {
 
     @Override
     public String createVm(String imageUuid) {
+        requireVmId(imageUuid);
+        JSONObject image = getImageInfoByImageUuid(imageUuid);
+        JSONObject payload = JSONObject.parseObject(IMAGE_CREATE_TEMPLATE);
+        String name = "MP_" + TextUtils.uuid();
+        payload.put("name", name);
+        payload.put("image_id", imageUuid);
+        payload.put("image", image);
+        VendorFirstVmCreateHttpData data = new VendorFirstVmCreateHttpData(payload);
+
+        // A malformed or lost response can occur after the VM has been created.
+        // Do not repeat the create request with a new name in that case.
         try {
-            return realCreateVm(imageUuid, false);
-        } catch (JSONException e) {
-            return realCreateVm(imageUuid, true);
+            HttpResult response = authenticated(headers -> getClient().post(INSTANCE_PATH + "?" + CLUSTER_QUERY,
+                    data, null, headers, 30000));
+            JSONArray instances = requireResponse(response, "创建").getJSONArray("instances");
+            if (instances == null || instances.size() != 1 || !(instances.get(0) instanceof String)) {
+                throw new MpRuntimeException("厂商一创建响应未确认唯一UUID");
+            }
+            String id = instances.getString(0);
+            requireVmId(id);
+            return id;
+        } catch (RuntimeException e) {
+            log.warn("厂商一创建结果未确认，request_name={}，请核查原请求", name);
+            throw new MpRuntimeException("厂商一创建结果未确认，request_name=" + name + "，" + e.getMessage()).e(e);
         }
-    }
-
-    private String realCreateVm(String imageUuid, boolean freshToken) {
-        JSONObject jsonObject = JSONObject.parseObject(IMAGE_CREATE_TEMPLATE);
-        jsonObject.put("name", "MP_" + TextUtils.uuid());
-        jsonObject.put("image_id", imageUuid);
-        jsonObject.put("image", getImageInfoByImageUuid(imageUuid));
-
-        VendorFirstVmCreateHttpData vendorFirstVmCreateHttpData = new VendorFirstVmCreateHttpData(jsonObject);
-
-        String result = getClient().post("/api/cloud/instances/?cluster=382ee7c7-336a-41ae-b71e-9c14365bdcd3", vendorFirstVmCreateHttpData, null, addAuthTokenToHeader(getHeaders(), false), 30000)
-                .getResult();
-        if (result != null) {
-            JSONObject createResult = JSONObject.parseObject(result);
-            return createResult.getJSONArray("instances").get(0).toString();
-        }
-        return "";
     }
 
     private JSONObject getImageInfoByImageUuid(String imageUuid) {
-        JSONObject vendorObject = JSONObject.parseObject(getClient().get("/api/cloud/images/?page=1&page_size=10000&cluster=382ee7c7-336a-41ae-b71e-9c14365bdcd3",
-                null, getHeaders(), 30000).getResult());
-        for (Object results : vendorObject.getJSONArray("results")) {
-            JSONObject result = (JSONObject) results;
+        JSONObject inventory = requireResponse(getClient().get("/api/cloud/images/?page=1&page_size=10000&" + CLUSTER_QUERY,
+                null, getHeaders(), 30000), "镜像查询");
+        JSONArray images = inventory.getJSONArray("results");
+        if (images == null) throw new MpRuntimeException("厂商一镜像清单缺失");
+        for (Object entry : images) {
+            if (!(entry instanceof JSONObject)) continue;
+            JSONObject result = (JSONObject) entry;
             if (imageUuid.equals(result.getString("uuid"))) {
+                if (!DEVICE_ACTIVE.equalsIgnoreCase(result.getString("status"))
+                        || !"image".equals(result.getString("image_type"))) {
+                    throw new MpRuntimeException("厂商一指定镜像不可用");
+                }
                 return result;
             }
-
         }
-        return null;
+        throw new MpRuntimeException("厂商一指定镜像未找到");
+    }
+
+    private JSONObject findInstance(String vmUuid) {
+        requireVmId(vmUuid);
+        final int size = 1000;
+        Set<String> seen = new HashSet<>();
+        for (int page = 1; page <= 100; page++) {
+            String url = INSTANCE_PATH + "?page=" + page + "&page_size=" + size + "&" + CLUSTER_QUERY;
+            JSONObject result = requireResponse(authenticated(headers -> getClient().get(url, null, headers, 30000)), "状态查询");
+            JSONArray instances = result.getJSONArray("results");
+            if (instances == null) throw new MpRuntimeException("厂商一虚拟机清单缺失");
+            for (Object entry : instances) {
+                if (!(entry instanceof JSONObject)) throw new MpRuntimeException("厂商一虚拟机清单格式异常");
+                JSONObject instance = (JSONObject) entry;
+                String id = instance.getString("uuid");
+                if (StringUtils.isBlank(id) || !seen.add(id)) throw new MpRuntimeException("厂商一虚拟机清单不完整或存在重复记录");
+                if (vmUuid.equals(id)) return instance;
+            }
+            Integer count = result.getInteger("count");
+            boolean more = StringUtils.isNotBlank(result.getString("next"));
+            if (count != null) {
+                if (count < seen.size()) throw new MpRuntimeException("厂商一虚拟机清单数量异常");
+                if (count == seen.size() && !more) return null;
+                if (instances.isEmpty()) throw new MpRuntimeException("厂商一虚拟机清单不完整");
+            } else if (!more && instances.size() < size) {
+                return null;
+            } else if (instances.isEmpty()) {
+                throw new MpRuntimeException("厂商一虚拟机清单不完整");
+            }
+        }
+        throw new MpRuntimeException("厂商一虚拟机清单未完整读取");
     }
 
     @Override
     public String[] getVmIpAndMac(String vmUuid) {
+        requireVmId(vmUuid);
         try {
-            String result = getClient().get("/api/cloud/instances/?page=1&page_size=1000&cluster=382ee7c7-336a-41ae-b71e-9c14365bdcd3", null, addAuthTokenToHeader(
-                    getHeaders(), false), 30000)
-                    .getResult();
-            JSONObject jsonObject = JSONObject.parseObject(result);
-            for (Object vmObject : jsonObject.getJSONArray("results")) {
-                JSONObject vmJsonObject = (JSONObject) vmObject;
-                if (vmUuid.equals(vmJsonObject.getString("uuid"))) {
-                    JSONObject finalObject = vmJsonObject.getJSONObject("address")
-                            .getJSONObject("network1").getJSONArray("fixed")
-                            .getJSONObject(0);
-                    String ip = finalObject.getString("addr");
-                    String mac = finalObject.getString("OS-EXT-IPS-MAC:mac_addr");
-                    return new String[]{ip, mac};
-                }
+            JSONObject instance = findInstance(vmUuid);
+            if (power(instance) != VmPowerState.RUNNING) return null;
+            JSONObject addresses = instance.getJSONObject("address");
+            JSONObject network = addresses == null ? null : addresses.getJSONObject("network1");
+            JSONArray fixed = network == null ? null : network.getJSONArray("fixed");
+            if (fixed == null) return null;
+            for (Object item : fixed) {
+                if (!(item instanceof JSONObject)) continue;
+                JSONObject entry = (JSONObject) item;
+                String ip = entry.getString("addr");
+                String mac = entry.getString("OS-EXT-IPS-MAC:mac_addr");
+                try {
+                    long numeric = VendorSecondIpRange.number(ip);
+                    if (numeric != 0 && numeric != 0xffffffffL && mac != null
+                            && mac.matches("(?i)([0-9a-f]{2}:){5}[0-9a-f]{2}")) return new String[]{ip, mac};
+                } catch (IllegalArgumentException ignored) { }
             }
             return null;
-        } catch (Exception e){
-            log.error("获取vm ip和mac异常: " + e.getMessage(), e);
+        } catch (RuntimeException e) {
+            log.warn("厂商一 VM {} 地址暂未确认：{}", vmUuid, e.getMessage());
             return null;
         }
     }
 
+    private VmPowerState power(JSONObject instance) {
+        String status = instance == null ? null : instance.getString("status");
+        if ("ACTIVE".equalsIgnoreCase(status)) return VmPowerState.RUNNING;
+        if ("SHUTOFF".equalsIgnoreCase(status)) return VmPowerState.STOPPED;
+        return VmPowerState.UNKNOWN;
+    }
+
+    @Override
+    public VmPowerState getVmPowerState(String vmUuid) {
+        return power(findInstance(vmUuid));
+    }
+
+    @Override
+    protected void submitPowerAction(String vmUuid, VmPowerState target) {
+        requireVmId(vmUuid);
+        String url = INSTANCE_PATH + vmUuid + "/action/?" + CLUSTER_QUERY;
+        JSONObject payload = new JSONObject();
+        payload.put("action", target == VmPowerState.RUNNING ? "power_on" : "power_off");
+        StringHttpData body = new StringHttpData(payload.toJSONString());
+        JSONObject result = requireResponse(authenticated(headers ->
+                getClient().post(url, body, null, headers, 30000)), "电源操作");
+        if (!Boolean.TRUE.equals(result.getBoolean("success"))) {
+            throw new MpRuntimeException("厂商一电源操作业务未确认，uuid=" + vmUuid);
+        }
+    }
+
+    private int httpStatus(HttpResult response) {
+        return response == null || response.getResponse() == null || response.getException() != null
+                ? 0 : response.getResponse().getStatusLine().getStatusCode();
+    }
+
+    private JSONObject requireResponse(HttpResult response, String operation) {
+        if (response == null || response.getException() != null || !response.isSuccess()) {
+            throw new MpRuntimeException("厂商一" + operation + "请求未确认，HTTP=" + httpStatus(response));
+        }
+        JSONObject result;
+        try { result = JSONObject.parseObject(response.getResult()); }
+        catch (RuntimeException e) { throw new MpRuntimeException("厂商一" + operation + "响应格式异常").e(e); }
+        if (result == null || Boolean.FALSE.equals(result.getBoolean("success"))
+                || (result.getInteger("code") != null && result.getInteger("code") >= 400)) {
+            throw new MpRuntimeException("厂商一" + operation + "业务失败");
+        }
+        return result;
+    }
+
+    protected long deleteConfirmTimeoutMillis() { return 30000; }
+    protected long deleteConfirmPollMillis() { return 2000; }
+
     @Override
     public void deleteVm(String vmUuid) {
-        String result = realDeleteVm(vmUuid, false);
-        if (result.contains("401 Authorization Required")) {
-            realDeleteVm(vmUuid, true);
+        requireVmId(vmUuid);
+        HttpResult response = authenticated(headers -> getClient().delete(INSTANCE_PATH + vmUuid + "/?" + CLUSTER_QUERY,
+                null, null, headers, 30000));
+        // Only a structured not-found response from the requested instance
+        // is idempotent. A proxy/server 404 or auth failure is not proof.
+        if (httpStatus(response) == 404) {
+            try {
+                JSONObject body = JSONObject.parseObject(response.getResult());
+                if (body != null && Integer.valueOf(404).equals(body.getInteger("code"))
+                        && "NotFound".equals(body.getString("error"))
+                        && StringUtils.contains(body.getString("message"), vmUuid)) return;
+            } catch (RuntimeException ignored) { }
+            throw new MpRuntimeException("厂商一删除结果未确认，HTTP=404");
         }
+        if (response == null || response.getException() != null || !response.isSuccess()) {
+            throw new MpRuntimeException("厂商一删除结果未确认，HTTP=" + httpStatus(response));
+        }
+        if (StringUtils.isNotBlank(response.getResult())) requireResponse(response, "删除");
+        long until = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(deleteConfirmTimeoutMillis());
+        do {
+            try {
+                if (findInstance(vmUuid) == null) return;
+            } catch (RuntimeException e) {
+                log.warn("厂商一 VM {} 回收状态暂不可确认", vmUuid);
+            }
+            long remaining = TimeUnit.NANOSECONDS.toMillis(until - System.nanoTime());
+            if (remaining <= 0) break;
+            try { Thread.sleep(Math.min(remaining, deleteConfirmPollMillis())); }
+            catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new MpRuntimeException("厂商一删除核对中断，保留资源关联").e(e);
+            }
+        } while (System.nanoTime() < until);
+        throw new MpRuntimeException("厂商一资源删除尚未确认，保留UUID=" + vmUuid);
     }
 
     @Override
     public String getConnection(String vmUuid) {
-        try {
-            return realGetConnection(vmUuid, false);
-        } catch (Exception e) {
-            log.error("获取vm连接异常: " + e.getMessage(), e);
-            return realGetConnection(vmUuid, true);
-        }
+        requireVmId(vmUuid);
+        String url = INSTANCE_PATH + vmUuid + "/vnc-console/?" + CLUSTER_QUERY;
+        String result = requireResponse(authenticated(headers -> getClient().get(url, null, headers, 30000)), "控制台查询")
+                .getString("vnc_url");
+        if (StringUtils.isBlank(result)) throw new MpRuntimeException("厂商一控制台地址未确认");
+        return result;
     }
-
-    private String realGetConnection(String vmUuid, boolean freshToken) {
-        String result = getClient().get("/api/cloud/instances/" + vmUuid + "/vnc-console/?cluster=382ee7c7-336a-41ae-b71e-9c14365bdcd3", null, addAuthTokenToHeader(
-                getHeaders(), freshToken), 30000)
-                .getResult();
-        JSONObject jsonObject = JSONObject.parseObject(result);
-        return jsonObject.getString("vnc_url");
-    }
-
-    private String realDeleteVm(String vmUuid, boolean freshToken)  {
-        return getClient().delete("/api/cloud/instances/" + vmUuid + "/?cluster=382ee7c7-336a-41ae-b71e-9c14365bdcd3", null, null,
-                addAuthTokenToHeader(getHeaders(), freshToken), 30000).getResult();
-
-    }
-
-
 }

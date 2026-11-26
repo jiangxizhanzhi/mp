@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.service;
 
 import cn.cyberpeace.mp.base.util.http.HttpClient;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 
 import java.util.List;
 import java.util.Map;
@@ -152,6 +153,31 @@ public interface MultiCloudService {
     String[] getVmIpAndMac(String vmUuid);
 
     void deleteVm(String vmUuid);
+
+    default void deleteManagedVm(String vmUuid, String sceneId, String elementId) {
+        if (vmUuid == null || vmUuid.trim().isEmpty()) {
+            throw new MpRuntimeException("厂商虚拟机UUID为空，未提交删除请求");
+        }
+        deleteVm(vmUuid);
+    }
+
+    default void validateManagedVm(String vmUuid, String sceneId, String elementId) {
+        // Providers whose identifiers are assigned by the provider can retain
+        // existing lifecycle behaviour.
+    }
+
+    VmPowerState getVmPowerState(String vmUuid);
+
+    /** Return only once the requested provider-side power state has been confirmed. */
+    void startVm(String vmUuid);
+
+    void stopVm(String vmUuid);
+
+    /** No provider-specific reboot endpoint is assumed. */
+    default void restartVm(String vmUuid) {
+        stopVm(vmUuid);
+        startVm(vmUuid);
+    }
 
     String getConnection(String vmUuid);
 

@@ -1033,103 +1033,117 @@ public class CreateHandler extends HandlerCommon {
         cloudElement.setResourceId(virtualFirewall.getId());
     }
 
+    protected void pauseVendorAddressPoll() throws InterruptedException {
+        Thread.sleep(5000);
+    }
+
     protected void createVirtualMachine(CloudPluginSceneElementBO cloudElement) {
-        if (Objects.nonNull(cloudElement.getSrcElement().getVendor())) {
-            for (MultiCloudService cloudService : BeanCommon.getBeanType(MultiCloudService.class).values()) {
-                if (cloudService.getVendor() == cloudElement.getSrcElement().getVendor()) {
-
-                    String resourceId;
-                    if (cloudService.getVendor() == 2) {
-                        if (org.apache.commons.collections.CollectionUtils.isEmpty(cloudElement.getSrcElement().getPorts())) {
-                            throw new MpRuntimeException("厂商二虚拟机缺少网口，无法管理地址");
-                        }
-                        var port = cloudElement.getSrcElement().getPorts().get(0);
-                        ManagedVmCreationResult managed = cloudService.createManagedVm(cloudElement.getImageUuid(),
-                                getPluginHandler().getSceneHandler().getSceneId(), cloudElement.getSrcElement().getEid(),
-                                port.getEid(), port.getIp());
-                        resourceId = managed.getResourceId();
-                        // An unconfirmed provider address must not be displayed as the original template address.
-                        port.setIp(StringUtils.defaultString(managed.getActualIp()));
-                        port.setMacAddr(StringUtils.defaultString(managed.getMacAddress()));
-                        port.setNetmask(managed.getNetmask());
-                        port.setGateway(managed.getGateway());
-                    } else {
-                        MultiCloudService.IP_THREADLOCAL.set(cloudElement.getSrcElement().getPorts().get(0).getIp());
-                        try {
-                            resourceId = cloudService.createVm(cloudElement.getImageUuid());
-                        } finally {
-                            MultiCloudService.IP_THREADLOCAL.remove();
-                        }
-                    }
-                    cloudElement.setResourceId(resourceId);
-
-                    if (cloudService.getVendor() != 2 && cloudService.ipAutoGen()) {
-                        String[] ipAndMac = null;
-                        int tryCount = 20;
-                        do {
-                            ipAndMac = cloudService.getVmIpAndMac(resourceId);
-
-                            if (ipAndMac == null) {
-                                try {
-                                    Thread.sleep(5000);
-                                } catch (InterruptedException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                            tryCount--;
-                        } while (ipAndMac == null || tryCount > 0);
-
-                        if (ipAndMac != null) {
-                            if (org.apache.commons.collections.CollectionUtils.isNotEmpty(cloudElement.getSrcElement().getPorts())) {
-                                cloudElement.getSrcElement().getPorts().get(0).setIp(ipAndMac[0]);
-                                cloudElement.getSrcElement().getPorts().get(0).setMacAddr(ipAndMac[1]);
-                            }
-                        }
-                    }
-
-                    AccessMode accessMode = new AccessMode();
-                    accessMode.setProxy(true);
-                    accessMode.setProtocol("vnc");
-                    accessMode.setUsername("");
-                    accessMode.setPassword("");
-                    if (org.apache.commons.collections.CollectionUtils.isNotEmpty(cloudElement.getSrcElement().getPorts())) {
-                        cloudElement.getSrcElement().getPorts().get(0).setAccessModes(Lists.newArrayList(accessMode));
-                    }
-
-                    var cloudPorts = getPluginHandler().getPorts(cloudElement);
-                    if (org.apache.commons.collections.CollectionUtils.isNotEmpty(cloudPorts)) {
-                        CloudAccessMode cloudAccessMode = new CloudAccessMode();
-                        BeanUtils.copyProperties(accessMode, cloudAccessMode);
-                        cloudAccessMode.setAvailable(true);
-                        cloudAccessMode.setAccessIp(cloudElement.getSrcElement().getPorts().get(0).getIp());
-                        cloudAccessMode.setId(TextUtils.uuid());
-                        // 拓扑数据会下发给普通用户，仅使用非管理接入的账号密码。
-                        cloudPorts.stream()
-                                .map(CloudPluginSceneElementPortBO::getAccessModes)
-                                .filter(Objects::nonNull)
-                                .flatMap(Collection::stream)
-                                .filter(mode -> StringUtils.isNotBlank(mode.getProtocol()))
-                                .map(mode -> Objects.requireNonNullElse(mode.getDisplayCredentials(), mode))
-                                .filter(mode -> !Boolean.TRUE.equals(mode.getManageMode()))
-                                .filter(mode -> StringUtils.isNoneBlank(mode.getUsername(), mode.getPassword()))
-                                .findFirst()
-                                .ifPresent(mode -> {
-                                    AccessMode credentials = new AccessMode();
-                                    credentials.setUsername(mode.getUsername());
-                                    credentials.setPassword(mode.getPassword());
-                                    cloudAccessMode.setDisplayCredentials(credentials);
-                                });
-                        cloudPorts.get(0).setAccessModes(Lists.newArrayList(cloudAccessMode));
-                    }
-
-
-
-                    return;
-                }
-
+        MultiCloudService cloudService = getVendorCloudService(cloudElement);
+        if (cloudService != null) {
+            if (org.apache.commons.collections.CollectionUtils.isEmpty(cloudElement.getSrcElement().getPorts())) {
+                throw new MpRuntimeException("厂商" + cloudService.getVendor() + "虚拟机缺少网口，无法管理地址");
             }
-        }
+            String resourceId;
+            ManagedVmCreationResult managedResult = null;
+            if (cloudService.getVendor() == 2 || cloudService.getVendor() == 3) {
+                var port = cloudElement.getSrcElement().getPorts().get(0);
+                managedResult = cloudService.createManagedVm(cloudElement.getImageUuid(),
+                        getPluginHandler().getSceneHandler().getSceneId(), cloudElement.getSrcElement().getEid(),
+                        port.getEid(), port.getIp());
+                resourceId = managedResult.getResourceId();
+                cloudElement.setResourceId(resourceId);
+                // An unconfirmed provider address must not be displayed as the original template address.
+                port.setIp(StringUtils.defaultString(managedResult.getActualIp()));
+                port.setMacAddr(StringUtils.defaultString(managedResult.getMacAddress()));
+                port.setNetmask(StringUtils.defaultString(managedResult.getNetmask()));
+                port.setGateway(StringUtils.defaultString(managedResult.getGateway()));
+            } else {
+                MultiCloudService.IP_THREADLOCAL.set(cloudElement.getSrcElement().getPorts().get(0).getIp());
+                try {
+                    resourceId = cloudService.createVm(cloudElement.getImageUuid());
+                } finally {
+                    MultiCloudService.IP_THREADLOCAL.remove();
+                }
+            }
+            if (managedResult == null && StringUtils.isBlank(resourceId)) {
+                throw new MpRuntimeException("厂商" + cloudService.getVendor() + "创建响应未确认虚拟机标识");
+            }
+            cloudElement.setResourceId(resourceId);
 
+            if (managedResult == null && cloudService.ipAutoGen()) {
+                String[] ipAndMac = null;
+                var port = cloudElement.getSrcElement().getPorts().get(0);
+                port.setIp("");
+                port.setMacAddr("");
+                try {
+                    for (int attempt = 0; attempt < 20; attempt++) {
+                        String[] candidate = cloudService.getVmIpAndMac(resourceId);
+                        if (candidate != null && candidate.length >= 2
+                                && StringUtils.isNoneBlank(candidate[0], candidate[1])) {
+                            ipAndMac = candidate;
+                            break;
+                        }
+                        if (attempt < 19) pauseVendorAddressPoll();
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    getPluginHandler().getSceneHandler().updateSceneElementWithPlugins(cloudElement.getSrcElement().getId());
+                    throw new MpRuntimeException("厂商虚拟机地址核对中断，保留资源标识").e(e);
+                } catch (RuntimeException e) {
+                    getPluginHandler().getSceneHandler().updateSceneElementWithPlugins(cloudElement.getSrcElement().getId());
+                    throw e;
+                }
+                if (ipAndMac == null) {
+                    getPluginHandler().getSceneHandler().updateSceneElementWithPlugins(cloudElement.getSrcElement().getId());
+                    throw new MpRuntimeException("厂商" + cloudService.getVendor() + "虚拟机运行及地址尚未确认，uuid=" + resourceId);
+                }
+                port.setIp(ipAndMac[0]);
+                port.setMacAddr(ipAndMac[1]);
+            }
+
+            AccessMode accessMode = new AccessMode();
+            accessMode.setProxy(true);
+            accessMode.setProtocol("vnc");
+            accessMode.setUsername("");
+            accessMode.setPassword("");
+            if (org.apache.commons.collections.CollectionUtils.isNotEmpty(cloudElement.getSrcElement().getPorts())) {
+                cloudElement.getSrcElement().getPorts().get(0).setAccessModes(Lists.newArrayList(accessMode));
+            }
+
+            var cloudPorts = getPluginHandler().getPorts(cloudElement);
+            if (org.apache.commons.collections.CollectionUtils.isNotEmpty(cloudPorts)) {
+                CloudAccessMode cloudAccessMode = new CloudAccessMode();
+                BeanUtils.copyProperties(accessMode, cloudAccessMode);
+                cloudAccessMode.setAvailable(managedResult == null || managedResult.isReady());
+                cloudAccessMode.setAccessIp(cloudElement.getSrcElement().getPorts().get(0).getIp());
+                cloudAccessMode.setId(TextUtils.uuid());
+                // 拓扑数据会下发给普通用户，仅使用非管理接入的账号密码。
+                cloudPorts.stream()
+                        .map(CloudPluginSceneElementPortBO::getAccessModes)
+                        .filter(Objects::nonNull)
+                        .flatMap(Collection::stream)
+                        .filter(mode -> StringUtils.isNotBlank(mode.getProtocol()))
+                        .map(mode -> Objects.requireNonNullElse(mode.getDisplayCredentials(), mode))
+                        .filter(mode -> !Boolean.TRUE.equals(mode.getManageMode()))
+                        .filter(mode -> StringUtils.isNoneBlank(mode.getUsername(), mode.getPassword()))
+                        .findFirst()
+                        .ifPresent(mode -> {
+                            AccessMode credentials = new AccessMode();
+                            credentials.setUsername(mode.getUsername());
+                            credentials.setPassword(mode.getPassword());
+                            cloudAccessMode.setDisplayCredentials(credentials);
+                        });
+                cloudPorts.get(0).setAccessModes(Lists.newArrayList(cloudAccessMode));
+            }
+
+            if (managedResult != null && !managedResult.isReady()) {
+                // Persist accepted UUID and the verified (possibly blank) address before
+                // propagating the incomplete creation as an abnormal element.
+                getPluginHandler().getSceneHandler().updateSceneElementWithPlugins(cloudElement.getSrcElement().getId());
+                throw new MpRuntimeException(managedResult.pendingMessage());
+            }
+            return;
+        }
 
         if (ElementTypeUtils.isExternal(cloudElement)) {
             // 外部虚拟机 需要连接网络

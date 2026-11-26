@@ -1,321 +1,353 @@
 package cn.cyberpeace.mp.service;
 
+import cn.cyberpeace.mp.base.config.XdAppConfig;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.http.HttpClient;
 import cn.cyberpeace.mp.base.util.http.HttpData;
 import cn.cyberpeace.mp.base.util.http.HttpResult;
 import cn.cyberpeace.mp.base.util.http.MultiCloudClient;
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.read.ListAppender;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.sun.net.httpserver.HttpServer;
-import org.apache.http.HttpVersion;
-import org.apache.http.message.BasicHttpResponse;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
-import org.slf4j.LoggerFactory;
-import org.springframework.test.util.ReflectionTestUtils;
 
-import java.net.InetSocketAddress;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
+import static cn.cyberpeace.mp.service.VendorSecondAddressPoolTest.response;
+import static cn.cyberpeace.mp.service.VendorThirdVmLedger.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 class VendorThirdCloudServiceImplTest {
-
     private static final String NETWORK = "36eca7b1-5fe7-48a5-be8e-19f1a01017d2";
+    private static final String IP = "198.51.100.2", MAC = "02:00:00:00:00:02";
     private static final String NODE = "test-node";
     private final List<String> events = new ArrayList<>();
-    private final Deque<String> cloneStates = new ArrayDeque<>();
-    private final Deque<String> startStates = new ArrayDeque<>();
-    private final Map<String, String> bodies = new HashMap<>();
-    private final Map<String, Integer> codes = new HashMap<>();
-    private final ListAppender<ILoggingEvent> logs = new ListAppender<>();
-    private MultiCloudClient multiCloudClient;
+    private VendorThirdVmLedgerTest db;
+    private VendorThirdVmLedger ledger;
     private VendorThirdCloudServiceImpl service;
-    private AtomicInteger previousId;
-    private long waitMillis = 10000;
-    private int vmId;
-    private int configReads;
-    private boolean started;
-    private JSONObject cloneRequest;
-    private JSONObject networkRequest;
-    private String cloneState = "stopped";
-    private String startState = "running";
-    private String readback = "virtio=02:00:00:00:00:02,ip=198.51.100.2,network=" + NETWORK;
+    private MultiCloudClient clients;
+    private XdAppConfig config;
+    private int id, lockReads, missingReads, startReads, networkReads, addressReads, collisions;
+    private String name, node = NODE, state = "stopped";
+    private boolean configured, exists, lostClone, lostStart, lostNetwork, lostDelete, rejectNetwork, rejectClone, rejectStart,
+            rejectDelete, noAddress, neverUnlock, noInventory, wrongName, noDigest, holdStart, holdDelete;
+    private JSONObject request, networkRequest;
+    private long wait = 200;
 
-    @BeforeEach
-    void setUp() {
-        previousId = (AtomicInteger) ReflectionTestUtils.getField(VendorThirdCloudServiceImpl.class, "maxId");
-        ReflectionTestUtils.setField(VendorThirdCloudServiceImpl.class, "maxId", new AtomicInteger(9000));
-        logs.start();
-        ((Logger) LoggerFactory.getLogger(VendorThirdCloudServiceImpl.class)).addAppender(logs);
-        multiCloudClient = mock(MultiCloudClient.class);
+    @BeforeEach void setup() throws Exception {
+        db = new VendorThirdVmLedgerTest();
+        db.setup();
+        ledger = db.ledger;
+        config = new XdAppConfig();
+        config.setXdThreeNetworkId(NETWORK);
+        clients = mock(MultiCloudClient.class);
         HttpClient client = mock(HttpClient.class);
-        when(multiCloudClient.getClient(3)).thenReturn(client);
+        when(clients.getClient(3)).thenReturn(client);
         when(client.get(anyString(), isNull(), anyMap(), eq(30000)))
                 .thenAnswer(inv -> respond("GET", inv.getArgument(0), null));
         when(client.post(anyString(), any(), isNull(), anyMap(), eq(30000)))
                 .thenAnswer(inv -> respond("POST", inv.getArgument(0), inv.getArgument(1)));
         when(client.put(anyString(), any(), isNull(), anyMap(), eq(30000)))
                 .thenAnswer(inv -> respond("PUT", inv.getArgument(0), inv.getArgument(1)));
-        service = new VendorThirdCloudServiceImpl(multiCloudClient) {
-            @Override
-            public Map<String, String> getHeaders() {
-                return Collections.emptyMap();
-            }
+        when(client.delete(anyString(), any(), isNull(), anyMap(), eq(30000)))
+                .thenAnswer(inv -> respond("DELETE", inv.getArgument(0), inv.getArgument(1)));
+        service = newService(ledger);
+    }
 
-            @Override
-            void waitForVmState(int id, String node, String status, long timeoutMillis) {
-                assertEquals(600000, timeoutMillis);
-                super.waitForVmState(id, node, status, waitMillis);
-            }
+    private VendorThirdCloudServiceImpl newService(VendorThirdVmLedger use) {
+        return new VendorThirdCloudServiceImpl(clients, config, use) {
+            @Override public Map<String, String> getHeaders() { return Collections.emptyMap(); }
+            @Override protected long cloneTimeoutMillis() { return wait; }
+            @Override protected long networkTimeoutMillis() { return wait; }
+            @Override protected long readyTimeoutMillis() { return wait; }
+            @Override protected long deleteTimeoutMillis() { return wait; }
+            @Override protected long pollMillis() { return 2; }
         };
     }
 
-    @AfterEach
-    void tearDown() {
-        ReflectionTestUtils.setField(VendorThirdCloudServiceImpl.class, "maxId", previousId);
-        ((Logger) LoggerFactory.getLogger(VendorThirdCloudServiceImpl.class)).detachAppender(logs);
-        logs.stop();
+    private ManagedVmCreationResult create() {
+        return service.createManagedVm("115", "scene", "element", "port-element", "198.51.100.99");
     }
 
-    @Test
-    void configuresAndReadsBackNetworkBeforeStarting() {
-        assertEquals("9001", service.createVm("115"));
-        assertEquals(Arrays.asList("templates", "templates", "clone", "poll-clone", "read-config",
-                "write-config", "readback", "start", "poll-start"), events);
-        assertEquals(9001, cloneRequest.getIntValue("newid"));
-        assertEquals(NODE, cloneRequest.getString("target"));
-        assertTrue(cloneRequest.getString("name").startsWith("MP_CREATE_"));
+    private Lease row() { return ledger.byId(id); }
+    private long count(String e) { return events.stream().filter(e::equals).count(); }
+
+    @Test void verifiesCloneNetworkRunningAndActualAddressNotTemplate() {
+        missingReads = 2;
+        lockReads = 2;
+        networkReads = 2;
+        startReads = 2;
+        addressReads = 2;
+        wait = 1000;
+        ManagedVmCreationResult result = create();
+        assertTrue(result.isReady());
+        assertEquals("9001", result.getResourceId());
+        assertEquals(IP, result.getActualIp());
+        assertEquals(MAC, result.getMacAddress());
+        assertEquals("255.255.255.0", result.getNetmask());
+        assertEquals(READY, row().getStatus());
+        assertEquals("start-UPID", row().getTaskId());
         assertEquals("initial-digest", networkRequest.getString("digest"));
         assertEquals("virtio,network=" + NETWORK, networkRequest.getString("vnet0"));
-        assertTrue(warnings().isEmpty());
+        assertEquals(NODE, request.getString("target"));
+        assertTrue(request.getString("name").startsWith("MP_CREATE_"));
+        assertTrue(events.indexOf("network") > events.lastIndexOf("locked"));
+        assertTrue(events.indexOf("start") > events.indexOf("network"));
+        assertEquals(1, count("clone"));
+        assertEquals(1, count("start"));
     }
 
-    @Test
-    void pollsPastMissingVmAndCloneLockUntilReady() {
-        cloneStates.addAll(Arrays.asList("missing", "stopped,clone", "stopped"));
-        startStates.addAll(Arrays.asList("stopped", "running"));
-        assertEquals("9001", service.createVm("115"));
-        assertEquals(3, Collections.frequency(events, "poll-clone"));
-        assertEquals(2, Collections.frequency(events, "poll-start"));
-        assertTrue(events.indexOf("write-config") > events.lastIndexOf("poll-clone"));
-        assertTrue(events.indexOf("start") > events.indexOf("readback"));
-        assertTrue(warnings().isEmpty());
+    @Test void lostResponsesContinueOnSameIdentityWhenActualStateConfirms() {
+        lostClone = lostNetwork = lostStart = true;
+        assertTrue(create().isReady());
+        assertEquals(1, count("clone"));
+        assertEquals(1, count("network"));
+        assertEquals(1, count("start"));
     }
 
-    @Test
-    void cloneTimeoutStillAttemptsNetworkAndStart() {
-        waitMillis = 0;
-        cloneState = "unknown,clone";
-        assertEquals("9001", service.createVm("115"));
-        assertTrue(events.contains("write-config"));
-        assertTrue(events.contains("start"));
-        assertEquals(1, warnings().size());
-        assertTrue(warnings().get(0).contains("等待克隆关机就绪超时"));
-        assertTrue(warnings().get(0).contains("status=unknown, lock=clone"));
+    @Test void lockedCloneDoesNotProceedButRetryResumesSameReservation() {
+        neverUnlock = true;
+        ManagedVmCreationResult pending = create();
+        assertFalse(pending.isReady());
+        assertEquals(String.valueOf(id), pending.getResourceId());
+        assertEquals(PENDING, row().getStatus());
+        assertEquals(0, count("network"));
+        neverUnlock = false;
+        service = newService(new VendorThirdVmLedger(db.jdbc, db.tx));
+        assertTrue(create().isReady());
+        assertEquals(1, count("clone"));
     }
 
-    @Test
-    void startupTimeoutStillReturnsVmId() {
-        waitMillis = 0;
-        startState = "stopped";
-        assertEquals("9001", service.createVm("115"));
-        assertEquals(1, warnings().size());
-        assertTrue(warnings().get(0).contains("等待启动运行超时"));
-        assertTrue(warnings().get(0).contains("目标状态尚未确认"));
+    @Test void explicitIdentifierConflictAllocatesNewIdAndDelivers() {
+        collisions = 1;
+        assertTrue(create().isReady());
+        assertEquals(9002, id);
+        assertEquals(REJECTED, ledger.byId(9001).getStatus());
+        assertEquals(2, count("clone"));
     }
 
-    @Test
-    void bothTimeoutsOnlyWarnAndContinue() {
-        waitMillis = 0;
-        cloneState = "unknown,clone";
-        startState = "stopped";
-        assertEquals("9001", service.createVm("115"));
-        assertEquals(2, warnings().size());
-        assertTrue(warnings().stream().allMatch(s -> s.contains("node=" + NODE)
-                && s.contains("elapsedMs=") && s.contains("继续后续流程")));
+    @Test void businessRejectionWithHttp200DoesNotBecomeFalseSuccess() {
+        rejectClone = true;
+        assertThrows(MpRuntimeException.class, this::create);
+        assertEquals(REJECTED, row().getStatus());
+        assertNull(ledger.byOwner(ownerKey("scene", "element")));
+        assertEquals(0, count("start"));
     }
 
-    @Test
-    void missingVmTimeoutUsesRequestedCloneNodeForNextSteps() {
-        waitMillis = 0;
-        cloneState = "missing";
-        startState = "missing";
-        bodies.put("poll-clone", "{\"success\":1,\"data\":[{\"vmid\":42,\"status\":\"stopped\"}]}");
-        assertEquals("9001", service.createVm("115"));
-        assertEquals(2, warnings().size());
-        assertTrue(warnings().stream().allMatch(s -> s.contains("found=false")));
-        assertTrue(events.contains("write-config"));
+    @Test void unavailableInventoryNeverSubmitsClone() {
+        noInventory = true;
+        assertThrows(MpRuntimeException.class, this::create);
+        assertEquals(0, count("clone"));
+        assertTrue(ledger.list().isEmpty());
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = {"clone", "poll-clone", "read-config", "write-config", "readback", "start", "poll-start"})
-    void businessFailureStopsFollowingStepsEvenWithHttp200(String stage) {
-        bodies.put(stage, "{\"success\":0,\"status\":500,\"message\":\"fixture rejection\"}");
-        MpRuntimeException error = assertThrows(MpRuntimeException.class, () -> service.createVm("115"));
-        assertTrue(error.getMessage().contains("业务失败"));
-        assertTrue(error.getMessage().contains("fixture rejection"));
-        assertEquals(stage, events.get(events.size() - 1));
+    @Test void truncatedOrBusinessFailedInventoryIsNotAuthoritative() {
+        assertThrows(MpRuntimeException.class, () -> VendorThirdInventory.parse(
+                response(200, "{\"success\":1,\"total\":2,\"data\":[]}")));
+        assertThrows(MpRuntimeException.class, () -> VendorThirdInventory.parse(
+                response(200, "{\"success\":0,\"data\":[]}")));
+        assertThrows(MpRuntimeException.class, () -> VendorThirdInventory.parse(
+                response(200, "{\"success\":1,\"data\":[{\"type\":\"qemu\"}]}")));
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = {"clone", "write-config", "start"})
-    void httpFailureStopsFollowingSteps(String stage) {
-        codes.put(stage, 500);
-        MpRuntimeException error = assertThrows(MpRuntimeException.class, () -> service.createVm("115"));
-        assertTrue(error.getMessage().contains("HTTP=500"));
-        assertEquals(stage, events.get(events.size() - 1));
+    @Test void networkRejectionCannotLeadToStartingOnWrongNetwork() {
+        rejectNetwork = true;
+        assertFalse(create().isReady());
+        assertEquals(PENDING, row().getStatus());
+        assertEquals(3, count("network"));
+        assertEquals(0, count("start"));
     }
 
-    @Test
-    void missingDigestDoesNotSkipConfigurationAndStart() {
-        bodies.put("read-config", "{\"success\":1,\"data\":{}}");
-        assertTrue(assertThrows(MpRuntimeException.class, () -> service.createVm("115"))
-                .getMessage().contains("digest"));
-        assertFalse(events.contains("write-config"));
-        assertFalse(events.contains("start"));
+    @Test void noDigestCannotLeadToNetworkWrite() {
+        noDigest = true;
+        assertFalse(create().isReady());
+        assertEquals(0, count("network"));
+        assertEquals(0, count("start"));
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = {"virtio=02:00:00:00:00:02,network=36eca7b1-5fe7-48a5-be8e-19f1a01017d2-other",
-            "e1000=02:00:00:00:00:02,network=36eca7b1-5fe7-48a5-be8e-19f1a01017d2", ""})
-    void readbackMismatchStopsBeforeStart(String value) {
-        readback = value;
-        assertTrue(assertThrows(MpRuntimeException.class, () -> service.createVm("115"))
-                .getMessage().contains("回读与目标配置不一致"));
-        assertTrue(events.contains("write-config"));
-        assertFalse(events.contains("start"));
+    @Test void retryExplicitStartRejectionAndThenDeliver() {
+        rejectStart = true;
+        assertTrue(create().isReady());
+        assertEquals(2, count("start"));
     }
 
-    @Test
-    void elapsedDeadlineEndsPollingWithoutThrowing() {
-        vmId = 9001;
-        cloneState = "unknown,clone";
-        waitMillis = 20;
-        long started = System.nanoTime();
-        assertDoesNotThrow(() -> service.waitForVmState(vmId, NODE, "stopped", 600000));
-        assertTrue(System.nanoTime() - started >= 20000000);
-        assertTrue(events.contains("poll-clone"));
-        assertEquals(1, warnings().size());
+    @Test void acceptedStartNotRepeatedWhenProviderRemainsStopped() {
+        holdStart = true;
+        assertFalse(create().isReady());
+        assertFalse(create().isReady());
+        assertEquals(1, count("start"));
+        assertEquals(1, count("clone"));
     }
 
-    @Test
-    void interruptedPollingRestoresInterruptAndStops() {
-        vmId = 9001;
-        cloneState = "unknown,clone";
-        Thread.currentThread().interrupt();
-        try {
-            assertTrue(assertThrows(MpRuntimeException.class,
-                    () -> service.waitForVmState(vmId, NODE, "stopped", 600000))
-                    .getMessage().contains("被中断"));
-            assertTrue(Thread.currentThread().isInterrupted());
-        } finally {
-            Thread.interrupted();
-        }
+    @Test void runningWithoutAddressRemainsPendingAndReconciliationReadsBackLater() {
+        db.scene("element", "");
+        noAddress = true;
+        ManagedVmCreationResult pending = create();
+        assertFalse(pending.isReady());
+        assertTrue(pending.isRunningConfirmed());
+        assertNull(pending.getActualIp());
+        assertEquals(PENDING, row().getStatus());
+        noAddress = false;
+        service.reconcileVmLedger();
+        assertEquals(READY, row().getStatus());
+        assertEquals(IP, db.jdbc.queryForObject("SELECT ip FROM mp_scene_scene_element_port", String.class));
+        assertEquals(String.valueOf(id), db.jdbc.queryForObject("SELECT resource_id FROM mp_sceneplugincloud_scene_element", String.class));
+        assertTrue(create().isReady());
+        assertEquals(1, count("clone"));
+        assertEquals(1, count("start"));
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = {false, true})
-    void realHttpRoundTripHonorsOrderingAndBusinessFailure(boolean rejectNetwork) throws Exception {
-        HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
-        server.createContext("/", exchange -> {
-            String content = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
-            HttpResult response = respond(exchange.getRequestMethod(), exchange.getRequestURI().toString(),
-                    content.isEmpty() ? null : new StringHttpData(content));
-            byte[] bytes = response.getResult().getBytes(StandardCharsets.UTF_8);
-            exchange.getResponseHeaders().set("Content-Type", "application/json");
-            exchange.sendResponseHeaders(response.getResponse().getStatusLine().getStatusCode(), bytes.length);
-            exchange.getResponseBody().write(bytes);
-            exchange.close();
-        });
-        server.start();
-        try {
-            HttpClient client = HttpClient.builder().configServer("http://127.0.0.1:" + server.getAddress().getPort()).build();
-            when(multiCloudClient.getClient(3)).thenReturn(client);
-            if (rejectNetwork) {
-                bodies.put("write-config", "{\"success\":0,\"status\":500,\"message\":\"hotplug rejected\"}");
-                assertTrue(assertThrows(MpRuntimeException.class, () -> service.createVm("115"))
-                        .getMessage().contains("hotplug rejected"));
-                assertFalse(events.contains("start"));
-            } else {
-                assertEquals("9001", service.createVm("115"));
-                assertTrue(events.indexOf("write-config") < events.indexOf("start"));
-                assertTrue(events.indexOf("readback") < events.indexOf("start"));
-                assertEquals("initial-digest", networkRequest.getString("digest"));
+    @Test void deleteUsesActualNodeAndConfirmsAbsenceEvenWhenResponseLost() {
+        assertTrue(create().isReady());
+        node = "migrated-node";
+        lostDelete = true;
+        service.deleteManagedVm("", "scene", "element");
+        assertFalse(exists);
+        assertEquals(DELETED, row().getStatus());
+        assertNull(ledger.byOwner(ownerKey("scene", "element")));
+        assertEquals(1, count("stop"));
+        assertEquals(1, count("delete"));
+        service.deleteManagedVm(String.valueOf(id), "scene", "element");
+        assertEquals(1, count("delete"));
+    }
+
+    @Test void deleteBusinessRejectionRetainsAssociationUntilConfirmedGone() {
+        assertTrue(create().isReady());
+        rejectDelete = true;
+        assertThrows(MpRuntimeException.class, () -> service.deleteManagedVm(String.valueOf(id), "scene", "element"));
+        assertEquals(DELETING, row().getStatus());
+        assertEquals(3, count("delete"));
+        assertTrue(exists);
+        rejectDelete = false;
+        service.deleteManagedVm(String.valueOf(id), "scene", "element");
+        assertEquals(DELETED, row().getStatus());
+    }
+
+    @Test void acceptedDeleteNotRepeatedAndLateAbsenceIsReconciled() {
+        assertTrue(create().isReady());
+        holdDelete = true;
+        assertThrows(MpRuntimeException.class, () -> service.deleteManagedVm(String.valueOf(id), "scene", "element"));
+        assertThrows(MpRuntimeException.class, () -> service.deleteManagedVm(String.valueOf(id), "scene", "element"));
+        assertEquals(1, count("delete"));
+        exists = false;
+        service.reconcileVmLedger();
+        assertEquals(DELETED, row().getStatus());
+    }
+
+    @Test void mismatchingIdentityIsNeverStoppedOrDeleted() {
+        assertTrue(create().isReady());
+        wrongName = true;
+        assertThrows(MpRuntimeException.class, () -> service.validateManagedVm(String.valueOf(id), "scene", "element"));
+        assertThrows(MpRuntimeException.class, () -> service.deleteManagedVm(String.valueOf(id), "scene", "element"));
+        assertEquals(0, count("stop"));
+        assertEquals(0, count("delete"));
+    }
+
+    @Test void historicalMissingVmIsIdempotentButExistingUnownedVmIsNotDeleted() {
+        service.deleteManagedVm("8888", "old-scene", "old-element");
+        assertThrows(MpRuntimeException.class, () -> service.deleteManagedVm("9000", "old-scene", "old-element"));
+        assertEquals(0, count("delete"));
+    }
+
+    @Test void incompleteInventoryCannotConfirmAbsence() {
+        assertTrue(create().isReady());
+        noInventory = true;
+        assertThrows(MpRuntimeException.class, () -> service.deleteManagedVm(String.valueOf(id), "scene", "element"));
+        assertEquals(DELETING, row().getStatus());
+        assertEquals(0, count("delete"));
+    }
+
+    private JSONObject vm(int vmid, String vmName, int template, String vmNode, String status) {
+        JSONObject vm = new JSONObject();
+        vm.put("vmid", vmid);
+        vm.put("type", "qemu");
+        vm.put("name", vmName);
+        vm.put("template", template);
+        vm.put("node", vmNode);
+        vm.put("status", status);
+        return vm;
+    }
+
+    private HttpResult ok(Object data) {
+        JSONObject json = new JSONObject();
+        json.put("success", 1);
+        json.put("data", data);
+        return response(200, json.toJSONString());
+    }
+
+    private HttpResult failed(String message) {
+        JSONObject json = new JSONObject();
+        json.put("success", 0);
+        json.put("message", message);
+        return response(200, json.toJSONString());
+    }
+
+    private HttpResult uncertain() { return response(503, "{\"message\":\"fixture lost response\"}"); }
+
+    private HttpResult respond(String method, String path, HttpData data) {
+        if (path.startsWith("/api2/json/cluster/resources/")) {
+            if (noInventory) return uncertain();
+            JSONArray inventory = new JSONArray();
+            inventory.add(vm(115, "template", 1, NODE, "stopped"));
+            inventory.add(vm(9000, "unrelated", 0, NODE, "running"));
+            if (exists && missingReads-- <= 0) {
+                if (startReads > 0 && count("start") > 0 && !holdStart && --startReads == 0) state = "running";
+                JSONObject vm = vm(id, wrongName ? "foreign" : name, 0, node, state);
+                if (neverUnlock || lockReads-- > 0) {
+                    vm.put("lock", "clone");
+                    events.add("locked");
+                }
+                inventory.add(vm);
             }
-        } finally {
-            server.stop(0);
+            return ok(inventory);
         }
-    }
-
-    private List<String> warnings() {
-        return logs.list.stream().filter(e -> e.getLevel() == Level.WARN)
-                .map(ILoggingEvent::getFormattedMessage).collect(Collectors.toList());
-    }
-
-    private HttpResult respond(String method, String path, HttpData body) {
-        String stage;
-        String response;
-        if (path.equals("/api2/json/cluster/resources/")) {
-            stage = "templates";
-            response = "{\"success\":1,\"data\":[{\"template\":1,\"vmid\":115,\"node\":\"" + NODE
-                    + "\",\"name\":\"fixture-template\"}]}";
-        } else if (path.equals("/api2/json/cluster/resources/?type=vm")) {
-            stage = started ? "poll-start" : "poll-clone";
-            Deque<String> states = started ? startStates : cloneStates;
-            String state = states.isEmpty() ? (started ? startState : cloneState) : states.removeFirst();
-            String data = "[]";
-            if (!state.equals("missing")) {
-                String[] parts = state.split(",", 2);
-                data = "[{\"vmid\":" + vmId + ",\"node\":\"" + NODE + "\",\"status\":\"" + parts[0] + "\""
-                        + (parts.length == 2 ? ",\"lock\":\"" + parts[1] + "\"" : "") + "}]";
-            }
-            response = "{\"success\":1,\"data\":" + data + "}";
-        } else {
-            assertTrue(path.startsWith("/api2/json/nodes/" + NODE + "/qemu/"));
-            if (path.endsWith("/115/clone") && method.equals("POST")) {
-                stage = "clone";
-                cloneRequest = JSONObject.parseObject(body.toContent());
-                vmId = cloneRequest.getIntValue("newid");
-                response = "{\"success\":1,\"data\":\"fixture-clone-UPID\"}";
-            } else if (path.endsWith("/config") && method.equals("GET")) {
-                stage = ++configReads == 1 ? "read-config" : "readback";
-                JSONObject config = new JSONObject();
-                config.put("digest", "initial-digest");
-                config.put("vnet0", configReads == 1 ? "virtio=02:00:00:00:00:01,ip=198.51.100.1,network=" + NETWORK : readback);
-                JSONObject result = new JSONObject();
-                result.put("success", 1);
-                result.put("data", config);
-                response = result.toJSONString();
-            } else if (path.endsWith("/config") && method.equals("PUT")) {
-                stage = "write-config";
-                networkRequest = JSONObject.parseObject(body.toContent());
-                response = "{\"success\":1,\"data\":null}";
-            } else if (path.endsWith("/status/start") && method.equals("POST")) {
-                stage = "start";
-                assertNull(body);
-                started = true;
-                response = "{\"success\":1,\"data\":\"fixture-start-UPID\"}";
-            } else {
-                throw new AssertionError("Unexpected request: " + method + " " + path);
-            }
+        if (path.equals("/api2/json/nodes/" + NODE + "/qemu/115/clone")) {
+            events.add("clone");
+            request = JSONObject.parseObject(data.toContent());
+            id = request.getIntValue("newid");
+            name = request.getString("name");
+            if (collisions-- > 0) return failed("VMID already exists");
+            if (rejectClone) return failed("fixture rejected");
+            exists = true;
+            return lostClone ? uncertain() : ok("clone-UPID");
         }
-        events.add(stage);
-        HttpResult result = new HttpResult();
-        result.setResponse(new BasicHttpResponse(HttpVersion.HTTP_1_1, codes.getOrDefault(stage, 200), "fixture"));
-        result.setResult(bodies.getOrDefault(stage, response));
-        return result;
+        String prefix = "/api2/json/nodes/" + node + "/qemu/" + id;
+        if (path.equals(prefix + "/config") && method.equals("GET")) {
+            JSONObject info = new JSONObject();
+            info.put("name", name);
+            if (!noDigest) info.put("digest", "initial-digest");
+            boolean verifiedNetwork = configured && networkReads-- <= 0;
+            boolean address = state.equals("running") && !noAddress && addressReads-- <= 0;
+            info.put("vnet0", "virtio=" + MAC + (address ? ",ip=" + IP + "/24,gw=198.51.100.1" : "")
+                    + ",network=" + (verifiedNetwork ? NETWORK : "wrong-network"));
+            return ok(info);
+        }
+        if (path.equals(prefix + "/config") && method.equals("PUT")) {
+            events.add("network");
+            networkRequest = JSONObject.parseObject(data.toContent());
+            if (rejectNetwork) return failed("fixture config rejected");
+            configured = true;
+            return lostNetwork ? uncertain() : ok(null);
+        }
+        if (path.equals(prefix + "/status/start")) {
+            events.add("start");
+            if (rejectStart) { rejectStart = false; return failed("fixture start rejected"); }
+            if (startReads == 0 && !holdStart) state = "running";
+            return lostStart ? uncertain() : ok("start-UPID");
+        }
+        if (path.equals(prefix + "/status/stop")) {
+            events.add("stop");
+            state = "stopped";
+            return ok("stop-UPID");
+        }
+        if (path.equals("/api2/extjs/nodes/" + node + "/qemu/" + id + "/") && method.equals("DELETE")) {
+            events.add("delete");
+            if (rejectDelete) return failed("fixture delete rejected");
+            if (!holdDelete) exists = false;
+            return lostDelete ? uncertain() : ok("delete-UPID");
+        }
+        throw new AssertionError("Unexpected " + method + " " + path);
     }
 }

@@ -121,6 +121,50 @@ class VendorSecondAddressPoolTest {
         assertEquals(PENDING, row(B).getStatus());
     }
 
+    @Test void defaultRangeContains150Addresses() {
+        XdAppConfig defaults = new XdAppConfig();
+        VendorSecondIpRange configured = new VendorSecondIpRange(defaults);
+        assertEquals(150, configured.addresses().size());
+        assertEquals("192.168.140.76", configured.addresses().get(0));
+        assertEquals("192.168.140.225", configured.addresses().get(149));
+        Set<String> onDemand = configured.onDemandScope(defaults.getXdTwoIpOnDemandProbeRange());
+        assertEquals(150, onDemand.size());
+        assertTrue(onDemand.contains("192.168.140.76"));
+        assertTrue(onDemand.contains("192.168.140.125"));
+        assertTrue(onDemand.contains("192.168.140.126"));
+        assertTrue(onDemand.contains("192.168.140.225"));
+        assertFalse(onDemand.contains("192.168.140.226"));
+        assertTrue(configured.reviewedFree(defaults.getXdTwoIpReviewedFree()).isEmpty());
+        assertEquals(300000L, defaults.getXdTwoAllocationRecoveryTimeoutMs());
+    }
+
+    @Test void onDemandDefaultCannotExtendAnExplicitlyConfiguredSmallerPool() {
+        XdAppConfig legacy = new XdAppConfig();
+        legacy.setXdTwoIpPoolStart("192.168.140.126");
+        Set<String> legacyScope = new VendorSecondIpRange(legacy).onDemandScope(legacy.getXdTwoIpOnDemandProbeRange());
+        assertEquals(100, legacyScope.size());
+        assertFalse(legacyScope.contains("192.168.140.125"));
+        legacy.setXdTwoIpPoolStart("192.168.140.120");
+        assertEquals(106, new VendorSecondIpRange(legacy).onDemandScope(legacy.getXdTwoIpOnDemandProbeRange()).size());
+        assertTrue(new VendorSecondIpRange(legacy).onDemandScope("").isEmpty());
+    }
+
+    @Test void leftExpansionKeepsExistingLeasesAndSeedsOnlyNewAddresses() {
+        createVerified("existing", "active-vm", A);
+        config.setXdTwoIpPoolStart("198.51.100.8");
+        pool.prepare(inventory(2, vm("active-vm", "fixture", A), vm("legacy", "fixture", "198.51.100.9")));
+        assertEquals(5, pool.list().size());
+        assertEquals(USED, row(A).getStatus());
+        assertEquals("active-vm", row(A).getVmUuid());
+        assertEquals("INITIAL_UNREVIEWED", row("198.51.100.8").getReason());
+        assertEquals("OBSERVED_RESOURCE", row("198.51.100.9").getReason());
+        config.setXdTwoIpReviewedFree("198.51.100.8-" + C);
+        pool.prepare(inventory(2, vm("active-vm", "fixture", A), vm("legacy", "fixture", "198.51.100.9")));
+        assertEquals(FREE, row("198.51.100.8").getStatus());
+        assertEquals(PENDING, row("198.51.100.9").getStatus());
+        assertEquals(USED, row(A).getStatus());
+    }
+
     @Test void preferredOccupiedAndProbeOccupiedFallBackDeterministically() {
         pool.prepare(inventory(1, vm("existing", "old", A)));
         probes.put(B, ProbeResult.REACHABLE);
@@ -215,6 +259,16 @@ class VendorSecondAddressPoolTest {
         assertEquals(C, reserve(pool, "new", B).getIp());
     }
 
+    @Test void partialInventoryCannotConfirmExclusiveAddress() {
+        pool.prepare(inventory(0));
+        Lease lease = reserve(pool, "owner", A);
+        pool.recordCreated(lease, "vm");
+        assertNull(pool.confirm(lease, "vm", inventory(2, vm("vm", "MP_owner", A))));
+        assertEquals(PENDING, row(A).getStatus());
+        assertNotNull(pool.confirm(lease, "vm", inventory(1, vm("vm", "MP_owner", A))));
+        assertEquals(USED, row(A).getStatus());
+    }
+
     @Test void onlyConfirmedDeletionAllowsReuse() {
         Lease lease = createVerified("owner", "vm", A);
         pool.beginDelete("vm", inventory(1, vm("vm", lease.getRequestName(), A)));
@@ -228,6 +282,126 @@ class VendorSecondAddressPoolTest {
         assertEquals(A, reserve(pool, "new", A).getIp());
     }
 
+    @Test void onDemandRecoveryMakesDeletedAddressAvailableBeforeScheduledJob() {
+        Lease lease = createVerified("owner", "vm", A);
+        reserve(pool, "second", B);
+        reserve(pool, "third", C);
+        pool.beginDelete("vm", inventory(1, vm("vm", lease.getRequestName(), A)));
+        pool.deleteSubmitted("vm", true);
+        assertThrows(Exhausted.class, () -> reserve(pool, "new", A));
+        List<Lease> beforeRead = pool.releasingLeases();
+        pool.recoverForAllocation(beforeRead, inventory(0));
+        assertEquals(FREE, row(A).getStatus());
+        assertEquals(A, reserve(pool, "new", A).getIp());
+    }
+
+    @Test void onDemandRecoveryRetainsConflictsUnreviewedAndIncompleteResources() {
+        config.setXdTwoIpReviewedFree(A);
+        Lease lease = createVerified("owner", "vm", A);
+        pool.beginDelete("vm", inventory(1, vm("vm", lease.getRequestName(), A)));
+        pool.deleteSubmitted("vm", true);
+        pool.recoverForAllocation(pool.releasingLeases(), inventory(2));
+        assertEquals(RELEASING, row(A).getStatus());
+        probes.put(A, ProbeResult.REACHABLE);
+        pool.recoverForAllocation(pool.releasingLeases(), inventory(2, vm("conflict1", "fixture", B), vm("conflict2", "fixture", B)));
+        assertEquals("POST_DELETE_OCCUPIED", row(A).getReason());
+        assertEquals("OBSERVED_CONFLICT", row(B).getReason());
+        assertEquals("INITIAL_UNREVIEWED", row(C).getReason());
+        assertThrows(Exhausted.class, () -> reserve(pool, "new", A));
+    }
+
+    @Test void onDemandCanReserveOnlyAnExplicitExclusiveInitialCandidate() {
+        config.setXdTwoIpReviewedFree("");
+        config.setXdTwoIpOnDemandProbeRange(A + "-" + B);
+        pool.prepare(inventory(0));
+        probes.put(A, ProbeResult.REACHABLE);
+        Lease provisional = pool.reserveOnDemand("scene", "node", "port", A, "owner", "MP_owner",
+                inventory(0), new HashSet<>());
+        assertNotNull(provisional);
+        assertEquals(B, provisional.getIp());
+        assertEquals(RESERVED, row(B).getStatus());
+        assertEquals("PROBE_OCCUPIED", row(A).getReason());
+        assertEquals("INITIAL_UNREVIEWED", row(C).getReason());
+        pool.rejectBeforeCreation(provisional, false);
+        assertEquals(PENDING, row(B).getStatus());
+        assertEquals("INITIAL_UNREVIEWED", row(B).getReason());
+    }
+
+    @Test void onDemandRequiresCompleteInventoryAndActualProbe() {
+        config.setXdTwoIpReviewedFree("");
+        config.setXdTwoIpOnDemandProbeRange(A);
+        pool.prepare(inventory(0));
+        assertNull(pool.reserveOnDemand("scene", "node", "port", A, "owner", "MP_owner",
+                inventory(2), new HashSet<>()));
+        probes.put(A, ProbeResult.UNAVAILABLE);
+        assertNull(pool.reserveOnDemand("scene", "node", "port", A, "owner", "MP_owner",
+                inventory(0), new HashSet<>()));
+        assertEquals(PENDING, row(A).getStatus());
+        assertEquals("INITIAL_UNREVIEWED", row(A).getReason());
+    }
+
+    @Test void onDemandNeverBorrowsAnAddressClaimedByAnotherActiveScene() {
+        config.setXdTwoIpReviewedFree("");
+        config.setXdTwoIpOnDemandProbeRange(A + "-" + B);
+        pool.prepare(inventory(0));
+        jdbc.update("INSERT INTO mp_scene_scene VALUES ('existing-scene',0,2,4)");
+        jdbc.update("INSERT INTO mp_scene_scene_element_port (id,scene,scene_element,ip) VALUES ('existing-port','existing-scene','other',?)", A);
+        Lease lease = pool.reserveOnDemand("scene", "node", "port", A, "owner", "MP_owner",
+                inventory(0), new HashSet<>());
+        assertNotNull(lease);
+        assertEquals(B, lease.getIp());
+        assertEquals(PENDING, row(A).getStatus());
+    }
+
+    @Test void onDemandCannotOverrideObservedConflictOrUnapprovedAddress() {
+        config.setXdTwoIpReviewedFree("");
+        config.setXdTwoIpOnDemandProbeRange(A);
+        pool.prepare(inventory(2, vm("first", "fixture", A), vm("second", "fixture", A)));
+        assertNull(pool.reserveOnDemand("scene", "node", "port", A, "owner", "MP_owner",
+                inventory(0), new HashSet<>()));
+        assertEquals("OBSERVED_CONFLICT", row(A).getReason());
+        assertEquals("INITIAL_UNREVIEWED", row(B).getReason());
+    }
+
+    @Test void snapshotBeforeNewDeletionAttemptDoesNotReleaseLease() {
+        Lease lease = createVerified("owner", "vm", A);
+        pool.beginDelete("vm", inventory(1, vm("vm", lease.getRequestName(), A)));
+        pool.deleteSubmitted("vm", true);
+        List<Lease> staleSnapshot = pool.releasingLeases();
+        pool.beginDelete("vm", inventory(1, vm("vm", lease.getRequestName(), A)));
+        assertFalse(pool.reconcileDeleted("vm", inventory(0), staleSnapshot));
+        assertEquals(RELEASING, row(A).getStatus());
+    }
+
+    @Test void missingUuidResolvedFromUniqueUncertainRequestName() {
+        pool.prepare(inventory(0));
+        Lease lease = reserve(pool, "owner", A);
+        pool.uncertainCreation(lease);
+        assertThrows(MpRuntimeException.class, () -> pool.resolveManagedVmForDelete("scene", "other", inventory(0)));
+        assertThrows(MpRuntimeException.class, () -> pool.resolveManagedVmForDelete("scene", "owner", inventory(2,
+                vm("one", lease.getRequestName(), A))));
+        assertEquals("late-vm", pool.resolveManagedVmForDelete("scene", "owner", inventory(1,
+                vm("late-vm", lease.getRequestName(), A))));
+        assertEquals("late-vm", row(A).getVmUuid());
+    }
+
+    @Test void partialInventoryCannotBindUncertainCreationByName() {
+        pool.prepare(inventory(0));
+        Lease lease = reserve(pool, "owner", A);
+        pool.uncertainCreation(lease);
+        pool.reconcile(inventory(2, vm("late-vm", lease.getRequestName(), A)));
+        assertNull(row(A).getVmUuid());
+        assertEquals("CREATE_UNCERTAIN", row(A).getReason());
+        pool.reconcile(inventory(1, vm("late-vm", lease.getRequestName(), A)));
+        assertEquals("late-vm", row(A).getVmUuid());
+    }
+
+    @Test void mismatchingSceneOrVmIdentityCannotOperateOnManagedLease() {
+        createVerified("owner", "vm", A);
+        assertDoesNotThrow(() -> pool.validateManagedOwner("vm", "scene", "owner"));
+        assertThrows(MpRuntimeException.class, () -> pool.validateManagedOwner("vm", "other-scene", "other"));
+        assertThrows(MpRuntimeException.class, () -> pool.validateManagedOwner("different-vm", "scene", "owner"));
+    }
     @Test void addressRespondingAfterDeletionRemainsQuarantined() {
         Lease lease = createVerified("owner", "vm", A);
         pool.beginDelete("vm", inventory(1, vm("vm", lease.getRequestName(), A)));
