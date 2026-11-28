@@ -2,6 +2,9 @@ package cn.cyberpeace.mp.service;
 
 import cn.cyberpeace.mp.base.config.XdAppConfig;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.util.http.HttpClient;
+import cn.cyberpeace.mp.base.util.http.MultiCloudClient;
+import com.alibaba.fastjson.JSONObject;
 import org.h2.jdbcx.JdbcDataSource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,9 +16,12 @@ import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.*;
+import static cn.cyberpeace.mp.service.VendorSecondAddressPoolTest.*;
 
 class VendorVmReclaimServiceTest {
     private static final String NAME = "MP_0123456789abcdef0123456789abcdef";
@@ -41,6 +47,7 @@ class VendorVmReclaimServiceTest {
         jdbc.execute("CREATE TABLE mp_scene_scene_element(id VARCHAR(64) PRIMARY KEY,scene VARCHAR(64),node_id VARCHAR(64),vendor INT,event INT,event_status INT,update_time TIMESTAMP)");
         jdbc.execute("CREATE TABLE mp_sceneplugincloud_scene_element(scene VARCHAR(64),scene_element VARCHAR(64),resource_id VARCHAR(64),virtual_type INT,external INT)");
         jdbc.execute("CREATE TABLE mp_cscene_cscene_instance(scene VARCHAR(64),deleted INT)");
+        jdbc.execute("CREATE TABLE mp_scene_scene_element_port(id VARCHAR(64),scene VARCHAR(64),scene_element VARCHAR(64),ip VARCHAR(15))");
         config = new XdAppConfig();
         providers = new ArrayList<>();
         for (int vendor = 1; vendor <= 3; vendor++) {
@@ -73,6 +80,66 @@ class VendorVmReclaimServiceTest {
         visible(1, "first-ledger", "first-vm", NAME);
         service.reclaim(1);
         verify(provider(1)).reclaimClosedVm("first-vm", NAME, "first-ledger", "element-first-ledger");
+    }
+
+    @Test void absentResourcesAreNotSkippedWhenProviderLedgersStillNeedReconciliation() {
+        for (int vendor = 1; vendor <= 3; vendor++) {
+            String scene = "absent-" + vendor, id = "vm-" + vendor;
+            seed(vendor, scene, id, true);
+            when(provider(vendor).readReclaimInventory()).thenReturn(Collections.emptyMap());
+            when(provider(vendor).reconcileAbsentVm(id, scene, "element-" + scene)).thenReturn(true);
+            service.reclaim(vendor);
+            verify(provider(vendor)).reconcileAbsentVm(id, scene, "element-" + scene);
+            verify(provider(vendor), never()).reclaimClosedVm(anyString(), anyString(), anyString(), anyString());
+        }
+    }
+
+    @Test void secondVendorFallbackDeletesVmAndReturnsItsIpToPool() {
+        actualSecondVendorReclaim(true);
+    }
+
+    @Test void secondVendorFallbackReleasesUsedIpEvenWhenVmWasDeletedOutsideMp() {
+        actualSecondVendorReclaim(false);
+    }
+
+    private void actualSecondVendorReclaim(boolean initiallyExists) {
+        String scene = "second-integration", id = "11111111-2222-3333-4444-555555555555", ip = "198.51.100.10";
+        seed(2, scene, id, true);
+        config.setXdTwoIpPoolStart(ip);
+        config.setXdTwoIpPoolEnd(ip);
+        config.setXdTwoIpGateway("198.51.100.1");
+        config.setXdTwoIpNetmask("255.255.255.0");
+        jdbc.update("INSERT INTO mp_vendor_second_address_pool (ip,status,owner_key,scene_id,element_id,request_name,vm_uuid,reason,seen_in_inventory,updated_at) "
+                + "VALUES (?,'USED',?,?,?,?,?,'VERIFIED',1,?)", ip, "original-owner", scene, "element-" + scene, NAME, id, OLD);
+        VendorSecondAddressPool pool = new VendorSecondAddressPool(jdbc, config, tx) {
+            @Override ProbeResult probe(String address) { return ProbeResult.NO_REPLY; }
+        };
+        AtomicBoolean exists = new AtomicBoolean(initiallyExists);
+        HttpClient client = mock(HttpClient.class);
+        MultiCloudClient multi = mock(MultiCloudClient.class);
+        when(multi.getClient(2)).thenReturn(client);
+        String servers = "/janus/20180725/servers";
+        JSONObject vm = vm(id, NAME, ip);
+        vm.put("status", "stopped");
+        when(client.get(eq(servers), isNull(), anyMap(), eq(30000))).thenAnswer(inv ->
+                exists.get() ? listResponse(1, vm) : listResponse(0));
+        when(client.delete(eq(servers + "/" + id), any(), isNull(), anyMap(), eq(30000))).thenAnswer(inv -> {
+            exists.set(false);
+            return response(200, "{\"code\":0}");
+        });
+        VendorSecondCloudServiceImpl actual = new VendorSecondCloudServiceImpl(multi, config, pool) {
+            @Override public Map<String, String> getHeaders() { return Collections.emptyMap(); }
+            @Override protected long recycleDeleteTimeoutMillis() { return 0; }
+        };
+        providers.set(1, actual);
+        service.reclaim(2);
+        assertFalse(exists.get());
+        VendorSecondAddressPool.Lease result = pool.list().get(0);
+        assertEquals("FREE", result.getStatus());
+        assertNull(result.getVmUuid());
+        service.reclaim(2);
+        verify(client, times(initiallyExists ? 1 : 0)).delete(eq(servers + "/" + id), any(), isNull(), anyMap(), eq(30000));
+        verify(client, never()).post(anyString(), any(), any(), anyMap(), anyInt());
     }
 
     private String state(int vendor, String id) {

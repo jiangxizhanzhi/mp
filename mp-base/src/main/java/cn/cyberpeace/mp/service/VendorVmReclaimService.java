@@ -32,7 +32,7 @@ public class VendorVmReclaimService {
             + "AND s.update_time<=? AND e.update_time<=? "
             + "AND NOT EXISTS (SELECT 1 FROM mp_cscene_cscene_instance i WHERE i.scene=s.id AND i.deleted=0) ";
     private static final long CLAIM_TIMEOUT = TimeUnit.HOURS.toMillis(2);
-    private static final long RETRY_INTERVAL = TimeUnit.MINUTES.toMillis(50);
+    private static final long RETRY_INTERVAL = TimeUnit.MINUTES.toMillis(2);
     private final JdbcTemplate jdbc;
     private final TransactionTemplate store;
     private final XdAppConfig config;
@@ -186,11 +186,22 @@ public class VendorVmReclaimService {
         }, vendor);
         List<String> ordered = new ArrayList<>(candidates.keySet());
         ordered.sort(Comparator.comparing(previous::get, Comparator.nullsFirst(Comparator.naturalOrder())));
-        int observed = 0, skipped = 0, attempted = 0, confirmed = 0;
+        int observed = 0, skipped = 0, attempted = 0, confirmed = 0, settled = 0;
         int limit = Math.max(1, Math.min(100, config.getXdVendorReclaimMaxPerRun()));
         long deadline = System.nanoTime() + TimeUnit.MINUTES.toNanos(45);
         for (String id : ordered) {
-            if (!inventory.containsKey(id)) continue;
+            if (Thread.currentThread().isInterrupted() || System.nanoTime() >= deadline) break;
+            if (!inventory.containsKey(id)) {
+                Map<String, Ref> missingRefs = candidates.get(id);
+                if (missingRefs.size() != 1) continue;
+                Ref missing = missingRefs.values().iterator().next();
+                try {
+                    if (stillClosed(vendor, missing) && provider.reconcileAbsentVm(id, missing.scene, missing.element)) settled++;
+                } catch (RuntimeException e) {
+                    log.warn("厂商{}已消失资源的台账核对待重试，uuid={}, scene={}", vendor, id, missing.scene, e);
+                }
+                continue;
+            }
             observed++;
             Map<String, Ref> refs = candidates.get(id);
             String name = inventory.get(id);
@@ -226,7 +237,7 @@ public class VendorVmReclaimService {
             }
             if (Thread.currentThread().isInterrupted()) break;
         }
-        log.info("厂商{}兜底回收汇总，历史候选={}, 仍存在={}, 跳过={}, 尝试={}, 已确认={}",
-                vendor, candidates.size(), observed, skipped, attempted, confirmed);
+        log.info("厂商{}兜底回收汇总，历史候选={}, 仍存在={}, 跳过={}, 尝试={}, 已确认={}, 已消失资源台账结案={}",
+                vendor, candidates.size(), observed, skipped, attempted, confirmed, settled);
     }
 }

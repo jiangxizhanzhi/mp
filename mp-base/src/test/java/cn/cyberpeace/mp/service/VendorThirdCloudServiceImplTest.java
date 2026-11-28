@@ -289,6 +289,17 @@ class VendorThirdCloudServiceImplTest {
         assertEquals(0, count("delete"));
     }
 
+    @Test void fallbackClosesVmidLedgerWhenProviderVmDisappearsWithoutSceneDelete() {
+        assertTrue(create().isReady());
+        exists = false;
+        assertFalse(service.reconcileAbsentVm(String.valueOf(id), "other-scene", "element"));
+        assertTrue(service.reconcileAbsentVm(String.valueOf(id), "scene", "element"));
+        assertEquals(DELETED, row().getStatus());
+        assertNull(ledger.byOwner(ownerKey("scene", "element")));
+        assertEquals(0, count("delete"));
+        assertEquals(0, count("stop"));
+    }
+
     private JSONObject vm(int vmid, String vmName, int template, String vmNode, String status) {
         JSONObject vm = new JSONObject();
         vm.put("vmid", vmid);

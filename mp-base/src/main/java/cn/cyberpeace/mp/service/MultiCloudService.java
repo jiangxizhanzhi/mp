@@ -186,6 +186,11 @@ public interface MultiCloudService {
         throw new UnsupportedOperationException("Provider reclaim is not supported");
     }
 
+    /** Settle remaining local leases when a closed scene's VM is already absent. */
+    default boolean reconcileAbsentVm(String vmUuid, String sceneId, String elementId) {
+        return false;
+    }
+
     static boolean isMpCreatedName(String name) {
         return name != null && name.matches("MP_[0-9a-fA-F]{32}");
     }

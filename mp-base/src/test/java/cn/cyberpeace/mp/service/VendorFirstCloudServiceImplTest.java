@@ -166,6 +166,16 @@ class VendorFirstCloudServiceImplTest {
         verify(client, never()).delete(anyString(), any(), any(), anyMap(), anyInt());
     }
 
+    @Test void fallbackClosesCreationLedgerWhenProviderVmIsAlreadyGone() {
+        VendorFirstVmLedger.Lease lease = ledger.reserve("scene", "element", IMAGE, "MP_fixture");
+        ledger.created(lease, VM);
+        when(client.get(startsWith(INSTANCES + "?"), isNull(), anyMap(), eq(30000)))
+                .thenReturn(response(200, "{\"count\":0,\"results\":[]}"));
+        assertTrue(service.reconcileAbsentVm(VM, "scene", "element"));
+        assertNull(ledger.byOwner("scene", "element"));
+        verify(client, never()).delete(anyString(), any(), any(), anyMap(), anyInt());
+    }
+
     @Test void reclaimVerifiesCurrentIdentityBeforeDeleting() {
         String id = "11111111-2222-3333-4444-555555555555";
         String name = "MP_0123456789abcdef0123456789abcdef";

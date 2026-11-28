@@ -623,6 +623,17 @@ public class VendorThirdCloudServiceImpl extends AbstractVendorCloudService {
     }
 
     @Override
+    public boolean reconcileAbsentVm(String vmUuid, String sceneId, String elementId) {
+        VendorThirdVmLedger.Lease lease = ledger.byId(parseVmid(vmUuid));
+        if (lease == null || !sceneId.equals(lease.getSceneId()) || !elementId.equals(lease.getElementId())
+                || VendorThirdVmLedger.CREATING.equals(lease.getStatus())
+                || VendorThirdVmLedger.DELETED.equals(lease.getStatus()) || VendorThirdVmLedger.REJECTED.equals(lease.getStatus())) return false;
+        VendorThirdInventory current = readInventory(true);
+        if (current.find(lease.getVmid()) != null || current.hasName(lease.getRequestName())) return false;
+        return confirmAbsent(ledger.beginDelete(lease), current);
+    }
+
+    @Override
     public boolean matchesReclaimIdentity(String vmUuid, String name, String sceneId, String elementId) {
         if (StringUtils.isBlank(name) || sceneId == null || elementId == null) return false;
         VendorThirdVmLedger.Lease lease = ledger.byId(parseVmid(vmUuid));

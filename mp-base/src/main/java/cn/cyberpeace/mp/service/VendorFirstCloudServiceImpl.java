@@ -412,6 +412,16 @@ public class VendorFirstCloudServiceImpl extends AbstractVendorCloudService {
     }
 
     @Override
+    public boolean reconcileAbsentVm(String vmUuid, String sceneId, String elementId) {
+        VendorFirstVmLedger.Lease lease = ledger.byOwner(sceneId, elementId);
+        if (lease == null || !vmUuid.equals(lease.getUuid())) return false;
+        Map<String, JSONObject> current = readInstances(null);
+        if (current.containsKey(vmUuid) || uniqueRequestVm(lease, current) != null) return false;
+        ledger.deleted(lease);
+        return true;
+    }
+
+    @Override
     public void deleteManagedVm(String vmUuid, String sceneId, String elementId) {
         VendorFirstVmLedger.Lease lease = ledger.byOwner(sceneId, elementId);
         if (lease != null) {

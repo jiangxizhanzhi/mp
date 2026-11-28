@@ -444,6 +444,23 @@ public class VendorSecondCloudServiceImpl extends AbstractVendorCloudService {
         deleteManagedVm(vmUuid, sceneId, elementId);
     }
 
+    @Override
+    public boolean reconcileAbsentVm(String vmUuid, String sceneId, String elementId) {
+        if (!MultiCloudService.isProviderUuid(vmUuid)) return false;
+        boolean retained = addressPool.list().stream().anyMatch(row -> vmUuid.equals(row.getVmUuid())
+                && sceneId.equals(row.getSceneId()) && elementId.equals(row.getElementId())
+                && (VendorSecondAddressPool.USED.equals(row.getStatus())
+                || VendorSecondAddressPool.RELEASING.equals(row.getStatus()) || "LEGACY_RECORD".equals(row.getReason())));
+        if (!retained) return false;
+        validateManagedVm(vmUuid, sceneId, elementId);
+        VendorSecondInventory observed = readInventorySafely();
+        if (!observed.complete || observed.vms.containsKey(vmUuid)) return false;
+        addressPool.beginDelete(vmUuid, observed);
+        addressPool.deleteSubmitted(vmUuid, false);
+        List<VendorSecondAddressPool.Lease> beforeRead = addressPool.releasingLeases();
+        return addressPool.reconcileDeleted(vmUuid, readInventorySafely(), beforeRead);
+    }
+
     private JSONObject getTargetImage(String imageUuid) {
         try {
             String url = "/janus/20180725/images";
