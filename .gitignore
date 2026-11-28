@@ -49,3 +49,7 @@ mp-situation-aware/log
 **/target/maven-archiver/**
 **/target/maven-status/**
 **/target/*.jar
+
+### On-site reports and Python test cache ###
+/capacity_report_*/
+/scripts/__pycache__/

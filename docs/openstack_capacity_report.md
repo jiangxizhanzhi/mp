@@ -1,0 +1,72 @@
+# 现场当前资源与节点调度只读核查
+
+在 **controller01** 上执行 `scripts/report_openstack_capacity.sh`。脚本只查询现状和写入本地报告，不清理资源、不改超分/预留、不重启服务。
+
+```bash
+bash report_openstack_capacity.sh
+```
+
+推荐使用现场现有的 root 运维账户，需要 Bash、Python 3.7+（现场 Ubuntu 20.04 自带 Python 3.8）。默认优先通过本机 mysql 只读事务取得 Placement 当前库存及分配；失败后尝试 OpenStack API。API 自动加载已有 `/root/admin.openrc`，或沿用已设置的 `OS_AUTH_URL` / `OS_CLOUD`。命令行路径可通过 `MYSQL_BIN`、`OPENSTACK_BIN` 指定。脚本不安装依赖、不询问或保存密码。
+
+脚本使用既有可信 SSH 连接只读采样 compute01 的实际资源，主机密钥校验保持启用。没有已配置的 SSH 时会报告物理资源未确认，仍可统计已取得的 Placement 额度；不会自动改 SSH 或云平台配置。
+
+## 默认报告
+
+- 两节点的 VCPU、MEMORY_MB、DISK_GB 总量、预留、超分比、已分配及可新增额度，查询的是执行时数据，不沿用历史日志数值。
+- Nova compute 服务 up/down、是否启用调度、Placement 禁用标记，以及已取得的 Cell 映射/禁用状态；不满足条件的节点不计入可新增合计。DB 模式按 `last_seen_up`（无则 `created_at`）与 `service_down_time` 判断服务状态，并标明来源。
+- controller01、compute01 各自当前未删除虚拟机的数量、状态、资源总和、最近 24 小时新建/启动数量和最多 20 个实例样本；另列未分配宿主机实例和 `nova_cell0` 中未调度成功的实例。读取 `compute_nodes.stats.num_instances` 对照调度器实例计数，并通过 `virsh --readonly` 对照宿主机实际域数量。
+- nova-scheduler、nova-conductor 服务状态；主机聚合/可用区、实例数限制、白名单资源元数据；最近存活实例的指定宿主机、可用区、规格/NUMA/CPU 策略等调度约束样本，以及近期 `NoValidHost` 等故障分类。故障同时查询 `nova` 与 `nova_cell0`，不导出原始异常详情。
+- 从运行中的 nova-compute / nova-scheduler 进程找出 `--config-file`、`--config-dir`，按顺序读取白名单配置，并记录文件是否晚于进程启动。核对 CPU/内存/磁盘超分、资源预留、CPU 绑定集合及 Placement 当前生效值；过滤器、权重、实例数上限以 **scheduler 进程的配置**为准，不拿 compute 自己的同名配置充当调度器配置。
+- 清理后 Placement 分配按现存实例、已删除实例、迁移消费者、未匹配消费者分类；只做核查，不删除分配。未匹配消费者可能来自其他 Cell，不能直接认定为残留。
+- 逻辑 CPU、1 秒 CPU 忙碌率、系统负载、Linux MemAvailable，以及根目录、Nova 实例目录、Cinder 目录等实际磁盘空间。相同 device 的目录共享文件系统，不能重复累加空闲容量。
+- Cinder 后端上报的逻辑/物理容量、精简配置和现有卷数量/逻辑 GiB，同时列出其文件中的后端、超分/预留、NFS 快照白名单配置；特别标出 Cinder 路径与根盘是否共享，以及扣除默认 300 GiB 保护线后的物理空间。
+- 本机 Neutron 分配池的地址总数、池内已分配数及余量；厂商二 MP 地址台账按 status/reason 单独汇总，不混为同一个地址池。
+- 默认新增 **36 台 Kali（4 vCPU、4 GiB、30 GiB）+36 台 CentOS（1 vCPU、1 GiB、30 GiB）**，共 180 vCPU、180 GiB 内存、2160 GiB 逻辑磁盘。计算当前比例及两节点 CPU 比例分别为 2/3/4 的九种组合，给出两节点 CPU/内存允许时的分配示例。
+
+默认假设卷启动，示例不把 Nova DISK_GB 当作 Cinder 可用空间；以 `--disk-mode local` 运行时会额外检查各节点本地磁盘调度余量。实例数过滤也参与测算：例如启用 `NumInstancesFilter` 且上限 56，就需要扣除该节点现有实例槽位；启用 `AggregateNumInstancesFilter` 时读取该节点聚合上限。多个调度器配置不一致会提示，并在已知限制中取保守值。显式启用实例数过滤而未填写上限时，注明依 Nova 默认值 50 测算。
+
+报告中的配置文件值与运行中实际已加载值有区别：文件晚于进程启动会提示待确认；显式 `*_allocation_ratio=0` 或未设置时，可由 Placement 管理，`initial_*` 仅影响初始库存。资源计算始终使用本次查询的 Placement 库存。磁盘预留可能另含镜像缓存保护，不能只按 `reserved_host_disk_mb` 判断异常。
+
+模板原卷大于 30 GiB、精简卷实际增长、项目配额、可用区及亲和性等仍需结合实际启动请求核对，示例不是实际启动成功承诺。更高 CPU 超分只是调度额度变化，不增加真实计算能力。
+
+## 如何判断两节点都正常参与调度
+
+先看报告开头的 `节点调度核查`，再看两个节点的当前实例状态、近期启动记录和 libvirt 域数量。两节点都有现存实例说明当前分布覆盖两节点；如果有近期启动记录，还能确认相应时间内实例已落到节点。节点没有实例可能是刚完成清理，不单凭 0 台认定异常。
+
+服务 `up/enabled`、Placement 未禁用、Cell 未禁用且映射存在，是参与调度的必要条件。还需核对 scheduler/conductor、过滤器及实例数槽位、可用区/聚合、请求的指定宿主机、CPU 策略及错误记录。报告使用 `info` / `check` / `unknown` 列出证据与缺失项；**退出码 0 表示采集完成，不表示全部检查正常**。本脚本不创建测试虚拟机；最终新建成功须由实际业务启动结果验收。
+
+## 其他用法
+
+```bash
+# 不采集远端物理资源，但仍读取两节点调度库存
+bash report_openstack_capacity.sh --skip-ssh
+
+# 现场已有管理员环境、希望只用API读取Placement库存
+bash report_openstack_capacity.sh --source api
+
+# 改变这批虚拟机数量，或按本地盘启动测算
+bash report_openstack_capacity.sh --kali-count 36 --centos-count 36 --disk-mode local
+
+# 可选，追加指定项目的配额上限；不会把管理员项目当成业务项目
+bash report_openstack_capacity.sh --project 项目UUID
+
+# 查看近72小时的启动/故障情况，增加每节点样本数
+bash report_openstack_capacity.sh --recent-hours 72 --sample-limit 40
+
+bash report_openstack_capacity.sh --help
+```
+
+项目配额参数仅展示所选项目的上限，不等同于已扣除当前项目使用量的剩余配额。默认不指定项目，避免误把管理员项目额度用于 MP 场景判断。`--source api` 指 Placement 库存来源，其他详细项目仍可读取本机数据库。数据库实例和宿主机统计默认对应现场 `nova` Cell，Cell0 故障另外读取；其他 Cell 不自动连接，Cell 映射不导出数据库连接串。
+
+数据库、SSH 采样或 Cinder CLI 插件不可用时，相应内容标记缺失，不当作 0 或空闲；Placement 所有读取方式都失败则退出码为 2。SSH 不可用时无法确认该节点的物理余量和进程配置，应根据报告的缺失项补采。没有采到 scheduler 配置时，实例数限制的测算仍有未确认条件。
+
+默认在当前目录创建唯一的 `capacity_report_主机_日期时间_随机后缀/`，包含 `report.txt` 与 `report.json`。可把两个文件带回用于离线核查。只输出白名单资源数据，不保存管理员认证环境、完整配置、数据库密码、控制台凭据或整库内容。自选 `--output-dir` 必须不存在，避免覆盖之前采集结果。
+
+本地验证：
+
+```bash
+bash -n scripts/report_openstack_capacity.sh
+PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s scripts -p 'test_report_openstack_capacity.py' -v
+```
+
+相关已有只读 CLI：[Placement 命令](https://docs.openstack.org/osc-placement/ussuri/cli/index.html)、[Cinder 后端容量查询](https://docs.openstack.org/python-openstackclient/ussuri/cli/command-objects/volume-backend.html)、[按宿主机查询实例](https://docs.openstack.org/python-openstackclient/ussuri/cli/command-objects/server.html)、[主机聚合](https://docs.openstack.org/python-openstackclient/ussuri/cli/command-objects/aggregate.html)。

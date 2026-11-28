@@ -1,0 +1,416 @@
+"""Offline capacity-report tests: no site credentials, SSH or cloud calls."""
+import contextlib
+import datetime
+import io
+import json
+import os
+from pathlib import Path
+import shlex
+import socket
+import subprocess
+import tempfile
+import types
+import unittest
+from unittest.mock import Mock, patch
+
+SCRIPT = Path(__file__).with_name('report_openstack_capacity.sh')
+SOURCE = SCRIPT.read_text().split("<<'PY'\n",1)[1].rsplit('\nPY',1)[0]
+mod = types.ModuleType('capacity_report')
+exec(compile(SOURCE,str(SCRIPT),'exec'),mod.__dict__)
+
+
+def inventory(after_cleanup=False):
+    return {
+        'controller01': {'VCPU':mod.inventory_row(56,14,2,0),
+                         'MEMORY_MB':mod.inventory_row(385599,157696,1,0),
+                         'DISK_GB':mod.inventory_row(1784,1534,1,0)},
+        'compute01': {'VCPU':mod.inventory_row(56,8,2,0 if after_cleanup else 29),
+                      'MEMORY_MB':mod.inventory_row(257583,12000,1,37888),
+                      'DISK_GB':mod.inventory_row(8938,98,2,0)}}
+
+
+def states():
+    return {n:{'state':'up','status':'enabled','placement_disabled':False} for n in ['controller01','compute01']}
+
+
+class CapacityTests(unittest.TestCase):
+    def setUp(self):
+        mod.WARNINGS.clear()
+        self.args=mod.parse_args([])
+
+    def test_current_inventory_and_post_cleanup_are_recomputed(self):
+        before=inventory();after=inventory(True)
+        self.assertEqual(151,sum(mod.free_resource(i,'VCPU') for i in before.values()))
+        self.assertEqual(180,sum(mod.free_resource(i,'VCPU') for i in after.values()))
+        self.assertIsNone(mod.placement(self.args,before,states(),{}, {}, [2,2]))
+        example=mod.placement(self.args,after,states(),{}, {}, [2,2])
+        self.assertIsNotNone(example)
+        self.assertEqual(36,sum(v['kali'] for v in example.values()))
+        self.assertEqual(36,sum(v['centos'] for v in example.values()))
+
+    def test_cpu_ratios_three_and_four_are_only_calculations(self):
+        inv=inventory()
+        rows=mod.analyze(self.args,inv,states(),{}, {})
+        by_ratio={tuple(r['ratios'].values()):r for r in rows}
+        self.assertEqual(199,by_ratio[(2,3)]['available_vcpu'])
+        self.assertEqual(241,by_ratio[(3,3)]['available_vcpu'])
+        self.assertEqual(331,by_ratio[(4,4)]['available_vcpu'])
+        self.assertIsNotNone(by_ratio[(2,3)]['example_placement'])
+        self.assertEqual('2',inv['compute01']['VCPU']['ratio'])
+
+    def test_local_disk_constraints_are_not_cinder_constraints(self):
+        inv=inventory()
+        self.assertIsNotNone(mod.placement(self.args,inv,states(),{}, {}, [2,3]))
+        self.args.disk_mode='local'
+        self.assertIsNone(mod.placement(self.args,inv,states(),{}, {}, [2,3]))
+        self.assertIsNotNone(mod.placement(self.args,inv,states(),{}, {}, [2,4]))
+
+    def test_disabled_down_or_unknown_nodes_cannot_supply_capacity(self):
+        for change in [{'state':'down'},{'status':'disabled'},{'placement_disabled':True},{'placement_disabled':None}]:
+            s=states();s['compute01'].update(change)
+            row=mod.analyze(self.args,inventory(),s,{}, {})[-1]
+            self.assertEqual(168,row['available_vcpu'])
+            self.assertIsNone(row['example_placement'])
+
+    def test_memory_and_max_unit_are_checked_per_node(self):
+        inv=inventory()
+        inv['controller01']['MEMORY_MB']=mod.inventory_row(1024,0,1,0)
+        self.assertIsNone(mod.placement(self.args,inv,states(),{}, {}, [3,3]))
+        inv=inventory();inv['controller01']['VCPU']['max_unit']=2
+        inv['compute01']['VCPU']['max_unit']=2
+        self.assertIsNone(mod.placement(self.args,inv,states(),{}, {}, [4,4]))
+
+    def test_instance_limit_is_checked_when_filter_enabled(self):
+        stats={n:{'config':{'filter_scheduler.enabled_filters':'ComputeFilter,NumInstancesFilter',
+                          'filter_scheduler.max_instances_per_host':'4'}} for n in self.args.nodes}
+        self.assertIsNone(mod.placement(self.args,inventory(),states(),stats,{'controller01':2,'compute01':2},[4,4]))
+
+    def test_negative_remaining_is_reported_without_creating_available_cpu(self):
+        row=mod.inventory_row(8,2,1,9)
+        self.assertEqual(-3,row['remaining'])
+        self.assertEqual(0,row['available'])
+        self.assertEqual(7,mod.inventory_row(10,2,'1.2',2)['remaining'])
+        for ratio in ['NaN','Infinity',0,-1]:
+            with self.assertRaises(mod.ProbeError):mod.inventory_row(8,0,ratio,1)
+
+    def test_invalid_nodes_are_rejected_before_database_or_ssh(self):
+        for argv in [['--nodes',"controller01';DROP"],['--nodes','controller01','controller01'],['--kali-count','-1']]:
+            with contextlib.redirect_stderr(io.StringIO()),self.assertRaises(SystemExit):mod.parse_args(argv)
+
+    def test_database_inventory_uses_current_allocations(self):
+        rows=[]
+        for n,values in inventory().items():
+            for rc,row in values.items():
+                number=next(k for k,v in mod.RESOURCES.items() if v==rc)
+                rows.append([n,str(number),str(row['total']),str(row['reserved']),row['ratio'],str(row['allocated']),'1',str(row['max_unit']),'1'])
+        with patch.object(mod,'sql',return_value=rows):
+            self.assertEqual(67,mod.inventory_db(self.args)['compute01']['VCPU']['remaining'])
+        with patch.object(mod,'sql',return_value=[]),self.assertRaises(mod.ProbeError):mod.inventory_db(self.args)
+
+    def test_api_inventory_accepts_usage_list_and_dict_shapes(self):
+        provider='11111111-2222-3333-4444-555555555555'
+        def fake(args,*cmd):
+            if cmd[:3]==('resource','provider','list'):return [{'name':cmd[-1],'uuid':provider,'parent_provider_uuid':None}]
+            if cmd[:4]==('resource','provider','usage','show'):
+                return [{'resource_class':'VCPU','usage':29}] if cmd[-1]==provider else {}
+            return [{'resource_class':'VCPU','total':56,'reserved':8,'allocation_ratio':2},
+                    {'resource_class':'MEMORY_MB','total':257583,'reserved':12000,'allocation_ratio':1}]
+        with patch.object(mod,'osc',side_effect=fake):
+            self.assertEqual(67,mod.inventory_api(self.args)['compute01']['VCPU']['remaining'])
+
+    def test_database_service_state_includes_placement_disable_trait(self):
+        with patch.object(mod,'sql',side_effect=[[
+                ['controller01','0','0','10'],['compute01','0','0','10']],[['compute01']]]):
+            result=mod.services_db(self.args,{})
+        self.assertTrue(mod.eligible(result['controller01']))
+        self.assertFalse(mod.eligible(result['compute01']))
+
+    def test_neutron_pool_union_and_allocation_deduplication(self):
+        rows=[['pool','subnet','198.51.100.0/24','198.51.100.10','198.51.100.20'],
+              ['pool','subnet','198.51.100.0/24','198.51.100.20','198.51.100.30'],
+              ['ip','subnet','198.51.100.10','',''],['ip','subnet','198.51.100.10','',''],
+              ['ip','subnet','198.51.100.30','',''],['ip','subnet','198.51.100.1','','']]
+        with patch.object(mod,'sql',return_value=rows):result=mod.neutron_pools(self.args)[0]
+        self.assertEqual(21,result['pool_addresses'])
+        self.assertEqual(2,result['allocated_in_pool'])
+        self.assertEqual(19,result['remaining'])
+
+    def test_failed_command_does_not_echo_secret_stderr(self):
+        failure=subprocess.CompletedProcess(['fake'],1,b'',b'OS_PASSWORD=DO_NOT_PRINT token=DO_NOT_PRINT')
+        with patch.object(mod.subprocess,'run',return_value=failure):
+            with self.assertRaises(mod.ProbeError) as ctx:mod.run(['fake'],'test query')
+        self.assertNotIn('DO_NOT_PRINT',str(ctx.exception))
+
+    def test_empty_tsv_columns_are_preserved_by_command_runner(self):
+        value=subprocess.CompletedProcess(['mysql'],0,b'ip\tsubnet\t192.168.1.1\t\t\n',b'')
+        with patch.object(mod.subprocess,'run',return_value=value):
+            self.assertEqual([['ip','subnet','192.168.1.1','','']],mod.sql(self.args,'SELECT test'))
+
+    def test_remote_paths_are_quoted_data_not_remote_shell_code(self):
+        self.args.cinder_path="/data/test ' $(must_not_run)"
+        with patch.object(mod.socket,'gethostname',return_value='controller01'),patch.object(mod,'run',return_value='{"host":"compute01"}') as call:
+            mod.host_stats(self.args,'compute01')
+        command=call.call_args[0][0]
+        self.assertIn('StrictHostKeyChecking=yes',command)
+        params=shlex.split(command[-1])
+        self.assertEqual(['python3','-'],params[:2])
+        self.assertEqual(self.args.cinder_path,json.loads(params[2])['cinder_path'])
+
+    def test_skip_ssh_does_not_issue_ssh(self):
+        self.args.skip_ssh=True
+        with patch.object(mod.socket,'gethostname',return_value='controller01'),patch.object(mod,'run') as call:
+            with self.assertRaises(mod.ProbeError):mod.host_stats(self.args,'compute01')
+        call.assert_not_called()
+
+    def test_host_helper_has_valid_python_syntax(self):
+        compile(mod.HOST_HELPER,'host helper','exec')
+
+    def test_end_to_end_report_preserves_unknown_fields_and_restricts_file_permissions(self):
+        def unavailable(*a,**k):raise mod.ProbeError('optional source unavailable')
+        with tempfile.TemporaryDirectory() as tmp, contextlib.redirect_stdout(io.StringIO()) as output, \
+             patch.object(mod,'inventory_db',return_value=inventory()),patch.object(mod,'host_stats',side_effect=unavailable), \
+             patch.object(mod,'services_db',return_value=states()),patch.object(mod,'sql',side_effect=unavailable), \
+             patch.object(mod,'cinder_pools',side_effect=unavailable),patch.object(mod,'osc',side_effect=unavailable):
+            target=Path(tmp)/'report'
+            self.assertEqual(0,mod.main(['--output-dir',str(target)]))
+            data=json.loads((target/'report.json').read_text())
+            self.assertIsNone(data['cinder_pools'])
+            self.assertIsNone(data['cinder_volumes'])
+            self.assertIsNone(data['neutron_pools'])
+            self.assertTrue(data['warnings'])
+            self.assertEqual(0o600,(target/'report.json').stat().st_mode & 0o777)
+            self.assertEqual(0o700,target.stat().st_mode & 0o777)
+            self.assertIn('allocated',output.getvalue())
+
+    def test_no_duplicate_top_level_function_definitions(self):
+        tree=mod.ast.parse(SOURCE)
+        names=[n.name for n in tree.body if isinstance(n,mod.ast.FunctionDef)]
+        self.assertEqual(len(names),len(set(names)))
+
+    def test_disabled_or_unmapped_cells_cannot_supply_capacity(self):
+        for flag in ['cell_disabled','cell_mapping_missing']:
+            s=states();s['compute01'][flag]=True
+            self.assertEqual(168,mod.analyze(self.args,inventory(),s,{}, {})[-1]['available_vcpu'])
+
+    def test_instance_distribution_after_cleanup_keeps_zero_and_unassigned_distinct(self):
+        now=datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None).isoformat(' ')
+        rows=[['id1','compute01','active','','4','4096','30','0',now,now],
+              ['id2','','error','scheduling','1','1024','30','0',now,'']]
+        with patch.object(mod,'sql',return_value=rows):result=mod.instances_db(self.args)
+        self.assertEqual(0,result['nodes']['controller01']['total'])
+        self.assertEqual(1,result['nodes']['compute01']['recent_launched'])
+        self.assertEqual(4096,result['nodes']['compute01']['memory_mb_sum'])
+        self.assertEqual({'error':1},result['unassigned']['states'])
+        self.assertEqual({'scheduling':1},result['unassigned']['tasks'])
+
+    def test_api_instance_distribution_requests_all_projects_and_all_pages(self):
+        with patch.object(mod,'osc',return_value=[{'ID':'vm','Status':'ACTIVE','Networks':'secret'}]) as call:
+            result=mod.instances_api(self.args)
+        self.assertEqual(1,result['nodes']['controller01']['total'])
+        self.assertIsNone(result['nodes']['controller01']['recent_created'])
+        self.assertNotIn('secret',json.dumps(result))
+        command=call.call_args_list[0][0]
+        self.assertIn('--all-projects',command);self.assertIn('-1',command)
+
+    def test_scheduler_limits_override_the_compute_host_file(self):
+        stats={n:{'config':{'filter_scheduler.enabled_filters':'ComputeFilter','filter_scheduler.max_instances_per_host':'1000'}} for n in self.args.nodes}
+        stats['controller01']['nova_processes']=[{'binary':'nova-scheduler','config':{
+            'filter_scheduler.enabled_filters':'ComputeFilter, NumInstancesFilter','filter_scheduler.max_instances_per_host':'56'}}]
+        scheduler=mod.scheduler_settings(stats)
+        effective=mod.calculation_stats(stats,scheduler,[])
+        self.assertEqual(56,effective['compute01']['scheduling_max_instances'])
+        self.assertIsNone(mod.placement(self.args,inventory(True),states(),effective,{'controller01':50,'compute01':50},[4,4]))
+        self.assertEqual('1000',stats['compute01']['config']['filter_scheduler.max_instances_per_host'])
+
+    def test_unused_compute_filter_setting_does_not_impose_a_limit(self):
+        stats={n:{'config':{'filter_scheduler.enabled_filters':'NumInstancesFilter','filter_scheduler.max_instances_per_host':'1'}} for n in self.args.nodes}
+        scheduler={'config':{'filter_scheduler.enabled_filters':'ComputeFilter'}}
+        effective=mod.calculation_stats(stats,scheduler,[])
+        self.assertNotIn('scheduling_max_instances',effective['controller01'])
+        self.assertIsNotNone(mod.placement(self.args,inventory(True),states(),effective,{},[2,2]))
+
+    def test_omitted_scheduler_maximum_does_not_inherit_compute_maximum(self):
+        stats={'compute01':{'config':{'filter_scheduler.max_instances_per_host':'1000'}}}
+        scheduler={'config':{'filter_scheduler.enabled_filters':'NumInstancesFilter'}}
+        effective=mod.calculation_stats(stats,scheduler,[])
+        self.assertEqual(50,effective['compute01']['scheduling_max_instances'])
+        self.assertIn('默认50',effective['compute01']['scheduling_limit_source'])
+
+    def test_aggregate_instance_limit_and_scheduler_default_limit(self):
+        scheduler={'config':{'filter_scheduler.enabled_filters':'AggregateNumInstancesFilter'}}
+        aggs=[{'hosts':['compute01'],'metadata':{'max_instances_per_host':'60'}}]
+        effective=mod.calculation_stats({n:{} for n in self.args.nodes},scheduler,aggs)
+        self.assertEqual(60,effective['compute01']['scheduling_max_instances'])
+        self.assertEqual(50,effective['controller01']['scheduling_max_instances'])
+
+    def test_conflicting_scheduler_settings_are_exposed(self):
+        processes=[{'binary':'nova-scheduler','config':{'filter_scheduler.max_instances_per_host':str(n),
+                    'filter_scheduler.enabled_filters':'NumInstancesFilter'}} for n in [56,80]]
+        result=mod.scheduler_settings({'controller01':{'nova_processes':processes},'compute01':None})
+        self.assertEqual('56',result['config']['filter_scheduler.max_instances_per_host'])
+        self.assertIn('filter_scheduler.max_instances_per_host',result['conflicting_keys'])
+
+    def test_ratio_drift_and_disk_cache_reservation_are_distinguished(self):
+        cfg={'DEFAULT.cpu_allocation_ratio':'4','DEFAULT.reserved_host_cpus':'8',
+             'DEFAULT.disk_allocation_ratio':'1','DEFAULT.reserved_host_disk_mb':'100000'}
+        result=mod.resource_config_audit(inventory(),{'controller01':{'config':cfg}})
+        controller={r['resource']:r for r in result if r['host']=='controller01'}
+        self.assertEqual('DIFFERENT',controller['VCPU']['ratio_check'])
+        self.assertEqual('DIFFERENT',controller['VCPU']['reservation_check'])
+        self.assertEqual('含额外磁盘保护预留',controller['DISK_GB']['reservation_check'])
+        cfg['DEFAULT.cpu_allocation_ratio']='0'
+        result=mod.resource_config_audit(inventory(),{'controller01':{'config':cfg}})
+        self.assertIn('Placement',result[0]['ratio_check'])
+
+    def test_aggregate_queries_use_api_database_and_redact_unrelated_metadata(self):
+        rows=[['1','lab','controller01','availability_zone','nova'],['1','lab','compute01','max_instances_per_host','56']]
+        with patch.object(mod,'sql',return_value=rows) as call:result=mod.aggregates_db(self.args)
+        self.assertEqual(['controller01','compute01'],result[0]['hosts'])
+        self.assertIn('nova_api.aggregates',call.call_args[0][1])
+        def api(args,*cmd):
+            if cmd==('aggregate','list'):return [{'ID':1}]
+            return {'id':1,'name':'lab','hosts':"['controller01']",'properties':"{'availability_zone':'nova','password':'do-not-print'}"}
+        with patch.object(mod,'osc',side_effect=api):result=mod.aggregates_api(self.args)
+        self.assertNotIn('do-not-print',json.dumps(result))
+
+    def test_request_spec_objects_preserve_only_scheduling_constraints(self):
+        spec={'nova_object.data':{'force_hosts':['compute01'],'availability_zone':'nova','admin_password':'do-not-print',
+            'requested_destination':{'nova_object.data':{'host':'compute01','password':'do-not-print'}},
+            'flavor':{'nova_object.data':{'vcpus':4,'extra_specs':{'hw:cpu_policy':'dedicated','secret':'do-not-print'}}}}}
+        with patch.object(mod,'sql',return_value=[['id','compute01',json.dumps(spec)]]):result=mod.request_constraints_db(self.args)
+        self.assertNotIn('do-not-print',json.dumps(result))
+        self.assertIn('dedicated',json.dumps(result))
+        self.assertEqual(['compute01'],result[0]['constraints']['force_hosts'])
+
+    def test_compute_stats_returns_scheduler_count_without_unrelated_stats(self):
+        row=['compute01','id','compute01','QEMU','56','29','257583','37888','8938','0','8','0',
+             '{"num_instances":11,"num_io_ops":2,"secret":"do-not-print"}','2026-11-28 10:00:00']
+        with patch.object(mod,'sql',return_value=[row]):result=mod.hypervisors_db(self.args)
+        self.assertEqual(11,result['compute01']['num_instances'])
+        self.assertNotIn('do-not-print',json.dumps(result))
+
+    def test_config_merge_uses_runtime_files_and_excludes_credentials(self):
+        helper={};exec(mod.CONFIG_HELPER,helper)
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);base=root/'base.conf';extra=root/'conf.d';extra.mkdir()
+            base.write_text('[DEFAULT]\ncpu_allocation_ratio=2\n[database]\nconnection=mysql://user:do-not-print@host/nova\n')
+            (extra/'10-limit.conf').write_text('[DEFAULT]\ncpu_allocation_ratio=3\n[filter_scheduler]\nmax_instances_per_host=56\n')
+            (extra/'20-override.conf').write_text('[DEFAULT]\ncpu_allocation_ratio=4\n')
+            files=helper['config_paths'](['--config-file',str(base),'--config-dir='+str(extra)])
+            result=helper['read_config'](files)
+            self.assertFalse(result['config_incomplete'])
+            self.assertEqual('4',result['config']['DEFAULT.cpu_allocation_ratio'])
+            self.assertNotIn('do-not-print',json.dumps(result))
+
+    def test_running_nova_process_reports_config_changed_after_start(self):
+        helper={};exec(mod.CONFIG_HELPER,helper)
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);(root/'stat').write_text('btime 1\n');proc=root/'123';proc.mkdir()
+            cfg=root/'nova.conf';cfg.write_text('[DEFAULT]\ncpu_allocation_ratio=3\n')
+            (proc/'cmdline').write_bytes(('python3\0/usr/bin/nova-compute\0--config-file\0'+str(cfg)+'\0').encode())
+            (proc/'stat').write_text('123 (nova-compute) S '+'0 '*18+'0 '+'0 '*5)
+            result=helper['nova_processes'](str(root))
+            self.assertEqual(1,len(result))
+            self.assertTrue(result[0]['config_newer_than_process'])
+            self.assertEqual('3',result[0]['config']['DEFAULT.cpu_allocation_ratio'])
+
+    def test_usage_response_cannot_silently_turn_unknown_shape_into_zero(self):
+        provider='11111111-2222-3333-4444-555555555555'
+        def fake(args,*cmd):
+            if cmd[:3]==('resource','provider','list'):return [{'name':cmd[-1],'uuid':provider,'parent_provider_uuid':None}]
+            return {'usages':{'VCPU':29}}
+        with patch.object(mod,'osc',side_effect=fake),self.assertRaises(mod.ProbeError):mod.inventory_api(self.args)
+
+    def test_cinder_cli_python_repr_capabilities_are_supported(self):
+        with patch.object(mod,'osc',return_value=[{'Name':'nfs#pool','Capabilities':"{'free_capacity_gb':626,'max_over_subscription_ratio':20,'secret':'do-not-print'}"}]):
+            result=mod.cinder_pools(self.args)
+        self.assertEqual(626,result[0]['free_capacity_gb'])
+        self.assertNotIn('do-not-print',json.dumps(result))
+
+    def test_standalone_bash_entrypoint_with_offline_command_fixtures(self):
+        now=datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None).isoformat(' ')
+        inv=[]
+        for node,resources in inventory().items():
+            for number,rc in mod.RESOURCES.items():
+                row=resources[rc]
+                inv.append([node,number,row['total'],row['reserved'],row['ratio'],row['allocated'],1,row['max_unit'],1])
+        spec={'nova_object.data':{'availability_zone':'nova','force_hosts':['compute01'],'admin_password':'site-admin-secret'}}
+        data={
+            'FROM placement.inventories':inv,
+            "binary='nova-compute'": [[n,0,0,3] for n in self.args.nodes],
+            'FROM placement.resource_provider_traits':[],
+            'FROM nova_api.host_mappings':[[n,'cell-uuid','cell1',0] for n in self.args.nodes],
+            'FROM nova.instances WHERE deleted=0 ORDER BY':[
+                ['vm1','controller01','active','',1,1024,30,0,now,now],
+                ['vm2','compute01','active','',4,4096,30,0,now,now]],
+            'FROM nova_cell0.instances WHERE deleted=0 ORDER BY':[],
+            'FROM nova.compute_nodes':[
+                [n,'node-uuid',n,'QEMU',56,0,257583,0,8938,0,1,0,'{"num_instances":1,"num_io_ops":0}',now]
+                for n in self.args.nodes],
+            'FROM nova_api.aggregates':[],
+            'FROM cinder.volumes':[['in-use',2,60]],
+            'FROM mp.mp_vendor_second_address_pool':[['FREE','PROBE_CONFIRMED_FREE',198]],
+            "binary IN ('nova-scheduler','nova-conductor')":[['controller01',b,0,0,3] for b in ['nova-scheduler','nova-conductor']],
+            'FROM placement.allocations a JOIN':[['compute01',0,'deleted_instance',1,4]],
+            'FROM nova.instance_faults':[['failed-vm','',500,'NoValidHost',now]],
+            'FROM nova_cell0.instance_faults':[['failed-cell0-vm','',500,'NoValidHost',now]],
+            'JOIN nova_api.request_specs':[['vm2','compute01',json.dumps(spec)]],
+            'FROM neutron.ipallocationpools':[['pool','subnet','192.168.10.0/24','192.168.10.100','192.168.10.200'],
+                                            ['ip','subnet','192.168.10.100','','']]}
+        fixture_code='''#!/usr/bin/env python3
+import json,os,sys
+from pathlib import Path
+kind=Path(sys.argv[0]).name
+data=json.loads(Path(os.environ['CAPACITY_TEST_DATA']).read_text())
+if kind=='mysql_fixture':
+    query=sys.argv[sys.argv.index('--execute')+1]
+    if not query.startswith('START TRANSACTION READ ONLY; ') or not query.endswith('; COMMIT'):sys.exit(91)
+    matches=[rows for key,rows in data.items() if key in query]
+    if len(matches)!=1:sys.exit(92)
+    print('\\n'.join('\\t'.join(str(value) for value in row) for row in matches[0]))
+elif kind=='ssh':
+    sys.stdin.read()
+    host=next(a for a in sys.argv if a.startswith('root@')).split('@')[1]
+    cfg={'DEFAULT.cpu_allocation_ratio':'2','DEFAULT.ram_allocation_ratio':'1',
+         'filter_scheduler.enabled_filters':'ComputeFilter,NumInstancesFilter','filter_scheduler.max_instances_per_host':'56'}
+    processes=[{'binary':'nova-compute','pid':123,'config':cfg,'config_files':[],'config_newer_than_process':False}]
+    if host=='controller01':processes.append(dict(processes[0],binary='nova-scheduler',pid=124))
+    print(json.dumps({'host':host,'config':cfg,'nova_processes':processes,'filesystems':[],
+                      'cpu_count':56,'libvirt_domains':{'total':1,'running':1}}))
+elif kind=='openstack_fixture':
+    if sys.argv[1:6]!=['volume','backend','pool','list','--long']:sys.exit(93)
+    print(json.dumps([{'Name':'nfs#pool','Capabilities':{'total_capacity_gb':1784,'free_capacity_gb':626}}]))
+else:sys.exit(94)
+'''
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);(root/'data.json').write_text(json.dumps(data))
+            for name in ['mysql_fixture','ssh','openstack_fixture']:
+                p=root/name;p.write_text(fixture_code);p.chmod(0o700)
+            env=dict(os.environ,PATH=str(root)+os.pathsep+os.environ.get('PATH',''),
+                     MYSQL_BIN=str(root/'mysql_fixture'),OPENSTACK_BIN=str(root/'openstack_fixture'),
+                     CAPACITY_TEST_DATA=str(root/'data.json'),OS_AUTH_URL='https://fixture.invalid',OS_PASSWORD='site-admin-secret')
+            output=root/'report'
+            process=subprocess.run(['bash',str(SCRIPT),'--output-dir',str(output)],env=env,
+                                   stdout=subprocess.PIPE,stderr=subprocess.PIPE,timeout=30)
+            self.assertEqual(0,process.returncode,process.stderr.decode())
+            report=json.loads((output/'report.json').read_text())
+            self.assertEqual(100,report['neutron_pools'][0]['remaining'])
+            self.assertEqual(1,report['instances']['nodes']['controller01']['total'])
+            self.assertEqual(56,report['calculation_physical']['compute01']['scheduling_max_instances'])
+            self.assertEqual(9,len(report['ratio_comparison']))
+            self.assertTrue(any(r['database']=='nova_cell0' for r in report['recent_faults']))
+            self.assertTrue(any('NoValidHost' in r['message'] for r in report['scheduling_checks']))
+            self.assertTrue(any('deleted_instance' in r['message'] for r in report['scheduling_checks']))
+            self.assertNotIn('site-admin-secret',process.stdout.decode()+process.stderr.decode()+(output/'report.json').read_text())
+            self.assertFalse(report['warnings'],report['warnings'])
+
+    def test_all_sources_unavailable_is_not_a_successful_zero_capacity_report(self):
+        with tempfile.TemporaryDirectory() as tmp,contextlib.redirect_stderr(io.StringIO()), \
+             patch.object(mod,'inventory_db',side_effect=mod.ProbeError('DB unavailable')), \
+             patch.object(mod,'inventory_api',side_effect=mod.ProbeError('API unavailable')):
+            out=Path(tmp)/'none'
+            self.assertEqual(2,mod.main(['--output-dir',str(out)]))
+            self.assertFalse(out.exists())
+
+
+if __name__=='__main__':unittest.main()
