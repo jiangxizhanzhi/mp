@@ -44,7 +44,11 @@ def run(args, label, timeout=60, data=None):
     if result.returncode:
         # Neither command stderr nor config-parser messages are safe to print:
         # they can contain authentication URLs, passwords or configuration lines.
-        raise ProbeError(label + '：调用失败，退出码=' + str(result.returncode))
+        # Retain numeric diagnostics only; never echo raw stderr/SQL/URLs.
+        detail = ''
+        match = re.search(rb'ERROR\s+(\d{3,5})\s+\(([A-Z0-9]{5})\)',result.stderr)
+        if match:detail = '，SQL错误码='+match[1].decode()+'，SQLSTATE='+match[2].decode()
+        raise ProbeError(label + '：调用失败，退出码=' + str(result.returncode)+detail)
     # SQL TSV can end in empty columns; stripping tabs would silently lose them.
     return result.stdout.decode('utf-8', 'replace').rstrip('\r\n')
 
@@ -89,7 +93,8 @@ def auth(args):
 def osc(args, *command):
     auth(args)
     exe = os.environ.get('OPENSTACK_BIN') or shutil.which('openstack', path=ENV.get('PATH')) or '/opt/openstack_project/bin/openstack'
-    return json.loads(run([exe, *command, '-f', 'json'], 'OpenStack 只读 ' + ' '.join(command[:3]), args.timeout))
+    options = ['--os-placement-api-version','1.6'] if command[:4]==('resource','provider','trait','list') else []
+    return json.loads(run([exe,*options,*command,'-f','json'], 'OpenStack 只读 ' + ' '.join(command[:3]), args.timeout))
 
 
 def inventory_row(total, reserved, ratio, used, minimum=1, maximum=None, step=1):
@@ -296,11 +301,11 @@ def host_stats(args, node):
 def services_db(args, stats):
     rows = sql(args, """SELECT host,disabled,forced_down,
         TIMESTAMPDIFF(SECOND,COALESCE(last_seen_up,created_at),UTC_TIMESTAMP())
-        FROM nova.services WHERE deleted=0 AND binary='nova-compute'""")
-    traits = sql(args, """SELECT p.name FROM placement.resource_provider_traits a
+        FROM nova.services WHERE deleted=0 AND `binary`='nova-compute'""")
+    traits = optional('Placement 禁用标记 DB',lambda:sql(args, """SELECT p.name FROM placement.resource_provider_traits a
         JOIN placement.resource_providers p ON p.id=a.resource_provider_id
-        JOIN placement.traits t ON t.id=a.trait_id WHERE t.name='COMPUTE_STATUS_DISABLED'""")
-    disabled = {r[0] for r in traits}
+        JOIN placement.traits t ON t.id=a.trait_id WHERE t.name='COMPUTE_STATUS_DISABLED'"""))
+    disabled = {r[0] for r in traits} if traits is not None else None
     result = {}
     for node in args.nodes:
         matches = [r for r in rows if r[0] == node]
@@ -310,7 +315,7 @@ def services_db(args, stats):
         threshold = int((stats.get(node) or {}).get('config', {}).get('DEFAULT.service_down_time', 60))
         up = forced == '0' and age != 'NULL' and abs(int(age)) <= threshold
         result[node] = dict(state='up' if up else 'down', status='enabled' if off == '0' else 'disabled',
-                            placement_disabled=node in disabled, heartbeat_age_seconds=None if age == 'NULL' else int(age),
+                            placement_disabled=node in disabled if disabled is not None else None, heartbeat_age_seconds=None if age == 'NULL' else int(age),
                             source='nova DB heartbeat, threshold='+str(threshold)+'s')
     return result
 
@@ -322,13 +327,15 @@ def services_api(args):
         if row.get('host') not in args.nodes:
             continue
         node = row['host']
-        provider = [normalized(r) for r in osc(args, 'resource', 'provider', 'list', '--name', node)]
-        if len(provider) != 1:
-            continue
-        traits = osc(args, 'resource', 'provider', 'trait', 'list', str(uuid.UUID(provider[0]['uuid'])))
-        if not isinstance(traits,list) or any('name' not in normalized(t) for t in traits):
-            raise ProbeError(node+'：Placement trait 响应字段不完整')
-        disabled = any(normalized(t).get('name') == 'COMPUTE_STATUS_DISABLED' for t in traits)
+        def disabled_trait():
+            provider = [normalized(r) for r in osc(args, 'resource', 'provider', 'list', '--name', node)]
+            provider = [p for p in provider if p.get('name')==node and not p.get('parent_provider_uuid')]
+            if len(provider)!=1:raise ProbeError(node+'：未取得唯一根资源提供者')
+            traits = osc(args, 'resource', 'provider', 'trait', 'list', str(uuid.UUID(provider[0]['uuid'])))
+            if not isinstance(traits,list) or any('name' not in normalized(t) for t in traits):
+                raise ProbeError(node+'：Placement trait 响应字段不完整')
+            return any(normalized(t).get('name') == 'COMPUTE_STATUS_DISABLED' for t in traits)
+        disabled = optional(node+' Placement 禁用标记 API',disabled_trait)
         result[node] = dict(state=str(row.get('state', 'unknown')).lower(), status=str(row.get('status', 'unknown')).lower(),
                             placement_disabled=disabled, source='Nova/Placement API')
     return result
@@ -386,9 +393,9 @@ def instances_api(args):
 
 
 def control_services_db(args, stats):
-    rows = sql(args,"""SELECT host,binary,disabled,forced_down,
+    rows = sql(args,"""SELECT host,`binary`,disabled,forced_down,
         TIMESTAMPDIFF(SECOND,COALESCE(last_seen_up,created_at),UTC_TIMESTAMP())
-        FROM nova.services WHERE deleted=0 AND binary IN ('nova-scheduler','nova-conductor')""")
+        FROM nova.services WHERE deleted=0 AND `binary` IN ('nova-scheduler','nova-conductor')""")
     result = []
     for host,binary,disabled,forced,age in rows:
         threshold = int((stats.get(host) or {}).get('config',{}).get('DEFAULT.service_down_time',60))
@@ -469,15 +476,24 @@ def hypervisors_db(args):
 
 def allocation_audit_db(args):
     names = ','.join("'"+n+"'" for n in args.nodes)
+    columns = dict(sql(args,"""SELECT column_name,data_type FROM information_schema.columns
+        WHERE table_schema='placement' AND table_name='allocations'
+        AND column_name IN ('consumer_id','consumer_uuid')"""))
+    extra_join = ''
+    if 'consumer_uuid' in columns:consumer = 'a.consumer_uuid'
+    elif columns.get('consumer_id') in ['char','varchar']:consumer = 'a.consumer_id'
+    elif columns.get('consumer_id') in ['int','bigint','smallint','mediumint']:
+        consumer = 'c.uuid';extra_join = ' LEFT JOIN placement.consumers c ON c.id=a.consumer_id '
+    else:raise ProbeError('Placement allocations 消费者字段无法识别')
     rows = sql(args,"""SELECT p.name,a.resource_class_id,
         CASE WHEN i.deleted=0 THEN 'existing_instance'
              WHEN m.id IS NOT NULL THEN 'migration_consumer'
              WHEN i.uuid IS NOT NULL THEN 'deleted_instance'
-             ELSE 'unmatched_consumer' END AS kind,COUNT(DISTINCT a.consumer_uuid),SUM(a.used)
+             ELSE 'unmatched_consumer' END AS kind,COUNT(DISTINCT """+consumer+"""),SUM(a.used)
         FROM placement.allocations a JOIN placement.resource_providers p ON p.id=a.resource_provider_id
-        LEFT JOIN nova.instances i ON i.uuid=a.consumer_uuid
-        LEFT JOIN nova.migrations m ON m.uuid=a.consumer_uuid
-        WHERE p.name IN ("""+names+") AND a.resource_class_id IN (0,1,2) GROUP BY p.name,a.resource_class_id,kind")
+        """+extra_join+' LEFT JOIN nova.instances i ON i.uuid='+consumer+
+        ' LEFT JOIN nova.migrations m ON m.uuid='+consumer+
+        ' WHERE p.name IN ('+names+') AND a.resource_class_id IN (0,1,2) GROUP BY p.name,a.resource_class_id,kind')
     return [dict(host=host,resource=RESOURCES[int(rc)],kind=kind,consumers=int(count),allocated=int(used))
             for host,rc,kind,count,used in rows]
 
@@ -548,6 +564,7 @@ def scheduler_settings(stats):
     if limits and any('filter_scheduler.max_instances_per_host' in c for c in configurations):
         config['filter_scheduler.max_instances_per_host'] = str(min(limits))
     return dict(processes=processes,config=config,conflicting_keys=conflicts,
+                file_settings_may_be_unloaded=any(p.get('config_newer_than_process') or p.get('config_incomplete') for p in processes),
                 inferred_defaults={'filter_scheduler.max_instances_per_host':50} if any('filter_scheduler.max_instances_per_host' not in c for c in configurations) else {},
                 source='running scheduler process config files' if processes else 'unknown; scheduler process not sampled')
 
@@ -573,6 +590,8 @@ def calculation_stats(stats, scheduler, aggregates):
             entry['scheduling_limit_source'] = ('scheduler配置/聚合' if scheduler.get('processes') or scheduler['config'] else '未确认scheduler；暂按已读文件估算')
             if 'filter_scheduler.max_instances_per_host' not in cfg or scheduler.get('inferred_defaults'):
                 entry['scheduling_limit_source'] += '；未显式填写全局上限，按Nova默认50'
+            if scheduler.get('file_settings_may_be_unloaded'):
+                entry['scheduling_limit_source'] += '；文件晚于进程，实际加载值未确认'
         entry['config'] = cfg
         result[node] = entry
     return result
@@ -651,14 +670,23 @@ def scheduling_checks(report):
     faults = report.get('recent_faults')
     if faults and any(f['category']=='NoValidHost' for f in faults):
         checks.append(dict(level='check',message='最近窗口内发现 NoValidHost；报告保留实例 UUID 和故障时间供关联'))
-    return checks
+    unique = []
+    seen = set()
+    for check in checks:
+        key = (check['level'],check.get('host'),check['message'])
+        if key not in seen:unique.append(check);seen.add(key)
+    return unique
 
 
 def cinder_pools(args):
     result = []
     allowed = ['name','total_capacity_gb','free_capacity_gb','allocated_capacity_gb','provisioned_capacity_gb',
                'reserved_percentage','max_over_subscription_ratio','thin_provisioning_support','thick_provisioning_support']
-    for row in osc(args, 'volume', 'backend', 'pool', 'list', '--long'):
+    try:rows = osc(args, 'volume', 'backend', 'pool', 'list', '--long')
+    except ProbeError:
+        # Older clients register this read-only command only under Volume v2.
+        rows = osc(args,'--os-volume-api-version','2','volume','backend','pool','list','--long')
+    for row in rows:
         row = normalized(row)
         caps = row.get('capabilities', {})
         if isinstance(caps, str):
@@ -704,6 +732,29 @@ def eligible(state):
     return bool(state and state.get('state') == 'up' and state.get('status') == 'enabled'
                 and state.get('placement_disabled') is False and not state.get('cell_disabled')
                 and not state.get('cell_mapping_missing'))
+
+
+def scheduling_status(state):
+    if eligible(state):return 'eligible'
+    state = state or {}
+    if state.get('state')=='down' or state.get('status')=='disabled' or state.get('placement_disabled') is True or state.get('cell_disabled') or state.get('cell_mapping_missing'):
+        return 'blocked'
+    return 'unknown'
+
+
+def capacity_summary(inventory, states):
+    statuses = {node:scheduling_status(states.get(node)) for node in inventory}
+    def total(nodes):
+        return {rc:sum(inv[rc]['available'] for node,inv in inventory.items() if node in nodes and rc in inv)
+                for rc in RESOURCES.values()}
+    return dict(inventory_available=total(inventory),confirmed_available=total([n for n,s in statuses.items() if s=='eligible']),
+                unknown_nodes=[n for n,s in statuses.items() if s=='unknown'],blocked_nodes=[n for n,s in statuses.items() if s=='blocked'],
+                scheduling_verified=all(s!='unknown' for s in statuses.values()))
+
+
+def inventory_only_states(inventory):
+    # Used only for explicitly hypothetical inventory calculations, never claims.
+    return {n:dict(state='up',status='enabled',placement_disabled=False) for n in inventory}
 
 
 def free_resource(inv, resource, ratio=None):
@@ -756,9 +807,13 @@ def analyze(args, inventory, states, stats, counts):
         for first in (2,3,4):
             for second in (2,3,4):
                 ratios = (first,second)
-                available = sum(free_resource(inventory[n],'VCPU',r) for n,r in zip(args.nodes,ratios) if eligible(states.get(n)))
-                rows.append({'ratios':dict(zip(args.nodes,ratios)), 'available_vcpu':available,
-                             'after_request':available-requested,
+                confirmed = sum(free_resource(inventory[n],'VCPU',r) for n,r in zip(args.nodes,ratios) if eligible(states.get(n)))
+                known = all(scheduling_status(states.get(n))!='unknown' for n in args.nodes)
+                raw = sum(free_resource(inventory[n],'VCPU',r) for n,r in zip(args.nodes,ratios))
+                rows.append({'ratios':dict(zip(args.nodes,ratios)), 'available_vcpu':confirmed if known else None,
+                             'confirmed_available_vcpu':confirmed,'inventory_available_vcpu':raw,
+                             'after_request':confirmed-requested if known else None,'inventory_after_request':raw-requested,
+                             'inventory_example_placement':placement(args,inventory,inventory_only_states(inventory),stats,counts,ratios),
                              'example_placement':placement(args,inventory,states,stats,counts,ratios)})
     return rows
 
@@ -807,15 +862,25 @@ def human(report):
         lines.append('  进程配置来源/文件时间：'+json.dumps(sample.get('nova_processes'),ensure_ascii=False,indent=2))
         if sample.get('cinder_config') is not None:
             lines.append('  Cinder 文件配置（白名单）：'+json.dumps(sample['cinder_config'],ensure_ascii=False))
-    lines += ['', '=== 服务/Placement 条件允许的节点合计（已取得Cell条件时也校验）===',
-              '可新增 VCPU={}，MEMORY={:.2f} GiB，DISK_GB 调度余量={}'.format(totals['VCPU'],totals['MEMORY_MB']/1024,totals['DISK_GB']),
+    summary = report['capacity_summary']
+    raw = summary['inventory_available']
+    lines += ['', '=== Placement 库存余量（未扣除调度状态/请求限制）===',
+              '库存 VCPU={}，MEMORY={:.2f} GiB，DISK_GB={}'.format(raw['VCPU'],raw['MEMORY_MB']/1024,raw['DISK_GB']),
+              '=== 调度状态已确认的节点余量 ===']
+    if summary['unknown_nodes']:
+        lines += ['整体可调度余量：未确认；状态未知节点='+','.join(summary['unknown_nodes']),
+                  '已核实节点的余量下界 VCPU={}，MEMORY={:.2f} GiB；下界为0不代表没有资源。'.format(totals['VCPU'],totals['MEMORY_MB']/1024)]
+    else:
+        lines.append('已核实可新增 VCPU={}，MEMORY={:.2f} GiB，DISK_GB 调度余量={}'.format(totals['VCPU'],totals['MEMORY_MB']/1024,totals['DISK_GB']))
+    lines += [
               '=== 本批新增需求 ===',
               'Kali={} 台（4 vCPU/4 GiB/30 GiB），CentOS={} 台（1 vCPU/1 GiB/30 GiB）'.format(report['kali_count'],report['centos_count']),
               '合计 {} vCPU / {} GiB 内存 / {} GiB 逻辑磁盘；磁盘模式假设={}'.format(report['requested_vcpu'],report['requested_vcpu'],report['requested_disk_gib'],report['disk_mode']),
-              '按当前比例，CPU额度{}；内存额度{}。'.format('足够' if totals['VCPU']>=report['requested_vcpu'] else '不足', '足够' if totals['MEMORY_MB']>=report['requested_vcpu']*1024 else '不足')]
+              '只按当前库存，CPU额度{}；内存额度{}；这不是调度成功确认。'.format('足够' if raw['VCPU']>=report['requested_vcpu'] else '不足', '足够' if raw['MEMORY_MB']>=report['requested_vcpu']*1024 else '不足')]
     if any('DISK_GB' not in inv and eligible(report['services'].get(n)) for n,inv in report['inventory'].items()):
         lines.append('部分节点缺少本地 DISK_GB 库存，上述磁盘仅为已知部分；共享盘需查后端。')
     lines.append('按当前库存及已取得实例数限制的两节点分配示例：'+json.dumps(report['current_example_placement'],ensure_ascii=False))
+    lines.append('仅假设两节点可调度的库存分配示例：'+json.dumps(report['inventory_example_placement'],ensure_ascii=False))
     lines += ['', '=== 调度器/Conductor 服务 ===',json.dumps(report['control_services'],ensure_ascii=False,indent=2),
               '=== 调度器过滤器、权重和实例数上限（从scheduler进程配置读取）===',json.dumps(report['scheduler'],ensure_ascii=False,indent=2),
               '=== 超分/预留文件配置与当前 Placement 比较 ===',json.dumps(report['resource_config_audit'],ensure_ascii=False,indent=2),
@@ -827,8 +892,10 @@ def human(report):
               '=== 最近 {} 小时故障样本（含窗口内已删除实例）==='.format(report['recent_hours']),json.dumps(report['recent_faults'],ensure_ascii=False,indent=2)]
     lines += ['', '=== 仅计算 CPU 超分 2/3/4 的假设，不修改任何配置 ===']
     for row in report['ratio_comparison']:
-        lines.append('{}: 可新增VCPU={}，本批后余额={}，CPU/内存{}，示例={}'.format(
-            row['ratios'],row['available_vcpu'],row['after_request'],'测算可分配' if row['example_placement'] else '未找到可行分配',json.dumps(row['example_placement'],ensure_ascii=False)))
+        lines.append('{}: 已核实可新增VCPU={}，本批后余额={}；假设两节点可调度的库存VCPU={}，本批后库存余额={}，库存示例={}'.format(
+            row['ratios'],'未确认' if row['available_vcpu'] is None else row['available_vcpu'],
+            '未确认' if row['after_request'] is None else row['after_request'],row['inventory_available_vcpu'],row['inventory_after_request'],
+            json.dumps(row['inventory_example_placement'],ensure_ascii=False)))
     lines += ['', '=== Cinder 后端上报 ===', json.dumps(report['cinder_pools'],ensure_ascii=False,indent=2),
               '=== Cinder 当前卷数量/逻辑容量（GiB）===', json.dumps(report['cinder_volumes'],ensure_ascii=False),
               '=== Neutron 地址池（仅统计分配池内的分配）===', json.dumps(report['neutron_pools'],ensure_ascii=False,indent=2),
@@ -934,6 +1001,8 @@ def main(argv=None):
                   neutron_pools=optional('Neutron 地址池',lambda:neutron_pools(args)),
                   vendor_second_addresses=vendor_addresses,project_quota=quota,warnings=WARNINGS)
     report['scheduling_checks'] = scheduling_checks(report)
+    report['capacity_summary'] = capacity_summary(inventory,states)
+    report['inventory_example_placement'] = placement(args,inventory,inventory_only_states(inventory),calc_stats,counts,current)
     text = human(report)
     out = Path(args.output_dir or ('capacity_report_'+socket.gethostname().split('.')[0]+'_'+datetime.datetime.now().strftime('%Y%m%d_%H%M%S')+'_'+uuid.uuid4().hex[:6]))
     out.mkdir(mode=0o700,parents=True,exist_ok=False)

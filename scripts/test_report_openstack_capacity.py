@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 import shlex
 import socket
+import sqlite3
 import subprocess
 import tempfile
 import types
@@ -69,7 +70,8 @@ class CapacityTests(unittest.TestCase):
         for change in [{'state':'down'},{'status':'disabled'},{'placement_disabled':True},{'placement_disabled':None}]:
             s=states();s['compute01'].update(change)
             row=mod.analyze(self.args,inventory(),s,{}, {})[-1]
-            self.assertEqual(168,row['available_vcpu'])
+            self.assertEqual(168,row['confirmed_available_vcpu'])
+            self.assertEqual(None if change.get('placement_disabled','absent') is None else 168,row['available_vcpu'])
             self.assertIsNone(row['example_placement'])
 
     def test_memory_and_max_unit_are_checked_per_node(self):
@@ -337,7 +339,7 @@ class CapacityTests(unittest.TestCase):
         spec={'nova_object.data':{'availability_zone':'nova','force_hosts':['compute01'],'admin_password':'site-admin-secret'}}
         data={
             'FROM placement.inventories':inv,
-            "binary='nova-compute'": [[n,0,0,3] for n in self.args.nodes],
+            "`binary`='nova-compute'": [[n,0,0,3] for n in self.args.nodes],
             'FROM placement.resource_provider_traits':[],
             'FROM nova_api.host_mappings':[[n,'cell-uuid','cell1',0] for n in self.args.nodes],
             'FROM nova.instances WHERE deleted=0 ORDER BY':[
@@ -350,7 +352,8 @@ class CapacityTests(unittest.TestCase):
             'FROM nova_api.aggregates':[],
             'FROM cinder.volumes':[['in-use',2,60]],
             'FROM mp.mp_vendor_second_address_pool':[['FREE','PROBE_CONFIRMED_FREE',198]],
-            "binary IN ('nova-scheduler','nova-conductor')":[['controller01',b,0,0,3] for b in ['nova-scheduler','nova-conductor']],
+            "`binary` IN ('nova-scheduler','nova-conductor')":[['controller01',b,0,0,3] for b in ['nova-scheduler','nova-conductor']],
+            'FROM information_schema.columns':[['consumer_id','varchar']],
             'FROM placement.allocations a JOIN':[['compute01',0,'deleted_instance',1,4]],
             'FROM nova.instance_faults':[['failed-vm','',500,'NoValidHost',now]],
             'FROM nova_cell0.instance_faults':[['failed-cell0-vm','',500,'NoValidHost',now]],
@@ -403,6 +406,104 @@ else:sys.exit(94)
             self.assertTrue(any('deleted_instance' in r['message'] for r in report['scheduling_checks']))
             self.assertNotIn('site-admin-secret',process.stdout.decode()+process.stderr.decode()+(output/'report.json').read_text())
             self.assertFalse(report['warnings'],report['warnings'])
+
+    def test_observed_172_vcpu_inventory_is_not_reported_as_zero_when_services_fail(self):
+        inv=inventory(True)
+        inv['compute01']['VCPU']=mod.inventory_row(56,8,2,8)
+        inv['compute01']['MEMORY_MB']=mod.inventory_row(257583,12000,1,16384)
+        summary=mod.capacity_summary(inv,{})
+        self.assertEqual(172,summary['inventory_available']['VCPU'])
+        self.assertEqual(0,summary['confirmed_available']['VCPU'])
+        self.assertFalse(summary['scheduling_verified'])
+        self.assertEqual(self.args.nodes,summary['unknown_nodes'])
+        rows=mod.analyze(self.args,inv,{}, {},{'controller01':0,'compute01':1})
+        self.assertIsNone(rows[0]['available_vcpu'])
+        self.assertIsNone(rows[0]['after_request'])
+        self.assertEqual(172,rows[0]['inventory_available_vcpu'])
+        self.assertEqual(-8,rows[0]['inventory_after_request'])
+        self.assertEqual(220,rows[1]['inventory_available_vcpu'])
+        self.assertIsNotNone(rows[1]['inventory_example_placement'])
+
+    def test_failed_trait_query_preserves_both_nova_service_states(self):
+        ident='11111111-2222-3333-4444-555555555555'
+        def cli(args,*cmd):
+            if cmd[:3]==('compute','service','list'):
+                return [{'Host':n,'State':'up','Status':'enabled'} for n in self.args.nodes]
+            if cmd[:3]==('resource','provider','list'):
+                return [{'name':cmd[-1],'uuid':ident}]
+            raise mod.ProbeError('trait unavailable')
+        with patch.object(mod,'osc',side_effect=cli):result=mod.services_api(self.args)
+        self.assertEqual(set(self.args.nodes),set(result))
+        self.assertEqual('up',result['controller01']['state'])
+        self.assertIsNone(result['controller01']['placement_disabled'])
+        self.assertEqual('unknown',mod.scheduling_status(result['controller01']))
+
+    def test_failed_db_traits_preserve_nova_heartbeat_state(self):
+        with patch.object(mod,'sql',side_effect=[[['controller01','0','0','3']],mod.ProbeError('trait query unavailable')]):
+            result=mod.services_db(self.args,{})
+        self.assertEqual('up',result['controller01']['state'])
+        self.assertIsNone(result['controller01']['placement_disabled'])
+
+    def test_service_queries_quote_the_mariadb_binary_reserved_word(self):
+        with patch.object(mod,'sql',return_value=[]) as call:
+            mod.services_db(self.args,{})
+            mod.control_services_db(self.args,{})
+        queries=[c[0][1] for c in call.call_args_list if 'FROM nova.services' in c[0][1]]
+        self.assertEqual(2,len(queries))
+        for query in queries:
+            self.assertIn('`binary`',query)
+            self.assertNotRegex(query.replace('`binary`','quoted_service_column'),r'\bbinary\b')
+
+    def test_trait_cli_explicitly_requests_the_required_microversion(self):
+        with patch.object(mod,'auth'),patch.object(mod,'run',return_value='[]') as call:
+            mod.osc(self.args,'resource','provider','trait','list','provider-id')
+        command=call.call_args[0][0]
+        self.assertEqual(['--os-placement-api-version','1.6'],command[1:3])
+
+    def test_sql_numeric_diagnostics_are_safe_without_echoing_error_text(self):
+        result=subprocess.CompletedProcess(['mysql'],1,b'',b'ERROR 1064 (42000) at line 1: password=DO_NOT_PRINT')
+        with patch.object(mod.subprocess,'run',return_value=result),self.assertRaises(mod.ProbeError) as ctx:
+            mod.run(['mysql'],'DB')
+        self.assertIn('1064',str(ctx.exception))
+        self.assertIn('42000',str(ctx.exception))
+        self.assertNotIn('DO_NOT_PRINT',str(ctx.exception))
+
+    def test_cinder_old_client_gets_a_volume_v2_read_only_retry(self):
+        with patch.object(mod,'osc',side_effect=[mod.ProbeError('command not available'),[{'Name':'nfs','free_capacity_gb':636}]]) as call:
+            result=mod.cinder_pools(self.args)
+        self.assertEqual(636,result[0]['free_capacity_gb'])
+        self.assertEqual(('--os-volume-api-version','2'),call.call_args_list[1][0][1:3])
+
+    def test_consumer_id_uuid_schema_executes_allocation_joins(self):
+        # Execute the actual generated joins against UUID consumer_id columns,
+        # matching the site's Placement schema; not just command-name mocks.
+        with sqlite3.connect(':memory:') as db:
+            for schema in ['placement','nova']:db.execute("ATTACH DATABASE ':memory:' AS "+schema)
+            db.execute('CREATE TABLE placement.allocations(resource_provider_id int,resource_class_id int,consumer_id varchar(36),used int)')
+            db.execute('CREATE TABLE placement.resource_providers(id int,name varchar(200))')
+            db.execute('CREATE TABLE nova.instances(uuid varchar(36),deleted int)')
+            db.execute('CREATE TABLE nova.migrations(uuid varchar(36),id int)')
+            db.execute("INSERT INTO placement.resource_providers VALUES (1,'compute01')")
+            db.executemany('INSERT INTO nova.instances VALUES (?,?)',[('existing',0),('deleted',1)])
+            db.execute("INSERT INTO nova.migrations VALUES ('migration',1)")
+            db.executemany('INSERT INTO placement.allocations VALUES (1,0,?,4)',[(n,) for n in ['existing','deleted','migration','other']])
+            def query(args,statement):
+                if 'information_schema.columns' in statement:return [['consumer_id','varchar']]
+                return [[str(v) for v in row] for row in db.execute(statement)]
+            with patch.object(mod,'sql',side_effect=query):result=mod.allocation_audit_db(self.args)
+        self.assertEqual({'existing_instance','deleted_instance','migration_consumer','unmatched_consumer'},{r['kind'] for r in result})
+        self.assertEqual(16,sum(r['allocated'] for r in result))
+
+    def test_integer_consumer_schema_joins_consumer_uuid_without_guessing(self):
+        with patch.object(mod,'sql',side_effect=[[['consumer_id','bigint']],[]]) as call:
+            self.assertEqual([],mod.allocation_audit_db(self.args))
+        query=call.call_args[0][1]
+        self.assertIn('placement.consumers c ON c.id=a.consumer_id',query)
+        self.assertIn('i.uuid=c.uuid',query)
+
+    def test_unrecognized_consumer_schema_fails_without_claiming_no_residual(self):
+        with patch.object(mod,'sql',return_value=[]),self.assertRaises(mod.ProbeError):
+            mod.allocation_audit_db(self.args)
 
     def test_all_sources_unavailable_is_not_a_successful_zero_capacity_report(self):
         with tempfile.TemporaryDirectory() as tmp,contextlib.redirect_stderr(io.StringIO()), \

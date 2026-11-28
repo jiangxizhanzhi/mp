@@ -58,6 +58,20 @@ bash report_openstack_capacity.sh --help
 
 项目配额参数仅展示所选项目的上限，不等同于已扣除当前项目使用量的剩余配额。默认不指定项目，避免误把管理员项目额度用于 MP 场景判断。`--source api` 指 Placement 库存来源，其他详细项目仍可读取本机数据库。数据库实例和宿主机统计默认对应现场 `nova` Cell，Cell0 故障另外读取；其他 Cell 不自动连接，Cell 映射不导出数据库连接串。
 
+## 首次现场输出后的兼容修正
+
+2026-11-28 首次回传报告中，两节点 Placement 库存实际剩余 84+88=172 vCPU，但服务查询失败，旧报告将未核实节点排除后的下界 0 当成可新增总量展示，连带使所有超分组合显示为 0。该数值不能用于判断库存枯竭或节点停机。新版增加 `capacity_summary`，分别展示 `inventory_available`（库存余量）、`confirmed_available`（已核实节点余量下界）、`unknown_nodes` 和 `blocked_nodes`。存在状态未知节点时，组合中的 `available_vcpu`、`after_request` 为 `null`，文字显示“未确认”；另提供 `inventory_available_vcpu` / `inventory_after_request` 和明确假设两节点可调度的示例。这些假设不填充或伪造服务状态。
+
+同时修正以下采集问题：
+
+- Nova 服务 SQL 使用反引号转义 MariaDB 的保留字 `binary`；失败时仅保留 SQL 错误码和 SQLSTATE，不输出原始错误文本或认证信息。
+- Placement 消费者字段先查列结构，再区分 UUID 形式的 `consumer_id` / `consumer_uuid` 或需要连接 `consumers.uuid` 的整数形式。现场导出结构为 `consumer_id varchar(36)`。
+- API 查询 provider traits 显式请求最低需要的 Placement 微版本 1.6。trait 查询失败时保留已取得的 Nova 服务 up/enabled 状态，并将禁用标记置为未知，继续查询另一个节点。
+- Cinder 后端池 CLI 失败时增加 Volume v2 模式的只读兼容重试；仍失败就标明缺失，不将其当成空池或空闲空间。
+- 去除 scheduler 多个 worker 产生的重复提示；文件晚于进程启动时，将实例数上限明确标为文件值、加载状态未确认。不能仅凭当前文件写着 120 就证明运行中的 scheduler 已采用 120。
+
+旧报告保持原样，修复后的脚本需要再次在现场采集，才能补齐缺失的计算服务、禁用标记和分配核查；离线修正说明不意味着已经取得这些现场数据。
+
 数据库、SSH 采样或 Cinder CLI 插件不可用时，相应内容标记缺失，不当作 0 或空闲；Placement 所有读取方式都失败则退出码为 2。SSH 不可用时无法确认该节点的物理余量和进程配置，应根据报告的缺失项补采。没有采到 scheduler 配置时，实例数限制的测算仍有未确认条件。
 
 默认在当前目录创建唯一的 `capacity_report_主机_日期时间_随机后缀/`，包含 `report.txt` 与 `report.json`。可把两个文件带回用于离线核查。只输出白名单资源数据，不保存管理员认证环境、完整配置、数据库密码、控制台凭据或整库内容。自选 `--output-dir` 必须不存在，避免覆盖之前采集结果。
@@ -69,4 +83,4 @@ bash -n scripts/report_openstack_capacity.sh
 PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s scripts -p 'test_report_openstack_capacity.py' -v
 ```
 
-相关已有只读 CLI：[Placement 命令](https://docs.openstack.org/osc-placement/ussuri/cli/index.html)、[Cinder 后端容量查询](https://docs.openstack.org/python-openstackclient/ussuri/cli/command-objects/volume-backend.html)、[按宿主机查询实例](https://docs.openstack.org/python-openstackclient/ussuri/cli/command-objects/server.html)、[主机聚合](https://docs.openstack.org/python-openstackclient/ussuri/cli/command-objects/aggregate.html)。
+相关已有只读 CLI：[Placement 命令及 trait 微版本要求](https://docs.openstack.org/osc-placement/ussuri/cli/index.html)、[Cinder 后端容量查询](https://docs.openstack.org/python-openstackclient/ussuri/cli/command-objects/volume-backend.html)、[按宿主机查询实例](https://docs.openstack.org/python-openstackclient/ussuri/cli/command-objects/server.html)、[主机聚合](https://docs.openstack.org/python-openstackclient/ussuri/cli/command-objects/aggregate.html)、[MariaDB 保留字](https://mariadb.com/docs/server/reference/sql-structure/sql-language-structure/reserved-words)。
