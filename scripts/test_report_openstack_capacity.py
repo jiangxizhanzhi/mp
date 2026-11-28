@@ -37,7 +37,7 @@ def states():
 class CapacityTests(unittest.TestCase):
     def setUp(self):
         mod.WARNINGS.clear()
-        self.args=mod.parse_args([])
+        self.args=mod.parse_args(['--disk-mode','volume'])
 
     def test_current_inventory_and_post_cleanup_are_recomputed(self):
         before=inventory();after=inventory(True)
@@ -350,7 +350,16 @@ class CapacityTests(unittest.TestCase):
                 [n,'node-uuid',n,'QEMU',56,0,257583,0,8938,0,1,0,'{"num_instances":1,"num_io_ops":0}',now]
                 for n in self.args.nodes],
             'FROM nova_api.aggregates':[],
-            'FROM cinder.volumes':[['in-use',2,60]],
+            'SELECT status,COUNT(*),SUM(size) FROM cinder.volumes':[['in-use',2,60]],
+            'SELECT host,status,COUNT(*),SUM(size) FROM cinder.volumes':[['controller01@nfs','in-use',2,60]],
+            'FROM cinder.services':[['controller01@nfs','cinder-volume',0,3]],
+            'FROM glance.images i':[
+                ['kali-image','kali','active','qcow2','bare',0,30,'block_device_mapping',
+                 json.dumps([{'boot_index':0,'source_type':'snapshot','destination_type':'volume','volume_size':30,
+                              'snapshot_id':'11111111-2222-3333-4444-555555555555'}])],
+                ['centos-image','centos8','active','qcow2','bare',1024,0,'','']],
+            'FROM cinder.snapshots s':[['11111111-2222-3333-4444-555555555555','source-volume',30,'available',30,'controller01@nfs','controller01:/data/nfs_data/cinder']],
+            'LEFT JOIN nova.block_device_mapping b':[['vm2','compute01','snapshot','volume','vol2','snap',30,'controller01@nfs',30,'controller01:/data/nfs_data/cinder']],
             'FROM mp.mp_vendor_second_address_pool':[['FREE','PROBE_CONFIRMED_FREE',198]],
             "`binary` IN ('nova-scheduler','nova-conductor')":[['controller01',b,0,0,3] for b in ['nova-scheduler','nova-conductor']],
             'FROM information_schema.columns':[['consumer_id','varchar']],
@@ -401,6 +410,9 @@ else:sys.exit(94)
             self.assertEqual(1,report['instances']['nodes']['controller01']['total'])
             self.assertEqual(56,report['calculation_physical']['compute01']['scheduling_max_instances'])
             self.assertEqual(9,len(report['ratio_comparison']))
+            self.assertEqual('auto',report['disk_mode'])
+            self.assertEqual([1080,1080],report['storage_profile']['local_logical_gib_range'])
+            self.assertEqual([1080,1080],report['storage_profile']['volume_logical_gib_range'])
             self.assertTrue(any(r['database']=='nova_cell0' for r in report['recent_faults']))
             self.assertTrue(any('NoValidHost' in r['message'] for r in report['scheduling_checks']))
             self.assertTrue(any('deleted_instance' in r['message'] for r in report['scheduling_checks']))
@@ -512,6 +524,176 @@ else:sys.exit(94)
             out=Path(tmp)/'none'
             self.assertEqual(2,mod.main(['--output-dir',str(out)]))
             self.assertFalse(out.exists())
+
+
+class StorageTests(unittest.TestCase):
+    SNAPSHOT='11111111-2222-3333-4444-555555555555'
+
+    def setUp(self):
+        mod.WARNINGS.clear()
+        self.args=mod.parse_args([])
+
+    def image(self,name,mode='volume',size=60,minimum=0):
+        row=dict(id=name+'-id',name=name,status='active',disk_format='qcow2',container_format='bare',
+                 size=1024 if mode=='local' else 0,min_disk=minimum)
+        props={} if mode=='local' else {'block_device_mapping':json.dumps([dict(boot_index=0,source_type='snapshot',
+                     destination_type=mode,volume_size=size,snapshot_id=self.SNAPSHOT)])}
+        return mod.template_record(row,props)
+
+    def catalog(self):
+        return {'images':[self.image('kali',minimum=60),self.image('centos8','local')]}
+
+    def sources(self):
+        return {'snapshots':{self.SNAPSHOT:{'size_gib':60,'parent_size_gib':60,'status':'available'}},'volumes':{}}
+
+    def test_default_auto_detects_mixed_disks_and_keeps_actual_snapshot_size(self):
+        p=mod.template_plan(self.args,self.catalog(),self.sources())
+        self.assertEqual('auto',self.args.disk_mode)
+        self.assertEqual('volume',p['groups']['kali']['boot_mode'])
+        self.assertEqual([60,60],p['groups']['kali']['root_gib_range'])
+        self.assertEqual([2160,2160],p['volume_logical_gib_range'])
+        self.assertEqual([1080,1080],p['local_logical_gib_range'])
+        self.assertFalse(p['groups']['kali']['local_min_disk_violation'])
+        self.assertTrue(p['groups']['kali']['capacity_model_ready'])
+
+    def test_mixed_disk_placement_does_not_put_36_local_centoses_on_250gib_controller(self):
+        self.args.storage_profile=mod.template_plan(self.args,self.catalog(),self.sources())
+        inv=inventory(True);inv['compute01']['VCPU']=mod.inventory_row(56,8,2,8)
+        example=mod.placement(self.args,inv,states(),{}, {'controller01':0,'compute01':1},[2,3])
+        self.assertIsNotNone(example)
+        self.assertLessEqual(example['controller01']['centos'],8)
+        self.assertEqual(36,sum(x['kali'] for x in example.values()))
+        self.assertEqual(36,sum(x['centos'] for x in example.values()))
+        self.assertFalse(mod.fits(inv['controller01'],12,36,2,'auto',storage_profile=self.args.storage_profile))
+
+    def test_multiple_volume_templates_report_a_size_range_without_picking_one(self):
+        catalog=self.catalog();catalog['images'].append(self.image('kali-other',size=50))
+        p=mod.template_plan(self.args,catalog,None)
+        self.assertEqual('ambiguous',p['groups']['kali']['selection'])
+        self.assertEqual('volume',p['groups']['kali']['boot_mode'])
+        self.assertEqual([1800,2160],p['volume_logical_gib_range'])
+        self.assertEqual(2,len(p['groups']['kali']['candidate_ids']))
+        self.assertIsNone(p['groups']['kali']['selector'])
+
+    def test_mixed_template_modes_and_missing_templates_remain_unknown(self):
+        catalog=self.catalog();catalog['images'].append(self.image('kali-local','local'))
+        p=mod.template_plan(self.args,catalog,None)
+        self.assertIn('kali',p['unknown_groups'])
+        self.assertIsNone(p['volume_logical_gib_range'])
+        self.assertIsNone(p['local_logical_gib_range'])
+        self.args.storage_profile=p
+        self.assertIsNone(mod.placement(self.args,inventory(),states(),{}, {},[4,4]))
+        self.assertEqual(['kali','centos'],mod.template_plan(self.args,None,None)['unknown_groups'])
+
+    def test_exact_template_selector_removes_ambiguity(self):
+        catalog=self.catalog();catalog['images'].append(self.image('kali-other',size=50))
+        self.args.kali_image='kali-other-id'
+        p=mod.template_plan(self.args,catalog,None)
+        self.assertEqual('explicit',p['groups']['kali']['selection'])
+        self.assertEqual([50,50],p['groups']['kali']['root_gib_range'])
+
+    def test_zero_count_group_does_not_require_a_template(self):
+        self.args.kali_count=0
+        p=mod.template_plan(self.args,{'images':[self.image('centos8','local')]},None)
+        self.assertFalse(p['unknown_groups'])
+        self.assertEqual([0,0],p['volume_logical_gib_range'])
+
+    def test_min_disk_is_checked_for_local_boot_but_volume_boot_uses_volume_size(self):
+        catalog={'images':[self.image('kali','local',minimum=60),self.image('centos8','local')]}
+        p=mod.template_plan(self.args,catalog,None)
+        self.assertTrue(p['groups']['kali']['local_min_disk_violation'])
+        self.assertFalse(p['groups']['kali']['capacity_model_ready'])
+        p=mod.template_plan(self.args,self.catalog(),self.sources())
+        self.assertFalse(p['groups']['kali']['local_min_disk_violation'])
+
+    def test_source_volume_size_overrides_stale_template_metadata(self):
+        sources=self.sources();sources['snapshots'][self.SNAPSHOT].update(size_gib=80,parent_size_gib=80)
+        p=mod.template_plan(self.args,self.catalog(),sources)
+        self.assertEqual([80,80],p['groups']['kali']['root_gib_range'])
+        self.assertEqual([2880,2880],p['volume_logical_gib_range'])
+
+    def test_manual_disk_mode_is_a_labeled_override(self):
+        self.args.disk_mode='volume'
+        p=mod.template_plan(self.args,self.catalog(),self.sources())
+        self.assertTrue(p['groups']['centos']['manual_mode_conflicts_with_detection'])
+        self.assertIn('假设',p['scope'])
+
+    def test_invalid_mapping_does_not_echo_arbitrary_properties(self):
+        row={'id':'id','name':'kali','size':0,'min_disk':0}
+        image=mod.template_record(row,{'block_device_mapping':'{"password":"DO_NOT_PRINT"}','database_password':'DO_NOT_PRINT'})
+        self.assertEqual('unknown',image['boot_mode'])
+        self.assertFalse(image['mapping_valid'])
+        self.assertNotIn('DO_NOT_PRINT',json.dumps(image))
+
+    def test_template_selector_is_sql_data_and_mapping_properties_are_whitelisted(self):
+        self.args.kali_image="kali'; SELECT secret -- $(do_not_run)"
+        with patch.object(mod,'sql',return_value=[]) as call:mod.template_catalog_db(self.args)
+        statement=call.call_args[0][1]
+        self.assertNotIn(self.args.kali_image,statement)
+        self.assertIn(self.args.kali_image.encode().hex(),statement)
+        self.assertIn("p.name IN ('block_device_mapping'",statement)
+
+    def test_nfs_parser_rejects_credential_uris(self):
+        helper={};exec(mod.CONFIG_HELPER+mod.STORAGE_HELPER,helper)
+        for value in ['iscsi://user:DO_NOT_PRINT@host/target','https://host/path?token=DO_NOT_PRINT','host:/path with space']:
+            self.assertIsNone(mod.parse_nfs_share(value))
+            self.assertIsNone(helper['nfs_share'](value))
+        self.assertEqual('2001:db8::1',mod.parse_nfs_share('[2001:db8::1]:/data/cinder')['server'])
+
+    def test_nfs_probe_reads_actual_shares_mounts_and_exports_without_credentials(self):
+        helper={};exec(mod.CONFIG_HELPER+mod.STORAGE_HELPER,helper)
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);share=root/'shares';conf=root/'cinder.conf';mounts=root/'mountinfo';exports=root/'exports'
+            share.write_text('compute01:/data/cinder -o password=DO_NOT_PRINT\n')
+            conf.write_text('[DEFAULT]\nenabled_backends=nfs\n[database]\nconnection=mysql://DO_NOT_PRINT\n[nfs]\n'
+                'volume_driver=cinder.volume.drivers.nfs.NfsDriver\nvolume_backend_name=misleading-controller-name\nnfs_shares_config='+str(share)+'\n')
+            mounts.write_text('1 0 8:1 / / rw - ext4 /dev/sda1 rw\n2 1 0:5 / /opt/cinder/mnt rw - nfs4 compute01:/data/cinder rw,password=DO_NOT_PRINT\n')
+            exports.write_text(str(root)+' *(rw,secret=DO_NOT_PRINT)\n')
+            result=helper['storage_probe']([str(conf)],str(mounts),[str(exports)])
+        self.assertTrue(result['config_readable'])
+        self.assertEqual('compute01',result['backends'][0]['shares'][0]['server'])
+        self.assertEqual('nfs4',result['nfs_mounts'][0]['fstype'])
+        self.assertTrue(result['exported_paths'][0]['filesystem'])
+        self.assertNotIn('DO_NOT_PRINT',json.dumps(result))
+
+    def test_storage_server_is_determined_from_share_not_backend_name_or_device_number(self):
+        backend={'section':'nfs','config':{'volume_backend_name':'nfs-controller01'},
+                 'shares':[{'source':'10.0.0.2:/data/cinder','server':'10.0.0.2','path':'/data/cinder'}]}
+        stats={'controller01':{'host_addresses':['10.0.0.1'],'filesystems':[],
+                 'storage':{'backends':[backend],'nfs_mounts':[]}},
+               'compute01':{'host_addresses':['10.0.0.2'],'filesystems':[],
+                 'storage':{'backends':[],'nfs_mounts':[],'exported_paths':[{'filesystem':{
+                     'path':'/data/cinder','device':64768,'free_bytes':8000000000}}]}}}
+        link=mod.storage_topology(stats)['connections'][0]
+        self.assertEqual('controller01',link['manager_node'])
+        self.assertEqual('compute01',link['storage_node'])
+        self.assertEqual(8000000000,link['filesystem']['free_bytes'])
+
+    def test_cinder_provider_location_only_emits_nfs_share_not_iscsi_credentials(self):
+        row=['vm','compute01','snapshot','volume','volume-id','snap-id','60','controller01@nfs','60','iscsi://user:DO_NOT_PRINT@host/target']
+        with patch.object(mod,'sql',return_value=[row]):result=mod.instance_root_disks_db(self.args)
+        self.assertIsNone(result[0]['nfs_share'])
+        self.assertNotIn('DO_NOT_PRINT',json.dumps(result))
+
+    def test_template_sources_fetch_only_referenced_valid_uuids(self):
+        row=[self.SNAPSHOT,'parent',60,'available',80,'controller01@nfs','compute01:/data/cinder']
+        with patch.object(mod,'sql',return_value=[row]) as call:
+            result=mod.template_sources_db(self.args,self.catalog())
+        self.assertEqual('compute01',result['snapshots'][self.SNAPSHOT]['nfs_share']['server'])
+        self.assertEqual(80,result['snapshots'][self.SNAPSHOT]['parent_size_gib'])
+        self.assertIn(self.SNAPSHOT,call.call_args[0][1])
+
+
+    def test_parent_volume_growth_does_not_enlarge_an_existing_snapshot(self):
+        sources=self.sources();sources['snapshots'][self.SNAPSHOT]['parent_size_gib']=120
+        p=mod.template_plan(self.args,self.catalog(),sources)
+        self.assertEqual([60,60],p['groups']['kali']['root_gib_range'])
+
+    def test_snapshot_error_state_blocks_capacity_example(self):
+        sources=self.sources();sources['snapshots'][self.SNAPSHOT]['status']='error'
+        p=mod.template_plan(self.args,self.catalog(),sources)
+        self.assertFalse(p['groups']['kali']['capacity_model_ready'])
+        self.assertEqual('error',p['groups']['kali']['source_not_ready'][0]['status'])
 
 
 if __name__=='__main__':unittest.main()

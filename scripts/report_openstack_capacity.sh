@@ -204,8 +204,9 @@ def read_config(paths):
             if c.has_option(section,key):cfg[section+'.'+key]=c.get(section,key)
     return {'config':cfg,'config_files':loaded,'config_incomplete':failed}
 
-def nova_processes(proc='/proc'):
+def nova_processes(proc='/proc',allowed=None):
     result=[]
+    allowed=allowed or ['nova-compute','nova-scheduler']
     try:
         boot=float(next(x.split()[1] for x in (Path(proc)/'stat').read_text().splitlines() if x.startswith('btime ')))
         ticks=os.sysconf('SC_CLK_TCK')
@@ -214,7 +215,7 @@ def nova_processes(proc='/proc'):
         if not path.name.isdigit():continue
         try:
             argv=(path/'cmdline').read_bytes().decode('utf-8','replace').strip('\0').split('\0')
-            binary=next((Path(v).name for v in argv[:3] if Path(v).name in ['nova-compute','nova-scheduler']),None)
+            binary=next((Path(v).name for v in argv[:3] if Path(v).name in allowed),None)
             if not binary:continue
             item={'binary':binary,'pid':int(path.name)}
             item.update(read_config(config_paths(argv)))
@@ -227,10 +228,94 @@ def nova_processes(proc='/proc'):
     return result
 '''
 
-HOST_HELPER = CONFIG_HELPER + r'''
+STORAGE_HELPER = r'''
+import ipaddress,re,shlex
+def nfs_share(value):
+    value=str(value).strip()
+    m=re.fullmatch(r'(\[[0-9a-fA-F:]+\]|[A-Za-z0-9][A-Za-z0-9_.-]*):(/(?!/)[^\s\x00]*)',value)
+    return {'source':value,'server':m[1].strip('[]'),'path':m[2]} if m else None
+
+def mounts_read(filename='/proc/self/mountinfo'):
+    def decode(value):return re.sub(r'\\([0-7]{3})',lambda m:chr(int(m[1],8)),value)
+    result=[]
+    for line in Path(filename).read_text().splitlines():
+        before,after=line.split(' - ',1);left=before.split();right=after.split()
+        kind=right[0];source=decode(right[1]);target=decode(left[4])
+        if kind in ['nfs','nfs4']:
+            share=nfs_share(source)
+            source=share['source'] if share else '<unrecognized NFS source>'
+        elif not source.startswith('/dev/'):source='<'+kind+'>'
+        result.append({'mountpoint':target,'fstype':kind,'source':source})
+    return result
+
+def filesystem_record(path,mounts):
+    if not Path(path).exists():return None
+    usage=shutil.disk_usage(path)
+    matches=[m for m in mounts if path==m['mountpoint'] or path.startswith(m['mountpoint'].rstrip('/')+'/')]
+    mount=max(matches,key=lambda m:len(m['mountpoint'])) if matches else None
+    return {'path':path,'device':os.stat(path).st_dev,'total_bytes':usage.total,'used_bytes':usage.used,
+            'free_bytes':usage.free,'mount':mount}
+
+def storage_probe(paths=None,mount_file='/proc/self/mountinfo',export_files=None):
+    result={'config_files':[],'config_readable':False,'config_incomplete':False,'backends':[],
+            'nfs_mounts':None,'export_files_read':[],'exported_paths':[],'issues':[]}
+    c=configparser.ConfigParser(interpolation=None,strict=False)
+    for name in paths or ['/etc/cinder/cinder.conf']:
+        try:
+            with open(name,encoding='utf-8') as f:c.read_file(f)
+            result['config_files'].append(name);result['config_readable']=True
+        except Exception:result['config_incomplete']=True
+    try:mounts=mounts_read(mount_file);result['nfs_mounts']=[m for m in mounts if m['fstype'] in ['nfs','nfs4']]
+    except Exception:mounts=[];result['issues'].append('mountinfo unavailable')
+    backends=[x.strip() for x in c.defaults().get('enabled_backends','').split(',') if x.strip()]
+    if not backends and c.defaults().get('volume_driver'):backends=['DEFAULT']
+    for section in backends:
+        def get(key,default=None):return c.get(section,key,fallback=default)
+        state=get('state_path','/var/lib/cinder')
+        def resolve(value):return value.replace('${state_path}',state).replace('$state_path',state)
+        keys=['volume_driver','volume_backend_name','reserved_percentage','max_over_subscription_ratio',
+              'nfs_snapshot_support','nfs_qcow2_volumes','nfs_sparsed_volumes']
+        row={'section':section,'config':{k:get(k) for k in keys if get(k) is not None},'shares':None}
+        if 'nfs' in str(get('volume_driver','')).lower():
+            filename=resolve(get('nfs_shares_config','/etc/cinder/nfs_shares'))
+            row['shares_file']=filename;row['mount_base']=resolve(get('nfs_mount_point_base',state+'/mnt'))
+            try:
+                shares=[]
+                for line in Path(filename).read_text().splitlines():
+                    parts=shlex.split(line,comments=True)
+                    if not parts:continue
+                    parsed=nfs_share(parts[0])
+                    if parsed is None:raise ValueError()
+                    shares.append(parsed)
+                row['shares']=shares
+            except Exception:result['issues'].append('NFS share file unavailable or unrecognized')
+        result['backends'].append(row)
+    files=export_files if export_files is not None else [Path('/etc/exports'),*sorted(Path('/etc/exports.d').glob('*.exports'))]
+    exported=set()
+    for filename in files:
+        try:
+            lines=Path(filename).read_text().splitlines();result['export_files_read'].append(str(filename))
+        except OSError:continue
+        for line in lines:
+            try:parts=shlex.split(line,comments=True)
+            except ValueError:continue
+            if parts and parts[0].startswith('/'):exported.add(parts[0])
+    for path in sorted(exported):
+        try:result['exported_paths'].append({'path':path,'filesystem':filesystem_record(path,mounts)})
+        except OSError:result['issues'].append('export filesystem unavailable')
+    return result
+'''
+
+HOST_HELPER = CONFIG_HELPER + STORAGE_HELPER + r'''
 opt=json.loads(sys.argv[1]);out={'host':socket.gethostname().split('.')[0],'cpu_count':os.cpu_count(),'filesystems':[],'config':{}}
 try:out['nova_processes']=nova_processes()
 except Exception:out['nova_processes']=None
+try:out['cinder_processes']=nova_processes(allowed=['cinder-volume','cinder-scheduler'])
+except Exception:out['cinder_processes']=None
+try:
+    p=subprocess.run(['hostname','-I'],stdout=subprocess.PIPE,stderr=subprocess.DEVNULL,timeout=5)
+    out['host_addresses']=[str(ipaddress.ip_address(x)) for x in p.stdout.decode().split()]
+except Exception:out['host_addresses']=[]
 compute=next((p for p in (out['nova_processes'] or []) if p['binary']=='nova-compute'),None)
 if compute:
     out['config']=compute['config'];out['config_source']='running nova-compute config files'
@@ -270,13 +355,22 @@ try:
         for k in ['enabled_backends','volume_driver','volume_backend_name','reserved_percentage',
         'max_over_subscription_ratio','nfs_snapshot_support','nfs_qcow2_volumes'] if c.has_option(s,k)}
 except Exception:out['cinder_config']=None
+try:
+    running=next((p for p in (out['cinder_processes'] or []) if p['binary']=='cinder-volume'),None)
+    config_files=[f['path'] for f in running['config_files']] if running else None
+    out['storage']=storage_probe(config_files)
+    out['storage']['config_source']='cinder-volume process files' if running else 'file only; cinder-volume process not confirmed'
+except Exception:out['storage']=None
 paths=['/','/var/log','/var/lib/docker',opt['cinder_path']]
 state=out['config'].get('DEFAULT.state_path','/opt/openstack/nova')
 paths.append(out['config'].get('DEFAULT.instances_path',state+'/instances').replace('${state_path}',state).replace('$state_path',state))
+try:node_mounts=mounts_read()
+except Exception:node_mounts=[]
 for path in dict.fromkeys(paths):
     if not Path(path).exists():continue
     try:
-        u=shutil.disk_usage(path);out['filesystems'].append({'path':path,'device':os.stat(path).st_dev,'total_bytes':u.total,'used_bytes':u.used,'free_bytes':u.free})
+        fs=filesystem_record(path,node_mounts)
+        if fs:out['filesystems'].append(fs)
     except OSError:pass
 print(json.dumps(out))
 '''
@@ -698,6 +792,219 @@ def cinder_pools(args):
     return result
 
 
+def parse_nfs_share(value):
+    match = re.fullmatch(r'(\[[0-9a-fA-F:]+\]|[A-Za-z0-9][A-Za-z0-9_.-]*):(/(?!/)[^\s\x00]*)',str(value).strip())
+    return dict(source=match[0],server=match[1].strip('[]'),path=match[2]) if match else None
+
+
+def cinder_services_db(args):
+    rows = sql(args,"""SELECT host,`binary`,disabled,
+        TIMESTAMPDIFF(SECOND,COALESCE(updated_at,created_at),UTC_TIMESTAMP())
+        FROM cinder.services WHERE deleted=0""")
+    return [dict(host=host,binary=binary,status='enabled' if off=='0' else 'disabled',
+                 heartbeat_age_seconds=None if age=='NULL' else int(age),source='Cinder DB heartbeat')
+            for host,binary,off,age in rows]
+
+
+def volume_locations_db(args):
+    rows = sql(args,"""SELECT host,status,COUNT(*),SUM(size) FROM cinder.volumes
+        WHERE deleted=0 GROUP BY host,status""")
+    return [dict(manager_host=host,status=status,count=int(count),logical_gib=int(size or 0))
+            for host,status,count,size in rows]
+
+
+def instance_root_disks_db(args):
+    rows=sql(args,"""SELECT i.uuid,COALESCE(i.host,''),COALESCE(b.source_type,''),COALESCE(b.destination_type,''),
+        COALESCE(b.volume_id,''),COALESCE(b.snapshot_id,''),COALESCE(b.volume_size,0),
+        COALESCE(v.host,''),COALESCE(v.size,0),COALESCE(v.provider_location,'') FROM nova.instances i
+        LEFT JOIN nova.block_device_mapping b ON b.instance_uuid=i.uuid AND b.deleted=0 AND b.boot_index=0
+        LEFT JOIN cinder.volumes v ON v.id=b.volume_id AND v.deleted=0
+        WHERE i.deleted=0 ORDER BY i.host,i.uuid LIMIT """+str(args.sample_limit*len(args.nodes)))
+    return [dict(uuid=ident,compute_host=host,source_type=source_type or None,destination_type=dest or 'unknown',
+                 volume_id=volume or None,snapshot_id=snapshot or None,requested_volume_gib=int(size),
+                 cinder_manager_host=manager or None,actual_volume_gib=int(actual),nfs_share=parse_nfs_share(location))
+            for ident,host,source_type,dest,volume,snapshot,size,manager,actual,location in rows]
+
+
+def storage_topology(stats):
+    def alias(value):
+        try:return str(ipaddress.ip_address(value))
+        except ValueError:return str(value).lower().split('.')[0]
+    aliases = {n:{alias(x) for x in [n,s.get('host',n),*s.get('host_addresses',[])]} for n,s in stats.items() if s}
+    connections = []
+    for manager,sample in stats.items():
+        for backend in ((sample or {}).get('storage') or {}).get('backends',[]):
+            for share in backend.get('shares') or []:
+                matches = [n for n,values in aliases.items() if alias(share['server']) in values]
+                node = matches[0] if len(matches)==1 else None
+                physical = None
+                if node:
+                    sample2 = stats[node]
+                    files = [*sample2.get('filesystems',[]),*(e.get('filesystem') for e in (sample2.get('storage') or {}).get('exported_paths',[]))]
+                    physical = next((f for f in files if f and f['path']==share['path']),None)
+                mounted = [n for n,s in stats.items() if s and any(
+                    m['source']==share['source'] for m in (s.get('storage') or {}).get('nfs_mounts') or [])]
+                connections.append(dict(manager_node=manager,backend=backend['config'].get('volume_backend_name',backend['section']),
+                    driver=backend['config'].get('volume_driver'),share=share,storage_node=node,
+                    filesystem=physical,mounted_by=mounted,scope='configured share plus observed mounts; not a test volume creation'))
+    return dict(connections=connections,missing_node_samples=[n for n,s in stats.items() if not s or s.get('storage') is None],
+                managers_without_readable_config=[n for n,s in stats.items() if s and any(p['binary']=='cinder-volume' for p in s.get('cinder_processes') or []) and not (s.get('storage') or {}).get('config_readable')],
+                note='backend名称/服务运行位置不是物理存储位置；同一NFS共享及同一主机device不能重复累加容量。')
+
+
+def sql_text(value):
+    # mysql --execute has no binding API. Encode user selectors as SQL hex data.
+    return "CONVERT(0x"+str(value).encode('utf-8').hex()+" USING utf8mb4)"
+
+
+def template_record(row, properties):
+    record = {k:row.get(k) for k in ['id','name','status','disk_format','container_format']}
+    record.update(size_bytes=int(row.get('size') or 0),min_disk_gib=int(row.get('min_disk') or 0),block_devices=[],mapping_valid=True)
+    raw = properties.get('block_device_mapping',properties.get('block_device_mapping_v2'))
+    try:
+        if raw is None:devices=[]
+        else:
+            devices=json.loads(raw) if isinstance(raw,str) else raw
+            if not isinstance(devices,list):raise ValueError()
+        for item in devices:
+            if not isinstance(item,dict):raise ValueError()
+            if item.get('no_device'):continue
+            allowed=['boot_index','source_type','destination_type','volume_size','snapshot_id','volume_id','image_id','uuid']
+            clean={k:item[k] for k in allowed if item.get(k) is not None}
+            for key in ['boot_index','volume_size']:
+                if key in clean:clean[key]=int(clean[key])
+            record['block_devices'].append(clean)
+    except (ValueError,TypeError):record['mapping_valid']=False;record['block_devices']=[]
+    roots=[d for d in record['block_devices'] if d.get('boot_index')==0]
+    root=roots[0] if len(roots)==1 else None
+    record['root_device']=root
+    record['extra_mapped_disks']=len([d for d in record['block_devices'] if d.get('boot_index')!=0])
+    if not record['mapping_valid'] or len(roots)>1:mode='unknown'
+    elif root and root.get('destination_type') in ['volume','local']:mode=root['destination_type']
+    elif root:mode='unknown'
+    elif record['container_format']=='docker':mode='unsupported'
+    elif record['size_bytes']>0:mode='local'
+    else:mode='unknown'
+    record['boot_mode']=mode
+    return record
+
+
+def template_catalog_db(args):
+    tests=[]
+    for kind in ['kali','centos']:
+        selector=getattr(args,kind+'_image')
+        tests.append('i.id='+sql_text(selector)+' OR i.name='+sql_text(selector) if selector else "LOWER(i.name) LIKE '%"+kind+"%'")
+    rows=sql(args,"""SELECT i.id,i.name,i.status,i.disk_format,i.container_format,COALESCE(i.size,0),i.min_disk,
+        COALESCE(p.name,''),COALESCE(p.value,'') FROM glance.images i
+        LEFT JOIN glance.image_properties p ON p.image_id=i.id AND p.deleted=0
+          AND p.name IN ('block_device_mapping','block_device_mapping_v2','bdm_v2')
+        WHERE i.deleted=0 AND i.status='active' AND ("""+' OR '.join(tests)+') ORDER BY i.name,i.id')
+    grouped={}
+    for ident,name,status,disk,container,size,minimum,key,value in rows:
+        entry=grouped.setdefault(ident,dict(row=dict(id=ident,name=name,status=status,disk_format=disk,
+            container_format=container,size=size,min_disk=minimum),properties={}))
+        if key:entry['properties'][key]=value
+    return dict(source='Glance DB whitelist',images=[template_record(e['row'],e['properties']) for e in grouped.values()])
+
+
+def template_catalog_api(args):
+    rows=osc(args,'image','list','--long')
+    if not isinstance(rows,list):raise ProbeError('Glance 镜像列表无法识别')
+    selected=[]
+    for row in rows:
+        row=normalized(row)
+        if any((getattr(args,k+'_image') in [row.get('name'),row.get('id')] if getattr(args,k+'_image') else k in str(row.get('name','')).lower()) for k in ['kali','centos']):selected.append(row)
+    if len(selected)>args.template_limit:raise ProbeError('镜像候选过多，请指定 --kali-image/--centos-image 或增加 --template-limit')
+    images=[]
+    for row in selected:
+        ident=str(uuid.UUID(row['id']))
+        detail=optional('镜像 '+ident+' 详情',lambda ident=ident:osc(args,'image','show',ident))
+        if detail is None:
+            images.append(dict(id=ident,name=row.get('name'),boot_mode='unknown',mapping_valid=False,min_disk_gib=0,size_bytes=0,root_device=None,extra_mapped_disks=0));continue
+        detail=normalized(detail);props=detail.get('properties',{})
+        if isinstance(props,str):props=ast.literal_eval(props)
+        if not isinstance(props,dict):raise ProbeError('镜像属性映射无法识别')
+        images.append(template_record(detail,props))
+    return dict(source='Glance API whitelist',images=images)
+
+
+def template_sources_db(args,catalog):
+    snapshots=set();volumes=set()
+    for image in (catalog or {}).get('images',[]):
+        for device in image.get('block_devices',[]):
+            kind=device.get('source_type')
+            value=device.get(kind+'_id',device.get('uuid')) if kind in ['snapshot','volume'] else None
+            if value:
+                try:value=str(uuid.UUID(str(value)))
+                except ValueError:continue
+                (snapshots if kind=='snapshot' else volumes).add(value)
+    result={'snapshots':{},'volumes':{}}
+    if snapshots:
+        ids=','.join("'"+v+"'" for v in sorted(snapshots))
+        rows=sql(args,"""SELECT s.id,s.volume_id,s.volume_size,s.status,COALESCE(v.size,0),COALESCE(v.host,''),
+            COALESCE(v.provider_location,'') FROM cinder.snapshots s
+            LEFT JOIN cinder.volumes v ON v.id=s.volume_id AND v.deleted=0
+            WHERE s.deleted=0 AND s.id IN ("""+ids+')')
+        for ident,parent,size,status,parent_size,host,location in rows:
+            result['snapshots'][ident]=dict(volume_id=parent,size_gib=int(size),status=status,parent_size_gib=int(parent_size),
+                                           manager_host=host,nfs_share=parse_nfs_share(location))
+    if volumes:
+        ids=','.join("'"+v+"'" for v in sorted(volumes))
+        rows=sql(args,"SELECT id,size,status,host,COALESCE(provider_location,'') FROM cinder.volumes WHERE deleted=0 AND id IN ("+ids+')')
+        for ident,size,status,host,location in rows:
+            result['volumes'][ident]=dict(size_gib=int(size),status=status,manager_host=host,nfs_share=parse_nfs_share(location))
+    return result
+
+
+def template_plan(args,catalog,sources):
+    result={'mode':args.disk_mode,'groups':{},'notes':[]}
+    for kind in ['kali','centos']:
+        selector=getattr(args,kind+'_image');count=getattr(args,kind+'_count');requested=getattr(args,kind+'_disk_gib')
+        candidates=[i for i in (catalog or {}).get('images',[]) if (selector in [i['id'],i['name']] if selector else kind in i['name'].lower())]
+        modes={i['boot_mode'] for i in candidates}
+        detected=next(iter(modes)) if len(modes)==1 else 'unknown'
+        mode=detected if args.disk_mode=='auto' else args.disk_mode
+        minimum=[];actual=[];missing=[];source_locations=[];source_not_ready=[]
+        for image in candidates:
+            root=image.get('root_device') or {};size=int(root.get('volume_size') or 0)
+            source_kind=root.get('source_type');ident=root.get(str(source_kind)+'_id',root.get('uuid'))
+            info=((sources or {}).get('snapshots' if source_kind=='snapshot' else 'volumes',{}).get(ident)
+                  if source_kind in ['snapshot','volume'] else None)
+            if source_kind in ['snapshot','volume'] and not info:missing.append(image['id'])
+            # A later parent-volume extension does not enlarge its old snapshot.
+            source_size=int((info or {}).get('size_gib',0))
+            if info:
+                location=dict(manager_host=info.get('manager_host'),nfs_share=info.get('nfs_share'))
+                if location not in source_locations:source_locations.append(location)
+                if info.get('status')!='available':source_not_ready.append(dict(image_id=image['id'],source_type=source_kind,status=info.get('status')))
+            minimum.append(int(image.get('min_disk_gib') or 0))
+            # Volume-backed boot checks min_disk against volume size, not flavor.root_gb.
+            actual.append(max(requested,image.get('min_disk_gib',0),size,source_size))
+        low=min(actual) if actual else requested;high=max(actual) if actual else requested
+        local_min_violation=mode=='local' and any(n>requested for n in minimum)
+        extra=any(i.get('extra_mapped_disks') for i in candidates)
+        ready=count==0 or (mode in ['local','volume'] and not local_min_violation and not extra and not source_not_ready)
+        if args.disk_mode=='auto' and not candidates:ready=count==0
+        entry=dict(count=count,requested_root_gib=requested,selector=selector,candidate_ids=[i['id'] for i in candidates],
+            selection='explicit' if selector and len(candidates)==1 else 'unique' if len(candidates)==1 else 'ambiguous' if candidates else 'missing',
+            detected_mode=detected,boot_mode=mode,root_gib_range=[low,high],capacity_model_ready=ready,
+            source_details_missing=missing,source_storage_locations=source_locations,source_not_ready=source_not_ready,
+            local_min_disk_violation=local_min_violation,extra_disks_unmodeled=extra,
+            size_scope='已知模板/源对象大小范围；源对象未查到时不保证上界完整')
+        entry['manual_mode_conflicts_with_detection']=args.disk_mode!='auto' and detected in ['local','volume'] and detected!=mode
+        result['groups'][kind]=entry
+        if count and (not ready or entry['selection'] in ['ambiguous','missing'] or missing or high>requested or entry['manual_mode_conflicts_with_detection']):
+            result['notes'].append(kind+'：选择='+entry['selection']+'，检测='+detected+'，测算='+mode+
+                '，根盘范围='+str([low,high])+' GiB；申请值不代表快照会缩小，源卷缺失或多模板时需确认。')
+    result['local_logical_gib_range']=[sum(g['count']*g['root_gib_range'][i] for g in result['groups'].values() if g['boot_mode']=='local') for i in [0,1]]
+    result['volume_logical_gib_range']=[sum(g['count']*g['root_gib_range'][i] for g in result['groups'].values() if g['boot_mode']=='volume') for i in [0,1]]
+    result['unknown_groups']=[k for k,g in result['groups'].items() if g['count'] and not g['capacity_model_ready']]
+    if any(g['count'] and g['boot_mode'] not in ['local','volume'] for g in result['groups'].values()):
+        result['local_logical_gib_range']=None;result['volume_logical_gib_range']=None
+    result['scope']='按模板元数据及已查源卷测算；volume/local手动模式仅为假设，不改变启动方式；逻辑大小不是实际写入。'
+    return result
+
+
 def neutron_pools(args):
     rows = sql(args, """SELECT 'pool',s.id,s.cidr,p.first_ip,p.last_ip FROM neutron.ipallocationpools p
         JOIN neutron.subnets s ON s.id=p.subnet_id;
@@ -766,7 +1073,7 @@ def free_resource(inv, resource, ratio=None):
     return max(0, int(Decimal(row['total']-row['reserved'])*Decimal(str(ratio)))-row['allocated'])
 
 
-def fits(inv, kali, centos, ratio, disk_mode, physical=None, instances=None):
+def fits(inv, kali, centos, ratio, disk_mode, physical=None, instances=None, storage_profile=None):
     for rc, amount in [('VCPU', kali*4+centos), ('MEMORY_MB', (kali*4+centos)*1024)]:
         free = free_resource(inv, rc, ratio if rc == 'VCPU' else None)
         if free is None or amount > free:
@@ -775,8 +1082,19 @@ def fits(inv, kali, centos, ratio, disk_mode, physical=None, instances=None):
         for n, size in [(kali, 4 if rc == 'VCPU' else 4096), (centos, 1 if rc == 'VCPU' else 1024)]:
             if n and not (r['min_unit'] <= size <= r['max_unit'] and size % r['step_size'] == 0):
                 return False
-    if disk_mode == 'local' and (free_resource(inv, 'DISK_GB') is None or (kali+centos)*30 > free_resource(inv, 'DISK_GB')):
-        return False
+    local_disks=[]
+    if storage_profile is not None:
+        for kind,count in [('kali',kali),('centos',centos)]:
+            group=storage_profile['groups'][kind]
+            if count and not group['capacity_model_ready']:return False
+            if count and group['boot_mode']=='local':local_disks.append((count,group['root_gib_range'][1]))
+    elif disk_mode=='auto' and kali+centos:return False
+    elif disk_mode=='local':local_disks=[(kali+centos,30)]
+    required=sum(count*size for count,size in local_disks)
+    if required:
+        if free_resource(inv,'DISK_GB') is None or required>free_resource(inv,'DISK_GB'):return False
+        disk=inv['DISK_GB']
+        if any(not disk['min_unit']<=size<=disk['max_unit'] or size%disk['step_size'] for count,size in local_disks):return False
     cfg = (physical or {}).get('config', {})
     filters = {f.strip() for f in cfg.get('filter_scheduler.enabled_filters', '').split(',')}
     maximum = cfg.get('filter_scheduler.max_instances_per_host')
@@ -794,7 +1112,7 @@ def placement(args, inventory, states, stats, counts, ratios):
     for kali in range(min(args.kali_count, free_resource(inventory[a], 'VCPU', ratios[0])//4)+1):
         for centos in range(min(args.centos_count, free_resource(inventory[a], 'VCPU', ratios[0]))+1):
             distributions = [(a,kali,centos,ratios[0]), (b,args.kali_count-kali,args.centos_count-centos,ratios[1])]
-            if all((eligible(states.get(node)) or k+c == 0) and fits(inventory[node],k,c,r,args.disk_mode,stats.get(node),counts.get(node))
+            if all((eligible(states.get(node)) or k+c == 0) and fits(inventory[node],k,c,r,args.disk_mode,stats.get(node),counts.get(node),getattr(args,'storage_profile',None))
                    for node,k,c,r in distributions):
                 return {node: {'kali':k,'centos':c} for node,k,c,r in distributions}
     return None
@@ -825,6 +1143,13 @@ def human(report):
              '', '=== 节点调度核查 ===']
     for check in report['scheduling_checks']:
         lines.append('[{}] {}{}'.format(check['level'],check.get('host',''),('：' if check.get('host') else '')+check['message']))
+    lines += ['', '=== 存储位置：后端管理节点 → NFS服务器/路径 → 文件系统 ===',json.dumps(report['storage_topology'],ensure_ascii=False,indent=2),
+              '=== Cinder 服务心跳（服务位置不等于磁盘位置）===',json.dumps(report['cinder_services'],ensure_ascii=False,indent=2),
+              '=== Cinder 卷按后端管理主机统计 ===',json.dumps(report['volume_locations'],ensure_ascii=False,indent=2),
+              '=== 当前实例系统盘映射样本 ===',json.dumps(report['instance_root_disks'],ensure_ascii=False,indent=2),
+              '=== Kali/CentOS 活跃模板及实际块设备映射 ===',json.dumps(report['template_catalog'],ensure_ascii=False,indent=2),
+              '=== 模板关联的快照/源卷及NFS位置 ===',json.dumps(report['template_sources'],ensure_ascii=False,indent=2),
+              '=== 本批存储需求：自动检测/显式假设 ===',json.dumps(report['storage_profile'],ensure_ascii=False,indent=2)]
     totals = {'VCPU':0,'MEMORY_MB':0,'DISK_GB':0}
     for node, inv in report['inventory'].items():
         state = report['services'].get(node, {})
@@ -862,6 +1187,7 @@ def human(report):
         lines.append('  进程配置来源/文件时间：'+json.dumps(sample.get('nova_processes'),ensure_ascii=False,indent=2))
         if sample.get('cinder_config') is not None:
             lines.append('  Cinder 文件配置（白名单）：'+json.dumps(sample['cinder_config'],ensure_ascii=False))
+        lines.append('  当前挂载、NFS共享配置及导出目录：'+json.dumps(sample.get('storage'),ensure_ascii=False,indent=2))
     summary = report['capacity_summary']
     raw = summary['inventory_available']
     lines += ['', '=== Placement 库存余量（未扣除调度状态/请求限制）===',
@@ -874,8 +1200,9 @@ def human(report):
         lines.append('已核实可新增 VCPU={}，MEMORY={:.2f} GiB，DISK_GB 调度余量={}'.format(totals['VCPU'],totals['MEMORY_MB']/1024,totals['DISK_GB']))
     lines += [
               '=== 本批新增需求 ===',
-              'Kali={} 台（4 vCPU/4 GiB/30 GiB），CentOS={} 台（1 vCPU/1 GiB/30 GiB）'.format(report['kali_count'],report['centos_count']),
-              '合计 {} vCPU / {} GiB 内存 / {} GiB 逻辑磁盘；磁盘模式假设={}'.format(report['requested_vcpu'],report['requested_vcpu'],report['requested_disk_gib'],report['disk_mode']),
+              'Kali={} 台（4 vCPU/4 GiB/申请{} GiB），CentOS={} 台（1 vCPU/1 GiB/申请{} GiB）'.format(report['kali_count'],report['kali_disk_gib'],report['centos_count'],report['centos_disk_gib']),
+              '申请合计 {} vCPU / {} GiB 内存 / {} GiB 逻辑磁盘；磁盘测算模式={}'.format(report['requested_vcpu'],report['requested_vcpu'],report['requested_disk_gib'],report['disk_mode']),
+              '按模板/模式测算：本地盘逻辑范围={} GiB，卷逻辑范围={} GiB，未确认组={}'.format(report['storage_profile']['local_logical_gib_range'],report['storage_profile']['volume_logical_gib_range'],report['storage_profile']['unknown_groups']),
               '只按当前库存，CPU额度{}；内存额度{}；这不是调度成功确认。'.format('足够' if raw['VCPU']>=report['requested_vcpu'] else '不足', '足够' if raw['MEMORY_MB']>=report['requested_vcpu']*1024 else '不足')]
     if any('DISK_GB' not in inv and eligible(report['services'].get(n)) for n,inv in report['inventory'].items()):
         lines.append('部分节点缺少本地 DISK_GB 库存，上述磁盘仅为已知部分；共享盘需查后端。')
@@ -903,7 +1230,10 @@ def human(report):
               '=== 指定项目配额（未指定项目则未采集）===', json.dumps(report['project_quota'],ensure_ascii=False),
               '', '注意：卷启动消耗 Cinder 后端；不能将 compute01 本地磁盘空闲当作 controller01 NFS 余量。',
               '精简卷/快照克隆的逻辑大小不等于立即实际占用；模板原卷大于30 GiB时实际需求可能更大。',
+              '默认auto按活跃模板/源卷探测，候选不唯一时仅给模式/大小范围；没有模板证据不会默认全部为卷启动。',
+              'Cinder进程/后端名称不证明数据在该主机；以NFS共享源地址、实际挂载与服务器文件系统关联判断。',
               '分配示例未验证项目配额、可用区、亲和性及镜像约束，不代表真实启动验收。',
+              '示例只核对已取得的计算节点额度；Cinder调度、后端可写性及后续物理增长仍需单独确认。',
               '未发起测试虚拟机创建：两节点都有现存实例仅证明当前分布，不证明下一次请求一定可调度。',
               'nova.conf 显式 ratio=0/未设置时可由 Placement 管理；initial_* 只影响初始化。当前调度额度以 Placement 为准。',
               '数据库默认查询 nova 与 nova_cell0；分配归属只关联 nova，unmatched_consumer 也可能来自其他cell，不能直接当作垃圾。',
@@ -924,7 +1254,12 @@ def parse_args(argv=None):
     p.add_argument('--disk-floor-gib', type=int, default=300)
     p.add_argument('--kali-count', type=int, default=36)
     p.add_argument('--centos-count', type=int, default=36)
-    p.add_argument('--disk-mode', choices=['volume','local'], default='volume', help='volume按Cinder卷启动；local测算额外本地磁盘调度额度')
+    p.add_argument('--disk-mode', choices=['auto','volume','local'], default='auto', help='默认auto按模板识别本地盘/卷/混合；volume/local仅作显式假设')
+    p.add_argument('--kali-image',help='实际选用的Kali Glance镜像完整名称或UUID；省略则列出同类候选')
+    p.add_argument('--centos-image',help='实际选用的CentOS Glance镜像完整名称或UUID；省略则列出同类候选')
+    p.add_argument('--kali-disk-gib',type=int,default=30,help='Kali申请盘大小；不会缩小原有卷/快照')
+    p.add_argument('--centos-disk-gib',type=int,default=30)
+    p.add_argument('--template-limit',type=int,default=40,help='API备用查询最大模板详情数，避免大量逐个调用')
     p.add_argument('--project', help='可选：追加指定项目的配额上限，不输出认证信息')
     p.add_argument('--recent-hours',type=int,default=24,help='近期实例/故障检查窗口，默认24小时')
     p.add_argument('--sample-limit',type=int,default=20,help='每节点实例样本数、近期故障样本上限，默认20')
@@ -936,6 +1271,12 @@ def parse_args(argv=None):
     if not re.fullmatch(r'[A-Za-z_][A-Za-z0-9_-]*',args.ssh_user):p.error('SSH用户名不合法')
     if min(args.kali_count,args.centos_count,args.disk_floor_gib)<0 or not 5<=args.timeout<=300:p.error('数量/保护线不能为负，timeout范围5～300秒')
     if not 1<=args.recent_hours<=720 or not 1<=args.sample_limit<=200:p.error('recent-hours范围1～720，sample-limit范围1～200')
+    if not 1<=args.template_limit<=200 or min(args.kali_disk_gib,args.centos_disk_gib)<1:p.error('template-limit范围1～200，申请盘大小至少1 GiB')
+    for key in ['kali_image','centos_image']:
+        value=getattr(args,key)
+        if value:
+            try:setattr(args,key,str(uuid.UUID(value)))
+            except ValueError:pass
     return args
 
 
@@ -954,6 +1295,7 @@ def main(argv=None):
         print('无法取得当前 Placement 库存；没有把读取失败解释为资源空闲。',file=sys.stderr)
         for w in WARNINGS:print(w['section']+'：'+w['reason'],file=sys.stderr)
         return 2
+    print('[采集] 当前节点资源、进程配置及NFS挂载',file=sys.stderr)
     stats = {node:optional(node+' 物理资源',lambda node=node:host_stats(args,node)) for node in args.nodes}
     states = (read_with_fallback('Nova/Placement 调度状态',lambda:services_db(args,stats),lambda:services_api(args))
               if source=='db' else optional('Nova/Placement 调度状态 API',lambda:services_api(args))) or {}
@@ -974,6 +1316,11 @@ def main(argv=None):
     aggregates = read_with_fallback('主机聚合/可用区',lambda:aggregates_db(args),lambda:aggregates_api(args))
     calc_stats = optional('实例数限制计算',lambda:calculation_stats(stats,scheduler,aggregates)) or {n:(s or {}) for n,s in stats.items()}
     current = [float(inventory[n]['VCPU']['ratio']) for n in args.nodes]
+    print('[采集] Kali/CentOS模板、快照与源卷',file=sys.stderr)
+    catalog=read_with_fallback('Kali/CentOS模板',lambda:template_catalog_db(args),lambda:template_catalog_api(args))
+    sources=optional('模板快照与源卷',lambda:template_sources_db(args,catalog)) if catalog is not None else None
+    args.storage_profile=template_plan(args,catalog,sources)
+    for note in args.storage_profile['notes']:warning('模板存储测算',note)
     volume_counts = optional('Cinder 卷统计',lambda:sql(args,"SELECT status,COUNT(*),SUM(size) FROM cinder.volumes WHERE deleted=0 GROUP BY status"))
     vendor_addresses = optional('MP厂商二地址台账',lambda:sql(args,"SELECT status,reason,COUNT(*) FROM mp.mp_vendor_second_address_pool GROUP BY status,reason"))
     quota = None
@@ -983,6 +1330,11 @@ def main(argv=None):
             allowed = {'cores','ram','instances','gigabytes','volumes','snapshots','ports','networks','subnets'}
             quota = {k:v for k,v in normalized(raw_quota).items() if k in allowed}
     report = dict(collected_at=stamp, inventory_source=source, inventory=inventory,services=states,physical=stats,
+                  template_catalog=catalog,template_sources=sources,storage_profile=args.storage_profile,
+                  storage_topology=storage_topology(stats),
+                  cinder_services=optional('Cinder服务',lambda:cinder_services_db(args)),
+                  volume_locations=optional('Cinder卷后端分布',lambda:volume_locations_db(args)),
+                  instance_root_disks=optional('实例系统盘映射',lambda:instance_root_disks_db(args)),
                   recent_hours=args.recent_hours,sample_limit=args.sample_limit,instances=instances,hypervisors=hypervisors,
                   cell0_instances=optional('Cell0 未调度实例',lambda:instances_db(args,'nova_cell0')),
                   scheduler=scheduler,aggregates=aggregates,cells=cells,calculation_physical=calc_stats,
@@ -994,7 +1346,8 @@ def main(argv=None):
                   resource_config_audit=optional('Nova 配置与 Placement 核对',lambda:resource_config_audit(inventory,stats)),
                   cinder_path=args.cinder_path,disk_floor_gib=args.disk_floor_gib,
                   kali_count=args.kali_count,centos_count=args.centos_count,requested_vcpu=args.kali_count*4+args.centos_count,
-                  requested_disk_gib=(args.kali_count+args.centos_count)*30,disk_mode=args.disk_mode,
+                  requested_disk_gib=args.kali_count*args.kali_disk_gib+args.centos_count*args.centos_disk_gib,disk_mode=args.disk_mode,
+                  kali_disk_gib=args.kali_disk_gib,centos_disk_gib=args.centos_disk_gib,
                   current_example_placement=placement(args,inventory,states,calc_stats,counts,current),
                   ratio_comparison=analyze(args,inventory,states,calc_stats,counts),
                   cinder_pools=optional('Cinder 后端池',lambda:cinder_pools(args)),cinder_volumes=volume_counts,
