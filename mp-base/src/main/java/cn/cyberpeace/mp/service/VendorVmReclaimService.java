@@ -72,9 +72,10 @@ public class VendorVmReclaimService {
 
         // Provider ledgers can preserve an identity even when the failed
         // original lifecycle did not write the UUID into the runtime plugin.
-        if (vendor == 2 || vendor == 3) {
-            String ledger = vendor == 2 ? "mp_vendor_second_address_pool" : "mp_vendor_third_vm_ledger";
-            String idColumn = vendor == 2 ? "vm_uuid" : "vmid";
+        if (vendor >= 1 && vendor <= 3) {
+            String ledger = vendor == 1 ? "mp_vendor_first_vm_ledger"
+                    : vendor == 2 ? "mp_vendor_second_address_pool" : "mp_vendor_third_vm_ledger";
+            String idColumn = vendor == 3 ? "vmid" : "vm_uuid";
             refs.addAll(jdbc.query("SELECT a." + idColumn + " AS vm_id,c.resource_id AS recorded_id,s.id AS scene_id,e.id AS element_id"
                             + FROM + "JOIN " + ledger + " a ON a.scene_id=s.id AND a.element_id=e.id WHERE " + CLOSED
                             + "AND a." + idColumn + " IS NOT NULL",
@@ -112,9 +113,10 @@ public class VendorVmReclaimService {
         if (current.size() != 1) return false;
         if (!ref.vmId.equals(current.get(0))) {
             if (!ref.fromLedger || (vendor != 3 && StringUtils.isNotBlank(current.get(0)))) return false;
-            String table = vendor == 2 ? "mp_vendor_second_address_pool" : "mp_vendor_third_vm_ledger";
-            String column = vendor == 2 ? "vm_uuid" : "vmid";
-            if (vendor != 2 && vendor != 3) return false;
+            String table = vendor == 1 ? "mp_vendor_first_vm_ledger"
+                    : vendor == 2 ? "mp_vendor_second_address_pool" : "mp_vendor_third_vm_ledger";
+            String column = vendor == 3 ? "vmid" : "vm_uuid";
+            if (vendor < 1 || vendor > 3) return false;
             Integer count = jdbc.queryForObject("SELECT COUNT(*) FROM " + table + " WHERE scene_id=? AND element_id=? AND " + column + "=?",
                     Integer.class, ref.scene, ref.element, vendor == 3 ? Integer.valueOf(ref.vmId) : ref.vmId);
             if (count == null || count != 1) return false;

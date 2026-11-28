@@ -584,7 +584,14 @@ public class VendorThirdCloudServiceImpl extends AbstractVendorCloudService {
                 throw new MpRuntimeException("厂商三已结案资源名称再次出现，需核查归属");
             return;
         }
-        if (StringUtils.isBlank(vmUuid)) throw new MpRuntimeException("厂商三历史节点VMID为空且无资源台账，未提交回收");
+        if (StringUtils.isBlank(vmUuid)) {
+            if (!retired.isEmpty()) throw new MpRuntimeException("厂商三历史节点仍有未结案台账，保留关联待核查");
+            // Old failed creations have no VMID and no journal. Finish the local
+            // node without guessing another VM's identity or sending an empty ID.
+            readInventory(true);
+            log.warn("厂商三历史节点无VMID及资源台账，完成本地节点回收，scene={}, element={}", sceneId, elementId);
+            return;
+        }
         int id = parseVmid(vmUuid);
         // Legacy records may share the same VMID. Absence is idempotent, but
         // an existing resource without the original request name must not be deleted.

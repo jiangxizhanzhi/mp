@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 public class VendorSecondAddressReconcileJob {
     private final VendorSecondCloudServiceImpl vendor;
 
-    @MpScheduled(cron = "0 * * * * ?", description = "核对厂商二IP占用及回收状态", id = "vendor_second_address_reconcile")
+    @MpScheduled(cron = "0/20 * * * * ?", description = "核对厂商二IP占用及回收状态", id = "vendor_second_address_reconcile")
     public void reconcile() {
         try {
             vendor.reconcileAddressPool();

@@ -45,7 +45,7 @@ class VendorPowerLifecycleTest {
                 id = "fixture-id";
                 oldToken = ReflectionTestUtils.getField(VendorFirstCloudServiceImpl.class, "TOKEN");
                 ReflectionTestUtils.setField(VendorFirstCloudServiceImpl.class, "TOKEN", "fixture");
-                service = new VendorFirstCloudServiceImpl(multi) {
+                service = new VendorFirstCloudServiceImpl(multi, mock(VendorFirstVmLedger.class)) {
                     @Override protected long powerTimeoutMillis() { return 0; }
                     @Override public Map<String, String> getHeaders() { return new HashMap<>(); }
                 };

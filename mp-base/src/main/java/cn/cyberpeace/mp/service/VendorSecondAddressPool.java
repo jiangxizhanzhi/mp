@@ -17,6 +17,7 @@ import java.net.InetAddress;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /** Persistent, exclusive address ownership. Only confirmed releases become FREE. */
 @Service
@@ -30,9 +31,13 @@ public class VendorSecondAddressPool {
     private static final String TABLE = "mp_vendor_second_address_pool";
     private static final String INITIAL = "INITIAL_UNREVIEWED";
     private static final long STALE_MS = 10 * 60 * 1000L;
+    private static final String OTHER_RUNTIME_CLAIM = "SELECT 1 FROM mp_scene_scene_element_port p "
+            + "JOIN mp_scene_scene s ON s.id=p.scene WHERE p.ip=? AND s.deleted=0 "
+            + "AND (?=0 OR p.scene<>? OR p.scene_element<>? OR p.scene_element IS NULL)";
     private final JdbcTemplate jdbc;
     private final XdAppConfig config;
     private final TransactionTemplate storeTransaction;
+    private final AtomicInteger probeCursor = new AtomicInteger();
 
     public VendorSecondAddressPool(JdbcTemplate jdbc, XdAppConfig config, PlatformTransactionManager transactions) {
         this.jdbc = jdbc;
@@ -312,6 +317,14 @@ public class VendorSecondAddressPool {
                 matches.add(row);
             }
         }
+        if (matches.isEmpty()) {
+            if (!inventory.complete) throw new MpRuntimeException("厂商二清单未确认完整，无法完成无资源关联节点的回收");
+            log.warn("厂商二历史节点无UUID及地址租约，完成本地节点回收，不发送空标识请求，scene={}, element={}", sceneId, elementId);
+            return null;
+        }
+        Set<String> known = new HashSet<>();
+        for (Lease row : matches) if (row.vmUuid != null && !row.vmUuid.isEmpty()) known.add(row.vmUuid);
+        if (known.size() == 1 && matches.stream().allMatch(row -> known.contains(row.vmUuid))) return known.iterator().next();
         if (matches.size() != 1) {
             throw new MpRuntimeException("厂商二虚拟机UUID为空且无法唯一关联地址台账，未提交回收请求");
         }
@@ -402,7 +415,7 @@ public class VendorSecondAddressPool {
         for (Lease row : beforeRead) {
             // Recover a bounded batch so concurrent creators can reuse one inventory
             // read; do not perform an unrestricted sweep of the management network.
-            if (range.contains(row.ip) && row.seenInInventory && !inventory.vms.containsKey(row.vmUuid)
+            if (range.contains(row.ip) && (row.seenInInventory || legacyDelete(row)) && !inventory.vms.containsKey(row.vmUuid)
                     && (!"DELETE_IN_FLIGHT".equals(row.reason) || stale(row)) && checked.add(row.vmUuid)) {
                 reconcileDeleted(row.vmUuid, inventory, beforeRead);
                 if (checked.size() >= 12) return;
@@ -426,19 +439,24 @@ public class VendorSecondAddressPool {
             if (!uuid.equals(row.vmUuid) || !RELEASING.equals(row.status)) continue;
             // An accepted create can be missing from a list while the provider is still creating it.
             // Do not infer that its address is released if that resource was never observed.
-            if (!row.seenInInventory || ("DELETE_IN_FLIGHT".equals(row.reason) && !stale(row))) return false;
+            if ((!row.seenInInventory && !legacyDelete(row))
+                    || ("DELETE_IN_FLIGHT".equals(row.reason) && !stale(row))) return false;
             // Do not release a lease changed by a concurrent deletion/recovery since
             // the inventory request began. The CAS also protects against concurrent probes.
             Lease current = read(row.ip);
             if (!uuid.equals(current.vmUuid) || !RELEASING.equals(current.status)) continue;
             if (!Objects.equals(row.reason, current.reason) || !Objects.equals(row.updatedAt, current.updatedAt)) return false;
-            if (occupied.containsKey(row.ip) || probe(row.ip) == ProbeResult.REACHABLE) {
+            ProbeResult reachable = probe(row.ip);
+            if (occupied.containsKey(row.ip) || hasOtherRuntimeClaim(row) || reachable != ProbeResult.NO_REPLY) {
                 write("UPDATE " + TABLE + " SET status=?,reason=?,updated_at=CURRENT_TIMESTAMP WHERE ip=? AND vm_uuid=? AND status=? AND reason=? AND updated_at=?",
-                        PENDING, "POST_DELETE_OCCUPIED", row.ip, uuid, RELEASING, row.reason, row.updatedAt);
+                        PENDING, reachable == ProbeResult.UNAVAILABLE ? "POST_DELETE_PROBE_PENDING" : "POST_DELETE_OCCUPIED",
+                        row.ip, uuid, RELEASING, row.reason, row.updatedAt);
             } else {
                 int released = write("UPDATE " + TABLE + " SET status=?,reason=?,owner_key=NULL,scene_id=NULL,element_id=NULL,port_id=NULL,request_name=NULL,vm_uuid=NULL,mac_addr=NULL,seen_in_inventory=0,updated_at=CURRENT_TIMESTAMP "
-                                + "WHERE ip=? AND vm_uuid=? AND status=? AND reason=? AND updated_at=? AND seen_in_inventory=1",
-                        FREE, "DELETE_CONFIRMED", row.ip, uuid, RELEASING, row.reason, row.updatedAt);
+                                + "WHERE ip=? AND vm_uuid=? AND status=? AND reason=? AND updated_at=? "
+                                + "AND NOT EXISTS (" + OTHER_RUNTIME_CLAIM + ")",
+                        FREE, "DELETE_CONFIRMED", row.ip, uuid, RELEASING, row.reason, row.updatedAt, row.ip,
+                        row.sceneId != null && row.elementId != null ? 1 : 0, row.sceneId, row.elementId);
                 if (released == 1) log.info("厂商二已确认资源不存在，释放 ip={}, uuid={}", row.ip, uuid);
             }
         }
@@ -447,6 +465,61 @@ public class VendorSecondAddressPool {
 
     private boolean stale(Lease lease) {
         return lease.updatedAt != null && lease.updatedAt.toInstant().isBefore(Instant.now().minusMillis(STALE_MS));
+    }
+
+    /** Legacy runtime references predate the journal; they are not in-flight creates. */
+    private boolean legacyDelete(Lease row) {
+        if (row.owner != null || row.requestName != null || row.sceneId == null || row.elementId == null || row.vmUuid == null) return false;
+        Integer count = jdbc.queryForObject("SELECT COUNT(*) FROM mp_scene_scene_element e JOIN mp_scene_scene s ON s.id=e.scene "
+                        + "JOIN mp_sceneplugincloud_scene_element c ON c.scene=e.scene AND c.scene_element=e.node_id "
+                        + "WHERE e.id=? AND e.scene=? AND e.vendor=2 AND c.resource_id=? AND (s.event=9 OR s.deleted=1)",
+                Integer.class, row.elementId, row.sceneId, row.vmUuid);
+        return count != null && count == 1;
+    }
+
+    private boolean hasOtherRuntimeClaim(Lease row) {
+        return !jdbc.queryForList(OTHER_RUNTIME_CLAIM, row.ip,
+                row.sceneId != null && row.elementId != null ? 1 : 0, row.sceneId, row.elementId).isEmpty();
+    }
+
+    /** Complete fresh inventory + no active owner + negative site probe makes the IP reusable. */
+    void refreshAvailableAddresses(VendorSecondInventory inventory, List<Lease> beforeRead) {
+        if (!inventory.complete || !config.isXdTwoIpProbeEnabled()) return;
+        VendorSecondIpRange range = new VendorSecondIpRange(config);
+        Set<String> approved = range.onDemandScope(config.getXdTwoIpOnDemandProbeRange());
+        Set<String> occupied = inventory.ownersByAddress().keySet();
+        List<Lease> candidates = new ArrayList<>();
+        for (Lease row : beforeRead) {
+            boolean unowned = row.owner == null && row.sceneId == null && (row.vmUuid == null
+                    || (!inventory.vms.containsKey(row.vmUuid) && "OBSERVED_RESOURCE".equals(row.reason)));
+            boolean postDelete = row.reason.startsWith("POST_DELETE_") && row.vmUuid != null && !inventory.vms.containsKey(row.vmUuid);
+            if (approved.contains(row.ip) && PENDING.equals(row.status) && (postDelete || (unowned
+                    && Arrays.asList(INITIAL, "PROBE_OCCUPIED", "PROVIDER_IP_CONFLICT", "OBSERVED_RESOURCE", "OBSERVED_CONFLICT").contains(row.reason)))) {
+                candidates.add(row);
+            }
+        }
+        candidates.sort(Comparator.comparingLong(row -> VendorSecondIpRange.number(row.ip)));
+        if (candidates.isEmpty()) return;
+        int start = Math.floorMod(probeCursor.getAndAdd(16), candidates.size()), checked = 0, released = 0;
+        for (int i = 0; i < candidates.size() && checked < 16; i++) {
+            Lease row = candidates.get((start + i) % candidates.size());
+            if (occupied.contains(row.ip) || hasOtherRuntimeClaim(row)) continue;
+            checked++;
+            if (probe(row.ip) != ProbeResult.NO_REPLY) continue;
+            // Match the snapshot taken BEFORE fetching inventory; a concurrent create,
+            // delete or observation must invalidate this release.
+            int changed = write("UPDATE " + TABLE + " SET status=?,reason=?,owner_key=NULL,scene_id=NULL,element_id=NULL,port_id=NULL,request_name=NULL,vm_uuid=NULL,mac_addr=NULL,seen_in_inventory=0,updated_at=CURRENT_TIMESTAMP "
+                            + "WHERE ip=? AND status=? AND reason=? AND updated_at=? "
+                            + "AND (owner_key=? OR (owner_key IS NULL AND ?=1)) "
+                            + "AND (vm_uuid=? OR (vm_uuid IS NULL AND ?=1)) "
+                            + "AND NOT EXISTS (" + OTHER_RUNTIME_CLAIM + ")",
+                    FREE, "PROBE_CONFIRMED_FREE", row.ip, row.status, row.reason, row.updatedAt,
+                    row.owner, row.owner == null ? 1 : 0, row.vmUuid, row.vmUuid == null ? 1 : 0, row.ip,
+                    row.sceneId != null && row.elementId != null ? 1 : 0, row.sceneId, row.elementId);
+            released += changed;
+            if (changed == 1) log.info("厂商二完整清单无占用且地址无响应，转为可用 ip={}", row.ip);
+        }
+        log.info("厂商二地址自动核对，候选={}, 本轮检测={}, 新增FREE={}", candidates.size(), checked, released);
     }
 
     void reconcile(VendorSecondInventory inventory) {

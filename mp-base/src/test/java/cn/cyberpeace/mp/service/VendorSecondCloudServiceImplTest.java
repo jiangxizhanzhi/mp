@@ -14,6 +14,8 @@ import org.mockito.InOrder;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static cn.cyberpeace.mp.service.VendorSecondAddressPoolTest.*;
@@ -428,6 +430,23 @@ class VendorSecondCloudServiceImplTest {
         verify(pool).beginDelete(eq("existing"), any());
         verify(client, never()).post(anyString(), any(), any(), anyMap(), anyInt());
         verify(client, never()).delete(anyString(), any(), any(), anyMap(), anyInt());
+    }
+
+    @Test void historicalNodeWithoutLeaseCompletesWithoutStopOrDeleteRequest() {
+        when(pool.resolveManagedVmForDelete(eq("scene"), eq("old-node"), any())).thenReturn(null);
+        service.deleteManagedVm("", "scene", "old-node");
+        verify(pool, never()).beginDelete(any(), any());
+        verify(client, never()).post(anyString(), any(), any(), anyMap(), anyInt());
+        verify(client, never()).delete(anyString(), any(), any(), anyMap(), anyInt());
+    }
+
+    @Test void overlappingScheduledReconcileIsSkipped() {
+        when(client.get(eq(SERVERS), isNull(), anyMap(), eq(30000))).thenAnswer(inv -> {
+            CompletableFuture.runAsync(service::reconcileAddressPool).get(5, TimeUnit.SECONDS);
+            return listResponse(0);
+        });
+        service.reconcileAddressPool();
+        verify(client, times(1)).get(eq(SERVERS), isNull(), anyMap(), eq(30000));
     }
 
     @Test void reclaimNeverDeletesWhenCurrentProviderIdentityDiffersOrListIsPartial() {

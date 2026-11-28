@@ -246,6 +246,7 @@ class VendorThirdCloudServiceImplTest {
     }
 
     @Test void historicalMissingVmIsIdempotentButExistingUnownedVmIsNotDeleted() {
+        service.deleteManagedVm("", "old-scene", "old-element");
         service.deleteManagedVm("8888", "old-scene", "old-element");
         assertThrows(MpRuntimeException.class, () -> service.deleteManagedVm("9000", "old-scene", "old-element"));
         assertEquals(0, count("delete"));

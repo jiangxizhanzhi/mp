@@ -21,15 +21,19 @@ class VendorFirstCloudServiceImplTest {
     private static final String INSTANCES = "/api/cloud/instances/";
     private HttpClient client;
     private VendorFirstCloudServiceImpl service;
+    private VendorFirstVmLedger ledger;
     private Object previousToken;
 
-    @BeforeEach void setup() {
+    @BeforeEach void setup() throws Exception {
         previousToken = ReflectionTestUtils.getField(VendorFirstCloudServiceImpl.class, "TOKEN");
         ReflectionTestUtils.setField(VendorFirstCloudServiceImpl.class, "TOKEN", "fixture-token");
         MultiCloudClient clients = mock(MultiCloudClient.class);
         client = mock(HttpClient.class);
         when(clients.getClient(1)).thenReturn(client);
-        service = new VendorFirstCloudServiceImpl(clients) {
+        VendorFirstVmLedgerTest db = new VendorFirstVmLedgerTest();
+        db.setup();
+        ledger = db.ledger;
+        service = new VendorFirstCloudServiceImpl(clients, ledger) {
             @Override protected long deleteConfirmTimeoutMillis() { return 0; }
         };
         when(client.get(startsWith("/api/cloud/images/"), isNull(), anyMap(), eq(30000)))
@@ -122,6 +126,43 @@ class VendorFirstCloudServiceImplTest {
 
     @Test void blankIdNeverCallsProvider() {
         assertThrows(MpRuntimeException.class, () -> service.deleteVm(""));
+        verify(client, never()).delete(anyString(), any(), any(), anyMap(), anyInt());
+    }
+
+    @Test void legacyBlankSceneNodeCompletesWithoutSendingEmptyDelete() {
+        when(client.get(startsWith(INSTANCES + "?"), isNull(), anyMap(), eq(30000)))
+                .thenReturn(response(200, "{\"count\":0,\"results\":[]}"));
+        assertDoesNotThrow(() -> service.deleteManagedVm("", "old-scene", "old-element"));
+        verify(client, never()).delete(anyString(), any(), any(), anyMap(), anyInt());
+    }
+
+    @Test void lostSceneCreateResponseUsesPersistedNameAndDoesNotCloneAgain() {
+        when(client.post(startsWith(INSTANCES + "?"), any(), isNull(), anyMap(), eq(30000)))
+                .thenReturn(response(200, "not-json"));
+        assertThrows(MpRuntimeException.class, () -> service.createSceneVm(IMAGE, "scene", "element"));
+        VendorFirstVmLedger.Lease row = ledger.byOwner("scene", "element");
+        assertEquals("UNCERTAIN", row.getStatus());
+        when(client.get(startsWith(INSTANCES + "?"), isNull(), anyMap(), eq(30000)))
+                .thenReturn(response(200, "{\"count\":0,\"results\":[]}"));
+        assertThrows(MpRuntimeException.class, () -> service.createSceneVm(IMAGE, "scene", "element"));
+        assertThrows(MpRuntimeException.class, () -> service.deleteManagedVm("", "scene", "element"));
+        when(client.get(startsWith(INSTANCES + "?"), isNull(), anyMap(), eq(30000)))
+                .thenReturn(response(200, "{\"count\":1,\"results\":[{\"uuid\":\"fixture-id\",\"name\":\"" + row.getName() + "\"}]}"));
+        assertEquals(VM, service.createSceneVm(IMAGE, "scene", "element"));
+        verify(client, times(1)).post(startsWith(INSTANCES + "?"), any(), isNull(), anyMap(), eq(30000));
+        assertEquals(VM, ledger.byOwner("scene", "element").getUuid());
+        when(client.delete(startsWith(INSTANCES + VM + "/?"), isNull(), isNull(), anyMap(), eq(30000)))
+                .thenReturn(response(200, "{\"success\":true}"));
+        when(client.get(startsWith(INSTANCES + "?"), isNull(), anyMap(), eq(30000)))
+                .thenReturn(response(200, "{\"count\":0,\"results\":[]}"));
+        service.deleteManagedVm("", "scene", "element");
+        assertNull(ledger.byOwner("scene", "element"));
+    }
+
+    @Test void sceneDeleteCannotUseDifferentRecordedUuid() {
+        VendorFirstVmLedger.Lease lease = ledger.reserve("scene", "element", IMAGE, "MP_fixture");
+        ledger.created(lease, VM);
+        assertThrows(MpRuntimeException.class, () -> service.deleteManagedVm("someone-else", "scene", "element"));
         verify(client, never()).delete(anyString(), any(), any(), anyMap(), anyInt());
     }
 

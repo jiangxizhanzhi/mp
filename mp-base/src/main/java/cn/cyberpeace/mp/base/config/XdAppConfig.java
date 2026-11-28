@@ -24,10 +24,10 @@ public class XdAppConfig {
     private String xdTwoDeviceId;
     @Value("${mp.xdapp.xd-two-port-id}")
     private String xdTwoPortId;
-    @Value("${mp.xdapp.xd-two-ip-pool-start:192.168.140.76}")
-    private String xdTwoIpPoolStart = "192.168.140.76";
-    @Value("${mp.xdapp.xd-two-ip-pool-end:192.168.140.225}")
-    private String xdTwoIpPoolEnd = "192.168.140.225";
+    @Value("${mp.xdapp.xd-two-ip-pool-start:192.168.140.51}")
+    private String xdTwoIpPoolStart = "192.168.140.51";
+    @Value("${mp.xdapp.xd-two-ip-pool-end:192.168.140.250}")
+    private String xdTwoIpPoolEnd = "192.168.140.250";
     @Value("${mp.xdapp.xd-two-ip-netmask:255.255.255.0}")
     private String xdTwoIpNetmask = "255.255.255.0";
     @Value("${mp.xdapp.xd-two-ip-gateway:192.168.140.254}")
@@ -35,10 +35,10 @@ public class XdAppConfig {
     // Only initial, manually reviewed free addresses are opened. Never resets existing leases.
     @Value("${mp.xdapp.xd-two-ip-reviewed-free:}")
     private String xdTwoIpReviewedFree = "";
-    // The site confirmed the .76-.225 address pool is assigned to vendor two.
+    // The site confirmed the .51-.250 address pool is assigned to vendor two.
     // An explicit empty override disables the initial-pending fallback.
-    @Value("${mp.xdapp.xd-two-ip-on-demand-probe-range:192.168.140.76-192.168.140.225}")
-    private String xdTwoIpOnDemandProbeRange = "192.168.140.76-192.168.140.225";
+    @Value("${mp.xdapp.xd-two-ip-on-demand-probe-range:192.168.140.51-192.168.140.250}")
+    private String xdTwoIpOnDemandProbeRange = "192.168.140.51-192.168.140.250";
     @Value("${mp.xdapp.xd-two-ip-probe-enabled:true}")
     private boolean xdTwoIpProbeEnabled = true;
     @Value("${mp.xdapp.xd-two-ip-probe-timeout-ms:1000}")

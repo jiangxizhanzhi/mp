@@ -121,19 +121,22 @@ class VendorSecondAddressPoolTest {
         assertEquals(PENDING, row(B).getStatus());
     }
 
-    @Test void defaultRangeContains150Addresses() {
+    @Test void defaultRangeContains200Addresses() {
         XdAppConfig defaults = new XdAppConfig();
         VendorSecondIpRange configured = new VendorSecondIpRange(defaults);
-        assertEquals(150, configured.addresses().size());
-        assertEquals("192.168.140.76", configured.addresses().get(0));
-        assertEquals("192.168.140.225", configured.addresses().get(149));
+        assertEquals(200, configured.addresses().size());
+        assertEquals("192.168.140.51", configured.addresses().get(0));
+        assertEquals("192.168.140.250", configured.addresses().get(199));
         Set<String> onDemand = configured.onDemandScope(defaults.getXdTwoIpOnDemandProbeRange());
-        assertEquals(150, onDemand.size());
+        assertEquals(200, onDemand.size());
+        assertTrue(onDemand.contains("192.168.140.51"));
         assertTrue(onDemand.contains("192.168.140.76"));
         assertTrue(onDemand.contains("192.168.140.125"));
         assertTrue(onDemand.contains("192.168.140.126"));
         assertTrue(onDemand.contains("192.168.140.225"));
-        assertFalse(onDemand.contains("192.168.140.226"));
+        assertTrue(onDemand.contains("192.168.140.250"));
+        assertFalse(onDemand.contains("192.168.140.50"));
+        assertFalse(onDemand.contains("192.168.140.251"));
         assertTrue(configured.reviewedFree(defaults.getXdTwoIpReviewedFree()).isEmpty());
         assertEquals(300000L, defaults.getXdTwoAllocationRecoveryTimeoutMs());
     }
@@ -141,6 +144,7 @@ class VendorSecondAddressPoolTest {
     @Test void onDemandDefaultCannotExtendAnExplicitlyConfiguredSmallerPool() {
         XdAppConfig legacy = new XdAppConfig();
         legacy.setXdTwoIpPoolStart("192.168.140.126");
+        legacy.setXdTwoIpPoolEnd("192.168.140.225");
         Set<String> legacyScope = new VendorSecondIpRange(legacy).onDemandScope(legacy.getXdTwoIpOnDemandProbeRange());
         assertEquals(100, legacyScope.size());
         assertFalse(legacyScope.contains("192.168.140.125"));
@@ -377,7 +381,7 @@ class VendorSecondAddressPoolTest {
         pool.prepare(inventory(0));
         Lease lease = reserve(pool, "owner", A);
         pool.uncertainCreation(lease);
-        assertThrows(MpRuntimeException.class, () -> pool.resolveManagedVmForDelete("scene", "other", inventory(0)));
+        assertNull(pool.resolveManagedVmForDelete("scene", "other", inventory(0)));
         assertThrows(MpRuntimeException.class, () -> pool.resolveManagedVmForDelete("scene", "owner", inventory(2,
                 vm("one", lease.getRequestName(), A))));
         assertEquals("late-vm", pool.resolveManagedVmForDelete("scene", "owner", inventory(1,
@@ -429,6 +433,105 @@ class VendorSecondAddressPoolTest {
         assertFalse(pool.reconcileDeleted("async", inventory(1, vm("async", "MP_owner", A))));
         assertTrue(pool.reconcileDeleted("async", inventory(0)));
         assertEquals(FREE, row(A).getStatus());
+    }
+
+    @Test void initialAddressesBecomeFreeOnlyAfterCompleteInventoryAndNegativeProbe() {
+        config.setXdTwoIpReviewedFree("");
+        config.setXdTwoIpOnDemandProbeRange(A + "-" + C);
+        pool.prepare(inventory(0));
+        probes.put(B, ProbeResult.REACHABLE);
+        probes.put(C, ProbeResult.UNAVAILABLE);
+        pool.refreshAvailableAddresses(inventory(2), pool.list());
+        assertEquals(PENDING, row(A).getStatus());
+        pool.refreshAvailableAddresses(inventory(0), pool.list());
+        assertEquals(FREE, row(A).getStatus());
+        assertEquals("PROBE_CONFIRMED_FREE", row(A).getReason());
+        assertEquals(PENDING, row(B).getStatus());
+        assertEquals(PENDING, row(C).getStatus());
+        probes.put(B, ProbeResult.NO_REPLY);
+        probes.put(C, ProbeResult.NO_REPLY);
+        pool.refreshAvailableAddresses(inventory(0), pool.list());
+        assertEquals(3, pool.list().stream().filter(r -> FREE.equals(r.getStatus())).count());
+    }
+
+    @Test void negativePingCannotFreeProviderOccupiedOrActiveRuntimeAddresses() {
+        config.setXdTwoIpReviewedFree("");
+        config.setXdTwoIpOnDemandProbeRange(A + "-" + C);
+        pool.prepare(inventory(0));
+        jdbc.update("INSERT INTO mp_scene_scene VALUES ('live',0,2,4)");
+        jdbc.update("INSERT INTO mp_scene_scene_element_port (id,scene,scene_element,ip) VALUES ('live-port','live','node',?)", B);
+        pool.refreshAvailableAddresses(inventory(1, vm("occupied", "other", A)), pool.list());
+        assertEquals(PENDING, row(A).getStatus());
+        assertEquals(PENDING, row(B).getStatus());
+        assertEquals(FREE, row(C).getStatus());
+    }
+
+    @Test void historicalDeletedVmCanReleaseWithoutBeingObservedAgain() {
+        config.setXdTwoIpReviewedFree("");
+        jdbc.update("INSERT INTO mp_scene_scene VALUES ('old-scene',0,9,5)");
+        jdbc.update("INSERT INTO mp_scene_scene_element VALUES ('old-element','old-scene','node',2,9,5)");
+        jdbc.update("INSERT INTO mp_sceneplugincloud_scene_element VALUES ('old-scene','node','old-vm')");
+        jdbc.update("INSERT INTO mp_scene_scene_element_port (id,scene,scene_element,ip) VALUES ('old-port','old-scene','old-element',?)", A);
+        pool.prepare(inventory(0));
+        assertEquals("LEGACY_RECORD", row(A).getReason());
+        assertFalse(row(A).isSeenInInventory());
+        pool.beginDelete("old-vm", inventory(0));
+        pool.deleteSubmitted("old-vm", false);
+        assertTrue(pool.reconcileDeleted("old-vm", inventory(0), pool.releasingLeases()));
+        assertEquals(FREE, row(A).getStatus());
+        assertNull(row(A).getVmUuid());
+    }
+
+    @Test void unavailableProbeDoesNotBlockSceneCompletionButRetainsIpUntilNextCheck() {
+        config.setXdTwoIpOnDemandProbeRange(A + "-" + C);
+        Lease lease = createVerified("owner", "vm", A);
+        pool.beginDelete("vm", inventory(1, vm("vm", lease.getRequestName(), A)));
+        pool.deleteSubmitted("vm", true);
+        probes.put(A, ProbeResult.UNAVAILABLE);
+        assertTrue(pool.reconcileDeleted("vm", inventory(0)));
+        assertEquals(PENDING, row(A).getStatus());
+        probes.put(A, ProbeResult.NO_REPLY);
+        pool.refreshAvailableAddresses(inventory(0), pool.list());
+        assertEquals(FREE, row(A).getStatus());
+    }
+
+    @Test void autoProbeCannotOverwriteConcurrentObservation() {
+        config.setXdTwoIpReviewedFree("");
+        config.setXdTwoIpOnDemandProbeRange(A);
+        pool.prepare(inventory(0));
+        List<Lease> beforeRead = pool.list();
+        jdbc.update("UPDATE mp_vendor_second_address_pool SET reason='OBSERVED_RESOURCE',vm_uuid='late' WHERE ip=?", A);
+        pool.refreshAvailableAddresses(inventory(0), beforeRead);
+        assertEquals(PENDING, row(A).getStatus());
+        assertEquals("late", row(A).getVmUuid());
+    }
+
+    @Test void fortyUnreviewedAddressesAreOpenedOverBoundedRounds() {
+        config.setXdTwoIpReviewedFree("");
+        config.setXdTwoIpPoolEnd("198.51.100.49");
+        config.setXdTwoIpOnDemandProbeRange(A + "-198.51.100.49");
+        pool.prepare(inventory(0));
+        assertEquals(40, pool.list().size());
+        pool.refreshAvailableAddresses(inventory(0), pool.list());
+        assertEquals(16, pool.list().stream().filter(r -> FREE.equals(r.getStatus())).count());
+        pool.refreshAvailableAddresses(inventory(0), pool.list());
+        pool.refreshAvailableAddresses(inventory(0), pool.list());
+        assertEquals(40, pool.list().stream().filter(r -> FREE.equals(r.getStatus())).count());
+    }
+
+    @Test void activeRuntimeClaimArrivingDuringProbePreventsRelease() {
+        config.setXdTwoIpReviewedFree("");
+        config.setXdTwoIpOnDemandProbeRange(A);
+        pool.prepare(inventory(0));
+        jdbc.update("INSERT INTO mp_scene_scene VALUES ('late-live',0,2,4)");
+        VendorSecondAddressPool racing = new VendorSecondAddressPool(jdbc, config, tx) {
+            @Override ProbeResult probe(String ip) {
+                jdbc.update("INSERT INTO mp_scene_scene_element_port (id,scene,scene_element,ip) VALUES ('late-port','late-live','node',?)", ip);
+                return ProbeResult.NO_REPLY;
+            }
+        };
+        racing.refreshAvailableAddresses(inventory(0), racing.list());
+        assertEquals(PENDING, row(A).getStatus());
     }
 
     @Test void importsLegacyAndUpdatesOnlyMatchingRuntimePort() {

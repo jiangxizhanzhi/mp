@@ -32,7 +32,8 @@ class VendorVmReclaimServiceTest {
         jdbc = new JdbcTemplate(source);
         tx = new DataSourceTransactionManager(source);
         for (String migration : List.of("V202611260900__vendor_second_address_pool.sql",
-                "V202611261000__vendor_third_vm_ledger.sql", "V202611261100__vendor_vm_reclaim.sql")) {
+                "V202611261000__vendor_third_vm_ledger.sql", "V202611261100__vendor_vm_reclaim.sql",
+                "V202611280900__vendor_reclaim_recovery.sql")) {
             String ddl = Files.readString(Paths.get("../mp/src/main/resources/db/migration", migration));
             for (String statement : ddl.split(";")) if (!statement.trim().isEmpty()) jdbc.execute(statement);
         }
@@ -63,6 +64,15 @@ class VendorVmReclaimServiceTest {
     private void visible(int vendor, String scene, String id, String name) {
         when(provider(vendor).readReclaimInventory()).thenReturn(Collections.singletonMap(id, name));
         when(provider(vendor).matchesReclaimIdentity(id, name, scene, "element-" + scene)).thenReturn(true);
+    }
+
+    @Test void vendorOneClosedSceneCanRecoverIdentityFromCreationLedger() {
+        seed(1, "first-ledger", "", true);
+        jdbc.update("INSERT INTO mp_vendor_first_vm_ledger (request_name,scene_id,element_id,image_id,vm_uuid,status,updated_at) "
+                + "VALUES (?,?,?,?,?,'CREATED',?)", NAME, "first-ledger", "element-first-ledger", "image", "first-vm", OLD);
+        visible(1, "first-ledger", "first-vm", NAME);
+        service.reclaim(1);
+        verify(provider(1)).reclaimClosedVm("first-vm", NAME, "first-ledger", "element-first-ledger");
     }
 
     private String state(int vendor, String id) {

@@ -1060,7 +1060,8 @@ public class CreateHandler extends HandlerCommon {
             } else {
                 MultiCloudService.IP_THREADLOCAL.set(cloudElement.getSrcElement().getPorts().get(0).getIp());
                 try {
-                    resourceId = cloudService.createVm(cloudElement.getImageUuid());
+                    resourceId = cloudService.createSceneVm(cloudElement.getImageUuid(),
+                            getPluginHandler().getSceneHandler().getSceneId(), cloudElement.getSrcElement().getEid());
                 } finally {
                     MultiCloudService.IP_THREADLOCAL.remove();
                 }

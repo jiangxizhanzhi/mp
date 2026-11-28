@@ -59,12 +59,16 @@ class CreateHandlerTest {
         cloudElement.setSrcElement(element);
         cloudElement.setImageUuid("115");
         MpRuntimeException failure = new MpRuntimeException("fixture create failure");
-        when(cloud.createVm("115")).thenAnswer(inv -> {
+        when(cloud.createSceneVm(eq("115"), any(), any())).thenAnswer(inv -> {
             assertEquals("198.51.100.2", MultiCloudService.IP_THREADLOCAL.get());
             throw failure;
         });
         try {
             CreateHandler handler = mock(CreateHandler.class, CALLS_REAL_METHODS);
+            CloudScenePluginHandler plugin = mock(CloudScenePluginHandler.class);
+            SceneHandler scene = mock(SceneHandler.class);
+            when(plugin.getSceneHandler()).thenReturn(scene);
+            doReturn(plugin).when(handler).getPluginHandler();
             assertSame(failure, assertThrows(MpRuntimeException.class, () -> handler.createVirtualMachine(cloudElement)));
             assertNull(MultiCloudService.IP_THREADLOCAL.get());
             assertTrue(cloudElement.getResourceId() == null || cloudElement.getResourceId().isEmpty());
@@ -130,7 +134,7 @@ class CreateHandlerTest {
         MultiCloudService cloud = mock(MultiCloudService.class);
         when(cloud.getVendor()).thenReturn(1);
         when(cloud.ipAutoGen()).thenReturn(true);
-        when(cloud.createVm("fixture")).thenReturn("fixture-id");
+        when(cloud.createSceneVm(eq("fixture"), any(), any())).thenReturn("fixture-id");
         when(context.getBeansOfType(MultiCloudService.class)).thenReturn(Collections.singletonMap("vendor", cloud));
         when(cloud.getVmIpAndMac("fixture-id")).thenReturn(
                 ready ? new String[]{"198.51.100.10", "02:00:00:00:00:01"} : null);

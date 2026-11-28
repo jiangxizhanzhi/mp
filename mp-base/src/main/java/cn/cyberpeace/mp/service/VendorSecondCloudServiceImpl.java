@@ -403,8 +403,18 @@ public class VendorSecondCloudServiceImpl extends AbstractVendorCloudService {
     }
 
     public void reconcileAddressPool() {
-        List<VendorSecondAddressPool.Lease> releasing = addressPool.releasingLeases();
-        addressPool.reconcile(readInventorySafely(), releasing);
+        if (!allocationRecoveryLock.tryLock()) return;
+        try {
+            List<VendorSecondAddressPool.Lease> before = addressPool.list();
+            VendorSecondInventory inventory = readInventorySafely();
+            List<VendorSecondAddressPool.Lease> releasing = new ArrayList<>();
+            for (VendorSecondAddressPool.Lease row : before)
+                if (VendorSecondAddressPool.RELEASING.equals(row.getStatus())) releasing.add(row);
+            addressPool.reconcile(inventory, releasing);
+            addressPool.refreshAvailableAddresses(inventory, before);
+        } finally {
+            allocationRecoveryLock.unlock();
+        }
     }
 
     @Override
@@ -498,6 +508,7 @@ public class VendorSecondCloudServiceImpl extends AbstractVendorCloudService {
     public void deleteManagedVm(String vmUuid, String sceneId, String elementId) {
         if (StringUtils.isBlank(vmUuid)) {
             vmUuid = addressPool.resolveManagedVmForDelete(sceneId, elementId, readInventorySafely());
+            if (vmUuid == null) return;
             log.info("厂商二从地址台账恢复待回收虚拟机关联，scene={}, element={}, uuid={}", sceneId, elementId, vmUuid);
         }
         validateManagedVm(vmUuid, sceneId, elementId);

@@ -144,6 +144,11 @@ public interface MultiCloudService {
 
     String createVm(String imageUuid);
 
+    /** Scene-aware creation lets a provider persist the request before submitting it. */
+    default String createSceneVm(String imageUuid, String sceneId, String elementId) {
+        return createVm(imageUuid);
+    }
+
     default ManagedVmCreationResult createManagedVm(String imageUuid, String sceneId, String elementId,
                                                      String portId, String requestedIp) {
         throw new UnsupportedOperationException("Managed address allocation is not supported by this provider");

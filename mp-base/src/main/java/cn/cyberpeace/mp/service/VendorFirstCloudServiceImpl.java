@@ -22,6 +22,7 @@ import java.util.function.Function;
 @Slf4j
 public class VendorFirstCloudServiceImpl extends AbstractVendorCloudService {
     private final MultiCloudClient multiCloudClient;
+    private final VendorFirstVmLedger ledger;
     private static final String INSTANCE_PATH = "/api/cloud/instances/";
     private static final String CLUSTER_QUERY = "cluster=382ee7c7-336a-41ae-b71e-9c14365bdcd3";
     public static final String DEVICE_ACTIVE = "active";
@@ -194,10 +195,35 @@ public class VendorFirstCloudServiceImpl extends AbstractVendorCloudService {
 
     @Override
     public String createVm(String imageUuid) {
+        return submitCreate(imageUuid, "MP_" + TextUtils.uuid(), null);
+    }
+
+    @Override
+    public String createSceneVm(String imageUuid, String sceneId, String elementId) {
+        VendorFirstVmLedger.Lease existing = ledger.byOwner(sceneId, elementId);
+        if (existing != null) {
+            if (!imageUuid.equals(existing.getImage())) throw new MpRuntimeException("厂商一节点已有不同镜像的创建关联");
+            if (StringUtils.isNotBlank(existing.getUuid())) return existing.getUuid();
+            String recovered = uniqueRequestVm(existing, readInstances(null));
+            if (recovered == null) throw new MpRuntimeException("厂商一原创建请求结果仍待确认，未重复提交，request_name=" + existing.getName());
+            ledger.created(existing, recovered);
+            return recovered;
+        }
+        // Validate the image before creating any persistent in-flight record.
         requireVmId(imageUuid);
         JSONObject image = getImageInfoByImageUuid(imageUuid);
+        VendorFirstVmLedger.Lease lease = ledger.reserve(sceneId, elementId, imageUuid, "MP_" + TextUtils.uuid());
+        return submitPreparedCreate(imageUuid, image, lease.getName(), lease);
+    }
+
+    private String submitCreate(String imageUuid, String name, VendorFirstVmLedger.Lease lease) {
+        requireVmId(imageUuid);
+        JSONObject image = getImageInfoByImageUuid(imageUuid);
+        return submitPreparedCreate(imageUuid, image, name, lease);
+    }
+
+    private String submitPreparedCreate(String imageUuid, JSONObject image, String name, VendorFirstVmLedger.Lease lease) {
         JSONObject payload = JSONObject.parseObject(IMAGE_CREATE_TEMPLATE);
-        String name = "MP_" + TextUtils.uuid();
         payload.put("name", name);
         payload.put("image_id", imageUuid);
         payload.put("image", image);
@@ -214,8 +240,10 @@ public class VendorFirstCloudServiceImpl extends AbstractVendorCloudService {
             }
             String id = instances.getString(0);
             requireVmId(id);
+            if (lease != null) ledger.created(lease, id);
             return id;
         } catch (RuntimeException e) {
+            if (lease != null) ledger.uncertain(lease);
             log.warn("厂商一创建结果未确认，request_name={}，请核查原请求", name);
             throw new MpRuntimeException("厂商一创建结果未确认，request_name=" + name + "，" + e.getMessage()).e(e);
         }
@@ -375,6 +403,39 @@ public class VendorFirstCloudServiceImpl extends AbstractVendorCloudService {
 
     protected long deleteConfirmTimeoutMillis() { return 30000; }
     protected long deleteConfirmPollMillis() { return 2000; }
+
+    private String uniqueRequestVm(VendorFirstVmLedger.Lease lease, Map<String, JSONObject> inventory) {
+        List<String> matches = new ArrayList<>();
+        inventory.forEach((id, vm) -> { if (lease.getName().equals(vm.getString("name"))) matches.add(id); });
+        if (matches.size() > 1) throw new MpRuntimeException("厂商一原创建名称不唯一，保留关联待核查");
+        return matches.isEmpty() ? null : matches.get(0);
+    }
+
+    @Override
+    public void deleteManagedVm(String vmUuid, String sceneId, String elementId) {
+        VendorFirstVmLedger.Lease lease = ledger.byOwner(sceneId, elementId);
+        if (lease != null) {
+            if (StringUtils.isNotBlank(vmUuid) && StringUtils.isNotBlank(lease.getUuid()) && !vmUuid.equals(lease.getUuid()))
+                throw new MpRuntimeException("厂商一场景资源UUID与创建台账不一致");
+            if (StringUtils.isBlank(lease.getUuid())) {
+                String recovered = uniqueRequestVm(lease, readInstances(null));
+                if (recovered == null) throw new MpRuntimeException("厂商一原创建请求尚未核实，保留场景关联");
+                if (StringUtils.isNotBlank(vmUuid) && !vmUuid.equals(recovered))
+                    throw new MpRuntimeException("厂商一场景UUID与原创建名称不一致");
+                ledger.created(lease, recovered);
+                vmUuid = recovered;
+            } else {
+                vmUuid = lease.getUuid();
+            }
+        }
+        if (StringUtils.isBlank(vmUuid)) {
+            readInstances(null);
+            log.warn("厂商一历史节点无UUID及创建台账，完成本地节点回收，scene={}, element={}", sceneId, elementId);
+            return;
+        }
+        deleteVm(vmUuid);
+        if (lease != null) ledger.deleted(lease);
+    }
 
     @Override
     public void deleteVm(String vmUuid) {
